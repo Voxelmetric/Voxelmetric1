@@ -1,0 +1,66 @@
+﻿using UnityEngine;
+using System.Collections;
+
+public class Tree {
+    public static void Build(Chunk chunk, BlockPos pos)
+    {
+        int leaves =TerrainGen.GetNoise(pos.x + chunk.pos.x, 0, pos.z + chunk.pos.z, 1f, 2, 1) +1;
+
+        for (int x = -leaves; x <= leaves; x++)
+        {
+            for (int y = 3; y <= 6; y++)
+            {
+                for (int z = -leaves; z <= leaves; z++)
+                {
+                    TerrainGen.SetBlock(chunk, new SBlock(BlockType.leaves), pos.x + x, pos.y + y, pos.z + z, true);
+                }
+            }
+        }
+        for (int y = 0; y <= 5; y++)
+        {
+            TerrainGen.SetBlock(chunk, new SBlock(BlockType.log), pos.x, pos.y + y, pos.z, true);
+        }
+    }
+
+
+    public static bool ChunkContains(Chunk chunk, BlockPos pos)
+    {
+        //          fpy
+        //           | fpz
+        //           | /
+        //           |/
+        //   fnx-----x-------fpx
+        //          /|
+        //         / |
+        //       fnz |
+        //          fny
+
+
+        int fpy = pos.y+6;
+        int fny = pos.y-0;
+        int fpx = pos.x+3;
+        int fnx = pos.x-3;
+        int fpz = pos.z+3;
+        int fnz = pos.z-3;
+
+        if (fpy < chunk.pos.y)
+            return false;
+
+        if (fny > (chunk.pos.y + Config.ChunkSize))
+            return false;
+
+        if (fpx < chunk.pos.x)
+            return false;
+
+        if (fnx > (chunk.pos.x + Config.ChunkSize))
+            return false;
+
+        if (fpz < chunk.pos.z)
+            return false;
+
+        if (fnz > (chunk.pos.z + Config.ChunkSize))
+            return false;
+
+        return true;
+    }
+}
