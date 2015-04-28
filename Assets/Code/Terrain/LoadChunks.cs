@@ -83,7 +83,7 @@ public class LoadChunks : MonoBehaviour {
                 continue;
 
             //load a column of chunks in this position
-            for (int y = -4; y < 4; y++)
+            for (int y = 4; y >= -4; y--)
             {
 
                 for (int x = newChunkPos.x - Config.ChunkSize; x <= newChunkPos.x + Config.ChunkSize; x += Config.ChunkSize)

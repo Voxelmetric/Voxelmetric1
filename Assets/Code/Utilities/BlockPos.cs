@@ -53,6 +53,16 @@ public struct BlockPos
         return new BlockPos(this.x + x, this.y + y, this.z + z);
     }
 
+    public BlockPos Add(BlockPos pos)
+    {
+        return new BlockPos(this.x + pos.x, this.y + pos.y, this.z + pos.z);
+    }
+
+    public BlockPos Subtract(BlockPos pos)
+    {
+        return new BlockPos(this.x - pos.x, this.y - pos.y, this.z - pos.z);
+    }
+
     public override string ToString()
     {
         return "(" + x + ", " + y + ", " + z + ")";

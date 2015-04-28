@@ -43,7 +43,7 @@ public struct SBlock
 
     public void BuildBlock(Chunk chunk, BlockPos pos, MeshData meshData)
     {
-        Block().BuildBlock(chunk, pos, meshData, this);
+        Block().BuildBlock(chunk, pos, meshData);
     }
 
     public static implicit operator Block(SBlock sBlock)

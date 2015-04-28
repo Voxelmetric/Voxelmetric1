@@ -71,6 +71,9 @@ public class Chunk : MonoBehaviour
     public bool UpdateChunk()
     {
         rendered = true;
+        
+        //if(pos.y==48)
+            //BlockLight.LightArea(world, pos.Add(8,8,8));
 
         MeshData meshData = new MeshData();
 

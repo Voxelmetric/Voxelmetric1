@@ -27,6 +27,8 @@ public static class BlockBuilder
         bool esSolid = false;
         bool swSolid = false;
 
+        float light = 0;
+
         switch (direction)
         {
             case Direction.up:
@@ -39,6 +41,9 @@ public static class BlockBuilder
                 neSolid = chunk.GetBlock(pos.Add(1, 1, 1)).Block().IsSolid(Direction.south) && chunk.GetBlock(pos.Add( 1, 1, 1)).Block().IsSolid(Direction.west);
                 esSolid = chunk.GetBlock(pos.Add(1, 1, -1)).Block().IsSolid(Direction.west) && chunk.GetBlock(pos.Add(1,1,-1)).Block().IsSolid(Direction.north);
                 swSolid = chunk.GetBlock(pos.Add(-1, 1, -1)).Block().IsSolid(Direction.north) && chunk.GetBlock(pos.Add(-1,1,-1)).Block().IsSolid(Direction.east);
+
+                light = chunk.GetBlock(pos.Add(0,1,0)).data1 / 255f;
+
                 break;
             case Direction.down:
                 nSolid = chunk.GetBlock(pos.Add(0,-1,-1)).Block().IsSolid(Direction.south);
@@ -50,6 +55,9 @@ public static class BlockBuilder
                 neSolid = chunk.GetBlock(pos.Add(1, -1, -1)).Block().IsSolid(Direction.south) && chunk.GetBlock(pos.Add(1, -1, -1)).Block().IsSolid(Direction.west);
                 esSolid = chunk.GetBlock(pos.Add(1, -1, 1)).Block().IsSolid(Direction.west) && chunk.GetBlock(pos.Add(1, -1, 1)).Block().IsSolid(Direction.north);
                 swSolid = chunk.GetBlock(pos.Add(-1, -1, 1)).Block().IsSolid(Direction.north) && chunk.GetBlock(pos.Add(-1, -1,1)).Block().IsSolid(Direction.east);
+
+                light = chunk.GetBlock(pos.Add(0, -1, 0)).data1 / 255f;
+
                 break;
             case Direction.north:
                 nSolid = chunk.GetBlock(pos.Add(1,0,1)).Block().IsSolid(Direction.west);
@@ -61,6 +69,9 @@ public static class BlockBuilder
                 neSolid = chunk.GetBlock(pos.Add(1, 1, 1)).Block().IsSolid(Direction.south) && chunk.GetBlock(pos.Add(1,1,1)).Block().IsSolid(Direction.west);
                 wnSolid = chunk.GetBlock(pos.Add(1, -1, 1)).Block().IsSolid(Direction.west) && chunk.GetBlock(pos.Add(1, -1, 1)).Block().IsSolid(Direction.north);
                 swSolid = chunk.GetBlock(pos.Add(-1, -1, 1)).Block().IsSolid(Direction.north) && chunk.GetBlock(pos.Add(-1, -1, 1)).Block().IsSolid(Direction.east);
+
+                light = chunk.GetBlock(pos.Add(0, 0, 1)).data1 / 255f;
+
                 break;
             case Direction.east:
                 nSolid = chunk.GetBlock(pos.Add(1,0,-1)).Block().IsSolid(Direction.up);
@@ -72,6 +83,9 @@ public static class BlockBuilder
                 neSolid = chunk.GetBlock(pos.Add(1, 1, -1)).Block().IsSolid(Direction.south) && chunk.GetBlock(pos.Add(1, 1, -1)).Block().IsSolid(Direction.west);
                 wnSolid = chunk.GetBlock(pos.Add(1, -1, -1)).Block().IsSolid(Direction.east) && chunk.GetBlock(pos.Add(1, -1, -1)).Block().IsSolid(Direction.north);
                 swSolid = chunk.GetBlock(pos.Add(1, -1, 1)).Block().IsSolid(Direction.north) && chunk.GetBlock(pos.Add(1, -1, 1)).Block().IsSolid(Direction.east);
+
+                light = chunk.GetBlock(pos.Add(1, 0, 0)).data1 / 255f;
+
                 break;
             case Direction.south:
                 nSolid = chunk.GetBlock(pos.Add(-1,0,-1)).Block().IsSolid(Direction.down);
@@ -83,6 +97,9 @@ public static class BlockBuilder
                 neSolid = chunk.GetBlock(pos.Add(-1, 1, -1)).Block().IsSolid(Direction.south) && chunk.GetBlock(pos.Add(-1, 1, -1)).Block().IsSolid(Direction.west);
                 wnSolid = chunk.GetBlock(pos.Add(-1, -1, -1)).Block().IsSolid(Direction.east) && chunk.GetBlock(pos.Add(-1, -1, -1)).Block().IsSolid(Direction.north);
                 swSolid = chunk.GetBlock(pos.Add(1, -1, -1)).Block().IsSolid(Direction.north) && chunk.GetBlock(pos.Add(1, -1, -1)).Block().IsSolid(Direction.east);
+
+                light = chunk.GetBlock(pos.Add(0, 0, -1)).data1 / 255f;
+
                 break;
             case Direction.west:
                 nSolid = chunk.GetBlock(pos.Add(-1,0,1)).Block().IsSolid(Direction.up);
@@ -94,13 +111,16 @@ public static class BlockBuilder
                 neSolid = chunk.GetBlock(pos.Add(-1, 1, 1)).Block().IsSolid(Direction.south) && chunk.GetBlock(pos.Add(-1, 1, 1)).Block().IsSolid(Direction.west);
                 wnSolid = chunk.GetBlock(pos.Add(-1, -1, 1)).Block().IsSolid(Direction.east) && chunk.GetBlock(pos.Add(-1, -1, 1)).Block().IsSolid(Direction.north);
                 swSolid = chunk.GetBlock(pos.Add(-1, -1, -1)).Block().IsSolid(Direction.north) && chunk.GetBlock(pos.Add(-1, -1, -1)).Block().IsSolid(Direction.east);
+
+                light = chunk.GetBlock(pos.Add(-1, 0, 0)).data1 / 255f;
+
                 break;
             default:
                 Debug.LogError("Direction not recognized");
                 break;
         }
 
-        AddColors(meshData, wnSolid, nSolid, neSolid, eSolid, esSolid, sSolid, swSolid, wSolid);
+        AddColors(meshData, wnSolid, nSolid, neSolid, eSolid, esSolid, sSolid, swSolid, wSolid, light);
     }
 
     public static void BuildTexture(Chunk chunk, BlockPos pos, MeshData meshData, Direction direction, Block block, Tile tilePos)
@@ -201,7 +221,7 @@ public static class BlockBuilder
         meshData.AddQuadTriangles(useCollisionMesh);
     }
 
-    static void AddColors(MeshData meshData, bool wnSolid, bool nSolid, bool neSolid, bool eSolid, bool esSolid, bool sSolid, bool swSolid, bool wSolid)
+    static void AddColors(MeshData meshData, bool wnSolid, bool nSolid, bool neSolid, bool eSolid, bool esSolid, bool sSolid, bool swSolid, bool wSolid, float light)
     {
         float ne = 1;
         float es = 1;
@@ -244,6 +264,6 @@ public static class BlockBuilder
         if (esSolid)
             es -= 0.2f;
 
-        meshData.AddColors(ne, es, sw, wn);
+        meshData.AddColors(ne, es, sw, wn, light);
     }
 }
