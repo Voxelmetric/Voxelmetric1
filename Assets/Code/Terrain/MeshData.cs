@@ -81,10 +81,10 @@ public class MeshData
 
     public void AddColors(float ne, float es, float sw, float wn, float light)
     {
-        wn = wn * light / 2;
-        ne = ne * light / 2;
-        es = es * light / 2;
-        sw = sw * light / 2;
+        wn = (wn/2) + (light / 2);
+        ne = (ne/2) + (light / 2);
+        es = (es /2) + (light / 2);
+        sw = (sw/2) + (light / 2);
         
         colors.Add(new Color(wn, wn, wn));
         colors.Add(new Color(ne, ne, ne));
