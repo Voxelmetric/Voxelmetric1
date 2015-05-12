@@ -19,7 +19,6 @@ public class LoadChunks : MonoBehaviour {
         FindChunksToLoad();
 
         LoadAndRenderChunks();
-        LoadAndRenderChunks();
     }
 
     bool DeleteChunks()
@@ -52,9 +51,7 @@ public class LoadChunks : MonoBehaviour {
     bool FindChunksToLoad()
     {
         if ( updateList.Count != 0 || buildList.Count!=0)
-        {
             return false;
-        }
 
         //Cycle through the array of positions
         for (int i = 0; i < Data.chunkLoadOrder.Length; i++)
@@ -108,23 +105,38 @@ public class LoadChunks : MonoBehaviour {
             int count = buildList.Count;
             for (int i = 0; i < count; i++)
             {
-                BuildChunk(buildList[0]);
+                var pos = buildList[0];
+                Chunk chunk = world.GetChunk(pos.x, pos.y, pos.z);
+                if(chunk==null){
+                    world.CreateChunk(pos.x, pos.y, pos.z);
+                }
                 buildList.RemoveAt(0);
+
+                if (pos.y == -64 && chunk == null)
+                {
+                    BlockLight.ResetLightChunkColumn(world, world.GetChunk(pos.x, pos.y, pos.z));
+                    return;
+                }
             }
         }
 
         if ( updateList.Count!=0)
         {
-            Chunk chunk = world.GetChunk(updateList[0].x, updateList[0].y, updateList[0].z);
-            if (chunk != null)
-                chunk.update = true;
-            updateList.RemoveAt(0);
+            int count = updateList.Count;
+            for (int i = 0; i < count && i<3; i++)
+            {
+                var pos = updateList[0];
+                Chunk chunk = world.GetChunk(updateList[0].x, updateList[0].y, updateList[0].z);
+                if (chunk != null){
+                    Profiler.BeginSample("flood light setup");
+                    if (pos.y == -64)
+                        BlockLight.FloodLightChunkColumn(world, chunk);
+                    Profiler.EndSample();
+                    chunk.update = true;
+                }
+                updateList.RemoveAt(0);
+            }
         }
     }
 
-    void BuildChunk(BlockPos pos)
-    {
-        if (world.GetChunk(pos.x,pos.y,pos.z) == null)
-           world.CreateChunk(pos.x,pos.y,pos.z);
-    }
 }

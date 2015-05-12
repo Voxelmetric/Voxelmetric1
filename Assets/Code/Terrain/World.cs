@@ -38,8 +38,8 @@ public class World : MonoBehaviour {
 
         Serialization.Load(newChunk);
 
-        if(y==-64)
-            BlockLight.ResetLightChunkColumn(this, newChunk);
+        //if(y==-64)
+        //    BlockLight.ResetLightChunkColumn(this, newChunk);
     }
 
     public void DestroyChunk(int x, int y, int z)
