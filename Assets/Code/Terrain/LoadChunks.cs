@@ -112,11 +112,12 @@ public class LoadChunks : MonoBehaviour {
                 }
                 buildList.RemoveAt(0);
 
-                if (pos.y == -64 && chunk == null)
-                {
-                    BlockLight.ResetLightChunkColumn(world, world.GetChunk(pos.x, pos.y, pos.z));
-                    return;
-                }
+                //Removed from master until lighting is faster
+                //if (pos.y == -64 && chunk == null)
+                //{
+                //    BlockLight.ResetLightChunkColumn(world, world.GetChunk(pos.x, pos.y, pos.z));
+                //    return;
+                //}
             }
         }
 
