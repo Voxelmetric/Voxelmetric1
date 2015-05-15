@@ -44,6 +44,18 @@ public class Chunk : MonoBehaviour
         return world.GetBlock(pos.x + blockPos.x, pos.y + blockPos.y, pos.z + blockPos.z);
     }
 
+    public static bool InRange(BlockPos localPos)
+    {
+        if (!InRange(localPos.x))
+            return false;
+        if (!InRange(localPos.y))
+            return false;
+        if (!InRange(localPos.z))
+            return false;
+
+        return true;
+    }
+
     public static bool InRange(int index)
     {
         if (index < 0 || index >= Config.ChunkSize)
