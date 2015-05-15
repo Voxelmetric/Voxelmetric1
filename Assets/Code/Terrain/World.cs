@@ -103,7 +103,8 @@ public class World : MonoBehaviour {
             chunk.SetBlock(x - chunk.pos.x, y - chunk.pos.y, z - chunk.pos.z, block, updateChunk);
             if (updateChunk)
             {
-                BlockLight.LightArea(this, new BlockPos(x, y, z));
+                //Removed from master until it's faster
+                //BlockLight.LightArea(this, new BlockPos(x, y, z));
 
                 UpdateIfEqual(x - chunk.pos.x, 0, new BlockPos(x - 1, y, z));
                 UpdateIfEqual(x - chunk.pos.x, Config.ChunkSize - 1, new BlockPos(x + 1, y, z));
