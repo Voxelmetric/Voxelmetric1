@@ -3,9 +3,6 @@ using System.Collections;
 
 public class BlockSolid : Block
 {
-    public static int health = 100;
-    public static int toughness = 100;
-    public static bool canBeWalkedOn = true;
 
     public BlockSolid() : base() { }
 

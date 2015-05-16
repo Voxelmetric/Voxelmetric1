@@ -126,11 +126,11 @@ public class LoadChunks : MonoBehaviour {
             int count = updateList.Count;
             for (int i = 0; i < count && i<3; i++)
             {
-                var pos = updateList[0];
                 Chunk chunk = world.GetChunk(updateList[0].x, updateList[0].y, updateList[0].z);
                 if (chunk != null){
 
                     //Removed from master until it's faster
+                    //var pos = updateList[0];
                     //Profiler.BeginSample("flood light setup");
                     //if (pos.y == -64)
                     //    BlockLight.FloodLightChunkColumn(world, chunk);

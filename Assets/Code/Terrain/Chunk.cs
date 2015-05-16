@@ -56,6 +56,7 @@ public class Chunk : MonoBehaviour
         return true;
     }
 
+
     public static bool InRange(int index)
     {
         if (index < 0 || index >= Config.ChunkSize)
