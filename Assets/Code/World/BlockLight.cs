@@ -20,7 +20,7 @@ public static class BlockLight
         {
             for (int z = pos.z - lightEffectRadius-1; z < pos.z + lightEffectRadius+1; z++)
             {
-                for (int y = Config.WorldMaxY - 1; y >= Config.WorldMinY; y--)
+                for (int y = Config.Env.WorldMaxY - 1; y >= Config.Env.WorldMinY; y--)
                 {
                     FloodLight(world, x,y,z);
                 }
@@ -30,9 +30,9 @@ public static class BlockLight
 
     public static void ResetLightChunkColumn(World world, Chunk chunk)
     {
-        for (int x = chunk.pos.x; x < chunk.pos.x + Config.ChunkSize; x++)
+        for (int x = chunk.pos.x; x < chunk.pos.x + Config.Env.ChunkSize; x++)
         {
-            for (int z = chunk.pos.z; z < chunk.pos.z + Config.ChunkSize; z++)
+            for (int z = chunk.pos.z; z < chunk.pos.z + Config.Env.ChunkSize; z++)
             {
                 ResetLightColumn(world, x, z);
             }
@@ -42,11 +42,11 @@ public static class BlockLight
 
     public static void FloodLightChunkColumn(World world, Chunk chunk){
         
-        for (int x = chunk.pos.x; x < chunk.pos.x + Config.ChunkSize; x++)
+        for (int x = chunk.pos.x; x < chunk.pos.x + Config.Env.ChunkSize; x++)
         {
-            for (int z = chunk.pos.z; z < chunk.pos.z + Config.ChunkSize; z++)
+            for (int z = chunk.pos.z; z < chunk.pos.z + Config.Env.ChunkSize; z++)
             {
-                for (int y = Config.WorldMaxY - 1; y >= Config.WorldMinY; y--)
+                for (int y = Config.Env.WorldMaxY - 1; y >= Config.Env.WorldMinY; y--)
                 {
                     FloodLight(world, x, y, z);
                 }
@@ -57,9 +57,9 @@ public static class BlockLight
     public static void ResetLightColumn(World world, int x, int z)
     {
         bool sunlightObstructed = false;
-        for (int y = Config.WorldMaxY - 1; y >= Config.WorldMinY; y--)
+        for (int y = Config.Env.WorldMaxY - 1; y >= Config.Env.WorldMinY; y--)
         {
-            Chunk chunk = world.GetChunk(x, y, z);
+            Chunk chunk = world.GetChunk(new BlockPos(x, y, z));
             BlockPos localPos = new BlockPos(x, y, z).Subtract(chunk.pos);
 
             if (chunk == null){
@@ -83,8 +83,8 @@ public static class BlockLight
     public static void FloodLight(World world, int x, int y, int z)
     {
         
-        SBlock block = world.GetBlock(x,y,z);
-        if (block.type != (byte)BlockType.air)
+        Block block = world.GetBlock(new BlockPos(x, y, z));
+        if (block.type != Block.Air.type)
             return;
 
         if (block.data1 <= lightReduceBy)
@@ -106,19 +106,19 @@ public static class BlockLight
     public static void SpillLight(World world, BlockPos pos, byte light, Chunk chunk = null){
 
         if(chunk==null){
-            chunk = world.GetChunk(pos.x, pos.y, pos.z);
+            chunk = world.GetChunk(pos);
         }
 
         BlockPos localPos = pos.Subtract(chunk.pos);
 
-        if (chunk.blocks[localPos.x, localPos.y, localPos.z].type != (byte)BlockType.air)
+        if (chunk.blocks[localPos.x, localPos.y, localPos.z].type != Block.Air.type)
             return;
 
         if(chunk.blocks[localPos.x, localPos.y, localPos.z].data1 >= light)
             return;
 
         chunk.blocks[localPos.x, localPos.y, localPos.z].data1 = light;
-        chunk.update = true;
+        chunk.QueueUpdate();
 
         if (light > lightReduceBy)
         {

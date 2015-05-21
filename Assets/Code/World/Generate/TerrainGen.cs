@@ -21,17 +21,17 @@ public class TerrainGen
     {
 
 
-        for (int x = 0; x < Config.ChunkSize; x++)
+        for (int x = 0; x < Config.Env.ChunkSize; x++)
         {
-            for (int z = 0; z < Config.ChunkSize; z++)
+            for (int z = 0; z < Config.Env.ChunkSize; z++)
             {
                 GenerateTerrain(chunk, x, z);
             }
         }
 
-        for (int x = -3; x < Config.ChunkSize +3; x++)
+        for (int x = -3; x < Config.Env.ChunkSize +3; x++)
         {
-            for (int z = -3; z < Config.ChunkSize +3; z++)
+            for (int z = -3; z < Config.Env.ChunkSize +3; z++)
             {
                 CreateTreeIfValid(x, z, chunk);
             }
@@ -72,36 +72,34 @@ public class TerrainGen
         int dirtHeight = stoneHeight + LayerDirt(chunk.pos.x + x, chunk.pos.z + z);
         //CreateTreeIfValid(x, z, chunk, dirtHeight);
 
-        for (int y = 0; y < Config.ChunkSize; y++)
+        for (int y = 0; y < Config.Env.ChunkSize; y++)
         {
 
             if (y + chunk.pos.y <= stoneHeight)
             {
-                SetBlock(chunk, new SBlock(BlockType.stone), x, y, z);
+                SetBlock(chunk, Block.Stone, new BlockPos(x,y,z));
             }
             else if (y + chunk.pos.y < dirtHeight)
             {
-                SetBlock(chunk, new SBlock(BlockType.dirt), x, y, z);
+                SetBlock(chunk, Block.Dirt, new BlockPos(x,y,z));
             }
             else if (y + chunk.pos.y == dirtHeight)
             {
-                SetBlock(chunk, new SBlock(BlockType.grass), x, y, z);
+                SetBlock(chunk, Block.Grass, new BlockPos(x,y,z));
             }
 
         }
 
     }
 
-    public static void SetBlock(Chunk chunk, SBlock block, int x, int y, int z, bool replaceBlocks = false)
+    public static void SetBlock(Chunk chunk, Block block, BlockPos pos, bool replaceBlocks = false)
     {
-        if (x >= 0 && x < Config.ChunkSize
-            && y >= 0 && y < Config.ChunkSize
-            && z >= 0 && z < Config.ChunkSize)
+        if (Chunk.InRange(pos))
         {
-            if (replaceBlocks || chunk.blocks[x, y, z] == 0)
+            if (replaceBlocks || chunk.blocks[pos.x, pos.y, pos.z] == 0)
             {
-                chunk.SetBlock(x, y, z, block, false);
-                chunk.blocks[x, y, z].modified = false;
+                chunk.SetBlock(pos, block, false);
+                chunk.blocks[pos.x, pos.y, pos.z].modified = false;
             }
         }
     }

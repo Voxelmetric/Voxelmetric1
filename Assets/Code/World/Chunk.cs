@@ -8,9 +8,9 @@ using System.Collections;
 public class Chunk : MonoBehaviour
 {
 
-    public SBlock[, ,] blocks = new SBlock[Config.ChunkSize, Config.ChunkSize, Config.ChunkSize];
+    public Block[, ,] blocks = new Block[Config.Env.ChunkSize, Config.Env.ChunkSize, Config.Env.ChunkSize];
 
-    public bool update = false;
+    bool update = false;
 
     MeshFilter filter;
     MeshCollider coll;
@@ -18,7 +18,7 @@ public class Chunk : MonoBehaviour
     public World world;
     public BlockPos pos;
 
-    public bool rendered;
+    public bool rendered = false;
 
     void Start()
     {
@@ -26,7 +26,6 @@ public class Chunk : MonoBehaviour
         coll = gameObject.GetComponent<MeshCollider>();
     }
 
-    //Update is called once per frame
     void Update()
     {
         if (update)
@@ -36,12 +35,18 @@ public class Chunk : MonoBehaviour
         }
     }
 
-    public SBlock GetBlock(BlockPos blockPos)
+    public void QueueUpdate()
     {
-        if (InRange(blockPos.x) && InRange(blockPos.y) && InRange(blockPos.z))
+        update = true;
+    }
+
+    //gets the block from the blocks array or gets it from World
+    public Block GetBlock(BlockPos blockPos)
+    {
+        if (InRange(blockPos))
             return blocks[blockPos.x, blockPos.y, blockPos.z];
 
-        return world.GetBlock(pos.x + blockPos.x, pos.y + blockPos.y, pos.z + blockPos.z);
+        return world.GetBlock(blockPos + pos);
     }
 
     public static bool InRange(BlockPos localPos)
@@ -56,54 +61,49 @@ public class Chunk : MonoBehaviour
         return true;
     }
 
-
     public static bool InRange(int index)
     {
-        if (index < 0 || index >= Config.ChunkSize)
+        if (index < 0 || index >= Config.Env.ChunkSize)
             return false;
 
         return true;
     }
 
-    public void SetBlock(int x, int y, int z, SBlock block, bool updateChunk = true)
+    public void SetBlock(BlockPos blockPos, Block block, bool updateChunk = true)
     {
-        if (InRange(x) && InRange(y) && InRange(z))
+        if (InRange(blockPos))
         {
-            blocks[x, y, z] = block;
+            blocks[blockPos.x, blockPos.y, blockPos.z] = block;
+
             if (updateChunk)
                 update = true;
         }
         else
         {
-            world.SetBlock(pos.x + x, pos.y + y, pos.z + z, block, updateChunk);
+            //if the block is out of range set it though world
+            world.SetBlock(blockPos + pos, block, updateChunk);
         }
-
     }
 
     // Updates the chunk based on its contents
-    public bool UpdateChunk()
+    void UpdateChunk()
     {
         rendered = true;
-        
-        //if(pos.y==48)
-            //BlockLight.LightArea(world, pos.Add(8,8,8));
-
         MeshData meshData = new MeshData();
 
-        for (int x = 0; x < Config.ChunkSize; x++)
+        for (int x = 0; x < Config.Env.ChunkSize; x++)
         {
-            for (int y = 0; y < Config.ChunkSize; y++)
+            for (int y = 0; y < Config.Env.ChunkSize; y++)
             {
-                for (int z = 0; z < Config.ChunkSize; z++)
+                for (int z = 0; z < Config.Env.ChunkSize; z++)
                 {
-                    blocks[x, y, z].BuildBlock(this, new BlockPos(x, y, z), meshData);
+                    //TODO: blocks should have a controller parameter which would have this build block function
+                    blocks[x, y, z].controller.BuildBlock(this, new BlockPos(x, y, z), meshData);
                 }
             }
         }
 
         RenderMesh(meshData);
-
-        return true;
     }
 
     // Sends the calculated mesh information
@@ -119,15 +119,16 @@ public class Chunk : MonoBehaviour
         filter.mesh.uv = meshData.uv.ToArray();
         filter.mesh.RecalculateNormals();
 
-        Profiler.BeginSample("collision mesh");
-        coll.sharedMesh = null;
-        Mesh mesh = new Mesh();
-        mesh.vertices = meshData.colVertices.ToArray();
-        mesh.triangles = meshData.colTriangles.ToArray();
-        mesh.RecalculateNormals();
+        if (Config.Toggle.UseCollisionMesh)
+        {
+            coll.sharedMesh = null;
+            Mesh mesh = new Mesh();
+            mesh.vertices = meshData.colVertices.ToArray();
+            mesh.triangles = meshData.colTriangles.ToArray();
+            mesh.RecalculateNormals();
 
-        coll.sharedMesh = mesh;
-        Profiler.EndSample();
+            coll.sharedMesh = mesh;
+        }
     }
 
 }

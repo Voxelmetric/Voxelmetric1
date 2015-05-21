@@ -1,7 +1,4 @@
-﻿using UnityEngine;
-using System.Collections;
-
-public static class Data {
+﻿public static class Data {
 
     public static BlockPos[] chunkLoadOrder = {   new BlockPos( 0, 0,  0), new BlockPos(-1, 0,  0), new BlockPos( 0, 0, -1), new BlockPos( 0, 0,  1), new BlockPos( 1, 0,  0),
     new BlockPos(-1, 0, -1), new BlockPos(-1, 0,  1), new BlockPos( 1, 0, -1), new BlockPos( 1, 0,  1), new BlockPos(-2, 0,  0),

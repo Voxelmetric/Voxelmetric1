@@ -1,18 +1,7 @@
 ﻿using UnityEngine;
-using System.Collections;
 
-public static class Terrain
+public static class Voxelmetric
 {
-    public static BlockPos GetBlockPos(Vector3 pos)
-    {
-        BlockPos blockPos = new BlockPos(
-            Mathf.RoundToInt(pos.x),
-            Mathf.RoundToInt(pos.y),
-            Mathf.RoundToInt(pos.z)
-            );
-
-        return blockPos;
-    }
 
     public static BlockPos GetBlockPos(RaycastHit hit, bool adjacent = false)
     {
@@ -22,12 +11,15 @@ public static class Terrain
             MoveWithinBlock(hit.point.z, hit.normal.z, adjacent)
             );
 
-        return GetBlockPos(pos);
+        return pos;
     }
 
     static float MoveWithinBlock(float pos, float norm, bool adjacent = false)
     {
-        if (pos - (int)pos == 0.5f || pos - (int)pos == -0.5f)
+        //Because of float imprecision we can't guarantee a hit on the side of a
+        //block will be exactly 0.5 so we add a bit of padding
+        float offset = pos - (int)pos;
+        if ((offset > 0.49f && offset < 0.51) || (offset > -0.51f && offset < -0.49))
         {
             if (adjacent)
             {
@@ -39,47 +31,47 @@ public static class Terrain
             }
         }
 
-        return (float)pos;
+        return pos;
     }
 
-    public static bool SetBlock(RaycastHit hit, SBlock block, bool adjacent = false)
+    public static bool SetBlock(RaycastHit hit, Block block, bool adjacent = false)
     {
         Chunk chunk = hit.collider.GetComponent<Chunk>();
+
         if (chunk == null)
             return false;
 
         BlockPos pos = GetBlockPos(hit, adjacent);
-
-        chunk.world.SetBlock(pos.x, pos.y, pos.z, block);
+        chunk.world.SetBlock(pos, block);
 
         return true;
     }
 
-    public static bool SetBlock(BlockPos pos, World world, SBlock block)
+    public static bool SetBlock(BlockPos pos, World world, Block block)
     {
-        Chunk chunk = world.GetChunk(pos.x, pos.y, pos.z);
+        Chunk chunk = world.GetChunk(pos);
         if (chunk == null)
             return false;
 
-        chunk.world.SetBlock(pos.x, pos.y, pos.z, block);
+        chunk.world.SetBlock(pos, block);
 
         return true;
     }
 
-    public static SBlock GetBlock(RaycastHit hit, bool adjacent = false)
+    public static Block GetBlock(RaycastHit hit, bool adjacent = false)
     {
         Chunk chunk = hit.collider.GetComponent<Chunk>();
         if (chunk == null)
-            return new SBlock(BlockType.air);
+            return Block.Air;
 
         BlockPos pos = GetBlockPos(hit, adjacent);
 
         return GetBlock(pos, chunk.world);
     }
 
-    public static SBlock GetBlock(BlockPos pos, World world)
+    public static Block GetBlock(BlockPos pos, World world)
     {
-        SBlock block = world.GetBlock(pos.x, pos.y, pos.z);
+        Block block = world.GetBlock(pos);
 
         return block;
     }

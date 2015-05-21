@@ -9,7 +9,7 @@ using System.IO;
 [Serializable]
 public class Save
 {
-    public Dictionary<BlockPos, SBlock> blocks = new Dictionary<BlockPos, SBlock>();
+    public Dictionary<BlockPos, Block> blocks = new Dictionary<BlockPos, Block>();
     public bool changed = false;
 
     public Save(Chunk chunk)
@@ -18,11 +18,11 @@ public class Save
         //blocks already in the save fie if there is one. Then add 
         AddSavedBlocks(chunk);
 
-        for (int x = 0; x < Config.ChunkSize; x++)
+        for (int x = 0; x < Config.Env.ChunkSize; x++)
         {
-            for (int y = 0; y < Config.ChunkSize; y++)
+            for (int y = 0; y < Config.Env.ChunkSize; y++)
             {
-                for (int z = 0; z < Config.ChunkSize; z++)
+                for (int z = 0; z < Config.Env.ChunkSize; z++)
                 {
                     BlockPos pos = new BlockPos(x, y, z);
                     if (chunk.blocks[x, y, z].modified)

@@ -1,14 +1,10 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class Block
+public class BlockController
 {
-    public static int health = 100;
-    public static int toughness = 100;
-    public static bool canBeWalkedOn = false;
-
     //Base block constructor
-    public Block() { OnCreate(); }
+    public BlockController() { OnCreate(); }
 
     public virtual void AddBlockData (Chunk chunk, BlockPos pos, MeshData meshData) { }
 

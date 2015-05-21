@@ -233,11 +233,11 @@ public class PathFinder {
 
     public static bool IsWalkable(World world, BlockPos pos)
     {
-        if(!world.GetBlock(pos.x, pos.y, pos.z).Block().IsSolid(Direction.up))
+        if(!world.GetBlock(pos).controller.IsSolid(Direction.up))
             return false;
 
         for(int y = 1; y< characterHeight+1; y++){
-            if (world.GetBlock(pos.x, pos.y + y, pos.z).GetType() != typeof(BlockAir))
+            if (world.GetBlock(pos.Add(0,y,0)).GetType() != typeof(BlockAir))
                 return false;
         }
 

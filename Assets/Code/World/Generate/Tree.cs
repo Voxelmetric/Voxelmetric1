@@ -12,13 +12,13 @@ public class Tree {
             {
                 for (int z = -leaves; z <= leaves; z++)
                 {
-                    TerrainGen.SetBlock(chunk, new SBlock(BlockType.leaves), pos.x + x, pos.y + y, pos.z + z, true);
+                    TerrainGen.SetBlock(chunk, Block.Leaves, pos.Add(x,y,z), true);
                 }
             }
         }
         for (int y = 0; y <= 5; y++)
         {
-            TerrainGen.SetBlock(chunk, new SBlock(BlockType.log), pos.x, pos.y + y, pos.z, true);
+            TerrainGen.SetBlock(chunk, Block.Log, pos.Add(0, y, 0), true);
         }
     }
 
@@ -46,19 +46,19 @@ public class Tree {
         if (fpy < chunk.pos.y)
             return false;
 
-        if (fny > (chunk.pos.y + Config.ChunkSize))
+        if (fny > (chunk.pos.y + Config.Env.ChunkSize))
             return false;
 
         if (fpx < chunk.pos.x)
             return false;
 
-        if (fnx > (chunk.pos.x + Config.ChunkSize))
+        if (fnx > (chunk.pos.x + Config.Env.ChunkSize))
             return false;
 
         if (fpz < chunk.pos.z)
             return false;
 
-        if (fnz > (chunk.pos.z + Config.ChunkSize))
+        if (fnz > (chunk.pos.z + Config.Env.ChunkSize))
             return false;
 
         return true;

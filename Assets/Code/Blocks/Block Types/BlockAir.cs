@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class BlockAir : Block
+public class BlockAir : BlockController
 {
 
     public BlockAir() : base() { }

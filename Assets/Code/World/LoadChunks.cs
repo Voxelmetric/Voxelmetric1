@@ -24,7 +24,7 @@ public class LoadChunks : MonoBehaviour {
     bool DeleteChunks()
     {
 
-        if (timer == 10)
+        if (timer == Config.Env.WaitBetweenDeletes)
         {
             var chunksToDelete = new List<BlockPos>();
             foreach (var chunk in world.chunks)
@@ -33,12 +33,12 @@ public class LoadChunks : MonoBehaviour {
                     new Vector3(chunk.Value.pos.x, 0, chunk.Value.pos.z),
                     new Vector3(transform.position.x, 0, transform.position.z));
 
-                if (distance > 256)
+                if (distance > Config.Env.DistanceToDeleteChunks)
                     chunksToDelete.Add(chunk.Key);
             }
 
             foreach (var chunk in chunksToDelete)
-                world.DestroyChunk(chunk.x, chunk.y, chunk.z);
+                world.DestroyChunk(chunk);
 
             timer = 0;
             return true;
@@ -54,25 +54,20 @@ public class LoadChunks : MonoBehaviour {
             return false;
 
         //Cycle through the array of positions
-        for (int i = 0; i < Data.chunkLoadOrder.Length; i++)
+        for (int i = 0; i < Config.Env.ChunksToLoad; i++)
         {
             //Get the position of this gameobject to generate around
-            BlockPos playerPos = new BlockPos(
-                Mathf.FloorToInt(transform.position.x / Config.ChunkSize) * Config.ChunkSize,
-                Mathf.FloorToInt(transform.position.y / Config.ChunkSize) * Config.ChunkSize,
-                Mathf.FloorToInt(transform.position.z / Config.ChunkSize) * Config.ChunkSize
-                );
+            BlockPos playerPos = ((BlockPos)transform.position).ContainingChunkCoordinates();
 
             //translate the player position and array position into chunk position
             BlockPos newChunkPos = new BlockPos(
-                Data.chunkLoadOrder[i].x * Config.ChunkSize + playerPos.x,
+                Data.chunkLoadOrder[i].x * Config.Env.ChunkSize + playerPos.x,
                 0,
-                Data.chunkLoadOrder[i].z * Config.ChunkSize + playerPos.z
+                Data.chunkLoadOrder[i].z * Config.Env.ChunkSize + playerPos.z
                 );
 
             //Get the chunk in the defined position
-            Chunk newChunk = world.GetChunk(
-                newChunkPos.x, newChunkPos.y, newChunkPos.z);
+            Chunk newChunk = world.GetChunk(newChunkPos);
 
             //If the chunk already exists and it's already
             //rendered or in queue to be rendered continue
@@ -80,17 +75,17 @@ public class LoadChunks : MonoBehaviour {
                 continue;
 
             //load a column of chunks in this position
-            for (int y = 4; y >= -4; y--)
+            for (int y = Config.Env.WorldMaxY / Config.Env.ChunkSize; y >= Config.Env.WorldMinY / Config.Env.ChunkSize; y--)
             {
 
-                for (int x = newChunkPos.x - Config.ChunkSize; x <= newChunkPos.x + Config.ChunkSize; x += Config.ChunkSize)
+                for (int x = newChunkPos.x - Config.Env.ChunkSize; x <= newChunkPos.x + Config.Env.ChunkSize; x += Config.Env.ChunkSize)
                 {
-                    for (int z = newChunkPos.z - Config.ChunkSize; z <= newChunkPos.z + Config.ChunkSize; z += Config.ChunkSize)
+                    for (int z = newChunkPos.z - Config.Env.ChunkSize; z <= newChunkPos.z + Config.Env.ChunkSize; z += Config.Env.ChunkSize)
                     {
-                        buildList.Add(new BlockPos(x, y * Config.ChunkSize, z));
+                        buildList.Add(new BlockPos(x, y * Config.Env.ChunkSize, z));
                     }
                 }
-                updateList.Add(new BlockPos( newChunkPos.x, y * Config.ChunkSize, newChunkPos.z));
+                updateList.Add(new BlockPos( newChunkPos.x, y * Config.Env.ChunkSize, newChunkPos.z));
             }
             return true;
         }
@@ -106,37 +101,41 @@ public class LoadChunks : MonoBehaviour {
             for (int i = 0; i < count; i++)
             {
                 var pos = buildList[0];
-                Chunk chunk = world.GetChunk(pos.x, pos.y, pos.z);
+                Chunk chunk = world.GetChunk(pos);
                 if(chunk==null){
-                    world.CreateChunk(pos.x, pos.y, pos.z);
+                    world.CreateChunk(pos);
                 }
                 buildList.RemoveAt(0);
 
-                //Removed from master until lighting is faster
-                //if (pos.y == -64 && chunk == null)
-                //{
-                //    BlockLight.ResetLightChunkColumn(world, world.GetChunk(pos.x, pos.y, pos.z));
-                //    return;
-                //}
+                if (Config.Toggle.BlockLighting)
+                {
+                    if (pos.y == Config.Env.WorldMinY && chunk == null)
+                    {
+                        BlockLight.ResetLightChunkColumn(world, world.GetChunk(pos));
+                        return;
+                    }
+                }
             }
         }
 
         if ( updateList.Count!=0)
         {
             int count = updateList.Count;
+
+            //This three would be a config entry but this will all change once we add threading 
             for (int i = 0; i < count && i<3; i++)
             {
-                Chunk chunk = world.GetChunk(updateList[0].x, updateList[0].y, updateList[0].z);
+                Chunk chunk = world.GetChunk(updateList[0]);
                 if (chunk != null){
 
-                    //Removed from master until it's faster
-                    //var pos = updateList[0];
-                    //Profiler.BeginSample("flood light setup");
-                    //if (pos.y == -64)
-                    //    BlockLight.FloodLightChunkColumn(world, chunk);
-                    //Profiler.EndSample();
+                    if (Config.Toggle.BlockLighting)
+                    {
+                        var pos = updateList[0];
+                        if (pos.y == Config.Env.WorldMinY / Config.Env.ChunkSize)
+                            BlockLight.FloodLightChunkColumn(world, chunk);
+                    }
 
-                    chunk.update = true;
+                    chunk.QueueUpdate();
                 }
                 updateList.RemoveAt(0);
             }

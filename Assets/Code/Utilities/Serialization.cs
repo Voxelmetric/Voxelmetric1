@@ -7,11 +7,10 @@ using System.Runtime.Serialization;
 
 public static class Serialization
 {
-    public static string saveFolderName = "voxelGameSaves";
 
     public static string SaveLocation(string worldName)
     {
-        string saveLocation = saveFolderName + "/" + worldName + "/";
+        string saveLocation = Config.Directories.SaveFolder + "/" + worldName + "/";
 
         if (!Directory.Exists(saveLocation))
         {
