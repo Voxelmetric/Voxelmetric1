@@ -13,6 +13,7 @@ voxelGameSaves/
 /*.userprefs
 /*.pidb
 /*.booproj
+.vs/
 
 #Unity3D Generated File On Crash Reports
 sysinfo.txt
@@ -64,3 +65,4 @@ $RECYCLE.BIN/
 # Windows shortcuts
 *.lnk
 .settings/settings.json
+*.suo
