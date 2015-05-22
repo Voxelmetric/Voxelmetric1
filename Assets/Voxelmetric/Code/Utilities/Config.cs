@@ -20,7 +20,7 @@
     public static class Toggle
     {
         public static bool UseCollisionMesh = true;
-        public static bool BlockLighting = true;
+        public static bool BlockLighting = false;
     }
 
     public static class Textures

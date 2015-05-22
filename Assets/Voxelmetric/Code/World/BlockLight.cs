@@ -20,8 +20,8 @@
             {
                    for (int y = Config.Env.WorldMaxY - 1; y >= Config.Env.WorldMinY; y--)
                    {
-                       //FloodLight(world, x, y, z);
-                   }
+                    FloodLight(world, x, y, z);
+                }
             }
         }
         world.GetChunk(pos).QueueUpdate();
@@ -33,7 +33,7 @@
         {
             for (int z = chunk.pos.z; z < chunk.pos.z + Config.Env.ChunkSize; z++)
             {
-                //ResetLightColumn(world, x, z);
+                ResetLightColumn(world, x, z);
             }
         }
         
