@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class Tree {
+public class StructureTree {
     public static void Build(Chunk chunk, BlockPos pos)
     {
         int leaves =TerrainGen.GetNoise(pos.x + chunk.pos.x, 0, pos.z + chunk.pos.z, 1f, 2, 1) +1;

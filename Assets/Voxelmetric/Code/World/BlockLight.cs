@@ -1,7 +1,4 @@
-﻿using UnityEngine;
-using System.Collections;
-
-public static class BlockLight
+﻿public static class BlockLight
 {
 
     public static int lightEffectRadius = 4;
@@ -16,16 +13,18 @@ public static class BlockLight
                 ResetLightColumn(world, x, z);
             }
         }
+
         for (int x = pos.x - lightEffectRadius-1; x < pos.x + lightEffectRadius+1; x++)
         {
             for (int z = pos.z - lightEffectRadius-1; z < pos.z + lightEffectRadius+1; z++)
             {
-                for (int y = Config.Env.WorldMaxY - 1; y >= Config.Env.WorldMinY; y--)
-                {
-                    FloodLight(world, x,y,z);
-                }
+                   for (int y = Config.Env.WorldMaxY - 1; y >= Config.Env.WorldMinY; y--)
+                   {
+                       //FloodLight(world, x, y, z);
+                   }
             }
         }
+        world.GetChunk(pos).QueueUpdate();
     }
 
     public static void ResetLightChunkColumn(World world, Chunk chunk)
@@ -34,7 +33,7 @@ public static class BlockLight
         {
             for (int z = chunk.pos.z; z < chunk.pos.z + Config.Env.ChunkSize; z++)
             {
-                ResetLightColumn(world, x, z);
+                //ResetLightColumn(world, x, z);
             }
         }
         
@@ -66,17 +65,22 @@ public static class BlockLight
                 continue;
             }
 
-            if (chunk.blocks[localPos.x, localPos.y, localPos.z].type != 0)
+            Block block = chunk.GetBlock(localPos);
+
+            if (block.type != 0)
             {
                 sunlightObstructed = true;
                 continue;
             }
 
             if(sunlightObstructed){
-                chunk.blocks[localPos.x, localPos.y, localPos.z].data1 = 0;
+                block.data1 = 0;
             } else {
-                chunk.blocks[localPos.x, localPos.y, localPos.z].data1 = 255;
+                block.data1 = 255;
             }
+
+            chunk.SetBlock(localPos, block, false);
+
         }
     }
 
@@ -110,14 +114,16 @@ public static class BlockLight
         }
 
         BlockPos localPos = pos.Subtract(chunk.pos);
+        Block block = chunk.GetBlock(localPos);
 
-        if (chunk.blocks[localPos.x, localPos.y, localPos.z].type != Block.Air.type)
+        if (block.type != Block.Air.type)
             return;
 
-        if(chunk.blocks[localPos.x, localPos.y, localPos.z].data1 >= light)
+        if(block.data1 >= light)
             return;
 
-        chunk.blocks[localPos.x, localPos.y, localPos.z].data1 = light;
+        block.data1 = light;
+        chunk.SetBlock(localPos, block, false);
         chunk.QueueUpdate();
 
         if (light > lightReduceBy)

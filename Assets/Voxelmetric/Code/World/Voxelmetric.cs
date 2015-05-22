@@ -44,6 +44,11 @@ public static class Voxelmetric
         BlockPos pos = GetBlockPos(hit, adjacent);
         chunk.world.SetBlock(pos, block);
 
+        if (Config.Toggle.BlockLighting)
+        {
+            BlockLight.LightArea(chunk.world, pos);
+        }
+
         return true;
     }
 
@@ -54,6 +59,11 @@ public static class Voxelmetric
             return false;
 
         chunk.world.SetBlock(pos, block);
+
+        if (Config.Toggle.BlockLighting)
+        {
+            BlockLight.LightArea(world, pos);
+        }
 
         return true;
     }

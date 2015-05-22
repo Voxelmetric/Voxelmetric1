@@ -1,5 +1,4 @@
 ﻿using UnityEngine;
-using System.Collections;
 
 [RequireComponent(typeof(MeshFilter))]
 [RequireComponent(typeof(MeshRenderer))]
@@ -8,7 +7,7 @@ using System.Collections;
 public class Chunk : MonoBehaviour
 {
 
-    public Block[, ,] blocks = new Block[Config.Env.ChunkSize, Config.Env.ChunkSize, Config.Env.ChunkSize];
+    private Block[, ,] blocks = new Block[Config.Env.ChunkSize, Config.Env.ChunkSize, Config.Env.ChunkSize];
 
     bool update = false;
 
@@ -43,10 +42,18 @@ public class Chunk : MonoBehaviour
     //gets the block from the blocks array or gets it from World
     public Block GetBlock(BlockPos blockPos)
     {
-        if (InRange(blockPos))
-            return blocks[blockPos.x, blockPos.y, blockPos.z];
+        Block returnBlock;
 
-        return world.GetBlock(blockPos + pos);
+        if (InRange(blockPos))
+        {
+            returnBlock = blocks[blockPos.x, blockPos.y, blockPos.z];
+        }
+        else
+        {
+            returnBlock = world.GetBlock(blockPos + pos);
+        }
+
+        return returnBlock;
     }
 
     public static bool InRange(BlockPos localPos)
@@ -97,7 +104,6 @@ public class Chunk : MonoBehaviour
             {
                 for (int z = 0; z < Config.Env.ChunkSize; z++)
                 {
-                    //TODO: blocks should have a controller parameter which would have this build block function
                     blocks[x, y, z].controller.BuildBlock(this, new BlockPos(x, y, z), meshData);
                 }
             }

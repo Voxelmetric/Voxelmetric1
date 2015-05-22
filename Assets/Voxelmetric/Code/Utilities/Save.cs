@@ -25,12 +25,12 @@ public class Save
                 for (int z = 0; z < Config.Env.ChunkSize; z++)
                 {
                     BlockPos pos = new BlockPos(x, y, z);
-                    if (chunk.blocks[x, y, z].modified)
+                    if (chunk.GetBlock(pos).modified)
                     {
                         //remove any existing blocks in the dictionary as they're
                         //from the existing save and are overwritten
                         blocks.Remove(pos);
-                        blocks.Add(pos, chunk.blocks[x, y, z]);
+                        blocks.Add(pos, chunk.GetBlock(pos));
                         changed = true;
                     }
                 }

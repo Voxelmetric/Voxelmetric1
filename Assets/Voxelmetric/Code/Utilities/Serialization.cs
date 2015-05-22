@@ -60,8 +60,9 @@ public static class Serialization
         //as not to trigger a new save on unload unless new blocks are added.
         foreach (var block in save.blocks)
         {
-            chunk.blocks[block.Key.x, block.Key.y, block.Key.z] = block.Value;
-            chunk.blocks[block.Key.x, block.Key.y, block.Key.z].modified = false;
+            Block placeBlock = block.Value;
+            placeBlock.modified = false;
+            chunk.SetBlock(block.Key, placeBlock, false);
         }
 
         stream.Close();

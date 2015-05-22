@@ -96,10 +96,10 @@ public class TerrainGen
     {
         if (Chunk.InRange(pos))
         {
-            if (replaceBlocks || chunk.blocks[pos.x, pos.y, pos.z] == 0)
+            if (replaceBlocks || chunk.GetBlock(pos).type == Block.Air.type)
             {
+                block.modified = false;
                 chunk.SetBlock(pos, block, false);
-                chunk.blocks[pos.x, pos.y, pos.z].modified = false;
             }
         }
     }
@@ -122,9 +122,9 @@ public class TerrainGen
             terrainHeight += LayerDirt(x + chunk.pos.x, z + chunk.pos.z); ;
 
 
-            if (Tree.ChunkContains(chunk, new BlockPos(x + chunk.pos.x, terrainHeight, z + chunk.pos.z)))
+            if (StructureTree.ChunkContains(chunk, new BlockPos(x + chunk.pos.x, terrainHeight, z + chunk.pos.z)))
             {
-                Tree.Build(chunk, new BlockPos(x, terrainHeight - chunk.pos.y, z));
+                StructureTree.Build(chunk, new BlockPos(x, terrainHeight - chunk.pos.y, z));
             }
         }
     }
