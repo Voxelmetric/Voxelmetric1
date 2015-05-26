@@ -1,4 +1,7 @@
-﻿public static class BlockLight
+﻿using System.Threading;
+using System.Collections.Generic;
+
+public static class BlockLight
 {
 
     public static int lightEffectRadius = 4;
@@ -6,25 +9,39 @@
     public static byte lightReduceBy = 64;
 
     public static void LightArea(World world, BlockPos pos){
-        for (int x = pos.x - lightEffectRadius; x < pos.x + lightEffectRadius; x++)
-        {
-            for (int z = pos.z - lightEffectRadius; z < pos.z + lightEffectRadius; z++)
-            {
-                ResetLightColumn(world, x, z);
-            }
-        }
 
-        for (int x = pos.x - lightEffectRadius-1; x < pos.x + lightEffectRadius+1; x++)
-        {
-            for (int z = pos.z - lightEffectRadius-1; z < pos.z + lightEffectRadius+1; z++)
-            {
+        Thread thread = new Thread(() =>
+       {
+           List<BlockPos> chunksToUpdate = new List<BlockPos>();
+
+           for (int x = pos.x - lightEffectRadius; x < pos.x + lightEffectRadius; x++)
+           {
+               for (int z = pos.z - lightEffectRadius; z < pos.z + lightEffectRadius; z++)
+               {
+                   ResetLightColumn(world, x, z, chunksToUpdate);
+               }
+           }
+
+           for (int x = pos.x - lightEffectRadius - 1; x < pos.x + lightEffectRadius + 1; x++)
+           {
+               for (int z = pos.z - lightEffectRadius - 1; z < pos.z + lightEffectRadius + 1; z++)
+               {
                    for (int y = Config.Env.WorldMaxY - 1; y >= Config.Env.WorldMinY; y--)
                    {
-                    FloodLight(world, x, y, z);
-                }
-            }
-        }
-        world.GetChunk(pos).QueueUpdate();
+                       FloodLight(world, x, y, z, chunksToUpdate);
+                   }
+               }
+           }
+           //world.GetChunk(pos).QueueUpdate();
+
+           foreach (var chunkPos in chunksToUpdate)
+           {
+               world.GetChunk(chunkPos).QueueUpdate();
+           }
+
+       });
+        thread.Start();
+
     }
 
     public static void ResetLightChunkColumn(World world, Chunk chunk)
@@ -33,7 +50,7 @@
         {
             for (int z = chunk.pos.z; z < chunk.pos.z + Config.Env.ChunkSize; z++)
             {
-                ResetLightColumn(world, x, z);
+                //ResetLightColumn(world, x, z);
             }
         }
         
@@ -47,13 +64,13 @@
             {
                 for (int y = Config.Env.WorldMaxY - 1; y >= Config.Env.WorldMinY; y--)
                 {
-                    FloodLight(world, x, y, z);
+                   // FloodLight(world, x, y, z);
                 }
             }
         }
     }
 
-    public static void ResetLightColumn(World world, int x, int z)
+    public static void ResetLightColumn(World world, int x, int z, List<BlockPos> chunksToUpdate)
     {
         bool sunlightObstructed = false;
         for (int y = Config.Env.WorldMaxY - 1; y >= Config.Env.WorldMinY; y--)
@@ -73,18 +90,24 @@
                 continue;
             }
 
-            if(sunlightObstructed){
+            if (sunlightObstructed)
+            {
                 block.data1 = 0;
-            } else {
+            }
+            else
+            {
                 block.data1 = 255;
             }
 
             chunk.SetBlock(localPos, block, false);
 
+            if(!chunksToUpdate.Contains(chunk.pos))
+                chunksToUpdate.Add(chunk.pos);
+
         }
     }
 
-    public static void FloodLight(World world, int x, int y, int z)
+    public static void FloodLight(World world, int x, int y, int z, List<BlockPos> chunksToUpdate)
     {
         
         Block block = world.GetBlock(new BlockPos(x, y, z));
@@ -97,17 +120,15 @@
         byte lightSpill = block.data1;
         lightSpill -= lightReduceBy;
     
-        SpillLight(world, new BlockPos(x + 1, y, z), lightSpill);
-        SpillLight(world, new BlockPos(x, y + 1, z), lightSpill);
-        SpillLight(world, new BlockPos(x, y, z + 1), lightSpill);
-        SpillLight(world, new BlockPos(x - 1, y, z), lightSpill);
-        SpillLight(world, new BlockPos(x, y - 1, z), lightSpill);
-        SpillLight(world, new BlockPos(x, y, z - 1), lightSpill);
-       
-       return;
+        SpillLight(world, new BlockPos(x + 1, y, z), lightSpill, chunksToUpdate);
+        SpillLight(world, new BlockPos(x, y + 1, z), lightSpill, chunksToUpdate);
+        SpillLight(world, new BlockPos(x, y, z + 1), lightSpill, chunksToUpdate);
+        SpillLight(world, new BlockPos(x - 1, y, z), lightSpill, chunksToUpdate);
+        SpillLight(world, new BlockPos(x, y - 1, z), lightSpill, chunksToUpdate);
+        SpillLight(world, new BlockPos(x, y, z - 1), lightSpill, chunksToUpdate);
     }
 
-    public static void SpillLight(World world, BlockPos pos, byte light, Chunk chunk = null){
+    public static void SpillLight(World world, BlockPos pos, byte light, List<BlockPos> chunksToUpdate, Chunk chunk = null){
 
         if(chunk==null){
             chunk = world.GetChunk(pos);
@@ -119,37 +140,39 @@
         if (block.type != Block.Air.type)
             return;
 
-        if(block.data1 >= light)
+        if (block.data1 >= light)
             return;
+
+        if (!chunksToUpdate.Contains(chunk.pos))
+            chunksToUpdate.Add(chunk.pos);
 
         block.data1 = light;
         chunk.SetBlock(localPos, block, false);
-        chunk.QueueUpdate();
 
         if (light > lightReduceBy)
         {
             light -= lightReduceBy;
 
-            CallSpillLight(world, chunk, pos.Add(1, 0, 0), light);
-            CallSpillLight(world, chunk, pos.Add(0, 1, 0), light);
-            CallSpillLight(world, chunk, pos.Add(0, 0, 1), light);
-            CallSpillLight(world, chunk, pos.Add(-1, 0, 0), light);
-            CallSpillLight(world, chunk, pos.Add(0, -1, 0), light);
-            CallSpillLight(world, chunk, pos.Add(0, 0, -1), light);
+            CallSpillLight(world, chunk, pos.Add(1, 0, 0), light, chunksToUpdate);
+            CallSpillLight(world, chunk, pos.Add(0, 1, 0), light, chunksToUpdate);
+            CallSpillLight(world, chunk, pos.Add(0, 0, 1), light, chunksToUpdate);
+            CallSpillLight(world, chunk, pos.Add(-1, 0, 0), light, chunksToUpdate);
+            CallSpillLight(world, chunk, pos.Add(0, -1, 0), light, chunksToUpdate);
+            CallSpillLight(world, chunk, pos.Add(0, 0, -1), light, chunksToUpdate);
         }
         return;
     }
 
-    static void CallSpillLight(World world, Chunk chunk, BlockPos pos, byte light)
+    static void CallSpillLight(World world, Chunk chunk, BlockPos pos, byte light, List<BlockPos> chunksToUpdate)
     {
         BlockPos localPos = pos.Subtract(chunk.pos);
         if (Chunk.InRange(localPos))
         {
-            SpillLight(world, pos, light, chunk);
+            SpillLight(world, pos, light, chunksToUpdate, chunk);
         }
         else
         {
-            SpillLight(world, pos, light);
+            SpillLight(world, pos, light, chunksToUpdate);
         }
     }
 }

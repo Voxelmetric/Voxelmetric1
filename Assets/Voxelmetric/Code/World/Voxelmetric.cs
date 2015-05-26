@@ -42,7 +42,7 @@ public static class Voxelmetric
             return false;
 
         BlockPos pos = GetBlockPos(hit, adjacent);
-        chunk.world.SetBlock(pos, block);
+        chunk.world.SetBlock(pos, block, !Config.Toggle.BlockLighting);
 
         if (Config.Toggle.BlockLighting)
         {
@@ -58,7 +58,7 @@ public static class Voxelmetric
         if (chunk == null)
             return false;
 
-        chunk.world.SetBlock(pos, block);
+        chunk.world.SetBlock(pos, block, !Config.Toggle.BlockLighting);
 
         if (Config.Toggle.BlockLighting)
         {
