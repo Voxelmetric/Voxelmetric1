@@ -1,5 +1,5 @@
 ﻿using UnityEngine;
-using System.Collections;
+using System.Threading;
 using System.Collections.Generic;
 
 public class World : MonoBehaviour {
@@ -29,10 +29,15 @@ public class World : MonoBehaviour {
         //Add it to the chunks dictionary with the position as the key
         chunks.Add(pos, newChunk);
 
-        var terrainGen = new TerrainGen();
-        terrainGen.ChunkGen(newChunk);
+        Thread thread = new Thread(() =>
+       {
+           var terrainGen = new TerrainGen();
+           terrainGen.ChunkGen(newChunk);
 
-        Serialization.Load(newChunk);
+           Serialization.Load(newChunk);
+           newChunk.terrainGenerated = true;
+       });
+        thread.Start();
     }
 
     //Saves the chunk and destroys the game object
@@ -116,7 +121,7 @@ public class World : MonoBehaviour {
         {
             Chunk chunk = GetChunk(pos);
             if (chunk != null)
-                chunk.QueueUpdate();
+                chunk.UpdateChunk();
         }
     }
 }

@@ -32,11 +32,10 @@ public static class BlockLight
                    }
                }
            }
-           //world.GetChunk(pos).QueueUpdate();
 
            foreach (var chunkPos in chunksToUpdate)
            {
-               world.GetChunk(chunkPos).QueueUpdate();
+               world.GetChunk(chunkPos).UpdateChunk();
            }
 
        });
@@ -46,11 +45,11 @@ public static class BlockLight
 
     public static void ResetLightChunkColumn(World world, Chunk chunk)
     {
-        for (int x = chunk.pos.x; x < chunk.pos.x + Config.Env.ChunkSize; x++)
+        for (int x = chunk.pos.x -1; x < chunk.pos.x + Config.Env.ChunkSize +1; x++)
         {
-            for (int z = chunk.pos.z; z < chunk.pos.z + Config.Env.ChunkSize; z++)
+            for (int z = chunk.pos.z -1; z < chunk.pos.z + Config.Env.ChunkSize +1; z++)
             {
-                //ResetLightColumn(world, x, z);
+                ResetLightColumn(world, x, z, new List<BlockPos>());
             }
         }
         
@@ -64,7 +63,7 @@ public static class BlockLight
             {
                 for (int y = Config.Env.WorldMaxY - 1; y >= Config.Env.WorldMinY; y--)
                 {
-                   // FloodLight(world, x, y, z);
+                    FloodLight(world, x, y, z, new List<BlockPos>());
                 }
             }
         }

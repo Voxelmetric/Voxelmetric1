@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using System.Threading;
 
 [RequireComponent(typeof(MeshFilter))]
 [RequireComponent(typeof(MeshRenderer))]
@@ -6,16 +7,19 @@
 
 public class Chunk : MonoBehaviour
 {
+    private Block[,,] blocks = new Block[Config.Env.ChunkSize, Config.Env.ChunkSize, Config.Env.ChunkSize];
 
-    private Block[, ,] blocks = new Block[Config.Env.ChunkSize, Config.Env.ChunkSize, Config.Env.ChunkSize];
-
-    bool update = false;
+    bool meshReady = false;
+    public bool busy = false;
+    public bool terrainGenerated = false;
 
     MeshFilter filter;
     MeshCollider coll;
 
     public World world;
     public BlockPos pos;
+
+    MeshData meshData = new MeshData();
 
     public bool rendered = false;
 
@@ -27,16 +31,28 @@ public class Chunk : MonoBehaviour
 
     void Update()
     {
-        if (update)
+        if (meshReady)
         {
-            update = false;
-            UpdateChunk();
+            meshReady = false;
+            RenderMesh();
+            meshData = new MeshData();
+            busy = false;
         }
     }
 
-    public void QueueUpdate()
+    public void UpdateChunk()
     {
-        update = true;
+        if (!busy)
+        {
+            rendered = true;
+            busy = true;
+            Thread thread = new Thread(() =>
+           {
+               BuildMeshData();
+               meshReady = true;
+           });
+            thread.Start();
+        }
     }
 
     //gets the block from the blocks array or gets it from World
@@ -83,7 +99,7 @@ public class Chunk : MonoBehaviour
             blocks[blockPos.x, blockPos.y, blockPos.z] = block;
 
             if (updateChunk)
-                update = true;
+                UpdateChunk();
         }
         else
         {
@@ -93,11 +109,8 @@ public class Chunk : MonoBehaviour
     }
 
     // Updates the chunk based on its contents
-    void UpdateChunk()
+    void BuildMeshData()
     {
-        rendered = true;
-        MeshData meshData = new MeshData();
-
         for (int x = 0; x < Config.Env.ChunkSize; x++)
         {
             for (int y = 0; y < Config.Env.ChunkSize; y++)
@@ -108,13 +121,11 @@ public class Chunk : MonoBehaviour
                 }
             }
         }
-
-        RenderMesh(meshData);
     }
 
     // Sends the calculated mesh information
     // to the mesh and collision components
-    void RenderMesh(MeshData meshData)
+    void RenderMesh()
     {
         filter.mesh.Clear();
         filter.mesh.vertices = meshData.vertices.ToArray();

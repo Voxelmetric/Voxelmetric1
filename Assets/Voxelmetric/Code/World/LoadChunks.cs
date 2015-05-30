@@ -1,24 +1,21 @@
 ﻿using UnityEngine;
-using System.Collections;
+using System.Threading;
 using System.Collections.Generic;
 
-public class LoadChunks : MonoBehaviour {
+public class LoadChunks : MonoBehaviour
+{
 
     public World world;
 
     int timer = 0;
 
-    List<BlockPos> updateList = new List<BlockPos>();
-    List<BlockPos> buildList = new List<BlockPos>();
-
-	// Update is called once per frame
-	void Update () {
+    // Update is called once per frame
+    void Update()
+    {
         if (DeleteChunks())
             return;
 
         FindChunksToLoad();
-
-        LoadAndRenderChunks();
     }
 
     bool DeleteChunks()
@@ -50,9 +47,6 @@ public class LoadChunks : MonoBehaviour {
 
     bool FindChunksToLoad()
     {
-        if ( updateList.Count != 0 || buildList.Count!=0)
-            return false;
-
         //Cycle through the array of positions
         for (int i = 0; i < Config.Env.ChunksToLoad; i++)
         {
@@ -71,75 +65,82 @@ public class LoadChunks : MonoBehaviour {
 
             //If the chunk already exists and it's already
             //rendered or in queue to be rendered continue
-            if (newChunk != null  && (newChunk.rendered || updateList.Contains(newChunkPos)))
+            if (newChunk != null && (newChunk.rendered || newChunk.busy))
                 continue;
 
-            //load a column of chunks in this position
-            for (int y = Config.Env.WorldMaxY / Config.Env.ChunkSize; y >= Config.Env.WorldMinY / Config.Env.ChunkSize; y--)
-            {
-
-                for (int x = newChunkPos.x - Config.Env.ChunkSize; x <= newChunkPos.x + Config.Env.ChunkSize; x += Config.Env.ChunkSize)
-                {
-                    for (int z = newChunkPos.z - Config.Env.ChunkSize; z <= newChunkPos.z + Config.Env.ChunkSize; z += Config.Env.ChunkSize)
-                    {
-                        buildList.Add(new BlockPos(x, y * Config.Env.ChunkSize, z));
-                    }
-                }
-                updateList.Add(new BlockPos( newChunkPos.x, y * Config.Env.ChunkSize, newChunkPos.z));
-            }
+            LoadChunkColumn(newChunkPos);
             return true;
         }
 
-        return true;
+        return false;
     }
 
-    void LoadAndRenderChunks()
+    public void LoadChunkColumn(BlockPos columnPosition)
     {
-        if (buildList.Count != 0)
+        //First create the chunk game objects in the world class
+        //The world class wont do any generation when threaded chunk creation is enabled
+        for (int y = Config.Env.WorldMaxY; y >= Config.Env.WorldMinY; y -= Config.Env.ChunkSize)
         {
-            int count = buildList.Count;
-            for (int i = 0; i < count; i++)
+            for (int x = columnPosition.x - Config.Env.ChunkSize; x <= columnPosition.x + Config.Env.ChunkSize; x += Config.Env.ChunkSize)
             {
-                var pos = buildList[0];
-                Chunk chunk = world.GetChunk(pos);
-                if(chunk==null){
-                    world.CreateChunk(pos);
-                }
-                buildList.RemoveAt(0);
-
-                if (Config.Toggle.BlockLighting)
+                for (int z = columnPosition.z - Config.Env.ChunkSize; z <= columnPosition.z + Config.Env.ChunkSize; z += Config.Env.ChunkSize)
                 {
-                    if (pos.y == Config.Env.WorldMinY && chunk == null)
+                    BlockPos pos = new BlockPos(x, y, z);
+                    Chunk chunk = world.GetChunk(pos);
+                    if (chunk == null)
                     {
-                        BlockLight.ResetLightChunkColumn(world, world.GetChunk(pos));
-                        return;
+                        world.CreateChunk(pos);
                     }
                 }
             }
         }
 
-        if ( updateList.Count!=0)
+
+        //Now we can start the threaded chunk generation
+        Thread thread = new Thread(() =>
         {
-            int count = updateList.Count;
+            Chunk chunk;
 
-            //This three would be a config entry but this will all change once we add threading 
-            for (int i = 0; i < count && i<3; i++)
+            for (int y = Config.Env.WorldMaxY; y >= Config.Env.WorldMinY; y -= Config.Env.ChunkSize)
             {
-                Chunk chunk = world.GetChunk(updateList[0]);
-                if (chunk != null){
-
-                    if (Config.Toggle.BlockLighting)
+                for (int x = - Config.Env.ChunkSize; x <= Config.Env.ChunkSize; x += Config.Env.ChunkSize)
+                {
+                    for (int z = - Config.Env.ChunkSize; z <= Config.Env.ChunkSize; z += Config.Env.ChunkSize)
                     {
-                        var pos = updateList[0];
-                        if (pos.y == Config.Env.WorldMinY / Config.Env.ChunkSize)
-                            BlockLight.FloodLightChunkColumn(world, chunk);
+                        chunk = world.GetChunk(columnPosition.Add(x, y, z));
+                        while (!chunk.terrainGenerated)
+                        {
+                            Thread.Sleep(0);
+                        }
                     }
-
-                    chunk.QueueUpdate();
                 }
-                updateList.RemoveAt(0);
             }
-        }
+
+            if (Config.Toggle.LightSceneOnStart)
+            {
+                //reset light
+                chunk = world.GetChunk(columnPosition);
+                BlockLight.ResetLightChunkColumn(world, chunk);
+
+                //Flood light
+                for (int y = Config.Env.WorldMaxY; y >= Config.Env.WorldMinY; y -= Config.Env.ChunkSize)
+                {
+                    //Threading issues with the flood lighting will crash unity and possibly your sound card :S
+                    //chunk = world.GetChunk(columnPosition.Add(0, y, 0));
+                    //BlockLight.FloodLightChunkColumn(world, chunk);
+                }
+            }
+            
+            //Render chunk
+            for (int y = Config.Env.WorldMaxY; y >= Config.Env.WorldMinY; y -= Config.Env.ChunkSize)
+            {
+                chunk = world.GetChunk(columnPosition.Add(0, y, 0));
+                chunk.UpdateChunk();
+            }
+        });
+
+        thread.Start();
+
     }
 
 }
