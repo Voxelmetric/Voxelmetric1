@@ -22,6 +22,7 @@
         public static bool UseCollisionMesh = true;
         public static bool BlockLighting = false;
         public static bool LightSceneOnStart = false;
+        public static bool UseMultiThreading = true;
     }
 
     public static class Textures

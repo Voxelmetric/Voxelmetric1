@@ -46,12 +46,20 @@ public class Chunk : MonoBehaviour
         {
             rendered = true;
             busy = true;
-            Thread thread = new Thread(() =>
-           {
-               BuildMeshData();
-               meshReady = true;
-           });
-            thread.Start();
+            if (Config.Toggle.UseMultiThreading)
+            {
+                Thread thread = new Thread(() =>
+               {
+                   BuildMeshData();
+                   meshReady = true;
+               });
+                thread.Start();
+            }
+            else
+            {
+                BuildMeshData();
+                meshReady = true;
+            }
         }
     }
 

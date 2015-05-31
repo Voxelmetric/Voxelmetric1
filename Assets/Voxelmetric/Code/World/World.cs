@@ -29,15 +29,23 @@ public class World : MonoBehaviour {
         //Add it to the chunks dictionary with the position as the key
         chunks.Add(pos, newChunk);
 
-        Thread thread = new Thread(() =>
-       {
-           var terrainGen = new TerrainGen();
-           terrainGen.ChunkGen(newChunk);
+        if (Config.Toggle.UseMultiThreading) {
+            Thread thread = new Thread(() => { GenAndLoadChunk(newChunk); });
+            thread.Start();
+        }
+        else
+        {
+            GenAndLoadChunk(newChunk);
+        }
+    }
 
-           Serialization.Load(newChunk);
-           newChunk.terrainGenerated = true;
-       });
-        thread.Start();
+    void GenAndLoadChunk(Chunk chunk)
+    {
+        var terrainGen = new TerrainGen();
+        terrainGen.ChunkGen(chunk);
+
+        Serialization.Load(chunk);
+        chunk.terrainGenerated = true;
     }
 
     //Saves the chunk and destroys the game object
