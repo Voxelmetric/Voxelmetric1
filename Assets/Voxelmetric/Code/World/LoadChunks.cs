@@ -112,16 +112,19 @@ public class LoadChunks : MonoBehaviour
     {
         Chunk chunk;
 
-        for (int y = Config.Env.WorldMaxY; y >= Config.Env.WorldMinY; y -= Config.Env.ChunkSize)
+        if (Config.Toggle.UseMultiThreading)
         {
-            for (int x = -Config.Env.ChunkSize; x <= Config.Env.ChunkSize; x += Config.Env.ChunkSize)
+            for (int y = Config.Env.WorldMaxY; y >= Config.Env.WorldMinY; y -= Config.Env.ChunkSize)
             {
-                for (int z = -Config.Env.ChunkSize; z <= Config.Env.ChunkSize; z += Config.Env.ChunkSize)
+                for (int x = -Config.Env.ChunkSize; x <= Config.Env.ChunkSize; x += Config.Env.ChunkSize)
                 {
-                    chunk = world.GetChunk(columnPosition.Add(x, y, z));
-                    while (!chunk.terrainGenerated)
+                    for (int z = -Config.Env.ChunkSize; z <= Config.Env.ChunkSize; z += Config.Env.ChunkSize)
                     {
-                        Thread.Sleep(0);
+                        chunk = world.GetChunk(columnPosition.Add(x, y, z));
+                        while (!chunk.terrainGenerated)
+                        {
+                            Thread.Sleep(0);
+                        }
                     }
                 }
             }

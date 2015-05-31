@@ -10,37 +10,45 @@ public static class BlockLight
 
     public static void LightArea(World world, BlockPos pos){
 
-        Thread thread = new Thread(() =>
-       {
-           List<BlockPos> chunksToUpdate = new List<BlockPos>();
+        if (Config.Toggle.UseMultiThreading)
+        {
+            Thread thread = new Thread(() => { LightAreaInner(world, pos); });
+            thread.Start();
+        }
+        else
+        {
+            LightAreaInner(world, pos);
+        }
 
-           for (int x = pos.x - lightEffectRadius; x < pos.x + lightEffectRadius; x++)
-           {
-               for (int z = pos.z - lightEffectRadius; z < pos.z + lightEffectRadius; z++)
-               {
-                   ResetLightColumn(world, x, z, chunksToUpdate);
-               }
-           }
+    }
 
-           for (int x = pos.x - lightEffectRadius - 1; x < pos.x + lightEffectRadius + 1; x++)
-           {
-               for (int z = pos.z - lightEffectRadius - 1; z < pos.z + lightEffectRadius + 1; z++)
-               {
-                   for (int y = Config.Env.WorldMaxY - 1; y >= Config.Env.WorldMinY; y--)
-                   {
-                       FloodLight(world, x, y, z, chunksToUpdate);
-                   }
-               }
-           }
+    static void LightAreaInner(World world, BlockPos pos)
+    {
+        List<BlockPos> chunksToUpdate = new List<BlockPos>();
 
-           foreach (var chunkPos in chunksToUpdate)
-           {
-               world.GetChunk(chunkPos).UpdateChunk();
-           }
+        for (int x = pos.x - lightEffectRadius; x < pos.x + lightEffectRadius; x++)
+        {
+            for (int z = pos.z - lightEffectRadius; z < pos.z + lightEffectRadius; z++)
+            {
+                ResetLightColumn(world, x, z, chunksToUpdate);
+            }
+        }
 
-       });
-        thread.Start();
+        for (int x = pos.x - lightEffectRadius - 1; x < pos.x + lightEffectRadius + 1; x++)
+        {
+            for (int z = pos.z - lightEffectRadius - 1; z < pos.z + lightEffectRadius + 1; z++)
+            {
+                for (int y = Config.Env.WorldMaxY - 1; y >= Config.Env.WorldMinY; y--)
+                {
+                    FloodLight(world, x, y, z, chunksToUpdate);
+                }
+            }
+        }
 
+        foreach (var chunkPos in chunksToUpdate)
+        {
+            world.GetChunk(chunkPos).UpdateChunk();
+        }
     }
 
     public static void ResetLightChunkColumn(World world, Chunk chunk)
