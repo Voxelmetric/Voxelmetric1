@@ -68,13 +68,13 @@ public static class Voxelmetric
         return true;
     }
 
-    public static Block GetBlock(RaycastHit hit, bool adjacent = false)
+    public static Block GetBlock(RaycastHit hit)
     {
         Chunk chunk = hit.collider.GetComponent<Chunk>();
         if (chunk == null)
             return Block.Air;
 
-        BlockPos pos = GetBlockPos(hit, adjacent);
+        BlockPos pos = GetBlockPos(hit, false);
 
         return GetBlock(pos, chunk.world);
     }
