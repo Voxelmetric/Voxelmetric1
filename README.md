@@ -2,6 +2,8 @@
 
 Voxelmetric an open source voxel framework for unity3d. It's meant to be an easy to use, easy to extend solution for voxel games. Voxelmetric is currently in alpa so expect breaking changes and incomplete documentation. I am currently mainating it alone and making changes as I learn but if anyone else wants to help they should feel free to make a pull request. Also use the issues to highlight bugs and things so that need to be adressed.
 
+For implementation and usage view the wiki.
+
 ## Features
 
 ##### Terrain Generation
