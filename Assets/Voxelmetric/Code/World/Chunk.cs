@@ -11,6 +11,7 @@ public class Chunk : MonoBehaviour
 
     bool meshReady = false;
     public bool busy = false;
+    public bool loaded = false;
     public bool terrainGenerated = false;
 
     MeshFilter filter;

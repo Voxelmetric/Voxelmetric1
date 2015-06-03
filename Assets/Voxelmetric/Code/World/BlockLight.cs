@@ -6,9 +6,10 @@ public static class BlockLight
 
     public static int lightEffectRadius = 4;
 
-    public static byte lightReduceBy = 64;
+    public static byte lightReduceBy = 128;
 
-    public static void LightArea(World world, BlockPos pos){
+    public static void LightArea(World world, BlockPos pos)
+    {
 
         if (Config.Toggle.UseMultiThreading)
         {
@@ -53,25 +54,26 @@ public static class BlockLight
 
     public static void ResetLightChunkColumn(World world, Chunk chunk)
     {
-        for (int x = chunk.pos.x -1; x < chunk.pos.x + Config.Env.ChunkSize +1; x++)
+        List<BlockPos> chunks = new List<BlockPos>();
+        for (int x = chunk.pos.x; x < chunk.pos.x + Config.Env.ChunkSize; x++)
         {
-            for (int z = chunk.pos.z -1; z < chunk.pos.z + Config.Env.ChunkSize +1; z++)
+            for (int z = chunk.pos.z; z < chunk.pos.z + Config.Env.ChunkSize ; z++)
             {
-                ResetLightColumn(world, x, z, new List<BlockPos>());
+                ResetLightColumn(world, x, z, chunks);
             }
         }
         
     }
 
     public static void FloodLightChunkColumn(World world, Chunk chunk){
-        
+        List<BlockPos> chunks = new List<BlockPos>();
         for (int x = chunk.pos.x; x < chunk.pos.x + Config.Env.ChunkSize; x++)
         {
             for (int z = chunk.pos.z; z < chunk.pos.z + Config.Env.ChunkSize; z++)
             {
-                for (int y = Config.Env.WorldMaxY - 1; y >= Config.Env.WorldMinY; y--)
+                for (int y = chunk.pos.y; y < chunk.pos.y + Config.Env.ChunkSize; y++)
                 {
-                    FloodLight(world, x, y, z, new List<BlockPos>());
+                    FloodLight(world, x, y, z, chunks, chunk);
                 }
             }
         }
@@ -114,7 +116,7 @@ public static class BlockLight
         }
     }
 
-    public static void FloodLight(World world, int x, int y, int z, List<BlockPos> chunksToUpdate)
+    public static void FloodLight(World world, int x, int y, int z, List<BlockPos> chunksToUpdate, Chunk stayWithin = null)
     {
         
         Block block = world.GetBlock(new BlockPos(x, y, z));
@@ -127,22 +129,29 @@ public static class BlockLight
         byte lightSpill = block.data1;
         lightSpill -= lightReduceBy;
     
-        SpillLight(world, new BlockPos(x + 1, y, z), lightSpill, chunksToUpdate);
-        SpillLight(world, new BlockPos(x, y + 1, z), lightSpill, chunksToUpdate);
-        SpillLight(world, new BlockPos(x, y, z + 1), lightSpill, chunksToUpdate);
-        SpillLight(world, new BlockPos(x - 1, y, z), lightSpill, chunksToUpdate);
-        SpillLight(world, new BlockPos(x, y - 1, z), lightSpill, chunksToUpdate);
-        SpillLight(world, new BlockPos(x, y, z - 1), lightSpill, chunksToUpdate);
+        SpillLight(world, new BlockPos(x + 1, y, z), lightSpill, chunksToUpdate, stayWithin);
+        SpillLight(world, new BlockPos(x, y + 1, z), lightSpill, chunksToUpdate, stayWithin);
+        SpillLight(world, new BlockPos(x, y, z + 1), lightSpill, chunksToUpdate, stayWithin);
+        SpillLight(world, new BlockPos(x - 1, y, z), lightSpill, chunksToUpdate, stayWithin);
+        SpillLight(world, new BlockPos(x, y - 1, z), lightSpill, chunksToUpdate, stayWithin);
+        SpillLight(world, new BlockPos(x, y, z - 1), lightSpill, chunksToUpdate, stayWithin);
     }
 
-    public static void SpillLight(World world, BlockPos pos, byte light, List<BlockPos> chunksToUpdate, Chunk chunk = null){
+    public static void SpillLight(World world, BlockPos pos, byte light, List<BlockPos> chunksToUpdate, Chunk chunk = null)
+    {
 
         if(chunk==null){
             chunk = world.GetChunk(pos);
         }
 
         BlockPos localPos = pos.Subtract(chunk.pos);
+
+        if (!Chunk.InRange(localPos))
+            return;
+
         Block block = chunk.GetBlock(localPos);
+
+
 
         if (block.type != Block.Air.type)
             return;

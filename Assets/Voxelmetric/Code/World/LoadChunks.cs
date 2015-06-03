@@ -65,7 +65,7 @@ public class LoadChunks : MonoBehaviour
 
             //If the chunk already exists and it's already
             //rendered or in queue to be rendered continue
-            if (newChunk != null && (newChunk.rendered || newChunk.busy))
+            if (newChunk != null && newChunk.loaded)
                 continue;
 
             LoadChunkColumn(newChunkPos);
@@ -93,6 +93,17 @@ public class LoadChunks : MonoBehaviour
                     }
                 }
             }
+        }
+
+        for (int y = Config.Env.WorldMaxY; y >= Config.Env.WorldMinY; y -= Config.Env.ChunkSize)
+        {
+            BlockPos pos = new BlockPos(columnPosition.x, y, columnPosition.z);
+            Chunk chunk = world.GetChunk(pos);
+            if (chunk != null)
+            {
+                chunk.loaded = true;
+            }
+
         }
 
 
@@ -140,8 +151,8 @@ public class LoadChunks : MonoBehaviour
             for (int y = Config.Env.WorldMaxY; y >= Config.Env.WorldMinY; y -= Config.Env.ChunkSize)
             {
                 //Threading issues with the flood lighting will crash unity and possibly your sound card :S
-                //chunk = world.GetChunk(columnPosition.Add(0, y, 0));
-                //BlockLight.FloodLightChunkColumn(world, chunk);
+                chunk = world.GetChunk(columnPosition.Add(0, y, 0));
+                BlockLight.FloodLightChunkColumn(world, chunk);
             }
         }
 
