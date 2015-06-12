@@ -54,8 +54,16 @@ public class World : MonoBehaviour {
         Chunk chunk = null;
         if (chunks.TryGetValue(pos, out chunk))
         {
-            Serialization.SaveChunk(chunk);
-            Object.Destroy(chunk.gameObject);
+            if (Config.Toggle.UseMultiThreading)
+            {
+                Thread thread = new Thread(() => { Serialization.SaveChunk(chunk); });
+                thread.Start();
+            }
+            else
+            {
+                Serialization.SaveChunk(chunk);
+            }
+
             chunks.Remove(pos);
         }
     }

@@ -13,6 +13,7 @@ public class Chunk : MonoBehaviour
     public bool busy = false;
     public bool loaded = false;
     public bool terrainGenerated = false;
+    bool markedForDeletion = false;
 
     MeshFilter filter;
     MeshCollider coll;
@@ -32,6 +33,11 @@ public class Chunk : MonoBehaviour
 
     void Update()
     {
+        if (markedForDeletion)
+        {
+            Destroy(gameObject);
+        }
+
         if (meshReady)
         {
             meshReady = false;
@@ -155,6 +161,11 @@ public class Chunk : MonoBehaviour
 
             coll.sharedMesh = mesh;
         }
+    }
+
+    public void MarkForDeletion()
+    {
+        markedForDeletion = true;
     }
 
 }

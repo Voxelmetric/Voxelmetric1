@@ -30,17 +30,17 @@ public static class Serialization
     {
         Save save = new Save(chunk);
 
-        if (!save.changed)
-            return;
+        if (save.changed)
+        {
+            string saveFile = SaveLocation(chunk.world.worldName);
+            saveFile += FileName(chunk.pos);
 
-        string saveFile = SaveLocation(chunk.world.worldName);
-        saveFile += FileName(chunk.pos);
-
-        IFormatter formatter = new BinaryFormatter();
-        Stream stream = new FileStream(saveFile, FileMode.Create, FileAccess.Write, FileShare.None);
-        formatter.Serialize(stream, save);
-        stream.Close();
-
+            IFormatter formatter = new BinaryFormatter();
+            Stream stream = new FileStream(saveFile, FileMode.Create, FileAccess.Write, FileShare.None);
+            formatter.Serialize(stream, save);
+            stream.Close();
+        }
+        chunk.MarkForDeletion();
     }
 
     public static bool Load(Chunk chunk)
