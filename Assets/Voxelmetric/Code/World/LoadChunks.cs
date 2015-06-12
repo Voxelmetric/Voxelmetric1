@@ -7,45 +7,56 @@ public class LoadChunks : MonoBehaviour
 
     public World world;
 
-    int timer = 0;
+    int deleteTimer = 0;
+    int chunkGenTimer = 0;
 
     // Update is called once per frame
     void Update()
     {
-        if (DeleteChunks())
-            return;
-
-        FindChunksToLoad();
-    }
-
-    bool DeleteChunks()
-    {
-
-        if (timer == Config.Env.WaitBetweenDeletes)
+        if (deleteTimer == Config.Env.WaitBetweenDeletes)
         {
-            var chunksToDelete = new List<BlockPos>();
-            foreach (var chunk in world.chunks)
-            {
-                float distance = Vector3.Distance(
-                    new Vector3(chunk.Value.pos.x, 0, chunk.Value.pos.z),
-                    new Vector3(transform.position.x, 0, transform.position.z));
-
-                if (distance > Config.Env.DistanceToDeleteChunks)
-                    chunksToDelete.Add(chunk.Key);
-            }
-
-            foreach (var chunk in chunksToDelete)
-                world.DestroyChunk(chunk);
-
-            timer = 0;
-            return true;
+            DeleteChunks();
+            deleteTimer = 0;
+            return;
+        }
+        else
+        {
+            deleteTimer++;
         }
 
-        timer++;
-        return false;
+        if (chunkGenTimer == Config.Env.WaitBetweenChunkGen)
+        {
+            FindChunksAndLoad();
+            chunkGenTimer = 0;
+            return;
+        }
+        else
+        {
+            chunkGenTimer++;
+        }
     }
 
-    bool FindChunksToLoad()
+    void DeleteChunks()
+    {
+
+
+        var chunksToDelete = new List<BlockPos>();
+        foreach (var chunk in world.chunks)
+        {
+            float distance = Vector3.Distance(
+                new Vector3(chunk.Value.pos.x, 0, chunk.Value.pos.z),
+                new Vector3(transform.position.x, 0, transform.position.z));
+
+            if (distance > Config.Env.DistanceToDeleteChunks)
+                chunksToDelete.Add(chunk.Key);
+        }
+
+        foreach (var chunk in chunksToDelete)
+            world.DestroyChunk(chunk);
+
+    }
+
+    bool FindChunksAndLoad()
     {
         //Cycle through the array of positions
         for (int i = 0; i < Config.Env.ChunksToLoad; i++)

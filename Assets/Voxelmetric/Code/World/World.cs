@@ -110,17 +110,23 @@ public class World : MonoBehaviour {
 
             if (updateChunk)
             {
-                //Checks to see if the block position is on the border of the chunk 
-                //and if so update the chunk it's touching
-                UpdateIfEqual(localPos.x, 0                    , pos.Add(-1,0,0));
-                UpdateIfEqual(localPos.x, Config.Env.ChunkSize - 1 , pos.Add(1, 0, 0));
-                UpdateIfEqual(localPos.y, 0                    , pos.Add(0,-1,0));
-                UpdateIfEqual(localPos.y, Config.Env.ChunkSize - 1 , pos.Add(0, 1, 0));
-                UpdateIfEqual(localPos.z, 0                    , pos.Add(0, 0, -1));
-                UpdateIfEqual(localPos.z, Config.Env.ChunkSize - 1 , pos.Add(0, 0, 1));
+                UpdateAdjacentChunks(pos);
             }
         
         }
+    }
+
+    public void UpdateAdjacentChunks(BlockPos pos)
+    {
+        BlockPos localPos = pos - pos.ContainingChunkCoordinates();
+        //Checks to see if the block position is on the border of the chunk 
+        //and if so update the chunk it's touching
+        UpdateIfEqual(localPos.x, 0, pos.Add(-1, 0, 0));
+        UpdateIfEqual(localPos.x, Config.Env.ChunkSize - 1, pos.Add(1, 0, 0));
+        UpdateIfEqual(localPos.y, 0, pos.Add(0, -1, 0));
+        UpdateIfEqual(localPos.y, Config.Env.ChunkSize - 1, pos.Add(0, 1, 0));
+        UpdateIfEqual(localPos.z, 0, pos.Add(0, 0, -1));
+        UpdateIfEqual(localPos.z, Config.Env.ChunkSize - 1, pos.Add(0, 0, 1));
     }
 
     void UpdateIfEqual(int value1, int value2, BlockPos pos)

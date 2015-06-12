@@ -10,6 +10,9 @@
         public static int ChunksToLoad = Data.chunkLoadOrder.Length;
         public static int DistanceToDeleteChunks = 256;
         public static int WaitBetweenDeletes = 10;
+
+        //Recommend setting this to at least 1 when LightSceneOnStart is enabled 
+        public static int WaitBetweenChunkGen = 0;
     }
 
     public static class Directories
@@ -20,8 +23,12 @@
     public static class Toggle
     {
         public static bool UseCollisionMesh = true;
+
+        //Lighting needs multithreading to work quickly
         public static bool BlockLighting = false;
         public static bool LightSceneOnStart = false;
+
+        //Multithreading must be disabled on web builds
         public static bool UseMultiThreading = true;
     }
 

@@ -6,7 +6,7 @@ public static class BlockLight
 
     public static int lightEffectRadius = 4;
 
-    public static byte lightReduceBy = 128;
+    public static byte lightReduceBy = 64;
 
     public static void LightArea(World world, BlockPos pos)
     {
@@ -45,6 +45,8 @@ public static class BlockLight
                 }
             }
         }
+
+        world.UpdateAdjacentChunks(pos);
 
         foreach (var chunkPos in chunksToUpdate)
         {
