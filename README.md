@@ -1,16 +1,16 @@
 # Voxelmetric
 
-Voxelmetric an open source voxel framework for unity3d. It's meant to be an easy to use, easy to extend solution for voxel games. Voxelmetric is currently in alpa so expect breaking changes and incomplete documentation. I am currently mainating it alone and making changes as I learn but if anyone else wants to help they should feel free to make a pull request. Also use the issues to highlight bugs and things so that need to be adressed.
+Voxelmetric an open source voxel framework for unity3d. It's meant to be an easy to use, easy to extend solution for voxel games. Voxelmetric is currently in alpha so expect breaking changes and incomplete documentation. I am currently mainating it alone and making changes as I learn but if anyone else wants to help they should feel free to make a pull request. Also use the issues to highlight bugs and things so that need to be adressed.
 
 For implementation and usage view the wiki.
 
 ## Features
 
 ##### Terrain Generation
-Generate relistic looking terrain with caves and landmarks like trees.
+Generate realistic looking terrain with caves and landmarks like trees.
 
 ##### Ambient Occlusion
-Darkening in the corners between blocks makes the terrain look more realisticly lit.
+Darkening in the corners between blocks makes the terrain look more realistically lit.
 
 ##### Saving and Loading
 Save and load your changes to the world at will.
