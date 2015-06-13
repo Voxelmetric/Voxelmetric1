@@ -5,10 +5,15 @@ using System.Collections.Generic;
 public class LoadChunks : MonoBehaviour
 {
 
-    public World world;
+    World world;
 
     int deleteTimer = 0;
     int chunkGenTimer = 0;
+
+    void Start()
+    {
+        world = World.instance;
+    }
 
     // Update is called once per frame
     void Update()
@@ -38,8 +43,6 @@ public class LoadChunks : MonoBehaviour
 
     void DeleteChunks()
     {
-
-
         var chunksToDelete = new List<BlockPos>();
         foreach (var chunk in world.chunks)
         {
@@ -116,7 +119,6 @@ public class LoadChunks : MonoBehaviour
             }
 
         }
-
 
         //Now we can start the threaded chunk generation
         if (Config.Toggle.UseMultiThreading) {

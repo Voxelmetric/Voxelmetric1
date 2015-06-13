@@ -52,8 +52,11 @@ public static class Voxelmetric
         return true;
     }
 
-    public static bool SetBlock(BlockPos pos, World world, Block block)
+    public static bool SetBlock(BlockPos pos, Block block, World world = null)
     {
+        if (!world)
+            world = World.instance;
+
         Chunk chunk = world.GetChunk(pos);
         if (chunk == null)
             return false;
@@ -79,8 +82,11 @@ public static class Voxelmetric
         return GetBlock(pos, chunk.world);
     }
 
-    public static Block GetBlock(BlockPos pos, World world)
+    public static Block GetBlock(BlockPos pos, World world = null)
     {
+        if (!world)
+            world = World.instance;
+
         Block block = world.GetBlock(pos);
 
         return block;

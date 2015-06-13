@@ -5,7 +5,6 @@ public class VoxelmetricExample : MonoBehaviour
 {
     Vector2 rot;
 
-    public World world;
     public string blockToPlace = "air";
     public Text text;
 

@@ -40,32 +40,41 @@ public static class Serialization
             formatter.Serialize(stream, save);
             stream.Close();
         }
-        chunk.MarkForDeletion();
     }
 
     public static bool Load(Chunk chunk)
     {
+
         string saveFile = SaveLocation(chunk.world.worldName);
         saveFile += FileName(chunk.pos);
 
         if (!File.Exists(saveFile))
             return false;
-
-        IFormatter formatter = new BinaryFormatter();
-        FileStream stream = new FileStream(saveFile, FileMode.Open);
-
-        Save save = (Save)formatter.Deserialize(stream);
-
-        //Once the blocks in the save are added they're marked as unmodified so
-        //as not to trigger a new save on unload unless new blocks are added.
-        foreach (var block in save.blocks)
+        try
         {
-            Block placeBlock = block.Value;
-            placeBlock.modified = false;
-            chunk.SetBlock(block.Key, placeBlock, false);
+
+            IFormatter formatter = new BinaryFormatter();
+            FileStream stream = new FileStream(saveFile, FileMode.Open);
+
+            Save save = (Save)formatter.Deserialize(stream);
+
+            //Once the blocks in the save are added they're marked as unmodified so
+            //as not to trigger a new save on unload unless new blocks are added.
+            for (int i =0; i< save.blocks.Length; i++)
+            {
+                Block placeBlock = save.blocks[i];
+                placeBlock.modified = false;
+                chunk.SetBlock(save.positions[i], placeBlock, false);
+            }
+
+            stream.Close();
+        }
+        catch (Exception ex)
+        {
+            Debug.LogError(ex);
         }
 
-        stream.Close();
+
         return true;
     }
 }

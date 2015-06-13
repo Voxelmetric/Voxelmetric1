@@ -4,6 +4,18 @@ using System.Collections.Generic;
 
 public class World : MonoBehaviour {
 
+    private static World _instance;
+
+    public static World instance
+    {
+        get
+        {
+            if (_instance == null)
+                _instance = GameObject.FindObjectOfType<World>();
+            return _instance;
+        }
+    }
+
     public Dictionary<BlockPos, Chunk> chunks = new Dictionary<BlockPos, Chunk>();
     public GameObject chunkPrefab;
 
@@ -45,6 +57,7 @@ public class World : MonoBehaviour {
         terrainGen.ChunkGen(chunk);
 
         Serialization.Load(chunk);
+
         chunk.terrainGenerated = true;
     }
 
@@ -56,12 +69,16 @@ public class World : MonoBehaviour {
         {
             if (Config.Toggle.UseMultiThreading)
             {
-                Thread thread = new Thread(() => { Serialization.SaveChunk(chunk); });
+                Thread thread = new Thread(() => {
+                    Serialization.SaveChunk(chunk);
+                    chunk.MarkForDeletion();
+                });
                 thread.Start();
             }
             else
             {
                 Serialization.SaveChunk(chunk);
+                chunk.MarkForDeletion();
             }
 
             chunks.Remove(pos);
