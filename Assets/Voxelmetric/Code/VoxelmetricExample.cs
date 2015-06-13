@@ -6,7 +6,10 @@ public class VoxelmetricExample : MonoBehaviour
     Vector2 rot;
 
     public string blockToPlace = "air";
-    public Text text;
+    public Text selectedBlockText;
+    public Text saveProgressText;
+
+    SaveProgress saveProgress;
 
     public void SetType(string newType){
         blockToPlace = newType;
@@ -46,8 +49,30 @@ public class VoxelmetricExample : MonoBehaviour
 
         if (Physics.Raycast(Camera.main.transform.position, mousePos - Camera.main.transform.position, out hit, 100))
         {
-            text.text = Voxelmetric.GetBlock(hit).ToString();
+            selectedBlockText.text = Voxelmetric.GetBlock(hit).ToString();
         }
+
+        if (saveProgress != null)
+        {
+            saveProgressText.text = SaveStatus();
+        }
+        else
+        {
+            saveProgressText.text = "Save";
+        }
+    }
+
+    public void SaveAll()
+    {
+        saveProgress = Voxelmetric.SaveAll();
+    }
+
+    public string SaveStatus()
+    {
+        if (saveProgress == null)
+            return "";
+
+        return saveProgress.GetProgress() + "%";
     }
 
 }

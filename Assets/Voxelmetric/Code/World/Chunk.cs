@@ -168,4 +168,9 @@ public class Chunk : MonoBehaviour
         markedForDeletion = true;
     }
 
+    public bool IsMarkedForDeletion()
+    {
+        return markedForDeletion;
+    }
+
 }

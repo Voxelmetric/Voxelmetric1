@@ -1,4 +1,6 @@
 ﻿using UnityEngine;
+using System.Threading;
+using System.Collections.Generic;
 
 public static class Voxelmetric
 {
@@ -90,5 +92,46 @@ public static class Voxelmetric
         Block block = world.GetBlock(pos);
 
         return block;
+    }
+
+    public static SaveProgress SaveAll(World world = null)
+    {
+        if (!world)
+            world = World.instance;
+
+        SaveProgress saveProgress = new SaveProgress(world.chunks.Keys);
+        List<Chunk> chunksToSave = new List<Chunk>();
+        chunksToSave.AddRange(world.chunks.Values);
+
+        if (Config.Toggle.UseMultiThreading)
+        {
+            Thread thread = new Thread(() =>
+           {
+
+               foreach (var chunk in chunksToSave)
+               {
+
+                   while (!chunk.terrainGenerated || chunk.busy)
+                   {
+                       Thread.Sleep(0);
+                   }
+
+                   Serialization.SaveChunk(chunk);
+
+                   saveProgress.SaveCompleteForChunk(chunk.pos);
+               }
+           });
+            thread.Start();
+        }
+        else
+        {
+            foreach (var chunk in chunksToSave)
+            {
+                Serialization.SaveChunk(chunk);
+                saveProgress.SaveCompleteForChunk(chunk.pos);
+            }
+        }
+
+        return saveProgress;
     }
 }
