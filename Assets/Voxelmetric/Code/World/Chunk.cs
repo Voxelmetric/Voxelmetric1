@@ -111,7 +111,11 @@ public class Chunk : MonoBehaviour
     {
         if (InRange(blockPos))
         {
+            blocks[blockPos.x, blockPos.y, blockPos.z].controller.OnDestroy(this, pos, blocks[blockPos.x, blockPos.y, blockPos.z]);
+
             blocks[blockPos.x, blockPos.y, blockPos.z] = block;
+
+            blocks[blockPos.x, blockPos.y, blockPos.z].controller.OnCreate(this, pos, blocks[blockPos.x, blockPos.y, blockPos.z]);
 
             if (updateChunk)
                 UpdateChunk();
@@ -132,7 +136,7 @@ public class Chunk : MonoBehaviour
             {
                 for (int z = 0; z < Config.Env.ChunkSize; z++)
                 {
-                    blocks[x, y, z].controller.BuildBlock(this, new BlockPos(x, y, z), meshData);
+                    blocks[x, y, z].controller.BuildBlock(this, new BlockPos(x, y, z), meshData, blocks[x,y,z]);
                 }
             }
         }

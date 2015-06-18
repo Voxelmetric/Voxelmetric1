@@ -1,21 +1,20 @@
 using UnityEngine;
-using System.Collections;
 using System;
 
 [Serializable]
 public static class BlockBuilder
 {
-    public static void BuildRenderer(Chunk chunk, BlockPos pos, MeshData meshData, Direction direction, BlockController block)
+    public static void BuildRenderer(Chunk chunk, BlockPos pos, MeshData meshData, Direction direction)
     {
-        AddQuadToMeshData(chunk, pos, meshData, direction, block, false);
+        AddQuadToMeshData(chunk, pos, meshData, direction, false);
     }
 
-    public static void BuildCollider(Chunk chunk, BlockPos pos, MeshData meshData, Direction direction, BlockController block)
+    public static void BuildCollider(Chunk chunk, BlockPos pos, MeshData meshData, Direction direction)
     {
-        AddQuadToMeshData(chunk, pos, meshData, direction, block, true);
+        AddQuadToMeshData(chunk, pos, meshData, direction, true);
     }
 
-    public static void BuildColors(Chunk chunk, BlockPos pos, MeshData meshData, Direction direction, BlockController block)
+    public static void BuildColors(Chunk chunk, BlockPos pos, MeshData meshData, Direction direction)
     {
         bool nSolid = false;
         bool eSolid = false;
@@ -123,7 +122,7 @@ public static class BlockBuilder
         AddColors(meshData, wnSolid, nSolid, neSolid, eSolid, esSolid, sSolid, swSolid, wSolid, light);
     }
 
-    public static void BuildTexture(Chunk chunk, BlockPos pos, MeshData meshData, Direction direction, BlockController block, Tile tilePos)
+    public static void BuildTexture(Chunk chunk, BlockPos pos, MeshData meshData, Direction direction, Tile tilePos)
     {
         Vector2[] UVs = new Vector2[4];
 
@@ -135,7 +134,7 @@ public static class BlockBuilder
         meshData.uv.AddRange(UVs);
     }
 
-    public static void BuildTexture(Chunk chunk, BlockPos pos, MeshData meshData, Direction direction, BlockController block, Tile[] tiles)
+    public static void BuildTexture(Chunk chunk, BlockPos pos, MeshData meshData, Direction direction, Tile[] tiles)
     {
         Tile tilePos = new Tile();
 
@@ -173,7 +172,7 @@ public static class BlockBuilder
         meshData.uv.AddRange(UVs);
     }
 
-    static void AddQuadToMeshData(Chunk chunk, BlockPos pos, MeshData meshData, Direction direction, BlockController block, bool useCollisionMesh)
+    static void AddQuadToMeshData(Chunk chunk, BlockPos pos, MeshData meshData, Direction direction,bool useCollisionMesh)
     {
         //Adding a tiny overlap between block meshes may solve floating point imprecision
         //errors causing pixel size gaps between blocks when looking closely

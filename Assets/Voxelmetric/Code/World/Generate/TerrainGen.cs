@@ -77,15 +77,22 @@ public class TerrainGen
 
             if (y + chunk.pos.y <= stoneHeight)
             {
-                SetBlock(chunk, Block.Stone, new BlockPos(x,y,z));
+                SetBlock(chunk, Block.Stone, new BlockPos(x, y, z));
             }
             else if (y + chunk.pos.y < dirtHeight)
             {
-                SetBlock(chunk, Block.Dirt, new BlockPos(x,y,z));
+                SetBlock(chunk, Block.Dirt, new BlockPos(x, y, z));
             }
             else if (y + chunk.pos.y == dirtHeight)
             {
-                SetBlock(chunk, Block.Grass, new BlockPos(x,y,z));
+                SetBlock(chunk, Block.Grass, new BlockPos(x, y, z));
+            }
+            else if (y + chunk.pos.y == dirtHeight + 1 && GetNoise(x+chunk.pos.x, y + chunk.pos.y, z + chunk.pos.z, 10, 10, 1) > 5)
+            {
+                Block wildGrass = Block.WildGrass;
+                wildGrass.data2 = (byte)(GetNoise(x + chunk.pos.x, y + chunk.pos.y, z + chunk.pos.z, 1, 155, 1)+100);
+
+                SetBlock(chunk, wildGrass, new BlockPos(x, y, z));
             }
 
         }

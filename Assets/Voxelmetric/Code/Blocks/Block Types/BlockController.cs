@@ -4,27 +4,29 @@ using System.Collections;
 public class BlockController
 {
     //Base block constructor
-    public BlockController() { OnCreate(); }
+    public BlockController() { }
 
-    public virtual void AddBlockData (Chunk chunk, BlockPos pos, MeshData meshData) { }
+    public virtual void AddBlockData (Chunk chunk, BlockPos pos, MeshData meshData, Block block) { }
 
-    public virtual void BuildBlock(Chunk chunk, BlockPos pos, MeshData meshData)
+    public virtual void BuildBlock(Chunk chunk, BlockPos pos, MeshData meshData, Block block)
     {
-        PreRender(chunk, pos);
-        AddBlockData(chunk, pos, meshData);
-        PostRender(chunk, pos);
+        PreRender(chunk, pos, block);
+        AddBlockData(chunk, pos, meshData, block);
+        PostRender(chunk, pos, block);
     }
 
-    public virtual void BuildFace(Chunk chunk, BlockPos pos, MeshData meshData, Direction direction) { }
 
     public virtual bool IsSolid(Direction direction) { return false; }
 
-    public virtual void OnCreate() { }
+    public virtual bool HasLight() { return false; }
 
-    public virtual void PreRender(Chunk chunk, BlockPos pos) { }
+    public virtual bool EmitsLight() { return false; }
 
-    public virtual void PostRender(Chunk chunk, BlockPos pos) { }
+    public virtual void OnCreate(Chunk chunk, BlockPos pos, Block block) { }
 
-    public virtual void OnDestroy() { }
+    public virtual void PreRender(Chunk chunk, BlockPos pos, Block block) { }
 
+    public virtual void PostRender(Chunk chunk, BlockPos pos, Block block) { }
+
+    public virtual void OnDestroy(Chunk chunk, BlockPos pos, Block block) { }
 }

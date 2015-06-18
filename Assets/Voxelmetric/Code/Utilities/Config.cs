@@ -42,6 +42,7 @@
         public static Tile LogTop = new Tile(2, 1);
         public static Tile Leaves = new Tile(0, 1);
         public static Tile Sand = new Tile(3, 2);
+        public static Tile WildGrass = new Tile(4, 0);
     }
 
 }

@@ -22,15 +22,12 @@ public struct Block
     }
 
     //Mappings
-    public static string[] typeNames = new string[] { "air", "stone", "dirt", "grass", "log", "leaves", "sand" };
-    public static BlockController[] controllers = new BlockController[] { new BlockAir(), new Stone(), new Dirt(), new Grass(), new Log(), new Leaves(), new Sand() };
+    public static string[] typeNames = new string[] { "air", "stone", "dirt", "grass", "log", "leaves", "sand", "wildgrass" };
+    public static BlockController[] controllers = new BlockController[] { new BlockAir(), new Stone(), new Dirt(), new Grass(), new Log(), new Leaves(), new Sand(), new WildGrass() };
 
     public BlockController controller
     {
-        get {
-            if (type > 6)
-                Debug.Log(type);
-            return controllers[type]; }
+        get { return controllers[type]; }
     }
 
     public static implicit operator BlockController(Block block)
@@ -115,5 +112,10 @@ public struct Block
     public static Block Sand
     {
         get { return new Block(6); }
+    }
+
+    public static Block WildGrass
+    {
+        get { return new Block(7); }
     }
 }
