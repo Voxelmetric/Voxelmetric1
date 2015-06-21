@@ -6,7 +6,7 @@ public class CubeDefinition : BlockDefenition
     public string blockName;
     public Vector2[] textures = new Vector2[6];
 
-    public bool blockIsSolid;
+    public bool blockIsSolid = true;
 
     public override BlockController Controller()
     {
