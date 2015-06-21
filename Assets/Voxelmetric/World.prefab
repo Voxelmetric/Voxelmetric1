@@ -1,22 +1,22 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!1 &151296
+--- !u!1 &104736
 GameObject:
   m_ObjectHideFlags: 0
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
   serializedVersion: 4
   m_Component:
-  - 4: {fileID: 418226}
-  - 114: {fileID: 11464966}
-  - 114: {fileID: 11489548}
-  - 114: {fileID: 11485260}
-  - 114: {fileID: 11496552}
-  - 114: {fileID: 11485824}
-  - 114: {fileID: 11417602}
-  - 114: {fileID: 11412784}
-  - 114: {fileID: 11497610}
-  - 114: {fileID: 11458412}
+  - 4: {fileID: 479208}
+  - 114: {fileID: 11498696}
+  - 114: {fileID: 11431488}
+  - 114: {fileID: 11468352}
+  - 114: {fileID: 11445694}
+  - 114: {fileID: 11495782}
+  - 114: {fileID: 11467390}
+  - 114: {fileID: 11411728}
+  - 114: {fileID: 11401272}
+  - 114: {fileID: 11430792}
   m_Layer: 0
   m_Name: World
   m_TagString: Untagged
@@ -24,62 +24,64 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!4 &418226
+--- !u!4 &479208
 Transform:
   m_ObjectHideFlags: 1
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 151296}
+  m_GameObject: {fileID: 104736}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 0
---- !u!114 &11412784
+--- !u!114 &11401272
 MonoBehaviour:
   m_ObjectHideFlags: 1
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 151296}
+  m_GameObject: {fileID: 104736}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 3bb4cdcfcb8373f419fe96608ee3594c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  blockName: log
+  blockName: cube
   textures:
-  - {x: 2, y: 1}
-  - {x: 2, y: 1}
-  - {x: 1, y: 1}
-  - {x: 1, y: 1}
-  - {x: 1, y: 1}
-  - {x: 1, y: 1}
---- !u!114 &11417602
-MonoBehaviour:
-  m_ObjectHideFlags: 1
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 151296}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3bb4cdcfcb8373f419fe96608ee3594c, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  blockName: grass
-  textures:
-  - {x: 2, y: 0}
+  - {x: 0, y: 0}
   - {x: 1, y: 0}
-  - {x: 3, y: 0}
-  - {x: 3, y: 0}
-  - {x: 3, y: 0}
-  - {x: 3, y: 0}
---- !u!114 &11458412
+  - {x: 0, y: 1}
+  - {x: 2, y: 2}
+  - {x: 1, y: 2}
+  - {x: 0, y: 2}
+  BlockIsSolid: 1
+--- !u!114 &11411728
 MonoBehaviour:
   m_ObjectHideFlags: 1
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 151296}
+  m_GameObject: {fileID: 104736}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3bb4cdcfcb8373f419fe96608ee3594c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  blockName: leaves
+  textures:
+  - {x: 0, y: 1}
+  - {x: 0, y: 1}
+  - {x: 0, y: 1}
+  - {x: 0, y: 1}
+  - {x: 0, y: 1}
+  - {x: 0, y: 1}
+  BlockIsSolid: 0
+--- !u!114 &11430792
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 104736}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: e72bf131f107a3a499bcb6f27d901d00, type: 3}
@@ -140,55 +142,12 @@ MonoBehaviour:
   - {x: .412699997, y: .319400012}
   - {x: .136899993, y: .0763999969}
   build: 0
---- !u!114 &11464966
+--- !u!114 &11431488
 MonoBehaviour:
   m_ObjectHideFlags: 1
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 151296}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d2da8c6b21a10564cbffd7e51b5ecc72, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  chunkPrefab: {fileID: 123308, guid: 333f2c50b10b7054480cca4cfff8382e, type: 2}
-  worldName: world
---- !u!114 &11485260
-MonoBehaviour:
-  m_ObjectHideFlags: 1
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 151296}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: debf7469c5e470246ba2c0cdccc8489d, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
---- !u!114 &11485824
-MonoBehaviour:
-  m_ObjectHideFlags: 1
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 151296}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3bb4cdcfcb8373f419fe96608ee3594c, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  blockName: dirt
-  textures:
-  - {x: 1, y: 0}
-  - {x: 1, y: 0}
-  - {x: 1, y: 0}
-  - {x: 1, y: 0}
-  - {x: 1, y: 0}
-  - {x: 1, y: 0}
---- !u!114 &11489548
-MonoBehaviour:
-  m_ObjectHideFlags: 1
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 151296}
+  m_GameObject: {fileID: 104736}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 3bb4cdcfcb8373f419fe96608ee3594c, type: 3}
@@ -202,36 +161,93 @@ MonoBehaviour:
   - {x: 0, y: 0}
   - {x: 0, y: 0}
   - {x: 0, y: 0}
---- !u!114 &11496552
+  BlockIsSolid: 1
+--- !u!114 &11445694
 MonoBehaviour:
   m_ObjectHideFlags: 1
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 151296}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ed375897bdcc7e64faaa1b5a85a2aa9b, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
---- !u!114 &11497610
-MonoBehaviour:
-  m_ObjectHideFlags: 1
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 151296}
+  m_GameObject: {fileID: 104736}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 3bb4cdcfcb8373f419fe96608ee3594c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  blockName: cube
+  blockName: dirt
   textures:
-  - {x: 0, y: 0}
   - {x: 1, y: 0}
-  - {x: 0, y: 1}
-  - {x: 2, y: 2}
-  - {x: 1, y: 2}
-  - {x: 0, y: 2}
+  - {x: 1, y: 0}
+  - {x: 1, y: 0}
+  - {x: 1, y: 0}
+  - {x: 1, y: 0}
+  - {x: 1, y: 0}
+  BlockIsSolid: 1
+--- !u!114 &11467390
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 104736}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3bb4cdcfcb8373f419fe96608ee3594c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  blockName: log
+  textures:
+  - {x: 2, y: 1}
+  - {x: 2, y: 1}
+  - {x: 1, y: 1}
+  - {x: 1, y: 1}
+  - {x: 1, y: 1}
+  - {x: 1, y: 1}
+  BlockIsSolid: 1
+--- !u!114 &11468352
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 104736}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ed375897bdcc7e64faaa1b5a85a2aa9b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  blockName: wildgrass
+  texture: {x: 4, y: 0}
+--- !u!114 &11495782
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 104736}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3bb4cdcfcb8373f419fe96608ee3594c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  blockName: grass
+  textures:
+  - {x: 2, y: 0}
+  - {x: 1, y: 0}
+  - {x: 3, y: 0}
+  - {x: 3, y: 0}
+  - {x: 3, y: 0}
+  - {x: 3, y: 0}
+  BlockIsSolid: 1
+--- !u!114 &11498696
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 104736}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d2da8c6b21a10564cbffd7e51b5ecc72, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  chunkPrefab: {fileID: 123308, guid: 333f2c50b10b7054480cca4cfff8382e, type: 2}
+  worldName: world
 --- !u!1001 &100100000
 Prefab:
   m_ObjectHideFlags: 1
@@ -241,5 +257,5 @@ Prefab:
     m_Modifications: []
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 0}
-  m_RootGameObject: {fileID: 151296}
+  m_RootGameObject: {fileID: 104736}
   m_IsPrefabParent: 1
