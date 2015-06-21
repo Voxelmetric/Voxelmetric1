@@ -34,7 +34,6 @@ public class CustomMeshDefinition : BlockDefenition {
             build = false;
         }
     }
-#endif
 
     static Mesh MeshFromAsset(string assetName)
     {
@@ -43,6 +42,7 @@ public class CustomMeshDefinition : BlockDefenition {
 
         return mesh;
     }
+#endif
 
     public override BlockController Controller()
     {
