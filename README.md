@@ -21,6 +21,9 @@ Terrain generates around a given object and is removed when you move too far awa
 ##### Threading
 Threading chunk updates and terrain loading means the voxels take full advantage of your hardware to generate fast without hurting framerate.
 
+##### Define New Block Types
+Define new blocks in the scene with your own textures and even your own 3d mesh for the block's geometry.
+
 ##### Pathfinding
 3d voxel aligned pathfinding for units makes it possible for AI to move around the terrain.
 
