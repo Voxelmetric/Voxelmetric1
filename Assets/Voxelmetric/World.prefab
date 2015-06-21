@@ -55,7 +55,7 @@ MonoBehaviour:
   - {x: 2, y: 2}
   - {x: 1, y: 2}
   - {x: 0, y: 2}
-  BlockIsSolid: 1
+  blockIsSolid: 1
 --- !u!114 &11411728
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -75,7 +75,7 @@ MonoBehaviour:
   - {x: 0, y: 1}
   - {x: 0, y: 1}
   - {x: 0, y: 1}
-  BlockIsSolid: 0
+  blockIsSolid: 0
 --- !u!114 &11430792
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -161,7 +161,7 @@ MonoBehaviour:
   - {x: 0, y: 0}
   - {x: 0, y: 0}
   - {x: 0, y: 0}
-  BlockIsSolid: 1
+  blockIsSolid: 1
 --- !u!114 &11445694
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -181,7 +181,7 @@ MonoBehaviour:
   - {x: 1, y: 0}
   - {x: 1, y: 0}
   - {x: 1, y: 0}
-  BlockIsSolid: 1
+  blockIsSolid: 1
 --- !u!114 &11467390
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -201,7 +201,7 @@ MonoBehaviour:
   - {x: 1, y: 1}
   - {x: 1, y: 1}
   - {x: 1, y: 1}
-  BlockIsSolid: 1
+  blockIsSolid: 1
 --- !u!114 &11468352
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -234,7 +234,7 @@ MonoBehaviour:
   - {x: 3, y: 0}
   - {x: 3, y: 0}
   - {x: 3, y: 0}
-  BlockIsSolid: 1
+  blockIsSolid: 1
 --- !u!114 &11498696
 MonoBehaviour:
   m_ObjectHideFlags: 1
