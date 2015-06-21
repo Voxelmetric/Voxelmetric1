@@ -27,7 +27,15 @@ public class CustomMesh : BlockController {
             if (uvs.Length == 0)
                 meshData.uv.Add(new Vector2(0, 0));
 
-            float lighting = block.data1 / 255;
+            float lighting;
+            if (Config.Toggle.BlockLighting)
+            {
+                lighting = block.data1 / 255;
+            }
+            else
+            {
+                lighting = 1;
+            }
             meshData.colors.Add(new Color(lighting, lighting, lighting, 1));
         }
 

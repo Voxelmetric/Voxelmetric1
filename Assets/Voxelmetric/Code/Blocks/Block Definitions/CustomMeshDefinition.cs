@@ -9,7 +9,7 @@ public class CustomMeshDefinition : BlockDefenition {
 
     public string meshAssetName;
     public string blockName = "custom block";
-    //public Vector3 positionOffset;
+    public Vector3 positionOffset;
 
     public Vector3[] verts = new Vector3[0];
     public int[] tris = new int[0];
@@ -23,7 +23,12 @@ public class CustomMeshDefinition : BlockDefenition {
         if (build)
         {
             Mesh blockMesh = MeshFromAsset(meshAssetName);
-            verts = blockMesh.vertices;
+            verts = new Vector3[blockMesh.vertices.Length];
+
+            for(int i =0; i< blockMesh.vertices.Length; i++)
+            {
+                verts[i] = blockMesh.vertices[i] + positionOffset;
+            }
             tris = blockMesh.triangles;
             uvs = blockMesh.uv;
             build = false;
