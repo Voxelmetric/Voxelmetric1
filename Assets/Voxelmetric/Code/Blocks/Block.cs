@@ -22,22 +22,27 @@ public struct Block
     }
 
     //Mappings
-    public static string[] typeNames = new string[] { "air", "stone", "dirt", "grass", "log", "leaves", "sand", "wildgrass" };
-    public static BlockController[] controllers = new BlockController[] { new BlockAir(), new Stone(), new Dirt(), new Grass(), new Log(), new Leaves(), new Sand(), new WildGrass() };
+    public static BlockIndex index = new BlockIndex();
 
     public BlockController controller
     {
-        get { return controllers[type]; }
+        get {
+            if (type >= index.controllers.Count)
+            {
+                Debug.LogError("Block " + type + " is out of range");
+            }
+            return index.controllers[type];
+        }
     }
 
     public static implicit operator BlockController(Block block)
     {
-        return controllers[block.type];
+        return index.controllers[block.type];
     }
 
     public override string ToString()
     {
-        return typeNames[type];
+        return index.controllers[type].Name();
     }
 
     public static implicit operator byte(Block block)
@@ -52,7 +57,7 @@ public struct Block
 
     public static implicit operator int (Block block)
     {
-        return (int)block.type;
+        return block.type;
     }
 
     public static implicit operator Block(byte b)
@@ -62,15 +67,14 @@ public struct Block
 
     public static implicit operator Block(string s)
     {
-        for (int i = 0; i < typeNames.Length; i++)
+        int blockIndex = 0;
+        if (index.names.TryGetValue(s, out blockIndex))
         {
-            if (s.ToLower() == typeNames[i].ToLower())
-            {
-                return (byte)i;
-            }
+            return blockIndex;
         }
 
-        return Void;
+        Debug.LogWarning("Block not found: " + s);
+        return 0;
     }
 
     //Reserved block types
@@ -84,38 +88,4 @@ public struct Block
         get { return new Block(0); }
     }
 
-    public static Block Stone
-    {
-        get { return new Block(1); }
-    }
-
-    public static Block Dirt
-    {
-        get { return new Block(2); }
-    }
-
-    public static Block Grass
-    {
-        get { return new Block(3); }
-    }
-
-    public static Block Log
-    {
-        get { return new Block(4); }
-    }
-
-    public static Block Leaves
-    {
-        get { return new Block(5); }
-    }
-
-    public static Block Sand
-    {
-        get { return new Block(6); }
-    }
-
-    public static Block WildGrass
-    {
-        get { return new Block(7); }
-    }
 }

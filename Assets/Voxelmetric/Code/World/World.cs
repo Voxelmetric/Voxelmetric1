@@ -21,6 +21,11 @@ public class World : MonoBehaviour {
 
     public string worldName = "world";
 
+    void Start()
+    {
+        Block.index.GetMissingDefinitions();
+    }
+
     //Instantiates a chunk at the supplied coordinates using the chunk prefab,
     //then runs terrain generation on it and loads the chunk's save file
     public void CreateChunk(BlockPos pos)
@@ -110,15 +115,14 @@ public class World : MonoBehaviour {
                 //This gets called if somehow our function got caught in a loop
                 //between World's GetBlock and Chunk's GetBlock
                 Debug.LogError("Error while setting block");
-                return Block.Stone;
+                return Block.Void;
             }
 
             return containerChunk.GetBlock(localPos);
         }
         else
         {
-            //return a solid block so that the faces beside it aren't rendered
-            return Block.Stone;
+            return Block.Air;
         }
 
     }

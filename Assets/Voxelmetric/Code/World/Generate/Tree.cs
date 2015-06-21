@@ -12,13 +12,13 @@ public class StructureTree {
             {
                 for (int z = -leaves; z <= leaves; z++)
                 {
-                    TerrainGen.SetBlock(chunk, Block.Leaves, pos.Add(x,y,z), true);
+                    TerrainGen.SetBlock(chunk, "leaves", pos.Add(x,y,z), true);
                 }
             }
         }
         for (int y = 0; y <= 5; y++)
         {
-            TerrainGen.SetBlock(chunk, Block.Log, pos.Add(0, y, 0), true);
+            TerrainGen.SetBlock(chunk, "log", pos.Add(0, y, 0), true);
         }
     }
 

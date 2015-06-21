@@ -16,4 +16,5 @@ public class Sand : BlockSolid
             BlockBuilder.BuildCollider(chunk, pos, meshData, direction);
         }
     }
+    public override string Name() { return "sand"; }
 }

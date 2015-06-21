@@ -9,4 +9,5 @@ public class WildGrass : BlockNonSolid
     {
         MeshBuilder.CrossMeshRenderer(chunk, pos, meshData, Config.Textures.WildGrass, block);
     }
+    public override string Name() { return "wildgrass"; }
 }

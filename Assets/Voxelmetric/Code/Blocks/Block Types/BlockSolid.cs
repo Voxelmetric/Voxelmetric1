@@ -38,5 +38,7 @@ public class BlockSolid : BlockController
         }
     }
 
+    public override string Name() { return "solid"; }
+
     public override bool IsSolid(Direction direction) { return true; }
 }

@@ -8,4 +8,6 @@ public class BlockAir : BlockController
 
     public override bool IsSolid(Direction direction) { return false; }
 
+    public override string Name() { return "air"; }
+
 }   

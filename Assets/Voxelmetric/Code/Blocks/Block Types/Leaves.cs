@@ -20,4 +20,5 @@ public class Leaves : BlockSolid
     {
         return false;
     }
+    public override string Name() { return "leaves"; }
 }

@@ -15,6 +15,7 @@ public class BlockController
         PostRender(chunk, pos, block);
     }
 
+    public virtual string Name() { return "BlockController";  }
 
     public virtual bool IsSolid(Direction direction) { return false; }
 

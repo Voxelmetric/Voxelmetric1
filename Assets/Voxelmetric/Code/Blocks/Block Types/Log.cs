@@ -15,4 +15,5 @@ public class Log : BlockSolid
             BlockBuilder.BuildCollider(chunk, pos, meshData, direction);
         }
     }
+    public override string Name() { return "log"; }
 }
