@@ -14,7 +14,7 @@ public class BlockIndex {
     {
         int index = controllers.Count;
 
-        if (index == 255)
+        if (index == ushort.MaxValue)
         {
             Debug.LogError("Too many block types!");
             return -1;

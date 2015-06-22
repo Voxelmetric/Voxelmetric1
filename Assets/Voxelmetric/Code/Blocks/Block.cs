@@ -4,7 +4,7 @@ using UnityEngine;
 [Serializable]
 public struct Block
 {
-    public readonly byte type;
+    public readonly ushort type;
     public byte data1;
     public byte data2;
     public byte data3;
@@ -13,7 +13,7 @@ public struct Block
 
     public Block(int type)
     {
-        this.type = (byte)type;
+        this.type = (ushort)type;
         modified = true;
         data1 = 0;
         data2 = 0;
@@ -45,14 +45,14 @@ public struct Block
         return index.controllers[type].Name();
     }
 
-    public static implicit operator byte(Block block)
+    public static implicit operator ushort(Block block)
     {
         return block.type;
     }
 
     public static implicit operator Block(int b)
     {
-        return new Block((byte)b);
+        return new Block((ushort)b);
     }
 
     public static implicit operator int (Block block)
@@ -60,7 +60,7 @@ public struct Block
         return block.type;
     }
 
-    public static implicit operator Block(byte b)
+    public static implicit operator Block(ushort b)
     {
         return new Block(b);
     }
@@ -80,7 +80,7 @@ public struct Block
     //Reserved block types
     public static Block Void
     {
-        get { return new Block(255); }
+        get { return new Block(ushort.MaxValue); }
     }
 
     public static Block Air
