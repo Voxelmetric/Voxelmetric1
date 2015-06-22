@@ -8,7 +8,7 @@ public class BlockDefenition : MonoBehaviour {
         return new BlockAir();
     }
     
-    public void AddToBlocks()
+    public virtual void AddToBlocks()
     {
         Block.index.AddBlockType(Controller());
     }
