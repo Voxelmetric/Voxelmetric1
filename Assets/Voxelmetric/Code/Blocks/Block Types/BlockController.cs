@@ -19,9 +19,9 @@ public class BlockController
 
     public virtual bool IsSolid(Direction direction) { return false; }
 
-    public virtual bool HasLight() { return false; }
+    public virtual bool IsTransparent() { return false; }
 
-    public virtual bool EmitsLight() { return false; }
+    public virtual byte LightEmmitted() { return 0; }
 
     public virtual void OnCreate(Chunk chunk, BlockPos pos, Block block) { }
 
@@ -30,4 +30,5 @@ public class BlockController
     public virtual void PostRender(Chunk chunk, BlockPos pos, Block block) { }
 
     public virtual void OnDestroy(Chunk chunk, BlockPos pos, Block block) { }
+
 }

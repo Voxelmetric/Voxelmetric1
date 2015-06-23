@@ -13,4 +13,7 @@ public class BlockCrossMesh : BlockNonSolid
         MeshBuilder.CrossMeshRenderer(chunk, pos, meshData, texture, block);
     }
     public override string Name() { return blockName; }
+
+    public override bool IsTransparent() { return true; }
+
 }

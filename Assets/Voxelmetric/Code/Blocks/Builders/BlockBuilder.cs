@@ -231,41 +231,43 @@ public static class BlockBuilder
         float sw = 1;
         float wn = 1;
 
+        float aoContrast = 0.2f;
+
         if (nSolid)
         {
-            wn -= 0.2f;
-            ne -= 0.2f;
+            wn -= aoContrast;
+            ne -= aoContrast;
         }
 
         if (eSolid)
         {
-            ne -= 0.2f;
-            es -= 0.2f;
+            ne -= aoContrast;
+            es -= aoContrast;
         }
 
         if (sSolid)
         {
-            es -= 0.2f;
-            sw -= 0.2f;
+            es -= aoContrast;
+            sw -= aoContrast;
         }
 
         if (wSolid)
         {
-            sw -= 0.2f;
-            wn -= 0.2f;
+            sw -= aoContrast;
+            wn -= aoContrast;
         }
 
         if (neSolid)
-            ne -= 0.2f;
+            ne -= aoContrast;
 
         if (swSolid)
-            sw -= 0.2f;
+            sw -= aoContrast;
 
         if (wnSolid)
-            wn -= 0.2f;
+            wn -= aoContrast;
 
         if (esSolid)
-            es -= 0.2f;
+            es -= aoContrast;
 
         meshData.AddColors(ne, es, sw, wn, light);
     }

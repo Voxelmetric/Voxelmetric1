@@ -4,9 +4,9 @@ using System.Collections.Generic;
 public static class BlockLight
 {
 
-    public static int lightEffectRadius = 4;
+    public static int lightEffectRadius = 8;
 
-    public static byte lightReduceBy = 64;
+    public static byte lightReduceBy = 32;
 
     public static void LightArea(World world, BlockPos pos)
     {
@@ -46,6 +46,7 @@ public static class BlockLight
             }
         }
 
+        world.GetChunk(pos).UpdateChunk();
         world.UpdateAdjacentChunks(pos);
 
         foreach (var chunkPos in chunksToUpdate)
@@ -95,25 +96,29 @@ public static class BlockLight
 
             Block block = chunk.GetBlock(localPos);
 
-            if (block.type != 0)
+            if (!block.controller.IsTransparent())
             {
                 sunlightObstructed = true;
                 continue;
             }
 
-            if (sunlightObstructed)
+            if (block.controller.IsTransparent())
             {
-                block.data1 = 0;
-            }
-            else
-            {
-                block.data1 = 255;
-            }
+                byte originalData1 = block.data1;
+                if (sunlightObstructed)
+                {
+                    block.data1 = block.controller.LightEmmitted();
+                }
+                else
+                {
+                    block.data1 = 255;
+                }
 
-            chunk.SetBlock(localPos, block, false);
+                chunk.SetBlock(localPos, block, false);
 
-            if(!chunksToUpdate.Contains(chunk.pos))
-                chunksToUpdate.Add(chunk.pos);
+                if (block.data1 != originalData1 && !chunksToUpdate.Contains(chunk.pos))
+                    chunksToUpdate.Add(chunk.pos);
+            }
 
         }
     }
@@ -122,13 +127,16 @@ public static class BlockLight
     {
         Block block = world.GetBlock(new BlockPos(x, y, z));
 
-        if (block.type != 0)
-            return;
-
-        if (block.data1 <= lightReduceBy)
+        if (!block.controller.IsTransparent() & block.controller.LightEmmitted() == 0)
             return;
 
         byte lightSpill = block.data1;
+        if (block.controller.LightEmmitted() > lightSpill)
+            lightSpill = block.controller.LightEmmitted();
+
+        if (lightSpill <= lightReduceBy)
+            return;
+
         lightSpill -= lightReduceBy;
 
         SpillLight(world, new BlockPos(x + 1, y, z), lightSpill, chunksToUpdate, stayWithin);
@@ -155,7 +163,7 @@ public static class BlockLight
 
         Block block = chunk.GetBlock(localPos);
 
-        if (block.type != Block.Air.type)
+        if (!block.controller.IsTransparent())
             return;
 
         if (block.data1 >= light)
@@ -167,16 +175,16 @@ public static class BlockLight
         block.data1 = light;
         chunk.SetBlock(localPos, block, false);
 
-        if (light > lightReduceBy)
+        if (block.data1 > lightReduceBy)
         {
-            light -= lightReduceBy;
+            block.data1 -= lightReduceBy;
 
-            CallSpillLight(world, chunk, pos.Add(1, 0, 0), light, chunksToUpdate, stayWithinChunk);
-            CallSpillLight(world, chunk, pos.Add(0, 1, 0), light, chunksToUpdate, stayWithinChunk);
-            CallSpillLight(world, chunk, pos.Add(0, 0, 1), light, chunksToUpdate, stayWithinChunk);
-            CallSpillLight(world, chunk, pos.Add(-1, 0, 0), light, chunksToUpdate, stayWithinChunk);
-            CallSpillLight(world, chunk, pos.Add(0, -1, 0), light, chunksToUpdate, stayWithinChunk);
-            CallSpillLight(world, chunk, pos.Add(0, 0, -1), light, chunksToUpdate, stayWithinChunk);
+            CallSpillLight(world, chunk, pos.Add(1, 0, 0), block.data1, chunksToUpdate, stayWithinChunk);
+            CallSpillLight(world, chunk, pos.Add(0, 1, 0), block.data1, chunksToUpdate, stayWithinChunk);
+            CallSpillLight(world, chunk, pos.Add(0, 0, 1), block.data1, chunksToUpdate, stayWithinChunk);
+            CallSpillLight(world, chunk, pos.Add(-1, 0, 0), block.data1, chunksToUpdate, stayWithinChunk);
+            CallSpillLight(world, chunk, pos.Add(0, -1, 0), block.data1, chunksToUpdate, stayWithinChunk);
+            CallSpillLight(world, chunk, pos.Add(0, 0, -1), block.data1, chunksToUpdate, stayWithinChunk);
         }
         return;
     }

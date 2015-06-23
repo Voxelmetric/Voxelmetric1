@@ -14,6 +14,6 @@ public class BlockNonSolid : BlockController
 
     public override bool IsSolid(Direction direction) { return false; }
 
-    public override bool HasLight() { return true; }
+    public override bool IsTransparent() { return true; }
 
 }

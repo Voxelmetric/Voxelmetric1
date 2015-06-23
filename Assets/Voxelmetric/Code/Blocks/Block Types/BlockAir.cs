@@ -10,4 +10,5 @@ public class BlockAir : BlockController
 
     public override string Name() { return "air"; }
 
+    public override bool IsTransparent() { return true; }
 }   

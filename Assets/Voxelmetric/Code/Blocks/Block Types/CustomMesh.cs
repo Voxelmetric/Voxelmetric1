@@ -30,7 +30,7 @@ public class CustomMesh : BlockController {
             float lighting;
             if (Config.Toggle.BlockLighting)
             {
-                lighting = block.data1 / 255;
+                lighting = block.data1 / 255f;
             }
             else
             {
@@ -53,5 +53,6 @@ public class CustomMesh : BlockController {
         }
     }
 
+    public override bool IsTransparent() { return true; }
 
 }

@@ -13,6 +13,9 @@
 
         //Recommend setting this to at least 2 when LightSceneOnStart is enabled 
         public static int WaitBetweenChunkGen = 0;
+
+        public static float AOStrength = 0.5f;
+        public static float BlockLightStrength = 0.5f;
     }
 
     public static class Directories
