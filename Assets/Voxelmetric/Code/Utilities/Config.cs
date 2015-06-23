@@ -11,7 +11,7 @@
         public static int DistanceToDeleteChunks = 256;
         public static int WaitBetweenDeletes = 10;
 
-        //Recommend setting this to at least 1 when LightSceneOnStart is enabled 
+        //Recommend setting this to at least 2 when LightSceneOnStart is enabled 
         public static int WaitBetweenChunkGen = 0;
     }
 

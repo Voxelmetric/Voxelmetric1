@@ -93,7 +93,7 @@ public class LoadChunks : MonoBehaviour
     {
         //First create the chunk game objects in the world class
         //The world class wont do any generation when threaded chunk creation is enabled
-        for (int y = Config.Env.WorldMaxY; y >= Config.Env.WorldMinY; y -= Config.Env.ChunkSize)
+        for (int y = Config.Env.WorldMinY; y <= Config.Env.WorldMaxY; y += Config.Env.ChunkSize)
         {
             for (int x = columnPosition.x - Config.Env.ChunkSize; x <= columnPosition.x + Config.Env.ChunkSize; x += Config.Env.ChunkSize)
             {
@@ -154,25 +154,15 @@ public class LoadChunks : MonoBehaviour
             }
         }
 
-        if (Config.Toggle.LightSceneOnStart)
-        {
-            //reset light
-            chunk = world.GetChunk(columnPosition);
-            BlockLight.ResetLightChunkColumn(world, chunk);
-
-            //Flood light
-            for (int y = Config.Env.WorldMaxY; y >= Config.Env.WorldMinY; y -= Config.Env.ChunkSize)
-            {
-                //Threading issues with the flood lighting will crash unity and possibly your sound card :S
-                chunk = world.GetChunk(columnPosition.Add(0, y, 0));
-                BlockLight.FloodLightChunkColumn(world, chunk);
-            }
-        }
-
         //Render chunk
         for (int y = Config.Env.WorldMaxY; y >= Config.Env.WorldMinY; y -= Config.Env.ChunkSize)
         {
             chunk = world.GetChunk(columnPosition.Add(0, y, 0));
+
+            if(Config.Toggle.LightSceneOnStart){
+                BlockLight.FloodLightChunkColumn(world, chunk);
+            }
+
             chunk.UpdateChunk();
         }
     }

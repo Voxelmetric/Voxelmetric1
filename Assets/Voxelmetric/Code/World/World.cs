@@ -63,6 +63,14 @@ public class World : MonoBehaviour {
 
         Serialization.Load(chunk);
 
+        if (Config.Toggle.LightSceneOnStart)
+        {
+            if (chunk.pos.y == Config.Env.WorldMaxY)
+            {
+                BlockLight.ResetLightChunkColumn(this, chunk);
+            }
+        }
+
         chunk.terrainGenerated = true;
     }
 
