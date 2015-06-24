@@ -2,13 +2,16 @@
 {
     public static class Env
     {
+        public static int ChunkLoadRadius = 8; //how many chunks to load in each direction
         public static float TileSize = 0.125f; // (1/8) for a tile sheet of 8 x 8 tiles
         public static int ChunkSize = 16;
         public static int WorldMaxY = 64;
         public static int WorldMinY = -64;
 
         public static int ChunksToLoad = Data.chunkLoadOrder.Length;
-        public static int DistanceToDeleteChunks = 256;
+        
+        //this is a sane minimum, below this chunks will start blinking in and out on edges		
+        public static int DistanceToDeleteChunks = (int)(ChunkSize * ChunkLoadRadius * 1.5f);
         public static int WaitBetweenDeletes = 10;
 
         //Recommend setting this to at least 2 when LightSceneOnStart is enabled 

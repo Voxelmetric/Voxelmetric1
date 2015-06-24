@@ -1,42 +1,32 @@
-﻿public static class Data {
+﻿using UnityEngine;
+using System.Linq;
+using System.Collections.Generic;
 
-    public static BlockPos[] chunkLoadOrder = {   new BlockPos( 0, 0,  0), new BlockPos(-1, 0,  0), new BlockPos( 0, 0, -1), new BlockPos( 0, 0,  1), new BlockPos( 1, 0,  0),
-    new BlockPos(-1, 0, -1), new BlockPos(-1, 0,  1), new BlockPos( 1, 0, -1), new BlockPos( 1, 0,  1), new BlockPos(-2, 0,  0),
-    new BlockPos( 0, 0, -2), new BlockPos( 0, 0,  2), new BlockPos( 2, 0,  0), new BlockPos(-2, 0, -1), new BlockPos(-2, 0,  1),
-    new BlockPos(-1, 0, -2), new BlockPos(-1, 0,  2), new BlockPos( 1, 0, -2), new BlockPos( 1, 0,  2), new BlockPos( 2, 0, -1),
-    new BlockPos( 2, 0,  1), new BlockPos(-2, 0, -2), new BlockPos(-2, 0,  2), new BlockPos( 2, 0, -2), new BlockPos( 2, 0,  2),
-    new BlockPos(-3, 0,  0), new BlockPos( 0, 0, -3), new BlockPos( 0, 0,  3), new BlockPos( 3, 0,  0), new BlockPos(-3, 0, -1),
-    new BlockPos(-3, 0,  1), new BlockPos(-1, 0, -3), new BlockPos(-1, 0,  3), new BlockPos( 1, 0, -3), new BlockPos( 1, 0,  3),
-    new BlockPos( 3, 0, -1), new BlockPos( 3, 0,  1), new BlockPos(-3, 0, -2), new BlockPos(-3, 0,  2), new BlockPos(-2, 0, -3),
-    new BlockPos(-2, 0,  3), new BlockPos( 2, 0, -3), new BlockPos( 2, 0,  3), new BlockPos( 3, 0, -2), new BlockPos( 3, 0,  2),
-    new BlockPos(-4, 0,  0), new BlockPos( 0, 0, -4), new BlockPos( 0, 0,  4), new BlockPos( 4, 0,  0), new BlockPos(-4, 0, -1),
-    new BlockPos(-4, 0,  1), new BlockPos(-1, 0, -4), new BlockPos(-1, 0,  4), new BlockPos( 1, 0, -4), new BlockPos( 1, 0,  4),
-    new BlockPos( 4, 0, -1), new BlockPos( 4, 0,  1), new BlockPos(-3, 0, -3), new BlockPos(-3, 0,  3), new BlockPos( 3, 0, -3),
-    new BlockPos( 3, 0,  3), new BlockPos(-4, 0, -2), new BlockPos(-4, 0,  2), new BlockPos(-2, 0, -4), new BlockPos(-2, 0,  4),
-    new BlockPos( 2, 0, -4), new BlockPos( 2, 0,  4), new BlockPos( 4, 0, -2), new BlockPos( 4, 0,  2), new BlockPos(-5, 0,  0),
-    new BlockPos(-4, 0, -3), new BlockPos(-4, 0,  3), new BlockPos(-3, 0, -4), new BlockPos(-3, 0,  4), new BlockPos( 0, 0, -5),
-    new BlockPos( 0, 0,  5), new BlockPos( 3, 0, -4), new BlockPos( 3, 0,  4), new BlockPos( 4, 0, -3), new BlockPos( 4, 0,  3),
-    new BlockPos( 5, 0,  0), new BlockPos(-5, 0, -1), new BlockPos(-5, 0,  1), new BlockPos(-1, 0, -5), new BlockPos(-1, 0,  5),
-    new BlockPos( 1, 0, -5), new BlockPos( 1, 0,  5), new BlockPos( 5, 0, -1), new BlockPos( 5, 0,  1), new BlockPos(-5, 0, -2),
-    new BlockPos(-5, 0,  2), new BlockPos(-2, 0, -5), new BlockPos(-2, 0,  5), new BlockPos( 2, 0, -5), new BlockPos( 2, 0,  5),
-    new BlockPos( 5, 0, -2), new BlockPos( 5, 0,  2), new BlockPos(-4, 0, -4), new BlockPos(-4, 0,  4), new BlockPos( 4, 0, -4),
-    new BlockPos( 4, 0,  4), new BlockPos(-5, 0, -3), new BlockPos(-5, 0,  3), new BlockPos(-3, 0, -5), new BlockPos(-3, 0,  5),
-    new BlockPos( 3, 0, -5), new BlockPos( 3, 0,  5), new BlockPos( 5, 0, -3), new BlockPos( 5, 0,  3), new BlockPos(-6, 0,  0),
-    new BlockPos( 0, 0, -6), new BlockPos( 0, 0,  6), new BlockPos( 6, 0,  0), new BlockPos(-6, 0, -1), new BlockPos(-6, 0,  1),
-    new BlockPos(-1, 0, -6), new BlockPos(-1, 0,  6), new BlockPos( 1, 0, -6), new BlockPos( 1, 0,  6), new BlockPos( 6, 0, -1),
-    new BlockPos( 6, 0,  1), new BlockPos(-6, 0, -2), new BlockPos(-6, 0,  2), new BlockPos(-2, 0, -6), new BlockPos(-2, 0,  6),
-    new BlockPos( 2, 0, -6), new BlockPos( 2, 0,  6), new BlockPos( 6, 0, -2), new BlockPos( 6, 0,  2), new BlockPos(-5, 0, -4),
-    new BlockPos(-5, 0,  4), new BlockPos(-4, 0, -5), new BlockPos(-4, 0,  5), new BlockPos( 4, 0, -5), new BlockPos( 4, 0,  5),
-    new BlockPos( 5, 0, -4), new BlockPos( 5, 0,  4), new BlockPos(-6, 0, -3), new BlockPos(-6, 0,  3), new BlockPos(-3, 0, -6),
-    new BlockPos(-3, 0,  6), new BlockPos( 3, 0, -6), new BlockPos( 3, 0,  6), new BlockPos( 6, 0, -3), new BlockPos( 6, 0,  3),
-    new BlockPos(-7, 0,  0), new BlockPos( 0, 0, -7), new BlockPos( 0, 0,  7), new BlockPos( 7, 0,  0), new BlockPos(-7, 0, -1),
-    new BlockPos(-7, 0,  1), new BlockPos(-5, 0, -5), new BlockPos(-5, 0,  5), new BlockPos(-1, 0, -7), new BlockPos(-1, 0,  7),
-    new BlockPos( 1, 0, -7), new BlockPos( 1, 0,  7), new BlockPos( 5, 0, -5), new BlockPos( 5, 0,  5), new BlockPos( 7, 0, -1),
-    new BlockPos( 7, 0,  1), new BlockPos(-6, 0, -4), new BlockPos(-6, 0,  4), new BlockPos(-4, 0, -6), new BlockPos(-4, 0,  6),
-    new BlockPos( 4, 0, -6), new BlockPos( 4, 0,  6), new BlockPos( 6, 0, -4), new BlockPos( 6, 0,  4), new BlockPos(-7, 0, -2),
-    new BlockPos(-7, 0,  2), new BlockPos(-2, 0, -7), new BlockPos(-2, 0,  7), new BlockPos( 2, 0, -7), new BlockPos( 2, 0,  7),
-    new BlockPos( 7, 0, -2), new BlockPos( 7, 0,  2), new BlockPos(-7, 0, -3), new BlockPos(-7, 0,  3), new BlockPos(-3, 0, -7),
-    new BlockPos(-3, 0,  7), new BlockPos( 3, 0, -7), new BlockPos( 3, 0,  7), new BlockPos( 7, 0, -3), new BlockPos( 7, 0,  3),
-    new BlockPos(-6, 0, -5), new BlockPos(-6, 0,  5), new BlockPos(-5, 0, -6), new BlockPos(-5, 0,  6), new BlockPos( 5, 0, -6),
-    new BlockPos( 5, 0,  6), new BlockPos( 6, 0, -5), new BlockPos( 6, 0,  5) };
+public static class Data
+{
+    public static BlockPos[] chunkLoadOrder;
+
+    static Data()
+    {
+        var chunkLoads = new List<BlockPos>();
+        for (int x = -Config.Env.ChunkLoadRadius; x <= Config.Env.ChunkLoadRadius; x++)
+        {
+            for (int z = -Config.Env.ChunkLoadRadius; z <= Config.Env.ChunkLoadRadius; z++)
+            {
+                chunkLoads.Add(new BlockPos(x, 0, z));
+            }
+        }
+
+        // limit how far away the blocks can be to achieve a circular loading pattern
+        float maxRadius = Config.Env.ChunkLoadRadius * 1.55f;
+
+        //sort 2d vectors by closeness to center
+        chunkLoadOrder = chunkLoads
+                            .Where(pos => Mathf.Abs(pos.x) + Mathf.Abs(pos.z) < maxRadius)
+                            .OrderBy(pos => Mathf.Abs(pos.x) + Mathf.Abs(pos.z)) //smallest magnitude vectors first
+                            .ThenBy(pos => Mathf.Abs(pos.x)) //make sure not to process e.g (-10,0) before (5,5)
+                            .ThenBy(pos => Mathf.Abs(pos.z))
+                            .ToArray();
+    }
+
 }
