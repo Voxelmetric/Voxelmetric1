@@ -14,6 +14,7 @@ public class Chunk : MonoBehaviour
     public bool loaded = false;
     public bool terrainGenerated = false;
     bool markedForDeletion = false;
+    bool queuedForUpdate = false;
 
     MeshFilter filter;
     MeshCollider coll;
@@ -22,8 +23,6 @@ public class Chunk : MonoBehaviour
     public BlockPos pos;
 
     MeshData meshData = new MeshData();
-
-    public bool rendered = false;
 
     void Start()
     {
@@ -45,28 +44,43 @@ public class Chunk : MonoBehaviour
             meshData = new MeshData();
             busy = false;
         }
+
     }
 
     public void UpdateChunk()
     {
-        if (!busy)
+        if (Config.Toggle.UseMultiThreading)
         {
-            rendered = true;
+            Thread thread = new Thread(() =>
+            {
+                //If there's already an update queued let that one run instead
+                if (!queuedForUpdate)
+                {
+                    // If the chunk is busy wait for it to be ready, but
+                    // set a flag saying an update is waiting so that later
+                    // updates don't sit around as well, one is enough
+                    if (busy)
+                    {
+                        queuedForUpdate = true;
+                        while (busy)
+                        {
+                            Thread.Sleep(0);
+                        }
+                        queuedForUpdate = false;
+                    }
+
+                    busy = true;
+                    BuildMeshData();
+                    meshReady = true;
+                }
+            });
+            thread.Start();
+        }
+        else //Not using multithreading
+        {
             busy = true;
-            if (Config.Toggle.UseMultiThreading)
-            {
-                Thread thread = new Thread(() =>
-               {
-                   BuildMeshData();
-                   meshReady = true;
-               });
-                thread.Start();
-            }
-            else
-            {
-                BuildMeshData();
-                meshReady = true;
-            }
+            BuildMeshData();
+            meshReady = true;
         }
     }
 
