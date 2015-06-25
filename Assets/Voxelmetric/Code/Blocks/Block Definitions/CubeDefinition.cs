@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class CubeDefinition : BlockDefenition
+public class CubeDefinition : BlockDefinition
 {
     public string blockName;
     public Vector2[] textures = new Vector2[6];
