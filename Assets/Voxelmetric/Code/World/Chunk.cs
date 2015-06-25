@@ -111,11 +111,11 @@ public class Chunk : MonoBehaviour
     {
         if (InRange(blockPos))
         {
-            blocks[blockPos.x, blockPos.y, blockPos.z].controller.OnDestroy(this, blockPos, blocks[blockPos.x, blockPos.y, blockPos.z]);
+            blocks[blockPos.x, blockPos.y, blockPos.z].controller.OnDestroy(this, blockPos + pos, blocks[blockPos.x, blockPos.y, blockPos.z]);
 
             blocks[blockPos.x, blockPos.y, blockPos.z] = block;
 
-            blocks[blockPos.x, blockPos.y, blockPos.z].controller.OnCreate(this, blockPos, blocks[blockPos.x, blockPos.y, blockPos.z]);
+            blocks[blockPos.x, blockPos.y, blockPos.z].controller.OnCreate(this, blockPos + pos, blocks[blockPos.x, blockPos.y, blockPos.z]);
 
             if (updateChunk)
                 UpdateChunk();
