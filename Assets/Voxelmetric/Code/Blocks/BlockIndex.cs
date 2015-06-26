@@ -26,7 +26,7 @@ public class BlockIndex {
     }
 
     public void GetMissingDefinitions() {
-        BlockDefenition[] definitions = World.instance.gameObject.GetComponents<BlockDefenition>();
+        BlockDefinition[] definitions = World.instance.gameObject.GetComponents<BlockDefinition>();
 
         foreach (var def in definitions)
         {

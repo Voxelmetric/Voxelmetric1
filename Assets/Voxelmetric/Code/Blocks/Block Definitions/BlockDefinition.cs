@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class BlockDefenition : MonoBehaviour {
+public class BlockDefinition : MonoBehaviour {
 
     public virtual BlockController Controller()
     {

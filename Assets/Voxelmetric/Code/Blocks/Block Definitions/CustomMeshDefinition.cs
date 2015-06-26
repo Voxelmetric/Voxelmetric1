@@ -5,7 +5,7 @@ using UnityEditor;
 #endif
 
 [ExecuteInEditMode]
-public class CustomMeshDefinition : BlockDefenition {
+public class CustomMeshDefinition : BlockDefinition {
 
     public string meshAssetName;
     public string blockName = "custom block";

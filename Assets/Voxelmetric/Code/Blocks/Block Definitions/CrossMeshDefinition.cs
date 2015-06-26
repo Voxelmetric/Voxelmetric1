@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class CrossMeshDefinition : BlockDefenition {
+public class CrossMeshDefinition : BlockDefinition {
 
     public string blockName;
     public Vector2 texture;
