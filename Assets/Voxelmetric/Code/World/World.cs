@@ -56,10 +56,10 @@ public class World : MonoBehaviour {
         }
     }
 
+    
     void GenAndLoadChunk(Chunk chunk)
     {
-        var terrainGen = new TerrainGen();
-        terrainGen.ChunkGen(chunk);
+        GenerateChunk(chunk); 
 
         Serialization.Load(chunk);
 
@@ -72,6 +72,19 @@ public class World : MonoBehaviour {
         }
 
         chunk.terrainGenerated = true;
+    }
+
+    /// <summary>
+    /// This is the code that generates the chunk. 
+    /// If using a different TerrainGen, override this class and call it here. 
+    /// </summary>
+    /// <param name="chunk"></param>
+    protected virtual void GenerateChunk (Chunk chunk)
+    {
+        var terrainGen = new TerrainGen();
+        terrainGen.ChunkGen(chunk);
+
+        
     }
 
     //Saves the chunk and destroys the game object
