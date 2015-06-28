@@ -10,6 +10,11 @@ public class BlockIndex {
     public List<BlockController> controllers = new List<BlockController>();
     public Dictionary<string, int> names = new Dictionary<string, int>();
 
+    /// <summary>
+    /// Adds a block type to the index and adds it's name to a dictionary for quick lookup
+    /// </summary>
+    /// <param name="controller">The controller object for this block</param>
+    /// <returns>The index of the block</returns>
     public int AddBlockType(BlockController controller)
     {
         int index = controllers.Count;
@@ -26,7 +31,7 @@ public class BlockIndex {
     }
 
     public void GetMissingDefinitions() {
-        BlockDefenition[] definitions = World.instance.gameObject.GetComponents<BlockDefenition>();
+        BlockDefenition[] definitions = World.instance.gameObject.GetComponentsInChildren<BlockDefenition>();
 
         foreach (var def in definitions)
         {
