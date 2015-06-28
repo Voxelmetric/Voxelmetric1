@@ -94,11 +94,20 @@ public static class Voxelmetric
         return block;
     }
 
+    /// <summary>
+    /// Saves all chunks currently loaded, if UseMultiThreading is enabled it saves the chunks
+    ///  asynchronously and the SaveProgress object returned will show the progress
+    /// </summary>
+    /// <param name="world">Optional parameter for the world to save chunks for, if left
+    /// empty it will use the world Singleton instead</param>
+    /// <returns>A SaveProgress object to monitor the save.</returns>
     public static SaveProgress SaveAll(World world = null)
     {
         if (!world)
             world = World.instance;
 
+        //Create a saveprogress object with positions of all the chunks in the world
+        //Then save each chunk and update the saveprogress's percentage for each save
         SaveProgress saveProgress = new SaveProgress(world.chunks.Keys);
         List<Chunk> chunksToSave = new List<Chunk>();
         chunksToSave.AddRange(world.chunks.Values);

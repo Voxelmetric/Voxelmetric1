@@ -120,7 +120,7 @@ public class LoadChunks : MonoBehaviour
 
         }
 
-        //Now we can start the threaded chunk generation
+        //Start the threaded chunk generation
         if (Config.Toggle.UseMultiThreading) {
             Thread thread = new Thread(() => { LoadChunkColumnInner(columnPosition); } );
             thread.Start();
@@ -135,7 +135,10 @@ public class LoadChunks : MonoBehaviour
     void LoadChunkColumnInner(BlockPos columnPosition)
     {
         Chunk chunk;
-
+        
+        // Terrain generation can happen in another thread meaning that we will reach this point before the
+        //thread completes, we need to wait for all the chunks we depend on to finish generating before we
+        //can calculate any light spread or render the chunk
         if (Config.Toggle.UseMultiThreading)
         {
             for (int y = Config.Env.WorldMaxY; y >= Config.Env.WorldMinY; y -= Config.Env.ChunkSize)

@@ -47,6 +47,9 @@ public class Chunk : MonoBehaviour
 
     }
 
+    /// <summary>
+    /// Updates the chunk either now or as soon as the chunk is no longer busy
+    /// </summary>
     public void UpdateChunk()
     {
         if (Config.Toggle.UseMultiThreading)
@@ -84,7 +87,12 @@ public class Chunk : MonoBehaviour
         }
     }
 
-    //gets the block from the blocks array or gets it from World
+    /// <summary>
+    /// Gets and returns a block from a local position within the chunk 
+    /// or fetches it from the world
+    /// </summary>
+    /// <param name="blockPos">A local block position</param>
+    /// <returns>The block at the position</returns>
     public Block GetBlock(BlockPos blockPos)
     {
         Block returnBlock;
@@ -101,6 +109,11 @@ public class Chunk : MonoBehaviour
         return returnBlock;
     }
 
+    /// <summary>
+    /// Returns true if the block local block position is contained in the chunk boundaries
+    /// </summary>
+    /// <param name="localPos">A local block position</param>
+    /// <returns>true or false depending on if the position is in range</returns>
     public static bool InRange(BlockPos localPos)
     {
         if (!InRange(localPos.x))
@@ -121,6 +134,12 @@ public class Chunk : MonoBehaviour
         return true;
     }
 
+    /// <summary>
+    /// Sets the block at the given local position
+    /// </summary>
+    /// <param name="blockPos">Local position</param>
+    /// <param name="block">Block to place at the given location</param>
+    /// <param name="updateChunk">Optional parameter, set to false to keep the chunk unupdated despite the change</param>
     public void SetBlock(BlockPos blockPos, Block block, bool updateChunk = true)
     {
         if (InRange(blockPos))
@@ -141,7 +160,9 @@ public class Chunk : MonoBehaviour
         }
     }
 
-    // Updates the chunk based on its contents
+    /// <summary>
+    /// Updates the chunk based on its contents
+    /// </summary>
     void BuildMeshData()
     {
         for (int x = 0; x < Config.Env.ChunkSize; x++)
@@ -156,8 +177,10 @@ public class Chunk : MonoBehaviour
         }
     }
 
-    // Sends the calculated mesh information
-    // to the mesh and collision components
+    /// <summary>
+    /// Sends the calculated mesh information
+    /// to the mesh and collision components
+    /// </summary>
     void RenderMesh()
     {
         filter.mesh.Clear();
@@ -181,6 +204,9 @@ public class Chunk : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Marks this chunk for deletion and the next update it will be destroyed
+    /// </summary>
     public void MarkForDeletion()
     {
         markedForDeletion = true;

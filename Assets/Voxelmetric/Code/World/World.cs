@@ -6,6 +6,7 @@ public class World : MonoBehaviour {
 
     private static World _instance;
 
+    //Lets this class be fetched as a singleton
     public static World instance
     {
         get
@@ -19,15 +20,21 @@ public class World : MonoBehaviour {
     public Dictionary<BlockPos, Chunk> chunks = new Dictionary<BlockPos, Chunk>();
     public GameObject chunkPrefab;
 
+    //This world name is used for the save file name
     public string worldName = "world";
 
     void Start()
     {
+        //Makes the block index fetch all the BlockDefinition components
+        //on this gameobject and add them to the index
         Block.index.GetMissingDefinitions();
     }
 
-    //Instantiates a chunk at the supplied coordinates using the chunk prefab,
-    //then runs terrain generation on it and loads the chunk's save file
+    /// <summary>
+    ///Instantiates a chunk at the supplied coordinates using the chunk prefab,
+    ///then runs terrain generation on it and loads the chunk's save file
+    /// </summary>
+    /// <param name="pos">The world position to create this chunk.</param>
     public void CreateChunk(BlockPos pos)
     {
         GameObject newChunkObject = Instantiate(
@@ -56,6 +63,11 @@ public class World : MonoBehaviour {
         }
     }
 
+    /// <summary>
+    ///Load terrain, saved changes and resets
+    ///the light for an empty chunk
+    /// </summary>
+    /// <param name="chunk">The chunk to generate and load for</param>
     void GenAndLoadChunk(Chunk chunk)
     {
         var terrainGen = new TerrainGen();
@@ -74,7 +86,10 @@ public class World : MonoBehaviour {
         chunk.terrainGenerated = true;
     }
 
-    //Saves the chunk and destroys the game object
+    /// <summary>
+    ///Saves the chunk and destroys the game object
+    /// </summary>
+    /// <param name="pos">Position of the chunk to destroy</param>
     public void DestroyChunk(BlockPos pos)
     {
         Chunk chunk = null;
@@ -98,7 +113,11 @@ public class World : MonoBehaviour {
         }
     }
 
-    //returns the chunk that contains the given block position or null if there is none
+    /// <summary>
+    /// Get's the chunk object at pos
+    /// </summary>
+    /// <param name="pos">Position of the chunk or of a block within the chunk</param>
+    /// <returns>chunk that contains the given block position or null if there is none</returns>
     public Chunk GetChunk(BlockPos pos)
     {
         //Get the coordinates of the chunk containing this block
@@ -110,7 +129,11 @@ public class World : MonoBehaviour {
         return containerChunk;
     }
 
-    //returns the block at the given global coordinates
+    /// <summary>
+    /// Gets the block at pos
+    /// </summary>
+    /// <param name="pos">Global position of the block</param>
+    /// <returns>The block at the given global coordinates</returns>
     public Block GetBlock(BlockPos pos)
     {
         Chunk containerChunk = GetChunk(pos);
@@ -135,8 +158,14 @@ public class World : MonoBehaviour {
 
     }
 
-    //Gets the chunk and sets the block at the given coordinates, updates the chunk and its
-    //neighbors if the update chunk flag is true or not set
+    /// <summary>
+    /// Gets the chunk and sets the block at the given coordinates, updates the chunk and its
+    /// neighbors if the update chunk flag is true or not set. Uses global coordinates, to use
+    /// local coordinates use the chunk's SetBlock function.
+    /// </summary>
+    /// <param name="pos">Global position of the block</param>
+    /// <param name="block">The block be placed</param>
+    /// <param name="updateChunk">Optional parameter, set to false not update the chunk despite the change</param>
     public void SetBlock(BlockPos pos, Block block, bool updateChunk = true)
     {
         Chunk chunk = GetChunk(pos);
@@ -153,6 +182,10 @@ public class World : MonoBehaviour {
         }
     }
 
+    /// <summary>
+    /// Updates any chunks neighboring a block position
+    /// </summary>
+    /// <param name="pos">position of change</param>
     public void UpdateAdjacentChunks(BlockPos pos)
     {
         BlockPos localPos = pos - pos.ContainingChunkCoordinates();
