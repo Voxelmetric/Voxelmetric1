@@ -5,19 +5,19 @@ using SimplexNoise;
 public class TerrainGen
 {
 
-    int stoneBaseHeight = -20;
-    float stoneBaseNoise = 0.03f;
-    int stoneBaseNoiseHeight = 10;
+    protected int stoneBaseHeight = -20;
+    protected float stoneBaseNoise = 0.03f;
+    protected int stoneBaseNoiseHeight = 10;
 
-    int stoneMountainHeight = 10;
-    float stoneMountainFrequency = 0.008f;
-    int stoneMinHeight = 0;
+    protected int stoneMountainHeight = 10;
+    protected float stoneMountainFrequency = 0.008f;
+    protected int stoneMinHeight = 0;
 
-    int dirtBaseHeight = 1;
-    float dirtNoise = 0.04f;
-    int dirtNoiseHeight = 2;
+    protected int dirtBaseHeight = 1;
+    protected float dirtNoise = 0.04f;
+    protected int dirtNoiseHeight = 2;
 
-    public void ChunkGen(Chunk chunk)
+    public virtual void ChunkGen(Chunk chunk)
     {
 
 
@@ -39,7 +39,7 @@ public class TerrainGen
 
     }
 
-    int LayerStoneBase(int x, int z)
+    protected virtual int LayerStoneBase(int x, int z)
     {
         int stoneHeight = stoneBaseHeight;
         stoneHeight += GetNoise(x, 0, z, stoneMountainFrequency, stoneMountainHeight, 1.6f);
@@ -51,12 +51,12 @@ public class TerrainGen
         return stoneHeight; 
     }
 
-    int LayerStoneNoise(int x, int z)
+    protected virtual int LayerStoneNoise(int x, int z)
     {
         return GetNoise(x, 0, z, stoneBaseNoise, stoneBaseNoiseHeight, 1);
     }
 
-    int LayerDirt(int x, int z)
+    protected virtual int LayerDirt(int x, int z)
     {
         int dirtHeight = dirtBaseHeight;
         dirtHeight += GetNoise(x, 100, z, dirtNoise, dirtNoiseHeight, 1);
@@ -64,7 +64,7 @@ public class TerrainGen
         return dirtHeight;
     }
 
-    void GenerateTerrain(Chunk chunk, int x, int z)
+    protected virtual void GenerateTerrain(Chunk chunk, int x, int z)
     {
         int stoneHeight = LayerStoneBase(chunk.pos.x + x, chunk.pos.z + z);
         stoneHeight += LayerStoneNoise(chunk.pos.x + x, chunk.pos.z + z);
