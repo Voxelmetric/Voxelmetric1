@@ -9,8 +9,15 @@
         public static int WorldMinY = -64;
 
         public static int ChunksToLoad = Data.chunkLoadOrder.Length;
-        
-        //this is a sane minimum, below this chunks will start blinking in and out on edges		
+
+        public static float BlockSize = 1f;
+
+        // Padding added to the size of block faces to fix floating point issues 
+        // where tiny gaps can appear between block faces
+        public static float BlockFacePadding = 0.0005f;
+
+        //this is a sane minimum, below this chunks will start blinking in and out on edges
+        //The distance is measured in blocks
         public static int DistanceToDeleteChunks = (int)(ChunkSize * ChunkLoadRadius * 1.5f);
         public static int WaitBetweenDeletes = 10;
 

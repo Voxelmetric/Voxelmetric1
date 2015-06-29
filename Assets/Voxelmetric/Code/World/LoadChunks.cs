@@ -46,11 +46,12 @@ public class LoadChunks : MonoBehaviour
         var chunksToDelete = new List<BlockPos>();
         foreach (var chunk in world.chunks)
         {
+            Vector3 chunkPos = chunk.Key; 
             float distance = Vector3.Distance(
-                new Vector3(chunk.Value.pos.x, 0, chunk.Value.pos.z),
+                new Vector3(chunkPos.x, 0, chunkPos.z),
                 new Vector3(transform.position.x, 0, transform.position.z));
 
-            if (distance > Config.Env.DistanceToDeleteChunks)
+            if (distance > Config.Env.DistanceToDeleteChunks * Config.Env.BlockSize)
                 chunksToDelete.Add(chunk.Key);
         }
 

@@ -7,6 +7,7 @@ public static class Voxelmetric
 
     public static BlockPos GetBlockPos(RaycastHit hit, bool adjacent = false)
     {
+
         Vector3 pos = new Vector3(
             MoveWithinBlock(hit.point.x, hit.normal.x, adjacent),
             MoveWithinBlock(hit.point.y, hit.normal.y, adjacent),
@@ -18,18 +19,22 @@ public static class Voxelmetric
 
     static float MoveWithinBlock(float pos, float norm, bool adjacent = false)
     {
+        float minHalfBlock = Config.Env.BlockSize / 2 - 0.01f;
+        float maxHalfBlock = Config.Env.BlockSize / 2 + 0.01f;
         //Because of float imprecision we can't guarantee a hit on the side of a
-        //block will be exactly 0.5 so we add a bit of padding
-        float offset = pos - (int)pos;
-        if ((offset > 0.49f && offset < 0.51) || (offset > -0.51f && offset < -0.49))
+
+        //Get the distance of this position from the nearest block center
+        //accounting for the size of the block
+        float offset = pos - ((int)(pos/Config.Env.BlockSize) * Config.Env.BlockSize);
+        if ((offset > minHalfBlock && offset < maxHalfBlock) || (offset < -minHalfBlock && offset > -maxHalfBlock))
         {
             if (adjacent)
             {
-                pos += (norm / 2);
+                pos += (norm / 2 * Config.Env.BlockSize);
             }
             else
             {
-                pos -= (norm / 2);
+                pos -= (norm / 2 * Config.Env.BlockSize);
             }
         }
 

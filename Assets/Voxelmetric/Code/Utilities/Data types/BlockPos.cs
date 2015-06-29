@@ -64,9 +64,9 @@ public struct BlockPos
     public static implicit operator BlockPos(Vector3 v)
     {
         BlockPos blockPos = new BlockPos(
-            Mathf.RoundToInt(v.x),
-            Mathf.RoundToInt(v.y),
-            Mathf.RoundToInt(v.z)
+            Mathf.RoundToInt(v.x / Config.Env.BlockSize),
+            Mathf.RoundToInt(v.y / Config.Env.BlockSize),
+            Mathf.RoundToInt(v.z / Config.Env.BlockSize)
             );
 
         return blockPos;
@@ -74,7 +74,7 @@ public struct BlockPos
 
     public static implicit operator Vector3(BlockPos pos)
     {
-        return new Vector3(pos.x, pos.y, pos.z);
+        return new Vector3(pos.x, pos.y, pos.z) * Config.Env.BlockSize;
     }
 
     //These operators let you add and subtract BlockPos from each other
