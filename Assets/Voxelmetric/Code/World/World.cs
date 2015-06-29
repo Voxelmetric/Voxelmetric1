@@ -63,6 +63,7 @@ public class World : MonoBehaviour {
         }
     }
 
+
     /// <summary>
     ///Load terrain, saved changes and resets
     ///the light for an empty chunk
@@ -70,8 +71,7 @@ public class World : MonoBehaviour {
     /// <param name="chunk">The chunk to generate and load for</param>
     void GenAndLoadChunk(Chunk chunk)
     {
-        var terrainGen = new TerrainGen();
-        terrainGen.ChunkGen(chunk);
+        GenerateChunk(chunk); 
 
         Serialization.Load(chunk);
 
@@ -87,7 +87,20 @@ public class World : MonoBehaviour {
     }
 
     /// <summary>
-    ///Saves the chunk and destroys the game object
+    /// This is the code that generates the chunk. 
+    /// If using a different TerrainGen, override this class and call it here. 
+    /// </summary>
+    /// <param name="chunk"></param>
+    protected virtual void GenerateChunk (Chunk chunk)
+    {
+        var terrainGen = new TerrainGen();
+        terrainGen.ChunkGen(chunk);
+
+        
+    }
+
+    /// <summary>
+    /// Saves the chunk and destroys the game object
     /// </summary>
     /// <param name="pos">Position of the chunk to destroy</param>
     public void DestroyChunk(BlockPos pos)
