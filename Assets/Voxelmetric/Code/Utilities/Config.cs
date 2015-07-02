@@ -1,4 +1,6 @@
-﻿namespace Config
+﻿using UnityEngine;
+
+namespace Config
 {
     public static class Env
     {
@@ -31,7 +33,8 @@
     public static class Directories
     {
         public static string SaveFolder = "VoxelSaves";
-        public static string BlockMeshFolder = "Assets/Voxelmetric/BlockMeshes/";
+        public static string BlockMeshFolder = "Meshes";
+        public static string TextureFolder = "Textures";
     }
 
     public static class Toggle

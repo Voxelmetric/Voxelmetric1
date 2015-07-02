@@ -28,6 +28,8 @@ public class Chunk : MonoBehaviour
     {
         filter = gameObject.GetComponent<MeshFilter>();
         coll = gameObject.GetComponent<MeshCollider>();
+
+        gameObject.GetComponent<Renderer>().material.mainTexture = Block.index.textureIndex.atlas;
     }
 
     void Update()

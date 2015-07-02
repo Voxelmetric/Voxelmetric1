@@ -5,7 +5,7 @@ public class BlockCrossMesh : BlockNonSolid
 {
     public BlockCrossMesh() : base() { }
 
-    public Tile texture;
+    public TextureCollection texture;
     public string blockName;
 
     public override void AddBlockData(Chunk chunk, BlockPos pos, MeshData meshData, Block block)
