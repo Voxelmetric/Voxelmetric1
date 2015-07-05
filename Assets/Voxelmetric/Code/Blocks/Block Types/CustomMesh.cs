@@ -43,7 +43,7 @@ public class CustomMesh : BlockController {
 
         if (uvs.Length != 0)
         {
-            Rect texture = collection.GetTexture(chunk, pos);
+            Rect texture = collection.GetTexture(chunk, pos, Direction.down);
 
             foreach (var uv in uvs)
             {

@@ -349,8 +349,8 @@ Transform:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 297876181}
-  m_LocalRotation: {x: -.238560408, y: .341786742, z: -.0901443437, w: -.904513597}
-  m_LocalPosition: {x: 0, y: 34.3744736, z: 0}
+  m_LocalRotation: {x: -.421877205, y: -.562778592, z: .407758027, w: -.582265615}
+  m_LocalPosition: {x: -22.8170033, y: 21.7001476, z: 4.67524576}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
@@ -985,7 +985,7 @@ MonoBehaviour:
           m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
           m_IntArgument: 3
           m_FloatArgument: 0
-          m_StringArgument: wildgrass
+          m_StringArgument: grass
           m_BoolArgument: 0
         m_CallState: 2
     m_TypeName: UnityEngine.UI.Button+ButtonClickedEvent, UnityEngine.UI, Version=1.0.0.0,
@@ -1132,6 +1132,30 @@ CanvasRenderer:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 820451823}
+--- !u!1 &898330090 stripped
+GameObject:
+  m_PrefabParentObject: {fileID: 104736, guid: 28fc5073d6f2b5b42acaec530dd745cd, type: 2}
+  m_PrefabInternal: {fileID: 1126565229}
+--- !u!114 &898330091
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 898330090}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3bb4cdcfcb8373f419fe96608ee3594c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  blockName: connected
+  textures:
+  - connected
+  - connected
+  - connected
+  - connected
+  - connected
+  - connected
+  blockIsSolid: 1
 --- !u!1 &916014973
 GameObject:
   m_ObjectHideFlags: 0
@@ -1144,7 +1168,7 @@ GameObject:
   - 114: {fileID: 916014976}
   - 114: {fileID: 916014975}
   m_Layer: 5
-  m_Name: Example textured block
+  m_Name: Connected textures
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1215,7 +1239,7 @@ MonoBehaviour:
           m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
           m_IntArgument: 3
           m_FloatArgument: 0
-          m_StringArgument: cube
+          m_StringArgument: connected
           m_BoolArgument: 0
         m_CallState: 2
     m_TypeName: UnityEngine.UI.Button+ButtonClickedEvent, UnityEngine.UI, Version=1.0.0.0,
@@ -1446,6 +1470,10 @@ Prefab:
       propertyPath: textures.Array.size
       value: 6
       objectReference: {fileID: 0}
+    - target: {fileID: 11431488, guid: 28fc5073d6f2b5b42acaec530dd745cd, type: 2}
+      propertyPath: textures.Array.size
+      value: 6
+      objectReference: {fileID: 0}
     - target: {fileID: 479208, guid: 28fc5073d6f2b5b42acaec530dd745cd, type: 2}
       propertyPath: m_LocalPosition.x
       value: 0
@@ -1630,7 +1658,8 @@ Prefab:
       propertyPath: build
       value: 1
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    m_RemovedComponents:
+    - {fileID: 11430792, guid: 28fc5073d6f2b5b42acaec530dd745cd, type: 2}
   m_ParentPrefab: {fileID: 100100000, guid: 28fc5073d6f2b5b42acaec530dd745cd, type: 2}
   m_IsPrefabParent: 0
 --- !u!1 &1195630378
@@ -1863,7 +1892,7 @@ MonoBehaviour:
   m_Color: {r: .801470578, g: .801470578, b: .801470578, a: 1}
   m_FontData:
     m_Font: {fileID: 10102, guid: 0000000000000000e000000000000000, type: 0}
-    m_FontSize: 14
+    m_FontSize: 12
     m_FontStyle: 0
     m_BestFit: 0
     m_MinSize: 10
@@ -1873,7 +1902,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: Example textured custom
+  m_Text: Connected textures
 --- !u!222 &1244088003
 CanvasRenderer:
   m_ObjectHideFlags: 0

@@ -124,7 +124,7 @@ public static class BlockBuilder
 
     public static void BuildTexture(Chunk chunk, BlockPos pos, MeshData meshData, Direction direction, TextureCollection textureCollection)
     {
-        Rect texture = textureCollection.GetTexture(chunk, pos);
+        Rect texture = textureCollection.GetTexture(chunk, pos, direction);
         Vector2[] UVs = new Vector2[4];
 
         UVs[0] = new Vector2(texture.x + texture.width, texture.y);
@@ -142,22 +142,22 @@ public static class BlockBuilder
         switch (direction)
         {
             case Direction.up:
-                texture = textureCollections[0].GetTexture(chunk, pos);
+                texture = textureCollections[0].GetTexture(chunk, pos, direction);
                 break;
             case Direction.down:
-                texture = textureCollections[1].GetTexture(chunk, pos);
+                texture = textureCollections[1].GetTexture(chunk, pos, direction);
                 break;
             case Direction.north:
-                texture = textureCollections[2].GetTexture(chunk, pos);
+                texture = textureCollections[2].GetTexture(chunk, pos, direction);
                 break;
             case Direction.east:
-                texture = textureCollections[3].GetTexture(chunk, pos);
+                texture = textureCollections[3].GetTexture(chunk, pos, direction);
                 break;
             case Direction.south:
-                texture = textureCollections[4].GetTexture(chunk, pos);
+                texture = textureCollections[4].GetTexture(chunk, pos, direction);
                 break;
             case Direction.west:
-                texture = textureCollections[5].GetTexture(chunk, pos);
+                texture = textureCollections[5].GetTexture(chunk, pos, direction);
                 break;
             default:
                 break;

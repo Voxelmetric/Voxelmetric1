@@ -4,11 +4,8 @@ using System.Collections.Generic;
 public class TextureCollection {
 
     public string textureName;
-
     bool usesConnectedTextures = false;
-
-    Dictionary<int, Rect> connectedTextures = new Dictionary<int, Rect>();
-
+    Rect[] connectedTextures = new Rect[48];
     List<Rect> textures = new List<Rect>();
 
     public TextureCollection(string name)
@@ -19,13 +16,8 @@ public class TextureCollection {
     public void AddTexture (Rect texture, int connectedTextureType) {
         if (connectedTextureType != -1)
         {
-            //usesConnectedTextures = true;
-            //connectedTextures.Add(connectedTextureType, texture);
-
-            //if (connectedTextures[-2] != new Rect() && connectedTextures[-3] != new Rect())
-            //{
-            //    GenerateConnectedTextures();
-            //}
+            usesConnectedTextures = true;
+            connectedTextures[connectedTextureType] = texture;
         }
         else
         {
@@ -33,16 +25,23 @@ public class TextureCollection {
         }
     }
 
-    void GenerateConnectedTextures()
-    {
-
-    }
-
-    public Rect GetTexture(Chunk chunk, BlockPos pos)
+    public Rect GetTexture(Chunk chunk, BlockPos pos, Direction direction)
     {
         if (usesConnectedTextures)
         {
-            return new Rect();
+            string blockName = chunk.GetBlock(pos).controller.Name();
+
+            bool wn = ConnectedTextures.IsSame(chunk, pos, -1, 1, direction, blockName);
+            bool n = ConnectedTextures.IsSame(chunk, pos, 0, 1, direction, blockName);
+            bool ne = ConnectedTextures.IsSame(chunk, pos, 1, 1, direction, blockName);
+            bool w = ConnectedTextures.IsSame(chunk, pos, -1, 0, direction, blockName);
+            bool e = ConnectedTextures.IsSame(chunk, pos, 1, 0, direction, blockName);
+            bool es = ConnectedTextures.IsSame(chunk, pos, 1, -1, direction, blockName);
+            bool s = ConnectedTextures.IsSame(chunk, pos, 0, -1, direction, blockName);
+            bool sw = ConnectedTextures.IsSame(chunk, pos, -1, -1, direction, blockName);
+
+            return connectedTextures[ConnectedTextures.GetTexture(n, e, s, w, wn, ne, es, sw)];
+            
         }
 
         if (textures.Count == 1)
@@ -64,5 +63,7 @@ public class TextureCollection {
         Debug.LogError("There were no textures for " + textureName);
         return new Rect();
     }
+
+    
 
 }
