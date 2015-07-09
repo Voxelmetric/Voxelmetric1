@@ -26,6 +26,9 @@
 
 //For more information, please refer to <http://unlicense.org/>
 
+// Some changes made by Alexander Stavrinou to support generating a
+// permutation array from a seed. 
+using System;
 
 namespace SimplexNoise
 {
@@ -36,13 +39,43 @@ namespace SimplexNoise
     /// </summary>
     public class Noise
     {
+        public Noise(string seed)
+        {
+            //Seed Voxelmetric uses the default world
+            if (seed == "Voxelmetric")
+                return;
+
+            Random random = new Random(seed.GetHashCode());
+            for (int i = 0; i < 256 - 1; i += 1)
+            {
+                int swapIndex = random.Next(i, 256);
+                if (swapIndex != i)
+                {
+                    byte temp = perm[i];
+
+                    perm[i] = perm[swapIndex];
+                    perm[swapIndex] = temp;
+                }
+            }
+
+            for (int i = 0; i < 256; i++)
+            {
+                perm[i+256] = perm[i];
+            }
+
+        }
+
+        public Noise() { }
+
         /// <summary>
         /// 1D simplex noise
         /// </summary>
         /// <param name="x"></param>
         /// <returns></returns>
-        public static float Generate(float x)
+        public float Generate(float x)
         {
+            var perm = new byte[0];
+
             int i0 = FastFloor(x);
             int i1 = i0 + 1;
             float x0 = x - i0;
@@ -68,8 +101,9 @@ namespace SimplexNoise
         /// <param name="x"></param>
         /// <param name="y"></param>
         /// <returns></returns>
-        public static float Generate(float x, float y)
+        public float Generate(float x, float y)
         {
+            var perm = new byte[0];
             const float F2 = 0.366025403f; // F2 = 0.5*(sqrt(3.0)-1.0)
             const float G2 = 0.211324865f; // G2 = (3.0-Math.sqrt(3.0))/6.0
 
@@ -138,7 +172,7 @@ namespace SimplexNoise
         }
 
 
-        public static float Generate(float x, float y, float z)
+        public float Generate(float x, float y, float z)
         {
             // Simple skewing factors for the 3D case
             const float F3 = 0.333333333f;
@@ -241,7 +275,7 @@ namespace SimplexNoise
             return 32.0f * (n0 + n1 + n2 + n3); // TODO: The scale factor is preliminary!
         }
 
-        public static byte[] perm = new byte[512] { 151,160,137,91,90,15,
+        public byte[] perm = new byte[512] { 151,160,137,91,90,15,
               131,13,201,95,96,53,194,233,7,225,140,36,103,30,69,142,8,99,37,240,21,10,23,
               190, 6,148,247,120,234,75,0,26,197,62,94,252,219,203,117,35,11,32,57,177,33,
               88,237,149,56,87,174,20,125,136,171,168, 68,175,74,165,71,134,139,48,27,166,
@@ -266,7 +300,7 @@ namespace SimplexNoise
               129,22,39,253, 19,98,108,110,79,113,224,232,178,185, 112,104,218,246,97,228,
               251,34,242,193,238,210,144,12,191,179,162,241, 81,51,145,235,249,14,239,107,
               49,192,214, 31,181,199,106,157,184, 84,204,176,115,121,50,45,127, 4,150,254,
-              138,236,205,93,222,114,67,29,24,72,243,141,128,195,78,66,215,61,156,180 
+              138,236,205,93,222,114,67,29,24,72,243,141,128,195,78,66,215,61,156,180
             };
 
         private static int FastFloor(float x)

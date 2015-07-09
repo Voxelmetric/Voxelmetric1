@@ -1,19 +1,24 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
+using SimplexNoise;
 
-public class TextureCollection {
+public class TextureCollection
+{
 
     public string textureName;
     bool usesConnectedTextures = false;
     Rect[] connectedTextures = new Rect[48];
     List<Rect> textures = new List<Rect>();
+    Noise noiseGen;
 
     public TextureCollection(string name)
     {
         textureName = name;
+        noiseGen = new Noise();
     }
 
-    public void AddTexture (Rect texture, int connectedTextureType) {
+    public void AddTexture(Rect texture, int connectedTextureType)
+    {
         if (connectedTextureType != -1)
         {
             usesConnectedTextures = true;
@@ -41,7 +46,7 @@ public class TextureCollection {
             bool sw = ConnectedTextures.IsSame(chunk, pos, -1, -1, direction, blockName);
 
             return connectedTextures[ConnectedTextures.GetTexture(n, e, s, w, wn, ne, es, sw)];
-            
+
         }
 
         if (textures.Count == 1)
@@ -51,7 +56,7 @@ public class TextureCollection {
 
         if (textures.Count > 1)
         {
-            float randomNumber = SimplexNoise.Noise.Generate(pos.x, pos.y, pos.z);
+            float randomNumber = noiseGen.Generate(pos.x, pos.y, pos.z);
             randomNumber += 1;
             randomNumber /= 2;
             randomNumber *= textures.Count;
@@ -64,6 +69,6 @@ public class TextureCollection {
         return new Rect();
     }
 
-    
+
 
 }

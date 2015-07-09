@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Threading;
 using System.Collections.Generic;
+using SimplexNoise;
 
 public class World : MonoBehaviour {
 
@@ -22,12 +23,14 @@ public class World : MonoBehaviour {
 
     //This world name is used for the save file name
     public string worldName = "world";
+    Noise noiseGen;
 
     void Start()
     {
         //Makes the block index fetch all the BlockDefinition components
         //on this gameobject and add them to the index
         Block.index.GetMissingDefinitions();
+        noiseGen = new Noise(worldName);
     }
 
     /// <summary>
@@ -93,7 +96,7 @@ public class World : MonoBehaviour {
     /// <param name="chunk"></param>
     protected virtual void GenerateChunk (Chunk chunk)
     {
-        var terrainGen = new TerrainGen();
+        var terrainGen = new TerrainGen(noiseGen);
         terrainGen.ChunkGen(chunk);
 
         

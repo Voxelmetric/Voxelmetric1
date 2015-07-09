@@ -5,6 +5,13 @@ using SimplexNoise;
 public class TerrainGen
 {
 
+    public TerrainGen(Noise noise)
+    {
+        noiseGen = noise;
+    }
+
+    Noise noiseGen;
+
     protected int stoneBaseHeight = -20;
     protected float stoneBaseNoise = 0.03f;
     protected int stoneBaseNoiseHeight = 10;
@@ -111,9 +118,9 @@ public class TerrainGen
         }
     }
 
-    public static int GetNoise(int x, int y, int z, float scale, int max, float power)
+    public int GetNoise(int x, int y, int z, float scale, int max, float power)
     {
-        float noise = (Noise.Generate(x * scale, y * scale, z * scale) + 1f) * (max / 2f);
+        float noise = (noiseGen.Generate(x * scale, y * scale, z * scale) + 1f) * (max / 2f);
 
         noise = Mathf.Pow(noise, power);
 
@@ -131,7 +138,7 @@ public class TerrainGen
 
             if (StructureTree.ChunkContains(chunk, new BlockPos(x + chunk.pos.x, terrainHeight, z + chunk.pos.z)))
             {
-                StructureTree.Build(chunk, new BlockPos(x, terrainHeight - chunk.pos.y, z));
+                StructureTree.Build(chunk, new BlockPos(x, terrainHeight - chunk.pos.y, z), this);
             }
         }
     }
