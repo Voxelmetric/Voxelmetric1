@@ -1,10 +1,10 @@
 ﻿using UnityEngine;
-using System.Collections;
+using SimplexNoise;
 
 public class StructureTree {
-    public static void Build(Chunk chunk, BlockPos pos)
+    public static void Build(Chunk chunk, BlockPos pos, TerrainGen terrainGen)
     {
-        int leaves =TerrainGen.GetNoise(pos.x + chunk.pos.x, 0, pos.z + chunk.pos.z, 1f, 2, 1) +1;
+        int leaves = terrainGen.GetNoise(pos.x + chunk.pos.x, 0, pos.z + chunk.pos.z, 1f, 2, 1) +1;
 
         for (int x = -leaves; x <= leaves; x++)
         {

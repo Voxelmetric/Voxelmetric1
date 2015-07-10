@@ -122,41 +122,42 @@ public static class BlockBuilder
         AddColors(meshData, wnSolid, nSolid, neSolid, eSolid, esSolid, sSolid, swSolid, wSolid, light);
     }
 
-    public static void BuildTexture(Chunk chunk, BlockPos pos, MeshData meshData, Direction direction, Tile tilePos)
+    public static void BuildTexture(Chunk chunk, BlockPos pos, MeshData meshData, Direction direction, TextureCollection textureCollection)
     {
+        Rect texture = textureCollection.GetTexture(chunk, pos, direction);
         Vector2[] UVs = new Vector2[4];
 
-        UVs[0] = new Vector2(Config.Env.TileSize * tilePos.x + Config.Env.TileSize, Config.Env.TileSize * tilePos.y);
-        UVs[1] = new Vector2(Config.Env.TileSize * tilePos.x + Config.Env.TileSize, Config.Env.TileSize * tilePos.y + Config.Env.TileSize);
-        UVs[2] = new Vector2(Config.Env.TileSize * tilePos.x, Config.Env.TileSize * tilePos.y + Config.Env.TileSize);
-        UVs[3] = new Vector2(Config.Env.TileSize * tilePos.x, Config.Env.TileSize * tilePos.y);
+        UVs[0] = new Vector2(texture.x + texture.width, texture.y);
+        UVs[1] = new Vector2(texture.x + texture.width, texture.y + texture.height);
+        UVs[2] = new Vector2(texture.x, texture.y + texture.height);
+        UVs[3] = new Vector2(texture.x, texture.y);
 
         meshData.uv.AddRange(UVs);
     }
 
-    public static void BuildTexture(Chunk chunk, BlockPos pos, MeshData meshData, Direction direction, Tile[] tiles)
+    public static void BuildTexture(Chunk chunk, BlockPos pos, MeshData meshData, Direction direction, TextureCollection[] textureCollections)
     {
-        Tile tilePos = new Tile();
+        Rect texture = new Rect();
 
         switch (direction)
         {
             case Direction.up:
-                tilePos = tiles[0];
+                texture = textureCollections[0].GetTexture(chunk, pos, direction);
                 break;
             case Direction.down:
-                tilePos = tiles[1];
+                texture = textureCollections[1].GetTexture(chunk, pos, direction);
                 break;
             case Direction.north:
-                tilePos = tiles[2];
+                texture = textureCollections[2].GetTexture(chunk, pos, direction);
                 break;
             case Direction.east:
-                tilePos = tiles[3];
+                texture = textureCollections[3].GetTexture(chunk, pos, direction);
                 break;
             case Direction.south:
-                tilePos = tiles[4];
+                texture = textureCollections[4].GetTexture(chunk, pos, direction);
                 break;
             case Direction.west:
-                tilePos = tiles[5];
+                texture = textureCollections[5].GetTexture(chunk, pos, direction);
                 break;
             default:
                 break;
@@ -164,10 +165,10 @@ public static class BlockBuilder
 
         Vector2[] UVs = new Vector2[4];
 
-        UVs[0] = new Vector2(Config.Env.TileSize * tilePos.x + Config.Env.TileSize, Config.Env.TileSize * tilePos.y);
-        UVs[1] = new Vector2(Config.Env.TileSize * tilePos.x + Config.Env.TileSize, Config.Env.TileSize * tilePos.y + Config.Env.TileSize);
-        UVs[2] = new Vector2(Config.Env.TileSize * tilePos.x, Config.Env.TileSize * tilePos.y + Config.Env.TileSize);
-        UVs[3] = new Vector2(Config.Env.TileSize * tilePos.x, Config.Env.TileSize * tilePos.y);
+        UVs[0] = new Vector2(texture.x + texture.width, texture.y);
+        UVs[1] = new Vector2(texture.x + texture.width, texture.y + texture.height);
+        UVs[2] = new Vector2(texture.x, texture.y + texture.height);
+        UVs[3] = new Vector2(texture.x, texture.y);
 
         meshData.uv.AddRange(UVs);
     }

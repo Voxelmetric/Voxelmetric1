@@ -1,17 +1,17 @@
 fileFormatVersion: 2
-guid: a47a4332c1c7c6a4493b185dc99d53e9
-timeCreated: 1434885437
+guid: cff7141e7c83e7d4a8f9174acaf8663b
+timeCreated: 1435874161
 licenseType: Free
 ModelImporter:
   serializedVersion: 18
   fileIDToRecycleName:
-    100000: Box001
+    100000: pyramid
     100002: //RootNode
-    400000: Box001
+    400000: pyramid
     400002: //RootNode
-    2300000: Box001
-    3300000: Box001
-    4300000: Box001
+    2300000: pyramid
+    3300000: pyramid
+    4300000: pyramid
   materials:
     importMaterials: 1
     materialName: 0
