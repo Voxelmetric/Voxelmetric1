@@ -23,6 +23,16 @@ public class BlockController
 
     public virtual byte LightEmmitted() { return 0; }
 
+    /// <summary>
+    /// Returns true if the block can be used as a possible path for path finding
+    /// </summary>
+    public virtual bool CanBeWalkedOn(Block block) { return false; }
+
+    /// <summary>
+    /// Returns true if the block does not block entities in path finding
+    /// </summary>
+    public virtual bool CanBeWalkedThrough(Block block) { return true; }
+
     public virtual void OnCreate(Chunk chunk, BlockPos pos, Block block) { }
 
     public virtual void PreRender(Chunk chunk, BlockPos pos, Block block) { }

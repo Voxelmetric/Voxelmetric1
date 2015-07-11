@@ -35,4 +35,8 @@ public class BlockSolid : BlockController
     public override string Name() { return "solid"; }
 
     public override bool IsSolid(Direction direction) { return true; }
+
+    public override bool CanBeWalkedOn(Block block) { return true; }
+
+    public override bool CanBeWalkedThrough(Block block) { return false; }
 }

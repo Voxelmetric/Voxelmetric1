@@ -1,11 +1,8 @@
 ﻿using UnityEngine;
-using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
+using System.Threading;
 
 public class PathFinder {
-
-    static int characterHeight = 2;
 
     World world;
     Dictionary<BlockPos, Heuristics> open = new Dictionary<BlockPos, Heuristics>();
@@ -13,11 +10,10 @@ public class PathFinder {
 
     public List<BlockPos> path = new List<BlockPos>();
 
-    public BlockPos targetLocation;
+    BlockPos targetLocation;
     BlockPos startLocation;
 
-    public bool complete = false;
-    public bool noRoute = false;
+    int entityHeight;
 
     public float range = 2;
     float distanceFromStartToTarget = 0;
@@ -41,29 +37,39 @@ public class PathFinder {
         }
     };
 
-    public PathFinder() { }
-
-    public void Start(BlockPos start, BlockPos target, World world)
+    public PathFinder(BlockPos startLocation, BlockPos targetLocation, World world, int entityHeight=2)
     {
-        open.Clear();
-        closed.Clear();
-
-        startLocation = start;
-        targetLocation = target;
+        this.startLocation = startLocation;
+        this.targetLocation = targetLocation;
+        distanceFromStartToTarget = Distance(startLocation, targetLocation);
         this.world = world;
+        this.entityHeight = entityHeight;
 
-        path.Clear();
+        open.Add(startLocation, new Heuristics(0, distanceFromStartToTarget, startLocation));
 
-        open.Add(start, new Heuristics(0,Distance(start, target), start));
-        complete = false;
-        noRoute = false;
-
-        distanceFromStartToTarget = Distance(start, target);
+        if (Config.Toggle.UseMultiThreading)
+        {
+            Thread thread = new Thread(() =>
+           {
+               while (path.Count == 0)
+               {
+                   update();
+               }
+           });
+            thread.Start();
+        }
+        else
+        {
+            while (path.Count == 0)
+            {
+                update();
+            }
+        }
     }
 
     public void update()
     {
-        if (!complete)
+        if (path.Count == 0)
         {
             ProcessBest();
         }
@@ -71,8 +77,6 @@ public class PathFinder {
 
     void PathComplete(BlockPos lastTile)
     {
-        complete = true;
-
         Heuristics pos;
         closed.TryGetValue(lastTile, out pos);
         path.Clear();
@@ -83,17 +87,9 @@ public class PathFinder {
         while (!pos.parent.Equals(startLocation))
         {
             path.Insert(0, pos.parent);
-            var startPos = pos.parent;
             if (!closed.TryGetValue(pos.parent, out pos))
                 break;
-
-            Debug.DrawLine(new Vector3(pos.parent.x, pos.parent.y + 1, pos.parent.z),
-            new Vector3(startPos.x, startPos.y + 1, startPos.z), Color.blue, 40);
-
         }
-
-        open.Clear();
-        closed.Clear();
     }
 
     void ProcessBest()
@@ -112,8 +108,6 @@ public class PathFinder {
 
         Heuristics parent;
         open.TryGetValue(bestPos, out parent);
-        Debug.DrawLine(new Vector3(parent.parent.x, parent.parent.y + 1, parent.parent.z),
-            new Vector3(bestPos.x, bestPos.y + 1, bestPos.z), Color.blue, 40);
 
         if (Distance(((Vector3)bestPos) + (Vector3.up*2), targetLocation) <= range)
         {
@@ -123,15 +117,18 @@ public class PathFinder {
 
         if (bestPos.Equals(new BlockPos(0, 10000, 0)))
         {
-            noRoute = true;
             Debug.Log("Failed to pf " + targetLocation.x + ", " + targetLocation.y + ", " + targetLocation.z);
-            complete = true;
-            path.Clear();
-            path.Add(startLocation);
+            bestPos = new BlockPos(0,10000,0);
 
-            open.Clear();
-            closed.Clear();
-            return;
+            foreach (var tile in open)
+            {
+                if (tile.Value.g + tile.Value.h < shortestDist)
+                {
+                    bestPos = tile.Key;
+                    shortestDist = tile.Value.g + tile.Value.h;
+                }
+            }
+            PathComplete(bestPos);
         }
 
         ProcessTile(bestPos);
@@ -144,9 +141,6 @@ public class PathFinder {
 
         if (!exists)
             return;
-
-        Debug.DrawLine(new Vector3(h.parent.x, h.parent.y + 1, h.parent.z),
-                new Vector3(pos.x, pos.y + 1, pos.z), Color.red, 40);
 
         open.Remove(pos);
         closed.Add(pos, h);
@@ -231,14 +225,21 @@ public class PathFinder {
 
     }
 
-    public static bool IsWalkable(World world, BlockPos pos)
+    public bool IsWalkable(World world, BlockPos pos)
     {
-        if(!world.GetBlock(pos).controller.IsSolid(Direction.up))
+        Block block = world.GetBlock(pos);
+
+        if (!block.controller.CanBeWalkedOn(block))
             return false;
 
-        for(int y = 1; y< characterHeight+1; y++){
-            if (world.GetBlock(pos.Add(0,y,0)).GetType() != typeof(BlockAir))
+        for (int y = 1; y < entityHeight + 1; y++)
+        {
+            block = world.GetBlock(pos.Add(0, y, 0));
+
+            if (!block.controller.CanBeWalkedThrough(block))
+            {
                 return false;
+            }
         }
 
         return true;

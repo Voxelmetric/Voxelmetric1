@@ -9,6 +9,10 @@ public class VoxelmetricExample : MonoBehaviour
     public Text selectedBlockText;
     public Text saveProgressText;
 
+    BlockPos pfStart;
+    BlockPos pfStop;
+    public PathFinder pf;
+
     SaveProgress saveProgress;
 
     public void SetType(string newType){
@@ -59,6 +63,34 @@ public class VoxelmetricExample : MonoBehaviour
         else
         {
             saveProgressText.text = "Save";
+        }
+
+        if (Input.GetKeyDown(KeyCode.I))
+        {
+            if (Physics.Raycast(Camera.main.transform.position, mousePos - Camera.main.transform.position, out hit, 100))
+            {
+                pfStart = Voxelmetric.GetBlockPos(hit);
+            }
+        }
+
+        if (Input.GetKeyDown(KeyCode.O))
+        {
+            if (Physics.Raycast(Camera.main.transform.position, mousePos - Camera.main.transform.position, out hit, 100))
+            {
+                pfStop = Voxelmetric.GetBlockPos(hit);
+            }
+        }
+
+        if (Input.GetKeyDown(KeyCode.P))
+        {
+             pf = new PathFinder(pfStart, pfStop, World.instance, 2);
+            Debug.Log(pf.path.Count);
+        }
+
+        if (pf!=null && pf.path.Count != 0)
+        {
+            for (int i = 0; i < pf.path.Count - 1; i++)
+                Debug.DrawLine(pf.path[i].Add(0,1,0), pf.path[i + 1].Add(0,1,0));
         }
     }
 
