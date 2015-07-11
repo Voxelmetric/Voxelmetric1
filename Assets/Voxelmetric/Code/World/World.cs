@@ -20,6 +20,7 @@ public class World : MonoBehaviour {
 
     public Dictionary<BlockPos, Chunk> chunks = new Dictionary<BlockPos, Chunk>();
     public GameObject chunkPrefab;
+    List<GameObject> chunkPool = new List<GameObject>();
 
     //This world name is used for the save file name
     public string worldName = "world";
@@ -40,10 +41,23 @@ public class World : MonoBehaviour {
     /// <param name="pos">The world position to create this chunk.</param>
     public void CreateChunk(BlockPos pos)
     {
-        GameObject newChunkObject = Instantiate(
-                        chunkPrefab, pos,
-                        Quaternion.Euler(Vector3.zero)
-                    ) as GameObject;
+        GameObject newChunkObject;
+        if (chunkPool.Count == 0)
+        {
+            //No chunks in pool, create new
+            newChunkObject = Instantiate(
+                            chunkPrefab, pos,
+                            Quaternion.Euler(Vector3.zero)
+                        ) as GameObject;
+        }
+        else
+        {
+            //Load a chunk from the pool
+            newChunkObject = chunkPool[0];
+            chunkPool.RemoveAt(0);
+            newChunkObject.SetActive(true);
+            newChunkObject.transform.position= pos;
+        }
 
         newChunkObject.transform.parent = gameObject.transform;
         newChunkObject.transform.name = "Chunk (" + pos + ")";
@@ -127,6 +141,12 @@ public class World : MonoBehaviour {
 
             chunks.Remove(pos);
         }
+    }
+
+    public void AddToChunkPool(GameObject chunk)
+    {
+        chunk.SetActive(false);
+        chunkPool.Add(chunk);
     }
 
     /// <summary>

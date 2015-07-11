@@ -34,9 +34,9 @@ public class Chunk : MonoBehaviour
 
     void Update()
     {
-        if (markedForDeletion)
+        if (markedForDeletion && !busy)
         {
-            Destroy(gameObject);
+            ReturnChunkToPool();
         }
 
         if (meshReady)
@@ -217,6 +217,27 @@ public class Chunk : MonoBehaviour
     public bool IsMarkedForDeletion()
     {
         return markedForDeletion;
+    }
+
+    void ReturnChunkToPool()
+    {
+        meshReady = false;
+        busy = false;
+        loaded = false;
+        terrainGenerated = false;
+        markedForDeletion = false;
+        queuedForUpdate = false;
+
+        if (filter.mesh)
+            filter.mesh.Clear();
+
+        if (coll.sharedMesh)
+            coll.sharedMesh.Clear();
+
+        blocks = new Block[Config.Env.ChunkSize, Config.Env.ChunkSize, Config.Env.ChunkSize];
+        meshData = new MeshData();
+
+        world.AddToChunkPool(gameObject);
     }
 
 }
