@@ -5,12 +5,9 @@ namespace Config
     public static class Env
     {
         public static int ChunkLoadRadius = 8; //how many chunks to load in each direction
-        public static float TileSize = 0.125f; // (1/8) for a tile sheet of 8 x 8 tiles
         public static int ChunkSize = 16;
         public static int WorldMaxY = 64;
         public static int WorldMinY = -64;
-
-        public static int ChunksToLoad = Data.chunkLoadOrder.Length;
 
         public static float BlockSize = 1f;
 
