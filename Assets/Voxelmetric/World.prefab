@@ -1,5 +1,28 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
+--- !u!1 &100940
+GameObject:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  serializedVersion: 4
+  m_Component:
+  - 4: {fileID: 487888}
+  - 114: {fileID: 11429476}
+  - 114: {fileID: 11408784}
+  - 114: {fileID: 11483332}
+  - 114: {fileID: 11467392}
+  - 114: {fileID: 11403236}
+  - 114: {fileID: 11477496}
+  - 114: {fileID: 11447936}
+  - 114: {fileID: 11433488}
+  m_Layer: 0
+  m_Name: Block Types
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
 --- !u!1 &104736
 GameObject:
   m_ObjectHideFlags: 0
@@ -9,14 +32,7 @@ GameObject:
   m_Component:
   - 4: {fileID: 479208}
   - 114: {fileID: 11498696}
-  - 114: {fileID: 11431488}
-  - 114: {fileID: 11468352}
-  - 114: {fileID: 11445694}
-  - 114: {fileID: 11495782}
-  - 114: {fileID: 11467390}
-  - 114: {fileID: 11411728}
-  - 114: {fileID: 11401272}
-  - 114: {fileID: 11430792}
+  - 114: {fileID: 11456570}
   m_Layer: 0
   m_Name: World
   m_TagString: Untagged
@@ -24,6 +40,41 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
+--- !u!1 &184620
+GameObject:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  serializedVersion: 4
+  m_Component:
+  - 4: {fileID: 410382}
+  - 114: {fileID: 11413014}
+  - 114: {fileID: 11418280}
+  - 114: {fileID: 11438196}
+  - 114: {fileID: 11460328}
+  - 114: {fileID: 11403132}
+  - 114: {fileID: 11478306}
+  - 114: {fileID: 11446294}
+  - 114: {fileID: 11483074}
+  m_Layer: 0
+  m_Name: Terrain Layers
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &410382
+Transform:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 184620}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 479208}
+  m_RootOrder: 1
 --- !u!4 &479208
 Transform:
   m_ObjectHideFlags: 1
@@ -33,35 +84,51 @@ Transform:
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
-  m_Children: []
+  m_Children:
+  - {fileID: 487888}
+  - {fileID: 410382}
   m_Father: {fileID: 0}
   m_RootOrder: 0
---- !u!114 &11401272
+--- !u!4 &487888
+Transform:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 100940}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 479208}
+  m_RootOrder: 0
+--- !u!114 &11403132
 MonoBehaviour:
   m_ObjectHideFlags: 1
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 104736}
+  m_GameObject: {fileID: 184620}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3bb4cdcfcb8373f419fe96608ee3594c, type: 3}
+  m_Script: {fileID: 11500000, guid: 1dc11f3ebdfd3c34b906c66aa7868fb4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  blockName: cube
-  textures:
-  - {x: 0, y: 0}
-  - {x: 1, y: 0}
-  - {x: 0, y: 1}
-  - {x: 2, y: 2}
-  - {x: 1, y: 2}
-  - {x: 0, y: 2}
-  blockIsSolid: 1
---- !u!114 &11411728
+  layerType: 0
+  layerName: DirtBase1
+  baseHeight: 42
+  frequency: 16
+  amplitude: 4
+  exponent: 1
+  blockName: dirt
+  percentage: 90
+  structureFrequency: 10
+  structureClassName: StructureTree
+  world: {fileID: 0}
+--- !u!114 &11403236
 MonoBehaviour:
   m_ObjectHideFlags: 1
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 104736}
+  m_GameObject: {fileID: 100940}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 3bb4cdcfcb8373f419fe96608ee3594c, type: 3}
@@ -69,105 +136,19 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   blockName: leaves
   textures:
-  - {x: 0, y: 1}
-  - {x: 0, y: 1}
-  - {x: 0, y: 1}
-  - {x: 0, y: 1}
-  - {x: 0, y: 1}
-  - {x: 0, y: 1}
+  - leaves
+  - leaves
+  - leaves
+  - leaves
+  - leaves
+  - leaves
   blockIsSolid: 0
---- !u!114 &11430792
+--- !u!114 &11408784
 MonoBehaviour:
   m_ObjectHideFlags: 1
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 104736}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e72bf131f107a3a499bcb6f27d901d00, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  meshAssetName: pyramid.obj
-  blockName: pyramid
-  positionOffset: {x: 0, y: -.5, z: 0}
-  verts:
-  - {x: -.438329995, y: -.5, z: -.404650033}
-  - {x: .435420007, y: -.5, z: .42245999}
-  - {x: -.438329995, y: -.5, z: .42245999}
-  - {x: .435420007, y: -.5, z: -.404650033}
-  - {x: -.0778599977, y: .283580005, z: -.107260004}
-  - {x: .0838700011, y: .283580005, z: .101000004}
-  - {x: .100060001, y: .283580005, z: -.0962000042}
-  - {x: -.0579000004, y: .283580005, z: .110889994}
-  - {x: -.0579000004, y: .283580005, z: .110889994}
-  - {x: .435420007, y: -.5, z: .42245999}
-  - {x: .0838700011, y: .283580005, z: .101000004}
-  - {x: -.438329995, y: -.5, z: .42245999}
-  - {x: -.0778599977, y: .283580005, z: -.107260004}
-  - {x: -.438329995, y: -.5, z: .42245999}
-  - {x: -.0579000004, y: .283580005, z: .110889994}
-  - {x: -.438329995, y: -.5, z: -.404650033}
-  - {x: .100060001, y: .283580005, z: -.0962000042}
-  - {x: -.438329995, y: -.5, z: -.404650033}
-  - {x: -.0778599977, y: .283580005, z: -.107260004}
-  - {x: .435420007, y: -.5, z: -.404650033}
-  - {x: .0838700011, y: .283580005, z: .101000004}
-  - {x: .435420007, y: -.5, z: -.404650033}
-  - {x: .100060001, y: .283580005, z: -.0962000042}
-  - {x: .435420007, y: -.5, z: .42245999}
-  tris: 00000000010000000200000001000000000000000300000004000000050000000600000005000000040000000700000008000000090000000a00000009000000080000000b0000000c0000000d0000000e0000000d0000000c0000000f000000100000001100000012000000110000001000000013000000140000001500000016000000150000001400000017000000
-  uvs:
-  - {x: .127499998, y: .125200003}
-  - {x: .242500007, y: .0163000003}
-  - {x: .127499998, y: .0163000003}
-  - {x: .242500007, y: .125200003}
-  - {x: .370700002, y: .0511999987}
-  - {x: .291599989, y: .1175}
-  - {x: .368999988, y: .120899998}
-  - {x: .285699993, y: .0621999986}
-  - {x: .273000002, y: .170699999}
-  - {x: .465900004, y: .477299988}
-  - {x: .328399986, y: .170699999}
-  - {x: .1241, y: .477299988}
-  - {x: .238399997, y: .171800002}
-  - {x: .445600003, y: .478399992}
-  - {x: .323700011, y: .171800002}
-  - {x: .122100003, y: .478399992}
-  - {x: .170000002, y: .171800002}
-  - {x: .380600005, y: .478399992}
-  - {x: .239600003, y: .171800002}
-  - {x: .0388999991, y: .478399992}
-  - {x: .423299998, y: .243000001}
-  - {x: .0926000029, y: .396899998}
-  - {x: .412699997, y: .319400012}
-  - {x: .136899993, y: .0763999969}
-  build: 0
---- !u!114 &11431488
-MonoBehaviour:
-  m_ObjectHideFlags: 1
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 104736}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3bb4cdcfcb8373f419fe96608ee3594c, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  blockName: stone
-  textures:
-  - {x: 0, y: 0}
-  - {x: 0, y: 0}
-  - {x: 0, y: 0}
-  - {x: 0, y: 0}
-  - {x: 0, y: 0}
-  - {x: 0, y: 0}
-  blockIsSolid: 1
---- !u!114 &11445694
-MonoBehaviour:
-  m_ObjectHideFlags: 1
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 104736}
+  m_GameObject: {fileID: 100940}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 3bb4cdcfcb8373f419fe96608ee3594c, type: 3}
@@ -175,19 +156,208 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   blockName: dirt
   textures:
-  - {x: 1, y: 0}
-  - {x: 1, y: 0}
-  - {x: 1, y: 0}
-  - {x: 1, y: 0}
-  - {x: 1, y: 0}
-  - {x: 1, y: 0}
+  - dirt
+  - dirt
+  - dirt
+  - dirt
+  - dirt
+  - dirt
   blockIsSolid: 1
---- !u!114 &11467390
+--- !u!114 &11413014
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 184620}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1dc11f3ebdfd3c34b906c66aa7868fb4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  layerType: 0
+  layerName: Base stone
+  baseHeight: 41
+  frequency: 26
+  amplitude: 6
+  exponent: 1
+  blockName: stone
+  percentage: 90
+  structureFrequency: 10
+  structureClassName: StructureTree
+  world: {fileID: 0}
+--- !u!114 &11418280
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 184620}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1dc11f3ebdfd3c34b906c66aa7868fb4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  layerType: 0
+  layerName: StoneMountains1
+  baseHeight: 1
+  frequency: 96
+  amplitude: 57
+  exponent: 1
+  blockName: stone
+  percentage: 90
+  structureFrequency: 10
+  structureClassName: StructureTree
+  world: {fileID: 0}
+--- !u!114 &11429476
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 100940}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ed375897bdcc7e64faaa1b5a85a2aa9b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  blockName: wildgrass
+  texture: wild_grass
+--- !u!114 &11433488
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 100940}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3bb4cdcfcb8373f419fe96608ee3594c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  blockName: stone
+  textures:
+  - stone
+  - stone
+  - stone
+  - stone
+  - stone
+  - stone
+  blockIsSolid: 1
+--- !u!114 &11438196
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 184620}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1dc11f3ebdfd3c34b906c66aa7868fb4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  layerType: 1
+  layerName: StoneMountains2
+  baseHeight: 4
+  frequency: 69
+  amplitude: 63
+  exponent: 1
+  blockName: stone
+  percentage: 90
+  structureFrequency: 9
+  structureClassName: StructureTree
+  world: {fileID: 0}
+--- !u!114 &11446294
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 184620}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1dc11f3ebdfd3c34b906c66aa7868fb4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  layerType: 2
+  layerName: Grass
+  baseHeight: 1
+  frequency: 1
+  amplitude: 1
+  exponent: 1
+  blockName: grass
+  percentage: 90
+  structureFrequency: 10
+  structureClassName: StructureTree
+  world: {fileID: 0}
+--- !u!114 &11447936
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 100940}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3bb4cdcfcb8373f419fe96608ee3594c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  blockName: connected
+  textures:
+  - connected
+  - connected
+  - connected
+  - connected
+  - connected
+  - connected
+  blockIsSolid: 1
+--- !u!114 &11456570
 MonoBehaviour:
   m_ObjectHideFlags: 1
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 104736}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 907a8e38596d0204db553b1e72d14b92, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  world: {fileID: 11498696}
+  temperatureScale: 100
+  drainageScale: 100
+  elevationScale: 100
+  rainfallScale: 100
+  percentageBiomePadding: .100000001
+  layerOrder:
+  - {fileID: 11413014}
+  - {fileID: 11418280}
+  - {fileID: 11438196}
+  - {fileID: 11460328}
+  - {fileID: 11403132}
+  - {fileID: 11478306}
+  - {fileID: 11446294}
+  - {fileID: 11483074}
+--- !u!114 &11460328
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 184620}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1dc11f3ebdfd3c34b906c66aa7868fb4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  layerType: 1
+  layerName: StoneNoise
+  baseHeight: 0
+  frequency: 7
+  amplitude: 3
+  exponent: 1
+  blockName: stone
+  percentage: 90
+  structureFrequency: 10
+  structureClassName: StructureTree
+  world: {fileID: 0}
+--- !u!114 &11467392
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 100940}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 3bb4cdcfcb8373f419fe96608ee3594c, type: 3}
@@ -195,32 +365,83 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   blockName: log
   textures:
-  - {x: 2, y: 1}
-  - {x: 2, y: 1}
-  - {x: 1, y: 1}
-  - {x: 1, y: 1}
-  - {x: 1, y: 1}
-  - {x: 1, y: 1}
+  - log_top
+  - log_top
+  - log_side
+  - log_side
+  - log_side
+  - log_side
   blockIsSolid: 1
---- !u!114 &11468352
+--- !u!114 &11477496
 MonoBehaviour:
   m_ObjectHideFlags: 1
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 104736}
+  m_GameObject: {fileID: 100940}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ed375897bdcc7e64faaa1b5a85a2aa9b, type: 3}
+  m_Script: {fileID: 11500000, guid: 3bb4cdcfcb8373f419fe96608ee3594c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  blockName: wildgrass
-  texture: {x: 4, y: 0}
---- !u!114 &11495782
+  blockName: cube
+  textures:
+  - log_top
+  - grass
+  - stone
+  - grass_side
+  - log_side
+  - stone
+  blockIsSolid: 1
+--- !u!114 &11478306
 MonoBehaviour:
   m_ObjectHideFlags: 1
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 104736}
+  m_GameObject: {fileID: 184620}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1dc11f3ebdfd3c34b906c66aa7868fb4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  layerType: 0
+  layerName: DirtBase2
+  baseHeight: 43
+  frequency: 9
+  amplitude: 6
+  exponent: 1
+  blockName: dirt
+  percentage: 90
+  structureFrequency: 10
+  structureClassName: StructureTree
+  world: {fileID: 0}
+--- !u!114 &11483074
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 184620}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1dc11f3ebdfd3c34b906c66aa7868fb4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  layerType: 3
+  layerName: Trees
+  baseHeight: 0
+  frequency: 10
+  amplitude: 10
+  exponent: 1
+  blockName: stone
+  percentage: 94
+  structureFrequency: 6
+  structureClassName: StructureTree
+  world: {fileID: 0}
+--- !u!114 &11483332
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 100940}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 3bb4cdcfcb8373f419fe96608ee3594c, type: 3}
@@ -228,12 +449,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   blockName: grass
   textures:
-  - {x: 2, y: 0}
-  - {x: 1, y: 0}
-  - {x: 3, y: 0}
-  - {x: 3, y: 0}
-  - {x: 3, y: 0}
-  - {x: 3, y: 0}
+  - grass_top
+  - dirt
+  - grass_side
+  - grass_side
+  - grass_side
+  - grass_side
   blockIsSolid: 1
 --- !u!114 &11498696
 MonoBehaviour:
