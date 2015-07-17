@@ -3,6 +3,7 @@ using System.Threading;
 using System.Collections.Generic;
 using SimplexNoise;
 
+[RequireComponent(typeof(TerrainGen))]
 public class World : MonoBehaviour {
 
     private static World _instance;
@@ -25,6 +26,7 @@ public class World : MonoBehaviour {
     //This world name is used for the save file name
     public string worldName = "world";
     Noise noiseGen;
+    TerrainGen terrainGen;
 
     void Start()
     {
@@ -32,6 +34,9 @@ public class World : MonoBehaviour {
         //on this gameobject and add them to the index
         Block.index.GetMissingDefinitions();
         noiseGen = new Noise(worldName);
+        terrainGen = gameObject.GetComponent<TerrainGen>();
+        terrainGen.noiseGen = noiseGen;
+        terrainGen.world = this;
     }
 
     /// <summary>
@@ -86,34 +91,20 @@ public class World : MonoBehaviour {
     ///the light for an empty chunk
     /// </summary>
     /// <param name="chunk">The chunk to generate and load for</param>
-    void GenAndLoadChunk(Chunk chunk)
+    protected virtual void GenAndLoadChunk(Chunk chunk)
     {
-        GenerateChunk(chunk); 
-
-        Serialization.Load(chunk);
-
-        if (Config.Toggle.LightSceneOnStart)
+        if (chunk.pos.y == Config.Env.WorldMaxY)
         {
-            if (chunk.pos.y == Config.Env.WorldMaxY)
-            {
+            terrainGen.GenerateTerrainForChunkColumn(chunk.pos);
+
+            for (int i = Config.Env.WorldMinY; i < Config.Env.WorldMaxY; i += Config.Env.ChunkSize)
+                Serialization.Load(GetChunk(new BlockPos(chunk.pos.x, i, chunk.pos.z)));
+
+            if (Config.Toggle.LightSceneOnStart)
                 BlockLight.ResetLightChunkColumn(this, chunk);
-            }
         }
 
         chunk.terrainGenerated = true;
-    }
-
-    /// <summary>
-    /// This is the code that generates the chunk. 
-    /// If using a different TerrainGen, override this class and call it here. 
-    /// </summary>
-    /// <param name="chunk"></param>
-    protected virtual void GenerateChunk (Chunk chunk)
-    {
-        var terrainGen = new TerrainGen(noiseGen);
-        terrainGen.ChunkGen(chunk);
-
-        
     }
 
     /// <summary>
@@ -135,7 +126,9 @@ public class World : MonoBehaviour {
             }
             else
             {
-                Serialization.SaveChunk(chunk);
+                if(chunk.chunkModified)
+                    Serialization.SaveChunk(chunk);
+
                 chunk.MarkForDeletion();
             }
 
@@ -189,7 +182,7 @@ public class World : MonoBehaviour {
         }
         else
         {
-            return Block.Air;
+            return "solid";
         }
 
     }

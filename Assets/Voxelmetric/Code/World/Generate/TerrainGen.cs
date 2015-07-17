@@ -1,144 +1,73 @@
 ﻿using UnityEngine;
-using System.Collections;
+using System.Collections.Generic;
 using SimplexNoise;
 
-public class TerrainGen
+public class TerrainGen: MonoBehaviour
 {
+    public Noise noiseGen;
+    public World world;
 
-    public TerrainGen(Noise noise)
+    public int temperatureScale = 100;
+    public int drainageScale = 100;
+    public int elevationScale = 100;
+    public int rainfallScale = 100;
+
+    public float percentageBiomePadding= 0.1f;
+
+    public TerrainLayer[] layerOrder = new TerrainLayer[0];
+
+    void Start()
     {
-        noiseGen = noise;
     }
 
-    Noise noiseGen;
-
-    protected int stoneBaseHeight = -20;
-    protected float stoneBaseNoise = 0.03f;
-    protected int stoneBaseNoiseHeight = 10;
-
-    protected int stoneMountainHeight = 10;
-    protected float stoneMountainFrequency = 0.008f;
-    protected int stoneMinHeight = 0;
-
-    protected int dirtBaseHeight = 1;
-    protected float dirtNoise = 0.04f;
-    protected int dirtNoiseHeight = 2;
-
-    public virtual void ChunkGen(Chunk chunk)
+    public void GenerateTerrainForChunkColumn(BlockPos pos)
     {
-
-
-        for (int x = 0; x < Config.Env.ChunkSize; x++)
+        for (int x = pos.x; x < pos.x + Config.Env.ChunkSize; x++)
         {
-            for (int z = 0; z < Config.Env.ChunkSize; z++)
+            for (int z = pos.z; z < pos.z + Config.Env.ChunkSize; z++)
             {
-                GenerateTerrain(chunk, x, z);
+                GenerateTerrainForBlockColumn(x, z);
             }
         }
 
-        for (int x = -3; x < Config.Env.ChunkSize +3; x++)
+        GenerateStructuresForChunk(pos);
+    }
+
+    public int GenerateTerrainForBlockColumn(int x, int z, bool justGetHeight = false)
+    {
+        int height = Config.Env.WorldMinY;
+        for (int i = 0; i < layerOrder.Length; i++)
         {
-            for (int z = -3; z < Config.Env.ChunkSize +3; z++)
+            if (layerOrder[i] == null)
             {
-                CreateTreeIfValid(x, z, chunk);
+                Debug.LogError("Layer name '" + layerOrder[i] + "' in layer order didn't match a valid layer");
+                continue;
+            }
+
+            if (layerOrder[i].noiseGen == null)
+            {
+                layerOrder[i].SetUpTerrainLayer(world, noiseGen);
+            }
+
+            if (layerOrder[i].layerType != TerrainLayer.LayerType.Structure)
+            {
+                height = layerOrder[i].GenerateLayer(x, z, height, 1, justGetHeight);
             }
         }
-
+        return height;
     }
 
-    protected virtual int LayerStoneBase(int x, int z)
+    public void GenerateStructuresForChunk(BlockPos chunkPos)
     {
-        int stoneHeight = stoneBaseHeight;
-        stoneHeight += GetNoise(x, 0, z, stoneMountainFrequency, stoneMountainHeight, 1.6f);
-        stoneHeight += GetNoise(x, 1000, z, 0.03f, 8, 1) * 2;
-
-        if (stoneHeight < stoneMinHeight)
-            return stoneMinHeight;
-
-        return stoneHeight; 
-    }
-
-    protected virtual int LayerStoneNoise(int x, int z)
-    {
-        return GetNoise(x, 0, z, stoneBaseNoise, stoneBaseNoiseHeight, 1);
-    }
-
-    protected virtual int LayerDirt(int x, int z)
-    {
-        int dirtHeight = dirtBaseHeight;
-        dirtHeight += GetNoise(x, 100, z, dirtNoise, dirtNoiseHeight, 1);
-       
-        return dirtHeight;
-    }
-
-    protected virtual void GenerateTerrain(Chunk chunk, int x, int z)
-    {
-        int stoneHeight = LayerStoneBase(chunk.pos.x + x, chunk.pos.z + z);
-        stoneHeight += LayerStoneNoise(chunk.pos.x + x, chunk.pos.z + z);
-
-        int dirtHeight = stoneHeight + LayerDirt(chunk.pos.x + x, chunk.pos.z + z);
-        //CreateTreeIfValid(x, z, chunk, dirtHeight);
-
-        for (int y = 0; y < Config.Env.ChunkSize; y++)
+        for (int i = 0; i < layerOrder.Length; i++)
         {
 
-            if (y + chunk.pos.y <= stoneHeight)
+            if (layerOrder[i] == null)
+                continue;
+
+            if (layerOrder[i].layerType == TerrainLayer.LayerType.Structure)
             {
-                SetBlock(chunk, "stone", new BlockPos(x, y, z));
-            }
-            else if (y + chunk.pos.y < dirtHeight)
-            {
-                SetBlock(chunk, "dirt", new BlockPos(x, y, z));
-            }
-            else if (y + chunk.pos.y == dirtHeight)
-            {
-                SetBlock(chunk, "grass", new BlockPos(x, y, z));
-            }
-            else if (y + chunk.pos.y == dirtHeight + 1 && GetNoise(x+chunk.pos.x, y + chunk.pos.y, z + chunk.pos.z, 10, 10, 1) > 5)
-            {
-                Block wildGrass = "wildgrass";
-                wildGrass.data2 = (byte)(GetNoise(x + chunk.pos.x, y + chunk.pos.y, z + chunk.pos.z, 1, 155, 1)+100);
-
-                SetBlock(chunk, wildGrass, new BlockPos(x, y, z));
-            }
-
-        }
-
-    }
-
-    public static void SetBlock(Chunk chunk, Block block, BlockPos pos, bool replaceBlocks = false)
-    {
-        if (Chunk.InRange(pos))
-        {
-            if (replaceBlocks || chunk.GetBlock(pos).type == Block.Air.type)
-            {
-                block.modified = false;
-                chunk.SetBlock(pos, block, false);
-            }
-        }
-    }
-
-    public int GetNoise(int x, int y, int z, float scale, int max, float power)
-    {
-        float noise = (noiseGen.Generate(x * scale, y * scale, z * scale) + 1f) * (max / 2f);
-
-        noise = Mathf.Pow(noise, power);
-
-        return Mathf.FloorToInt(noise);
-    }
-
-    void CreateTreeIfValid(int x, int z, Chunk chunk)
-    {
-        if (GetNoise(x + chunk.pos.x, 0, z + chunk.pos.z, 0.2f, 100, 1) < 3)
-        {
-            int terrainHeight = LayerStoneBase(x + chunk.pos.x, z + chunk.pos.z);
-            terrainHeight += LayerStoneNoise(x + chunk.pos.x, z + chunk.pos.z);
-            terrainHeight += LayerDirt(x + chunk.pos.x, z + chunk.pos.z); ;
-
-
-            if (StructureTree.ChunkContains(chunk, new BlockPos(x + chunk.pos.x, terrainHeight, z + chunk.pos.z)))
-            {
-                StructureTree.Build(chunk, new BlockPos(x, terrainHeight - chunk.pos.y, z), this);
+                layerOrder[i].GenerateStructures(chunkPos, this);
             }
         }
     }

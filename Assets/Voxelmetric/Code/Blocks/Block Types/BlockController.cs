@@ -40,5 +40,4 @@ public class BlockController
     public virtual void PostRender(Chunk chunk, BlockPos pos, Block block) { }
 
     public virtual void OnDestroy(Chunk chunk, BlockPos pos, Block block) { }
-
 }

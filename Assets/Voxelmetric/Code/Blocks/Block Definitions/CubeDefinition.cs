@@ -3,7 +3,6 @@ using System.Collections;
 
 public class CubeDefinition : BlockDefinition
 {
-    public string blockName;
     public string[] textures = new string[6];
 
     public bool blockIsSolid = true;
@@ -18,7 +17,15 @@ public class CubeDefinition : BlockDefinition
 
         for (int i = 0; i < 6; i++)
         {
-            textureCoordinates[i] = Block.index.textureIndex.GetTextureCollection(textures[i]);
+            try
+            {
+                textureCoordinates[i] = Block.index.textureIndex.GetTextureCollection(textures[i]);
+            }
+            catch
+            {
+                if (Application.isPlaying)
+                    Debug.LogError("Couldn't find texture for " + textures[i]);
+            }
         }
 
         controller.textures = textureCoordinates;

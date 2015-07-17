@@ -15,6 +15,7 @@ public class Chunk : MonoBehaviour
     public bool terrainGenerated = false;
     bool markedForDeletion = false;
     bool queuedForUpdate = false;
+    public bool chunkModified = false;
 
     MeshFilter filter;
     MeshCollider coll;
@@ -151,6 +152,9 @@ public class Chunk : MonoBehaviour
             blocks[blockPos.x, blockPos.y, blockPos.z] = block;
 
             blocks[blockPos.x, blockPos.y, blockPos.z].controller.OnCreate(this, blockPos + pos, blocks[blockPos.x, blockPos.y, blockPos.z]);
+
+            if (block.modified)
+                chunkModified = true;
 
             if (updateChunk)
                 UpdateChunk();

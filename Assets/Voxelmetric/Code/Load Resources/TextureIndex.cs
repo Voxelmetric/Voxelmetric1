@@ -9,8 +9,11 @@ public class TextureIndex {
 
     public Texture2D atlas;
 
-    public TextureIndex()
+    public TextureIndex(bool loadEmpty = false)
     {
+        if (loadEmpty)
+            return;
+
         List<Texture2D> atlasTextures = new List<Texture2D>();
 
         // Load all files in Textures folder

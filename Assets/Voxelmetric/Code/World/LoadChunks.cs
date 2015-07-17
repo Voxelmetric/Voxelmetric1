@@ -63,7 +63,7 @@ public class LoadChunks : MonoBehaviour
     bool FindChunksAndLoad()
     {
         //Cycle through the array of positions
-        for (int i = 0; i < Config.Env.ChunksToLoad; i++)
+        for (int i = 0; i < Data.chunkLoadOrder.Length; i++)
         {
             //Get the position of this gameobject to generate around
             BlockPos playerPos = ((BlockPos)transform.position).ContainingChunkCoordinates();

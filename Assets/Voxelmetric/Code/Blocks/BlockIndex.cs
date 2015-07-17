@@ -5,6 +5,7 @@ public class BlockIndex {
 
     public BlockIndex(){
         AddBlockType(new BlockAir());
+        AddBlockType(new BlockSolid());
     }
 
     public List<BlockController> controllers = new List<BlockController>();
