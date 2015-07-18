@@ -1,5 +1,7 @@
 ﻿using UnityEngine;
 using System.Threading;
+using System.Collections;
+using System.Collections.Generic;
 
 [RequireComponent(typeof(MeshFilter))]
 [RequireComponent(typeof(MeshRenderer))]
@@ -9,13 +11,8 @@ public class Chunk : MonoBehaviour
 {
     private Block[,,] blocks = new Block[Config.Env.ChunkSize, Config.Env.ChunkSize, Config.Env.ChunkSize];
 
-    bool meshReady = false;
-    public bool busy = false;
-    public bool loaded = false;
-    public bool terrainGenerated = false;
-    bool markedForDeletion = false;
-    bool queuedForUpdate = false;
-    public bool chunkModified = false;
+    public enum Flag {busy, meshReady, loaded, terrainGenerated, markedForDeletion, queuedForUpdate, chunkModified }
+    public Hashtable flags = new Hashtable();
 
     MeshFilter filter;
     MeshCollider coll;
@@ -33,19 +30,47 @@ public class Chunk : MonoBehaviour
         gameObject.GetComponent<Renderer>().material.mainTexture = Block.index.textureIndex.atlas;
     }
 
+    public bool GetFlag(object key)
+    {
+        if (!flags.ContainsKey(key))
+        {
+            return false;
+        }
+        return (bool)flags[key];
+    }
+
+    public T GetFlag<T>(object key) where T : new()
+    {
+        if (!flags.ContainsKey(key))
+        {
+            return new T();
+        }
+        return (T)flags[key];
+    }
+
+    public void SetFlag(object key, object value)
+    {
+        if (flags.ContainsKey(key))
+        {
+            flags.Remove(key);
+        }
+
+        flags.Add(key, value);
+    }
+
     void Update()
     {
-        if (markedForDeletion && !busy)
+        if (GetFlag(Flag.markedForDeletion) && !GetFlag(Flag.busy))
         {
             ReturnChunkToPool();
         }
 
-        if (meshReady)
+        if (GetFlag<bool>(Flag.meshReady))
         {
-            meshReady = false;
+            SetFlag(Flag.meshReady, false);
             RenderMesh();
             meshData = new MeshData();
-            busy = false;
+            SetFlag(Flag.busy, false);
         }
 
     }
@@ -60,33 +85,33 @@ public class Chunk : MonoBehaviour
             Thread thread = new Thread(() =>
             {
                 //If there's already an update queued let that one run instead
-                if (!queuedForUpdate)
+                if (!GetFlag(Flag.queuedForUpdate))
                 {
                     // If the chunk is busy wait for it to be ready, but
                     // set a flag saying an update is waiting so that later
                     // updates don't sit around as well, one is enough
-                    if (busy)
+                    if (GetFlag(Flag.busy))
                     {
-                        queuedForUpdate = true;
-                        while (busy)
+                        SetFlag(Flag.queuedForUpdate, true);
+                        while (GetFlag(Flag.busy))
                         {
                             Thread.Sleep(0);
                         }
-                        queuedForUpdate = false;
+                        SetFlag(Flag.queuedForUpdate, false);
                     }
 
-                    busy = true;
+                    SetFlag(Flag.busy, true);
                     BuildMeshData();
-                    meshReady = true;
+                    SetFlag(Flag.meshReady, true);
                 }
             });
             thread.Start();
         }
         else //Not using multithreading
         {
-            busy = true;
+            SetFlag(Flag.busy, true);
             BuildMeshData();
-            meshReady = true;
+            SetFlag(Flag.meshReady, true);
         }
     }
 
@@ -154,7 +179,7 @@ public class Chunk : MonoBehaviour
             blocks[blockPos.x, blockPos.y, blockPos.z].controller.OnCreate(this, blockPos + pos, blocks[blockPos.x, blockPos.y, blockPos.z]);
 
             if (block.modified)
-                chunkModified = true;
+                SetFlag(Flag.chunkModified, true);
 
             if (updateChunk)
                 UpdateChunk();
@@ -215,22 +240,17 @@ public class Chunk : MonoBehaviour
     /// </summary>
     public void MarkForDeletion()
     {
-        markedForDeletion = true;
+        SetFlag(Flag.markedForDeletion, true);
     }
 
     public bool IsMarkedForDeletion()
     {
-        return markedForDeletion;
+        return GetFlag(Flag.markedForDeletion); ;
     }
 
     void ReturnChunkToPool()
     {
-        meshReady = false;
-        busy = false;
-        loaded = false;
-        terrainGenerated = false;
-        markedForDeletion = false;
-        queuedForUpdate = false;
+        flags.Clear();
 
         if (filter.mesh)
             filter.mesh.Clear();

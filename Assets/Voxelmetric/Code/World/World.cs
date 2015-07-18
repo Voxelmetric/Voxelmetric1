@@ -104,7 +104,7 @@ public class World : MonoBehaviour {
                 BlockLight.ResetLightChunkColumn(this, chunk);
         }
 
-        chunk.terrainGenerated = true;
+        chunk.SetFlag(Chunk.Flag.terrainGenerated, true);
     }
 
     /// <summary>
@@ -126,7 +126,7 @@ public class World : MonoBehaviour {
             }
             else
             {
-                if(chunk.chunkModified)
+                if(chunk.GetFlag(Chunk.Flag.chunkModified))
                     Serialization.SaveChunk(chunk);
 
                 chunk.MarkForDeletion();

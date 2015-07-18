@@ -80,7 +80,7 @@ public class LoadChunks : MonoBehaviour
 
             //If the chunk already exists and it's already
             //rendered or in queue to be rendered continue
-            if (newChunk != null && newChunk.loaded)
+            if (newChunk != null && newChunk.GetFlag(Chunk.Flag.loaded))
                 continue;
 
             LoadChunkColumn(newChunkPos);
@@ -116,7 +116,7 @@ public class LoadChunks : MonoBehaviour
             Chunk chunk = world.GetChunk(pos);
             if (chunk != null)
             {
-                chunk.loaded = true;
+                chunk.SetFlag(Chunk.Flag.loaded, true);
             }
 
         }
@@ -149,7 +149,7 @@ public class LoadChunks : MonoBehaviour
                     for (int z = -Config.Env.ChunkSize; z <= Config.Env.ChunkSize; z += Config.Env.ChunkSize)
                     {
                         chunk = world.GetChunk(columnPosition.Add(x, y, z));
-                        while (!chunk.terrainGenerated)
+                        while (!chunk.GetFlag(Chunk.Flag.terrainGenerated))
                         {
                             Thread.Sleep(0);
                         }
