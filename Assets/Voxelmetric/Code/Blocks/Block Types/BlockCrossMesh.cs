@@ -16,4 +16,13 @@ public class BlockCrossMesh : BlockNonSolid
 
     public override bool IsTransparent() { return true; }
 
+    public override void OnCreate(Chunk chunk, BlockPos pos, Block block)
+    {
+        if (block.data2 == 0)
+        {
+            block.data2 = 255;
+            chunk.SetBlock(pos - chunk.pos, block, false);
+        }
+    }
+
 }
