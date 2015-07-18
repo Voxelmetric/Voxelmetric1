@@ -243,6 +243,8 @@ public class EditLayers
             GUILayout.EndVertical();
             GUILayout.EndHorizontal();
 
+            if (GUI.changed)
+                EditorUtility.SetDirty(gen.layerOrder[selected]);
         }
         else if (selected == -1)
         {
@@ -367,6 +369,7 @@ public class EditLayers
         layers.AddRange(gen.layerOrder);
         layers.Add(layer);
         gen.layerOrder = layers.ToArray();
+        EditorUtility.SetDirty(gen);
     }
 
     void GetTerrainLayers()
@@ -374,7 +377,10 @@ public class EditLayers
         gen = World.instance.gameObject.GetComponent<TerrainGen>();
         List<TerrainLayer> layers = new List<TerrainLayer>();
         layers.AddRange(gen.layerOrder);
-        layers.Remove(null);
+        if (layers.Remove(null))
+        {
+            EditorUtility.SetDirty(gen);
+        }
         gen.layerOrder = layers.ToArray();
     }
 
