@@ -77,6 +77,26 @@ public struct BlockPos
         return new Vector3(pos.x, pos.y, pos.z) * Config.Env.BlockSize;
     }
 
+    public static implicit operator BlockPos(Direction d)
+    {
+        switch (d) {
+            case Direction.up:
+                return new BlockPos(0, 1, 0);
+            case Direction.down:
+                return new BlockPos(0, -1, 0);
+            case Direction.north:
+                return new BlockPos(0, 0, 1);
+            case Direction.east:
+                return new BlockPos(1, 0, 0);
+            case Direction.south:
+                return new BlockPos(0, 0, -1);
+            case Direction.west:
+                return new BlockPos(-1, 0, 0);
+            default:
+                return new BlockPos();
+        }
+    }
+
     //These operators let you add and subtract BlockPos from each other
     //or check equality with == and !=
     public static BlockPos operator -(BlockPos pos1, BlockPos pos2)
