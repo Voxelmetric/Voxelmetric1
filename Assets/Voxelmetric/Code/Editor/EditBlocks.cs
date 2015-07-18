@@ -74,6 +74,7 @@ public class EditBlocks {
             {
                 selectedBlock = i;
             }
+
         }
         GUILayout.EndScrollView();
 
@@ -186,6 +187,78 @@ public class EditBlocks {
                 cube.blockIsSolid = EditorGUILayout.Toggle(cube.blockIsSolid,
                     new GUIStyle(GUI.skin.toggle) { fontSize = 14 }, new GUILayoutOption[] { GUILayout.ExpandWidth(true), GUILayout.Height(18) });
                 GUILayout.EndHorizontal();
+
+            }
+            else if (definitions[selectedBlock].GetType() == typeof(MeshDefinition))
+            {
+                MeshDefinition mesh = (MeshDefinition)definitions[selectedBlock];
+
+                GUILayout.BeginHorizontal();
+                GUILayout.Label("Mesh name", new GUIStyle { fontSize = 14, alignment = TextAnchor.MiddleCenter }, new GUILayoutOption[] { GUILayout.Width(200) });
+                mesh.meshName = EditorGUILayout.TextField(mesh.meshName,
+                    new GUIStyle(GUI.skin.textField) { fontSize = 14, }, new GUILayoutOption[] { GUILayout.Height(18), GUILayout.ExpandWidth(true) });
+                GUILayout.EndHorizontal();
+                GUILayout.Space(10);
+
+                GUILayout.BeginHorizontal();
+                GUILayout.Label("Texture", new GUIStyle { fontSize = 14, alignment = TextAnchor.MiddleCenter }, new GUILayoutOption[] { GUILayout.Width(200) });
+                int i = EditorGUILayout.Popup(textureNames.IndexOf(mesh.texture), textureNames.ToArray(),
+                    new GUIStyle(GUI.skin.textField) { fontSize = 14 }, new GUILayoutOption[] { GUILayout.ExpandWidth(true), GUILayout.Height(18) });
+                if (i >= 0)
+                    mesh.texture = textureNames[i];
+                GUILayout.EndHorizontal();
+
+                GUILayout.Space(10);
+
+                GUILayout.BeginHorizontal();
+                GUILayout.Label("Block is solid upwards", new GUIStyle { fontSize = 14, alignment = TextAnchor.MiddleCenter }, new GUILayoutOption[] { GUILayout.Width(200) });
+                mesh.blockIsSolid[0] = EditorGUILayout.Toggle(mesh.blockIsSolid[0],
+                    new GUIStyle(GUI.skin.toggle) { fontSize = 14 }, new GUILayoutOption[] { GUILayout.ExpandWidth(true), GUILayout.Height(18) });
+                GUILayout.EndHorizontal();
+                GUILayout.Space(10);
+
+                GUILayout.BeginHorizontal();
+                GUILayout.Label("Block is solid downwards", new GUIStyle { fontSize = 14, alignment = TextAnchor.MiddleCenter }, new GUILayoutOption[] { GUILayout.Width(200) });
+                mesh.blockIsSolid[1] = EditorGUILayout.Toggle(mesh.blockIsSolid[1],
+                    new GUIStyle(GUI.skin.toggle) { fontSize = 14 }, new GUILayoutOption[] { GUILayout.ExpandWidth(true), GUILayout.Height(18) });
+                GUILayout.EndHorizontal();
+                GUILayout.Space(10);
+
+                GUILayout.BeginHorizontal();
+                GUILayout.Label("Block is solid north", new GUIStyle { fontSize = 14, alignment = TextAnchor.MiddleCenter }, new GUILayoutOption[] { GUILayout.Width(200) });
+                mesh.blockIsSolid[2] = EditorGUILayout.Toggle(mesh.blockIsSolid[2],
+                    new GUIStyle(GUI.skin.toggle) { fontSize = 14 }, new GUILayoutOption[] { GUILayout.ExpandWidth(true), GUILayout.Height(18) });
+                GUILayout.EndHorizontal();
+                GUILayout.Space(10);
+
+                GUILayout.BeginHorizontal();
+                GUILayout.Label("Block is solid east", new GUIStyle { fontSize = 14, alignment = TextAnchor.MiddleCenter }, new GUILayoutOption[] { GUILayout.Width(200) });
+                mesh.blockIsSolid[3] = EditorGUILayout.Toggle(mesh.blockIsSolid[3],
+                    new GUIStyle(GUI.skin.toggle) { fontSize = 14 }, new GUILayoutOption[] { GUILayout.ExpandWidth(true), GUILayout.Height(18) });
+                GUILayout.EndHorizontal();
+                GUILayout.Space(10);
+
+                GUILayout.BeginHorizontal();
+                GUILayout.Label("Block is solid south", new GUIStyle { fontSize = 14, alignment = TextAnchor.MiddleCenter }, new GUILayoutOption[] { GUILayout.Width(200) });
+                mesh.blockIsSolid[4] = EditorGUILayout.Toggle(mesh.blockIsSolid[4],
+                    new GUIStyle(GUI.skin.toggle) { fontSize = 14 }, new GUILayoutOption[] { GUILayout.ExpandWidth(true), GUILayout.Height(18) });
+                GUILayout.EndHorizontal();
+
+                GUILayout.Space(10);
+
+                GUILayout.BeginHorizontal();
+                GUILayout.Label("Block is solid west", new GUIStyle { fontSize = 14, alignment = TextAnchor.MiddleCenter }, new GUILayoutOption[] { GUILayout.Width(200) });
+                mesh.blockIsSolid[5] = EditorGUILayout.Toggle(mesh.blockIsSolid[5],
+                    new GUIStyle(GUI.skin.toggle) { fontSize = 14 }, new GUILayoutOption[] { GUILayout.ExpandWidth(true), GUILayout.Height(18) });
+                GUILayout.EndHorizontal();
+
+                GUILayout.Space(10);
+
+                GUILayout.BeginHorizontal();
+                GUILayout.Label("Mesh position offset", new GUIStyle { fontSize = 14, alignment = TextAnchor.MiddleCenter }, new GUILayoutOption[] { GUILayout.Width(200) });
+                mesh.positionOffset = EditorGUILayout.Vector3Field("", mesh.positionOffset,
+                    new GUILayoutOption[] { GUILayout.ExpandWidth(true), GUILayout.Height(18) });
+                GUILayout.EndHorizontal();
             }
 
 
@@ -203,9 +276,13 @@ public class EditBlocks {
                 GetDefinedBlocks();
                 selectedBlock = -1;
             }
+
+
             GUILayout.EndVertical();
             GUILayout.EndHorizontal();
 
+            if (GUI.changed)
+                EditorUtility.SetDirty(definitions[selectedBlock]);
         }
         else if (selectedBlock == -1)
         {
@@ -236,7 +313,7 @@ public class EditBlocks {
         GUILayout.Space(10);
 
         GUILayout.BeginVertical(new GUILayoutOption[] { GUILayout.Width(200), GUILayout.Height(40) });
-        GUILayout.Box("A cross mesh with a variable height that works for wild grass or flowers.",
+        GUILayout.Box("A cross mesh with a variable height and x and z offset that works for wild grass or flowers.",
                 new GUIStyle(GUI.skin.box) { fontSize = 14, padding = new RectOffset(10, 10, 10, 10) });
 
         if (GUILayout.Button("Cross Mesh Block",
@@ -251,17 +328,20 @@ public class EditBlocks {
 
         GUILayout.Space(10);
 
-        //GUILayout.BeginVertical(new GUILayoutOption[] { GUILayout.Width(200), GUILayout.Height(40) });
-        //GUILayout.Box("A cube block textured on each side. If set to solid these blocks are the most efficient for large volumes",
-        //        new GUIStyle(GUI.skin.box) { fontSize = 14, padding = new RectOffset(10, 10, 10, 10) });
+        GUILayout.BeginVertical(new GUILayoutOption[] { GUILayout.Width(200), GUILayout.Height(40) });
+        GUILayout.Box("A block made from an imported mesh with an optional collider. These blocks are less optimized than cubes.",
+                new GUIStyle(GUI.skin.box) { fontSize = 14, padding = new RectOffset(10, 10, 10, 10) });
 
-        //if (GUILayout.Button("Cube Block",
-        //        new GUIStyle(GUI.skin.button) { fontSize = 20, padding = new RectOffset(10, 10, 10, 10) },
-        //        new GUILayoutOption[] { GUILayout.Width(200), GUILayout.Height(40) }
-        //    ))
-        //{
-        //}
-        //GUILayout.EndVertical();
+        if (GUILayout.Button("Mesh Block",
+                new GUIStyle(GUI.skin.button) { fontSize = 20, padding = new RectOffset(10, 10, 10, 10) },
+                new GUILayoutOption[] { GUILayout.Width(200), GUILayout.Height(40) }
+            ))
+        {
+            Block.index.textureIndex = new TextureIndex(true);
+            BlocksGO().AddComponent<MeshDefinition>();
+            GetDefinedBlocks();
+        }
+        GUILayout.EndVertical();
 
         GUILayout.EndHorizontal();
 

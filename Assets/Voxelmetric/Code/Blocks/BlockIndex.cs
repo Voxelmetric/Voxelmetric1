@@ -36,8 +36,6 @@ public class BlockIndex {
     public void GetMissingDefinitions() {
         textureIndex = new TextureIndex();
 
-        LoadMeshes.GetAndLoadMeshBlocks();
-
         BlockDefinition[] definitions = World.instance.gameObject.GetComponentsInChildren<BlockDefinition>();
 
         foreach (var def in definitions)

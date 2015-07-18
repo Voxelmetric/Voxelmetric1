@@ -16,6 +16,7 @@ GameObject:
   - 114: {fileID: 11477496}
   - 114: {fileID: 11447936}
   - 114: {fileID: 11433488}
+  - 114: {fileID: 11436550}
   m_Layer: 0
   m_Name: Block Types
   m_TagString: Untagged
@@ -240,6 +241,22 @@ MonoBehaviour:
   - stone
   - stone
   blockIsSolid: 1
+--- !u!114 &11436550
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 100940}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4e83e0020448b2f44a5e7e0e5dfb0f20, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  blockName: custommesh
+  meshName: custommesh
+  texture: pyramid
+  blockIsSolid: 000000000000
+  positionOffset: {x: 0, y: 0, z: 0}
 --- !u!114 &11438196
 MonoBehaviour:
   m_ObjectHideFlags: 1
