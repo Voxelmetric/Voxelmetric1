@@ -13,7 +13,6 @@ GameObject:
   - 114: {fileID: 11483332}
   - 114: {fileID: 11467392}
   - 114: {fileID: 11403236}
-  - 114: {fileID: 11477496}
   - 114: {fileID: 11447936}
   - 114: {fileID: 11433488}
   - 114: {fileID: 11436550}
@@ -115,7 +114,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   layerType: 0
   layerName: DirtBase1
-  baseHeight: 42
+  baseHeight: 60
   frequency: 16
   amplitude: 4
   exponent: 1
@@ -144,6 +143,7 @@ MonoBehaviour:
   - leaves
   - leaves
   blockIsSolid: 0
+  solidTowardsSameType: 1
 --- !u!114 &11408784
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -164,6 +164,7 @@ MonoBehaviour:
   - dirt
   - dirt
   blockIsSolid: 1
+  solidTowardsSameType: 1
 --- !u!114 &11413014
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -241,6 +242,7 @@ MonoBehaviour:
   - stone
   - stone
   blockIsSolid: 1
+  solidTowardsSameType: 1
 --- !u!114 &11436550
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -321,6 +323,7 @@ MonoBehaviour:
   - connected
   - connected
   blockIsSolid: 1
+  solidTowardsSameType: 1
 --- !u!114 &11456570
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -389,26 +392,7 @@ MonoBehaviour:
   - log_side
   - log_side
   blockIsSolid: 1
---- !u!114 &11477496
-MonoBehaviour:
-  m_ObjectHideFlags: 1
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 100940}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3bb4cdcfcb8373f419fe96608ee3594c, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  blockName: cube
-  textures:
-  - log_top
-  - grass
-  - stone
-  - grass_side
-  - log_side
-  - stone
-  blockIsSolid: 1
+  solidTowardsSameType: 1
 --- !u!114 &11478306
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -422,8 +406,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   layerType: 0
   layerName: DirtBase2
-  baseHeight: 43
-  frequency: 9
+  baseHeight: 59
+  frequency: 25
   amplitude: 6
   exponent: 1
   blockName: dirt
@@ -473,6 +457,7 @@ MonoBehaviour:
   - grass_side
   - grass_side
   blockIsSolid: 1
+  solidTowardsSameType: 1
 --- !u!114 &11498696
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -492,7 +477,11 @@ Prefab:
   serializedVersion: 2
   m_Modification:
     m_TransformParent: {fileID: 0}
-    m_Modifications: []
+    m_Modifications:
+    - target: {fileID: 0}
+      propertyPath: solidTowardsSameType
+      value: 0
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 0}
   m_RootGameObject: {fileID: 104736}

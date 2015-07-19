@@ -5,7 +5,6 @@ public class BlockCube : BlockSolid {
 
     public string blockName;
     public TextureCollection[] textures;
-    public bool isSolid = true;
 
     public override void BuildFace(Chunk chunk, BlockPos pos, MeshData meshData, Direction direction, Block block)
     {

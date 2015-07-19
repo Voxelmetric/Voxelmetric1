@@ -30,6 +30,11 @@ public class BlockIndex {
             return -1;
         }
 
+        if (names.ContainsKey(controller.Name()))
+        {
+            Debug.LogError("Two blocks with the name " + controller.Name() + " are defined");
+        } 
+
         controllers.Add(controller);
         blockOverrides.Add(GetBlockOverride(controller.Name()));
 

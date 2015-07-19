@@ -69,7 +69,7 @@ public class ConnectedTextures {
         if (!n && w && !e && s && !sw)
             return 8;
 
-        if (n && !w && e && s && !sw && !es)
+        if (n && !w && e && s && !ne && !es)
             return 9;
 
         if (!n && w && e && s && !es && !sw)

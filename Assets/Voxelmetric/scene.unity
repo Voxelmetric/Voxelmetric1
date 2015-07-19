@@ -1462,26 +1462,6 @@ Prefab:
       propertyPath: m_RootOrder
       value: 3
       objectReference: {fileID: 0}
-    - target: {fileID: 11436550, guid: 28fc5073d6f2b5b42acaec530dd745cd, type: 2}
-      propertyPath: blockIsSolid.Array.data[3]
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 11436550, guid: 28fc5073d6f2b5b42acaec530dd745cd, type: 2}
-      propertyPath: blockIsSolid.Array.data[5]
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 11446294, guid: 28fc5073d6f2b5b42acaec530dd745cd, type: 2}
-      propertyPath: blockName
-      value: grass
-      objectReference: {fileID: 0}
-    - target: {fileID: 11403132, guid: 28fc5073d6f2b5b42acaec530dd745cd, type: 2}
-      propertyPath: baseHeight
-      value: 50
-      objectReference: {fileID: 0}
-    - target: {fileID: 11478306, guid: 28fc5073d6f2b5b42acaec530dd745cd, type: 2}
-      propertyPath: baseHeight
-      value: 51
-      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: 28fc5073d6f2b5b42acaec530dd745cd, type: 2}
   m_IsPrefabParent: 0
