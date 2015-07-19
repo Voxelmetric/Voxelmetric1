@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
+using System;
 
 public class BlockIndex {
 
@@ -9,6 +10,7 @@ public class BlockIndex {
     }
 
     public List<BlockController> controllers = new List<BlockController>();
+    public List<BlockOverride> blockOverrides = new List<BlockOverride>();
     public Dictionary<string, int> names = new Dictionary<string, int>();
 
     public TextureIndex textureIndex;
@@ -29,6 +31,8 @@ public class BlockIndex {
         }
 
         controllers.Add(controller);
+        blockOverrides.Add(GetBlockOverride(controller.Name()));
+
         names.Add(controller.Name().ToLower().Replace(" ", ""), index);
         return index;
     }
@@ -43,6 +47,15 @@ public class BlockIndex {
             if(def.enabled)
                 def.AddToBlocks();
         }
+    }
+
+    BlockOverride GetBlockOverride(string blockName)
+    {
+        var type = Type.GetType(blockName + "Override" + ", " + typeof(BlockOverride).Assembly, false);
+        if (type == null)
+            return null;
+
+        return (BlockOverride)Activator.CreateInstance(type);
     }
 
 }

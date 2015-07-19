@@ -33,11 +33,41 @@ public class BlockController
     /// </summary>
     public virtual bool CanBeWalkedThrough(Block block) { return true; }
 
-    public virtual void OnCreate(Chunk chunk, BlockPos pos, Block block) { }
+    public virtual Block OnCreate(Chunk chunk, BlockPos pos, Block block)
+    {
+        if (BlockOverride.GetBlockOverride(block.type) == null)
+            return block;
 
-    public virtual void PreRender(Chunk chunk, BlockPos pos, Block block) { }
+        return BlockOverride.GetBlockOverride(block.type).OnCreate(chunk, pos, block);
+    }
 
-    public virtual void PostRender(Chunk chunk, BlockPos pos, Block block) { }
+    public virtual void PreRender(Chunk chunk, BlockPos pos, Block block)
+    {
+        if (BlockOverride.GetBlockOverride(block.type) != null)
+            BlockOverride.GetBlockOverride(block.type).PreRender(chunk, pos, block);
+    }
 
-    public virtual void OnDestroy(Chunk chunk, BlockPos pos, Block block) { }
+    public virtual void PostRender(Chunk chunk, BlockPos pos, Block block)
+    {
+        if (BlockOverride.GetBlockOverride(block.type) != null)
+            BlockOverride.GetBlockOverride(block.type).PostRender(chunk, pos, block);
+    }
+
+    public virtual void OnDestroy(Chunk chunk, BlockPos pos, Block block)
+    {
+        if (BlockOverride.GetBlockOverride(block.type) != null)
+            BlockOverride.GetBlockOverride(block.type).OnDestroy(chunk, pos, block);
+    }
+
+    public virtual void RandomUpdate(Chunk chunk, BlockPos pos, Block block)
+    {
+        if (BlockOverride.GetBlockOverride(block.type) != null)
+            BlockOverride.GetBlockOverride(block.type).RandomUpdate(chunk, pos, block);
+    }
+
+    public virtual void ScheduledUpdate(Chunk chunk, BlockPos pos, Block block)
+    {
+        if (BlockOverride.GetBlockOverride(block.type) != null)
+            BlockOverride.GetBlockOverride(block.type).ScheduledUpdate(chunk, pos, block);
+    }
 }

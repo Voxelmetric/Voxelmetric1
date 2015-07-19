@@ -17,3 +17,15 @@ public struct Tile {
         this.y = y;
     }
 }
+
+public struct BlockAndTimer
+{
+    public BlockPos pos;
+    public float time;
+
+    public BlockAndTimer(BlockPos pos, float time)
+    {
+        this.pos = pos;
+        this.time = time;
+    }
+}

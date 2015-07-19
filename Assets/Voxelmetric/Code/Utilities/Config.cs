@@ -11,6 +11,8 @@ namespace Config
 
         public static float BlockSize = 1f;
 
+        public static float UpdateFrequency = 0.1f;
+
         // Padding added to the size of block faces to fix floating point issues 
         // where tiny gaps can appear between block faces
         public static float BlockFacePadding = 0.0005f;

@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Threading;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 
@@ -11,7 +12,9 @@ public class Chunk : MonoBehaviour
 {
     private Block[,,] blocks = new Block[Config.Env.ChunkSize, Config.Env.ChunkSize, Config.Env.ChunkSize];
 
-    public enum Flag {busy, meshReady, loaded, terrainGenerated, markedForDeletion, queuedForUpdate, chunkModified }
+    private List<BlockAndTimer> scheduledUpdates = new List<BlockAndTimer>();
+
+    public enum Flag {busy, meshReady, loaded, terrainGenerated, markedForDeletion, queuedForUpdate, chunkModified, updateSoon }
     public Hashtable flags = new Hashtable();
 
     MeshFilter filter;
@@ -19,6 +22,8 @@ public class Chunk : MonoBehaviour
 
     public World world;
     public BlockPos pos;
+
+    float randomUpdateTime = 0;
 
     MeshData meshData = new MeshData();
 
@@ -60,6 +65,8 @@ public class Chunk : MonoBehaviour
 
     void Update()
     {
+        
+
         if (GetFlag(Flag.markedForDeletion) && !GetFlag(Flag.busy))
         {
             ReturnChunkToPool();
@@ -72,7 +79,52 @@ public class Chunk : MonoBehaviour
             meshData = new MeshData();
             SetFlag(Flag.busy, false);
         }
+    }
 
+    void FixedUpdate()
+    {
+        randomUpdateTime += Time.fixedDeltaTime;
+
+        if (randomUpdateTime >= Config.Env.UpdateFrequency)
+        {
+            if (GetFlag(Flag.updateSoon))
+            {
+                UpdateChunk();
+                SetFlag(Flag.updateSoon, false);
+            }
+
+            randomUpdateTime = 0;
+
+            BlockPos randomPos = new BlockPos();
+            randomPos.x = world.random.Next(0, 16);
+            randomPos.y = world.random.Next(0, 16);
+            randomPos.z = world.random.Next(0, 16);
+
+            GetBlock(randomPos).controller.RandomUpdate(this, randomPos + pos, GetBlock(randomPos));
+
+            ProcessScheduledUpdates();
+        }
+
+    }
+
+    void ProcessScheduledUpdates()
+    {
+        for (int i = 0; i < scheduledUpdates.Count; i++)
+        {
+            scheduledUpdates[i] = new BlockAndTimer(scheduledUpdates[i].pos, scheduledUpdates[i].time - Config.Env.UpdateFrequency);
+            if (scheduledUpdates[i].time <= 0)
+            {
+                Block block = GetBlock(scheduledUpdates[i].pos - pos);
+                block.controller.ScheduledUpdate(this, scheduledUpdates[i].pos, block);
+                scheduledUpdates.RemoveAt(i);
+                i--;
+            }
+        }
+    }
+
+    public void AddScheduledUpdate(BlockPos pos, float time)
+    {
+        scheduledUpdates.Add(new BlockAndTimer(pos, time));
     }
 
     /// <summary>
@@ -172,11 +224,14 @@ public class Chunk : MonoBehaviour
     {
         if (InRange(blockPos))
         {
-            blocks[blockPos.x, blockPos.y, blockPos.z].controller.OnDestroy(this, blockPos + pos, blocks[blockPos.x, blockPos.y, blockPos.z]);
+            //Only call create and destroy if this is a different block type, otherwise it's just updating the properties of an existing block
+            if (blocks[blockPos.x, blockPos.y, blockPos.z].type != block.type)
+            {
+                blocks[blockPos.x, blockPos.y, blockPos.z].controller.OnDestroy(this, blockPos + pos, blocks[blockPos.x, blockPos.y, blockPos.z]);
+                block = block.controller.OnCreate(this, blockPos + pos, block);
+            }
 
             blocks[blockPos.x, blockPos.y, blockPos.z] = block;
-
-            blocks[blockPos.x, blockPos.y, blockPos.z].controller.OnCreate(this, blockPos + pos, blocks[blockPos.x, blockPos.y, blockPos.z]);
 
             if (block.modified)
                 SetFlag(Flag.chunkModified, true);

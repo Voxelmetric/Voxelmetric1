@@ -684,7 +684,7 @@ GameObject:
   - 114: {fileID: 628789250}
   - 114: {fileID: 628789249}
   m_Layer: 5
-  m_Name: Log
+  m_Name: Grass
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -755,7 +755,7 @@ MonoBehaviour:
           m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
           m_IntArgument: 4
           m_FloatArgument: 0
-          m_StringArgument: log
+          m_StringArgument: grass
           m_BoolArgument: 0
         m_CallState: 2
     m_TypeName: UnityEngine.UI.Button+ButtonClickedEvent, UnityEngine.UI, Version=1.0.0.0,
@@ -914,7 +914,7 @@ GameObject:
   - 114: {fileID: 783904726}
   - 114: {fileID: 783904725}
   m_Layer: 5
-  m_Name: Grass
+  m_Name: Wild Grass
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1470,6 +1470,18 @@ Prefab:
       propertyPath: blockIsSolid.Array.data[5]
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 11446294, guid: 28fc5073d6f2b5b42acaec530dd745cd, type: 2}
+      propertyPath: blockName
+      value: grass
+      objectReference: {fileID: 0}
+    - target: {fileID: 11403132, guid: 28fc5073d6f2b5b42acaec530dd745cd, type: 2}
+      propertyPath: baseHeight
+      value: 50
+      objectReference: {fileID: 0}
+    - target: {fileID: 11478306, guid: 28fc5073d6f2b5b42acaec530dd745cd, type: 2}
+      propertyPath: baseHeight
+      value: 51
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: 28fc5073d6f2b5b42acaec530dd745cd, type: 2}
   m_IsPrefabParent: 0
@@ -1913,7 +1925,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: Grass
+  m_Text: Wild Grass
 --- !u!222 &1350949832
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -2107,7 +2119,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: Log
+  m_Text: Grass
 --- !u!222 &1845043974
 CanvasRenderer:
   m_ObjectHideFlags: 0

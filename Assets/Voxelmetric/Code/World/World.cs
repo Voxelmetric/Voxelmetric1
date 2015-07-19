@@ -27,6 +27,7 @@ public class World : MonoBehaviour {
     public string worldName = "world";
     Noise noiseGen;
     TerrainGen terrainGen;
+    public System.Random random;
 
     void Start()
     {
@@ -37,6 +38,7 @@ public class World : MonoBehaviour {
         terrainGen = gameObject.GetComponent<TerrainGen>();
         terrainGen.noiseGen = noiseGen;
         terrainGen.world = this;
+        random = new System.Random();
     }
 
     /// <summary>
