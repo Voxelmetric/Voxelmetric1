@@ -3,6 +3,8 @@ using System;
 
 public class BlockOverride {
 
+    public BlockController controller;
+
     public virtual Block OnCreate(Chunk chunk, BlockPos pos, Block block)
     {
         return block;

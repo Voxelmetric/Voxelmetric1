@@ -36,7 +36,9 @@ public class BlockIndex {
         } 
 
         controllers.Add(controller);
-        blockOverrides.Add(GetBlockOverride(controller.Name()));
+        BlockOverride blockOverride = GetBlockOverride(controller.Name());
+        blockOverride.controller = controller;
+        blockOverrides.Add(blockOverride);
 
         names.Add(controller.Name().ToLower().Replace(" ", ""), index);
         return index;
