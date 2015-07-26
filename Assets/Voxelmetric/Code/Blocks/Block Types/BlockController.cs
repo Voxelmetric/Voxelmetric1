@@ -33,6 +33,43 @@ public class BlockController
     /// </summary>
     public virtual bool CanBeWalkedThrough(Block block) { return true; }
 
+    ///////////////////////////////////////////
+    //        Extending the controller       //
+    ///////////////////////////////////////////
+    public Hashtable flags = new Hashtable();
+
+    T GetFlag<T>(object key) where T : new()
+    {
+
+        if (!flags.ContainsKey(key))
+        {
+            return new T();
+        }
+        return (T)flags[key];
+    }
+
+    public void SetFlag(object key, object value)
+    {
+        if (flags.ContainsKey(key))
+        {
+            flags.Remove(key);
+        }
+
+        flags.Add(key, value);
+    }
+
+    public virtual T GetFlagOrOverride<T>(Object key, Chunk chunk, BlockPos pos, Block block) where T : new()
+    {
+        if (BlockOverride.GetBlockOverride(block.type) != null)
+        {
+            System.Object overridenReturn = BlockOverride.GetBlockOverride(block.type).GetFlagIntercept(key, chunk, pos, block);
+            if (overridenReturn != null)
+                return (T)overridenReturn;
+        }
+
+        return GetFlag<T>(key);
+    }
+
     public virtual Block OnCreate(Chunk chunk, BlockPos pos, Block block)
     {
         if (BlockOverride.GetBlockOverride(block.type) == null)
