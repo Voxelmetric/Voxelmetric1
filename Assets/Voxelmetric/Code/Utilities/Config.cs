@@ -39,6 +39,7 @@ namespace Config
 
     public static class Toggle
     {
+        public static bool UseOldTerrainGen = false;
         public static bool UseCollisionMesh = true;
 
         //Lighting needs multithreading to work quickly

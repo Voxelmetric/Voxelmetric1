@@ -55,7 +55,8 @@ GameObject:
   - 114: {fileID: 11403132}
   - 114: {fileID: 11478306}
   - 114: {fileID: 11446294}
-  - 114: {fileID: 11483074}
+  - 114: {fileID: 11476858}
+  - 114: {fileID: 11430418}
   m_Layer: 0
   m_Name: Terrain Layers
   m_TagString: Untagged
@@ -122,6 +123,8 @@ MonoBehaviour:
   percentage: 90
   structureFrequency: 10
   structureClassName: StructureTree
+  customTerrainLayer: 0
+  terrainLayerClassName: 
   world: {fileID: 0}
 --- !u!114 &11403236
 MonoBehaviour:
@@ -143,7 +146,7 @@ MonoBehaviour:
   - leaves
   - leaves
   blockIsSolid: 0
-  solidTowardsSameType: 1
+  solidTowardsSameType: 0
 --- !u!114 &11408784
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -178,14 +181,16 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   layerType: 0
   layerName: Base stone
-  baseHeight: 41
-  frequency: 26
-  amplitude: 6
+  baseHeight: 45
+  frequency: 63
+  amplitude: 9
   exponent: 1
   blockName: stone
   percentage: 90
   structureFrequency: 10
   structureClassName: StructureTree
+  customTerrainLayer: 0
+  terrainLayerClassName: 
   world: {fileID: 0}
 --- !u!114 &11418280
 MonoBehaviour:
@@ -208,6 +213,8 @@ MonoBehaviour:
   percentage: 90
   structureFrequency: 10
   structureClassName: StructureTree
+  customTerrainLayer: 0
+  terrainLayerClassName: 
   world: {fileID: 0}
 --- !u!114 &11429476
 MonoBehaviour:
@@ -222,6 +229,30 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   blockName: wildgrass
   texture: wild_grass
+--- !u!114 &11430418
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 184620}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1dc11f3ebdfd3c34b906c66aa7868fb4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  layerType: 3
+  layerName: Trees
+  baseHeight: 0
+  frequency: 10
+  amplitude: 10
+  exponent: 1
+  blockName: stone
+  percentage: 93
+  structureFrequency: 6
+  structureClassName: StructureTree
+  customTerrainLayer: 0
+  terrainLayerClassName: 
+  world: {fileID: 0}
 --- !u!114 &11433488
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -274,12 +305,14 @@ MonoBehaviour:
   layerName: StoneMountains2
   baseHeight: 4
   frequency: 69
-  amplitude: 63
+  amplitude: 27
   exponent: 1
   blockName: stone
   percentage: 90
   structureFrequency: 9
   structureClassName: StructureTree
+  customTerrainLayer: 0
+  terrainLayerClassName: 
   world: {fileID: 0}
 --- !u!114 &11446294
 MonoBehaviour:
@@ -302,6 +335,8 @@ MonoBehaviour:
   percentage: 90
   structureFrequency: 10
   structureClassName: StructureTree
+  customTerrainLayer: 0
+  terrainLayerClassName: 
   world: {fileID: 0}
 --- !u!114 &11447936
 MonoBehaviour:
@@ -348,8 +383,9 @@ MonoBehaviour:
   - {fileID: 11460328}
   - {fileID: 11403132}
   - {fileID: 11478306}
+  - {fileID: 11476858}
   - {fileID: 11446294}
-  - {fileID: 11483074}
+  - {fileID: 11430418}
 --- !u!114 &11460328
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -371,6 +407,8 @@ MonoBehaviour:
   percentage: 90
   structureFrequency: 10
   structureClassName: StructureTree
+  customTerrainLayer: 0
+  terrainLayerClassName: 
   world: {fileID: 0}
 --- !u!114 &11467392
 MonoBehaviour:
@@ -393,6 +431,30 @@ MonoBehaviour:
   - log_side
   blockIsSolid: 1
   solidTowardsSameType: 1
+--- !u!114 &11476858
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 184620}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1dc11f3ebdfd3c34b906c66aa7868fb4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  layerType: 0
+  layerName: Caves
+  baseHeight: 0
+  frequency: 10
+  amplitude: 10
+  exponent: 1
+  blockName: air
+  percentage: 90
+  structureFrequency: 10
+  structureClassName: StructureTree
+  customTerrainLayer: 1
+  terrainLayerClassName: CavesLayer
+  world: {fileID: 0}
 --- !u!114 &11478306
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -414,28 +476,8 @@ MonoBehaviour:
   percentage: 90
   structureFrequency: 10
   structureClassName: StructureTree
-  world: {fileID: 0}
---- !u!114 &11483074
-MonoBehaviour:
-  m_ObjectHideFlags: 1
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 184620}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1dc11f3ebdfd3c34b906c66aa7868fb4, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  layerType: 3
-  layerName: Trees
-  baseHeight: 0
-  frequency: 10
-  amplitude: 10
-  exponent: 1
-  blockName: stone
-  percentage: 94
-  structureFrequency: 6
-  structureClassName: StructureTree
+  customTerrainLayer: 0
+  terrainLayerClassName: 
   world: {fileID: 0}
 --- !u!114 &11483332
 MonoBehaviour:

@@ -15,18 +15,43 @@ public class TerrainGen: MonoBehaviour
     public float percentageBiomePadding= 0.1f;
 
     public TerrainLayer[] layerOrder = new TerrainLayer[0];
+    public OldTerrainGen oldTerrainGen;
 
     public void GenerateTerrainForChunkColumn(BlockPos pos)
     {
-        for (int x = pos.x; x < pos.x + Config.Env.ChunkSize; x++)
+        if (Config.Toggle.UseOldTerrainGen)
         {
-            for (int z = pos.z; z < pos.z + Config.Env.ChunkSize; z++)
+            if (oldTerrainGen == null)
+                oldTerrainGen = new OldTerrainGen(noiseGen);
+
+            for (int y = Config.Env.WorldMinY; y < Config.Env.WorldMaxY; y += Config.Env.ChunkSize)
             {
-                GenerateTerrainForBlockColumn(x, z);
+                Chunk chunk = world.GetChunk(pos.Add(0, y, 0));
+
+                if(chunk != null)
+                    oldTerrainGen.ChunkGen(chunk);
+
+                for (int x = 0; x < Config.Env.ChunkSize; x++)
+                {
+                    for (int z = 0; z < Config.Env.ChunkSize; z++)
+                    {
+
+                    }
+                }
             }
         }
+        else
+        {
+            for (int x = pos.x; x < pos.x + Config.Env.ChunkSize; x++)
+            {
+                for (int z = pos.z; z < pos.z + Config.Env.ChunkSize; z++)
+                {
+                    GenerateTerrainForBlockColumn(x, z);
+                }
+            }
 
-        GenerateStructuresForChunk(pos);
+            GenerateStructuresForChunk(pos);
+        }
     }
 
     public int GenerateTerrainForBlockColumn(int x, int z, bool justGetHeight = false)

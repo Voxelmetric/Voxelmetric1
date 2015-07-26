@@ -149,10 +149,18 @@ public class TerrainLayer: MonoBehaviour {
         {
             for (int z = minZ; z < maxZ; z++)
             {
+                int percentChance = GetNoise(x, 0, z, structureFrequency, 100, 1);
                 if (GetNoise(x, 0, z, structureFrequency, 100, 1) > percentage)
                 {
-                    int height = terrainGen.GenerateTerrainForBlockColumn(x, z, true);
-                    structure.Build(world, chunkPos, new BlockPos(x, height, z), this);
+                    if (percentChance > GetNoise(x + 1, 0, z, structureFrequency, 100, 1)
+                        && percentChance > GetNoise(x - 1, 0, z, structureFrequency, 100, 1)
+                        && percentChance > GetNoise(x, 0, z + 1, structureFrequency, 100, 1)
+                        && percentChance > GetNoise(x, 0, z - 1, structureFrequency, 100, 1))
+                    {
+
+                        int height = terrainGen.GenerateTerrainForBlockColumn(x, z, true);
+                        structure.Build(world, chunkPos, new BlockPos(x, height, z), this);
+                    }
                 }
             }
         }

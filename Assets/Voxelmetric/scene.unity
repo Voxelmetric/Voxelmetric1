@@ -1492,7 +1492,7 @@ Prefab:
       objectReference: {fileID: 0}
     - target: {fileID: 11438196, guid: 28fc5073d6f2b5b42acaec530dd745cd, type: 2}
       propertyPath: amplitude
-      value: 27
+      value: 41
       objectReference: {fileID: 0}
     - target: {fileID: 11456570, guid: 28fc5073d6f2b5b42acaec530dd745cd, type: 2}
       propertyPath: layerOrder.Array.data[7]
@@ -1518,6 +1518,14 @@ Prefab:
       propertyPath: layerOrder.Array.data[5]
       value: 
       objectReference: {fileID: 1126565235}
+    - target: {fileID: 11418280, guid: 28fc5073d6f2b5b42acaec530dd745cd, type: 2}
+      propertyPath: frequency
+      value: 103
+      objectReference: {fileID: 0}
+    - target: {fileID: 11438196, guid: 28fc5073d6f2b5b42acaec530dd745cd, type: 2}
+      propertyPath: frequency
+      value: 85
+      objectReference: {fileID: 0}
     m_RemovedComponents:
     - {fileID: 11483074, guid: 28fc5073d6f2b5b42acaec530dd745cd, type: 2}
   m_ParentPrefab: {fileID: 100100000, guid: 28fc5073d6f2b5b42acaec530dd745cd, type: 2}
