@@ -23,7 +23,7 @@ namespace Config
         public static int WaitBetweenDeletes = 10;
 
         //Recommend setting this to at least 2 when LightSceneOnStart is enabled 
-        public static int WaitBetweenChunkGen = 0;
+        public static int WaitBetweenChunkGen = 1;
 
         public static float AOStrength = 1f;
         public static float BlockLightStrength = 0f;

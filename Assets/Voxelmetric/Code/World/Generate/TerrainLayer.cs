@@ -37,20 +37,44 @@ public class TerrainLayer: MonoBehaviour {
     [Tooltip("Name of the class that generates this structure")]
     public string structureClassName = "StructureTree";
 
+    public bool customTerrainLayer = false;
+    public string terrainLayerClassName = "";
+    public LayerOverride customLayer;
+
     public GeneratedStructure structure;
 
     public World world;
     public Noise noiseGen;
-    Chunk[] chunks;
 
 
     public TerrainLayer SetUpTerrainLayer(World world, Noise noise)
     {
         this.world = world;
         this.noiseGen = noise;
-        var type = Type.GetType(structureClassName + ", " + typeof(GeneratedStructure).Assembly);
-        structure = (GeneratedStructure)Activator.CreateInstance(type);
+        if (layerType == LayerType.Structure)
+        {
+            var type = Type.GetType(structureClassName + ", " + typeof(GeneratedStructure).Assembly);
+            structure = (GeneratedStructure)Activator.CreateInstance(type);
+        }
 
+        if (customTerrainLayer)
+        {
+            var customLayerType = Type.GetType(terrainLayerClassName + ", " + typeof(LayerOverride).Assembly);
+            customLayer = (LayerOverride)Activator.CreateInstance(customLayerType);
+
+            customLayer.world = world;
+            customLayer.noiseGen = noise;
+            customLayer.baseHeight = baseHeight;
+            customLayer.frequency = frequency;
+            customLayer.amplitude = amplitude;
+            customLayer.exponent = exponent;
+            customLayer.blockName = blockName;
+            customLayer.percentage = percentage;
+            customLayer.structureFrequency = structureFrequency;
+
+            if (layerType == LayerType.Structure)
+                customLayer.structure = structure;
+        }
 
         return this;
     }
@@ -59,6 +83,14 @@ public class TerrainLayer: MonoBehaviour {
     {
         if (layerType == LayerType.Structure)
             return heightSoFar;
+
+        if (customTerrainLayer)
+        {
+            //Profiler.BeginSample("custom");
+            int newHeight = customLayer.GenerateLayer(x, z, heightSoFar, strength, justGetHeight);
+            //Profiler.EndSample();
+            return newHeight;
+        }
 
         Block blockToPlace = blockName;
         blockToPlace.modified = false;
@@ -101,6 +133,13 @@ public class TerrainLayer: MonoBehaviour {
     {
         if (layerType != LayerType.Structure)
             return;
+
+        if (customTerrainLayer)
+        {
+            customLayer.GenerateStructures(chunkPos, terrainGen);
+            return;
+        }
+
         int minX = chunkPos.x - structure.negX;
         int maxX = chunkPos.x + Config.Env.ChunkSize + structure.posX;
         int minZ = chunkPos.z - structure.negZ;

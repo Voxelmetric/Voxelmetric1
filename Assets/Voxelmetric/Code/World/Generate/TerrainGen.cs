@@ -16,10 +16,6 @@ public class TerrainGen: MonoBehaviour
 
     public TerrainLayer[] layerOrder = new TerrainLayer[0];
 
-    void Start()
-    {
-    }
-
     public void GenerateTerrainForChunkColumn(BlockPos pos)
     {
         for (int x = pos.x; x < pos.x + Config.Env.ChunkSize; x++)

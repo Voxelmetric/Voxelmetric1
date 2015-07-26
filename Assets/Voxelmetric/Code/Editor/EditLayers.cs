@@ -65,13 +65,32 @@ public class EditLayers
                 fontStyle = FontStyle.Bold;
             }
 
+            GUILayout.BeginHorizontal();
             if (GUILayout.Button((i + 1) + ": " + gen.layerOrder[i].layerName,
-                new GUIStyle(GUI.skin.box) { fontSize = 20, fontStyle = fontStyle, padding = new RectOffset(10, 10, 10, 10) },
+                new GUIStyle(GUI.skin.box) { fontSize = 14, fontStyle = fontStyle, padding = new RectOffset(10, 10, 10, 10) },
                 new GUILayoutOption[] { GUILayout.ExpandWidth(true) }
             ))
             {
                 selected = i;
             }
+
+            if (GUILayout.Button(@"^",
+                new GUIStyle(GUI.skin.box) { fontSize = 14, padding = new RectOffset(10, 10, 10, 10) },
+                new GUILayoutOption[] { GUILayout.MinWidth(40) }
+            ))
+            {
+                MoveLayerOrder(i - 1, i);
+            }
+
+            if (GUILayout.Button("v",
+                new GUIStyle(GUI.skin.box) { fontSize = 14, padding = new RectOffset(10, 10, 10, 10) },
+                new GUILayoutOption[] { GUILayout.MinWidth(40) }
+            ))
+            {
+                MoveLayerOrder(i + 1, i);
+            }
+
+            GUILayout.EndHorizontal();
         }
         GUILayout.EndScrollView();
 
@@ -226,6 +245,23 @@ public class EditLayers
                 GUILayout.Space(10);
             }
 
+            if (gen.layerOrder[selected].customTerrainLayer)
+            {
+                GUILayout.Box("This custom layer uses a class that extends Terrain Layer for generation. All the properties above will be passed to your terrain class for convenience but you don't need to use them.",
+               new GUIStyle(GUI.skin.box) { fontSize = 14, padding = new RectOffset(10, 10, 10, 10) });
+
+                GUILayout.Space(10);
+
+                GUILayout.BeginHorizontal();
+                GUILayout.Label("Custom terrain layer name", new GUIStyle { fontSize = 14, alignment = TextAnchor.MiddleCenter }, new GUILayoutOption[] { GUILayout.Width(200) });
+                gen.layerOrder[selected].terrainLayerClassName = EditorGUILayout.TextField(gen.layerOrder[selected].terrainLayerClassName,
+                    new GUIStyle(GUI.skin.textField) { fontSize = 14 }, new GUILayoutOption[] { GUILayout.Height(18), GUILayout.ExpandWidth(true) });
+                GUILayout.EndHorizontal();
+
+                GUILayout.Space(10);
+
+            }
+
             GUILayout.BeginHorizontal();
             GUILayout.FlexibleSpace();
             GUILayout.BeginVertical();
@@ -243,7 +279,7 @@ public class EditLayers
             GUILayout.EndVertical();
             GUILayout.EndHorizontal();
 
-            if (GUI.changed)
+            if (GUI.changed && selected < gen.layerOrder.Length && selected >=0)
                 EditorUtility.SetDirty(gen.layerOrder[selected]);
         }
         else if (selected == -1)
@@ -330,6 +366,25 @@ public class EditLayers
         }
         GUILayout.EndVertical();
 
+        GUILayout.Space(10);
+
+        GUILayout.BeginVertical(new GUILayoutOption[] { GUILayout.Width(200), GUILayout.Height(40) });
+        GUILayout.Box("References a custom terrain layer defined as a class extending TerrainLayer",
+                new GUIStyle(GUI.skin.box) { fontSize = 14, padding = new RectOffset(10, 10, 10, 10) });
+
+        if (GUILayout.Button("Custom",
+                new GUIStyle(GUI.skin.button) { fontSize = 20, padding = new RectOffset(10, 10, 10, 10) },
+                new GUILayoutOption[] { GUILayout.Width(200), GUILayout.Height(40) }
+            ))
+        {
+            TerrainLayer newLayer = LayersGO().AddComponent<TerrainLayer>();
+            newLayer.layerType = TerrainLayer.LayerType.Absolute;
+            newLayer.customTerrainLayer = true;
+            AddToLayerOrder(newLayer);
+            GetTerrainLayers();
+        }
+        GUILayout.EndVertical();
+
         GUILayout.EndHorizontal();
 
 
@@ -356,11 +411,29 @@ public class EditLayers
     {
         Block.index.textureIndex = new TextureIndex(true);
         var definitions = World.instance.gameObject.GetComponentsInChildren<BlockDefinition>();
+        blockNames.Add("air");
 
         for (int i = 0; i < definitions.Length; i++)
         {
             blockNames.Add(definitions[i].Controller().Name());
         }
+
+    }
+
+    void MoveLayerOrder(int newIndex, int oldIndex)
+    {
+        if (newIndex >= gen.layerOrder.Length || newIndex < 0)
+            return;
+
+        if (selected == oldIndex)
+            selected = newIndex;
+
+        List<TerrainLayer> layers = new List<TerrainLayer>();
+        layers.AddRange(gen.layerOrder);
+        layers.RemoveAt(oldIndex);
+        layers.Insert(newIndex, gen.layerOrder[oldIndex]);
+        gen.layerOrder = layers.ToArray();
+        EditorUtility.SetDirty(gen);
     }
 
     void AddToLayerOrder(TerrainLayer layer)

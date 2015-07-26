@@ -1430,6 +1430,10 @@ Prefab:
   m_Modification:
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 11456570, guid: 28fc5073d6f2b5b42acaec530dd745cd, type: 2}
+      propertyPath: layerOrder.Array.size
+      value: 9
+      objectReference: {fileID: 0}
     - target: {fileID: 479208, guid: 28fc5073d6f2b5b42acaec530dd745cd, type: 2}
       propertyPath: m_LocalPosition.x
       value: 0
@@ -1462,9 +1466,138 @@ Prefab:
       propertyPath: m_RootOrder
       value: 3
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    - target: {fileID: 11403236, guid: 28fc5073d6f2b5b42acaec530dd745cd, type: 2}
+      propertyPath: solidTowardsSameType
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 11456570, guid: 28fc5073d6f2b5b42acaec530dd745cd, type: 2}
+      propertyPath: layerOrder.Array.data[8]
+      value: 
+      objectReference: {fileID: 1126565233}
+    - target: {fileID: 11413014, guid: 28fc5073d6f2b5b42acaec530dd745cd, type: 2}
+      propertyPath: blockName
+      value: stone
+      objectReference: {fileID: 0}
+    - target: {fileID: 11413014, guid: 28fc5073d6f2b5b42acaec530dd745cd, type: 2}
+      propertyPath: baseHeight
+      value: 45
+      objectReference: {fileID: 0}
+    - target: {fileID: 11413014, guid: 28fc5073d6f2b5b42acaec530dd745cd, type: 2}
+      propertyPath: amplitude
+      value: 9
+      objectReference: {fileID: 0}
+    - target: {fileID: 11413014, guid: 28fc5073d6f2b5b42acaec530dd745cd, type: 2}
+      propertyPath: frequency
+      value: 63
+      objectReference: {fileID: 0}
+    - target: {fileID: 11438196, guid: 28fc5073d6f2b5b42acaec530dd745cd, type: 2}
+      propertyPath: amplitude
+      value: 27
+      objectReference: {fileID: 0}
+    - target: {fileID: 11456570, guid: 28fc5073d6f2b5b42acaec530dd745cd, type: 2}
+      propertyPath: layerOrder.Array.data[7]
+      value: 
+      objectReference: {fileID: 1126565234}
+    - target: {fileID: 11456570, guid: 28fc5073d6f2b5b42acaec530dd745cd, type: 2}
+      propertyPath: layerOrder.Array.data[9]
+      value: 
+      objectReference: {fileID: 1126565233}
+    - target: {fileID: 11456570, guid: 28fc5073d6f2b5b42acaec530dd745cd, type: 2}
+      propertyPath: layerOrder.Array.data[0]
+      value: 
+      objectReference: {fileID: 1126565240}
+    - target: {fileID: 11456570, guid: 28fc5073d6f2b5b42acaec530dd745cd, type: 2}
+      propertyPath: layerOrder.Array.data[1]
+      value: 
+      objectReference: {fileID: 1126565239}
+    - target: {fileID: 11456570, guid: 28fc5073d6f2b5b42acaec530dd745cd, type: 2}
+      propertyPath: layerOrder.Array.data[6]
+      value: 
+      objectReference: {fileID: 1126565231}
+    - target: {fileID: 11456570, guid: 28fc5073d6f2b5b42acaec530dd745cd, type: 2}
+      propertyPath: layerOrder.Array.data[5]
+      value: 
+      objectReference: {fileID: 1126565235}
+    m_RemovedComponents:
+    - {fileID: 11483074, guid: 28fc5073d6f2b5b42acaec530dd745cd, type: 2}
   m_ParentPrefab: {fileID: 100100000, guid: 28fc5073d6f2b5b42acaec530dd745cd, type: 2}
   m_IsPrefabParent: 0
+--- !u!1 &1126565230 stripped
+GameObject:
+  m_PrefabParentObject: {fileID: 184620, guid: 28fc5073d6f2b5b42acaec530dd745cd, type: 2}
+  m_PrefabInternal: {fileID: 1126565229}
+--- !u!114 &1126565231
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 1126565230}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1dc11f3ebdfd3c34b906c66aa7868fb4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  layerType: 0
+  layerName: Caves
+  baseHeight: 0
+  frequency: 10
+  amplitude: 10
+  exponent: 1
+  blockName: air
+  percentage: 90
+  structureFrequency: 10
+  structureClassName: StructureTree
+  customTerrainLayer: 1
+  terrainLayerClassName: CavesLayer
+  world: {fileID: 0}
+--- !u!114 &1126565233
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 1126565230}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1dc11f3ebdfd3c34b906c66aa7868fb4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  layerType: 3
+  layerName: Trees
+  baseHeight: 0
+  frequency: 10
+  amplitude: 10
+  exponent: 1
+  blockName: stone
+  percentage: 93
+  structureFrequency: 6
+  structureClassName: StructureTree
+  customTerrainLayer: 0
+  terrainLayerClassName: 
+  world: {fileID: 0}
+--- !u!114 &1126565234 stripped
+MonoBehaviour:
+  m_PrefabParentObject: {fileID: 11446294, guid: 28fc5073d6f2b5b42acaec530dd745cd,
+    type: 2}
+  m_PrefabInternal: {fileID: 1126565229}
+  m_Script: {fileID: 11500000, guid: 1dc11f3ebdfd3c34b906c66aa7868fb4, type: 3}
+--- !u!114 &1126565235 stripped
+MonoBehaviour:
+  m_PrefabParentObject: {fileID: 11478306, guid: 28fc5073d6f2b5b42acaec530dd745cd,
+    type: 2}
+  m_PrefabInternal: {fileID: 1126565229}
+  m_Script: {fileID: 11500000, guid: 1dc11f3ebdfd3c34b906c66aa7868fb4, type: 3}
+--- !u!114 &1126565239 stripped
+MonoBehaviour:
+  m_PrefabParentObject: {fileID: 11418280, guid: 28fc5073d6f2b5b42acaec530dd745cd,
+    type: 2}
+  m_PrefabInternal: {fileID: 1126565229}
+  m_Script: {fileID: 11500000, guid: 1dc11f3ebdfd3c34b906c66aa7868fb4, type: 3}
+--- !u!114 &1126565240 stripped
+MonoBehaviour:
+  m_PrefabParentObject: {fileID: 11413014, guid: 28fc5073d6f2b5b42acaec530dd745cd,
+    type: 2}
+  m_PrefabInternal: {fileID: 1126565229}
+  m_Script: {fileID: 11500000, guid: 1dc11f3ebdfd3c34b906c66aa7868fb4, type: 3}
 --- !u!1 &1195630378
 GameObject:
   m_ObjectHideFlags: 0
