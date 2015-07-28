@@ -57,25 +57,6 @@ public class TerrainLayer: MonoBehaviour {
             structure = (GeneratedStructure)Activator.CreateInstance(type);
         }
 
-        if (customTerrainLayer)
-        {
-            var customLayerType = Type.GetType(terrainLayerClassName + ", " + typeof(LayerOverride).Assembly);
-            customLayer = (LayerOverride)Activator.CreateInstance(customLayerType);
-
-            customLayer.world = world;
-            customLayer.noiseGen = noise;
-            customLayer.baseHeight = baseHeight;
-            customLayer.frequency = frequency;
-            customLayer.amplitude = amplitude;
-            customLayer.exponent = exponent;
-            customLayer.blockName = blockName;
-            customLayer.percentage = percentage;
-            customLayer.structureFrequency = structureFrequency;
-
-            if (layerType == LayerType.Structure)
-                customLayer.structure = structure;
-        }
-
         return this;
     }
 
@@ -86,9 +67,27 @@ public class TerrainLayer: MonoBehaviour {
 
         if (customTerrainLayer)
         {
-            //Profiler.BeginSample("custom");
+            //Not the best place for this but it ensures that custom layers are always initialized before use
+            if (customLayer == null)
+            {
+                var customLayerType = Type.GetType(terrainLayerClassName + ", " + typeof(LayerOverride).Assembly);
+                customLayer = (LayerOverride)Activator.CreateInstance(customLayerType);
+
+                customLayer.world = world;
+                customLayer.noiseGen = noiseGen;
+                customLayer.baseHeight = baseHeight;
+                customLayer.frequency = frequency;
+                customLayer.amplitude = amplitude;
+                customLayer.exponent = exponent;
+                customLayer.blockName = blockName;
+                customLayer.percentage = percentage;
+                customLayer.structureFrequency = structureFrequency;
+
+                if (layerType == LayerType.Structure)
+                    customLayer.structure = structure;
+            }
+
             int newHeight = customLayer.GenerateLayer(x, z, heightSoFar, strength, justGetHeight);
-            //Profiler.EndSample();
             return newHeight;
         }
 
