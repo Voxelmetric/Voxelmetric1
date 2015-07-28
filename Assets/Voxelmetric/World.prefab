@@ -57,6 +57,8 @@ GameObject:
   - 114: {fileID: 11446294}
   - 114: {fileID: 11476858}
   - 114: {fileID: 11430418}
+  - 114: {fileID: 11453230}
+  - 114: {fileID: 11427492}
   m_Layer: 0
   m_Name: Terrain Layers
   m_TagString: Untagged
@@ -181,7 +183,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   layerType: 0
   layerName: Base stone
-  baseHeight: 45
+  baseHeight: 24
   frequency: 63
   amplitude: 9
   exponent: 1
@@ -206,12 +208,36 @@ MonoBehaviour:
   layerType: 0
   layerName: StoneMountains1
   baseHeight: 1
-  frequency: 96
+  frequency: 103
   amplitude: 57
   exponent: 1
   blockName: stone
   percentage: 90
   structureFrequency: 10
+  structureClassName: StructureTree
+  customTerrainLayer: 0
+  terrainLayerClassName: 
+  world: {fileID: 0}
+--- !u!114 &11427492
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 184620}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1dc11f3ebdfd3c34b906c66aa7868fb4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  layerType: 3
+  layerName: Trees
+  baseHeight: 0
+  frequency: 10
+  amplitude: 10
+  exponent: 1
+  blockName: stone
+  percentage: 84
+  structureFrequency: 11
   structureClassName: StructureTree
   customTerrainLayer: 0
   terrainLayerClassName: 
@@ -304,8 +330,8 @@ MonoBehaviour:
   layerType: 1
   layerName: StoneMountains2
   baseHeight: 4
-  frequency: 69
-  amplitude: 27
+  frequency: 85
+  amplitude: 41
   exponent: 1
   blockName: stone
   percentage: 90
@@ -359,6 +385,30 @@ MonoBehaviour:
   - connected
   blockIsSolid: 1
   solidTowardsSameType: 1
+--- !u!114 &11453230
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 184620}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1dc11f3ebdfd3c34b906c66aa7868fb4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  layerType: 0
+  layerName: Caves
+  baseHeight: 0
+  frequency: 10
+  amplitude: 10
+  exponent: 1
+  blockName: air
+  percentage: 90
+  structureFrequency: 10
+  structureClassName: StructureTree
+  customTerrainLayer: 1
+  terrainLayerClassName: CavesLayer
+  world: {fileID: 0}
 --- !u!114 &11456570
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -383,9 +433,9 @@ MonoBehaviour:
   - {fileID: 11460328}
   - {fileID: 11403132}
   - {fileID: 11478306}
-  - {fileID: 11476858}
+  - {fileID: 11453230}
   - {fileID: 11446294}
-  - {fileID: 11430418}
+  - {fileID: 11427492}
 --- !u!114 &11460328
 MonoBehaviour:
   m_ObjectHideFlags: 1
