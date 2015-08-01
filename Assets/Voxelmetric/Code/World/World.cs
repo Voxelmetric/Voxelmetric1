@@ -25,7 +25,7 @@ public class World : MonoBehaviour {
 
     //This world name is used for the save file name
     public string worldName = "world";
-    Noise noiseGen;
+    public Noise noiseGen;
     TerrainGen terrainGen;
     public System.Random random;
 
