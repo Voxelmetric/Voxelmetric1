@@ -188,6 +188,17 @@ public class EditBlocks {
                     new GUIStyle(GUI.skin.toggle) { fontSize = 14 }, new GUILayoutOption[] { GUILayout.ExpandWidth(true), GUILayout.Height(18) });
                 GUILayout.EndHorizontal();
 
+                if (!cube.blockIsSolid)
+                {
+                    GUILayout.Space(10);
+
+                    GUILayout.BeginHorizontal();
+                    GUILayout.Label("Solid towards same type", new GUIStyle { fontSize = 14, alignment = TextAnchor.MiddleCenter }, new GUILayoutOption[] { GUILayout.Width(200) });
+                    cube.solidTowardsSameType = EditorGUILayout.Toggle(cube.solidTowardsSameType,
+                        new GUIStyle(GUI.skin.toggle) { fontSize = 14 }, new GUILayoutOption[] { GUILayout.ExpandWidth(true), GUILayout.Height(18) });
+                    GUILayout.EndHorizontal();
+                }
+
             }
             else if (definitions[selectedBlock].GetType() == typeof(MeshDefinition))
             {
