@@ -90,7 +90,9 @@ public class TerrainLayer: MonoBehaviour {
         {
             if (GetNoise(x, -10555, z, 1, 100, 1) < chanceToSpawnBlock)
             {
-                world.SetBlock(new BlockPos(x, heightSoFar, z), blockToPlace, false);
+                if(!justGetHeight)
+                    world.SetBlock(new BlockPos(x, heightSoFar, z), blockToPlace, false);
+
                 return heightSoFar + 1;
             }
             else
