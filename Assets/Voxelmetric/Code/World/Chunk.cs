@@ -100,7 +100,7 @@ public class Chunk : MonoBehaviour
             randomPos.y = world.random.Next(0, 16);
             randomPos.z = world.random.Next(0, 16);
 
-            GetBlock(randomPos).controller.RandomUpdate(this, randomPos + pos, GetBlock(randomPos));
+            GetBlock(randomPos).controller.RandomUpdate(this, randomPos, GetBlock(randomPos));
 
             ProcessScheduledUpdates();
         }
