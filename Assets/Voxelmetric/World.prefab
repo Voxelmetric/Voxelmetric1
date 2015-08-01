@@ -128,8 +128,6 @@ MonoBehaviour:
   exponent: 1
   blockName: dirt
   chanceToSpawnBlock: 10
-  percentage: 90
-  structureFrequency: 10
   structureClassName: StructureTree
   customTerrainLayer: 0
   terrainLayerClassName: 
@@ -174,8 +172,6 @@ MonoBehaviour:
   exponent: 1
   blockName: air
   chanceToSpawnBlock: 10
-  percentage: 90
-  structureFrequency: 10
   structureClassName: StructureTree
   customTerrainLayer: 1
   terrainLayerClassName: CavesLayer
@@ -214,14 +210,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   layerType: 0
   layerName: Base stone
-  baseHeight: 45
+  baseHeight: 39
   frequency: 63
   amplitude: 9
   exponent: 1
   blockName: stone
   chanceToSpawnBlock: 10
-  percentage: 90
-  structureFrequency: 10
   structureClassName: StructureTree
   customTerrainLayer: 0
   terrainLayerClassName: 
@@ -244,9 +238,7 @@ MonoBehaviour:
   amplitude: 10
   exponent: 1
   blockName: stone
-  chanceToSpawnBlock: 10
-  percentage: 90
-  structureFrequency: 11
+  chanceToSpawnBlock: 12
   structureClassName: StructureTree
   customTerrainLayer: 0
   terrainLayerClassName: 
@@ -270,8 +262,6 @@ MonoBehaviour:
   exponent: 1
   blockName: stone
   chanceToSpawnBlock: 10
-  percentage: 90
-  structureFrequency: 10
   structureClassName: StructureTree
   customTerrainLayer: 0
   terrainLayerClassName: 
@@ -295,8 +285,6 @@ MonoBehaviour:
   exponent: 1
   blockName: stone
   chanceToSpawnBlock: 10
-  percentage: 84
-  structureFrequency: 11
   structureClassName: StructureTree
   customTerrainLayer: 0
   terrainLayerClassName: 
@@ -333,8 +321,6 @@ MonoBehaviour:
   exponent: 1
   blockName: stone
   chanceToSpawnBlock: 10
-  percentage: 93
-  structureFrequency: 6
   structureClassName: StructureTree
   customTerrainLayer: 0
   terrainLayerClassName: 
@@ -395,8 +381,6 @@ MonoBehaviour:
   exponent: 1
   blockName: stone
   chanceToSpawnBlock: 10
-  percentage: 90
-  structureFrequency: 9
   structureClassName: StructureTree
   customTerrainLayer: 0
   terrainLayerClassName: 
@@ -420,8 +404,6 @@ MonoBehaviour:
   exponent: 1
   blockName: air
   chanceToSpawnBlock: 10
-  percentage: 90
-  structureFrequency: 10
   structureClassName: StructureTree
   customTerrainLayer: 1
   terrainLayerClassName: CavesLayer
@@ -445,8 +427,6 @@ MonoBehaviour:
   exponent: 1
   blockName: grass
   chanceToSpawnBlock: 10
-  percentage: 90
-  structureFrequency: 10
   structureClassName: StructureTree
   customTerrainLayer: 0
   terrainLayerClassName: 
@@ -491,8 +471,6 @@ MonoBehaviour:
   exponent: 1
   blockName: air
   chanceToSpawnBlock: 10
-  percentage: 90
-  structureFrequency: 10
   structureClassName: StructureTree
   customTerrainLayer: 1
   terrainLayerClassName: CavesLayer
@@ -544,8 +522,6 @@ MonoBehaviour:
   exponent: 1
   blockName: stone
   chanceToSpawnBlock: 10
-  percentage: 90
-  structureFrequency: 10
   structureClassName: StructureTree
   customTerrainLayer: 0
   terrainLayerClassName: 
@@ -590,8 +566,6 @@ MonoBehaviour:
   exponent: 1
   blockName: air
   chanceToSpawnBlock: 10
-  percentage: 90
-  structureFrequency: 10
   structureClassName: StructureTree
   customTerrainLayer: 1
   terrainLayerClassName: CavesLayer
@@ -615,8 +589,6 @@ MonoBehaviour:
   exponent: 1
   blockName: dirt
   chanceToSpawnBlock: 10
-  percentage: 90
-  structureFrequency: 10
   structureClassName: StructureTree
   customTerrainLayer: 0
   terrainLayerClassName: 
@@ -660,9 +632,7 @@ MonoBehaviour:
   amplitude: 10
   exponent: 1
   blockName: wildgrass
-  chanceToSpawnBlock: 91
-  percentage: 90
-  structureFrequency: 10
+  chanceToSpawnBlock: 26
   structureClassName: StructureTree
   customTerrainLayer: 0
   terrainLayerClassName: 
@@ -686,8 +656,6 @@ MonoBehaviour:
   exponent: 1
   blockName: stone
   chanceToSpawnBlock: 10
-  percentage: 93
-  structureFrequency: 6
   structureClassName: StructureTree
   customTerrainLayer: 0
   terrainLayerClassName: 

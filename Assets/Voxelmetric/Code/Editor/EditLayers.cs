@@ -138,9 +138,14 @@ public class EditLayers
                 GUILayout.Box("Surface layers are used for a 1 block thick layer that covers all the terrain",
                new GUIStyle(GUI.skin.box) { fontSize = 14, padding = new RectOffset(10, 10, 10, 10) }, new GUILayoutOption[]{ GUILayout.ExpandWidth(true)});
             }
-            else if (gen.layerOrder[selected].layerType != TerrainLayer.LayerType.Structure)
+            else if (gen.layerOrder[selected].layerType == TerrainLayer.LayerType.Absolute )
             {
                 GUILayout.Box("Absolute layers replace terrain starting from the bottom up to their generated height, additive layers add their height on top of the terrain generated so far. For these layers min and max height are the heights the noise generation will keep within, frequency is the distance between the peaks and valleys in the noise and exponent is used by getting the height after the noise and getting it to the power of the supplied exponent.",
+               new GUIStyle(GUI.skin.box) { fontSize = 14, padding = new RectOffset(10, 10, 10, 10) }, new GUILayoutOption[] { GUILayout.ExpandWidth(true) });
+            }
+            else if (gen.layerOrder[selected].layerType == TerrainLayer.LayerType.Chance)
+            {
+                GUILayout.Box("Chance layers create a block if a random chance is larger than the percentage you define, use it for distributing blocks randomly onto the terrain.",
                new GUIStyle(GUI.skin.box) { fontSize = 14, padding = new RectOffset(10, 10, 10, 10) }, new GUILayoutOption[] { GUILayout.ExpandWidth(true) });
             }
             GUILayout.EndHorizontal();
@@ -230,29 +235,17 @@ public class EditLayers
 
             if (gen.layerOrder[selected].layerType == TerrainLayer.LayerType.Structure)
             {
-                GUILayout.Box("For structure layers you can define how often the structure should be generated, this is done by generating noise at the Frequency described and where the noise exceeds the percentage a structure is placed. Raise frequency to make structures generate further from each other and raise percentage if you find that structures are being generated on top of each other. You can also just define a block name and use that block instead of a structure.",
+                GUILayout.Box("For structure layers you can define how often the structure should be generated, this is not an actual percentage, per block. You can also define the Structure class to use for building.",
                new GUIStyle(GUI.skin.box) { fontSize = 14, padding = new RectOffset(10, 10, 10, 10) });
 
                 GUILayout.Space(10);
 
                 GUILayout.BeginHorizontal();
                 GUILayout.Label("Percentage", new GUIStyle { fontSize = 14, alignment = TextAnchor.MiddleCenter }, new GUILayoutOption[] { GUILayout.Width(200) });
-                gen.layerOrder[selected].percentage = (int)EditorGUILayout.FloatField(gen.layerOrder[selected].percentage,
+                gen.layerOrder[selected].chanceToSpawnBlock = (int)EditorGUILayout.FloatField(gen.layerOrder[selected].chanceToSpawnBlock,
                     new GUIStyle(GUI.skin.textField) { fontSize = 14 }, new GUILayoutOption[] { GUILayout.Height(18), GUILayout.Width(48) });
                 GUILayout.Space(10);
-                gen.layerOrder[selected].percentage = (int)GUILayout.HorizontalSlider((float)gen.layerOrder[selected].percentage, 1f, 100f,
-                    new GUILayoutOption[] { GUILayout.ExpandWidth(true), GUILayout.Height(18) });
-                GUILayout.Space(10);
-                GUILayout.EndHorizontal();
-
-                GUILayout.Space(10);
-
-                GUILayout.BeginHorizontal();
-                GUILayout.Label("Frequency", new GUIStyle { fontSize = 14, alignment = TextAnchor.MiddleCenter }, new GUILayoutOption[] { GUILayout.Width(200) });
-                gen.layerOrder[selected].structureFrequency = (int)EditorGUILayout.FloatField(gen.layerOrder[selected].structureFrequency,
-                    new GUIStyle(GUI.skin.textField) { fontSize = 14 }, new GUILayoutOption[] { GUILayout.Height(18), GUILayout.Width(48) });
-                GUILayout.Space(10);
-                gen.layerOrder[selected].structureFrequency = (int)GUILayout.HorizontalSlider((float)gen.layerOrder[selected].structureFrequency, 0f, 256f,
+                gen.layerOrder[selected].chanceToSpawnBlock = (int)GUILayout.HorizontalSlider((float)gen.layerOrder[selected].chanceToSpawnBlock, 1f, 100f,
                     new GUILayoutOption[] { GUILayout.ExpandWidth(true), GUILayout.Height(18) });
                 GUILayout.Space(10);
                 GUILayout.EndHorizontal();

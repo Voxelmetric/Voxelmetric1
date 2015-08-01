@@ -28,13 +28,6 @@ public class TerrainLayer: MonoBehaviour {
     public string blockName = "stone";
     public int chanceToSpawnBlock = 10;
 
-    [Header("Structure parameters")]
-    [Range(0, 100)]
-    [Tooltip("The threshold to create the structure at a location, if you get tightly packed clusters raise this")]
-    public int percentage=90;
-    [Range(1, 256)]
-    [Tooltip("Distance between structures")]
-    public int structureFrequency = 10;
     [Tooltip("Name of the class that generates this structure")]
     public string structureClassName = "StructureTree";
 
@@ -81,8 +74,6 @@ public class TerrainLayer: MonoBehaviour {
                 customLayer.amplitude = amplitude;
                 customLayer.exponent = exponent;
                 customLayer.blockName = blockName;
-                customLayer.percentage = percentage;
-                customLayer.structureFrequency = structureFrequency;
 
                 if (layerType == LayerType.Structure)
                     customLayer.structure = structure;
@@ -97,7 +88,7 @@ public class TerrainLayer: MonoBehaviour {
 
         if (layerType == LayerType.Chance)
         {
-            if (GetNoise(x, 0, z, 0.1f, 100, 1) > chanceToSpawnBlock)
+            if (GetNoise(x, -10555, z, 1, 100, 1) < chanceToSpawnBlock)
             {
                 world.SetBlock(new BlockPos(x, heightSoFar, z), blockToPlace, false);
                 return heightSoFar + 1;
@@ -164,13 +155,13 @@ public class TerrainLayer: MonoBehaviour {
         {
             for (int z = minZ; z < maxZ; z++)
             {
-                int percentChance = GetNoise(x, 0, z, structureFrequency, 100, 1);
-                if (GetNoise(x, 0, z, structureFrequency, 100, 1) > percentage)
+                int percentChance = GetNoise(x, 0, z, 10, 100, 1);
+                if (percentChance < chanceToSpawnBlock)
                 {
-                    if (percentChance > GetNoise(x + 1, 0, z, structureFrequency, 100, 1)
-                        && percentChance > GetNoise(x - 1, 0, z, structureFrequency, 100, 1)
-                        && percentChance > GetNoise(x, 0, z + 1, structureFrequency, 100, 1)
-                        && percentChance > GetNoise(x, 0, z - 1, structureFrequency, 100, 1))
+                    if (percentChance < GetNoise(x + 1, 0, z, 10, 100, 1)
+                        && percentChance < GetNoise(x - 1, 0, z, 10, 100, 1)
+                        && percentChance < GetNoise(x, 0, z + 1, 10, 100, 1)
+                        && percentChance < GetNoise(x, 0, z - 1, 10, 100, 1))
                     {
                         int height = terrainGen.GenerateTerrainForBlockColumn(x, z, true);
                         structure.Build(world, chunkPos, new BlockPos(x, height, z), this);
@@ -183,9 +174,11 @@ public class TerrainLayer: MonoBehaviour {
 
     public int GetNoise(int x, int y, int z, float scale, int max, float power)
     {
-        float noise = (noiseGen.Generate(x / scale, y / scale, z / scale) + 1f) * (max / 2f);
+        float noise = (noiseGen.Generate(x / scale, y / scale, z / scale) + 1f);
+        noise *= (max / 2f);
 
-        noise = Mathf.Pow(noise, power);
+        if(power!=1)
+            noise = Mathf.Pow(noise, power);
 
         return Mathf.FloorToInt(noise);
     }
