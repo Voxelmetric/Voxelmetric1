@@ -4,9 +4,7 @@
 TagManager:
   serializedVersion: 2
   tags:
-  - Dwarf
   - Chunk
-  - Construction
   layers:
   - Default
   - TransparentFX
@@ -16,9 +14,9 @@ TagManager:
   - UI
   - 
   - 
-  - Dwarves
-  - Terrain
-  - Construction
+  - Voxels
+  - 
+  - 
   - 
   - 
   - 
