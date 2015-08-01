@@ -12,6 +12,7 @@ public class OldTerrainGen
     }
 
     Noise noiseGen;
+    TerrainGen terrainGen;
 
     protected int stoneBaseHeight = -20;
     protected float stoneBaseNoise = 0.03f;
@@ -132,23 +133,17 @@ public class OldTerrainGen
 
     void CreateTreeIfValid(int x, int z, Chunk chunk)
     {
-        //not working
-        //if (GetNoise(x + chunk.pos.x, 0, z + chunk.pos.z, 0.2f, 100, 1) < 3)
-        //{
-        //    int terrainHeight = LayerStoneBase(x + chunk.pos.x, z + chunk.pos.z);
-        //    terrainHeight += LayerStoneNoise(x + chunk.pos.x, z + chunk.pos.z);
-        //    terrainHeight += LayerDirt(x + chunk.pos.x, z + chunk.pos.z); ;
+        if (GetNoise(x + chunk.pos.x, -10000, z + chunk.pos.z, 100, 100, 1) < 10)
+        {
+            if (GetNoise(x + chunk.pos.x, 10000, z + chunk.pos.z, 100, 100, 1) < 15)
+            {
+                int terrainHeight = LayerStoneBase(x + chunk.pos.x, z + chunk.pos.z);
+                terrainHeight += LayerStoneNoise(x + chunk.pos.x, z + chunk.pos.z);
+                terrainHeight += LayerDirt(x + chunk.pos.x, z + chunk.pos.z);
 
-        //    for (int y = 0; y < Config.Env.WorldMaxY; y++)
-        //    {
-        //        Block grass = "grass";
-        //        if (chunk.world.GetBlock(new BlockPos(x, y, z)) == grass)
-        //        {
-        //            treeStructure.OldBuild(chunk.world, chunk.pos, new BlockPos(chunk.pos.x + x, y+1, chunk.pos.z + z), this);
-        //            return;
-        //        }
-        //    }
-        //}
+                treeStructure.OldBuild(chunk.world, chunk.pos, new BlockPos(x, terrainHeight - chunk.pos.y, z), this);
+            }
+        }
     }
 
 }

@@ -240,8 +240,8 @@ MonoBehaviour:
   amplitude: 10
   exponent: 1
   blockName: stone
-  percentage: 93
-  structureFrequency: 6
+  percentage: 90
+  structureFrequency: 11
   structureClassName: StructureTree
   customTerrainLayer: 0
   terrainLayerClassName: 
@@ -260,8 +260,8 @@ MonoBehaviour:
   layerType: 0
   layerName: StoneMountains1
   baseHeight: 1
-  frequency: 103
-  amplitude: 57
+  frequency: 129
+  amplitude: 40
   exponent: 1
   blockName: stone
   percentage: 90
@@ -382,8 +382,8 @@ MonoBehaviour:
   layerType: 1
   layerName: StoneMountains2
   baseHeight: 4
-  frequency: 85
-  amplitude: 41
+  frequency: 111
+  amplitude: 38
   exponent: 1
   blockName: stone
   percentage: 90
@@ -673,6 +673,10 @@ Prefab:
     - target: {fileID: 0}
       propertyPath: solidTowardsSameType
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 0}
+      propertyPath: percentage
+      value: 90
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 0}

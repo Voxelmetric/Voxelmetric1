@@ -46,6 +46,7 @@ public class StructureTree: GeneratedStructure {
     public void OldBuild(World world, BlockPos chunkPos, BlockPos pos, OldTerrainGen gen)
     {
         int leaves = gen.GetNoise(pos.x, 0, pos.z, 1f, 2, 1) + 1;
+        pos = pos.Add(chunkPos);
 
         for (int x = -leaves; x <= leaves; x++)
         {
