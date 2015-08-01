@@ -123,7 +123,7 @@ public class EditLayers
             int i = 0;
             GUILayout.BeginHorizontal();
             GUILayout.Label("Layer type", new GUIStyle { fontSize = 14, alignment = TextAnchor.MiddleCenter }, new GUILayoutOption[] { GUILayout.Width(200) });
-            i = EditorGUILayout.Popup((int)gen.layerOrder[selected].layerType, new string[] { "Absolute", "Additive", "Surface", "Structure" },
+            i = EditorGUILayout.Popup((int)gen.layerOrder[selected].layerType, new string[] { "Absolute", "Additive", "Surface", "Structure", "Chance" },
                 new GUIStyle(GUI.skin.textField) { fontSize = 14 }, new GUILayoutOption[] { GUILayout.ExpandWidth(true), GUILayout.Height(18) });
             if (i >= 0)
                 gen.layerOrder[selected].layerType = (TerrainLayer.LayerType)i;
@@ -159,7 +159,7 @@ public class EditLayers
 
                 GUILayout.Space(10);
 
-                if (gen.layerOrder[selected].layerType != TerrainLayer.LayerType.Surface)
+                if (gen.layerOrder[selected].layerType != TerrainLayer.LayerType.Surface && gen.layerOrder[selected].layerType != TerrainLayer.LayerType.Chance)
                 {
                     GUILayout.BeginHorizontal();
                     GUILayout.Label("Min height", new GUIStyle { fontSize = 14, alignment = TextAnchor.MiddleCenter }, new GUILayoutOption[] { GUILayout.Width(200) });
@@ -213,9 +213,24 @@ public class EditLayers
                 }
             }
 
+            if (gen.layerOrder[selected].layerType == TerrainLayer.LayerType.Chance)
+            {
+                GUILayout.BeginHorizontal();
+                GUILayout.Label("Chance to create block", new GUIStyle { fontSize = 14, alignment = TextAnchor.MiddleCenter }, new GUILayoutOption[] { GUILayout.Width(200) });
+                gen.layerOrder[selected].chanceToSpawnBlock = (int)EditorGUILayout.FloatField(gen.layerOrder[selected].chanceToSpawnBlock,
+                    new GUIStyle(GUI.skin.textField) { fontSize = 14 }, new GUILayoutOption[] { GUILayout.Height(18), GUILayout.Width(48) });
+                GUILayout.Space(10);
+                gen.layerOrder[selected].chanceToSpawnBlock = (int)GUILayout.HorizontalSlider(gen.layerOrder[selected].chanceToSpawnBlock, 0, 100,
+                    new GUILayoutOption[] { GUILayout.ExpandWidth(true), GUILayout.Height(18) });
+                GUILayout.Space(10);
+                GUILayout.EndHorizontal();
+
+                GUILayout.Space(10);
+            }
+
             if (gen.layerOrder[selected].layerType == TerrainLayer.LayerType.Structure)
             {
-                GUILayout.Box("For structure layers you can define how often the structure should be generated, this is done by generating noise at the Frequency described and where the noise exceeds the percentage a structure is placed. Raise frequency to make structures generate further from each other and raise percentage if you find that structures are being generated on top of each other",
+                GUILayout.Box("For structure layers you can define how often the structure should be generated, this is done by generating noise at the Frequency described and where the noise exceeds the percentage a structure is placed. Raise frequency to make structures generate further from each other and raise percentage if you find that structures are being generated on top of each other. You can also just define a block name and use that block instead of a structure.",
                new GUIStyle(GUI.skin.box) { fontSize = 14, padding = new RectOffset(10, 10, 10, 10) });
 
                 GUILayout.Space(10);
@@ -243,7 +258,16 @@ public class EditLayers
                 GUILayout.EndHorizontal();
 
                 GUILayout.Space(10);
+
+                GUILayout.BeginHorizontal();
+                GUILayout.Label("Structure name", new GUIStyle { fontSize = 14, alignment = TextAnchor.MiddleCenter }, new GUILayoutOption[] { GUILayout.Width(200) });
+                gen.layerOrder[selected].structureClassName = EditorGUILayout.TextField(gen.layerOrder[selected].structureClassName,
+                    new GUIStyle(GUI.skin.textField) { fontSize = 14, }, new GUILayoutOption[] { GUILayout.Height(18), GUILayout.ExpandWidth(true) });
+                GUILayout.EndHorizontal();
+                GUILayout.Space(10);
             }
+
+            
 
             if (gen.layerOrder[selected].customTerrainLayer)
             {
@@ -380,6 +404,24 @@ public class EditLayers
             TerrainLayer newLayer = LayersGO().AddComponent<TerrainLayer>();
             newLayer.layerType = TerrainLayer.LayerType.Absolute;
             newLayer.customTerrainLayer = true;
+            AddToLayerOrder(newLayer);
+            GetTerrainLayers();
+        }
+        GUILayout.EndVertical();
+
+        GUILayout.Space(10);
+
+        GUILayout.BeginVertical(new GUILayoutOption[] { GUILayout.Width(200), GUILayout.Height(40) });
+        GUILayout.Box("This layer is used to create blocks randomly based on a percentage chance to spawn.",
+                new GUIStyle(GUI.skin.box) { fontSize = 14, padding = new RectOffset(10, 10, 10, 10) });
+
+        if (GUILayout.Button("Chance",
+                new GUIStyle(GUI.skin.button) { fontSize = 20, padding = new RectOffset(10, 10, 10, 10) },
+                new GUILayoutOption[] { GUILayout.Width(200), GUILayout.Height(40) }
+            ))
+        {
+            TerrainLayer newLayer = LayersGO().AddComponent<TerrainLayer>();
+            newLayer.layerType = TerrainLayer.LayerType.Chance;
             AddToLayerOrder(newLayer);
             GetTerrainLayers();
         }

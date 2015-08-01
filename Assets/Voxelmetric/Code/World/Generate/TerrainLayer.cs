@@ -6,7 +6,7 @@ using System;
 
 public class TerrainLayer: MonoBehaviour {
 
-    public enum LayerType { Absolute, Additive, Surface, Structure };
+    public enum LayerType { Absolute, Additive, Surface, Structure, Chance };
 
     public LayerType layerType = LayerType.Absolute;
     public string layerName = "layername";
@@ -26,6 +26,7 @@ public class TerrainLayer: MonoBehaviour {
     public float exponent = 1;
 
     public string blockName = "stone";
+    public int chanceToSpawnBlock = 10;
 
     [Header("Structure parameters")]
     [Range(0, 100)]
@@ -94,6 +95,19 @@ public class TerrainLayer: MonoBehaviour {
         Block blockToPlace = blockName;
         blockToPlace.modified = false;
 
+        if (layerType == LayerType.Chance)
+        {
+            if (GetNoise(x, 0, z, 0.1f, 100, 1) > chanceToSpawnBlock)
+            {
+                world.SetBlock(new BlockPos(x, heightSoFar, z), blockToPlace, false);
+                return heightSoFar + 1;
+            }
+            else
+            {
+                return heightSoFar;
+            }
+        }
+
         int height = GetNoise(x, 0, z, frequency, amplitude, exponent);
         height += baseHeight;
         height = (int)(height * strength);
@@ -139,10 +153,12 @@ public class TerrainLayer: MonoBehaviour {
             return;
         }
 
-        int minX = chunkPos.x - structure.negX;
-        int maxX = chunkPos.x + Config.Env.ChunkSize + structure.posX;
-        int minZ = chunkPos.z - structure.negZ;
-        int maxZ = chunkPos.z + Config.Env.ChunkSize + structure.posZ;
+        int minX, maxX, minZ, maxZ;
+
+        minX = chunkPos.x - structure.negX;
+        maxX = chunkPos.x + Config.Env.ChunkSize + structure.posX;
+        minZ = chunkPos.z - structure.negZ;
+        maxZ = chunkPos.z + Config.Env.ChunkSize + structure.posZ;
 
         for (int x = minX; x < maxX; x++)
         {
@@ -156,7 +172,6 @@ public class TerrainLayer: MonoBehaviour {
                         && percentChance > GetNoise(x, 0, z + 1, structureFrequency, 100, 1)
                         && percentChance > GetNoise(x, 0, z - 1, structureFrequency, 100, 1))
                     {
-
                         int height = terrainGen.GenerateTerrainForBlockColumn(x, z, true);
                         structure.Build(world, chunkPos, new BlockPos(x, height, z), this);
                     }

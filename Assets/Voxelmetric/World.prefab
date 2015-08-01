@@ -63,6 +63,7 @@ GameObject:
   - 114: {fileID: 11496202}
   - 114: {fileID: 11444470}
   - 114: {fileID: 11413568}
+  - 114: {fileID: 11496026}
   m_Layer: 0
   m_Name: Terrain Layers
   m_TagString: Untagged
@@ -126,6 +127,7 @@ MonoBehaviour:
   amplitude: 4
   exponent: 1
   blockName: dirt
+  chanceToSpawnBlock: 10
   percentage: 90
   structureFrequency: 10
   structureClassName: StructureTree
@@ -171,6 +173,7 @@ MonoBehaviour:
   amplitude: 10
   exponent: 1
   blockName: air
+  chanceToSpawnBlock: 10
   percentage: 90
   structureFrequency: 10
   structureClassName: StructureTree
@@ -216,6 +219,7 @@ MonoBehaviour:
   amplitude: 9
   exponent: 1
   blockName: stone
+  chanceToSpawnBlock: 10
   percentage: 90
   structureFrequency: 10
   structureClassName: StructureTree
@@ -240,6 +244,7 @@ MonoBehaviour:
   amplitude: 10
   exponent: 1
   blockName: stone
+  chanceToSpawnBlock: 10
   percentage: 90
   structureFrequency: 11
   structureClassName: StructureTree
@@ -264,6 +269,7 @@ MonoBehaviour:
   amplitude: 40
   exponent: 1
   blockName: stone
+  chanceToSpawnBlock: 10
   percentage: 90
   structureFrequency: 10
   structureClassName: StructureTree
@@ -288,6 +294,7 @@ MonoBehaviour:
   amplitude: 10
   exponent: 1
   blockName: stone
+  chanceToSpawnBlock: 10
   percentage: 84
   structureFrequency: 11
   structureClassName: StructureTree
@@ -325,6 +332,7 @@ MonoBehaviour:
   amplitude: 10
   exponent: 1
   blockName: stone
+  chanceToSpawnBlock: 10
   percentage: 93
   structureFrequency: 6
   structureClassName: StructureTree
@@ -386,6 +394,7 @@ MonoBehaviour:
   amplitude: 38
   exponent: 1
   blockName: stone
+  chanceToSpawnBlock: 10
   percentage: 90
   structureFrequency: 9
   structureClassName: StructureTree
@@ -410,6 +419,7 @@ MonoBehaviour:
   amplitude: 10
   exponent: 1
   blockName: air
+  chanceToSpawnBlock: 10
   percentage: 90
   structureFrequency: 10
   structureClassName: StructureTree
@@ -434,6 +444,7 @@ MonoBehaviour:
   amplitude: 1
   exponent: 1
   blockName: grass
+  chanceToSpawnBlock: 10
   percentage: 90
   structureFrequency: 10
   structureClassName: StructureTree
@@ -479,6 +490,7 @@ MonoBehaviour:
   amplitude: 10
   exponent: 1
   blockName: air
+  chanceToSpawnBlock: 10
   percentage: 90
   structureFrequency: 10
   structureClassName: StructureTree
@@ -511,6 +523,7 @@ MonoBehaviour:
   - {fileID: 11478306}
   - {fileID: 11444470}
   - {fileID: 11446294}
+  - {fileID: 11496026}
   - {fileID: 11413568}
 --- !u!114 &11460328
 MonoBehaviour:
@@ -530,6 +543,7 @@ MonoBehaviour:
   amplitude: 3
   exponent: 1
   blockName: stone
+  chanceToSpawnBlock: 10
   percentage: 90
   structureFrequency: 10
   structureClassName: StructureTree
@@ -575,6 +589,7 @@ MonoBehaviour:
   amplitude: 10
   exponent: 1
   blockName: air
+  chanceToSpawnBlock: 10
   percentage: 90
   structureFrequency: 10
   structureClassName: StructureTree
@@ -599,6 +614,7 @@ MonoBehaviour:
   amplitude: 6
   exponent: 1
   blockName: dirt
+  chanceToSpawnBlock: 10
   percentage: 90
   structureFrequency: 10
   structureClassName: StructureTree
@@ -626,6 +642,31 @@ MonoBehaviour:
   - grass_side
   blockIsSolid: 1
   solidTowardsSameType: 1
+--- !u!114 &11496026
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 184620}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1dc11f3ebdfd3c34b906c66aa7868fb4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  layerType: 4
+  layerName: Wild Grass
+  baseHeight: 0
+  frequency: 10
+  amplitude: 10
+  exponent: 1
+  blockName: wildgrass
+  chanceToSpawnBlock: 91
+  percentage: 90
+  structureFrequency: 10
+  structureClassName: StructureTree
+  customTerrainLayer: 0
+  terrainLayerClassName: 
+  world: {fileID: 0}
 --- !u!114 &11496202
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -644,6 +685,7 @@ MonoBehaviour:
   amplitude: 10
   exponent: 1
   blockName: stone
+  chanceToSpawnBlock: 10
   percentage: 93
   structureFrequency: 6
   structureClassName: StructureTree
