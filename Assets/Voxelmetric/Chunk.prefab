@@ -12,7 +12,7 @@ GameObject:
   - 64: {fileID: 6430060}
   - 23: {fileID: 2349168}
   - 114: {fileID: 11494728}
-  m_Layer: 9
+  m_Layer: 8
   m_Name: Chunk
   m_TagString: Chunk
   m_Icon: {fileID: 0}
@@ -85,10 +85,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9b7a843b0b517d24ca20e1f5ccd22bc9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  busy: 0
-  loaded: 0
-  terrainGenerated: 0
-  chunkModified: 0
   world: {fileID: 0}
   pos:
     x: 0
@@ -108,6 +104,10 @@ Prefab:
     - target: {fileID: 0}
       propertyPath: m_StaticEditorFlags
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 0}
+      propertyPath: m_Layer
+      value: 8
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 0}
