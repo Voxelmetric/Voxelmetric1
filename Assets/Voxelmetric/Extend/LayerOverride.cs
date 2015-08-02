@@ -14,8 +14,8 @@ public class LayerOverride
     public string blockName = "stone";
 
     public int percentage = 90;
-    public int structureFrequency = 10;
     public GeneratedStructure structure;
+    public int chanceToSpawnBlock = 10;
 
     public World world;
     public Noise noiseGen;

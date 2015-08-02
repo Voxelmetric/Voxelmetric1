@@ -73,6 +73,7 @@ public class TerrainLayer: MonoBehaviour {
                 customLayer.frequency = frequency;
                 customLayer.amplitude = amplitude;
                 customLayer.exponent = exponent;
+                customLayer.chanceToSpawnBlock = chanceToSpawnBlock;
                 customLayer.blockName = blockName;
 
                 if (layerType == LayerType.Structure)
