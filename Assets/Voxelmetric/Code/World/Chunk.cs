@@ -114,7 +114,7 @@ public class Chunk : MonoBehaviour
             scheduledUpdates[i] = new BlockAndTimer(scheduledUpdates[i].pos, scheduledUpdates[i].time - Config.Env.UpdateFrequency);
             if (scheduledUpdates[i].time <= 0)
             {
-                Block block = GetBlock(scheduledUpdates[i].pos - pos);
+                Block block = GetBlock(scheduledUpdates[i].pos);
                 block.controller.ScheduledUpdate(this, scheduledUpdates[i].pos, block);
                 scheduledUpdates.RemoveAt(i);
                 i--;
@@ -228,7 +228,7 @@ public class Chunk : MonoBehaviour
             if (blocks[blockPos.x, blockPos.y, blockPos.z].type != block.type)
             {
                 blocks[blockPos.x, blockPos.y, blockPos.z].controller.OnDestroy(this, blockPos + pos, blocks[blockPos.x, blockPos.y, blockPos.z]);
-                block = block.controller.OnCreate(this, blockPos + pos, block);
+                block = block.controller.OnCreate(this, blockPos, block);
             }
 
             blocks[blockPos.x, blockPos.y, blockPos.z] = block;
