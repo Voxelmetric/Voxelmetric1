@@ -27,6 +27,9 @@ namespace Config
 
         public static float AOStrength = 1f;
         public static float BlockLightStrength = 0f;
+
+        public static FilterMode textureAtlasFiltering = FilterMode.Point;
+        public static int textureAtlasPadding = 4;
     }
 
     public static class Directories

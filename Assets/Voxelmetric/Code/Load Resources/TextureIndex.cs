@@ -28,10 +28,11 @@ public class TextureIndex {
 
         // Create new atlas
         atlas = new Texture2D(8192, 8192);
-        atlas.filterMode = FilterMode.Point;
+        atlas.filterMode = Config.Env.textureAtlasFiltering;
 
         // Generate atlas
-        Rect[] rects = atlas.PackTextures(atlasTextures.ToArray(), 0, 8192, false);
+        Rect[] rects = atlas.PackTextures(atlasTextures.ToArray(), Config.Env.textureAtlasPadding, 8192, false);
+        uPaddingBleed.BleedEdges(atlas, Config.Env.textureAtlasPadding, rects, repeatingTextures: true);
 
         // Add each atlas entry into texture dictionary
         for (int i = 0; i < atlasTextures.Count; i++)
