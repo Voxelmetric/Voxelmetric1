@@ -38,6 +38,7 @@ namespace Config
         public static string BlockMeshFolder = "Meshes";
         public static string TextureFolder = "Textures";
         public static string ConnectedTextureFolder = "Connected Textures";
+        public static string PrefabsFolder = "Prefabs";
     }
 
     public static class Toggle

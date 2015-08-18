@@ -5,9 +5,73 @@ using System.Collections.Generic;
 public static class Voxelmetric
 {
 
+    public static GameObject CreateGameObjectBlock(Block original, Vector3 position, Quaternion rotation)
+    {
+        BlockPos blockPos = new BlockPos();
+
+        if (original == Block.Air)
+            return null;
+
+        EmptyChunk chunk = World.instance.GetComponent<EmptyChunk>();
+        if (chunk == null)
+        {
+            chunk = (EmptyChunk)World.instance.gameObject.AddComponent(typeof(EmptyChunk));
+            chunk.world = World.instance;
+        }
+
+        original.controller.OnCreate(chunk, blockPos - blockPos.ContainingChunkCoordinates(), original);
+
+        return GOFromBlock(original, blockPos, position, rotation, chunk);
+    }
+
+    public static GameObject CreateGameObjectBlock(BlockPos blockPos, Vector3 position, Quaternion rotation)
+    {
+        Block original = GetBlock(blockPos);
+        if (original == Block.Air)
+            return null;
+
+        EmptyChunk chunk = World.instance.GetComponent<EmptyChunk>();
+        if (chunk == null)
+        {
+            chunk = (EmptyChunk)World.instance.gameObject.AddComponent(typeof(EmptyChunk));
+            chunk.world = World.instance;
+        }
+
+        original.controller.OnCreate(chunk, blockPos - blockPos.ContainingChunkCoordinates(), original);
+
+        return GOFromBlock(original, blockPos, position, rotation, chunk);
+    }
+
+    static GameObject GOFromBlock(Block original, BlockPos blockPos, Vector3 position, Quaternion rotation, Chunk chunk)
+    {
+        GameObject go = (GameObject)GameObject.Instantiate(Resources.Load<GameObject>(Config.Directories.PrefabsFolder + "/Block"), position, rotation);
+        go.transform.localScale = new Vector3(Config.Env.BlockSize, Config.Env.BlockSize, Config.Env.BlockSize);
+
+        MeshData meshData = new MeshData();
+
+        original.controller.AddBlockData(chunk, blockPos, meshData, original);
+        for (int i = 0; i < meshData.vertices.Count; i++)
+        {
+            meshData.vertices[i] -= (Vector3)blockPos;
+        }
+
+        Mesh mesh = new Mesh();
+        mesh.vertices = meshData.vertices.ToArray();
+        mesh.triangles = meshData.triangles.ToArray();
+
+        mesh.colors = meshData.colors.ToArray();
+
+        mesh.uv = meshData.uv.ToArray();
+        mesh.RecalculateNormals();
+
+        go.GetComponent<Renderer>().material.mainTexture = Block.index.textureIndex.atlas;
+        go.GetComponent<MeshFilter>().mesh = mesh;
+
+        return go;
+    }
+
     public static BlockPos GetBlockPos(RaycastHit hit, bool adjacent = false)
     {
-
         Vector3 pos = new Vector3(
             MoveWithinBlock(hit.point.x, hit.normal.x, adjacent),
             MoveWithinBlock(hit.point.y, hit.normal.y, adjacent),

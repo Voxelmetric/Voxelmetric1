@@ -83,6 +83,11 @@ public class Chunk : MonoBehaviour
 
     void FixedUpdate()
     {
+        TimedUpdated();
+    }
+
+    protected virtual void TimedUpdated()
+    {
         randomUpdateTime += Time.fixedDeltaTime;
 
         if (randomUpdateTime >= Config.Env.UpdateFrequency)
@@ -102,24 +107,21 @@ public class Chunk : MonoBehaviour
 
             GetBlock(randomPos).controller.RandomUpdate(this, randomPos, GetBlock(randomPos));
 
-            ProcessScheduledUpdates();
-        }
 
-    }
-
-    void ProcessScheduledUpdates()
-    {
-        for (int i = 0; i < scheduledUpdates.Count; i++)
-        {
-            scheduledUpdates[i] = new BlockAndTimer(scheduledUpdates[i].pos, scheduledUpdates[i].time - Config.Env.UpdateFrequency);
-            if (scheduledUpdates[i].time <= 0)
+            //Process Scheduled Updates
+            for (int i = 0; i < scheduledUpdates.Count; i++)
             {
-                Block block = GetBlock(scheduledUpdates[i].pos);
-                block.controller.ScheduledUpdate(this, scheduledUpdates[i].pos, block);
-                scheduledUpdates.RemoveAt(i);
-                i--;
+                scheduledUpdates[i] = new BlockAndTimer(scheduledUpdates[i].pos, scheduledUpdates[i].time - Config.Env.UpdateFrequency);
+                if (scheduledUpdates[i].time <= 0)
+                {
+                    Block block = GetBlock(scheduledUpdates[i].pos);
+                    block.controller.ScheduledUpdate(this, scheduledUpdates[i].pos, block);
+                    scheduledUpdates.RemoveAt(i);
+                    i--;
+                }
             }
         }
+
     }
 
     public void AddScheduledUpdate(BlockPos pos, float time)
@@ -173,7 +175,7 @@ public class Chunk : MonoBehaviour
     /// </summary>
     /// <param name="blockPos">A local block position</param>
     /// <returns>The block at the position</returns>
-    public Block GetBlock(BlockPos blockPos)
+    public virtual Block GetBlock(BlockPos blockPos)
     {
         Block returnBlock;
 
@@ -220,7 +222,7 @@ public class Chunk : MonoBehaviour
     /// <param name="blockPos">Local position</param>
     /// <param name="block">Block to place at the given location</param>
     /// <param name="updateChunk">Optional parameter, set to false to keep the chunk unupdated despite the change</param>
-    public void SetBlock(BlockPos blockPos, Block block, bool updateChunk = true)
+    public virtual void SetBlock(BlockPos blockPos, Block block, bool updateChunk = true)
     {
         if (InRange(blockPos))
         {
