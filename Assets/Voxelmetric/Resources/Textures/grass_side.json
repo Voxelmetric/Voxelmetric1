@@ -1,0 +1,12 @@
+{
+  "textureConfigs":  [
+    {
+      "name": "grass_side",
+      "textures": [
+        {
+          "file": "grass_side"
+        }
+      ]
+    }
+  ]
+}

@@ -37,7 +37,7 @@ public class BlockOverride {
 
     public static BlockOverride GetBlockOverride(int blockType)
     {
-        return Block.index.blockOverrides[blockType];
+        return Voxelmetric.resources.blockIndex.blockOverrides[blockType];
     }
 
     public virtual System.Object GetFlagIntercept(System.Object key, Chunk chunk, BlockPos pos, Block block)

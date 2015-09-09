@@ -1,0 +1,30 @@
+{
+    "textureConfigs":  [
+        {
+    "name": "connected",
+    "connectedTextures": true,
+    "textures": [
+        {
+            "file": "connected-2",
+            "connectedType": 2,
+        },
+        {
+            "file": "connected-3",
+            "connectedType": 3,
+        },
+        {
+            "file": "connected-1",
+            "connectedType": 1,
+        },
+        {
+            "file": "connected-0",
+            "connectedType": 0,
+        },
+        {
+            "file": "connected-4",
+            "connectedType": 4,
+        }
+    ]
+}
+]
+}

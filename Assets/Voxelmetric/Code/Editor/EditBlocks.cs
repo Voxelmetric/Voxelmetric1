@@ -348,7 +348,7 @@ public class EditBlocks {
                 new GUILayoutOption[] { GUILayout.Width(200), GUILayout.Height(40) }
             ))
         {
-            Block.index.textureIndex = new TextureIndex(true);
+            Voxelmetric.resources.textureIndex = new TextureIndex();
             BlocksGO().AddComponent<MeshDefinition>();
             GetDefinedBlocks();
         }
@@ -377,7 +377,7 @@ public class EditBlocks {
 
     void GetDefinedBlocks()
     {
-        Block.index.textureIndex = new TextureIndex(true);
+        Voxelmetric.resources.textureIndex = new TextureIndex();
         definitions = World.instance.gameObject.GetComponentsInChildren<BlockDefinition>();
 
         blocks = new BlockController[definitions.Length];

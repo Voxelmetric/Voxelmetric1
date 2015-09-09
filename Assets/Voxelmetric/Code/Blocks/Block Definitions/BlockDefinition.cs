@@ -12,6 +12,6 @@ public class BlockDefinition : MonoBehaviour {
     
     public virtual void AddToBlocks()
     {
-        Block.index.AddBlockType(Controller());
+        Voxelmetric.resources.blockIndex.AddBlockType(Controller());
     }
 }

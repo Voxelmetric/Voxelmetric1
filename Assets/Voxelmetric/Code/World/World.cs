@@ -33,7 +33,7 @@ public class World : MonoBehaviour {
     {
         //Makes the block index fetch all the BlockDefinition components
         //on this gameobject and add them to the index
-        Block.index.GetMissingDefinitions();
+        Voxelmetric.resources.blockIndex.GetMissingDefinitions();
         noiseGen = new Noise(worldName);
         terrainGen = gameObject.GetComponent<TerrainGen>();
         terrainGen.noiseGen = noiseGen;

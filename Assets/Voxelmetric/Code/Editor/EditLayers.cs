@@ -444,7 +444,7 @@ public class EditLayers
 
     void GetDefinedBlocks()
     {
-        Block.index.textureIndex = new TextureIndex(true);
+        Voxelmetric.resources.textureIndex = new TextureIndex();
         var definitions = World.instance.gameObject.GetComponentsInChildren<BlockDefinition>();
         blockNames.Add("air");
 

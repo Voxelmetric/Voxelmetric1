@@ -1,0 +1,12 @@
+{
+  "textureConfigs":  [
+    {
+      "name": "stone",
+      "textures": [
+        {
+          "file": "stone"
+        }
+      ]
+    }
+  ]
+}

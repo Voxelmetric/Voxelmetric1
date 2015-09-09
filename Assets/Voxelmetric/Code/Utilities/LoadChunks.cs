@@ -63,16 +63,16 @@ public class LoadChunks : MonoBehaviour
     bool FindChunksAndLoad()
     {
         //Cycle through the array of positions
-        for (int i = 0; i < Data.chunkLoadOrder.Length; i++)
+        for (int i = 0; i < ChunkLoadOrder.chunkPositions.Length; i++)
         {
             //Get the position of this gameobject to generate around
             BlockPos playerPos = ((BlockPos)transform.position).ContainingChunkCoordinates();
 
             //translate the player position and array position into chunk position
             BlockPos newChunkPos = new BlockPos(
-                Data.chunkLoadOrder[i].x * Config.Env.ChunkSize + playerPos.x,
+                ChunkLoadOrder.chunkPositions[i].x * Config.Env.ChunkSize + playerPos.x,
                 0,
-                Data.chunkLoadOrder[i].z * Config.Env.ChunkSize + playerPos.z
+                ChunkLoadOrder.chunkPositions[i].z * Config.Env.ChunkSize + playerPos.z
                 );
 
             //Get the chunk in the defined position

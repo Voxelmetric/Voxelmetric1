@@ -21,7 +21,7 @@ public class CubeDefinition : BlockDefinition
         {
             try
             {
-                textureCoordinates[i] = Block.index.textureIndex.GetTextureCollection(textures[i]);
+                textureCoordinates[i] = Voxelmetric.resources.textureIndex.GetTextureCollection(textures[i]);
             }
             catch
             {

@@ -21,28 +21,25 @@ public struct Block
         data4 = 0;
     }
 
-    //Mappings
-    public static BlockIndex index = new BlockIndex();
-
     public BlockController controller
     {
         get {
-            if (type >= index.controllers.Count)
+            if (type >= Voxelmetric.resources.blockIndex.controllers.Count)
             {
                 Debug.LogError("Block " + type + " is out of range");
             }
-            return index.controllers[type];
+            return Voxelmetric.resources.blockIndex.controllers[type];
         }
     }
 
     public static implicit operator BlockController(Block block)
     {
-        return index.controllers[block.type];
+        return Voxelmetric.resources.blockIndex.controllers[block.type];
     }
 
     public override string ToString()
     {
-        return index.controllers[type].Name();
+        return Voxelmetric.resources.blockIndex.controllers[type].Name();
     }
 
     public static implicit operator ushort(Block block)
@@ -68,7 +65,7 @@ public struct Block
     public static implicit operator Block(string s)
     {
         int blockIndex = 0;
-        if (index.names.TryGetValue(s, out blockIndex))
+        if (Voxelmetric.resources.blockIndex.names.TryGetValue(s, out blockIndex))
         {
             return blockIndex;
         }

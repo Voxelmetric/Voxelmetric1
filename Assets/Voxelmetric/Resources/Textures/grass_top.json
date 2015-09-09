@@ -1,0 +1,12 @@
+{
+  "textureConfigs":  [
+    {
+      "name": "grass_top",
+      "textures": [
+        {
+          "file": "grass_top"
+        }
+      ]
+    }
+  ]
+}

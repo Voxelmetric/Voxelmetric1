@@ -9,7 +9,7 @@ public class CrossMeshDefinition : BlockDefinition {
     {
         BlockCrossMesh controller = new BlockCrossMesh();
         if(texture!="")
-            controller.texture = Block.index.textureIndex.GetTextureCollection(texture);
+            controller.texture = Voxelmetric.resources.textureIndex.GetTextureCollection(texture);
         controller.blockName = blockName;
         return controller;
     }

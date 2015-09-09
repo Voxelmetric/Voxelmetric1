@@ -2,11 +2,11 @@
 using System.Linq;
 using System.Collections.Generic;
 
-public static class Data
+public static class ChunkLoadOrder
 {
-    public static BlockPos[] chunkLoadOrder;
+    public static BlockPos[] chunkPositions;
 
-    static Data()
+    static ChunkLoadOrder()
     {
         var chunkLoads = new List<BlockPos>();
         for (int x = -Config.Env.ChunkLoadRadius; x <= Config.Env.ChunkLoadRadius; x++)
@@ -21,7 +21,7 @@ public static class Data
         float maxRadius = Config.Env.ChunkLoadRadius * 1.55f;
 
         //sort 2d vectors by closeness to center
-        chunkLoadOrder = chunkLoads
+        chunkPositions = chunkLoads
                             .Where(pos => Mathf.Abs(pos.x) + Mathf.Abs(pos.z) < maxRadius)
                             .OrderBy(pos => Mathf.Abs(pos.x) + Mathf.Abs(pos.z)) //smallest magnitude vectors first
                             .ThenBy(pos => Mathf.Abs(pos.x)) //make sure not to process e.g (-10,0) before (5,5)

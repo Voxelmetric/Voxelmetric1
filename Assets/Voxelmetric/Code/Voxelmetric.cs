@@ -4,6 +4,8 @@ using System.Collections.Generic;
 
 public static class Voxelmetric
 {
+    //Used as a manager class with references to classes treated like singletons
+    public static VoxelmetricResources resources = new VoxelmetricResources();
 
     public static GameObject CreateGameObjectBlock(Block original, Vector3 position, Quaternion rotation)
     {
@@ -64,7 +66,7 @@ public static class Voxelmetric
         mesh.uv = meshData.uv.ToArray();
         mesh.RecalculateNormals();
 
-        go.GetComponent<Renderer>().material.mainTexture = Block.index.textureIndex.atlas;
+        go.GetComponent<Renderer>().material.mainTexture = Voxelmetric.resources.textureIndex.atlas;
         go.GetComponent<MeshFilter>().mesh = mesh;
 
         return go;

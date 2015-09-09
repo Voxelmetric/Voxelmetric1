@@ -24,7 +24,7 @@ public struct BlockPos
             hash = hash * 227 + x.GetHashCode();
             hash = hash * 227 + y.GetHashCode();
             hash = hash * 227 + z.GetHashCode();
-            return hash;
+            return hash * 227;
         }
     }
 

@@ -1,0 +1,12 @@
+{
+  "textureConfigs":  [
+    {
+      "name": "leaves",
+      "textures": [
+        {
+          "file": "leaves"
+        }
+      ]
+    }
+  ]
+}

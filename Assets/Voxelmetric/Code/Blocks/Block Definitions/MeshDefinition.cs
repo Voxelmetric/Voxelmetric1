@@ -19,7 +19,7 @@ public class MeshDefinition : BlockDefinition {
         if (Application.isPlaying)
         {
             CustomMesh.SetUpMeshControllerMesh(meshName, controller, positionOffset);
-            controller.collection = Block.index.textureIndex.GetTextureCollection(texture);
+            controller.collection = Voxelmetric.resources.textureIndex.GetTextureCollection(texture);
         }
         return controller;
     }

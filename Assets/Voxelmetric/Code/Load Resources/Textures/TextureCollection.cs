@@ -17,12 +17,20 @@ public class TextureCollection
         noiseGen = new Noise();
     }
 
-    public void AddTexture(Rect texture, int connectedTextureType)
+    public void AddTexture(Rect texture, int connectedTextureType, int randomChance)
     {
         if (connectedTextureType != -1)
         {
             usesConnectedTextures = true;
             connectedTextures[connectedTextureType] = texture;
+        }
+        else if (randomChance > 1)
+        {
+            // Add the texture multiple times to raise the chance it's selected randomly
+            for (int i = 0; i < randomChance; i++)
+            {
+                textures.Add(texture);
+            }
         }
         else
         {
@@ -56,9 +64,11 @@ public class TextureCollection
 
         if (textures.Count > 1)
         {
-            float randomNumber = noiseGen.Generate(pos.x, pos.y, pos.z);
-            randomNumber += 1;
-            randomNumber /= 2;
+            int hash = pos.GetHashCode();
+            if (hash < 0)
+                hash *= -1;
+
+            float randomNumber = (hash % 100) /100f;
             randomNumber *= textures.Count;
 
             return textures[(int)randomNumber];

@@ -1,0 +1,15 @@
+{
+  "textureConfigs":  [
+    {
+      "name": "test",
+      "textures": [
+        {
+          "file": "log_top"
+        },
+        {
+          "file": "log_top"
+        }
+      ]
+    }
+  ]
+}

@@ -47,6 +47,7 @@ public class VoxelmetricExample : MonoBehaviour
 
             if (Physics.Raycast(Camera.main.transform.position, mousePos - Camera.main.transform.position, out hit, 100))
             {
+                Voxelmetric.CreateGameObjectBlock(Voxelmetric.GetBlockPos(hit), transform.position, new Quaternion());
                 Voxelmetric.SetBlock(hit, blockToPlace, adjacent);
             }
         }

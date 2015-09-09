@@ -1,0 +1,12 @@
+{
+  "textureConfigs":  [
+    {
+      "name": "dirt",
+      "textures": [
+        {
+          "file": "dirt"
+        }
+      ]
+    }
+  ]
+}

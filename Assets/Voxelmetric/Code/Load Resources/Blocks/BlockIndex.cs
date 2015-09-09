@@ -13,8 +13,6 @@ public class BlockIndex {
     public List<BlockOverride> blockOverrides = new List<BlockOverride>();
     public Dictionary<string, int> names = new Dictionary<string, int>();
 
-    public TextureIndex textureIndex;
-
     /// <summary>
     /// Adds a block type to the index and adds it's name to a dictionary for quick lookup
     /// </summary>
@@ -47,8 +45,6 @@ public class BlockIndex {
     }
 
     public void GetMissingDefinitions() {
-        textureIndex = new TextureIndex();
-
         BlockDefinition[] definitions = World.instance.gameObject.GetComponentsInChildren<BlockDefinition>();
 
         foreach (var def in definitions)
