@@ -29,7 +29,11 @@ namespace Config
         public static float BlockLightStrength = 0f;
 
         public static FilterMode textureAtlasFiltering = FilterMode.Point;
-        public static int textureAtlasPadding = 4;
+        public static bool useMipMaps = true;
+        public static TextureFormat textureFormat = TextureFormat.ARGB32;
+        public static int textureAtlasPadding = 32;
+        public static bool customTextureAtlas = false;
+        public static string customTextureAtlasFile = "custom_atlas";
     }
 
     public static class Directories
@@ -37,7 +41,6 @@ namespace Config
         public static string SaveFolder = "VoxelSaves";
         public static string BlockMeshFolder = "Meshes";
         public static string TextureFolder = "Textures";
-        public static string ConnectedTextureFolder = "Connected Textures";
         public static string PrefabsFolder = "Prefabs";
     }
 

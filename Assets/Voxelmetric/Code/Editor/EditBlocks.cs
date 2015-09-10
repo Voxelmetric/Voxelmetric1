@@ -390,7 +390,6 @@ public class EditBlocks {
     void GetTextureNames()
     {
         List<Texture2D> textures = new List<Texture2D>();
-        textures.AddRange(Resources.LoadAll<Texture2D>(Config.Directories.ConnectedTextureFolder));
         textures.AddRange(Resources.LoadAll<Texture2D>(Config.Directories.TextureFolder));
 
         //textureNames = new string[textures.Length];

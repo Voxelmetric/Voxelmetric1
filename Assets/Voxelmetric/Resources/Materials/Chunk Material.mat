@@ -104,7 +104,7 @@ Material:
       data:
         first:
           name: _Cutoff
-        second: .30399999
+        second: .899999976
       data:
         first:
           name: _Parallax
@@ -172,9 +172,9 @@ Material:
         second: {r: 1, g: 1, b: 1, a: 1}
       data:
         first:
-          name: _EmissionColorUI
-        second: {r: 1, g: 1, b: 1, a: 1}
-      data:
-        first:
           name: _Lightmapping
         second: {r: .70588237, g: .670588315, b: .564705908, a: 1}
+      data:
+        first:
+          name: _EmissionColorUI
+        second: {r: 1, g: 1, b: 1, a: 1}
