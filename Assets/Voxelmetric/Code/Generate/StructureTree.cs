@@ -26,8 +26,7 @@ public class StructureTree: GeneratedStructure {
                     if (Chunk.InRange(pos.x + x - chunkPos.x) && Chunk.InRange(pos.z + z - chunkPos.z))
                     {
                         Block block = "leaves";
-                        block.modified = false;
-                        world.SetBlock(pos.Add(x, y, z), block, false);
+                        world.SetBlock(pos.Add(x, y, z), block, updateChunk: false, setBlockModified: false);
                     }
                 }
             }
@@ -37,8 +36,7 @@ public class StructureTree: GeneratedStructure {
             if (y < Config.Env.WorldMaxY)
             {
                 Block block = "log";
-                block.modified = false;
-                world.SetBlock(pos.Add(0, y, 0), block, false);
+                world.SetBlock(pos.Add(0, y, 0), block, updateChunk: false, setBlockModified: false);
             }
         }
     }
@@ -57,8 +55,7 @@ public class StructureTree: GeneratedStructure {
                     if (Chunk.InRange(pos.x + x - chunkPos.x) && Chunk.InRange(pos.z + z - chunkPos.z))
                     {
                         Block block = "leaves";
-                        block.modified = false;
-                        world.SetBlock(pos.Add(x, y, z), block, false);
+                        world.SetBlock(pos.Add(x, y, z), block, updateChunk: false, setBlockModified: false);
                     }
                 }
             }
@@ -68,8 +65,7 @@ public class StructureTree: GeneratedStructure {
             if (y < Config.Env.WorldMaxY)
             {
                 Block block = "log";
-                block.modified = false;
-                world.SetBlock(pos.Add(0, y, 0), block, false);
+                world.SetBlock(pos.Add(0, y, 0), block, updateChunk: false, setBlockModified: false);
             }
         }
     }

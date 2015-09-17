@@ -21,7 +21,10 @@ public class BlockController
 
     public virtual bool IsTransparent() { return false; }
 
-    public virtual byte LightEmmitted() { return 0; }
+    /// <summary>
+    /// Must return a number between 0 and 15, 0 for non emitting
+    /// </summary>
+    public virtual byte LightEmitted() { return 0; }
 
     /// <summary>
     /// Returns true if the block can be used as a possible path for path finding

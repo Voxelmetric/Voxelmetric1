@@ -197,13 +197,13 @@ public class World : MonoBehaviour {
     /// <param name="pos">Global position of the block</param>
     /// <param name="block">The block be placed</param>
     /// <param name="updateChunk">Optional parameter, set to false not update the chunk despite the change</param>
-    public void SetBlock(BlockPos pos, Block block, bool updateChunk = true)
+    public void SetBlock(BlockPos pos, Block block, bool updateChunk = true, bool setBlockModified = true)
     {
         Chunk chunk = GetChunk(pos);
         if (chunk != null)
         {
             BlockPos localPos = pos - chunk.pos;
-            chunk.SetBlock(localPos, block, updateChunk);
+            chunk.SetBlock(localPos, block, updateChunk, setBlockModified);
 
             if (updateChunk)
             {

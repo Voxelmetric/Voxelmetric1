@@ -3,6 +3,7 @@ using System.Threading;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
 
 [RequireComponent(typeof(MeshFilter))]
 [RequireComponent(typeof(MeshRenderer))]
@@ -26,6 +27,7 @@ public class Chunk : MonoBehaviour
     float randomUpdateTime = 0;
 
     MeshData meshData = new MeshData();
+    public List<BlockPos> modifiedBlocks = new List<BlockPos>();
 
     void Start()
     {
@@ -222,7 +224,7 @@ public class Chunk : MonoBehaviour
     /// <param name="blockPos">Local position</param>
     /// <param name="block">Block to place at the given location</param>
     /// <param name="updateChunk">Optional parameter, set to false to keep the chunk unupdated despite the change</param>
-    public virtual void SetBlock(BlockPos blockPos, Block block, bool updateChunk = true)
+    public virtual void SetBlock(BlockPos blockPos, Block block, bool updateChunk = true, bool setBlockModified = true)
     {
         if (InRange(blockPos))
         {
@@ -235,8 +237,8 @@ public class Chunk : MonoBehaviour
 
             blocks[blockPos.x, blockPos.y, blockPos.z] = block;
 
-            if (block.modified)
-                SetFlag(Flag.chunkModified, true);
+            if (setBlockModified)
+                SetBlockModified(blockPos);
 
             if (updateChunk)
                 UpdateChunk();
@@ -321,4 +323,12 @@ public class Chunk : MonoBehaviour
         world.AddToChunkPool(gameObject);
     }
 
+    public void SetBlockModified(BlockPos pos)
+    {
+        if (!modifiedBlocks.Contains(pos))
+        {
+            modifiedBlocks.Add(pos);
+            SetFlag(Flag.chunkModified, true);
+        }
+    }
 }

@@ -56,10 +56,10 @@ public class CustomMesh : BlockController {
             if (uvs.Length == 0)
                 meshData.uv.Add(new Vector2(0, 0));
 
-            float lighting;
+            float lighting = 1;
             if (Config.Toggle.BlockLighting)
             {
-                lighting = block.data1 / 255f;
+                //lighting = block.data1 / 255f;
             }
             else
             {

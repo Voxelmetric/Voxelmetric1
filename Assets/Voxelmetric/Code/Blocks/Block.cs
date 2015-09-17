@@ -1,24 +1,18 @@
 ﻿using System;
+using System.Runtime.InteropServices;
 using UnityEngine;
 
 [Serializable]
 public struct Block
 {
     public readonly ushort type;
-    public byte data1;
-    public byte data2;
-    public byte data3;
-    public byte data4;
-    public bool modified;
+    
+    public BlockData data;
 
     public Block(int type)
     {
         this.type = (ushort)type;
-        modified = true;
-        data1 = 0;
-        data2 = 0;
-        data3 = 0;
-        data4 = 0;
+        data = new BlockData();
     }
 
     public BlockController controller

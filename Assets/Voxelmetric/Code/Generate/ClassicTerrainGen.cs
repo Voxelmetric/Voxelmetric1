@@ -101,8 +101,6 @@ public class OldTerrainGen
             else if (y + chunk.pos.y == dirtHeight + 1 && GetNoise(x + chunk.pos.x, y + chunk.pos.y, z + chunk.pos.z, 10, 10, 1) > 5)
             {
                 Block wildGrass = "wildgrass";
-                wildGrass.data2 = (byte)(GetNoise(x + chunk.pos.x, y + chunk.pos.y, z + chunk.pos.z, 1, 155, 1) + 100);
-
                 SetBlock(chunk, wildGrass, new BlockPos(x, y, z));
             }
 
@@ -116,8 +114,7 @@ public class OldTerrainGen
         {
             if (replaceBlocks || chunk.GetBlock(pos).type == Block.Air.type)
             {
-                block.modified = false;
-                chunk.SetBlock(pos, block, false);
+                chunk.SetBlock(pos, block, updateChunk: false, setBlockModified: false);
             }
         }
     }

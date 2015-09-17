@@ -63,8 +63,7 @@ public static class Serialization
             for (int i =0; i< save.blocks.Length; i++)
             {
                 Block placeBlock = save.blocks[i];
-                placeBlock.modified = false;
-                chunk.SetBlock(save.positions[i], placeBlock, false);
+                chunk.SetBlock(save.positions[i], placeBlock, updateChunk: false, setBlockModified: false);
             }
 
             stream.Close();

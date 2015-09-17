@@ -6,7 +6,7 @@ public static class BlockLight
 
     public static int lightEffectRadius = 8;
 
-    public static byte lightReduceBy = 32;
+    public static byte lightReduceBy = 2;
 
     public static void LightArea(World world, BlockPos pos)
     {
@@ -104,19 +104,19 @@ public static class BlockLight
 
             if (block.controller.IsTransparent())
             {
-                byte originalData1 = block.data1;
+                byte originalData1 = BlockDataMap.NonSolid.Light(block);
                 if (sunlightObstructed)
                 {
-                    block.data1 = block.controller.LightEmmitted();
+                    BlockDataMap.NonSolid.Light(block, block.controller.LightEmitted());
                 }
                 else
                 {
-                    block.data1 = 255;
+                    BlockDataMap.NonSolid.Light(block, 15);
                 }
 
                 chunk.SetBlock(localPos, block, false);
 
-                if (block.data1 != originalData1 && !chunksToUpdate.Contains(chunk.pos))
+                if (BlockDataMap.NonSolid.Light(block) != originalData1 && !chunksToUpdate.Contains(chunk.pos))
                     chunksToUpdate.Add(chunk.pos);
             }
 
@@ -127,12 +127,12 @@ public static class BlockLight
     {
         Block block = world.GetBlock(new BlockPos(x, y, z));
 
-        if (!block.controller.IsTransparent() & block.controller.LightEmmitted() == 0)
+        if (!block.controller.IsTransparent() & block.controller.LightEmitted() == 0)
             return;
 
-        byte lightSpill = block.data1;
-        if (block.controller.LightEmmitted() > lightSpill)
-            lightSpill = block.controller.LightEmmitted();
+        byte lightSpill = BlockDataMap.NonSolid.Light(block);
+        if (block.controller.LightEmitted() > lightSpill)
+            lightSpill = block.controller.LightEmitted();
 
         if (lightSpill <= lightReduceBy)
             return;
@@ -166,25 +166,27 @@ public static class BlockLight
         if (!block.controller.IsTransparent())
             return;
 
-        if (block.data1 >= light)
+        if (BlockDataMap.NonSolid.Light(block) >= light)
             return;
 
         if (!chunksToUpdate.Contains(chunk.pos))
             chunksToUpdate.Add(chunk.pos);
 
-        block.data1 = light;
+        BlockDataMap.NonSolid.Light(block, light);
         chunk.SetBlock(localPos, block, false);
 
-        if (block.data1 > lightReduceBy)
-        {
-            block.data1 -= lightReduceBy;
+        byte blockLight = BlockDataMap.NonSolid.Light(block);
 
-            CallSpillLight(world, chunk, pos.Add(1, 0, 0), block.data1, chunksToUpdate, stayWithinChunk);
-            CallSpillLight(world, chunk, pos.Add(0, 1, 0), block.data1, chunksToUpdate, stayWithinChunk);
-            CallSpillLight(world, chunk, pos.Add(0, 0, 1), block.data1, chunksToUpdate, stayWithinChunk);
-            CallSpillLight(world, chunk, pos.Add(-1, 0, 0), block.data1, chunksToUpdate, stayWithinChunk);
-            CallSpillLight(world, chunk, pos.Add(0, -1, 0), block.data1, chunksToUpdate, stayWithinChunk);
-            CallSpillLight(world, chunk, pos.Add(0, 0, -1), block.data1, chunksToUpdate, stayWithinChunk);
+        if (blockLight > lightReduceBy)
+        {
+            BlockDataMap.NonSolid.Light(block, (byte)(blockLight - lightReduceBy));
+
+            CallSpillLight(world, chunk, pos.Add(1, 0, 0), blockLight, chunksToUpdate, stayWithinChunk);
+            CallSpillLight(world, chunk, pos.Add(0, 1, 0), blockLight, chunksToUpdate, stayWithinChunk);
+            CallSpillLight(world, chunk, pos.Add(0, 0, 1), blockLight, chunksToUpdate, stayWithinChunk);
+            CallSpillLight(world, chunk, pos.Add(-1, 0, 0), blockLight, chunksToUpdate, stayWithinChunk);
+            CallSpillLight(world, chunk, pos.Add(0, -1, 0), blockLight, chunksToUpdate, stayWithinChunk);
+            CallSpillLight(world, chunk, pos.Add(0, 0, -1), blockLight, chunksToUpdate, stayWithinChunk);
         }
         return;
     }

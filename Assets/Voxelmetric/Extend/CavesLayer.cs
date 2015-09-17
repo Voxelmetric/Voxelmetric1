@@ -6,8 +6,7 @@ public class CavesLayer : LayerOverride {
     public override int GenerateLayer(int x, int z, int heightSoFar, float strength, bool justGetHeight = false)
     {
 
-        Block blockToPlace = blockName; 
-        blockToPlace.modified = false;
+        Block blockToPlace = blockName;
 
         int caveBottom = GetNoise(x, -1000, z, 500, 70, 1) + Config.Env.WorldMinY;
         int caveHeight = GetNoise(x, 1000, z, 50, 35, 1) + caveBottom;
@@ -22,7 +21,7 @@ public class CavesLayer : LayerOverride {
             {
                 for (int y = caveBottom; y < caveTop; y++)
                 {
-                    world.SetBlock(new BlockPos(x, y, z), blockToPlace, false);
+                    world.SetBlock(new BlockPos(x, y, z), blockToPlace, updateChunk: false, setBlockModified: false);
                 }
             }
 

@@ -9,7 +9,7 @@ public class EmptyChunk : Chunk
         return Block.Air;
     }
 
-    public override void SetBlock(BlockPos blockPos, Block block, bool updateChunk = true) { }
+    public override void SetBlock(BlockPos blockPos, Block block, bool updateChunk = true, bool setBlockModified = true) { }
 
     protected override void TimedUpdated() {}
 }

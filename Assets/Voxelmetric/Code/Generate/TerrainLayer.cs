@@ -85,14 +85,13 @@ public class TerrainLayer: MonoBehaviour {
         }
 
         Block blockToPlace = blockName;
-        blockToPlace.modified = false;
 
         if (layerType == LayerType.Chance)
         {
             if (GetNoise(x, -10555, z, 1, 100, 1) < chanceToSpawnBlock)
             {
                 if(!justGetHeight)
-                    world.SetBlock(new BlockPos(x, heightSoFar, z), blockToPlace, false);
+                    world.SetBlock(new BlockPos(x, heightSoFar, z), blockToPlace, updateChunk: false, setBlockModified: false);
 
                 return heightSoFar + 1;
             }
@@ -112,14 +111,14 @@ public class TerrainLayer: MonoBehaviour {
             {
                 for (int y = heightSoFar; y < height + Config.Env.WorldMinY; y++)
                 {
-                    world.SetBlock(new BlockPos(x, y, z), blockToPlace, false);
+                    world.SetBlock(new BlockPos(x, y, z), blockToPlace, updateChunk: false, setBlockModified: false);
                 }
             }
             else //additive or surface
             {
                 for (int y = heightSoFar; y < height + heightSoFar; y++)
                 {
-                    world.SetBlock(new BlockPos(x, y, z), blockToPlace, false);
+                    world.SetBlock(new BlockPos(x, y, z), blockToPlace, updateChunk: false, setBlockModified: false);
                 }
             }
         }

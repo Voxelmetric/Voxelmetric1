@@ -7,17 +7,32 @@ public class MeshBuilder {
     {
         float halfBlock = (Config.Env.BlockSize / 2) + Config.Env.BlockFacePadding;
         float colliderOffest = 0.05f * Config.Env.BlockSize;
-        float blockHeight = halfBlock * 2 * (block.data2 / 255f);
 
-        float offsetX = (halfBlock * 2 * ((byte)(block.data3 & 0x0F) / 32f)) - (halfBlock/2);
-        float offsetZ = (halfBlock * 2 * ((byte)((block.data3 & 0xF0) >> 4) / 32f)) - (halfBlock/2);
+        //Using the block positions hash is much better for random numbers than saving the offset and height in the block data
+        int hash = pos.GetHashCode();
+        if (hash < 0)
+            hash *= -1;
+
+        float blockHeight = halfBlock * 2 * (hash % 100) / 100f;
+
+        hash *= 39;
+        if (hash < 0)
+            hash *= -1;
+
+        float offsetX = (halfBlock * (hash % 100) / 100f) - (halfBlock / 2);
+
+        hash *= 39;
+        if (hash < 0)
+            hash *= -1;
+
+        float offsetZ = (halfBlock * (hash % 100) / 100f)-(halfBlock / 2);
 
         //Converting the position to a vector adjusts it based on block size and gives us real world coordinates for x, y and z
         Vector3 vPos = pos;
         Vector3 vPosCollider = pos;
         vPos += new Vector3(offsetX, 0, offsetZ);
 
-        float blockLight = ( (block.data1/255f) * Config.Env.BlockLightStrength) + (0.8f*Config.Env.AOStrength);
+        float blockLight = ( BlockDataMap.NonSolid.Light(block) / 15f * Config.Env.BlockLightStrength) +(0.8f * Config.Env.AOStrength);
 
         meshData.AddVertex(new Vector3(vPos.x - halfBlock, vPos.y - halfBlock, vPos.z + halfBlock));
         meshData.AddVertex(new Vector3(vPos.x - halfBlock, vPos.y - halfBlock + blockHeight, vPos.z + halfBlock));

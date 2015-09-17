@@ -9,12 +9,10 @@ public class TextureCollection
     bool usesConnectedTextures = false;
     Rect[] connectedTextures = new Rect[48];
     List<Rect> textures = new List<Rect>();
-    Noise noiseGen;
 
     public TextureCollection(string name)
     {
         textureName = name;
-        noiseGen = new Noise();
     }
 
     public void AddTexture(Rect texture, int connectedTextureType, int randomChance)
