@@ -1462,6 +1462,10 @@ Prefab:
       propertyPath: m_RootOrder
       value: 3
       objectReference: {fileID: 0}
+    - target: {fileID: 11496026, guid: 28fc5073d6f2b5b42acaec530dd745cd, type: 2}
+      propertyPath: chanceToSpawnBlock
+      value: 10
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: 28fc5073d6f2b5b42acaec530dd745cd, type: 2}
   m_IsPrefabParent: 0
