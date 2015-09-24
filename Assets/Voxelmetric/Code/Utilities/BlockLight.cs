@@ -46,12 +46,12 @@ public static class BlockLight
             }
         }
 
-        world.GetChunk(pos).UpdateChunk();
+        world.GetChunk(pos).UpdateNow();
         world.UpdateAdjacentChunks(pos);
 
         foreach (var chunkPos in chunksToUpdate)
         {
-            world.GetChunk(chunkPos).UpdateChunk();
+            world.GetChunk(chunkPos).UpdateNow();
         }
     }
 

@@ -167,7 +167,7 @@ public class LoadChunks : MonoBehaviour
                 BlockLight.FloodLightChunkColumn(world, chunk);
             }
 
-            chunk.UpdateChunk();
+            chunk.UpdateNow();
         }
     }
 

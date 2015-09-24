@@ -236,7 +236,7 @@ public class World : MonoBehaviour {
         {
             Chunk chunk = GetChunk(pos);
             if (chunk != null)
-                chunk.UpdateChunk();
+                chunk.UpdateNow();
         }
     }
 }

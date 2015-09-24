@@ -15,7 +15,7 @@ public class Chunk : MonoBehaviour
 
     private List<BlockAndTimer> scheduledUpdates = new List<BlockAndTimer>();
 
-    public enum Flag {busy, meshReady, loaded, terrainGenerated, markedForDeletion, queuedForUpdate, chunkModified, updateSoon }
+    public enum Flag {busy, meshReady, loaded, terrainGenerated, markedForDeletion, chunkModified, updateSoon, updateNow }
     public Hashtable flags = new Hashtable();
 
     MeshFilter filter;
@@ -67,8 +67,6 @@ public class Chunk : MonoBehaviour
 
     void Update()
     {
-        
-
         if (GetFlag(Flag.markedForDeletion) && !GetFlag(Flag.busy))
         {
             ReturnChunkToPool();
@@ -87,6 +85,15 @@ public class Chunk : MonoBehaviour
     {
         TimedUpdated();
     }
+    
+    void LateUpdate()
+    {
+        if(GetFlag(Flag.updateNow))
+        {
+            UpdateChunk();
+            SetFlag(Flag.updateNow, false);
+        }
+    }
 
     protected virtual void TimedUpdated()
     {
@@ -94,12 +101,6 @@ public class Chunk : MonoBehaviour
 
         if (randomUpdateTime >= Config.Env.UpdateFrequency)
         {
-            if (GetFlag(Flag.updateSoon))
-            {
-                UpdateChunk();
-                SetFlag(Flag.updateSoon, false);
-            }
-
             randomUpdateTime = 0;
 
             BlockPos randomPos = new BlockPos();
@@ -122,6 +123,12 @@ public class Chunk : MonoBehaviour
                     i--;
                 }
             }
+
+            if (GetFlag(Flag.updateSoon))
+            {
+                UpdateNow();
+                SetFlag(Flag.updateSoon, false);
+            }
         }
 
     }
@@ -134,34 +141,34 @@ public class Chunk : MonoBehaviour
     /// <summary>
     /// Updates the chunk either now or as soon as the chunk is no longer busy
     /// </summary>
-    public void UpdateChunk()
+    public void UpdateNow()
+    {
+        SetFlag(Flag.updateNow, true);
+    }
+    
+    public void UpdateSoon()
+    {
+        SetFlag(Flag.updateSoon, true);
+    }
+    
+    void UpdateChunk()
     {
         if (Config.Toggle.UseMultiThreading)
         {
-            Thread thread = new Thread(() =>
+            // If the chunk is busy set the flag to update it again
+            // at the end of the the nearest frame 
+            if (GetFlag(Flag.busy))
             {
-                //If there's already an update queued let that one run instead
-                if (!GetFlag(Flag.queuedForUpdate))
+                UpdateNow();
+            } else {
+                Thread thread = new Thread(() =>
                 {
-                    // If the chunk is busy wait for it to be ready, but
-                    // set a flag saying an update is waiting so that later
-                    // updates don't sit around as well, one is enough
-                    if (GetFlag(Flag.busy))
-                    {
-                        SetFlag(Flag.queuedForUpdate, true);
-                        while (GetFlag(Flag.busy))
-                        {
-                            Thread.Sleep(0);
-                        }
-                        SetFlag(Flag.queuedForUpdate, false);
-                    }
-
                     SetFlag(Flag.busy, true);
                     BuildMeshData();
                     SetFlag(Flag.meshReady, true);
-                }
-            });
-            thread.Start();
+                });
+                thread.Start();
+            }
         }
         else //Not using multithreading
         {
@@ -241,7 +248,7 @@ public class Chunk : MonoBehaviour
                 SetBlockModified(blockPos);
 
             if (updateChunk)
-                UpdateChunk();
+                UpdateNow();
         }
         else
         {
