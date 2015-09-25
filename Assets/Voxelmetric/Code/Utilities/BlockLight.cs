@@ -88,13 +88,11 @@ public static class BlockLight
         for (int y = Config.Env.WorldMaxY - 1; y >= Config.Env.WorldMinY; y--)
         {
             Chunk chunk = world.GetChunk(new BlockPos(x, y, z));
-            BlockPos localPos = new BlockPos(x, y, z).Subtract(chunk.pos);
-
             if (chunk == null){
                 continue;
             }
 
-            Block block = chunk.GetBlock(localPos);
+            Block block = chunk.GetBlock(new BlockPos(x, y, z));
 
             if (!block.controller.IsTransparent())
             {
@@ -114,7 +112,7 @@ public static class BlockLight
                     BlockDataMap.NonSolid.Light(block, 15);
                 }
 
-                chunk.SetBlock(localPos, block, false);
+                chunk.SetBlock(new BlockPos(x, y, z), block, false);
 
                 if (BlockDataMap.NonSolid.Light(block) != originalData1 && !chunksToUpdate.Contains(chunk.pos))
                     chunksToUpdate.Add(chunk.pos);
@@ -156,12 +154,7 @@ public static class BlockLight
             stayWithinChunk = false;
         }
 
-        BlockPos localPos = pos.Subtract(chunk.pos);
-
-        if (!Chunk.InRange(localPos))
-            return;
-
-        Block block = chunk.GetBlock(localPos);
+        Block block = chunk.GetBlock(pos);
 
         if (!block.controller.IsTransparent())
             return;
@@ -173,7 +166,7 @@ public static class BlockLight
             chunksToUpdate.Add(chunk.pos);
 
         BlockDataMap.NonSolid.Light(block, light);
-        chunk.SetBlock(localPos, block, false);
+        chunk.SetBlock(pos, block, false);
 
         byte blockLight = BlockDataMap.NonSolid.Light(block);
 
@@ -193,8 +186,7 @@ public static class BlockLight
 
     static void CallSpillLight(World world, Chunk chunk, BlockPos pos, byte light, List<BlockPos> chunksToUpdate, bool stayWithinChunk)
     {
-        BlockPos localPos = pos.Subtract(chunk.pos);
-        if (Chunk.InRange(localPos))
+        if (chunk.InRange(pos))
         {
             SpillLight(world, pos, light, chunksToUpdate, chunk);
         }

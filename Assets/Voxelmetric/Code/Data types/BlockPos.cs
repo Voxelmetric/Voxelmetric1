@@ -57,7 +57,7 @@ public struct BlockPos
 
     public BlockPos Subtract(BlockPos pos)
     {
-        return new BlockPos(this.x - pos.x, this.y - pos.y, this.z - pos.z);
+        return new BlockPos(x - pos.x, y - pos.y, z - pos.z);
     }
 
     //BlockPos and Vector3 can be substituted for one another
@@ -102,6 +102,26 @@ public struct BlockPos
     public static BlockPos operator -(BlockPos pos1, BlockPos pos2)
     {
         return pos1.Subtract(pos2);
+    }
+
+    public static bool operator >(BlockPos pos1, BlockPos pos2)
+    {
+        return (pos1.x > pos2.x || pos1.y > pos2.y || pos1.z > pos2.x);
+    }
+
+    public static bool operator <(BlockPos pos1, BlockPos pos2)
+    {
+        return (pos1.x < pos2.x || pos1.y < pos2.y || pos1.z < pos2.x);
+    }
+
+    public static bool operator >=(BlockPos pos1, BlockPos pos2)
+    {
+        return (pos1.x >= pos2.x || pos1.y >= pos2.y || pos1.z >= pos2.x);
+    }
+
+    public static bool operator <=(BlockPos pos1, BlockPos pos2)
+    {
+        return (pos1.x <= pos2.x || pos1.y <= pos2.y || pos1.z <= pos2.x);
     }
 
     public static BlockPos operator +(BlockPos pos1, BlockPos pos2)

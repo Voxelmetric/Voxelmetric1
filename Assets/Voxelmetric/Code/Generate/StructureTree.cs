@@ -23,7 +23,7 @@ public class StructureTree: GeneratedStructure {
             {
                 for (int z = -leaves; z <= leaves; z++)
                 {
-                    if (Chunk.InRange(pos.x + x - chunkPos.x) && Chunk.InRange(pos.z + z - chunkPos.z))
+                    if(pos < chunkPos + new BlockPos(Config.Env.ChunkSize, Config.Env.ChunkSize, Config.Env.ChunkSize) && pos >= chunkPos)
                     {
                         Block block = "leaves";
                         world.SetBlock(pos.Add(x, y, z), block, updateChunk: false, setBlockModified: false);
@@ -52,7 +52,7 @@ public class StructureTree: GeneratedStructure {
             {
                 for (int z = -leaves; z <= leaves; z++)
                 {
-                    if (Chunk.InRange(pos.x + x - chunkPos.x) && Chunk.InRange(pos.z + z - chunkPos.z))
+                    if(pos < chunkPos + new BlockPos(Config.Env.ChunkSize, Config.Env.ChunkSize, Config.Env.ChunkSize) && pos >= chunkPos)
                     {
                         Block block = "leaves";
                         world.SetBlock(pos.Add(x, y, z), block, updateChunk: false, setBlockModified: false);

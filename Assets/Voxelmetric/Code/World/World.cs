@@ -171,19 +171,14 @@ public class World : MonoBehaviour {
 
         if (containerChunk != null)
         {
-            BlockPos localPos = pos - containerChunk.pos;
-            if (!Chunk.InRange(localPos))
-            {
-                //This gets called if somehow our function got caught in a loop
-                //between World's GetBlock and Chunk's GetBlock
-                Debug.LogError("Error while setting block");
-                return Block.Void;
-            }
-
-            return containerChunk.GetBlock(localPos);
+            return containerChunk.GetBlock(pos);
         }
         else
         {
+            //If we're returning solid there was an error somewhere in chunk generation
+            //Something has caused a chunk to try to render or otherwise access blocks
+            //in a chunk that hasn't been loaded yet. Correct practice is to generate
+            //all chunks surrounding a chunk before attempting to render it.
             return "solid";
         }
 
@@ -200,16 +195,16 @@ public class World : MonoBehaviour {
     public void SetBlock(BlockPos pos, Block block, bool updateChunk = true, bool setBlockModified = true)
     {
         Chunk chunk = GetChunk(pos);
+
         if (chunk != null)
         {
-            BlockPos localPos = pos - chunk.pos;
-            chunk.SetBlock(localPos, block, updateChunk, setBlockModified);
+            chunk.SetBlock(pos, block, updateChunk, setBlockModified);
 
             if (updateChunk)
             {
                 UpdateAdjacentChunks(pos);
             }
-        
+
         }
     }
 
@@ -219,7 +214,9 @@ public class World : MonoBehaviour {
     /// <param name="pos">position of change</param>
     public void UpdateAdjacentChunks(BlockPos pos)
     {
+        //localPos is the position relative to the chunk's position
         BlockPos localPos = pos - pos.ContainingChunkCoordinates();
+
         //Checks to see if the block position is on the border of the chunk 
         //and if so update the chunk it's touching
         UpdateIfEqual(localPos.x, 0, pos.Add(-1, 0, 0));

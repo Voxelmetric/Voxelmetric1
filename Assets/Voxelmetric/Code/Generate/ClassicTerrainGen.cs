@@ -88,20 +88,20 @@ public class OldTerrainGen
 
             if (y + chunk.pos.y <= stoneHeight)
             {
-                SetBlock(chunk, "stone", new BlockPos(x, y, z));
+                SetBlock(chunk, "stone", new BlockPos(x, y, z) + chunk.pos);
             }
             else if (y + chunk.pos.y < dirtHeight)
             {
-                SetBlock(chunk, "dirt", new BlockPos(x, y, z));
+                SetBlock(chunk, "dirt", new BlockPos(x, y, z) + chunk.pos);
             }
             else if (y + chunk.pos.y == dirtHeight)
             {
-                SetBlock(chunk, "grass", new BlockPos(x, y, z));
+                SetBlock(chunk, "grass", new BlockPos(x, y, z) + chunk.pos);
             }
             else if (y + chunk.pos.y == dirtHeight + 1 && GetNoise(x + chunk.pos.x, y + chunk.pos.y, z + chunk.pos.z, 10, 10, 1) > 5)
             {
                 Block wildGrass = "wildgrass";
-                SetBlock(chunk, wildGrass, new BlockPos(x, y, z));
+                SetBlock(chunk, wildGrass, new BlockPos(x, y, z) + chunk.pos);
             }
 
         }
@@ -110,7 +110,7 @@ public class OldTerrainGen
 
     public static void SetBlock(Chunk chunk, Block block, BlockPos pos, bool replaceBlocks = false)
     {
-        if (Chunk.InRange(pos))
+        if (chunk.InRange(pos))
         {
             if (replaceBlocks || chunk.GetBlock(pos).type == Block.Air.type)
             {

@@ -6,13 +6,13 @@ public class BlockController
     //Base block constructor
     public BlockController() { }
 
-    public virtual void AddBlockData (Chunk chunk, BlockPos pos, MeshData meshData, Block block) { }
+    public virtual void AddBlockData (Chunk chunk, BlockPos localPos, BlockPos globalPos, MeshData meshData, Block block) { }
 
-    public virtual void BuildBlock(Chunk chunk, BlockPos pos, MeshData meshData, Block block)
+    public virtual void BuildBlock(Chunk chunk, BlockPos localPos, BlockPos globalPos, MeshData meshData, Block block)
     {
-        PreRender(chunk, pos, block);
-        AddBlockData(chunk, pos, meshData, block);
-        PostRender(chunk, pos, block);
+        PreRender(chunk, localPos, block);
+        AddBlockData(chunk, localPos, globalPos, meshData, block);
+        PostRender(chunk, localPos, block);
     }
 
     public virtual string Name() { return "BlockController";  }

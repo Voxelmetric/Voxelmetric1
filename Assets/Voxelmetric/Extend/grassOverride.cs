@@ -15,10 +15,10 @@ public class grassOverride : BlockOverride
             {
                 for (int z = -1; z <= 1; z++)
                 {
-                    if (chunk.GetBlock(pos.Add(x, y, z) - chunk.pos) == dirt
-                        && chunk.GetBlock(pos.Add(x, y + 1, z) - chunk.pos) == air)
+                    if (chunk.GetBlock(pos.Add(x, y, z)) == dirt
+                        && chunk.GetBlock(pos.Add(x, y + 1, z)) == air)
                     {
-                        chunk.SetBlock(pos.Add(x, y, z) - chunk.pos, "grass", false);
+                        chunk.SetBlock(pos.Add(x, y, z), "grass", false);
                         chunk.SetFlag(Chunk.Flag.updateSoon, true);
                     }
                 }

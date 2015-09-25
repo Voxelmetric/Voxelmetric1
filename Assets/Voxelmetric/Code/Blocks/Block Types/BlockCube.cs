@@ -6,14 +6,14 @@ public class BlockCube : BlockSolid {
     public string blockName;
     public TextureCollection[] textures;
 
-    public override void BuildFace(Chunk chunk, BlockPos pos, MeshData meshData, Direction direction, Block block)
+    public override void BuildFace(Chunk chunk, BlockPos localPos, BlockPos globalPos, MeshData meshData, Direction direction, Block block)
     {
-        BlockBuilder.BuildRenderer(chunk, pos, meshData, direction);
-        BlockBuilder.BuildTexture(chunk, pos, meshData, direction, textures);
-        BlockBuilder.BuildColors(chunk, pos, meshData, direction);
+        BlockBuilder.BuildRenderer(chunk, localPos, globalPos, meshData, direction);
+        BlockBuilder.BuildTexture(chunk, localPos, globalPos, meshData, direction, textures);
+        BlockBuilder.BuildColors(chunk, localPos, globalPos, meshData, direction);
         if (Config.Toggle.UseCollisionMesh)
         {
-            BlockBuilder.BuildCollider(chunk, pos, meshData, direction);
+            BlockBuilder.BuildCollider(chunk, localPos, globalPos, meshData, direction);
         }
     }
 

@@ -43,15 +43,15 @@ public class CustomMesh : BlockController {
         }
     }
 
-    public override void AddBlockData(Chunk chunk, BlockPos pos, MeshData meshData, Block block)
+    public override void AddBlockData(Chunk chunk, BlockPos localPos, BlockPos globalPos, MeshData meshData, Block block)
     {
         int initialVertCount = meshData.vertices.Count;
         int colInitialVertCount = meshData.colVertices.Count;
 
         foreach (var vert in verts)
         {
-            meshData.AddVertex(vert + (Vector3)pos);
-            meshData.colVertices.Add(vert + (Vector3)pos);
+            meshData.AddVertex(vert + (Vector3)localPos);
+            meshData.colVertices.Add(vert + (Vector3)localPos);
 
             if (uvs.Length == 0)
                 meshData.uv.Add(new Vector2(0, 0));
@@ -72,7 +72,7 @@ public class CustomMesh : BlockController {
         {
             Rect texture;
             if (collection != null)
-                texture = collection.GetTexture(chunk, pos, Direction.down);
+                texture = collection.GetTexture(chunk, localPos, Direction.down);
             else
                 texture = new Rect();
 
@@ -83,42 +83,42 @@ public class CustomMesh : BlockController {
             }
         }
 
-        if (!chunk.GetBlock(pos.Add(0, 1, 0)).controller.IsSolid(Direction.down))
+        if (!chunk.LocalGetBlock(localPos.Add(0, 1, 0)).controller.IsSolid(Direction.down))
             foreach (var tri in trisUp)
             {
                 meshData.AddTriangle(tri + initialVertCount);
                 meshData.colTriangles.Add(tri + colInitialVertCount);
             }
 
-        if (!chunk.GetBlock(pos.Add(0, -1, 0)).controller.IsSolid(Direction.up))
+        if (!chunk.LocalGetBlock(localPos.Add(0, -1, 0)).controller.IsSolid(Direction.up))
             foreach (var tri in trisDown)
             {
                 meshData.AddTriangle(tri + initialVertCount);
                 meshData.colTriangles.Add(tri + colInitialVertCount);
             }
 
-        if (!chunk.GetBlock(pos.Add(0, 0, 1)).controller.IsSolid(Direction.south))
+        if (!chunk.LocalGetBlock(localPos.Add(0, 0, 1)).controller.IsSolid(Direction.south))
             foreach (var tri in trisNorth)
             {
                 meshData.AddTriangle(tri + initialVertCount);
                 meshData.colTriangles.Add(tri + colInitialVertCount);
             }
 
-        if (!chunk.GetBlock(pos.Add(0, 0, -1)).controller.IsSolid(Direction.north))
+        if (!chunk.LocalGetBlock(localPos.Add(0, 0, -1)).controller.IsSolid(Direction.north))
             foreach (var tri in trisEast)
             {
                 meshData.AddTriangle(tri + initialVertCount);
                 meshData.colTriangles.Add(tri + colInitialVertCount);
             }
 
-        if (!chunk.GetBlock(pos.Add(1, 0, 0)).controller.IsSolid(Direction.west))
+        if (!chunk.LocalGetBlock(localPos.Add(1, 0, 0)).controller.IsSolid(Direction.west))
             foreach (var tri in trisSouth)
             {
                 meshData.AddTriangle(tri + initialVertCount);
                 meshData.colTriangles.Add(tri + colInitialVertCount);
             }
 
-        if (!chunk.GetBlock(pos.Add(-1, 0, 0)).controller.IsSolid(Direction.east))
+        if (!chunk.LocalGetBlock(localPos.Add(-1, 0, 0)).controller.IsSolid(Direction.east))
             foreach (var tri in trisEast)
             {
                 meshData.AddTriangle(tri + initialVertCount);

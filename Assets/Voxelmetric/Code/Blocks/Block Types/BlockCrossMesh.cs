@@ -8,9 +8,9 @@ public class BlockCrossMesh : BlockNonSolid
     public TextureCollection texture;
     public string blockName;
 
-    public override void AddBlockData(Chunk chunk, BlockPos pos, MeshData meshData, Block block)
+    public override void AddBlockData(Chunk chunk, BlockPos localPos, BlockPos globalPos, MeshData meshData, Block block)
     {
-        MeshBuilder.CrossMeshRenderer(chunk, pos, meshData, texture, block);
+        MeshBuilder.CrossMeshRenderer(chunk, localPos, globalPos, meshData, texture, block);
     }
     public override string Name() { return blockName; }
 

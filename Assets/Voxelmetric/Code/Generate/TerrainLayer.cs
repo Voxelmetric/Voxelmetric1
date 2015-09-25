@@ -111,7 +111,8 @@ public class TerrainLayer: MonoBehaviour {
             {
                 for (int y = heightSoFar; y < height + Config.Env.WorldMinY; y++)
                 {
-                    world.SetBlock(new BlockPos(x, y, z), blockToPlace, updateChunk: false, setBlockModified: false);
+                    world.GetChunk(new BlockPos(x, y, z)).SetBlock(new BlockPos(x, y, z), blockToPlace, false, false);
+                    //world.SetBlock(new BlockPos(x, y, z), blockToPlace, updateChunk: false, setBlockModified: false);
                 }
             }
             else //additive or surface
@@ -130,7 +131,9 @@ public class TerrainLayer: MonoBehaviour {
         else //absolute
         {
             if (Config.Env.WorldMinY + height > heightSoFar)
+            {
                 return Config.Env.WorldMinY + height;
+            }
         }
         return heightSoFar;
     }

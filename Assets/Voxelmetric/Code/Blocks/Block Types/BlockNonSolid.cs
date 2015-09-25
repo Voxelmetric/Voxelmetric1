@@ -5,7 +5,7 @@ public class BlockNonSolid : BlockController
 {
     public BlockNonSolid() : base() { }
 
-    public override void AddBlockData(Chunk chunk, BlockPos pos, MeshData meshData, Block block)
+    public override void AddBlockData(Chunk chunk, BlockPos localPos, BlockPos globalPos, MeshData meshData, Block block)
     {
 
     }

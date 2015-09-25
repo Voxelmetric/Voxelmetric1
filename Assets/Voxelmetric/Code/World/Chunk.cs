@@ -71,14 +71,6 @@ public class Chunk : MonoBehaviour
         {
             ReturnChunkToPool();
         }
-
-        if (GetFlag<bool>(Flag.meshReady))
-        {
-            SetFlag(Flag.meshReady, false);
-            RenderMesh();
-            meshData = new MeshData();
-            SetFlag(Flag.busy, false);
-        }
     }
 
     void FixedUpdate()
@@ -90,8 +82,20 @@ public class Chunk : MonoBehaviour
     {
         if(GetFlag(Flag.updateNow))
         {
+            Profiler.BeginSample("update chunk");
             UpdateChunk();
+            Profiler.EndSample();
             SetFlag(Flag.updateNow, false);
+        }
+
+        if (GetFlag<bool>(Flag.meshReady))
+        {
+            SetFlag(Flag.meshReady, false);
+            Profiler.BeginSample("update chunk");
+            RenderMesh();
+            Profiler.EndSample();
+            meshData = new MeshData();
+            SetFlag(Flag.busy, false);
         }
     }
 
@@ -103,10 +107,10 @@ public class Chunk : MonoBehaviour
         {
             randomUpdateTime = 0;
 
-            BlockPos randomPos = new BlockPos();
-            randomPos.x = world.random.Next(0, 16);
-            randomPos.y = world.random.Next(0, 16);
-            randomPos.z = world.random.Next(0, 16);
+            BlockPos randomPos = pos;
+            randomPos.x += world.random.Next(0, 16);
+            randomPos.y += world.random.Next(0, 16);
+            randomPos.z += world.random.Next(0, 16);
 
             GetBlock(randomPos).controller.RandomUpdate(this, randomPos, GetBlock(randomPos));
 
@@ -179,56 +183,58 @@ public class Chunk : MonoBehaviour
     }
 
     /// <summary>
-    /// Gets and returns a block from a local position within the chunk 
+    /// Gets and returns a block from a position within the chunk 
     /// or fetches it from the world
     /// </summary>
     /// <param name="blockPos">A local block position</param>
     /// <returns>The block at the position</returns>
     public virtual Block GetBlock(BlockPos blockPos)
     {
-        Block returnBlock;
-
         if (InRange(blockPos))
         {
-            returnBlock = blocks[blockPos.x, blockPos.y, blockPos.z];
+            return FetchBlockFromArray(blockPos);
         }
         else
         {
-            returnBlock = world.GetBlock(blockPos + pos);
+            return world.GetBlock(blockPos);
         }
+    }
 
-        return returnBlock;
+    /// <summary>
+    /// This function takes a block position relative to the chunk's position. It is slightly faster
+    /// than the GetBlock function so use this if you already have a local position available otherwise
+    /// use GetBlock. If the position is lesser or greater than the size of the chunk it will get the value
+    /// from the chunk containing the block pos
+    /// </summary>
+    /// <param name="blockPos"> A block pos relative to the chunk's position. MUST be a local position or the wrong block will be returned</param>
+    /// <returns>the block at the relative position</returns>
+    public virtual Block LocalGetBlock(BlockPos blockPos)
+    {
+        if ((blockPos.x < Config.Env.ChunkSize && blockPos.x >= 0) &&
+            (blockPos.y < Config.Env.ChunkSize && blockPos.y >= 0) &&
+            (blockPos.z < Config.Env.ChunkSize && blockPos.z >= 0))
+        {
+            return blocks[blockPos.x, blockPos.y, blockPos.z];
+        }
+        else
+        {
+            return world.GetBlock(blockPos + pos);
+        }
     }
 
     /// <summary>
     /// Returns true if the block local block position is contained in the chunk boundaries
     /// </summary>
-    /// <param name="localPos">A local block position</param>
-    /// <returns>true or false depending on if the position is in range</returns>
-    public static bool InRange(BlockPos localPos)
+    /// <param name="blockPos">A block position</param>
+    public bool InRange(BlockPos blockPos)
     {
-        if (!InRange(localPos.x))
-            return false;
-        if (!InRange(localPos.y))
-            return false;
-        if (!InRange(localPos.z))
-            return false;
-
-        return true;
-    }
-
-    public static bool InRange(int index)
-    {
-        if (index < 0 || index >= Config.Env.ChunkSize)
-            return false;
-
-        return true;
+        return (blockPos.ContainingChunkCoordinates() == pos);
     }
 
     /// <summary>
-    /// Sets the block at the given local position
+    /// Sets the block at the given position
     /// </summary>
-    /// <param name="blockPos">Local position</param>
+    /// <param name="blockPos">Block position</param>
     /// <param name="block">Block to place at the given location</param>
     /// <param name="updateChunk">Optional parameter, set to false to keep the chunk unupdated despite the change</param>
     public virtual void SetBlock(BlockPos blockPos, Block block, bool updateChunk = true, bool setBlockModified = true)
@@ -236,13 +242,13 @@ public class Chunk : MonoBehaviour
         if (InRange(blockPos))
         {
             //Only call create and destroy if this is a different block type, otherwise it's just updating the properties of an existing block
-            if (blocks[blockPos.x, blockPos.y, blockPos.z].type != block.type)
+            if (FetchBlockFromArray(blockPos).type != block.type)
             {
-                blocks[blockPos.x, blockPos.y, blockPos.z].controller.OnDestroy(this, blockPos + pos, blocks[blockPos.x, blockPos.y, blockPos.z]);
+                FetchBlockFromArray(blockPos).controller.OnDestroy(this, blockPos, FetchBlockFromArray(blockPos));
                 block = block.controller.OnCreate(this, blockPos, block);
             }
 
-            blocks[blockPos.x, blockPos.y, blockPos.z] = block;
+            SetBlockInArray(blockPos, block);
 
             if (setBlockModified)
                 SetBlockModified(blockPos);
@@ -253,8 +259,21 @@ public class Chunk : MonoBehaviour
         else
         {
             //if the block is out of range set it through world
-            world.SetBlock(blockPos + pos, block, updateChunk);
+            world.SetBlock(blockPos, block, updateChunk);
         }
+    }
+
+    /// <summary>
+    /// Quick way to return the block at a position in the array
+    /// </summary>
+    Block FetchBlockFromArray(BlockPos blockPos)
+    {
+        return blocks[blockPos.x - pos.x, blockPos.y - pos.y, blockPos.z - pos.z];
+    }
+
+    void SetBlockInArray(BlockPos blockPos, Block block)
+    {
+        blocks[blockPos.x - pos.x, blockPos.y - pos.y, blockPos.z - pos.z] = block;
     }
 
     /// <summary>
@@ -268,7 +287,7 @@ public class Chunk : MonoBehaviour
             {
                 for (int z = 0; z < Config.Env.ChunkSize; z++)
                 {
-                    blocks[x, y, z].controller.BuildBlock(this, new BlockPos(x, y, z), meshData, blocks[x,y,z]);
+                    blocks[x, y, z].controller.BuildBlock(this, new BlockPos(x, y, z), new BlockPos(x,y, z)+ pos, meshData, blocks[x, y, z]);
                 }
             }
         }

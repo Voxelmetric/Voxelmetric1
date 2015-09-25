@@ -51,7 +51,7 @@ public static class Voxelmetric
 
         MeshData meshData = new MeshData();
 
-        original.controller.AddBlockData(chunk, blockPos, meshData, original);
+        original.controller.AddBlockData(chunk, blockPos, blockPos, meshData, original);
         for (int i = 0; i < meshData.vertices.Count; i++)
         {
             meshData.vertices[i] -= (Vector3)blockPos;
