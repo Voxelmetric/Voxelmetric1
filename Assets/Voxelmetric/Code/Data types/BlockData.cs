@@ -1,4 +1,7 @@
-﻿using System;
+﻿//#define SINGLEWORLD
+#define MULTIWORLDS256
+//#define MULTIWORLDS65k
+using System;
 
 [Serializable]
 public struct BlockData
@@ -38,6 +41,38 @@ public struct BlockData
     public int GetData(int index, int width)
     {
         return (int)((data >> index) & (16 ^ width));
+    }
+
+    // Use of multiworlds is defined at the top of this file, uncomment the preprocessor directive
+    // for a single world, up to 256 worlds or up to 65k worlds
+
+#if (SINGLEWORLD)
+    static int world = 0;
+#elif (MULTIWORLDS256)
+    byte world;
+#elif(MULTIWORLDS65K)
+    ushort world;
+#endif
+
+    /// <summary>
+    /// If your game is using multiple worlds this function will return the world index
+    /// </summary>
+    /// <returns></returns>
+    public int World()
+    {
+        return (int)world;
+    }
+
+    /// <summary>
+    /// Sets the world index if there is one
+    /// </summary>
+    public void SetWorld(int index)
+    {
+#if (MULTIWORLDS256)
+        world = (byte) index;
+#elif(MULTIWORLDS65K)
+        world = (byte) index;
+#endif
     }
 
 }

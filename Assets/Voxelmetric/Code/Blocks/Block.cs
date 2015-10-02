@@ -26,6 +26,21 @@ public struct Block
         }
     }
 
+    public World world
+    {
+        get
+        {
+            if (Config.Toggle.UseMultipleWorlds)
+            {
+                return Voxelmetric.resources.worlds[data.World()];
+            }
+            else
+            {
+                return Voxelmetric.resources.worlds[0];
+            }
+        }
+    }
+
     public static implicit operator BlockController(Block block)
     {
         return Voxelmetric.resources.blockIndex.controllers[block.type];

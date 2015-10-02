@@ -48,6 +48,7 @@ namespace Config
     {
         public static bool UseOldTerrainGen = false;
         public static bool UseCollisionMesh = true;
+        public static bool UseMultipleWorlds = true;
 
         //Lighting needs multithreading to work quickly
         public static bool BlockLighting = false;

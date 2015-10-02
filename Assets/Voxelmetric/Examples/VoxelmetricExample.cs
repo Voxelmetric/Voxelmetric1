@@ -19,8 +19,20 @@ public class VoxelmetricExample : MonoBehaviour
         blockToPlace = newType;
     }
 
+    void Start()
+    {
+    }
+
+    bool test;
     void Update()
     {
+        if (!test)
+        {
+            Voxelmetric.resources.worlds[0].CreateChunk(new BlockPos());
+            test = true;
+        }
+        Voxelmetric.resources.worlds[0].SetBlock(new BlockPos(), "stone");
+
         if (Input.GetMouseButton(1))
         {
             rot = new Vector2(
@@ -47,6 +59,8 @@ public class VoxelmetricExample : MonoBehaviour
 
             if (Physics.Raycast(Camera.main.transform.position, mousePos - Camera.main.transform.position, out hit, 100))
             {
+                // Creates a game object block at the click pos:
+                // Voxelmetric.CreateGameObjectBlock(Voxelmetric.GetBlockPos(hit, adjacent), hit.collider.gameObject.GetComponent<Chunk>().world, hit.point, new Quaternion());
                 Voxelmetric.SetBlock(hit, blockToPlace, adjacent);
             }
         }
@@ -83,7 +97,7 @@ public class VoxelmetricExample : MonoBehaviour
 
         if (Input.GetKeyDown(KeyCode.P))
         {
-             pf = new PathFinder(pfStart, pfStop, World.instance, 2);
+             pf = new PathFinder(pfStart, pfStop, Voxelmetric.resources.worlds[0] , 2);
             Debug.Log(pf.path.Count);
         }
 
@@ -96,7 +110,7 @@ public class VoxelmetricExample : MonoBehaviour
 
     public void SaveAll()
     {
-        saveProgress = Voxelmetric.SaveAll();
+        saveProgress = Voxelmetric.SaveAll(Voxelmetric.resources.worlds[0]);
     }
 
     public string SaveStatus()

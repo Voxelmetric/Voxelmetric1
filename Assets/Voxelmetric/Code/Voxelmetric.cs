@@ -14,11 +14,11 @@ public static class Voxelmetric
         if (original == Block.Air)
             return null;
 
-        EmptyChunk chunk = World.instance.GetComponent<EmptyChunk>();
+        EmptyChunk chunk = original.world.GetComponent<EmptyChunk>();
         if (chunk == null)
         {
-            chunk = (EmptyChunk)World.instance.gameObject.AddComponent(typeof(EmptyChunk));
-            chunk.world = World.instance;
+            chunk = (EmptyChunk)original.world.gameObject.AddComponent(typeof(EmptyChunk));
+            chunk.world = original.world;
         }
 
         original.controller.OnCreate(chunk, blockPos - blockPos.ContainingChunkCoordinates(), original);
@@ -26,17 +26,18 @@ public static class Voxelmetric
         return GOFromBlock(original, blockPos, position, rotation, chunk);
     }
 
-    public static GameObject CreateGameObjectBlock(BlockPos blockPos, Vector3 position, Quaternion rotation)
+    public static GameObject CreateGameObjectBlock(BlockPos blockPos, World world, Vector3 position, Quaternion rotation)
     {
-        Block original = GetBlock(blockPos);
+        Block original = GetBlock(blockPos, world);
         if (original == Block.Air)
             return null;
 
-        EmptyChunk chunk = World.instance.GetComponent<EmptyChunk>();
+        EmptyChunk chunk = world.GetComponent<EmptyChunk>();
         if (chunk == null)
         {
-            chunk = (EmptyChunk)World.instance.gameObject.AddComponent(typeof(EmptyChunk));
-            chunk.world = World.instance;
+            chunk = (EmptyChunk)world.gameObject.AddComponent(typeof(EmptyChunk));
+            chunk.world = world;
+            chunk.pos = blockPos.ContainingChunkCoordinates();
         }
 
         original.controller.OnCreate(chunk, blockPos - blockPos.ContainingChunkCoordinates(), original);
@@ -74,12 +75,20 @@ public static class Voxelmetric
 
     public static BlockPos GetBlockPos(RaycastHit hit, bool adjacent = false)
     {
-        Vector3 pos = new Vector3(
-            MoveWithinBlock(hit.point.x, hit.normal.x, adjacent),
-            MoveWithinBlock(hit.point.y, hit.normal.y, adjacent),
-            MoveWithinBlock(hit.point.z, hit.normal.z, adjacent)
-            );
+        Vector3 pos = hit.point;
 
+        World world = hit.collider.gameObject.GetComponent<Chunk>().world;
+        pos = Quaternion.Inverse(world.gameObject.transform.rotation) * pos;
+        pos -= world.gameObject.transform.position;
+
+        Vector3 rotatedNormal = Quaternion.Inverse(world.gameObject.transform.rotation) * hit.normal;
+
+        pos = new Vector3(
+            MoveWithinBlock(pos.x, rotatedNormal.x, adjacent),
+            MoveWithinBlock(pos.y, rotatedNormal.y, adjacent),
+            MoveWithinBlock(pos.z, rotatedNormal.z, adjacent)
+            );
+        
         return pos;
     }
 
@@ -125,11 +134,8 @@ public static class Voxelmetric
         return true;
     }
 
-    public static bool SetBlock(BlockPos pos, Block block, World world = null)
+    public static bool SetBlock(BlockPos pos, Block block, World world)
     {
-        if (!world)
-            world = World.instance;
-
         Chunk chunk = world.GetChunk(pos);
         if (chunk == null)
             return false;
@@ -155,11 +161,8 @@ public static class Voxelmetric
         return GetBlock(pos, chunk.world);
     }
 
-    public static Block GetBlock(BlockPos pos, World world = null)
+    public static Block GetBlock(BlockPos pos, World world)
     {
-        if (!world)
-            world = World.instance;
-
         Block block = world.GetBlock(pos);
 
         return block;
@@ -172,11 +175,8 @@ public static class Voxelmetric
     /// <param name="world">Optional parameter for the world to save chunks for, if left
     /// empty it will use the world Singleton instead</param>
     /// <returns>A SaveProgress object to monitor the save.</returns>
-    public static SaveProgress SaveAll(World world = null)
+    public static SaveProgress SaveAll(World world)
     {
-        if (!world)
-            world = World.instance;
-
         //Create a saveprogress object with positions of all the chunks in the world
         //Then save each chunk and update the saveprogress's percentage for each save
         SaveProgress saveProgress = new SaveProgress(world.chunks.Keys);

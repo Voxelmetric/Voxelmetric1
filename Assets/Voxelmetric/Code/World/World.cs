@@ -6,19 +6,6 @@ using SimplexNoise;
 [RequireComponent(typeof(TerrainGen))]
 public class World : MonoBehaviour {
 
-    private static World _instance;
-
-    //Lets this class be fetched as a singleton
-    public static World instance
-    {
-        get
-        {
-            if (_instance == null)
-                _instance = GameObject.FindObjectOfType<World>();
-            return _instance;
-        }
-    }
-
     public Dictionary<BlockPos, Chunk> chunks = new Dictionary<BlockPos, Chunk>();
     public GameObject chunkPrefab;
     List<GameObject> chunkPool = new List<GameObject>();
@@ -29,11 +16,13 @@ public class World : MonoBehaviour {
     TerrainGen terrainGen;
     public System.Random random;
 
+    public int worldIndex;
+
     void Start()
     {
-        //Makes the block index fetch all the BlockDefinition components
-        //on this gameobject and add them to the index
-        Voxelmetric.resources.blockIndex.GetMissingDefinitions();
+        worldIndex = Voxelmetric.resources.worlds.Count;
+        Voxelmetric.resources.AddWorld(this);
+
         noiseGen = new Noise(worldName);
         terrainGen = gameObject.GetComponent<TerrainGen>();
         terrainGen.noiseGen = noiseGen;

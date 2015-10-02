@@ -31,6 +31,7 @@ public class BlockIndex {
         if (names.ContainsKey(controller.Name()))
         {
             Debug.LogError("Two blocks with the name " + controller.Name() + " are defined");
+            return -1;
         } 
 
         controllers.Add(controller);
@@ -45,8 +46,8 @@ public class BlockIndex {
     }
 
     public void GetMissingDefinitions() {
-        BlockDefinition[] definitions = World.instance.gameObject.GetComponentsInChildren<BlockDefinition>();
-
+        BlockDefinition[] definitions  = Voxelmetric.resources.worlds[0].gameObject.GetComponentsInChildren<BlockDefinition>();
+        //To Do: Make this read from a config
         foreach (var def in definitions)
         {
             if(def.enabled)

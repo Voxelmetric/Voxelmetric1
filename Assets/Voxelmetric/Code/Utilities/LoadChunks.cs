@@ -5,15 +5,10 @@ using System.Collections.Generic;
 public class LoadChunks : MonoBehaviour
 {
 
-    World world;
+    public World world;
 
     int deleteTimer = 0;
     int chunkGenTimer = 0;
-
-    void Start()
-    {
-        world = World.instance;
-    }
 
     // Update is called once per frame
     void Update()

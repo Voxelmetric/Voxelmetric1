@@ -273,6 +273,7 @@ public class Chunk : MonoBehaviour
 
     void SetBlockInArray(BlockPos blockPos, Block block)
     {
+        block.data.SetWorld(world.worldIndex);
         blocks[blockPos.x - pos.x, blockPos.y - pos.y, blockPos.z - pos.z] = block;
     }
 
