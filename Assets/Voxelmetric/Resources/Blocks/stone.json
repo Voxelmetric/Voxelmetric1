@@ -1,0 +1,13 @@
+{
+  "name": "stone",
+  "controller": "BlockCube",
+  "textures": [
+    "stone",
+    "stone",
+    "stone",
+    "stone",
+    "stone",
+    "stone"
+  ],
+  "isSolid": true,
+}

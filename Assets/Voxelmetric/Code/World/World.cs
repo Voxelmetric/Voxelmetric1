@@ -7,23 +7,38 @@ using SimplexNoise;
 public class World : MonoBehaviour {
 
     public Dictionary<BlockPos, Chunk> chunks = new Dictionary<BlockPos, Chunk>();
-    public GameObject chunkPrefab;
     List<GameObject> chunkPool = new List<GameObject>();
+    public GameObject chunkPrefab;
+
+    public string worldConfig;
+
+    public WorldConfig config;
+
+    public BlockIndex blockIndex;
+    public TextureIndex textureIndex;
 
     //This world name is used for the save file name
     public string worldName = "world";
     public Noise noiseGen;
     TerrainGen terrainGen;
+    //Make random an element on resources
     public System.Random random;
 
+    [HideInInspector]
     public int worldIndex;
 
     void Start()
     {
+        config = new ConfigLoader<WorldConfig>(new string[] {"Worlds" }).GetConfig(worldConfig);
+
         worldIndex = Voxelmetric.resources.worlds.Count;
         Voxelmetric.resources.AddWorld(this);
 
+        textureIndex = Voxelmetric.resources.GetOrLoadTextureIndex(this);
+        blockIndex = Voxelmetric.resources.GetOrLoadBlockIndex(this);
+
         noiseGen = new Noise(worldName);
+        //Move terrain gen to be an element of gen and load chunks
         terrainGen = gameObject.GetComponent<TerrainGen>();
         terrainGen.noiseGen = noiseGen;
         terrainGen.world = this;
@@ -168,9 +183,14 @@ public class World : MonoBehaviour {
             //Something has caused a chunk to try to render or otherwise access blocks
             //in a chunk that hasn't been loaded yet. Correct practice is to generate
             //all chunks surrounding a chunk before attempting to render it.
-            return "solid";
+            return new Block("solid", this);
         }
 
+    }
+
+    public void SetBlock(BlockPos pos, string block, bool updateChunk = true, bool setBlockModified = true)
+    {
+        SetBlock(pos, new Block(block, this), updateChunk, setBlockModified);
     }
 
     /// <summary>

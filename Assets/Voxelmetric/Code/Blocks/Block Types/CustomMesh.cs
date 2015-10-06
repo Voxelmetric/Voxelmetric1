@@ -13,11 +13,19 @@ public class CustomMesh : BlockController {
     public int[] trisOther = new int[0];
     public Vector2[] uvs = new Vector2[0];
 
-    public bool[] isSolid;
+    public bool isSolid;
 
     public TextureCollection collection;
 
     public string blockName;
+
+    public override void SetUpController(BlockConfig config, World world)
+    {
+        blockName = config.name;
+        collection = world.textureIndex.GetTextureCollection(config.textures[0]);
+        isSolid = config.isSolid;
+        SetUpMeshControllerMesh(config.meshFileName, this, new Vector3(config.meshXOffset, config.meshYOffset, config.meshZOffset));
+    }
 
     public override string Name()
     {
@@ -25,22 +33,7 @@ public class CustomMesh : BlockController {
     }
 
     public override bool IsSolid(Direction direction) {
-       switch(direction){
-            case Direction.up:
-                return isSolid[0];
-            case Direction.down:
-                return isSolid[1];
-            case Direction.north:
-                return isSolid[2];
-            case Direction.east:
-                return isSolid[3];
-            case Direction.south:
-                return isSolid[4];
-            case Direction.west:
-                return isSolid[5];
-            default:
-                return false;
-        }
+        return isSolid;
     }
 
     public override void AddBlockData(Chunk chunk, BlockPos localPos, BlockPos globalPos, MeshData meshData, Block block)

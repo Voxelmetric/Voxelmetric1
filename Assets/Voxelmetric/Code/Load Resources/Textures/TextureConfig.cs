@@ -24,9 +24,9 @@ public struct TextureConfig {
 
         public bool repeatingTexture;
     }
-}
 
-public struct TextureConfigArray
-{
-    public TextureConfig[] TextureConfigs;
+    public override string ToString()
+    {
+        return name;
+    }
 }

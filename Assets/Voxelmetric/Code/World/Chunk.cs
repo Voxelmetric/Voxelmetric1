@@ -34,7 +34,7 @@ public class Chunk : MonoBehaviour
         filter = gameObject.GetComponent<MeshFilter>();
         coll = gameObject.GetComponent<MeshCollider>();
 
-        gameObject.GetComponent<Renderer>().material.mainTexture = Voxelmetric.resources.textureIndex.atlas;
+        gameObject.GetComponent<Renderer>().material.mainTexture = world.textureIndex.atlas;
     }
 
     public bool GetFlag(object key)
@@ -229,6 +229,11 @@ public class Chunk : MonoBehaviour
     public bool InRange(BlockPos blockPos)
     {
         return (blockPos.ContainingChunkCoordinates() == pos);
+    }
+
+    public void SetBlock(BlockPos blockPos, String block, bool updateChunk = true, bool setBlockModified = true)
+    {
+        SetBlock(blockPos, new Block(block, world), updateChunk, setBlockModified);
     }
 
     /// <summary>

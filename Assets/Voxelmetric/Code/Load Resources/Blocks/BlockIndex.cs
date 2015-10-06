@@ -4,9 +4,12 @@ using System;
 
 public class BlockIndex {
 
-    public BlockIndex(){
+    public BlockIndex(string blockFolder, World world){
+
         AddBlockType(new BlockAir());
         AddBlockType(new BlockSolid());
+
+        GetMissingDefinitions(world, blockFolder);
     }
 
     public List<BlockController> controllers = new List<BlockController>();
@@ -45,13 +48,18 @@ public class BlockIndex {
         return index;
     }
 
-    public void GetMissingDefinitions() {
-        BlockDefinition[] definitions  = Voxelmetric.resources.worlds[0].gameObject.GetComponentsInChildren<BlockDefinition>();
-        //To Do: Make this read from a config
-        foreach (var def in definitions)
+    //World is only needed for setting up the textures
+    void GetMissingDefinitions(World world, string blockFolder) {
+        ConfigLoader<BlockConfig> config = new ConfigLoader<BlockConfig>(new string[] { blockFolder});
+        foreach (var blockConfig in config.AllConfigs())
         {
-            if(def.enabled)
-                def.AddToBlocks();
+            var type = Type.GetType(blockConfig.controller + ", " + typeof(BlockController).Assembly, false);
+            if (type == null)
+                Debug.LogError("Could not create controller " + blockConfig.controller);
+
+            BlockController controller = (BlockController)Activator.CreateInstance(type);
+            controller.SetUpController(blockConfig, world);
+            AddBlockType(controller);
         }
     }
 

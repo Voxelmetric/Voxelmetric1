@@ -84,7 +84,7 @@ public class TerrainLayer: MonoBehaviour {
             return newHeight;
         }
 
-        Block blockToPlace = blockName;
+        Block blockToPlace = new Block(blockName, world);
 
         if (layerType == LayerType.Chance)
         {

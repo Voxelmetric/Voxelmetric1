@@ -6,7 +6,7 @@ public class CavesLayer : LayerOverride {
     public override int GenerateLayer(int x, int z, int heightSoFar, float strength, bool justGetHeight = false)
     {
 
-        Block blockToPlace = blockName;
+        Block blockToPlace = new Block(blockName, world);
 
         int caveBottom = GetNoise(x, -1000, z, 500, 70, 1) + Config.Env.WorldMinY;
         int caveHeight = GetNoise(x, 1000, z, 50, 35, 1) + caveBottom;

@@ -1,12 +1,8 @@
 {
-  "textureConfigs":  [
-    {
       "name": "log_side",
       "textures": [
         {
           "file": "log_side"
         }
       ]
-    }
-  ]
 }

@@ -1,12 +1,8 @@
 {
-  "textureConfigs":  [
-    {
       "name": "log_top",
       "textures": [
         {
           "file": "log_top"
         }
       ]
-    }
-  ]
 }

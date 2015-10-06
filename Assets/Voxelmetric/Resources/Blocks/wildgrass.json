@@ -1,0 +1,8 @@
+{
+  "name": "wildgrass",
+  "controller": "BlockCrossMesh",
+  "textures": [
+    "wild_grass"
+  ],
+  "isSolid": false
+}

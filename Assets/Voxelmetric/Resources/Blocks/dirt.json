@@ -1,0 +1,13 @@
+{
+  "name": "dirt",
+  "controller": "BlockCube",
+  "textures": [
+    "dirt",
+    "dirt",
+    "dirt",
+    "dirt",
+    "dirt",
+    "dirt"
+  ],
+  "isSolid": true,
+}

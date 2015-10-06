@@ -1,6 +1,4 @@
 {
-    "textureConfigs":  [
-        {
     "name": "connected",
     "connectedTextures": true,
     "textures": [
@@ -45,6 +43,4 @@
             "height": 32
         }
     ]
-}
-]
 }

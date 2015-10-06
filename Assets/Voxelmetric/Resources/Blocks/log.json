@@ -1,0 +1,13 @@
+{
+  "name": "log",
+  "controller": "BlockCube",
+  "textures": [
+    "log_top",
+    "log_top",
+    "log_side",
+    "log_side",
+    "log_side",
+    "log_side"
+  ],
+  "isSolid": true,
+}

@@ -1,6 +1,4 @@
 {
-  "textureConfigs":  [
-    {
       "name": "pyramid",
       "randomTextures": true,
       "textures": [
@@ -13,6 +11,4 @@
             "weight": 1
           }
       ]
-    }
-  ]
 }

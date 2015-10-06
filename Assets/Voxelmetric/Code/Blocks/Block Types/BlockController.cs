@@ -15,6 +15,12 @@ public class BlockController
         PostRender(chunk, localPos, block);
     }
 
+    //This function should set up the controller for the world 
+    public virtual void SetUpController(BlockConfig config, World world)
+    {
+
+    }
+
     public virtual string Name() { return "BlockController";  }
 
     public virtual bool IsSolid(Direction direction) { return false; }
@@ -63,9 +69,9 @@ public class BlockController
 
     public virtual T GetFlagOrOverride<T>(Object key, Chunk chunk, BlockPos pos, Block block) where T : new()
     {
-        if (BlockOverride.GetBlockOverride(block.type) != null)
+        if (block.blockOveride != null)
         {
-            System.Object overridenReturn = BlockOverride.GetBlockOverride(block.type).GetFlagIntercept(key, chunk, pos, block);
+            System.Object overridenReturn = block.blockOveride.GetFlagIntercept(key, chunk, pos, block);
             if (overridenReturn != null)
                 return (T)overridenReturn;
         }
@@ -75,39 +81,39 @@ public class BlockController
 
     public virtual Block OnCreate(Chunk chunk, BlockPos pos, Block block)
     {
-        if (BlockOverride.GetBlockOverride(block.type) == null)
+        if (block.blockOveride == null)
             return block;
 
-        return BlockOverride.GetBlockOverride(block.type).OnCreate(chunk, pos, block);
+        return block.blockOveride.OnCreate(chunk, pos, block);
     }
 
     public virtual void PreRender(Chunk chunk, BlockPos pos, Block block)
     {
-        if (BlockOverride.GetBlockOverride(block.type) != null)
-            BlockOverride.GetBlockOverride(block.type).PreRender(chunk, pos, block);
+        if (block.blockOveride != null)
+            block.blockOveride.PreRender(chunk, pos, block);
     }
 
     public virtual void PostRender(Chunk chunk, BlockPos pos, Block block)
     {
-        if (BlockOverride.GetBlockOverride(block.type) != null)
-            BlockOverride.GetBlockOverride(block.type).PostRender(chunk, pos, block);
+        if (block.blockOveride != null)
+            block.blockOveride.PostRender(chunk, pos, block);
     }
 
     public virtual void OnDestroy(Chunk chunk, BlockPos pos, Block block)
     {
-        if (BlockOverride.GetBlockOverride(block.type) != null)
-            BlockOverride.GetBlockOverride(block.type).OnDestroy(chunk, pos, block);
+        if (block.blockOveride != null)
+            block.blockOveride.OnDestroy(chunk, pos, block);
     }
 
     public virtual void RandomUpdate(Chunk chunk, BlockPos pos, Block block)
     {
-        if (BlockOverride.GetBlockOverride(block.type) != null)
-            BlockOverride.GetBlockOverride(block.type).RandomUpdate(chunk, pos, block);
+        if (block.blockOveride != null)
+            block.blockOveride.RandomUpdate(chunk, pos, block);
     }
 
     public virtual void ScheduledUpdate(Chunk chunk, BlockPos pos, Block block)
     {
-        if (BlockOverride.GetBlockOverride(block.type) != null)
-            BlockOverride.GetBlockOverride(block.type).ScheduledUpdate(chunk, pos, block);
+        if (block.blockOveride != null)
+            block.blockOveride.ScheduledUpdate(chunk, pos, block);
     }
 }

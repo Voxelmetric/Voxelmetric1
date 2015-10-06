@@ -1,58 +1,59 @@
-﻿using UnityEngine;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using UnityEngine;
 using Newtonsoft.Json;
 
-/*
-  This class acts like a middle man between the configuration files Voxelmetric understands
-  and the configuration data that Voxelmetric components need. It reads JSON files from the
-  resource folders and converts them into data structures that are stored for other classes
-  to access.
-*/
-public class VoxelmetricConfigsLoader {
+public class ConfigLoader<T>
+{
+    Dictionary<string, T> configs = new Dictionary<string, T>();
+    string[] configFolders;
 
-    Dictionary<string, TextureConfig> textureConfigs = new Dictionary<string, TextureConfig>();
-
-    void LoadTextureConfigs()
+    public ConfigLoader(string[] folders)
     {
-        var configFiles = Resources.LoadAll<TextAsset>(Config.Directories.TextureFolder);
+        configFolders = folders;
+    }
 
-        foreach (var configFile in configFiles)
+    void LoadConfigs()
+    {
+        foreach (var configFolder in configFolders)
         {
-            TextureConfigArray configs = JsonConvert.DeserializeObject<TextureConfigArray>(configFile.text);
-            foreach (var conf in configs.TextureConfigs)
+            var configFiles = UnityEngine.Resources.LoadAll<TextAsset>(configFolder);
+
+            foreach (var configFile in configFiles)
             {
-                textureConfigs.Add(conf.name, conf);
+                T config = JsonConvert.DeserializeObject<T>(configFile.text);
+                if(!configs.ContainsKey(config.ToString()))
+                    configs.Add(config.ToString(), config);
             }
         }
     }
 
-    public TextureConfig GetTextureConfig(string textureName)
+    public T GetConfig(string configName)
     {
-        if (textureConfigs.Keys.Count == 0) {
-            LoadTextureConfigs();
+        if (configs.Keys.Count == 0)
+        {
+            LoadConfigs();
         }
 
-        TextureConfig conf;
-        if (textureConfigs.TryGetValue(textureName, out conf))
+        T conf;
+        if (configs.TryGetValue(configName, out conf))
         {
             return conf;
         }
         else
         {
-            Debug.LogError("Texture config not found for " + textureName + ". Using defaults");
+            Debug.LogError("Config not found for " + configName + ". Using defaults");
             return conf;
         }
     }
 
-    public TextureConfig[] AllTextureConfigs()
+    public T[] AllConfigs()
     {
-        if (textureConfigs.Keys.Count == 0)
+        if (this.configs.Keys.Count == 0)
         {
-            LoadTextureConfigs();
+            LoadConfigs();
         }
-        TextureConfig[] configs = new TextureConfig[textureConfigs.Count];
-        textureConfigs.Values.CopyTo(configs, 0);
-        return configs;
+        T[] configValues = new T[configs.Count];
+        configs.Values.CopyTo(configValues, 0);
+        return configValues;
     }
-	
 }

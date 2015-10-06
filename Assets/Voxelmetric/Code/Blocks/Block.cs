@@ -15,14 +15,31 @@ public struct Block
         data = new BlockData();
     }
 
+    public Block(string name, World world)
+    {
+        int type;
+        if (world.blockIndex.names.TryGetValue(name, out type))
+        {
+            this.type = (ushort)type;
+            data = new BlockData();
+        }
+        else
+        {
+            this.type = 0;
+            data = new BlockData();
+            Debug.LogWarning("Block not found: " + name);
+            Debug.LogWarning("Searched " + world.worldName + " with " + world.blockIndex.controllers.Count + " blocks");
+        }
+    }
+
     public BlockController controller
     {
         get {
-            if (type >= Voxelmetric.resources.blockIndex.controllers.Count)
+            if (type >= world.blockIndex.controllers.Count)
             {
                 Debug.LogError("Block " + type + " is out of range");
             }
-            return Voxelmetric.resources.blockIndex.controllers[type];
+            return world.blockIndex.controllers[type];
         }
     }
 
@@ -30,25 +47,26 @@ public struct Block
     {
         get
         {
-            if (Config.Toggle.UseMultipleWorlds)
-            {
-                return Voxelmetric.resources.worlds[data.World()];
-            }
-            else
-            {
-                return Voxelmetric.resources.worlds[0];
-            }
+            return Voxelmetric.resources.worlds[data.World()];
+        }
+    }
+
+    public BlockOverride blockOveride
+    {
+        get
+        {
+           return world.blockIndex.blockOverrides[type];
         }
     }
 
     public static implicit operator BlockController(Block block)
     {
-        return Voxelmetric.resources.blockIndex.controllers[block.type];
+        return block.world.blockIndex.controllers[block.type];
     }
 
     public override string ToString()
     {
-        return Voxelmetric.resources.blockIndex.controllers[type].Name();
+        return world.blockIndex.controllers[type].Name();
     }
 
     public static implicit operator ushort(Block block)
@@ -71,24 +89,19 @@ public struct Block
         return new Block(b);
     }
 
-    public static implicit operator Block(string s)
-    {
-        int blockIndex = 0;
-        if (Voxelmetric.resources.blockIndex.names.TryGetValue(s, out blockIndex))
-        {
-            return blockIndex;
-        }
+    //public static implicit operator Block(string s)
+    //{
+    //    int blockIndex = 0;
+    //    if (Voxelmetric.resources.worlds[0].blockIndex.names.TryGetValue(s, out blockIndex))
+    //    {
+    //        return blockIndex;
+    //    }
 
-        Debug.LogWarning("Block not found: " + s);
-        return 0;
-    }
+    //    Debug.LogWarning("Block not found: " + s);
+    //    return 0;
+    //}
 
     //Reserved block types
-    public static Block Void
-    {
-        get { return new Block(ushort.MaxValue); }
-    }
-
     public static Block Air
     {
         get { return new Block(0); }

@@ -427,7 +427,7 @@ public class EditLayers
 
     GameObject LayersGO()
     {
-        var layersTransform = World.instance.gameObject.transform.FindChild("Terrain Layers");
+        var layersTransform = Voxelmetric.resources.worlds[0].gameObject.transform.FindChild("Terrain Layers");
         GameObject layersGO;
         if (layersTransform != null)
         {
@@ -437,7 +437,7 @@ public class EditLayers
         {
             layersGO = new GameObject();
             layersGO.name = "Terrain Layers";
-            layersGO.transform.parent = World.instance.gameObject.transform;
+            layersGO.transform.parent = Voxelmetric.resources.worlds[0].gameObject.transform;
         }
         return layersGO;
     }

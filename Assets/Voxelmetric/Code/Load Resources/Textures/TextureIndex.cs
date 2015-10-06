@@ -4,6 +4,18 @@ using System.Collections.Generic;
 
 public class TextureIndex {
 
+    bool useTextureAtlas;
+    string textureAtlasLocation;
+    string textureFolder;
+
+    public TextureIndex(string textureFolder, bool useTextureAtlas, string textureAtlasLocation)
+    {
+        this.textureFolder = textureFolder;
+        this.useTextureAtlas = useTextureAtlas;
+        this.textureAtlasLocation = textureAtlasLocation;
+        LoadTextureIndex();
+    }
+
     // Texture atlas
     public Dictionary<string, TextureCollection> textures = new Dictionary<string, TextureCollection>();
 
@@ -11,15 +23,14 @@ public class TextureIndex {
 
     void LoadTextureIndex()
     {
-
-        if (Config.Env.customTextureAtlas)
+        // If you're using a pre defined texture atlas return now, don't try to generate a new one
+        if (useTextureAtlas)
         {
             UseCustomTextureAtlas();
             return;
         }
 
         TextureConfig[] configs = LoadAllTextures();
-
         List<Texture2D> individualTextures = new List<Texture2D>();
         for (int i = 0; i < configs.Length; i++)
         {
@@ -84,8 +95,8 @@ public class TextureIndex {
     //This function is used if you've made your own texture atlas and the configs just specify where the textures are
     void UseCustomTextureAtlas()
     {
-        atlas = Resources.Load<Texture2D>(Config.Directories.TextureFolder + "/" + Config.Env.customTextureAtlasFile);
-        TextureConfig[] configs = Voxelmetric.resources.config.AllTextureConfigs();
+        atlas = Resources.Load<Texture2D>(textureAtlasLocation);
+        TextureConfig[] configs = new ConfigLoader<TextureConfig>(new string[] { textureFolder }).AllConfigs();
 
         for (int i = 0; i < configs.Length; i++)
         {
@@ -114,10 +125,10 @@ public class TextureIndex {
 
     TextureConfig[] LoadAllTextures()
     {
-        TextureConfig[] configs = Voxelmetric.resources.config.AllTextureConfigs();
+        TextureConfig[] configs = new ConfigLoader<TextureConfig>(new string[] { textureFolder }).AllConfigs();
 
         // Load all files in Textures folder
-        Texture2D[] sourceTextures = Resources.LoadAll<Texture2D>(Config.Directories.TextureFolder);
+        Texture2D[] sourceTextures = Resources.LoadAll<Texture2D>(textureFolder);
 
         Dictionary<string, Texture2D> sourceTexturesLookup = new Dictionary<string, Texture2D>();
         foreach (var texture in sourceTextures) {

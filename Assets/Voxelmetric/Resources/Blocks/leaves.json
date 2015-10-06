@@ -1,0 +1,13 @@
+{
+  "name": "leaves",
+  "controller": "BlockCube",
+  "textures": [
+    "leaves",
+    "leaves",
+    "leaves",
+    "leaves",
+    "leaves",
+    "leaves"
+  ],
+  "isSolid": false
+}

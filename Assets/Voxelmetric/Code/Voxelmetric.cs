@@ -67,7 +67,7 @@ public static class Voxelmetric
         mesh.uv = meshData.uv.ToArray();
         mesh.RecalculateNormals();
 
-        go.GetComponent<Renderer>().material.mainTexture = Voxelmetric.resources.textureIndex.atlas;
+        go.GetComponent<Renderer>().material.mainTexture = chunk.world.textureIndex.atlas;
         go.GetComponent<MeshFilter>().mesh = mesh;
 
         return go;

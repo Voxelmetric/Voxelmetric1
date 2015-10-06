@@ -360,7 +360,7 @@ public class EditBlocks {
 
     GameObject BlocksGO()
     {
-        var blocksTransform = World.instance.gameObject.transform.FindChild("Block Types");
+        var blocksTransform = Voxelmetric.resources.worlds[0].gameObject.transform.FindChild("Block Types");
         GameObject blocksGO;
         if (blocksTransform != null)
         {
@@ -370,7 +370,7 @@ public class EditBlocks {
         {
             blocksGO = new GameObject();
             blocksGO.name = "Block Types";
-            blocksGO.transform.parent = World.instance.gameObject.transform;
+            blocksGO.transform.parent = Voxelmetric.resources.worlds[0].gameObject.transform;
         }
         return blocksGO;
     }
@@ -378,7 +378,7 @@ public class EditBlocks {
     void GetDefinedBlocks()
     {
         Voxelmetric.resources.textureIndex = new TextureIndex();
-        definitions = World.instance.gameObject.GetComponentsInChildren<BlockDefinition>();
+        definitions = Voxelmetric.resources.worlds[0].gameObject.GetComponentsInChildren<BlockDefinition>();
 
         blocks = new BlockController[definitions.Length];
         for (int i = 0; i < definitions.Length; i++)

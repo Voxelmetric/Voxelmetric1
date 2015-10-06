@@ -26,13 +26,7 @@ public class VoxelmetricExample : MonoBehaviour
     bool test;
     void Update()
     {
-        if (!test)
-        {
-            Voxelmetric.resources.worlds[0].CreateChunk(new BlockPos());
-            test = true;
-        }
-        Voxelmetric.resources.worlds[0].SetBlock(new BlockPos(), "stone");
-
+        //Movement
         if (Input.GetMouseButton(1))
         {
             rot = new Vector2(
@@ -45,31 +39,7 @@ public class VoxelmetricExample : MonoBehaviour
         transform.position += transform.forward * 50 * Input.GetAxis("Vertical") * Time.deltaTime;
         transform.position += transform.right * 50 * Input.GetAxis("Horizontal") * Time.deltaTime;
 
-        RaycastHit hit;
-        var mousePos = Camera.main.ScreenToWorldPoint(new Vector3(Input.mousePosition.x, Input.mousePosition.y, 10));
-
-        if (Input.GetMouseButtonDown(0))
-        {
-
-            bool adjacent = true;
-            if (((Block)blockToPlace).type == Block.Air.type)
-            {
-                adjacent = false;
-            }
-
-            if (Physics.Raycast(Camera.main.transform.position, mousePos - Camera.main.transform.position, out hit, 100))
-            {
-                // Creates a game object block at the click pos:
-                // Voxelmetric.CreateGameObjectBlock(Voxelmetric.GetBlockPos(hit, adjacent), hit.collider.gameObject.GetComponent<Chunk>().world, hit.point, new Quaternion());
-                Voxelmetric.SetBlock(hit, blockToPlace, adjacent);
-            }
-        }
-
-        if (Physics.Raycast(Camera.main.transform.position, mousePos - Camera.main.transform.position, out hit, 100))
-        {
-            selectedBlockText.text = Voxelmetric.GetBlock(hit).ToString();
-        }
-
+        //Save
         if (saveProgress != null)
         {
             saveProgressText.text = SaveStatus();
@@ -79,32 +49,65 @@ public class VoxelmetricExample : MonoBehaviour
             saveProgressText.text = "Save";
         }
 
-        if (Input.GetKeyDown(KeyCode.I))
+        //Blocks
+        RaycastHit hit;
+
+        var mousePos = Camera.main.ScreenToWorldPoint(new Vector3(Input.mousePosition.x, Input.mousePosition.y, 10));
+        if (Physics.Raycast(Camera.main.transform.position, mousePos - Camera.main.transform.position, out hit, 100))
         {
-            if (Physics.Raycast(Camera.main.transform.position, mousePos - Camera.main.transform.position, out hit, 100))
+            Chunk chunk = hit.collider.GetComponent<Chunk>();
+
+            if (chunk == null)
             {
-                pfStart = Voxelmetric.GetBlockPos(hit);
+                return;
             }
-        }
 
-        if (Input.GetKeyDown(KeyCode.O))
-        {
-            if (Physics.Raycast(Camera.main.transform.position, mousePos - Camera.main.transform.position, out hit, 100))
+            selectedBlockText.text = Voxelmetric.GetBlock(hit).ToString();
+
+            if (Input.GetMouseButtonDown(0))
             {
-                pfStop = Voxelmetric.GetBlockPos(hit);
+
+                bool adjacent = true;
+                if (new Block(blockToPlace, chunk.world).type == Block.Air.type)
+                {
+                    adjacent = false;
+                }
+
+                if (Physics.Raycast(Camera.main.transform.position, mousePos - Camera.main.transform.position, out hit, 100))
+                {
+                    // Creates a game object block at the click pos:
+                    // Voxelmetric.CreateGameObjectBlock(Voxelmetric.GetBlockPos(hit, adjacent), hit.collider.gameObject.GetComponent<Chunk>().world, hit.point, new Quaternion());
+                    Voxelmetric.SetBlock(hit, new Block(blockToPlace, chunk.world), adjacent);
+                }
             }
-        }
 
-        if (Input.GetKeyDown(KeyCode.P))
-        {
-             pf = new PathFinder(pfStart, pfStop, Voxelmetric.resources.worlds[0] , 2);
-            Debug.Log(pf.path.Count);
-        }
+            if (Input.GetKeyDown(KeyCode.I))
+            {
+                if (Physics.Raycast(Camera.main.transform.position, mousePos - Camera.main.transform.position, out hit, 100))
+                {
+                    pfStart = Voxelmetric.GetBlockPos(hit);
+                }
+            }
 
-        if (pf!=null && pf.path.Count != 0)
-        {
-            for (int i = 0; i < pf.path.Count - 1; i++)
-                Debug.DrawLine(pf.path[i].Add(0,1,0), pf.path[i + 1].Add(0,1,0));
+            if (Input.GetKeyDown(KeyCode.O))
+            {
+                if (Physics.Raycast(Camera.main.transform.position, mousePos - Camera.main.transform.position, out hit, 100))
+                {
+                    pfStop = Voxelmetric.GetBlockPos(hit);
+                }
+            }
+
+            if (Input.GetKeyDown(KeyCode.P))
+            {
+                pf = new PathFinder(pfStart, pfStop, Voxelmetric.resources.worlds[0], 2);
+                Debug.Log(pf.path.Count);
+            }
+
+            if (pf != null && pf.path.Count != 0)
+            {
+                for (int i = 0; i < pf.path.Count - 1; i++)
+                    Debug.DrawLine(pf.path[i].Add(0, 1, 0), pf.path[i + 1].Add(0, 1, 0));
+            }
         }
     }
 

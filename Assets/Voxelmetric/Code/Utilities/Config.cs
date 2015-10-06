@@ -40,7 +40,6 @@ namespace Config
     {
         public static string SaveFolder = "VoxelSaves";
         public static string BlockMeshFolder = "Meshes";
-        public static string TextureFolder = "Textures";
         public static string PrefabsFolder = "Prefabs";
     }
 

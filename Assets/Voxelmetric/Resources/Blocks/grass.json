@@ -1,0 +1,13 @@
+{
+  "name": "grass",
+  "controller": "BlockCube",
+  "textures": [
+    "grass_top",
+    "dirt",
+    "grass_side",
+    "grass_side",
+    "grass_side",
+    "grass_side"
+  ],
+  "isSolid": true,
+}
