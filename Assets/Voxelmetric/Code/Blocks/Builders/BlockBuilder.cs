@@ -26,7 +26,7 @@ public static class BlockBuilder
         bool esSolid = false;
         bool swSolid = false;
 
-        float light = 0;
+        //float light = 0;
 
         switch (direction)
         {
@@ -41,7 +41,7 @@ public static class BlockBuilder
                 esSolid = chunk.LocalGetBlock(localPos.Add(1, 1, -1)).controller.IsSolid(Direction.west) && chunk.LocalGetBlock(localPos.Add(1, 1, -1)).controller.IsSolid(Direction.north);
                 swSolid = chunk.LocalGetBlock(localPos.Add(-1, 1, -1)).controller.IsSolid(Direction.north) && chunk.LocalGetBlock(localPos.Add(-1, 1, -1)).controller.IsSolid(Direction.east);
 
-                light = BlockDataMap.NonSolid.Light(chunk.LocalGetBlock(localPos.Add(0, 1, 0)))/ 15f;
+                //light = BlockDataMap.NonSolid.Light(chunk.LocalGetBlock(localPos.Add(0, 1, 0)))/ 15f;
 
                 break;
             case Direction.down:
@@ -55,7 +55,7 @@ public static class BlockBuilder
                 esSolid = chunk.LocalGetBlock(localPos.Add(1, -1, 1)).controller.IsSolid(Direction.west) && chunk.LocalGetBlock(localPos.Add(1, -1, 1)).controller.IsSolid(Direction.north);
                 swSolid = chunk.LocalGetBlock(localPos.Add(-1, -1, 1)).controller.IsSolid(Direction.north) && chunk.LocalGetBlock(localPos.Add(-1, -1, 1)).controller.IsSolid(Direction.east);
 
-                light = BlockDataMap.NonSolid.Light(chunk.LocalGetBlock(localPos.Add(0, -1, 0))) / 15f;
+                //light = BlockDataMap.NonSolid.Light(chunk.LocalGetBlock(localPos.Add(0, -1, 0))) / 15f;
 
                 break;
             case Direction.north:
@@ -69,7 +69,7 @@ public static class BlockBuilder
                 wnSolid = chunk.LocalGetBlock(localPos.Add(1, -1, 1)).controller.IsSolid(Direction.west) && chunk.LocalGetBlock(localPos.Add(1, -1, 1)).controller.IsSolid(Direction.north);
                 swSolid = chunk.LocalGetBlock(localPos.Add(-1, -1, 1)).controller.IsSolid(Direction.north) && chunk.LocalGetBlock(localPos.Add(-1, -1, 1)).controller.IsSolid(Direction.east);
 
-                light = BlockDataMap.NonSolid.Light(chunk.LocalGetBlock(localPos.Add(0, 0, 1))) / 15f;
+                //light = BlockDataMap.NonSolid.Light(chunk.LocalGetBlock(localPos.Add(0, 0, 1))) / 15f;
 
                 break;
             case Direction.east:
@@ -83,7 +83,7 @@ public static class BlockBuilder
                 wnSolid = chunk.LocalGetBlock(localPos.Add(1, -1, -1)).controller.IsSolid(Direction.east) && chunk.LocalGetBlock(localPos.Add(1, -1, -1)).controller.IsSolid(Direction.north);
                 swSolid = chunk.LocalGetBlock(localPos.Add(1, -1, 1)).controller.IsSolid(Direction.north) && chunk.LocalGetBlock(localPos.Add(1, -1, 1)).controller.IsSolid(Direction.east);
 
-                light = BlockDataMap.NonSolid.Light(chunk.LocalGetBlock(localPos.Add(1, 0, 0))) / 15f;
+                //light = BlockDataMap.NonSolid.Light(chunk.LocalGetBlock(localPos.Add(1, 0, 0))) / 15f;
 
                 break;
             case Direction.south:
@@ -97,7 +97,7 @@ public static class BlockBuilder
                 wnSolid = chunk.LocalGetBlock(localPos.Add(-1, -1, -1)).controller.IsSolid(Direction.east) && chunk.LocalGetBlock(localPos.Add(-1, -1, -1)).controller.IsSolid(Direction.north);
                 swSolid = chunk.LocalGetBlock(localPos.Add(1, -1, -1)).controller.IsSolid(Direction.north) && chunk.LocalGetBlock(localPos.Add(1, -1, -1)).controller.IsSolid(Direction.east);
 
-                light = BlockDataMap.NonSolid.Light(chunk.LocalGetBlock(localPos.Add(0, 0, -1))) / 15f;
+                //light = BlockDataMap.NonSolid.Light(chunk.LocalGetBlock(localPos.Add(0, 0, -1))) / 15f;
 
                 break;
             case Direction.west:
@@ -111,7 +111,7 @@ public static class BlockBuilder
                 wnSolid = chunk.LocalGetBlock(localPos.Add(-1, -1, 1)).controller.IsSolid(Direction.east) && chunk.LocalGetBlock(localPos.Add(-1, -1, 1)).controller.IsSolid(Direction.north);
                 swSolid = chunk.LocalGetBlock(localPos.Add(-1, -1, -1)).controller.IsSolid(Direction.north) && chunk.LocalGetBlock(localPos.Add(-1, -1, -1)).controller.IsSolid(Direction.east);
 
-                light = BlockDataMap.NonSolid.Light(chunk.LocalGetBlock(localPos.Add(-1, 0, 0))) / 15f;
+                //light = BlockDataMap.NonSolid.Light(chunk.LocalGetBlock(localPos.Add(-1, 0, 0))) / 15f;
 
                 break;
             default:
@@ -119,7 +119,14 @@ public static class BlockBuilder
                 break;
         }
 
-        AddColors(meshData, wnSolid, nSolid, neSolid, eSolid, esSolid, sSolid, swSolid, wSolid, light);
+        if (chunk.world.config.addAOToMesh)
+        {
+            AddColorsAO(meshData, wnSolid, nSolid, neSolid, eSolid, esSolid, sSolid, swSolid, wSolid, chunk.world.config.ambientOcclusionStrength);
+        }
+        else
+        {
+            meshData.AddColors(1, 1, 1, 1, 1);
+        }
     }
 
     public static void BuildTexture(Chunk chunk, BlockPos localPos, BlockPos globalPos, MeshData meshData, Direction direction, TextureCollection textureCollection)
@@ -229,51 +236,51 @@ public static class BlockBuilder
         meshData.AddQuadTriangles(useCollisionMesh);
     }
 
-    static void AddColors(MeshData meshData, bool wnSolid, bool nSolid, bool neSolid, bool eSolid, bool esSolid, bool sSolid, bool swSolid, bool wSolid, float light)
+    static void AddColorsAO(MeshData meshData, bool wnSolid, bool nSolid, bool neSolid, bool eSolid, bool esSolid, bool sSolid, bool swSolid, bool wSolid, float strength)
     {
         float ne = 1;
         float es = 1;
         float sw = 1;
         float wn = 1;
 
-        float aoContrast = 0.2f;
+        strength /= 2;
 
         if (nSolid)
         {
-            wn -= aoContrast;
-            ne -= aoContrast;
+            wn -= strength;
+            ne -= strength;
         }
 
         if (eSolid)
         {
-            ne -= aoContrast;
-            es -= aoContrast;
+            ne -= strength;
+            es -= strength;
         }
 
         if (sSolid)
         {
-            es -= aoContrast;
-            sw -= aoContrast;
+            es -= strength;
+            sw -= strength;
         }
 
         if (wSolid)
         {
-            sw -= aoContrast;
-            wn -= aoContrast;
+            sw -= strength;
+            wn -= strength;
         }
 
         if (neSolid)
-            ne -= aoContrast;
+            ne -= strength;
 
         if (swSolid)
-            sw -= aoContrast;
+            sw -= strength;
 
         if (wnSolid)
-            wn -= aoContrast;
+            wn -= strength;
 
         if (esSolid)
-            es -= aoContrast;
+            es -= strength;
 
-        meshData.AddColors(ne, es, sw, wn, light);
+        meshData.AddColors(ne, es, sw, wn, 1);
     }
 }

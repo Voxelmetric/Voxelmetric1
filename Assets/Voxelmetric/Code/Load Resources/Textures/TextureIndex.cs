@@ -4,15 +4,11 @@ using System.Collections.Generic;
 
 public class TextureIndex {
 
-    bool useTextureAtlas;
-    string textureAtlasLocation;
-    string textureFolder;
+    WorldConfig config;
 
-    public TextureIndex(string textureFolder, bool useTextureAtlas, string textureAtlasLocation)
+    public TextureIndex(WorldConfig config)
     {
-        this.textureFolder = textureFolder;
-        this.useTextureAtlas = useTextureAtlas;
-        this.textureAtlasLocation = textureAtlasLocation;
+        this.config = config;
         LoadTextureIndex();
     }
 
@@ -24,7 +20,7 @@ public class TextureIndex {
     void LoadTextureIndex()
     {
         // If you're using a pre defined texture atlas return now, don't try to generate a new one
-        if (useTextureAtlas)
+        if (config.useCustomTextureAtlas)
         {
             UseCustomTextureAtlas();
             return;
@@ -43,12 +39,12 @@ public class TextureIndex {
 
         // Generate atlas
         Texture2D packedTextures = new Texture2D(8192, 8192);
-        Rect[] rects = packedTextures.PackTextures(individualTextures.ToArray(), Config.Env.textureAtlasPadding, 8192, false);
+        Rect[] rects = packedTextures.PackTextures(individualTextures.ToArray(), config.textureAtlasPadding, 8192, false);
 
         // Transfer over the pixels to another texture2d because PackTextures resets the texture format and useMipMaps settings
-        atlas = new Texture2D(packedTextures.width, packedTextures.height, Config.Env.textureFormat, Config.Env.useMipMaps);
+        atlas = new Texture2D(packedTextures.width, packedTextures.height, config.textureFormat, config.useMipMaps);
         atlas.SetPixels(packedTextures.GetPixels(0, 0, packedTextures.width, packedTextures.height));
-        atlas.filterMode = Config.Env.textureAtlasFiltering;
+        atlas.filterMode = config.textureAtlasFiltering;
 
         List<Rect> repeatingTextures = new List<Rect>();
         List<Rect> nonrepeatingTextures = new List<Rect>();
@@ -88,15 +84,15 @@ public class TextureIndex {
             }
         }
 
-        uPaddingBleed.BleedEdges(atlas, Config.Env.textureAtlasPadding, repeatingTextures.ToArray(), repeatingTextures: true);
-        uPaddingBleed.BleedEdges(atlas, Config.Env.textureAtlasPadding, nonrepeatingTextures.ToArray(), repeatingTextures: false);
+        uPaddingBleed.BleedEdges(atlas, config.textureAtlasPadding, repeatingTextures.ToArray(), repeatingTextures: true);
+        uPaddingBleed.BleedEdges(atlas, config.textureAtlasPadding, nonrepeatingTextures.ToArray(), repeatingTextures: false);
     }
 
     //This function is used if you've made your own texture atlas and the configs just specify where the textures are
     void UseCustomTextureAtlas()
     {
-        atlas = Resources.Load<Texture2D>(textureAtlasLocation);
-        TextureConfig[] configs = new ConfigLoader<TextureConfig>(new string[] { textureFolder }).AllConfigs();
+        atlas = Resources.Load<Texture2D>(config.customTextureAtlasFile);
+        TextureConfig[] configs = new ConfigLoader<TextureConfig>(new string[] { config.textureFolder }).AllConfigs();
 
         for (int i = 0; i < configs.Length; i++)
         {
@@ -125,10 +121,10 @@ public class TextureIndex {
 
     TextureConfig[] LoadAllTextures()
     {
-        TextureConfig[] configs = new ConfigLoader<TextureConfig>(new string[] { textureFolder }).AllConfigs();
+        TextureConfig[] configs = new ConfigLoader<TextureConfig>(new string[] { config.textureFolder }).AllConfigs();
 
         // Load all files in Textures folder
-        Texture2D[] sourceTextures = Resources.LoadAll<Texture2D>(textureFolder);
+        Texture2D[] sourceTextures = Resources.LoadAll<Texture2D>(config.textureFolder);
 
         Dictionary<string, Texture2D> sourceTexturesLookup = new Dictionary<string, Texture2D>();
         foreach (var texture in sourceTextures) {
@@ -174,7 +170,7 @@ public class TextureIndex {
         }
         else //If theres a width and a height fetch the pixels specified by the rect as a texture
         {
-            Texture2D newTexture = new Texture2D(texture.width, texture.height, Config.Env.textureFormat, file.mipmapCount < 1);
+            Texture2D newTexture = new Texture2D(texture.width, texture.height, config.textureFormat, file.mipmapCount < 1);
             newTexture.SetPixels(0, 0, texture.width, texture.height, file.GetPixels(texture.xPos, texture.yPos, texture.width, texture.height));
             return newTexture;
         }

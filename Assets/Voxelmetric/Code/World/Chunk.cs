@@ -103,7 +103,7 @@ public class Chunk : MonoBehaviour
     {
         randomUpdateTime += Time.fixedDeltaTime;
 
-        if (randomUpdateTime >= Config.Env.UpdateFrequency)
+        if (randomUpdateTime >= world.config.randomUpdateFrequency)
         {
             randomUpdateTime = 0;
 
@@ -118,7 +118,7 @@ public class Chunk : MonoBehaviour
             //Process Scheduled Updates
             for (int i = 0; i < scheduledUpdates.Count; i++)
             {
-                scheduledUpdates[i] = new BlockAndTimer(scheduledUpdates[i].pos, scheduledUpdates[i].time - Config.Env.UpdateFrequency);
+                scheduledUpdates[i] = new BlockAndTimer(scheduledUpdates[i].pos, scheduledUpdates[i].time - world.config.randomUpdateFrequency);
                 if (scheduledUpdates[i].time <= 0)
                 {
                     Block block = GetBlock(scheduledUpdates[i].pos);
@@ -244,6 +244,11 @@ public class Chunk : MonoBehaviour
     /// <param name="updateChunk">Optional parameter, set to false to keep the chunk unupdated despite the change</param>
     public virtual void SetBlock(BlockPos blockPos, Block block, bool updateChunk = true, bool setBlockModified = true)
     {
+        if (setBlockModified)
+        {
+            Debug.LogWarning("modified block: " + block);
+        }
+
         if (InRange(blockPos))
         {
             //Only call create and destroy if this is a different block type, otherwise it's just updating the properties of an existing block
@@ -314,7 +319,7 @@ public class Chunk : MonoBehaviour
         filter.mesh.uv = meshData.uv.ToArray();
         filter.mesh.RecalculateNormals();
 
-        if (Config.Toggle.UseCollisionMesh)
+        if (world.config.useCollisionMesh)
         {
             coll.sharedMesh = null;
             Mesh mesh = new Mesh();

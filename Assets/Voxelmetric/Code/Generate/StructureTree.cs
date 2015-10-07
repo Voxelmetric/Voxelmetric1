@@ -33,7 +33,7 @@ public class StructureTree: GeneratedStructure {
         }
         for (int y = 0; y <= 5; y++)
         {
-            if (y < Config.Env.WorldMaxY)
+            if (y < world.config.maxY)
             {
                 Block block = new Block("log", world);
                 world.SetBlock(pos.Add(0, y, 0), block, updateChunk: false, setBlockModified: false);

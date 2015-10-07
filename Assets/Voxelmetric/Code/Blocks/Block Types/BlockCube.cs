@@ -23,7 +23,7 @@ public class BlockCube : BlockSolid {
         BlockBuilder.BuildRenderer(chunk, localPos, globalPos, meshData, direction);
         BlockBuilder.BuildTexture(chunk, localPos, globalPos, meshData, direction, textures);
         BlockBuilder.BuildColors(chunk, localPos, globalPos, meshData, direction);
-        if (Config.Toggle.UseCollisionMesh)
+        if (block.world.config.useCollisionMesh)
         {
             BlockBuilder.BuildCollider(chunk, localPos, globalPos, meshData, direction);
         }

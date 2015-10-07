@@ -24,7 +24,7 @@ public class CustomMesh : BlockController {
         blockName = config.name;
         collection = world.textureIndex.GetTextureCollection(config.textures[0]);
         isSolid = config.isSolid;
-        SetUpMeshControllerMesh(config.meshFileName, this, new Vector3(config.meshXOffset, config.meshYOffset, config.meshZOffset));
+        SetUpMeshControllerMesh( world.config.meshFolder + "/" + config.meshFileName, this, new Vector3(config.meshXOffset, config.meshYOffset, config.meshZOffset));
     }
 
     public override string Name()
@@ -49,16 +49,8 @@ public class CustomMesh : BlockController {
             if (uvs.Length == 0)
                 meshData.uv.Add(new Vector2(0, 0));
 
-            float lighting = 1;
-            if (Config.Toggle.BlockLighting)
-            {
-                //lighting = block.data1 / 255f;
-            }
-            else
-            {
-                lighting = 1;
-            }
-            meshData.colors.Add(new Color(lighting, lighting, lighting, 1));
+            //Coloring of blocks is not yet implemented so just pass in full brightness
+            meshData.colors.Add(new Color(1, 1, 1, 1));
         }
 
         if (uvs.Length != 0)
@@ -160,9 +152,9 @@ public class CustomMesh : BlockController {
     /// <summary>
     /// Gets the mesh file with the given name and adds the mesh's data to the controller
     /// </summary>
-    public static void SetUpMeshControllerMesh(string meshName, CustomMesh controller, Vector3 positionOffset)
+    public static void SetUpMeshControllerMesh(string meshLocation, CustomMesh controller, Vector3 positionOffset)
     {
-        GameObject meshGO = (GameObject)Resources.Load(Config.Directories.BlockMeshFolder + "/" + meshName);//(from m in meshGOs where m.name == meshName select m).First();
+        GameObject meshGO = (GameObject)Resources.Load(meshLocation);//(from m in meshGOs where m.name == meshName select m).First();
 
         for (int GOIndex = 0; GOIndex < meshGO.transform.childCount; GOIndex++)
         {

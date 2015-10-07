@@ -79,17 +79,13 @@ public class MeshData
         }
     }
 
+    // Keeping this method even though we're not yet adding anything but 1, 1, 1, 1
     public void AddColors(float ne, float es, float sw, float wn, float light)
     {
-        float aoStrength = Config.Env.AOStrength;
-        float blockLightStrength = Config.Env.BlockLightStrength;
-
-
-        //This should be multiplicative, not additive
-        wn = (wn * aoStrength) + (light * blockLightStrength);
-        ne = (ne * aoStrength) + (light * blockLightStrength);
-        es = (es * aoStrength) + (light * blockLightStrength);
-        sw = (sw * aoStrength) + (light * blockLightStrength);
+        wn = (wn * light);
+        ne = (ne * light);
+        es = (es * light);
+        sw = (sw * light);
         
         colors.Add(new Color(wn, wn, wn));
         colors.Add(new Color(ne, ne, ne));

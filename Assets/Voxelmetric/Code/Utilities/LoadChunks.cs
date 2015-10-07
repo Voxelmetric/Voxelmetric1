@@ -7,13 +7,31 @@ public class LoadChunks : MonoBehaviour
 
     public World world;
 
+    [Range(1, 32)]
+    public int chunkLoadRadius = 8;
+    BlockPos[] chunkPositions;
+
+    //The distance is measured in blocks
+    [Range(1, 64)]
+    public int DistanceToDeleteChunks = (int)(8 * 1.25f);
+
+    [Range(10, 100)]
+    public int WaitBetweenDeletes = 10;
+    //Recommend setting this to at least 2 when LightSceneOnStart is enabled 
+    [Range(0, 100)]
+    public int WaitBetweenChunkGen = 1;
+
     int deleteTimer = 0;
     int chunkGenTimer = 0;
+
+    void Start() {
+        chunkPositions = ChunkLoadOrder.ChunkPositions(chunkLoadRadius);
+    }
 
     // Update is called once per frame
     void Update()
     {
-        if (deleteTimer == Config.Env.WaitBetweenDeletes)
+        if (deleteTimer == WaitBetweenDeletes)
         {
             DeleteChunks();
             deleteTimer = 0;
@@ -24,7 +42,7 @@ public class LoadChunks : MonoBehaviour
             deleteTimer++;
         }
 
-        if (chunkGenTimer == Config.Env.WaitBetweenChunkGen)
+        if (chunkGenTimer == WaitBetweenChunkGen)
         {
             FindChunksAndLoad();
             chunkGenTimer = 0;
@@ -46,7 +64,7 @@ public class LoadChunks : MonoBehaviour
                 new Vector3(chunkPos.x, 0, chunkPos.z),
                 new Vector3(transform.position.x, 0, transform.position.z));
 
-            if (distance > Config.Env.DistanceToDeleteChunks * Config.Env.BlockSize)
+            if (distance > DistanceToDeleteChunks * Config.Env.ChunkSize * Config.Env.BlockSize)
                 chunksToDelete.Add(chunk.Key);
         }
 
@@ -58,16 +76,16 @@ public class LoadChunks : MonoBehaviour
     bool FindChunksAndLoad()
     {
         //Cycle through the array of positions
-        for (int i = 0; i < ChunkLoadOrder.chunkPositions.Length; i++)
+        for (int i = 0; i < chunkPositions.Length; i++)
         {
             //Get the position of this gameobject to generate around
             BlockPos playerPos = ((BlockPos)transform.position).ContainingChunkCoordinates();
 
             //translate the player position and array position into chunk position
             BlockPos newChunkPos = new BlockPos(
-                ChunkLoadOrder.chunkPositions[i].x * Config.Env.ChunkSize + playerPos.x,
+                chunkPositions[i].x * Config.Env.ChunkSize + playerPos.x,
                 0,
-                ChunkLoadOrder.chunkPositions[i].z * Config.Env.ChunkSize + playerPos.z
+                chunkPositions[i].z * Config.Env.ChunkSize + playerPos.z
                 );
 
             //Get the chunk in the defined position
@@ -89,7 +107,7 @@ public class LoadChunks : MonoBehaviour
     {
         //First create the chunk game objects in the world class
         //The world class wont do any generation when threaded chunk creation is enabled
-        for (int y = Config.Env.WorldMinY; y <= Config.Env.WorldMaxY; y += Config.Env.ChunkSize)
+        for (int y = world.config.minY; y <= world.config.maxY; y += Config.Env.ChunkSize)
         {
             for (int x = columnPosition.x - Config.Env.ChunkSize; x <= columnPosition.x + Config.Env.ChunkSize; x += Config.Env.ChunkSize)
             {
@@ -105,7 +123,7 @@ public class LoadChunks : MonoBehaviour
             }
         }
 
-        for (int y = Config.Env.WorldMaxY; y >= Config.Env.WorldMinY; y -= Config.Env.ChunkSize)
+        for (int y = world.config.maxY; y >= world.config.minY; y -= Config.Env.ChunkSize)
         {
             BlockPos pos = new BlockPos(columnPosition.x, y, columnPosition.z);
             Chunk chunk = world.GetChunk(pos);
@@ -137,7 +155,7 @@ public class LoadChunks : MonoBehaviour
         //can calculate any light spread or render the chunk
         if (Config.Toggle.UseMultiThreading)
         {
-            for (int y = Config.Env.WorldMaxY; y >= Config.Env.WorldMinY; y -= Config.Env.ChunkSize)
+            for (int y = world.config.maxY; y >= world.config.minY; y -= Config.Env.ChunkSize)
             {
                 for (int x = -Config.Env.ChunkSize; x <= Config.Env.ChunkSize; x += Config.Env.ChunkSize)
                 {
@@ -154,13 +172,14 @@ public class LoadChunks : MonoBehaviour
         }
 
         //Render chunk
-        for (int y = Config.Env.WorldMaxY; y >= Config.Env.WorldMinY; y -= Config.Env.ChunkSize)
+        for (int y = world.config.maxY; y >= world.config.minY; y -= Config.Env.ChunkSize)
         {
             chunk = world.GetChunk(columnPosition.Add(0, y, 0));
 
-            if(Config.Toggle.LightSceneOnStart){
-                BlockLight.FloodLightChunkColumn(world, chunk);
-            }
+            //Disabled untill lighting is revisited
+            //if(Config.Toggle.LightSceneOnStart){
+            //    BlockLight.FloodLightChunkColumn(world, chunk);
+            //}
 
             chunk.UpdateNow();
         }

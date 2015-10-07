@@ -47,7 +47,7 @@ public static class Voxelmetric
 
     static GameObject GOFromBlock(Block original, BlockPos blockPos, Vector3 position, Quaternion rotation, Chunk chunk)
     {
-        GameObject go = (GameObject)GameObject.Instantiate(Resources.Load<GameObject>(Config.Directories.PrefabsFolder + "/Block"), position, rotation);
+        GameObject go = (GameObject)GameObject.Instantiate(Resources.Load<GameObject>(chunk.world.config.pathToBlockPrefab), position, rotation);
         go.transform.localScale = new Vector3(Config.Env.BlockSize, Config.Env.BlockSize, Config.Env.BlockSize);
 
         MeshData meshData = new MeshData();
@@ -124,12 +124,12 @@ public static class Voxelmetric
             return false;
 
         BlockPos pos = GetBlockPos(hit, adjacent);
-        chunk.world.SetBlock(pos, block, !Config.Toggle.BlockLighting);
+        chunk.world.SetBlock(pos, block);
 
-        if (Config.Toggle.BlockLighting)
-        {
-            BlockLight.LightArea(chunk.world, pos);
-        }
+        //if (Config.Toggle.BlockLighting)
+        //{
+        //    BlockLight.LightArea(chunk.world, pos);
+        //}
 
         return true;
     }
@@ -140,12 +140,12 @@ public static class Voxelmetric
         if (chunk == null)
             return false;
 
-        chunk.world.SetBlock(pos, block, !Config.Toggle.BlockLighting);
+        chunk.world.SetBlock(pos, block);
 
-        if (Config.Toggle.BlockLighting)
-        {
-            BlockLight.LightArea(world, pos);
-        }
+        //if (Config.Toggle.BlockLighting)
+        //{
+        //    BlockLight.LightArea(world, pos);
+        //}
 
         return true;
     }

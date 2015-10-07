@@ -381,6 +381,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   world: {fileID: 1571917861}
+  chunkLoadRadius: 8
+  DistanceToDeleteChunks: 10
+  WaitBetweenDeletes: 10
+  WaitBetweenChunkGen: 1
 --- !u!1 &312836251
 GameObject:
   m_ObjectHideFlags: 0

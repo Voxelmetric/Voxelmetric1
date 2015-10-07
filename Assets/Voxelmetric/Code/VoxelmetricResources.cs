@@ -29,7 +29,7 @@ public class VoxelmetricResources {
             return textureIndex;
         }
 
-        textureIndex = new TextureIndex(world.config.textureFolder, world.config.useCustomTextureAtlas, world.config.customTextureAtlasFile );
+        textureIndex = new TextureIndex(world.config);
         textureIndexes.Add(world.config.textureFolder, textureIndex);
         return textureIndex;
     }

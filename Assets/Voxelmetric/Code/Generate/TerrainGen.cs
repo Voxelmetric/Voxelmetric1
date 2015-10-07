@@ -4,7 +4,7 @@ using SimplexNoise;
 
 public class TerrainGen: MonoBehaviour
 {
-    public Noise noiseGen;
+    public Noise noiseGen ;
     public World world;
 
     public int temperatureScale = 100;
@@ -18,7 +18,6 @@ public class TerrainGen: MonoBehaviour
 
     public void GenerateTerrainForChunkColumn(BlockPos pos)
     {
-
         for (int x = pos.x; x < pos.x + Config.Env.ChunkSize; x++)
         {
             for (int z = pos.z; z < pos.z + Config.Env.ChunkSize; z++)
@@ -32,7 +31,7 @@ public class TerrainGen: MonoBehaviour
 
     public int GenerateTerrainForBlockColumn(int x, int z, bool justGetHeight = false)
     {
-        int height = Config.Env.WorldMinY;
+        int height = world.config.minY;
         for (int i = 0; i < layerOrder.Length; i++)
         {
             if (layerOrder[i] == null)

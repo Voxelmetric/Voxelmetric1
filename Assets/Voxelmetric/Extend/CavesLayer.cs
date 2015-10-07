@@ -8,7 +8,7 @@ public class CavesLayer : LayerOverride {
 
         Block blockToPlace = new Block(blockName, world);
 
-        int caveBottom = GetNoise(x, -1000, z, 500, 70, 1) + Config.Env.WorldMinY;
+        int caveBottom = GetNoise(x, -1000, z, 500, 70, 1) + world.config.minY;
         int caveHeight = GetNoise(x, 1000, z, 50, 35, 1) + caveBottom;
 
         caveHeight -= 20;

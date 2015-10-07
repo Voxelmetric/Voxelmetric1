@@ -4,56 +4,34 @@ namespace Config
 {
     public static class Env
     {
-        public static int ChunkLoadRadius = 8; //how many chunks to load in each direction
         public static int ChunkSize = 16;
-        public static int WorldMaxY = 64;
-        public static int WorldMinY = -64;
-
         public static float BlockSize = 1f;
-
-        public static float UpdateFrequency = 0.1f;
 
         // Padding added to the size of block faces to fix floating point issues 
         // where tiny gaps can appear between block faces
         public static float BlockFacePadding = 0.0005f;
 
-        //this is a sane minimum, below this chunks will start blinking in and out on edges
-        //The distance is measured in blocks
-        public static int DistanceToDeleteChunks = (int)(ChunkSize * ChunkLoadRadius * 1.5f);
-        public static int WaitBetweenDeletes = 10;
 
-        //Recommend setting this to at least 2 when LightSceneOnStart is enabled 
-        public static int WaitBetweenChunkGen = 1;
-
-        public static float AOStrength = 1f;
-        public static float BlockLightStrength = 0f;
-
-        public static FilterMode textureAtlasFiltering = FilterMode.Point;
-        public static bool useMipMaps = true;
-        public static TextureFormat textureFormat = TextureFormat.ARGB32;
-        public static int textureAtlasPadding = 32;
-        public static bool customTextureAtlas = false;
-        public static string customTextureAtlasFile = "custom_atlas";
+        //// These should be settings on chunk gen
+        //public static int ChunkLoadRadius = 8; //how many chunks to load in each direction
+        ////this is a sane minimum, below this chunks will start blinking in and out on edges
+        ////The distance is measured in blocks
+        //public static int DistanceToDeleteChunks = (int)(ChunkSize * ChunkLoadRadius * 1.5f);
+        //public static int WaitBetweenDeletes = 10;
+        ////Recommend setting this to at least 2 when LightSceneOnStart is enabled 
+        //public static int WaitBetweenChunkGen = 1;
     }
 
     public static class Directories
     {
         public static string SaveFolder = "VoxelSaves";
-        public static string BlockMeshFolder = "Meshes";
-        public static string PrefabsFolder = "Prefabs";
     }
 
     public static class Toggle
     {
-        public static bool UseOldTerrainGen = false;
-        public static bool UseCollisionMesh = true;
         public static bool UseMultipleWorlds = true;
-
-        //Lighting needs multithreading to work quickly
-        public static bool BlockLighting = false;
-        public static bool LightSceneOnStart = false;
-
-        //Multithreading must be disabled on web builds
+        
+        //Multi threading must be disabled on web builds
         public static bool UseMultiThreading = true;
     }
 

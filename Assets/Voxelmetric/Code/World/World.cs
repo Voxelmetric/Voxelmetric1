@@ -6,23 +6,21 @@ using SimplexNoise;
 [RequireComponent(typeof(TerrainGen))]
 public class World : MonoBehaviour {
 
-    public Dictionary<BlockPos, Chunk> chunks = new Dictionary<BlockPos, Chunk>();
+    public readonly Dictionary<BlockPos, Chunk> chunks = new Dictionary<BlockPos, Chunk>();
     List<GameObject> chunkPool = new List<GameObject>();
-    public GameObject chunkPrefab;
 
     public string worldConfig;
 
     public WorldConfig config;
-
     public BlockIndex blockIndex;
     public TextureIndex textureIndex;
 
-    //This world name is used for the save file name
+    //This world name is used for the save file name and as a seed for random noise
     public string worldName = "world";
-    public Noise noiseGen;
+
     TerrainGen terrainGen;
-    //Make random an element on resources
-    public System.Random random;
+    public System.Random random = new System.Random();
+    GameObject chunkPrefab;
 
     [HideInInspector]
     public int worldIndex;
@@ -37,12 +35,11 @@ public class World : MonoBehaviour {
         textureIndex = Voxelmetric.resources.GetOrLoadTextureIndex(this);
         blockIndex = Voxelmetric.resources.GetOrLoadBlockIndex(this);
 
-        noiseGen = new Noise(worldName);
         //Move terrain gen to be an element of gen and load chunks
         terrainGen = gameObject.GetComponent<TerrainGen>();
-        terrainGen.noiseGen = noiseGen;
+        terrainGen.noiseGen = new Noise(worldName);
         terrainGen.world = this;
-        random = new System.Random();
+        chunkPrefab = Resources.Load<GameObject>(config.pathToChunkPrefab);
     }
 
     /// <summary>
@@ -91,7 +88,6 @@ public class World : MonoBehaviour {
         }
     }
 
-
     /// <summary>
     ///Load terrain, saved changes and resets
     ///the light for an empty chunk
@@ -99,15 +95,16 @@ public class World : MonoBehaviour {
     /// <param name="chunk">The chunk to generate and load for</param>
     protected virtual void GenAndLoadChunk(Chunk chunk)
     {
-        if (chunk.pos.y == Config.Env.WorldMaxY)
+        if (chunk.pos.y == config.maxY)
         {
             terrainGen.GenerateTerrainForChunkColumn(chunk.pos);
 
-            for (int i = Config.Env.WorldMinY; i < Config.Env.WorldMaxY; i += Config.Env.ChunkSize)
+            for (int i = config.minY; i < config.maxY; i += Config.Env.ChunkSize)
                 Serialization.Load(GetChunk(new BlockPos(chunk.pos.x, i, chunk.pos.z)));
 
-            if (Config.Toggle.LightSceneOnStart)
-                BlockLight.ResetLightChunkColumn(this, chunk);
+            //disabled until lighting is revisited
+            //if (Config.Toggle.LightSceneOnStart)
+            //    BlockLight.ResetLightChunkColumn(this, chunk);
         }
 
         chunk.SetFlag(Chunk.Flag.terrainGenerated, true);
