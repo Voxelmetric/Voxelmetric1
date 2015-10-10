@@ -107,7 +107,6 @@ public class Chunk : MonoBehaviour
         }
 
         randomUpdateTime += Time.fixedDeltaTime;
-
         if (randomUpdateTime >= world.config.randomUpdateFrequency)
         {
             randomUpdateTime = 0;
@@ -135,7 +134,7 @@ public class Chunk : MonoBehaviour
 
             if (GetFlag(Flag.updateSoon))
             {
-                UpdateNow();
+                UpdateChunk();
                 SetFlag(Flag.updateSoon, false);
                 SetFlag(Flag.updateNow, false);
             }
