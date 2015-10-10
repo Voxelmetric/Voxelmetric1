@@ -42,13 +42,14 @@ public class World : MonoBehaviour {
         chunkPrefab = Resources.Load<GameObject>(config.pathToChunkPrefab);
     }
 
-    /// <summary>
-    ///Instantiates a chunk at the supplied coordinates using the chunk prefab,
-    ///then runs terrain generation on it and loads the chunk's save file
-    /// </summary>
-    /// <param name="pos">The world position to create this chunk.</param>
-    public void CreateChunk(BlockPos pos)
+    Chunk CreateChunk(BlockPos pos)
     {
+        Chunk existingChunk = GetChunk(pos);
+        if (existingChunk != null)
+        {
+            return existingChunk;
+        }
+
         GameObject newChunkObject;
         if (chunkPool.Count == 0)
         {
@@ -64,7 +65,7 @@ public class World : MonoBehaviour {
             newChunkObject = chunkPool[0];
             chunkPool.RemoveAt(0);
             newChunkObject.SetActive(true);
-            newChunkObject.transform.position= pos;
+            newChunkObject.transform.position = pos;
         }
 
         newChunkObject.transform.parent = gameObject.transform;
@@ -77,6 +78,35 @@ public class World : MonoBehaviour {
 
         //Add it to the chunks dictionary with the position as the key
         chunks.Add(pos, newChunk);
+        return newChunk;
+    }
+
+    /// <summary>
+    ///Instantiates a chunk at the supplied coordinates using the chunk prefab,
+    ///then runs terrain generation on it and loads the chunk's save file
+    /// </summary>
+    /// <param name="pos">The world position to create this chunk.</param>
+    public Chunk CreateAndLoadChunk(BlockPos pos)
+    {
+        pos = pos.ContainingChunkCoordinates();
+        Chunk newChunk = CreateChunk(pos);
+
+        if (newChunk.GetFlag(Chunk.Flag.loadStarted))
+            return newChunk;
+
+        newChunk.SetFlag(Chunk.Flag.loadStarted, true);
+
+        //Create neighbors
+        for (int x = pos.x - Config.Env.ChunkSize; x <= pos.x + Config.Env.ChunkSize; x += Config.Env.ChunkSize)
+        {
+            for (int z = pos.z - Config.Env.ChunkSize; z <= pos.z + Config.Env.ChunkSize; z += Config.Env.ChunkSize)
+            {
+                for (int y = pos.y - Config.Env.ChunkSize; y <= pos.y + Config.Env.ChunkSize; y += Config.Env.ChunkSize)
+                {
+                    CreateChunk(new BlockPos(x, y, z));
+                }
+            }
+        }
 
         if (Config.Toggle.UseMultiThreading) {
             Thread thread = new Thread(() => { GenAndLoadChunk(newChunk); });
@@ -86,6 +116,8 @@ public class World : MonoBehaviour {
         {
             GenAndLoadChunk(newChunk);
         }
+
+        return newChunk;
     }
 
     /// <summary>
@@ -97,17 +129,64 @@ public class World : MonoBehaviour {
     {
         if (chunk.pos.y == config.maxY)
         {
-            terrainGen.GenerateTerrainForChunkColumn(chunk.pos);
+            for (int x = chunk.pos.x - Config.Env.ChunkSize; x <= chunk.pos.x + Config.Env.ChunkSize; x += Config.Env.ChunkSize)
+            {
+                for (int z = chunk.pos.z - Config.Env.ChunkSize; z <= chunk.pos.z + Config.Env.ChunkSize; z += Config.Env.ChunkSize)
+                {
+                    Chunk genChunk = GetChunk(new BlockPos(x, config.maxY, z));
 
-            for (int i = config.minY; i < config.maxY; i += Config.Env.ChunkSize)
-                Serialization.Load(GetChunk(new BlockPos(chunk.pos.x, i, chunk.pos.z)));
+                    if (!genChunk.GetFlag(Chunk.Flag.contentsGenerated) && !genChunk.GetFlag(Chunk.Flag.generationInProgress))
+                    {
+                        genChunk.SetFlag(Chunk.Flag.generationInProgress, true);
+                        terrainGen.GenerateTerrainForChunkColumn(new BlockPos(x, config.maxY, z));
 
-            //disabled until lighting is revisited
-            //if (Config.Toggle.LightSceneOnStart)
-            //    BlockLight.ResetLightChunkColumn(this, chunk);
+                        for (int i = config.minY; i <= config.maxY; i += Config.Env.ChunkSize)
+                            Serialization.Load(GetChunk(new BlockPos(chunk.pos.x, i, chunk.pos.z)));
+
+                        for (int y = config.minY; y <= config.maxY; y += Config.Env.ChunkSize)
+                            GetChunk(new BlockPos(x, y, z)).SetFlag(Chunk.Flag.contentsGenerated, true);
+                    }
+                    else
+                    {
+                        for (int y = config.minY; y <= config.maxY; y += Config.Env.ChunkSize)
+                        {
+                            while (!GetChunk(new BlockPos(x, y, z)).GetFlag(Chunk.Flag.contentsGenerated))
+                            {
+                                Thread.Sleep(0);
+                            }
+                        }
+                    }
+
+                }
+            }
+        } else {
+            //Chunk generated was not the top one so the column isn't complete yet, return without rendering
+            return;
         }
 
-        chunk.SetFlag(Chunk.Flag.terrainGenerated, true);
+        //if (Config.Toggle.UseMultiThreading)
+        //{
+        //    for (int x = chunk.pos.x - Config.Env.ChunkSize; x <= chunk.pos.x + Config.Env.ChunkSize; x += Config.Env.ChunkSize)
+        //    {
+        //        for (int z = chunk.pos.z - Config.Env.ChunkSize; z <= chunk.pos.z + Config.Env.ChunkSize; z += Config.Env.ChunkSize)
+        //        {
+        //            Chunk genChunk = GetChunk(new BlockPos(x, config.maxY, z));
+
+        //            while (!genChunk.GetFlag(Chunk.Flag.contentsGenerated))
+        //            {
+        //                Thread.Sleep(0);
+        //            }
+        //        }
+        //    }
+        //}
+
+        for (int i = config.minY; i <= config.maxY; i += Config.Env.ChunkSize)
+        {
+            Chunk completedChunk = GetChunk(new BlockPos(chunk.pos.x, i, chunk.pos.z));
+            completedChunk.UpdateNow();
+            completedChunk.SetFlag(Chunk.Flag.loadComplete, true);
+        }
+        //chunk.UpdateNow();
     }
 
     /// <summary>
@@ -176,13 +255,9 @@ public class World : MonoBehaviour {
         }
         else
         {
-            //If we're returning solid there was an error somewhere in chunk generation
-            //Something has caused a chunk to try to render or otherwise access blocks
-            //in a chunk that hasn't been loaded yet. Correct practice is to generate
-            //all chunks surrounding a chunk before attempting to render it.
-            return new Block("solid", this);
+            return Block.Air;
         }
-
+        
     }
 
     public void SetBlock(BlockPos pos, string block, bool updateChunk = true, bool setBlockModified = true)
@@ -210,7 +285,6 @@ public class World : MonoBehaviour {
             {
                 UpdateAdjacentChunks(pos);
             }
-
         }
     }
 

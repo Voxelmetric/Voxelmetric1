@@ -191,7 +191,7 @@ public static class Voxelmetric
                foreach (var chunk in chunksToSave)
                {
 
-                   while (!chunk.GetFlag(Chunk.Flag.terrainGenerated) || chunk.GetFlag(Chunk.Flag.busy))
+                   while (!chunk.GetFlag(Chunk.Flag.contentsGenerated) || chunk.GetFlag(Chunk.Flag.busy))
                    {
                        Thread.Sleep(0);
                    }

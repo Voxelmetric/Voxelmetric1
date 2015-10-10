@@ -15,7 +15,7 @@ public class Chunk : MonoBehaviour
 
     private List<BlockAndTimer> scheduledUpdates = new List<BlockAndTimer>();
 
-    public enum Flag {busy, meshReady, loaded, terrainGenerated, markedForDeletion, chunkModified, updateSoon, updateNow }
+    public enum Flag {busy, meshReady, loadStarted, generationInProgress, contentsGenerated, loadComplete, markedForDeletion, chunkModified, updateSoon, updateNow }
     public Hashtable flags = new Hashtable();
 
     MeshFilter filter;
@@ -101,6 +101,11 @@ public class Chunk : MonoBehaviour
 
     protected virtual void TimedUpdated()
     {
+        if (!GetFlag(Flag.loadComplete))
+        {
+            return;
+        }
+
         randomUpdateTime += Time.fixedDeltaTime;
 
         if (randomUpdateTime >= world.config.randomUpdateFrequency)
@@ -132,6 +137,7 @@ public class Chunk : MonoBehaviour
             {
                 UpdateNow();
                 SetFlag(Flag.updateSoon, false);
+                SetFlag(Flag.updateNow, false);
             }
         }
 
@@ -244,11 +250,6 @@ public class Chunk : MonoBehaviour
     /// <param name="updateChunk">Optional parameter, set to false to keep the chunk unupdated despite the change</param>
     public virtual void SetBlock(BlockPos blockPos, Block block, bool updateChunk = true, bool setBlockModified = true)
     {
-        if (setBlockModified)
-        {
-            Debug.LogWarning("modified block: " + block);
-        }
-
         if (InRange(blockPos))
         {
             //Only call create and destroy if this is a different block type, otherwise it's just updating the properties of an existing block

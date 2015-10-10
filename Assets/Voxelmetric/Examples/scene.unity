@@ -384,7 +384,9 @@ MonoBehaviour:
   chunkLoadRadius: 8
   DistanceToDeleteChunks: 10
   WaitBetweenDeletes: 10
-  WaitBetweenChunkGen: 1
+  WaitBetweenColumnGen: 1
+  ChunksToLoadPerFrame: 5
+  loadTopChunkAlone: 1
 --- !u!1 &312836251
 GameObject:
   m_ObjectHideFlags: 0
@@ -2442,7 +2444,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d2da8c6b21a10564cbffd7e51b5ecc72, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  chunkPrefab: {fileID: 123308, guid: 333f2c50b10b7054480cca4cfff8382e, type: 2}
   worldConfig: default
   worldName: world
   worldIndex: 0
