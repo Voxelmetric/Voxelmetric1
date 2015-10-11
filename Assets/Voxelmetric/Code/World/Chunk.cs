@@ -77,7 +77,7 @@ public class Chunk : MonoBehaviour
     {
         TimedUpdated();
     }
-    
+
     void LateUpdate()
     {
         if(GetFlag(Flag.updateNow))
@@ -159,9 +159,13 @@ public class Chunk : MonoBehaviour
     {
         SetFlag(Flag.updateSoon, true);
     }
-    
-    void UpdateChunk()
+
+    /// <summary>
+    /// Immediately updated the chunk and prepares a mesh to render. Usually better to use UpdateNow or UpdateSoon
+    /// </summary>
+    public void UpdateChunk()
     {
+        SetFlag(Flag.loadComplete, true);
         if (Config.Toggle.UseMultiThreading)
         {
             // If the chunk is busy set the flag to update it again

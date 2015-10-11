@@ -7,20 +7,17 @@ public class LoadChunks : MonoBehaviour
 
     public World world;
 
-    [Range(1, 32)]
+    [Range(1, 64)]
     public int chunkLoadRadius = 8;
     BlockPos[] chunkPositions;
 
-    //The distance is measured in blocks
+    //The distance is measured in chunks
     [Range(1, 64)]
     public int DistanceToDeleteChunks = (int)(8 * 1.25f);
 
     //Every WaitBetweenDeletes frames load chunks will stop to remove chunks beyond DistanceToDeleteChunks
     [Range(1, 100)]
     public int WaitBetweenDeletes = 10;
-
-    [Range(1, 100)]
-    public int WaitBetweenColumnGen = 1;
 
     //Every frame LoadChunks is not deleting chunks or finding chunks it will 
     [Range(1, 16)]
@@ -29,10 +26,9 @@ public class LoadChunks : MonoBehaviour
     // Loads the top chunk of the column on its own rather than along with the ChunksToLoadPerFrame other chunks
     // This is useful because world generates the terrain for the column when the top chunk is loaded so this gives
     // the terrain generation a frame on its own
-    public bool loadTopChunkAlone = true;
+    public bool RenderChunksInSeparateFrame = true;
 
     int deleteTimer = 0;
-    int genTimer = 0;
 
     List<BlockPos> chunksToGenerate = new List<BlockPos>();
 
@@ -40,8 +36,6 @@ public class LoadChunks : MonoBehaviour
     {
         chunkPositions = ChunkLoadOrder.ChunkPositions(chunkLoadRadius);
     }
-
-
 
     // Update is called once per frame
     void Update()
@@ -57,34 +51,43 @@ public class LoadChunks : MonoBehaviour
             deleteTimer++;
         }
 
-        //if (genTimer == WaitBetweenColumnGen)
-        //{
-        //    FindChunksAndLoad();
-        //    genTimer = 0;
-        //    return;
-        //}
-        //else
-        //{
-        //    genTimer++;
-        //}
+        if (world.ChunksToRender.Count != 0)
+        {
+            for (int i = 0; i < ChunksToLoadPerFrame; i++)
+            {
+                if (world.ChunksToRender.Count == 0)
+                {
+                    break;
+                }
+
+                BlockPos pos = world.ChunksToRender[0];
+                world.GetChunk(pos).UpdateChunk();
+                world.ChunksToRender.RemoveAt(0);
+            }
+
+            if (RenderChunksInSeparateFrame)
+            {
+                return;
+            }
+        }
+
         if (chunksToGenerate.Count == 0)
         {
             FindChunksAndLoad();
-            return;
         }
 
-        Debug.Log(chunksToGenerate.Count);
         for (int i = 0; i < ChunksToLoadPerFrame; i++)
         {
             if (chunksToGenerate.Count == 0)
             {
-                return;
+                break;
             }
 
             BlockPos pos = chunksToGenerate[0];
             world.CreateAndLoadChunk(pos);
             chunksToGenerate.RemoveAt(0);
         }
+
     }
 
     void DeleteChunks()
@@ -134,12 +137,6 @@ public class LoadChunks : MonoBehaviour
 
             for (int y = world.config.minY; y <= world.config.maxY; y += Config.Env.ChunkSize)
                 chunksToGenerate.Add(new BlockPos(newChunkPos.x, y, newChunkPos.z));
-
-            //for (int y = world.config.minY; y <= world.config.maxY; y += Config.Env.ChunkSize)
-            //{
-            //    BlockPos pos = new BlockPos(newChunkPos.x, y, newChunkPos.z);
-            //    world.CreateAndLoadChunk(pos);
-            //}
 
             return true;
         }

@@ -381,12 +381,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   world: {fileID: 1571917861}
-  chunkLoadRadius: 8
-  DistanceToDeleteChunks: 10
+  chunkLoadRadius: 6
+  DistanceToDeleteChunks: 8
   WaitBetweenDeletes: 10
-  WaitBetweenColumnGen: 1
-  ChunksToLoadPerFrame: 5
-  loadTopChunkAlone: 1
+  ChunksToLoadPerFrame: 9
+  RenderChunksInSeprateFrame: 0
 --- !u!1 &312836251
 GameObject:
   m_ObjectHideFlags: 0
@@ -2446,6 +2445,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   worldConfig: default
   worldName: world
+  ChunksToRender: []
   worldIndex: 0
 --- !u!1 &1766354337
 GameObject:

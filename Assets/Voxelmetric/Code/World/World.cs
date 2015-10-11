@@ -22,6 +22,8 @@ public class World : MonoBehaviour {
     public System.Random random = new System.Random();
     GameObject chunkPrefab;
 
+    public List<BlockPos> ChunksToRender = new List<BlockPos>();
+
     [HideInInspector]
     public int worldIndex;
 
@@ -146,7 +148,7 @@ public class World : MonoBehaviour {
                         for (int y = config.minY; y <= config.maxY; y += Config.Env.ChunkSize)
                             GetChunk(new BlockPos(x, y, z)).SetFlag(Chunk.Flag.contentsGenerated, true);
                     }
-                    else
+                    else if (Config.Toggle.UseMultiThreading)
                     {
                         for (int y = config.minY; y <= config.maxY; y += Config.Env.ChunkSize)
                         {
@@ -164,29 +166,10 @@ public class World : MonoBehaviour {
             return;
         }
 
-        //if (Config.Toggle.UseMultiThreading)
-        //{
-        //    for (int x = chunk.pos.x - Config.Env.ChunkSize; x <= chunk.pos.x + Config.Env.ChunkSize; x += Config.Env.ChunkSize)
-        //    {
-        //        for (int z = chunk.pos.z - Config.Env.ChunkSize; z <= chunk.pos.z + Config.Env.ChunkSize; z += Config.Env.ChunkSize)
-        //        {
-        //            Chunk genChunk = GetChunk(new BlockPos(x, config.maxY, z));
-
-        //            while (!genChunk.GetFlag(Chunk.Flag.contentsGenerated))
-        //            {
-        //                Thread.Sleep(0);
-        //            }
-        //        }
-        //    }
-        //}
-
         for (int i = config.minY; i <= config.maxY; i += Config.Env.ChunkSize)
         {
-            Chunk completedChunk = GetChunk(new BlockPos(chunk.pos.x, i, chunk.pos.z));
-            completedChunk.UpdateNow();
-            completedChunk.SetFlag(Chunk.Flag.loadComplete, true);
+            ChunksToRender.Add(new BlockPos(chunk.pos.x, i, chunk.pos.z));
         }
-        //chunk.UpdateNow();
     }
 
     /// <summary>
