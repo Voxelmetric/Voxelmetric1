@@ -68,47 +68,59 @@ public class CustomMesh : BlockController {
             }
         }
 
-        if (!chunk.LocalGetBlock(localPos.Add(0, 1, 0)).controller.IsSolid(Direction.down))
+        if (!chunk.LocalGetBlock(localPos.Add(Direction.up)).controller.IsSolid(Direction.down))
+        {
             foreach (var tri in trisUp)
             {
                 meshData.AddTriangle(tri + initialVertCount);
                 meshData.colTriangles.Add(tri + colInitialVertCount);
             }
+        }
 
-        if (!chunk.LocalGetBlock(localPos.Add(0, -1, 0)).controller.IsSolid(Direction.up))
+        if (!chunk.LocalGetBlock(localPos.Add(Direction.down)).controller.IsSolid(Direction.up))
+        {
             foreach (var tri in trisDown)
             {
                 meshData.AddTriangle(tri + initialVertCount);
                 meshData.colTriangles.Add(tri + colInitialVertCount);
             }
+        }
 
-        if (!chunk.LocalGetBlock(localPos.Add(0, 0, 1)).controller.IsSolid(Direction.south))
+        if (!chunk.LocalGetBlock(localPos.Add(Direction.north)).controller.IsSolid(Direction.south))
+        {
             foreach (var tri in trisNorth)
             {
                 meshData.AddTriangle(tri + initialVertCount);
                 meshData.colTriangles.Add(tri + colInitialVertCount);
             }
+        }
 
-        if (!chunk.LocalGetBlock(localPos.Add(0, 0, -1)).controller.IsSolid(Direction.north))
-            foreach (var tri in trisEast)
-            {
-                meshData.AddTriangle(tri + initialVertCount);
-                meshData.colTriangles.Add(tri + colInitialVertCount);
-            }
-
-        if (!chunk.LocalGetBlock(localPos.Add(1, 0, 0)).controller.IsSolid(Direction.west))
+        if (!chunk.LocalGetBlock(localPos.Add(Direction.south)).controller.IsSolid(Direction.north))
+        {
             foreach (var tri in trisSouth)
             {
                 meshData.AddTriangle(tri + initialVertCount);
                 meshData.colTriangles.Add(tri + colInitialVertCount);
             }
+        }
 
-        if (!chunk.LocalGetBlock(localPos.Add(-1, 0, 0)).controller.IsSolid(Direction.east))
+        if (!chunk.LocalGetBlock(localPos.Add(Direction.west)).controller.IsSolid(Direction.east))
+        {
+            foreach (var tri in trisWest)
+            {
+                meshData.AddTriangle(tri + initialVertCount);
+                meshData.colTriangles.Add(tri + colInitialVertCount);
+            }
+        }
+
+        if (!chunk.LocalGetBlock(localPos.Add(Direction.east)).controller.IsSolid(Direction.west))
+        {
             foreach (var tri in trisEast)
             {
                 meshData.AddTriangle(tri + initialVertCount);
                 meshData.colTriangles.Add(tri + colInitialVertCount);
             }
+        }
 
         foreach (var tri in trisOther)
         {
@@ -243,16 +255,22 @@ public class CustomMesh : BlockController {
 
             trisUp.AddRange(controller.trisUp);
             controller.trisUp = trisUp.ToArray();
+
             trisDown.AddRange(controller.trisDown);
             controller.trisDown = trisDown.ToArray();
+
             trisNorth.AddRange(controller.trisNorth);
             controller.trisNorth = trisNorth.ToArray();
+
             trisEast.AddRange(controller.trisEast);
             controller.trisEast = trisEast.ToArray();
+        
             trisSouth.AddRange(controller.trisSouth);
             controller.trisSouth = trisSouth.ToArray();
+
             trisWest.AddRange(controller.trisWest);
             controller.trisWest = trisWest.ToArray();
+
             trisOther.AddRange(controller.trisOther);
             controller.trisOther = trisOther.ToArray();
 
