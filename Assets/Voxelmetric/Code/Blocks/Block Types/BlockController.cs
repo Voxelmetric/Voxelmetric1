@@ -69,51 +69,36 @@ public class BlockController
 
     public virtual T GetFlagOrOverride<T>(Object key, Chunk chunk, BlockPos pos, Block block) where T : new()
     {
-        if (block.blockOveride != null)
-        {
-            System.Object overridenReturn = block.blockOveride.GetFlagIntercept(key, chunk, pos, block);
-            if (overridenReturn != null)
-                return (T)overridenReturn;
-        }
-
         return GetFlag<T>(key);
     }
 
     public virtual Block OnCreate(Chunk chunk, BlockPos pos, Block block)
     {
-        if (block.blockOveride == null)
-            return block;
-
-        return block.blockOveride.OnCreate(chunk, pos, block);
+        return block;
     }
 
     public virtual void PreRender(Chunk chunk, BlockPos pos, Block block)
     {
-        if (block.blockOveride != null)
-            block.blockOveride.PreRender(chunk, pos, block);
+        
     }
 
     public virtual void PostRender(Chunk chunk, BlockPos pos, Block block)
     {
-        if (block.blockOveride != null)
-            block.blockOveride.PostRender(chunk, pos, block);
+        
     }
 
     public virtual void OnDestroy(Chunk chunk, BlockPos pos, Block block)
     {
-        if (block.blockOveride != null)
-            block.blockOveride.OnDestroy(chunk, pos, block);
+        
     }
 
     public virtual void RandomUpdate(Chunk chunk, BlockPos pos, Block block)
     {
-        if (block.blockOveride != null)
-            block.blockOveride.RandomUpdate(chunk, pos, block);
+        
     }
 
     public virtual void ScheduledUpdate(Chunk chunk, BlockPos pos, Block block)
     {
-        if (block.blockOveride != null)
-            block.blockOveride.ScheduledUpdate(chunk, pos, block);
+        
     }
 }

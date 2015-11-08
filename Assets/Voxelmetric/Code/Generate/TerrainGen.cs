@@ -1,53 +1,67 @@
 ﻿using UnityEngine;
-using System.Collections.Generic;
+using System;
+using System.Collections;
 using SimplexNoise;
 
-public class TerrainGen: MonoBehaviour
+public class TerrainGen
 {
-    public Noise noiseGen ;
-    public World world;
+    public TerrainGen(World world, string layerFolder)
+    {
+        this.world = world;
+        ConfigLoader<LayerConfig> layerConfigs = new ConfigLoader<LayerConfig>(new string[] { layerFolder });
 
-    public int temperatureScale = 100;
-    public int drainageScale = 100;
-    public int elevationScale = 100;
-    public int rainfallScale = 100;
+        layers = new TerrainLayer[layerConfigs.AllConfigs().Length];
+        for (int i = 0; i < layerConfigs.AllConfigs().Length; i++)
+        {
+            LayerConfig config = layerConfigs.AllConfigs()[i];
+            var type = Type.GetType(config.layerType + ", " + typeof(BlockController).Assembly, false);
+            if (type == null)
+                Debug.LogError("Could not create layer " + config.layerType + " : " + config.name);
 
-    public float percentageBiomePadding= 0.1f;
+            layers[i] = (TerrainLayer)Activator.CreateInstance(type);
+            layers[i].BaseSetUp(config, world, this);
+        }
+        
+        //Sort the layers by index
+        Array.Sort(layers);
+    }
 
-    public TerrainLayer[] layerOrder = new TerrainLayer[0];
+    World world;
+    TerrainLayer[] layers;
 
     public void GenerateTerrainForChunkColumn(BlockPos pos)
     {
+        Chunk[] chunks = new Chunk[(world.config.maxY - world.config.minY) / Config.Env.ChunkSize];
+        for (int y = world.config.minY; y < world.config.maxY; y += Config.Env.ChunkSize)
+        {
+            chunks[(y - world.config.minY) / Config.Env.ChunkSize] = world.GetChunk(new BlockPos(pos.x, y, pos.z)); ;
+        }
+
         for (int x = pos.x; x < pos.x + Config.Env.ChunkSize; x++)
         {
             for (int z = pos.z; z < pos.z + Config.Env.ChunkSize; z++)
             {
-                GenerateTerrainForBlockColumn(x, z);
+                GenerateTerrainForBlockColumn(x, z, false, chunks);
             }
         }
 
         GenerateStructuresForChunk(pos);
     }
 
-    public int GenerateTerrainForBlockColumn(int x, int z, bool justGetHeight = false)
+    public int GenerateTerrainForBlockColumn(int x, int z, bool justGetHeight, Chunk[] chunks = null)
     {
         int height = world.config.minY;
-        for (int i = 0; i < layerOrder.Length; i++)
+        for (int i = 0; i < layers.Length; i++)
         {
-            if (layerOrder[i] == null)
+            if (layers[i] == null)
             {
-                Debug.LogError("Layer name '" + layerOrder[i] + "' in layer order didn't match a valid layer");
+                Debug.LogError("Layer name '" + layers[i] + "' in layer order didn't match a valid layer");
                 continue;
             }
 
-            if (layerOrder[i].noiseGen == null)
+            if (!layers[i].isStructure)
             {
-                layerOrder[i].SetUpTerrainLayer(world, noiseGen);
-            }
-
-            if (layerOrder[i].layerType != TerrainLayer.LayerType.Structure)
-            {
-                height = layerOrder[i].GenerateLayer(x, z, height, 1, justGetHeight);
+                height = layers[i].GenerateLayer(chunks, x, z, height, 1, justGetHeight);
             }
         }
         return height;
@@ -55,17 +69,19 @@ public class TerrainGen: MonoBehaviour
 
     public void GenerateStructuresForChunk(BlockPos chunkPos)
     {
-        for (int i = 0; i < layerOrder.Length; i++)
+        for (int i = 0; i < layers.Length; i++)
         {
 
-            if (layerOrder[i] == null)
+            if (layers[i] == null)
                 continue;
 
-            if (layerOrder[i].layerType == TerrainLayer.LayerType.Structure)
+            if (layers[i].isStructure)
             {
-                layerOrder[i].GenerateStructures(chunkPos, this);
+                layers[i].GenerateStructures(chunkPos);
             }
         }
     }
 
 }
+
+

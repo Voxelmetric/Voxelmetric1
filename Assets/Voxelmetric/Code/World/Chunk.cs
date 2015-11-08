@@ -15,8 +15,13 @@ public class Chunk : MonoBehaviour
 
     private List<BlockAndTimer> scheduledUpdates = new List<BlockAndTimer>();
 
-    public enum Flag {busy, meshReady, loadStarted, generationInProgress, contentsGenerated, loadComplete, markedForDeletion, chunkModified, updateSoon, updateNow }
+    public enum Flag { busy, meshReady, loadStarted, generationInProgress, contentsGenerated, loadComplete, chunkModified, updateSoon, updateNow }
     public Hashtable flags = new Hashtable();
+
+    /// <summary>
+    /// Set to true for chunks that don't have anything in them so they don't run regular updates
+    /// </summary>
+    public bool noUpdate = false;
 
     MeshFilter filter;
     MeshCollider coll;
@@ -33,8 +38,29 @@ public class Chunk : MonoBehaviour
     {
         filter = gameObject.GetComponent<MeshFilter>();
         coll = gameObject.GetComponent<MeshCollider>();
+        noUpdate = false;
 
         gameObject.GetComponent<Renderer>().material.mainTexture = world.textureIndex.atlas;
+    }
+
+    void LateUpdate()
+    {
+        TimedUpdated();
+
+        if (GetFlag(Flag.updateNow))
+        {
+            UpdateChunk();
+            SetFlag(Flag.updateNow, false);
+            SetFlag(Flag.updateSoon, false);
+        }
+
+        if (GetFlag(Flag.meshReady))
+        {
+            SetFlag(Flag.meshReady, false);
+            RenderMesh();
+            meshData = new MeshData();
+            SetFlag(Flag.busy, false);
+        }
     }
 
     public bool GetFlag(object key)
@@ -65,40 +91,6 @@ public class Chunk : MonoBehaviour
         flags.Add(key, value);
     }
 
-    void Update()
-    {
-        if (GetFlag(Flag.markedForDeletion) && !GetFlag(Flag.busy))
-        {
-            ReturnChunkToPool();
-        }
-    }
-
-    void FixedUpdate()
-    {
-        TimedUpdated();
-    }
-
-    void LateUpdate()
-    {
-        if(GetFlag(Flag.updateNow))
-        {
-            Profiler.BeginSample("update chunk");
-            UpdateChunk();
-            Profiler.EndSample();
-            SetFlag(Flag.updateNow, false);
-        }
-
-        if (GetFlag<bool>(Flag.meshReady))
-        {
-            SetFlag(Flag.meshReady, false);
-            Profiler.BeginSample("update chunk");
-            RenderMesh();
-            Profiler.EndSample();
-            meshData = new MeshData();
-            SetFlag(Flag.busy, false);
-        }
-    }
-
     protected virtual void TimedUpdated()
     {
         if (!GetFlag(Flag.loadComplete))
@@ -112,12 +104,11 @@ public class Chunk : MonoBehaviour
             randomUpdateTime = 0;
 
             BlockPos randomPos = pos;
-            randomPos.x += world.random.Next(0, 16);
-            randomPos.y += world.random.Next(0, 16);
-            randomPos.z += world.random.Next(0, 16);
+            randomPos.x += Voxelmetric.resources.random.Next(0, 16);
+            randomPos.y += Voxelmetric.resources.random.Next(0, 16);
+            randomPos.z += Voxelmetric.resources.random.Next(0, 16);
 
             GetBlock(randomPos).controller.RandomUpdate(this, randomPos, GetBlock(randomPos));
-
 
             //Process Scheduled Updates
             for (int i = 0; i < scheduledUpdates.Count; i++)
@@ -154,7 +145,7 @@ public class Chunk : MonoBehaviour
     {
         SetFlag(Flag.updateNow, true);
     }
-    
+
     public void UpdateSoon()
     {
         SetFlag(Flag.updateSoon, true);
@@ -173,7 +164,9 @@ public class Chunk : MonoBehaviour
             if (GetFlag(Flag.busy))
             {
                 UpdateNow();
-            } else {
+            }
+            else
+            {
                 Thread thread = new Thread(() =>
                 {
                     SetFlag(Flag.busy, true);
@@ -228,6 +221,23 @@ public class Chunk : MonoBehaviour
         else
         {
             return world.GetBlock(blockPos + pos);
+        }
+    }
+
+    /// <summary>
+    /// This function takes a block position relative to the chunk's position. It is slightly faster
+    /// than the SetBlock function so use this if you already have a local position available otherwise
+    /// use SetBlock. If the position is lesser or greater than the size of the chunk it will call setblock
+    /// using the world.
+    /// </summary>
+    /// <param name="blockPos"> A block pos relative to the chunk's position.</param>
+    public virtual void LocalSetBlock(BlockPos blockPos, Block block)
+    {
+        if ((blockPos.x < Config.Env.ChunkSize && blockPos.x >= 0) &&
+            (blockPos.y < Config.Env.ChunkSize && blockPos.y >= 0) &&
+            (blockPos.z < Config.Env.ChunkSize && blockPos.z >= 0))
+        {
+            blocks[blockPos.x, blockPos.y, blockPos.z] = block;
         }
     }
 
@@ -287,6 +297,7 @@ public class Chunk : MonoBehaviour
 
     void SetBlockInArray(BlockPos blockPos, Block block)
     {
+        noUpdate = false;
         block.data.SetWorld(world.worldIndex);
         blocks[blockPos.x - pos.x, blockPos.y - pos.y, blockPos.z - pos.z] = block;
     }
@@ -302,9 +313,18 @@ public class Chunk : MonoBehaviour
             {
                 for (int z = 0; z < Config.Env.ChunkSize; z++)
                 {
-                    blocks[x, y, z].controller.BuildBlock(this, new BlockPos(x, y, z), new BlockPos(x,y, z)+ pos, meshData, blocks[x, y, z]);
+                    blocks[x, y, z].controller.BuildBlock(this, new BlockPos(x, y, z), new BlockPos(x, y, z) + pos, meshData, blocks[x, y, z]);
                 }
             }
+        }
+
+        if (meshData.triangles.Count < 0)
+        {
+            noUpdate = true;
+        }
+        else
+        {
+            noUpdate = false;
         }
     }
 
@@ -335,22 +355,10 @@ public class Chunk : MonoBehaviour
         }
     }
 
-    /// <summary>
-    /// Marks this chunk for deletion and the next update it will be destroyed
-    /// </summary>
-    public void MarkForDeletion()
-    {
-        SetFlag(Flag.markedForDeletion, true);
-    }
-
-    public bool IsMarkedForDeletion()
-    {
-        return GetFlag(Flag.markedForDeletion); ;
-    }
-
-    void ReturnChunkToPool()
+    public void ReturnChunkToPool()
     {
         flags.Clear();
+        noUpdate = false;
 
         if (filter.mesh)
             filter.mesh.Clear();
@@ -361,6 +369,7 @@ public class Chunk : MonoBehaviour
         blocks = new Block[Config.Env.ChunkSize, Config.Env.ChunkSize, Config.Env.ChunkSize];
         meshData = new MeshData();
 
+        world.chunks.Remove(pos);
         world.AddToChunkPool(gameObject);
     }
 

@@ -51,14 +51,6 @@ public struct Block
         }
     }
 
-    public BlockOverride blockOveride
-    {
-        get
-        {
-           return world.blockIndex.blockOverrides[type];
-        }
-    }
-
     public static implicit operator BlockController(Block block)
     {
         return block.world.blockIndex.controllers[block.type];
@@ -89,22 +81,15 @@ public struct Block
         return new Block(b);
     }
 
-    //public static implicit operator Block(string s)
-    //{
-    //    int blockIndex = 0;
-    //    if (Voxelmetric.resources.worlds[0].blockIndex.names.TryGetValue(s, out blockIndex))
-    //    {
-    //        return blockIndex;
-    //    }
-
-    //    Debug.LogWarning("Block not found: " + s);
-    //    return 0;
-    //}
-
     //Reserved block types
     public static Block Air
     {
         get { return new Block(0); }
+    }
+
+    public static Block Solid
+    {
+        get { return new Block(1); }
     }
 
 }

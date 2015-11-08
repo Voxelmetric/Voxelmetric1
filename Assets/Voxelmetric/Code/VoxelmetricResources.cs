@@ -1,7 +1,10 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
+using System;
 
 public class VoxelmetricResources {
+
+    public System.Random random = new System.Random();
 
     public List<World> worlds = new List<World>();
 
@@ -52,4 +55,5 @@ public class VoxelmetricResources {
         blockIndexes.Add(world.config.textureFolder, blockIndex);
         return blockIndex;
     }
+
 }

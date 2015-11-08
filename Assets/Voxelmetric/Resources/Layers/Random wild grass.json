@@ -1,0 +1,9 @@
+{
+  "name": "Random wild grass",
+  "index": 1100,
+  "layerType": "RandomLayer",
+  "properties": {
+    "blockName": "wildgrass",
+    "chance": "0.08"
+  }
+}

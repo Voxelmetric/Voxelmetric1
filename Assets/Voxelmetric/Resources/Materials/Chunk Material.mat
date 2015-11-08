@@ -107,6 +107,14 @@ Material:
         second: .342999995
       data:
         first:
+          name: _Shininess
+        second: .699999988
+      data:
+        first:
+          name: 
+        second: 0
+      data:
+        first:
           name: _Parallax
         second: .0199999996
       data:
@@ -157,10 +165,6 @@ Material:
         first:
           name: _Brightness
         second: 2
-      data:
-        first:
-          name: _Gloss
-        second: 0
     m_Colors:
       data:
         first:
@@ -172,9 +176,21 @@ Material:
         second: {r: 1, g: 1, b: 1, a: 1}
       data:
         first:
+          name: _SpecColor
+        second: {r: 1, g: 1, b: 1, a: 1}
+      data:
+        first:
+          name: 
+        second: {r: 0, g: 0, b: 0, a: 0}
+      data:
+        first:
           name: _Lightmapping
         second: {r: .70588237, g: .670588315, b: .564705908, a: 1}
       data:
         first:
           name: _EmissionColorUI
         second: {r: 1, g: 1, b: 1, a: 1}
+      data:
+        first:
+          name: _Emission
+        second: {r: 0, g: 0, b: 0, a: 0}

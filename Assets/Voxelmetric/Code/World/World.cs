@@ -3,10 +3,9 @@ using System.Threading;
 using System.Collections.Generic;
 using SimplexNoise;
 
-[RequireComponent(typeof(TerrainGen))]
 public class World : MonoBehaviour {
-
     public readonly Dictionary<BlockPos, Chunk> chunks = new Dictionary<BlockPos, Chunk>();
+    List<Chunk> chunksToDelete = new List<Chunk>();
     List<GameObject> chunkPool = new List<GameObject>();
 
     public string worldConfig;
@@ -16,20 +15,21 @@ public class World : MonoBehaviour {
     public TextureIndex textureIndex;
 
     //This world name is used for the save file name and as a seed for random noise
+    // leave empty to override with 
     public string worldName = "world";
 
     TerrainGen terrainGen;
-    public System.Random random = new System.Random();
+    TerrainLayer[] terrainLayers;
     GameObject chunkPrefab;
-
-    public List<BlockPos> ChunksToRender = new List<BlockPos>();
-
+    public Noise noise;
+    
     [HideInInspector]
     public int worldIndex;
 
     void Start()
     {
-        config = new ConfigLoader<WorldConfig>(new string[] {"Worlds" }).GetConfig(worldConfig);
+        config = new ConfigLoader<WorldConfig>(new string[] {"Worlds"}).GetConfig(worldConfig);
+        noise = new Noise(worldName);
 
         worldIndex = Voxelmetric.resources.worlds.Count;
         Voxelmetric.resources.AddWorld(this);
@@ -37,11 +37,18 @@ public class World : MonoBehaviour {
         textureIndex = Voxelmetric.resources.GetOrLoadTextureIndex(this);
         blockIndex = Voxelmetric.resources.GetOrLoadBlockIndex(this);
 
-        //Move terrain gen to be an element of gen and load chunks
-        terrainGen = gameObject.GetComponent<TerrainGen>();
-        terrainGen.noiseGen = new Noise(worldName);
-        terrainGen.world = this;
         chunkPrefab = Resources.Load<GameObject>(config.pathToChunkPrefab);
+    }
+
+    void LateUpdate()
+    {
+        for (int i = 0; i < chunksToDelete.Count; i++)
+        {
+            if (chunksToDelete[i] != null)
+                chunksToDelete[i].ReturnChunkToPool();
+        }
+
+        chunksToDelete.Clear();
     }
 
     Chunk CreateChunk(BlockPos pos)
@@ -88,7 +95,7 @@ public class World : MonoBehaviour {
     ///then runs terrain generation on it and loads the chunk's save file
     /// </summary>
     /// <param name="pos">The world position to create this chunk.</param>
-    public Chunk CreateAndLoadChunk(BlockPos pos)
+    public Chunk CreateChunkAndNeighbors(BlockPos pos)
     {
         pos = pos.ContainingChunkCoordinates();
         Chunk newChunk = CreateChunk(pos);
@@ -105,71 +112,13 @@ public class World : MonoBehaviour {
             {
                 for (int y = pos.y - Config.Env.ChunkSize; y <= pos.y + Config.Env.ChunkSize; y += Config.Env.ChunkSize)
                 {
+                    if(y>=config.minY)
                     CreateChunk(new BlockPos(x, y, z));
                 }
             }
         }
 
-        if (Config.Toggle.UseMultiThreading) {
-            Thread thread = new Thread(() => { GenAndLoadChunk(newChunk); });
-            thread.Start();
-        }
-        else
-        {
-            GenAndLoadChunk(newChunk);
-        }
-
         return newChunk;
-    }
-
-    /// <summary>
-    ///Load terrain, saved changes and resets
-    ///the light for an empty chunk
-    /// </summary>
-    /// <param name="chunk">The chunk to generate and load for</param>
-    protected virtual void GenAndLoadChunk(Chunk chunk)
-    {
-        if (chunk.pos.y == config.maxY)
-        {
-            for (int x = chunk.pos.x - Config.Env.ChunkSize; x <= chunk.pos.x + Config.Env.ChunkSize; x += Config.Env.ChunkSize)
-            {
-                for (int z = chunk.pos.z - Config.Env.ChunkSize; z <= chunk.pos.z + Config.Env.ChunkSize; z += Config.Env.ChunkSize)
-                {
-                    Chunk genChunk = GetChunk(new BlockPos(x, config.maxY, z));
-
-                    if (!genChunk.GetFlag(Chunk.Flag.contentsGenerated) && !genChunk.GetFlag(Chunk.Flag.generationInProgress))
-                    {
-                        genChunk.SetFlag(Chunk.Flag.generationInProgress, true);
-                        terrainGen.GenerateTerrainForChunkColumn(new BlockPos(x, config.maxY, z));
-
-                        for (int i = config.minY; i <= config.maxY; i += Config.Env.ChunkSize)
-                            Serialization.Load(GetChunk(new BlockPos(chunk.pos.x, i, chunk.pos.z)));
-
-                        for (int y = config.minY; y <= config.maxY; y += Config.Env.ChunkSize)
-                            GetChunk(new BlockPos(x, y, z)).SetFlag(Chunk.Flag.contentsGenerated, true);
-                    }
-                    else if (Config.Toggle.UseMultiThreading)
-                    {
-                        for (int y = config.minY; y <= config.maxY; y += Config.Env.ChunkSize)
-                        {
-                            while (!GetChunk(new BlockPos(x, y, z)).GetFlag(Chunk.Flag.contentsGenerated))
-                            {
-                                Thread.Sleep(0);
-                            }
-                        }
-                    }
-
-                }
-            }
-        } else {
-            //Chunk generated was not the top one so the column isn't complete yet, return without rendering
-            return;
-        }
-
-        for (int i = config.minY; i <= config.maxY; i += Config.Env.ChunkSize)
-        {
-            ChunksToRender.Add(new BlockPos(chunk.pos.x, i, chunk.pos.z));
-        }
     }
 
     /// <summary>
@@ -184,8 +133,10 @@ public class World : MonoBehaviour {
             if (Config.Toggle.UseMultiThreading)
             {
                 Thread thread = new Thread(() => {
+                if(chunk.GetFlag(Chunk.Flag.chunkModified))
                     Serialization.SaveChunk(chunk);
-                    chunk.MarkForDeletion();
+
+                chunksToDelete.Add(chunk);
                 });
                 thread.Start();
             }
@@ -194,10 +145,8 @@ public class World : MonoBehaviour {
                 if(chunk.GetFlag(Chunk.Flag.chunkModified))
                     Serialization.SaveChunk(chunk);
 
-                chunk.MarkForDeletion();
+                chunksToDelete.Add(chunk);
             }
-
-            chunks.Remove(pos);
         }
     }
 
@@ -238,7 +187,7 @@ public class World : MonoBehaviour {
         }
         else
         {
-            return Block.Air;
+            return Block.Solid;
         }
         
     }

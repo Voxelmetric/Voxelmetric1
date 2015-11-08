@@ -13,7 +13,6 @@ public class BlockIndex {
     }
 
     public List<BlockController> controllers = new List<BlockController>();
-    public List<BlockOverride> blockOverrides = new List<BlockOverride>();
     public Dictionary<string, int> names = new Dictionary<string, int>();
 
     /// <summary>
@@ -38,11 +37,6 @@ public class BlockIndex {
         } 
 
         controllers.Add(controller);
-        BlockOverride blockOverride = GetBlockOverride(controller.Name());
-        if(blockOverride != null)
-            blockOverride.controller = controller;
-
-        blockOverrides.Add(blockOverride);
 
         names.Add(controller.Name().ToLower().Replace(" ", ""), index);
         return index;
@@ -62,14 +56,4 @@ public class BlockIndex {
             AddBlockType(controller);
         }
     }
-
-    BlockOverride GetBlockOverride(string blockName)
-    {
-        var type = Type.GetType(blockName + "Override" + ", " + typeof(BlockOverride).Assembly, false);
-        if (type == null)
-            return null;
-
-        return (BlockOverride)Activator.CreateInstance(type);
-    }
-
 }

@@ -1,6 +1,6 @@
 {
   "name": "grass",
-  "controller": "BlockCube",
+  "controller": "GrassOverride",
   "textures": [
     "grass_top",
     "dirt",

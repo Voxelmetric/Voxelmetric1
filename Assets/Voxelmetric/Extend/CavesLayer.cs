@@ -1,15 +1,18 @@
 ﻿using UnityEngine;
-using System.Collections;
 
-public class CavesLayer : LayerOverride {
-
-    public override int GenerateLayer(int x, int z, int heightSoFar, float strength, bool justGetHeight = false)
+public class CavesLayer : TerrainLayer
+{
+    protected override void SetUp(LayerConfig config)
     {
+        // Doesn't currently support customization via config but you can add them like this:
+        // frequency = float.Parse(properties["frequency"]);
+        // and it will fetch an element in the config's property object called frequency
+    }
 
-        Block blockToPlace = new Block(blockName, world);
-
+    public override int GenerateLayer(Chunk[] chunks, int x, int z, int heightSoFar, float strength, bool justGetHeight = false)
+    {
         int caveBottom = GetNoise(x, -1000, z, 500, 70, 1) + world.config.minY;
-        int caveHeight = GetNoise(x, 1000, z, 50, 35, 1) + caveBottom;
+        int caveHeight = GetNoise(x, 1000, z, 50, 30, 1) + caveBottom;
 
         caveHeight -= 20;
 
@@ -19,13 +22,10 @@ public class CavesLayer : LayerOverride {
             int caveTop = caveHeight / 2;
             if (!justGetHeight)
             {
-                for (int y = caveBottom; y < caveTop; y++)
-                {
-                    world.SetBlock(new BlockPos(x, y, z), blockToPlace, updateChunk: false, setBlockModified: false);
-                }
+                SetBlocksColumn(chunks, x, z, caveBottom, caveTop, Block.Air);
             }
 
-            if (caveTop > heightSoFar)
+            if (caveTop > heightSoFar && caveBottom < heightSoFar)
                 return caveBottom;
         }
 

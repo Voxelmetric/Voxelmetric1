@@ -6,6 +6,9 @@ public class LoadChunks : MonoBehaviour
 {
 
     public World world;
+    public bool generateTerrain = true;
+    TerrainGen terrainGen;
+    public string layerFolder;
 
     [Range(1, 64)]
     public int chunkLoadRadius = 8;
@@ -27,6 +30,7 @@ public class LoadChunks : MonoBehaviour
     // This is useful because world generates the terrain for the column when the top chunk is loaded so this gives
     // the terrain generation a frame on its own
     public bool RenderChunksInSeparateFrame = true;
+    List<BlockPos> chunksToRender = new List<BlockPos>();
 
     int deleteTimer = 0;
 
@@ -40,6 +44,19 @@ public class LoadChunks : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        if (generateTerrain && terrainGen == null)
+        {
+            //Cant load chunks until the world is started so we can initialize TerrainGen
+            if (world.noise != null)
+            {
+                terrainGen = new TerrainGen(world, layerFolder);
+            }
+            else
+            {
+                return;
+            }
+        }
+
         if (deleteTimer == WaitBetweenDeletes)
         {
             DeleteChunks();
@@ -51,18 +68,18 @@ public class LoadChunks : MonoBehaviour
             deleteTimer++;
         }
 
-        if (world.ChunksToRender.Count != 0)
+        if (chunksToRender.Count != 0)
         {
             for (int i = 0; i < ChunksToLoadPerFrame; i++)
             {
-                if (world.ChunksToRender.Count == 0)
+                if (chunksToRender.Count == 0)
                 {
                     break;
                 }
 
-                BlockPos pos = world.ChunksToRender[0];
+                BlockPos pos = chunksToRender[0];
                 world.GetChunk(pos).UpdateChunk();
-                world.ChunksToRender.RemoveAt(0);
+                chunksToRender.RemoveAt(0);
             }
 
             if (RenderChunksInSeparateFrame)
@@ -84,7 +101,18 @@ public class LoadChunks : MonoBehaviour
             }
 
             BlockPos pos = chunksToGenerate[0];
-            world.CreateAndLoadChunk(pos);
+            Chunk newChunk = world.CreateChunkAndNeighbors(pos);
+
+            if (Config.Toggle.UseMultiThreading)
+            {
+                Thread thread = new Thread(() => { GenAndLoadChunk(newChunk); });
+                thread.Start();
+            }
+            else
+            {
+                GenAndLoadChunk(newChunk);
+            }
+
             chunksToGenerate.RemoveAt(0);
         }
 
@@ -101,11 +129,15 @@ public class LoadChunks : MonoBehaviour
                 new Vector3(transform.position.x, 0, transform.position.z));
 
             if (distance > DistanceToDeleteChunks * Config.Env.ChunkSize * Config.Env.BlockSize)
+            {
                 chunksToDelete.Add(chunk.Key);
+            }
         }
 
         foreach (var chunk in chunksToDelete)
+        {
             world.DestroyChunk(chunk);
+        }
 
     }
 
@@ -142,5 +174,59 @@ public class LoadChunks : MonoBehaviour
         }
 
         return false;
+    }
+
+    /// <summary>
+    ///Load terrain, saved changes and resets
+    ///the light for an empty chunk
+    /// </summary>
+    /// <param name="chunk">The chunk to generate and load for</param>
+    protected virtual void GenAndLoadChunk(Chunk chunk)
+    {
+        WorldConfig config = world.config;
+
+        if (chunk.pos.y == config.maxY)
+        {
+            for (int x = chunk.pos.x - Config.Env.ChunkSize; x <= chunk.pos.x + Config.Env.ChunkSize; x += Config.Env.ChunkSize)
+            {
+                for (int z = chunk.pos.z - Config.Env.ChunkSize; z <= chunk.pos.z + Config.Env.ChunkSize; z += Config.Env.ChunkSize)
+                {
+                    Chunk genChunk = world.GetChunk(new BlockPos(x, config.maxY, z));
+
+                    if (!genChunk.GetFlag(Chunk.Flag.contentsGenerated) && !genChunk.GetFlag(Chunk.Flag.generationInProgress))
+                    {
+                        genChunk.SetFlag(Chunk.Flag.generationInProgress, true);
+                        terrainGen.GenerateTerrainForChunkColumn(new BlockPos(x, config.maxY, z));
+
+                        for (int i = config.minY; i <= config.maxY; i += Config.Env.ChunkSize)
+                            Serialization.Load(world.GetChunk(new BlockPos(chunk.pos.x, i, chunk.pos.z)));
+
+                        for (int y = config.minY; y <= config.maxY; y += Config.Env.ChunkSize)
+                            world.GetChunk(new BlockPos(x, y, z)).SetFlag(Chunk.Flag.contentsGenerated, true);
+                    }
+                    else if (Config.Toggle.UseMultiThreading)
+                    {
+                        for (int y = config.minY; y <= config.maxY; y += Config.Env.ChunkSize)
+                        {
+                            while (!world.GetChunk(new BlockPos(x, y, z)).GetFlag(Chunk.Flag.contentsGenerated))
+                            {
+                                Thread.Sleep(0);
+                            }
+                        }
+                    }
+
+                }
+            }
+        }
+        else
+        {
+            //Chunk generated was not the top one so the column isn't complete yet, return without rendering
+            return;
+        }
+
+        for (int i = config.minY; i <= config.maxY; i += Config.Env.ChunkSize)
+        {
+            chunksToRender.Add(new BlockPos(chunk.pos.x, i, chunk.pos.z));
+        }
     }
 }

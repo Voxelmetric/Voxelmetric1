@@ -1,179 +1,58 @@
 ﻿using SimplexNoise;
-using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
-using System.Reflection;
+using System.Collections;
 using System;
 
-public class TerrainLayer: MonoBehaviour {
+public class TerrainLayer : IComparable
+{
 
-    public enum LayerType { Absolute, Additive, Surface, Structure, Chance };
-
-    public LayerType layerType = LayerType.Absolute;
-    public string layerName = "layername";
-
-    [Header("Absolute and additive layer parameters")]
-    [Range(0, 256)]
-    [Tooltip("Minimum height of this layer")]
-    public int baseHeight = 0;
-    [Range(1, 256)]
-    [Tooltip("Distance between peaks")]
-    public int frequency = 10;
-    [Range(1, 256)]
-    [Tooltip("The max height of peaks")]
-    public int amplitude = 10;
-    [Range(1, 3)]
-    [Tooltip("Applies the height to the power of this value")]
-    public float exponent = 1;
-
-    public string blockName = "stone";
-    public int chanceToSpawnBlock = 10;
-
-    [Tooltip("Name of the class that generates this structure")]
-    public string structureClassName = "StructureTree";
-
-    public bool customTerrainLayer = false;
-    public string terrainLayerClassName = "";
-    public LayerOverride customLayer;
-
-    public GeneratedStructure structure;
-
-    public World world;
-    public Noise noiseGen;
-
-
-    public TerrainLayer SetUpTerrainLayer(World world, Noise noise)
+    public void BaseSetUp(LayerConfig config, World world, TerrainGen terrainGen)
     {
+        this.terrainGen = terrainGen;
+        layerName = config.name;
+        isStructure = config.structure != null;
         this.world = world;
-        this.noiseGen = noise;
-        if (layerType == LayerType.Structure)
+        noiseGen = world.noise;
+        chunksPerColumn = (world.config.maxY - world.config.minY) / Config.Env.ChunkSize;
+        index = config.index;
+
+        foreach (var key in config.properties.Keys)
         {
-            var type = Type.GetType(structureClassName + ", " + typeof(GeneratedStructure).Assembly);
-            structure = (GeneratedStructure)Activator.CreateInstance(type);
+            properties.Add(key.ToString(), config.properties[key].ToString());
         }
 
-        return this;
+        SetUp(config);
     }
 
-    public virtual int GenerateLayer(int x, int z, int heightSoFar, float strength, bool justGetHeight = false)
+    protected virtual void SetUp(LayerConfig config) { }
+
+    protected TerrainGen terrainGen;
+    protected Dictionary<string, string> properties = new Dictionary<string, string>();
+    public string layerName = "";
+    public int index;
+    public bool isStructure;
+    protected World world;
+    protected Noise noiseGen;
+    protected int chunksPerColumn;
+
+    public virtual int GenerateLayer(Chunk[] chunks, int x, int z, int heightSoFar, float strength, bool justGetHeight = false)
     {
-        if (layerType == LayerType.Structure)
-            return heightSoFar;
-
-        if (customTerrainLayer)
-        {
-            //Not the best place for this but it ensures that custom layers are always initialized before use
-            if (customLayer == null)
-            {
-                var customLayerType = Type.GetType(terrainLayerClassName + ", " + typeof(LayerOverride).Assembly);
-                customLayer = (LayerOverride)Activator.CreateInstance(customLayerType);
-
-                customLayer.world = world;
-                customLayer.noiseGen = noiseGen;
-                customLayer.baseHeight = baseHeight;
-                customLayer.frequency = frequency;
-                customLayer.amplitude = amplitude;
-                customLayer.exponent = exponent;
-                customLayer.chanceToSpawnBlock = chanceToSpawnBlock;
-                customLayer.blockName = blockName;
-
-                if (layerType == LayerType.Structure)
-                    customLayer.structure = structure;
-            }
-
-            int newHeight = customLayer.GenerateLayer(x, z, heightSoFar, strength, justGetHeight);
-            return newHeight;
-        }
-
-        Block blockToPlace = new Block(blockName, world);
-
-        if (layerType == LayerType.Chance)
-        {
-            if (GetNoise(x, -10555, z, 1, 100, 1) < chanceToSpawnBlock)
-            {
-                if(!justGetHeight)
-                    world.SetBlock(new BlockPos(x, heightSoFar, z), blockToPlace, updateChunk: false, setBlockModified: false);
-
-                return heightSoFar + 1;
-            }
-            else
-            {
-                return heightSoFar;
-            }
-        }
-
-        int height = GetNoise(x, 0, z, frequency, amplitude, exponent);
-        height += baseHeight;
-        height = (int)(height * strength);
-
-        if (!justGetHeight)
-        {
-            if (layerType == LayerType.Absolute)
-            {
-                for (int y = heightSoFar; y < height + world.config.minY; y++)
-                {
-                    world.GetChunk(new BlockPos(x, y, z)).SetBlock(new BlockPos(x, y, z), blockToPlace, false, false);
-                    //world.SetBlock(new BlockPos(x, y, z), blockToPlace, updateChunk: false, setBlockModified: false);
-                }
-            }
-            else //additive or surface
-            {
-                for (int y = heightSoFar; y < height + heightSoFar; y++)
-                {
-                    world.SetBlock(new BlockPos(x, y, z), blockToPlace, updateChunk: false, setBlockModified: false);
-                }
-            }
-        }
-
-        if (layerType == LayerType.Additive || layerType == LayerType.Surface)
-        {
-            return heightSoFar + height;
-        }
-        else //absolute
-        {
-            if (world.config.minY + height > heightSoFar)
-            {
-                return world.config.minY + height;
-            }
-        }
         return heightSoFar;
     }
 
-    public virtual void GenerateStructures(BlockPos chunkPos, TerrainGen terrainGen)
+    int temp(int x, int z, int heightSoFar, float strength, World world, Noise noise, bool justGetHeight = false)
     {
-        if (layerType != LayerType.Structure)
-            return;
+        return 0;
+    }
 
-        if (customTerrainLayer)
-        {
-            customLayer.GenerateStructures(chunkPos, terrainGen);
-            return;
-        }
-
-        int minX, maxX, minZ, maxZ;
-
-        minX = chunkPos.x - structure.negX;
-        maxX = chunkPos.x + Config.Env.ChunkSize + structure.posX;
-        minZ = chunkPos.z - structure.negZ;
-        maxZ = chunkPos.z + Config.Env.ChunkSize + structure.posZ;
-
-        for (int x = minX; x < maxX; x++)
-        {
-            for (int z = minZ; z < maxZ; z++)
-            {
-                int percentChance = GetNoise(x, 0, z, 10, 100, 1);
-                if (percentChance < chanceToSpawnBlock)
-                {
-                    if (percentChance < GetNoise(x + 1, 0, z, 10, 100, 1)
-                        && percentChance < GetNoise(x - 1, 0, z, 10, 100, 1)
-                        && percentChance < GetNoise(x, 0, z + 1, 10, 100, 1)
-                        && percentChance < GetNoise(x, 0, z - 1, 10, 100, 1))
-                    {
-                        int height = terrainGen.GenerateTerrainForBlockColumn(x, z, true);
-                        structure.Build(world, chunkPos, new BlockPos(x, height, z), this);
-                    }
-                }
-            }
-        }
+    /// <summary>
+    /// Called once for each chunk column. Should generate any 
+    /// parts of the structure within the chunk using GeneratedStructure.
+    /// </summary>
+    /// <param name="chunkPos">pos of the chunk column</param>
+    public virtual void GenerateStructures(BlockPos chunkPos)
+    {
 
     }
 
@@ -186,6 +65,41 @@ public class TerrainLayer: MonoBehaviour {
             noise = Mathf.Pow(noise, power);
 
         return Mathf.FloorToInt(noise);
+    }
+
+    //Sets a column of chunks starting at startPlaceHeight and ending at endPlaceHeight using localSetBlock for speed
+    protected void SetBlocksColumn(Chunk[] chunks, int x, int z, int startPlaceHeight, int endPlaceHeight, Block blockToPlace)
+    {
+        // Loop through each chunk in the column
+        for (int i = 0; i < chunksPerColumn; i++)
+        {
+            // And for each one loop through its height
+            for (int y = 0; y < Config.Env.ChunkSize; y++)
+            {
+                //and if this is above the starting height
+                if (chunks[i].pos.y + y >= startPlaceHeight)
+                {
+                    // And below or equal to the end height place the block using 
+                    // localSetBlock which is faster than the non-local pos set block
+                    if (chunks[i].pos.y + y < endPlaceHeight)
+                    {
+                        //chunks[i].world.SetBlock(new BlockPos(x, y + chunks[i].pos.y, z), blockToPlace, false, false);
+                        chunks[i].LocalSetBlock(new BlockPos(x - chunks[i].pos.x, y, z - chunks[i].pos.z), blockToPlace);
+                    }
+                    else
+                    {
+                        // Return early, we've reached the end of the blocks to add
+                        return;
+                    }
+                }
+            }
+        }
+    }
+
+    // implement IComparable interface
+    public int CompareTo(object obj)
+    {
+        return index.CompareTo((obj as TerrainLayer).index);
     }
 
 }

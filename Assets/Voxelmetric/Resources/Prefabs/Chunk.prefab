@@ -15,7 +15,7 @@ GameObject:
   m_Layer: 8
   m_Name: Chunk
   m_TagString: Chunk
-  m_Icon: {fileID: 0}
+  m_Icon: {fileID: 2974397684917235467, guid: 0000000000000000d000000000000000, type: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
@@ -42,7 +42,7 @@ MeshRenderer:
   m_ReceiveShadows: 1
   m_Materials:
   - {fileID: 2100000, guid: 7fa2460a4614b844c9c80d1c0398b97d, type: 2}
-  m_SubsetIndices:
+  m_SubsetIndices: 
   m_StaticBatchRoot: {fileID: 0}
   m_UseLightProbes: 0
   m_ReflectionProbeUsage: 1
@@ -83,13 +83,15 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 9b7a843b0b517d24ca20e1f5ccd22bc9, type: 3}
-  m_Name:
-  m_EditorClassIdentifier:
+  m_Name: 
+  m_EditorClassIdentifier: 
+  noUpdate: 0
   world: {fileID: 0}
   pos:
     x: 0
     y: 0
     z: 0
+  modifiedBlocks: []
 --- !u!1001 &100100000
 Prefab:
   m_ObjectHideFlags: 1
@@ -99,7 +101,7 @@ Prefab:
     m_Modifications:
     - target: {fileID: 0}
       propertyPath: m_Materials.Array.data[0]
-      value:
+      value: 
       objectReference: {fileID: 2100000, guid: 7fa2460a4614b844c9c80d1c0398b97d, type: 2}
     - target: {fileID: 0}
       propertyPath: m_StaticEditorFlags
