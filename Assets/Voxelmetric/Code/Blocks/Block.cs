@@ -3,10 +3,11 @@ using System.Runtime.InteropServices;
 using UnityEngine;
 
 [Serializable]
+[StructLayout(LayoutKind.Sequential, Pack = 1)]
 public struct Block
 {
     public readonly ushort type;
-    
+
     public BlockData data;
 
     public Block(int type)

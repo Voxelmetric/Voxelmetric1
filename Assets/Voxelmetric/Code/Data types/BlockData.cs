@@ -1,78 +1,98 @@
-﻿//#define SINGLEWORLD
-#define MULTIWORLDS256
-//#define MULTIWORLDS65k
-using System;
+﻿using System;
+using System.Runtime.InteropServices;
 
 [Serializable]
+[StructLayout(LayoutKind.Sequential)]
 public struct BlockData
 {
-    // This can be set to a long if 32 bits isn't enough memory but be careful raising this too high
-    public int data;
+    int data;
 
-    public bool this[int index]
+    public byte this[int index]
     {
         get
         {
-            return ((data >> index) & 0x1) == 1;
+            return BitConverter.GetBytes(data)[index];
         }
-
         set
         {
-            int mask = (1 << index);
+            byte[] bytes = BitConverter.GetBytes(data);
+            bytes[index] = value;
+            data = BitConverter.ToInt32(bytes, 0);
+        }
+    }
+
+    public bool this[int byteIndex, int boolIndex]
+    {
+        get
+        {
+           return ((this[byteIndex] >> boolIndex) & 0x1) == 1;
+        }
+        set
+        {
+            int byteAtIndex = this[byteIndex];
+            
+            int mask = (1 << boolIndex);
             if (value)
             {
-                data |= mask;
+                byteAtIndex |= mask;
             }
             else
             {
-                data &= ~mask;
+                byteAtIndex &= ~mask;
             }
+
+            this[byteIndex] = (byte)byteAtIndex;
         }
     }
 
-    public void SetData(int index, int value, int width)
+    public static implicit operator int(BlockData bd)
     {
-        for (int i = 0; i < width; i++)
+        return (int)bd.data;
+    }
+
+    public static implicit operator BlockData(int i)
+    {
+        BlockData newBD = new BlockData();
+        newBD.data = i;
+        return newBD;
+    }
+
+    public bool GetBit(int index, bool value)
+    {
+        return ((data >> index) & 0x1) == 1;
+    }
+
+    public void SetBit(int index, bool value)
+    {
+        int mask = (1 << index);
+        if (value)
         {
-            this[index + i] = ((value >> i) & 0x1) == 1;
+            data |= mask;
+        }
+        else
+        {
+            data &= ~mask;
         }
     }
 
-    public int GetData(int index, int width)
-    {
-        return (int)((data >> index) & (16 ^ width));
-    }
-
-    // Use of multiworlds is defined at the top of this file, uncomment the preprocessor directive
-    // for a single world, up to 256 worlds or up to 65k worlds
-
-#if (SINGLEWORLD)
-    static int world = 0;
-#elif (MULTIWORLDS256)
-    byte world;
-#elif(MULTIWORLDS65K)
-    ushort world;
-#endif
-
-    /// <summary>
-    /// If your game is using multiple worlds this function will return the world index
-    /// </summary>
-    /// <returns></returns>
     public int World()
     {
-        return (int)world;
+        if (Config.Toggle.UseMultipleWorlds)
+        {
+            return this[3];
+        }
+        else
+        {
+            return 0;
+        }
     }
 
-    /// <summary>
-    /// Sets the world index if there is one
-    /// </summary>
     public void SetWorld(int index)
     {
-#if (MULTIWORLDS256)
-        world = (byte) index;
-#elif(MULTIWORLDS65K)
-        world = (byte) index;
-#endif
+        if (Config.Toggle.UseMultipleWorlds)
+        {
+            this[3] = (byte)index;
+        }
     }
 
 }
