@@ -15,10 +15,14 @@ public class PathFinder {
 
     int entityHeight;
 
-    public float range = 2;
+    public float range = 0.5f;
     float distanceFromStartToTarget = 0;
     float maxDistToTravelAfterDirect = 80;
     float maxDistToTravelMultiplier = 2;
+
+    public enum Status { stopped, working, failed, succeeded };
+
+    public Status status;
 
     struct Heuristics
     {
@@ -37,10 +41,11 @@ public class PathFinder {
         }
     };
 
-    public PathFinder(BlockPos startLocation, BlockPos targetLocation, World world, int entityHeight=2)
+    public PathFinder(BlockPos start, BlockPos target, World world, int entityHeight=2)
     {
-        this.startLocation = startLocation;
-        this.targetLocation = targetLocation;
+        status = Status.working;
+        startLocation = start.Add(Direction.down);
+        targetLocation = target.Add(Direction.down);
         distanceFromStartToTarget = Distance(startLocation, targetLocation);
         this.world = world;
         this.entityHeight = entityHeight;
@@ -51,7 +56,7 @@ public class PathFinder {
         {
             Thread thread = new Thread(() =>
            {
-               while (path.Count == 0)
+               while (status == Status.working)
                {
                    update();
                }
@@ -60,16 +65,16 @@ public class PathFinder {
         }
         else
         {
-            while (path.Count == 0)
-            {
-                update();
-            }
+            //while (status == Status.working)
+            //{
+            //    update();
+            //}
         }
     }
 
     public void update()
     {
-        if (path.Count == 0)
+        if (status == Status.working)
         {
             ProcessBest();
         }
@@ -80,16 +85,17 @@ public class PathFinder {
         Heuristics pos;
         closed.TryGetValue(lastTile, out pos);
         path.Clear();
-        path.Add(lastTile);
+        path.Add(lastTile.Add(Direction.up));
 
         open.TryGetValue(lastTile, out pos);
 
         while (!pos.parent.Equals(startLocation))
         {
-            path.Insert(0, pos.parent);
+            path.Insert(0, pos.parent.Add(Direction.up));
             if (!closed.TryGetValue(pos.parent, out pos))
                 break;
         }
+
     }
 
     void ProcessBest()
@@ -109,26 +115,16 @@ public class PathFinder {
         Heuristics parent;
         open.TryGetValue(bestPos, out parent);
 
-        if (Distance(((Vector3)bestPos) + (Vector3.up*2), targetLocation) <= range)
+        if (Distance(((Vector3)bestPos), targetLocation) <= range)
         {
             PathComplete(bestPos);
+            status = Status.succeeded;
             return;
         }
 
         if (bestPos.Equals(new BlockPos(0, 10000, 0)))
         {
-            Debug.Log("Failed to pf " + targetLocation.x + ", " + targetLocation.y + ", " + targetLocation.z);
-            bestPos = new BlockPos(0,10000,0);
-
-            foreach (var tile in open)
-            {
-                if (tile.Value.g + tile.Value.h < shortestDist)
-                {
-                    bestPos = tile.Key;
-                    shortestDist = tile.Value.g + tile.Value.h;
-                }
-            }
-            PathComplete(bestPos);
+            status = Status.failed;
         }
 
         ProcessTile(bestPos);
@@ -163,15 +159,15 @@ public class PathFinder {
         adjacentPositions.Add(new BlockPos(pos.x - 1, pos.y, pos.z));
         distanceFromStart.Add(dist.g +1);
 
-        //diagonal directions
-        adjacentPositions.Add(new BlockPos(pos.x + 1, pos.y, pos.z + 1));
-        distanceFromStart.Add(dist.g +1.414f);
-        adjacentPositions.Add(new BlockPos(pos.x + 1, pos.y, pos.z - 1));
-        distanceFromStart.Add(dist.g +1.414f);
-        adjacentPositions.Add(new BlockPos(pos.x - 1, pos.y, pos.z - 1));
-        distanceFromStart.Add(dist.g +1.414f);
-        adjacentPositions.Add(new BlockPos(pos.x - 1, pos.y, pos.z + 1));
-        distanceFromStart.Add(dist.g +1.414f);
+        ////diagonal directions
+        //adjacentPositions.Add(new BlockPos(pos.x + 1, pos.y, pos.z + 1));
+        //distanceFromStart.Add(dist.g +1.414f);
+        //adjacentPositions.Add(new BlockPos(pos.x + 1, pos.y, pos.z - 1));
+        //distanceFromStart.Add(dist.g +1.414f);
+        //adjacentPositions.Add(new BlockPos(pos.x - 1, pos.y, pos.z - 1));
+        //distanceFromStart.Add(dist.g +1.414f);
+        //adjacentPositions.Add(new BlockPos(pos.x - 1, pos.y, pos.z + 1));
+        //distanceFromStart.Add(dist.g +1.414f);
 
         //climb up directions
         adjacentPositions.Add(new BlockPos(pos.x, pos.y+1, pos.z+1));
