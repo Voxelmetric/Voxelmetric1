@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Runtime.InteropServices;
+using UnityEngine;
 
 [Serializable]
 [StructLayout(LayoutKind.Sequential)]
@@ -11,13 +12,28 @@ public struct BlockData
     {
         get
         {
-            return BitConverter.GetBytes(data)[index];
+            switch (index)
+            {
+                case 0:
+                    return (byte)((data & 0x000000FF));
+                case 1:
+                    return (byte)((data & 0x0000FF00) >> 8);
+                case 2:
+                    return (byte)((data & 0x00FF0000) >> 16);
+                case 3:
+                    return (byte)((data & 0xFF000000) >> 24);
+                default:
+                    Debug.LogWarning("block data index out of range");
+                    return 0;
+            }
         }
         set
         {
-            byte[] bytes = BitConverter.GetBytes(data);
+            byte[] bytes = new byte[4];
+            for (int i = 0; i < 4; i++) { bytes[i] = this[i]; }
             bytes[index] = value;
-            data = BitConverter.ToInt32(bytes, 0);
+
+            data = bytes[0] | (bytes[1] << 8) | (bytes[2] << 16) | (bytes[3] << 24);
         }
     }
 
