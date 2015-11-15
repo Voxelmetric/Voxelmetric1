@@ -51,7 +51,7 @@ public class World : MonoBehaviour {
         chunksToDelete.Clear();
     }
 
-    Chunk CreateChunk(BlockPos pos)
+    public Chunk CreateChunk(BlockPos pos)
     {
         Chunk existingChunk = GetChunk(pos);
         if (existingChunk != null)
