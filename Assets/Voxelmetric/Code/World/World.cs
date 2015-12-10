@@ -187,7 +187,14 @@ public class World : MonoBehaviour {
         }
         else
         {
-            return Block.Solid;
+            if (pos.y < config.minY)
+            {
+                return Block.Solid;
+            }
+            else
+            {
+                return Block.Air;
+            }
         }
         
     }

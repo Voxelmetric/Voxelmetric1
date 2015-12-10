@@ -30,15 +30,15 @@ public class BlockIndex {
             return -1;
         }
 
-        if (names.ContainsKey(controller.Name()))
+        if (names.ContainsKey(controller.Name(0)))
         {
-            Debug.LogError("Two blocks with the name " + controller.Name() + " are defined");
+            Debug.LogError("Two blocks with the name " + controller.Name(0) + " are defined");
             return -1;
         } 
 
         controllers.Add(controller);
 
-        names.Add(controller.Name().ToLower().Replace(" ", ""), index);
+        names.Add(controller.Name(0).ToLower().Replace(" ", ""), index);
         return index;
     }
 

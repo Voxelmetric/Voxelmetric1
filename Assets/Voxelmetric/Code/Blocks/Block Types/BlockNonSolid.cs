@@ -10,10 +10,10 @@ public class BlockNonSolid : BlockController
 
     }
 
-    public override string Name() { return "nonsolid"; }
+    public override string Name(Block block) { return "nonsolid"; }
 
-    public override bool IsSolid(Direction direction) { return false; }
+    public override bool IsSolid(Block block, Direction direction) { return false; }
 
-    public override bool IsTransparent() { return true; }
+    public override bool IsTransparent(Block block) { return true; }
 
 }

@@ -7,7 +7,7 @@ public class ConnectedTextures {
 
     public static bool IsSame(Chunk chunk, BlockPos pos, int h, int v, Direction forwards, string name)
     {
-        return chunk.GetBlock(RelativePos(pos, h, v, forwards)).controller.Name() == name;
+        return chunk.GetBlock(RelativePos(pos, h, v, forwards)).controller.Name(0) == name;
     }
 
     public static BlockPos RelativePos(BlockPos pos, int h, int v, Direction forwards)

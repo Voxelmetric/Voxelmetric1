@@ -52,6 +52,11 @@ public struct Block
         }
     }
 
+    public bool IsSolid(Direction direction)
+    {
+        return controller.IsSolid(this, direction);
+    }
+
     public static implicit operator BlockController(Block block)
     {
         return block.world.blockIndex.controllers[block.type];
@@ -59,7 +64,7 @@ public struct Block
 
     public override string ToString()
     {
-        return world.blockIndex.controllers[type].Name();
+        return world.blockIndex.controllers[type].Name(this);
     }
 
     public static implicit operator ushort(Block block)

@@ -17,8 +17,8 @@ public class PathFinder {
 
     public float range = 0.5f;
     float distanceFromStartToTarget = 0;
-    float maxDistToTravelAfterDirect = 80;
-    float maxDistToTravelMultiplier = 2;
+    float maxDistToTravelAfterDirect = 800;
+    float maxDistToTravelMultiplier = 10;
 
     public enum Status { stopped, working, failed, succeeded };
 
@@ -41,9 +41,10 @@ public class PathFinder {
         }
     };
 
-    public PathFinder(BlockPos start, BlockPos target, World world, int entityHeight=2)
+    public PathFinder(BlockPos start, BlockPos target, World world, float range = 0.5f, int entityHeight=1)
     {
         status = Status.working;
+        this.range = range;
         startLocation = start.Add(Direction.down);
         targetLocation = target.Add(Direction.down);
         distanceFromStartToTarget = Distance(startLocation, targetLocation);

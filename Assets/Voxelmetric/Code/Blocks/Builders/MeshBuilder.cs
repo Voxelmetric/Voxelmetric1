@@ -3,29 +3,37 @@ using UnityEngine;
 
 public class MeshBuilder {
 
-    public static void CrossMeshRenderer(Chunk chunk, BlockPos localPos, BlockPos globalPos, MeshData meshData, TextureCollection texture, Block block)
+    public static void CrossMeshRenderer
+        (Chunk chunk, BlockPos localPos, BlockPos globalPos, MeshData meshData, TextureCollection texture, Block block, bool useOffset = true)
     {
         float halfBlock = (Config.Env.BlockSize / 2) + Config.Env.BlockFacePadding;
         float colliderOffest = 0.05f * Config.Env.BlockSize;
 
+        float blockHeight = 1;
+        float offsetX = 0;
+        float offsetZ = 0;
+
         //Using the block positions hash is much better for random numbers than saving the offset and height in the block data
-        int hash = localPos.GetHashCode();
-        if (hash < 0)
-            hash *= -1;
+        if (useOffset)
+        {
+            int hash = localPos.GetHashCode();
+            if (hash < 0)
+                hash *= -1;
 
-        float blockHeight = halfBlock * 2 * (hash % 100) / 100f;
+            blockHeight = halfBlock * 2 * (hash % 100) / 100f;
 
-        hash *= 39;
-        if (hash < 0)
-            hash *= -1;
+            hash *= 39;
+            if (hash < 0)
+                hash *= -1;
 
-        float offsetX = (halfBlock * (hash % 100) / 100f) - (halfBlock / 2);
+            offsetX = (halfBlock * (hash % 100) / 100f) - (halfBlock / 2);
 
-        hash *= 39;
-        if (hash < 0)
-            hash *= -1;
+            hash *= 39;
+            if (hash < 0)
+                hash *= -1;
 
-        float offsetZ = (halfBlock * (hash % 100) / 100f)-(halfBlock / 2);
+            offsetZ = (halfBlock * (hash % 100) / 100f) - (halfBlock / 2);
+        }
 
         //Converting the position to a vector adjusts it based on block size and gives us real world coordinates for x, y and z
         Vector3 vPos = localPos;

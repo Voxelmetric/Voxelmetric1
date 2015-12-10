@@ -75,9 +75,13 @@ public static class Voxelmetric
 
     public static BlockPos GetBlockPos(RaycastHit hit, bool adjacent = false)
     {
-        Vector3 pos = hit.point;
-
         World world = hit.collider.gameObject.GetComponent<Chunk>().world;
+        return GetBlockPos(hit, world, adjacent);
+    }
+
+    public static BlockPos GetBlockPos(RaycastHit hit, World world, bool adjacent = false)
+    {
+        Vector3 pos = hit.point;
         pos = Quaternion.Inverse(world.gameObject.transform.rotation) * pos;
         pos -= world.gameObject.transform.position;
 
@@ -88,7 +92,7 @@ public static class Voxelmetric
             MoveWithinBlock(pos.y, rotatedNormal.y, adjacent),
             MoveWithinBlock(pos.z, rotatedNormal.z, adjacent)
             );
-        
+
         return pos;
     }
 

@@ -6,9 +6,9 @@ public class BlockAir : BlockController
 
     public BlockAir() : base() { }
 
-    public override bool IsSolid(Direction direction) { return false; }
+    public override bool IsSolid(Block block, Direction direction) { return false; }
 
-    public override string Name() { return "air"; }
+    public override string Name(Block block) { return "air"; }
 
-    public override bool IsTransparent() { return true; }
+    public override bool IsTransparent(Block block) { return true; }
 }   

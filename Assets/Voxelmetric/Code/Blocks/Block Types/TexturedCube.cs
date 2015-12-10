@@ -1,18 +1,18 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class BlockCube : BlockSolid {
-
-    public string blockName;
-    public TextureCollection[] textures;
+public class TexturedCube : BlockCube
+{
+    public string[] textureList = new string[] { "actionmine"};
+    public TextureCollection[] textureCollections;
 
     public override void SetUpController(BlockConfig config, World world)
     {
         blockName = config.name;
-        textures = new TextureCollection[6];
-        for (int i = 0; i < 6; i++)
+        textureCollections = new TextureCollection[textureList.Length];
+        for (int i = 0; i < textureList.Length; i++)
         {
-            textures[i] = world.textureIndex.GetTextureCollection(config.textures[i]);
+            textureCollections[i] = world.textureIndex.GetTextureCollection(textureList[i]);
         }
         isSolid = config.isSolid;
         solidTowardsSameType = config.solidTowardsSameType;
@@ -22,22 +22,14 @@ public class BlockCube : BlockSolid {
     public override void BuildFace(Chunk chunk, BlockPos localPos, BlockPos globalPos, MeshData meshData, Direction direction, Block block)
     {
         BlockBuilder.BuildRenderer(chunk, localPos, globalPos, meshData, direction);
-        BlockBuilder.BuildTexture(chunk, localPos, globalPos, meshData, direction, textures);
+        BlockBuilder.BuildTexture(chunk, localPos, globalPos, meshData, direction, new TextureCollection[] {
+            textureCollections[block.data], textureCollections[block.data], textureCollections[block.data],
+            textureCollections[block.data], textureCollections[block.data], textureCollections[block.data]
+        });
         BlockBuilder.BuildColors(chunk, localPos, globalPos, meshData, direction);
         if (block.world.config.useCollisionMesh)
         {
             BlockBuilder.BuildCollider(chunk, localPos, globalPos, meshData, direction);
         }
     }
-
-    public override string Name(Block block)
-    {
-        return blockName;
-    }
-
-    public override bool IsSolid(Block block, Direction direction)
-    {
-        return isSolid;
-    }
-
 }

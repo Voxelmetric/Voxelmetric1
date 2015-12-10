@@ -25,14 +25,16 @@ public class CustomMesh : BlockController {
         collection = world.textureIndex.GetTextureCollection(config.textures[0]);
         isSolid = config.isSolid;
         SetUpMeshControllerMesh( world.config.meshFolder + "/" + config.meshFileName, this, new Vector3(config.meshXOffset, config.meshYOffset, config.meshZOffset));
+
+        base.SetUpController(config, world);
     }
 
-    public override string Name()
+    public override string Name(Block block)
     {
         return blockName;
     }
 
-    public override bool IsSolid(Direction direction) {
+    public override bool IsSolid(Block block, Direction direction) {
         return isSolid;
     }
 
@@ -68,7 +70,7 @@ public class CustomMesh : BlockController {
             }
         }
 
-        if (!chunk.LocalGetBlock(localPos.Add(Direction.up)).controller.IsSolid(Direction.down))
+        if (!chunk.LocalGetBlock(localPos.Add(Direction.up)).IsSolid(Direction.down))
         {
             foreach (var tri in trisUp)
             {
@@ -77,7 +79,7 @@ public class CustomMesh : BlockController {
             }
         }
 
-        if (!chunk.LocalGetBlock(localPos.Add(Direction.down)).controller.IsSolid(Direction.up))
+        if (!chunk.LocalGetBlock(localPos.Add(Direction.down)).IsSolid(Direction.up))
         {
             foreach (var tri in trisDown)
             {
@@ -86,7 +88,7 @@ public class CustomMesh : BlockController {
             }
         }
 
-        if (!chunk.LocalGetBlock(localPos.Add(Direction.north)).controller.IsSolid(Direction.south))
+        if (!chunk.LocalGetBlock(localPos.Add(Direction.north)).IsSolid(Direction.south))
         {
             foreach (var tri in trisNorth)
             {
@@ -95,7 +97,7 @@ public class CustomMesh : BlockController {
             }
         }
 
-        if (!chunk.LocalGetBlock(localPos.Add(Direction.south)).controller.IsSolid(Direction.north))
+        if (!chunk.LocalGetBlock(localPos.Add(Direction.south)).IsSolid(Direction.north))
         {
             foreach (var tri in trisSouth)
             {
@@ -104,7 +106,7 @@ public class CustomMesh : BlockController {
             }
         }
 
-        if (!chunk.LocalGetBlock(localPos.Add(Direction.west)).controller.IsSolid(Direction.east))
+        if (!chunk.LocalGetBlock(localPos.Add(Direction.west)).IsSolid(Direction.east))
         {
             foreach (var tri in trisWest)
             {
@@ -113,7 +115,7 @@ public class CustomMesh : BlockController {
             }
         }
 
-        if (!chunk.LocalGetBlock(localPos.Add(Direction.east)).controller.IsSolid(Direction.west))
+        if (!chunk.LocalGetBlock(localPos.Add(Direction.east)).IsSolid(Direction.west))
         {
             foreach (var tri in trisEast)
             {
@@ -129,7 +131,7 @@ public class CustomMesh : BlockController {
         }
     }
 
-    public override bool IsTransparent() { return true; }
+    public override bool IsTransparent(Block block) { return true; }
 
 
     static bool AlignedWith(Vector3 vertex, int xyOrz, float value)

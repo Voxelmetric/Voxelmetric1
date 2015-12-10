@@ -15,22 +15,19 @@ public class BlockController
         PostRender(chunk, localPos, block);
     }
 
+    public BlockConfig config;
+
     //This function should set up the controller for the world 
     public virtual void SetUpController(BlockConfig config, World world)
     {
-
+        this.config = config;
     }
 
-    public virtual string Name() { return "BlockController";  }
+    public virtual string Name(Block block) { return "BlockController";  }
 
-    public virtual bool IsSolid(Direction direction) { return false; }
+    public virtual bool IsSolid(Block block, Direction direction) { return false; }
 
-    public virtual bool IsTransparent() { return false; }
-
-    /// <summary>
-    /// Must return a number between 0 and 15, 0 for non emitting
-    /// </summary>
-    public virtual byte LightEmitted() { return 0; }
+    public virtual bool IsTransparent(Block block) { return false; }
 
     /// <summary>
     /// Returns true if the block can be used as a possible path for path finding

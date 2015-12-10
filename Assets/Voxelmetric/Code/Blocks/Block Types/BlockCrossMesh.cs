@@ -12,14 +12,15 @@ public class BlockCrossMesh : BlockNonSolid
     {
         blockName = config.name;
         texture = world.textureIndex.GetTextureCollection(config.textures[0]);
+        base.SetUpController(config, world);
     }
 
     public override void AddBlockData(Chunk chunk, BlockPos localPos, BlockPos globalPos, MeshData meshData, Block block)
     {
         MeshBuilder.CrossMeshRenderer(chunk, localPos, globalPos, meshData, texture, block);
     }
-    public override string Name() { return blockName; }
+    public override string Name(Block block) { return blockName; }
 
-    public override bool IsTransparent() { return true; }
+    public override bool IsTransparent(Block block) { return true; }
 
 }

@@ -40,7 +40,7 @@ public class TextureCollection
     {
         if (usesConnectedTextures)
         {
-            string blockName = chunk.GetBlock(pos).controller.Name();
+            string blockName = chunk.GetBlock(pos).controller.Name(0);
 
             bool wn = ConnectedTextures.IsSame(chunk, pos, -1, 1, direction, blockName);
             bool n = ConnectedTextures.IsSame(chunk, pos, 0, 1, direction, blockName);

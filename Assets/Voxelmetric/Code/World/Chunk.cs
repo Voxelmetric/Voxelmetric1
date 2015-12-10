@@ -15,7 +15,7 @@ public class Chunk : MonoBehaviour
 
     private List<BlockAndTimer> scheduledUpdates = new List<BlockAndTimer>();
 
-    public enum Flag { busy, meshReady, loadStarted, generationInProgress, contentsGenerated, loadComplete, chunkModified, updateSoon, updateNow }
+    public enum Flag { busy, meshReady, loadStarted, generationInProgress, contentsGenerated, loadComplete, chunkModified, updateSoon, updateNow}
     public Hashtable flags = new Hashtable();
 
     /// <summary>
@@ -23,18 +23,18 @@ public class Chunk : MonoBehaviour
     /// </summary>
     public bool noUpdate = false;
 
-    MeshFilter filter;
-    MeshCollider coll;
+    protected MeshFilter filter;
+    protected MeshCollider coll;
 
     public World world;
     public BlockPos pos;
 
     float randomUpdateTime = 0;
 
-    MeshData meshData = new MeshData();
+    protected MeshData meshData = new MeshData();
     public List<BlockPos> modifiedBlocks = new List<BlockPos>();
 
-    void Start()
+    protected virtual void Start()
     {
         filter = gameObject.GetComponent<MeshFilter>();
         coll = gameObject.GetComponent<MeshCollider>();
@@ -43,7 +43,7 @@ public class Chunk : MonoBehaviour
         gameObject.GetComponent<Renderer>().material.mainTexture = world.textureIndex.atlas;
     }
 
-    void LateUpdate()
+    protected virtual void LateUpdate()
     {
         TimedUpdated();
 
@@ -154,7 +154,7 @@ public class Chunk : MonoBehaviour
     /// <summary>
     /// Immediately updated the chunk and prepares a mesh to render. Usually better to use UpdateNow or UpdateSoon
     /// </summary>
-    public void UpdateChunk()
+    public virtual void UpdateChunk()
     {
         SetFlag(Flag.loadComplete, true);
         if (Config.Toggle.UseMultiThreading)
@@ -250,7 +250,7 @@ public class Chunk : MonoBehaviour
         return (blockPos.ContainingChunkCoordinates() == pos);
     }
 
-    public void SetBlock(BlockPos blockPos, String block, bool updateChunk = true, bool setBlockModified = true)
+    public virtual void SetBlock(BlockPos blockPos, String block, bool updateChunk = true, bool setBlockModified = true)
     {
         SetBlock(blockPos, new Block(block, world), updateChunk, setBlockModified);
     }
@@ -290,12 +290,12 @@ public class Chunk : MonoBehaviour
     /// <summary>
     /// Quick way to return the block at a position in the array
     /// </summary>
-    Block FetchBlockFromArray(BlockPos blockPos)
+    protected virtual Block FetchBlockFromArray(BlockPos blockPos)
     {
         return blocks[blockPos.x - pos.x, blockPos.y - pos.y, blockPos.z - pos.z];
     }
 
-    void SetBlockInArray(BlockPos blockPos, Block block)
+    protected virtual void SetBlockInArray(BlockPos blockPos, Block block)
     {
         noUpdate = false;
         block.data.SetWorld(world.worldIndex);
@@ -305,7 +305,7 @@ public class Chunk : MonoBehaviour
     /// <summary>
     /// Updates the chunk based on its contents
     /// </summary>
-    void BuildMeshData()
+    protected virtual void BuildMeshData()
     {
         for (int x = 0; x < Config.Env.ChunkSize; x++)
         {
@@ -332,7 +332,7 @@ public class Chunk : MonoBehaviour
     /// Sends the calculated mesh information
     /// to the mesh and collision components
     /// </summary>
-    void RenderMesh()
+    protected virtual void RenderMesh()
     {
         filter.mesh.Clear();
         filter.mesh.vertices = meshData.vertices.ToArray();

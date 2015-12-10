@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 
 public struct BlockConfig
 {
@@ -13,6 +14,8 @@ public struct BlockConfig
     public float meshXOffset;
     public float meshYOffset;
     public float meshZOffset;
+
+    public Hashtable additionalProperties;
 
     public override string ToString()
     {
