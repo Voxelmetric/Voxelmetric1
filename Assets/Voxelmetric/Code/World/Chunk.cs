@@ -11,9 +11,9 @@ using System.Runtime.InteropServices;
 
 public class Chunk : MonoBehaviour
 {
-    private Block[,,] blocks = new Block[Config.Env.ChunkSize, Config.Env.ChunkSize, Config.Env.ChunkSize];
+    protected Block[,,] blocks = new Block[Config.Env.ChunkSize, Config.Env.ChunkSize, Config.Env.ChunkSize];
 
-    private List<BlockAndTimer> scheduledUpdates = new List<BlockAndTimer>();
+    protected List<BlockAndTimer> scheduledUpdates = new List<BlockAndTimer>();
 
     public enum Flag { busy, meshReady, loadStarted, generationInProgress, contentsGenerated, loadComplete, chunkModified, updateSoon, updateNow}
     public Hashtable flags = new Hashtable();
