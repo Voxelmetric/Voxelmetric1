@@ -23,7 +23,7 @@ public class BlockController
         this.config = config;
     }
 
-    public virtual string Name(Block block) { return "BlockController";  }
+    public virtual string Name(Block block = new Block()) { return "BlockController";  }
 
     public virtual bool IsSolid(Block block, Direction direction) { return false; }
 
