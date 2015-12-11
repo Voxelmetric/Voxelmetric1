@@ -1,0 +1,13 @@
+{
+  "name": "stone noise layer",
+  "index": 200,
+  "layerType": "AdditiveLayer",
+  "properties": {
+    "blockName": "coloredblock",
+    "frequency": "7",
+    "exponent": "1",
+    "minHeight": "1",
+    "maxHeight": "4",
+    "blockColors": "111,113,116"
+  }
+}

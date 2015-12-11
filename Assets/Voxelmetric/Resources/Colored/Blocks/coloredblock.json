@@ -1,0 +1,8 @@
+{
+  "name": "coloredblock",
+  "controller": "BlockColored",
+  "textures": [
+    "noise"
+  ],
+  "isSolid": true,
+}

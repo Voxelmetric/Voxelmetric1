@@ -15,6 +15,13 @@ public class AbsoluteLayer : TerrainLayer
     {
         // Config files for absolute layers MUST define these properties
         blockToPlace = new Block(properties["blockName"], world);
+
+        if (properties.ContainsKey("blockColors"))
+        {
+            string[] colors = properties["blockColors"].Split(',');
+            blockToPlace = BlockColored.SetBlockColor(blockToPlace, byte.Parse(colors[0]), byte.Parse(colors[1]), byte.Parse(colors[2]));
+        }
+
         frequency = float.Parse(properties["frequency"]);
         exponent = float.Parse(properties["exponent"]);
         minHeight = int.Parse(properties["minHeight"]);

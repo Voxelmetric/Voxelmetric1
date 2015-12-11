@@ -1,0 +1,9 @@
+{
+  "name": "Surface grass layer",
+  "index": 1000,
+  "layerType": "SurfaceLayer",
+  "properties": {
+    "blockName": "coloredblock",
+    "blockColors": "51,178,57"
+  }
+}
