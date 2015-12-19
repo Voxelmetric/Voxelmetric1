@@ -59,7 +59,7 @@ public class CustomMesh : BlockController {
         {
             Rect texture;
             if (collection != null)
-                texture = collection.GetTexture(chunk, localPos, Direction.down);
+                texture = collection.GetTexture(chunk, localPos, globalPos, Direction.down);
             else
                 texture = new Rect();
 

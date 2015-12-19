@@ -3,31 +3,29 @@ using System.Collections.Generic;
 
 public class ConnectedTextures {
 
-
-
-    public static bool IsSame(Chunk chunk, BlockPos pos, int h, int v, Direction forwards, string name)
+    public static bool IsSame(Chunk chunk, BlockPos localPos, int h, int v, Direction forwards, int type)
     {
-        return chunk.GetBlock(RelativePos(pos, h, v, forwards)).controller.Name(0) == name;
+        return chunk.LocalGetBlock(RelativePos(localPos, h, v, forwards)).type == type;
     }
 
-    public static BlockPos RelativePos(BlockPos pos, int h, int v, Direction forwards)
+    public static BlockPos RelativePos(BlockPos localPos, int h, int v, Direction forwards)
     {
         switch (forwards)
         {
             case Direction.up:
-                return pos.Add(v, 0, h);
+                return localPos.Add(v, 0, h);
             case Direction.down:
-                return pos.Add(v, 0, -h);
+                return localPos.Add(v, 0, -h);
             case Direction.north:
-                return pos.Add(h, v, 0);
+                return localPos.Add(h, v, 0);
             case Direction.south:
-                return pos.Add(-h, v, 0);
+                return localPos.Add(-h, v, 0);
             case Direction.east:
-                return pos.Add(0, v, -h);
+                return localPos.Add(0, v, -h);
             case Direction.west:
-                return pos.Add(0, v, h);
+                return localPos.Add(0, v, h);
             default:
-                return pos;
+                return localPos;
         }
     }
 

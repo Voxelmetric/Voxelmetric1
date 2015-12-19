@@ -36,23 +36,22 @@ public class TextureCollection
         }
     }
 
-    public Rect GetTexture(Chunk chunk, BlockPos pos, Direction direction)
+    public Rect GetTexture(Chunk chunk, BlockPos localPos, BlockPos globalPos, Direction direction)
     {
         if (usesConnectedTextures)
         {
-            string blockName = chunk.GetBlock(pos).controller.Name(0);
+            int blockType = chunk.LocalGetBlock(localPos).type;
 
-            bool wn = ConnectedTextures.IsSame(chunk, pos, -1, 1, direction, blockName);
-            bool n = ConnectedTextures.IsSame(chunk, pos, 0, 1, direction, blockName);
-            bool ne = ConnectedTextures.IsSame(chunk, pos, 1, 1, direction, blockName);
-            bool w = ConnectedTextures.IsSame(chunk, pos, -1, 0, direction, blockName);
-            bool e = ConnectedTextures.IsSame(chunk, pos, 1, 0, direction, blockName);
-            bool es = ConnectedTextures.IsSame(chunk, pos, 1, -1, direction, blockName);
-            bool s = ConnectedTextures.IsSame(chunk, pos, 0, -1, direction, blockName);
-            bool sw = ConnectedTextures.IsSame(chunk, pos, -1, -1, direction, blockName);
+            bool wn = ConnectedTextures.IsSame(chunk, localPos, -1, 1, direction, blockType);
+            bool n = ConnectedTextures.IsSame(chunk, localPos, 0, 1, direction, blockType);
+            bool ne = ConnectedTextures.IsSame(chunk, localPos, 1, 1, direction, blockType);
+            bool w = ConnectedTextures.IsSame(chunk, localPos, -1, 0, direction, blockType);
+            bool e = ConnectedTextures.IsSame(chunk, localPos, 1, 0, direction, blockType);
+            bool es = ConnectedTextures.IsSame(chunk, localPos, 1, -1, direction, blockType);
+            bool s = ConnectedTextures.IsSame(chunk, localPos, 0, -1, direction, blockType);
+            bool sw = ConnectedTextures.IsSame(chunk, localPos, -1, -1, direction, blockType);
 
             return connectedTextures[ConnectedTextures.GetTexture(n, e, s, w, wn, ne, es, sw)];
-
         }
 
         if (textures.Count == 1)
@@ -62,7 +61,7 @@ public class TextureCollection
 
         if (textures.Count > 1)
         {
-            int hash = pos.GetHashCode();
+            int hash = localPos.GetHashCode();
             if (hash < 0)
                 hash *= -1;
 

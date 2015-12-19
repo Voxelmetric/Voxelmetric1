@@ -1,0 +1,13 @@
+{
+  "name": "connected",
+  "controller": "BlockCube",
+  "textures": [
+    "connected",
+    "connected",
+    "connected",
+    "connected",
+    "connected",
+    "connected"
+  ],
+  "isSolid": true,
+}

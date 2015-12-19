@@ -19,7 +19,7 @@ public class BlockColored : BlockSolid {
     {
         BlockBuilder.BuildRenderer(chunk, localPos, globalPos, meshData, direction);
 
-        Rect texture = textureCollection.GetTexture(chunk, globalPos, direction);
+        Rect texture = textureCollection.GetTexture(chunk, localPos, globalPos, direction);
         Vector2[] UVs = new Vector2[4];
 
         UVs[0] = new Vector2(texture.x + texture.width, texture.y);

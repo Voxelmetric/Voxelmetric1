@@ -131,7 +131,7 @@ public static class BlockBuilder
 
     public static void BuildTexture(Chunk chunk, BlockPos localPos, BlockPos globalPos, MeshData meshData, Direction direction, TextureCollection textureCollection)
     {
-        Rect texture = textureCollection.GetTexture(chunk, globalPos, direction);
+        Rect texture = textureCollection.GetTexture(chunk, localPos, globalPos, direction);
         Vector2[] UVs = new Vector2[4];
 
         UVs[0] = new Vector2(texture.x + texture.width, texture.y);
@@ -149,22 +149,22 @@ public static class BlockBuilder
         switch (direction)
         {
             case Direction.up:
-                texture = textureCollections[0].GetTexture(chunk, localPos, direction);
+                texture = textureCollections[0].GetTexture(chunk, localPos, globalPos, direction);
                 break;
             case Direction.down:
-                texture = textureCollections[1].GetTexture(chunk, localPos, direction);
+                texture = textureCollections[1].GetTexture(chunk, localPos, globalPos, direction);
                 break;
             case Direction.north:
-                texture = textureCollections[2].GetTexture(chunk, localPos, direction);
+                texture = textureCollections[2].GetTexture(chunk, localPos, globalPos, direction);
                 break;
             case Direction.east:
-                texture = textureCollections[3].GetTexture(chunk, localPos, direction);
+                texture = textureCollections[3].GetTexture(chunk, localPos, globalPos, direction);
                 break;
             case Direction.south:
-                texture = textureCollections[4].GetTexture(chunk, localPos, direction);
+                texture = textureCollections[4].GetTexture(chunk, localPos, globalPos, direction);
                 break;
             case Direction.west:
-                texture = textureCollections[5].GetTexture(chunk, localPos, direction);
+                texture = textureCollections[5].GetTexture(chunk, localPos, globalPos, direction);
                 break;
             default:
                 break;
