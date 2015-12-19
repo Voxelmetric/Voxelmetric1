@@ -9,6 +9,7 @@ public class LoadChunks : MonoBehaviour
     public bool generateTerrain = true;
     TerrainGen terrainGen;
     public string layerFolder;
+    private BlockPos objectPos;
 
     [Range(1, 64)]
     public int chunkLoadRadius = 8;
@@ -17,6 +18,7 @@ public class LoadChunks : MonoBehaviour
     //The distance is measured in chunks
     [Range(1, 64)]
     public int DistanceToDeleteChunks = (int)(8 * 1.25f);
+    private int distanceToDeleteInUnitsSquared;
 
     //Every WaitBetweenDeletes frames load chunks will stop to remove chunks beyond DistanceToDeleteChunks
     [Range(1, 100)]
@@ -39,11 +41,15 @@ public class LoadChunks : MonoBehaviour
     void Start()
     {
         chunkPositions = ChunkLoadOrder.ChunkPositions(chunkLoadRadius);
+        distanceToDeleteInUnitsSquared = (int)(DistanceToDeleteChunks * Config.Env.ChunkSize * Config.Env.BlockSize);
+        distanceToDeleteInUnitsSquared *= distanceToDeleteInUnitsSquared;
     }
 
     // Update is called once per frame
     void Update()
     {
+        objectPos = transform.position;
+
         if (generateTerrain && terrainGen == null)
         {
             //Cant load chunks until the world is started so we can initialize TerrainGen
@@ -59,7 +65,19 @@ public class LoadChunks : MonoBehaviour
 
         if (deleteTimer == WaitBetweenDeletes)
         {
-            DeleteChunks();
+            if (Config.Toggle.UseMultiThreading)
+            {
+                Thread thread = new Thread(() =>
+                {
+                    DeleteChunks();
+                });
+                thread.Start();
+            }
+            else
+            {
+                DeleteChunks();
+            }
+
             deleteTimer = 0;
             return;
         }
@@ -120,25 +138,26 @@ public class LoadChunks : MonoBehaviour
 
     void DeleteChunks()
     {
+        int posX = objectPos.x;
+        int posZ = objectPos.z;
+
         var chunksToDelete = new List<BlockPos>();
         foreach (var chunk in world.chunks)
         {
-            Vector3 chunkPos = chunk.Key;
-            float distance = Vector3.Distance(
-                new Vector3(chunkPos.x, 0, chunkPos.z),
-                new Vector3(transform.position.x, 0, transform.position.z));
+            BlockPos chunkPos = chunk.Key;
+            int xd = posX - chunkPos.x;
+            int yd = posZ - chunkPos.z;
 
-            if (distance > DistanceToDeleteChunks * Config.Env.ChunkSize * Config.Env.BlockSize)
+            if ((xd * xd + yd * yd) > distanceToDeleteInUnitsSquared)
             {
                 chunksToDelete.Add(chunk.Key);
             }
         }
 
-        foreach (var chunk in chunksToDelete)
+        for(int i = 0; i< chunksToDelete.Count; i++)// (var chunk in chunksToDelete)
         {
-            world.DestroyChunk(chunk);
+            world.DestroyChunk(chunksToDelete[i]);
         }
-
     }
 
     bool FindChunksAndLoad()
@@ -147,7 +166,7 @@ public class LoadChunks : MonoBehaviour
         for (int i = 0; i < chunkPositions.Length; i++)
         {
             //Get the position of this gameobject to generate around
-            BlockPos playerPos = ((BlockPos)transform.position).ContainingChunkCoordinates();
+            BlockPos playerPos = objectPos.ContainingChunkCoordinates();
 
             //translate the player position and array position into chunk position
             BlockPos newChunkPos = new BlockPos(
