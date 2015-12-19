@@ -1,5 +1,5 @@
 {
-  "name": "connectedmesh",
+  "name": "connectedblock",
   "controller": "BlockConnected",
   "textures": [
     "pyramid"
@@ -16,6 +16,6 @@
     "meshWest": "custommesh",
     "meshWestOffset": "-0.5,0,0",
 
-    "connectsTo": "connectedmesh"
+    "connectsTo": "connectedblock"
   }
 }
