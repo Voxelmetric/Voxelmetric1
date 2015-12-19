@@ -92,4 +92,14 @@ public class MeshData
         colors.Add(new Color(es, es, es));
         colors.Add(new Color(sw, sw, sw));
     }
+
+    public void ClearMesh()
+    {
+        colors.Clear();
+        vertices.Clear();
+        triangles.Clear();
+        uv.Clear();
+        colTriangles.Clear();
+        colVertices.Clear();
+    }
 }

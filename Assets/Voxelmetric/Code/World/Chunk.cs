@@ -58,7 +58,8 @@ public class Chunk : MonoBehaviour
         {
             SetFlag(Flag.meshReady, false);
             RenderMesh();
-            meshData = new MeshData();
+            meshData.ClearMesh();
+
             SetFlag(Flag.busy, false);
         }
     }
