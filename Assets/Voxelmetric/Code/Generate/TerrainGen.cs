@@ -14,7 +14,7 @@ public class TerrainGen
         for (int i = 0; i < layerConfigs.AllConfigs().Length; i++)
         {
             LayerConfig config = layerConfigs.AllConfigs()[i];
-            var type = Type.GetType(config.layerType + ", " + typeof(BlockController).Assembly, false);
+            var type = Type.GetType(config.layerType + ", " + typeof(Block).Assembly, false);
             if (type == null)
                 Debug.LogError("Could not create layer " + config.layerType + " : " + config.name);
 

@@ -1,6 +1,6 @@
 {
   "name": "log",
-  "controller": "BlockCube",
+  "controller": "CubeBlock",
   "textures": [
     "log_top",
     "log_top",

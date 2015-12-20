@@ -226,14 +226,14 @@ public class PathFinder {
     {
         Block block = world.GetBlock(pos);
 
-        if (!block.controller.CanBeWalkedOn(block))
+        if (!block.canBeWalkedOn)
             return false;
 
         for (int y = 1; y < entityHeight + 1; y++)
         {
             block = world.GetBlock(pos.Add(0, y, 0));
 
-            if (!block.controller.CanBeWalkedThrough(block))
+            if (!block.canBeWalkedThrough)
             {
                 return false;
             }

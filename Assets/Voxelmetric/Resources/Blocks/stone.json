@@ -1,6 +1,6 @@
 {
   "name": "stone",
-  "controller": "BlockCube",
+  "controller": "CubeBlock",
   "textures": [
     "stone",
     "stone",

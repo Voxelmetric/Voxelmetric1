@@ -4,7 +4,7 @@ using UnityEngine;
 public class MeshBuilder {
 
     public static void CrossMeshRenderer
-        (Chunk chunk, BlockPos localPos, BlockPos globalPos, MeshData meshData, TextureCollection texture, Block block, bool useOffset = true)
+        (Chunk chunk, BlockPos localPos, BlockPos globalPos, MeshData meshData, TextureCollection texture, bool useOffset = true)
     {
         float halfBlock = (Config.Env.BlockSize / 2) + Config.Env.BlockFacePadding;
         float colliderOffest = 0.05f * Config.Env.BlockSize;

@@ -26,8 +26,8 @@ public class StructureTreeColored : GeneratedStructure
                 {
                     if (pos < chunkPos + new BlockPos(Config.Env.ChunkSize, Config.Env.ChunkSize, Config.Env.ChunkSize) && pos >= chunkPos)
                     {
-                        Block block = BlockColored.SetBlockColor(new Block("coloredblock", world), 57, 100, 49);
-                        world.SetBlock(pos.Add(x, y, z), block, updateChunk: false, setBlockModified: false);
+                        //Block block = BlockColored.SetBlockColor(new Block("coloredblock", world), 57, 100, 49);
+                        //world.SetBlock(pos.Add(x, y, z), block, updateChunk: false, setBlockModified: false);
                     }
                 }
             }
@@ -36,8 +36,8 @@ public class StructureTreeColored : GeneratedStructure
         {
             if (y < world.config.maxY)
             {
-                Block block = BlockColored.SetBlockColor(new Block("coloredblock", world), 66, 44, 17);
-                world.SetBlock(pos.Add(0, y, 0), block, updateChunk: false, setBlockModified: false);
+                //Block block = BlockColored.SetBlockColor(new Block("coloredblock", world), 66, 44, 17);
+                //world.SetBlock(pos.Add(0, y, 0), block, updateChunk: false, setBlockModified: false);
             }
         }
     }

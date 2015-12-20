@@ -1,6 +1,6 @@
 {
   "name": "leaves",
-  "controller": "BlockCube",
+  "controller": "CubeBlock",
   "textures": [
     "leaves",
     "leaves",

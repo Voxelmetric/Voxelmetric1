@@ -1,19 +1,16 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class BlockNonSolid : BlockController
+public class NonSolidBlockConfig : BlockConfig
 {
-    public BlockNonSolid() : base() { }
-
-    public override void AddBlockData(Chunk chunk, BlockPos localPos, BlockPos globalPos, MeshData meshData, Block block)
+    public override void SetUp(Hashtable config, World world)
     {
+        base.SetUp(config, world);
 
+        //These are defined in the parent class but redefine them with non solid block defaults
+        solid = _GetPropertyFromConfig(config, "solid", defaultValue: false);
+        transparent = _GetPropertyFromConfig(config, "transparent", defaultValue: true);
+        canBeWalkedOn = _GetPropertyFromConfig(config, "canBeWalkedOn", defaultValue: false);
+        canBeWalkedThrough = _GetPropertyFromConfig(config, "canBeWalkedThrough", defaultValue: true);
     }
-
-    public override string Name(Block block) { return "nonsolid"; }
-
-    public override bool IsSolid(Block block, Direction direction) { return false; }
-
-    public override bool IsTransparent(Block block) { return true; }
-
 }

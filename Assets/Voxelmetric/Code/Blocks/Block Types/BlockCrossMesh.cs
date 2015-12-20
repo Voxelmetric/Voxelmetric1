@@ -1,26 +1,12 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class BlockCrossMesh : BlockNonSolid
+public class CrossMeshBlock : Block
 {
-    public BlockCrossMesh() : base() { }
+    public TextureCollection texture { get { return ((CrossMeshBlockConfig)config).texture; } }
 
-    public TextureCollection texture;
-    public string blockName;
-
-    public override void SetUpController(BlockConfig config, World world)
+    public override void AddBlockData(Chunk chunk, BlockPos localPos, BlockPos globalPos, MeshData meshData)
     {
-        blockName = config.name;
-        texture = world.textureIndex.GetTextureCollection(config.textures[0]);
-        base.SetUpController(config, world);
+        MeshBuilder.CrossMeshRenderer(chunk, localPos, globalPos, meshData, texture);
     }
-
-    public override void AddBlockData(Chunk chunk, BlockPos localPos, BlockPos globalPos, MeshData meshData, Block block)
-    {
-        MeshBuilder.CrossMeshRenderer(chunk, localPos, globalPos, meshData, texture, block);
-    }
-    public override string Name(Block block) { return blockName; }
-
-    public override bool IsTransparent(Block block) { return true; }
-
 }

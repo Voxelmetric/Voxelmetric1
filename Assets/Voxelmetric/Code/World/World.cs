@@ -201,7 +201,7 @@ public class World : MonoBehaviour {
 
     public void SetBlock(BlockPos pos, string block, bool updateChunk = true, bool setBlockModified = true)
     {
-        SetBlock(pos, new Block(block, this), updateChunk, setBlockModified);
+        SetBlock(pos, Block.New(block, this), updateChunk, setBlockModified);
     }
 
     /// <summary>

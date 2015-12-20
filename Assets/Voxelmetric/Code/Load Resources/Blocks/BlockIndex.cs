@@ -1,59 +1,129 @@
-﻿using UnityEngine;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
-using System;
+using UnityEngine;
+using Newtonsoft.Json;
 
 public class BlockIndex {
 
+    public Dictionary<int, BlockConfig> configs = new Dictionary<int, BlockConfig>();
+    public Dictionary<string, int> names = new Dictionary<string, int>();
+    int largestIndexSoFar = 0;
+
     public BlockIndex(string blockFolder, World world){
 
-        AddBlockType(new BlockAir());
-        AddBlockType(new BlockSolid());
+        // Add the static air block type
+        AddBlockType(new BlockConfig() {
+            name = "air",
+            type = 0,
+            world = world,
+            blockClass = typeof(Block),
+            solid = false,
+            canBeWalkedOn = false,
+            transparent = true,
+            canBeWalkedThrough = true,
+        });
 
-        GetMissingDefinitions(world, blockFolder);
+        // Add the static solid block type
+        AddBlockType(new BlockConfig()
+        {
+            name = "solid",
+            type = 1,
+            world = world,
+            blockClass = typeof(Block),
+            solid = true,
+            canBeWalkedOn = true,
+            transparent = false,
+            canBeWalkedThrough = false,
+        });
+
+        // If you want to add block types with a different method
+        // this is the place to insert them
+
+        //Add all the block definitions defined in the config files
+        GetBlocksFromConfigs(world, blockFolder);
     }
-
-    public List<BlockController> controllers = new List<BlockController>();
-    public Dictionary<string, int> names = new Dictionary<string, int>();
 
     /// <summary>
     /// Adds a block type to the index and adds it's name to a dictionary for quick lookup
     /// </summary>
     /// <param name="controller">The controller object for this block</param>
     /// <returns>The index of the block</returns>
-    public int AddBlockType(BlockController controller)
+    public void AddBlockType(BlockConfig config)
     {
-        int index = controllers.Count;
-
-        if (index == ushort.MaxValue)
+        // Use the type defined in the config if there is one,
+        // otherwise add one to the largest index so far.
+        if (config.type == -1)
         {
-            Debug.LogError("Too many block types!");
-            return -1;
+            config.type = largestIndexSoFar + 1;
         }
 
-        if (names.ContainsKey(controller.Name(0)))
+        if (config.type == ushort.MaxValue)
         {
-            Debug.LogError("Two blocks with the name " + controller.Name(0) + " are defined");
-            return -1;
-        } 
+            Debug.LogError("Too many block types!");
+        }
 
-        controllers.Add(controller);
+        if (names.ContainsKey(config.name))
+        {
+            Debug.LogError("Two blocks with the name " + config.name + " are defined");
+        }
 
-        names.Add(controller.Name(0).ToLower().Replace(" ", ""), index);
-        return index;
+        configs.Add(config.type, config);
+        names.Add(config.name, config.type);
+
+        if (config.type > largestIndexSoFar)
+        {
+            largestIndexSoFar = config.type;
+        }
     }
 
     //World is only needed for setting up the textures
-    void GetMissingDefinitions(World world, string blockFolder) {
-        ConfigLoader<BlockConfig> config = new ConfigLoader<BlockConfig>(new string[] { blockFolder});
-        foreach (var blockConfig in config.AllConfigs())
-        {
-            var type = Type.GetType(blockConfig.controller + ", " + typeof(BlockController).Assembly, false);
-            if (type == null)
-                Debug.LogError("Could not create controller " + blockConfig.controller);
+    void GetBlocksFromConfigs(World world, string blockFolder) {
 
-            BlockController controller = (BlockController)Activator.CreateInstance(type);
-            controller.SetUpController(blockConfig, world);
-            AddBlockType(controller);
+        var configFiles = UnityEngine.Resources.LoadAll<TextAsset>(blockFolder);
+
+        foreach (var configFile in configFiles)
+        {
+            Hashtable configHash = JsonConvert.DeserializeObject<Hashtable>(configFile.text);
+
+            Type configType = Type.GetType(configHash["configClass"] + ", " + typeof(BlockConfig).Assembly, false);
+
+            if (configType == null)
+                Debug.LogError("Could not create config for " + configHash["configClass"]);
+
+            BlockConfig config = (BlockConfig)Activator.CreateInstance(configType);
+
+            config.SetUp(configHash, world);
+
+            AddBlockType(config);
+        }
+    }
+
+    public int GetType(string name)
+    {
+        int type;
+        if (names.TryGetValue(name, out type))
+        {
+            return type;
+        }
+        else
+        {
+            Debug.LogWarning("Block not found: " + name);
+            return 0;
+        }
+    }
+
+    public BlockConfig GetConfig(int index)
+    {
+        BlockConfig config;
+        if (configs.TryGetValue(index, out config))
+        {
+            return config;
+        }
+        else
+        {
+            Debug.LogWarning("Config not found: " + index);
+            return null;
         }
     }
 }

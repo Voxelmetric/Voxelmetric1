@@ -68,7 +68,7 @@ public class VoxelmetricExample : MonoBehaviour
             {
 
                 bool adjacent = true;
-                if (new Block(blockToPlace, chunk.world).type == Block.Air.type)
+                if (Block.New(blockToPlace, chunk.world).type == Block.Air.type)
                 {
                     adjacent = false;
                 }
@@ -77,7 +77,7 @@ public class VoxelmetricExample : MonoBehaviour
                 {
                     // Creates a game object block at the click pos:
                     // Voxelmetric.CreateGameObjectBlock(Voxelmetric.GetBlockPos(hit, adjacent), hit.collider.gameObject.GetComponent<Chunk>().world, hit.point, new Quaternion());
-                    Voxelmetric.SetBlock(hit, new Block(blockToPlace, chunk.world), adjacent);
+                    Voxelmetric.SetBlock(hit, Block.New(blockToPlace, chunk.world), adjacent);
                 }
             }
 

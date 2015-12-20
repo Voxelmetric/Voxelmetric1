@@ -21,7 +21,7 @@ public static class Voxelmetric
             chunk.world = original.world;
         }
 
-        original.controller.OnCreate(chunk, blockPos - blockPos.ContainingChunkCoordinates(), original);
+        original.OnCreate(chunk, blockPos - blockPos.ContainingChunkCoordinates(), blockPos);
 
         return GOFromBlock(original, blockPos, position, rotation, chunk);
     }
@@ -40,7 +40,7 @@ public static class Voxelmetric
             chunk.pos = blockPos.ContainingChunkCoordinates();
         }
 
-        original.controller.OnCreate(chunk, blockPos - blockPos.ContainingChunkCoordinates(), original);
+        original.OnCreate(chunk, blockPos - blockPos.ContainingChunkCoordinates(), blockPos);
 
         return GOFromBlock(original, blockPos, position, rotation, chunk);
     }
@@ -52,7 +52,7 @@ public static class Voxelmetric
 
         MeshData meshData = new MeshData();
 
-        original.controller.AddBlockData(chunk, blockPos, blockPos, meshData, original);
+        original.AddBlockData(chunk, blockPos, blockPos, meshData);
         for (int i = 0; i < meshData.vertices.Count; i++)
         {
             meshData.vertices[i] -= (Vector3)blockPos;

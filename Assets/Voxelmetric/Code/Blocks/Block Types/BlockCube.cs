@@ -1,43 +1,19 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class BlockCube : BlockSolid {
+public class CubeBlock : Block {
 
-    public string blockName;
-    public TextureCollection[] textures;
+    public TextureCollection[] textures { get { return ((CubeBlockConfig)config).textures; } }
 
-    public override void SetUpController(BlockConfig config, World world)
-    {
-        blockName = config.name;
-        textures = new TextureCollection[6];
-        for (int i = 0; i < 6; i++)
-        {
-            textures[i] = world.textureIndex.GetTextureCollection(config.textures[i]);
-        }
-        isSolid = config.isSolid;
-        solidTowardsSameType = config.solidTowardsSameType;
-        base.SetUpController(config, world);
-    }
-
-    public override void BuildFace(Chunk chunk, BlockPos localPos, BlockPos globalPos, MeshData meshData, Direction direction, Block block)
+    public virtual void BuildFace(Chunk chunk, BlockPos localPos, BlockPos globalPos, MeshData meshData, Direction direction)
     {
         BlockBuilder.BuildRenderer(chunk, localPos, globalPos, meshData, direction);
         BlockBuilder.BuildTexture(chunk, localPos, globalPos, meshData, direction, textures);
         BlockBuilder.BuildColors(chunk, localPos, globalPos, meshData, direction);
-        if (block.world.config.useCollisionMesh)
+        if (world.config.useCollisionMesh)
         {
             BlockBuilder.BuildCollider(chunk, localPos, globalPos, meshData, direction);
         }
-    }
-
-    public override string Name(Block block)
-    {
-        return blockName;
-    }
-
-    public override bool IsSolid(Block block, Direction direction)
-    {
-        return isSolid;
     }
 
 }

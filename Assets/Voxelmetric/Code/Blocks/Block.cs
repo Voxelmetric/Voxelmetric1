@@ -3,99 +3,66 @@ using System.Runtime.InteropServices;
 using UnityEngine;
 
 [Serializable]
-[StructLayout(LayoutKind.Sequential, Pack = 1)]
-public struct Block
+public class Block
 {
-    public readonly ushort type;
-
-    public BlockData data;
-
+    public Block() { }
     public Block(int type)
     {
         this.type = (ushort)type;
-        data = new BlockData();
     }
 
-    public Block(string name, World world)
+    public ushort type;
+
+    public virtual string       name                { get { return config.name;                     } }
+    public virtual string       displayName         { get { return name;                            } }
+    public virtual World        world               { get { return Voxelmetric.resources.worlds[0]; } }
+    public virtual BlockConfig  config              { get { return world.blockIndex.configs[type];  } }
+    public virtual bool         solid               { get { return true;                            } }
+    public virtual bool         transparent         { get { return false;                           } }
+    public virtual bool         canBeWalkedOn       { get { return true;                            } }
+    public virtual bool         canBeWalkedThrough  { get { return false;                           } }
+
+    public virtual bool IsSolid(Direction direction)
     {
-        int type;
-        if (world.blockIndex.names.TryGetValue(name, out type))
-        {
-            this.type = (ushort)type;
-            data = new BlockData();
-        }
-        else
-        {
-            this.type = 0;
-            data = new BlockData();
-            Debug.LogWarning("Block not found: " + name);
-            Debug.LogWarning("Searched " + world.worldName + " with " + world.blockIndex.controllers.Count + " blocks");
-        }
+        return true;
     }
 
-    public BlockController controller
+    public virtual void BuildBlock(Chunk chunk, BlockPos localPos, BlockPos globalPos, MeshData meshData, Block block)
     {
-        get {
-            if (type >= world.blockIndex.controllers.Count)
-            {
-                Debug.LogError("Block " + type + " is out of range");
-            }
-            return world.blockIndex.controllers[type];
-        }
+        PreRender(chunk, localPos, globalPos);
+        AddBlockData(chunk, localPos, globalPos, meshData);
+        PostRender(chunk, localPos, globalPos);
     }
 
-    public World world
+    public virtual void AddBlockData    (Chunk chunk, BlockPos localPos, BlockPos globalPos, MeshData meshData) { }
+    public virtual void OnCreate        (Chunk chunk, BlockPos localPos, BlockPos globalPos) { }
+    public virtual void PreRender       (Chunk chunk, BlockPos localPos, BlockPos globalPos) { }
+    public virtual void PostRender      (Chunk chunk, BlockPos localPos, BlockPos globalPos) { }
+    public virtual void OnDestroy       (Chunk chunk, BlockPos localPos, BlockPos globalPos) { }
+    public virtual void RandomUpdate    (Chunk chunk, BlockPos localPos, BlockPos globalPos) { }
+    public virtual void ScheduledUpdate (Chunk chunk, BlockPos localPos, BlockPos globalPos) { }
+
+    public void SetWorld(int index)
     {
-        get
-        {
-            return Voxelmetric.resources.worlds[data.World()];
-        }
+
     }
 
-    public bool IsSolid(Direction direction)
+    public static Block New(string name, World world)
     {
-        return controller.IsSolid(this, direction);
+        return New(world.blockIndex.GetType(name), world);
     }
 
-    public static implicit operator BlockController(Block block)
+    public static Block New(int type, World world)
     {
-        return block.world.blockIndex.controllers[block.type];
+        return (Block)Activator.CreateInstance(world.blockIndex.GetConfig(type).blockClass);
     }
 
     public override string ToString()
     {
-        return world.blockIndex.controllers[type].Name(this);
+        return name;
     }
 
-    public static implicit operator ushort(Block block)
-    {
-        return block.type;
-    }
-
-    public static implicit operator Block(int b)
-    {
-        return new Block((ushort)b);
-    }
-
-    public static implicit operator int (Block block)
-    {
-        return block.type;
-    }
-
-    public static implicit operator Block(ushort b)
-    {
-        return new Block(b);
-    }
-
-    //Reserved block types
-    public static Block Air
-    {
-        get { return new Block(0); }
-    }
-
-    public static Block Solid
-    {
-        get { return new Block(1); }
-    }
-
+    // Static block types: These are always added as 0 and 1 in the block index
+    public static Block Air { get { return new Block(0); } }
+    public static Block Solid { get { return new Block(1); } }
 }

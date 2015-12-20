@@ -109,7 +109,7 @@ public class Chunk : MonoBehaviour
             randomPos.y += Voxelmetric.resources.random.Next(0, 16);
             randomPos.z += Voxelmetric.resources.random.Next(0, 16);
 
-            GetBlock(randomPos).controller.RandomUpdate(this, randomPos, GetBlock(randomPos));
+            GetBlock(randomPos).RandomUpdate(this, randomPos, randomPos + pos);
 
             //Process Scheduled Updates
             for (int i = 0; i < scheduledUpdates.Count; i++)
@@ -118,7 +118,7 @@ public class Chunk : MonoBehaviour
                 if (scheduledUpdates[i].time <= 0)
                 {
                     Block block = GetBlock(scheduledUpdates[i].pos);
-                    block.controller.ScheduledUpdate(this, scheduledUpdates[i].pos, block);
+                    block.ScheduledUpdate(this, scheduledUpdates[i].pos, scheduledUpdates[i].pos + pos);
                     scheduledUpdates.RemoveAt(i);
                     i--;
                 }
@@ -253,7 +253,7 @@ public class Chunk : MonoBehaviour
 
     public virtual void SetBlock(BlockPos blockPos, String block, bool updateChunk = true, bool setBlockModified = true)
     {
-        SetBlock(blockPos, new Block(block, world), updateChunk, setBlockModified);
+        SetBlock(blockPos, Block.New(block, world), updateChunk, setBlockModified);
     }
 
     /// <summary>
@@ -269,8 +269,8 @@ public class Chunk : MonoBehaviour
             //Only call create and destroy if this is a different block type, otherwise it's just updating the properties of an existing block
             if (FetchBlockFromArray(blockPos).type != block.type)
             {
-                FetchBlockFromArray(blockPos).controller.OnDestroy(this, blockPos, FetchBlockFromArray(blockPos));
-                block = block.controller.OnCreate(this, blockPos, block);
+                FetchBlockFromArray(blockPos).OnDestroy(this, blockPos, blockPos + pos);
+                block.OnCreate(this, blockPos, blockPos + pos);
             }
 
             SetBlockInArray(blockPos, block);
@@ -299,7 +299,7 @@ public class Chunk : MonoBehaviour
     protected virtual void SetBlockInArray(BlockPos blockPos, Block block)
     {
         noUpdate = false;
-        block.data.SetWorld(world.worldIndex);
+        block.SetWorld(world.worldIndex);
         blocks[blockPos.x - pos.x, blockPos.y - pos.y, blockPos.z - pos.z] = block;
     }
 
@@ -314,7 +314,7 @@ public class Chunk : MonoBehaviour
             {
                 for (int z = 0; z < Config.Env.ChunkSize; z++)
                 {
-                    blocks[x, y, z].controller.BuildBlock(this, new BlockPos(x, y, z), new BlockPos(x, y, z) + pos, meshData, blocks[x, y, z]);
+                    blocks[x, y, z].BuildBlock(this, new BlockPos(x, y, z), new BlockPos(x, y, z) + pos, meshData, blocks[x, y, z]);
                 }
             }
         }

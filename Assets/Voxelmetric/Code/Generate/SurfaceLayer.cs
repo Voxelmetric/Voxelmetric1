@@ -11,13 +11,13 @@ public class SurfaceLayer : TerrainLayer
 
     protected override void SetUp(LayerConfig config)
     {
-        blockToPlace = new Block(properties["blockName"], world);
+        blockToPlace = Block.New(properties["blockName"], world);
 
-        if (properties.ContainsKey("blockColors"))
-        {
-            string[] colors = properties["blockColors"].Split(',');
-            blockToPlace = BlockColored.SetBlockColor(blockToPlace, byte.Parse(colors[0]), byte.Parse(colors[1]), byte.Parse(colors[2]));
-        }
+        //if (properties.ContainsKey("blockColors"))
+        //{
+        //    string[] colors = properties["blockColors"].Split(',');
+        //    blockToPlace = BlockColored.SetBlockColor(blockToPlace, byte.Parse(colors[0]), byte.Parse(colors[1]), byte.Parse(colors[2]));
+        //}
     }
 
     public override int GenerateLayer(Chunk[] chunks, int x, int z, int heightSoFar, float strength, bool justGetHeight = false)

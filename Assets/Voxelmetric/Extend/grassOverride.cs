@@ -5,10 +5,10 @@ using System.Collections;
 // This class inherits from BlockCube so that it renders just like any other
 // cube block but it replaces the RandomUpdate function with its own
 // Use this class for a block by setting the config's controller to GrassOverride
-public class GrassOverride : BlockCube
+public class GrassBlock : CubeBlock
 {
     //On random update spread grass to any nearby dirt blocks on the surface
-    public override void RandomUpdate(Chunk chunk, BlockPos pos, Block block)
+    public override void RandomUpdate(Chunk chunk, BlockPos localPos, BlockPos globalPos)
     {
         for (int x = -1; x <= 1; x++)
         {
@@ -16,10 +16,10 @@ public class GrassOverride : BlockCube
             {
                 for (int z = -1; z <= 1; z++)
                 {
-                    if (chunk.GetBlock(pos.Add(x, y, z)) == new Block("dirt", chunk.world)
-                        && chunk.GetBlock(pos.Add(x, y + 1, z)) == new Block("air", chunk.world))
+                    if (chunk.GetBlock(globalPos.Add(x, y, z)).type == chunk.world.blockIndex.GetType("dirt")
+                        && chunk.GetBlock(globalPos.Add(x, y + 1, z)).type == chunk.world.blockIndex.GetType("air"))
                     {
-                        chunk.SetBlock(pos.Add(x, y, z), "grass", false);
+                        chunk.SetBlock(globalPos.Add(x, y, z), "grass", false);
                         chunk.SetFlag(Chunk.Flag.updateSoon, true);
                     }
                 }
