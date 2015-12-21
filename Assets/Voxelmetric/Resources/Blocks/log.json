@@ -1,6 +1,7 @@
 {
   "name": "log",
-  "controller": "CubeBlock",
+  "blockClass": "CubeBlock",
+  "configClass": "CubeBlockConfig",
   "textures": [
     "log_top",
     "log_top",
@@ -9,5 +10,4 @@
     "log_side",
     "log_side"
   ],
-  "isSolid": true,
 }

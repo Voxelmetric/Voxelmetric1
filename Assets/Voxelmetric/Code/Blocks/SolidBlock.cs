@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class BlockSolid : Block
+public class SolidBlock : Block
 {
     public virtual bool solidTowardsSameType { get { return ((SolidBlockConfig)config).solidTowardsSameType; } }
 
@@ -10,12 +10,12 @@ public class BlockSolid : Block
         for (int d = 0; d < 6; d++)
         {
             Direction dir = DirectionUtils.Get(d);
-            if (!chunk.LocalGetBlock(localPos.Add(dir)).IsSolid(DirectionUtils.Opposite(dir)))
+            Block adjacentBlock = chunk.LocalGetBlock(localPos.Add(dir));
+            if (!adjacentBlock.IsSolid(DirectionUtils.Opposite(dir)))
             {
-                if ((solid || !solidTowardsSameType || chunk.LocalGetBlock(localPos.Add(dir)).type != type))
+                if (solid || !solidTowardsSameType || adjacentBlock.type != type)
                 {
                     BuildFace(chunk, localPos, globalPos, meshData, dir);
-                    break;
                 }
             }
         }

@@ -1,9 +1,0 @@
-{
-  "name": "custommesh",
-  "controller": "CustomMesh",
-  "textures": [
-    "pyramid"
-  ],
-  "meshFileName": "CustomMesh",
-  "isSolid": false,
-}

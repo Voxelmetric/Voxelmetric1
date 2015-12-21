@@ -12,10 +12,11 @@ using System.Collections;
 /// </summary>
 public class BlockConfig
 {
-    public int type = -1;
+    public int type;
+    public World world;
+
     public string name;
     public Type blockClass;
-    public World world;
     public bool solid;
     public bool transparent;
     public bool canBeWalkedOn;
@@ -41,13 +42,6 @@ public class BlockConfig
         canBeWalkedOn = _GetPropertyFromConfig(config, "canBeWalkedOn", defaultValue: true);
         canBeWalkedThrough = _GetPropertyFromConfig(config, "canBeWalkedThrough", defaultValue: false);
     }
-
-    //public string[] textures;
-
-    //public string meshFileName;
-    //public float meshXOffset;
-    //public float meshYOffset;
-    //public float meshZOffset;
 
     public override string ToString()
     {

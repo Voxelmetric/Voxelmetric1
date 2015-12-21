@@ -1,6 +1,7 @@
 {
   "name": "grass",
-  "controller": "GrassBlock",
+  "blockClass": "GrassBlock",
+  "configClass": "CubeBlockConfig",
   "textures": [
     "grass_top",
     "dirt",
@@ -9,5 +10,4 @@
     "grass_side",
     "grass_side"
   ],
-  "isSolid": true,
 }

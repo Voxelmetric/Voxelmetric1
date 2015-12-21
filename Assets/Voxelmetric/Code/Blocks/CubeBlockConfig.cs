@@ -1,4 +1,5 @@
-﻿using System;
+﻿using UnityEngine;
+using System;
 using System.Collections;
 using Newtonsoft.Json;
 
@@ -11,11 +12,11 @@ public class CubeBlockConfig: SolidBlockConfig
         base.SetUp(config, world);
 
         textures = new TextureCollection[6];
-        string[] textureNames = (string[])JsonConvert.DeserializeObject((string)config["textures"]);
+        Newtonsoft.Json.Linq.JArray textureNames = (Newtonsoft.Json.Linq.JArray)JsonConvert.DeserializeObject(config["textures"].ToString());
 
         for (int i = 0; i < 6; i++)
         {
-            textures[i] = world.textureIndex.GetTextureCollection(textureNames[i]);
+            textures[i] = world.textureIndex.GetTextureCollection(textureNames[i].ToObject<string>());
         }
     }
 }

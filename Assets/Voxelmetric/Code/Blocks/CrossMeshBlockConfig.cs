@@ -9,5 +9,6 @@ public class CrossMeshBlockConfig: BlockConfig
     {
         base.SetUp(config, world);
         texture = world.textureIndex.GetTextureCollection(_GetPropertyFromConfig(config, "texture", ""));
+        solid = _GetPropertyFromConfig(config, "solid", false);
     }
 }

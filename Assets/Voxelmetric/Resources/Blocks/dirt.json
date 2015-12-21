@@ -1,6 +1,7 @@
 {
   "name": "dirt",
-  "controller": "CubeBlock",
+  "blockClass": "CubeBlock",
+  "configClass": "CubeBlockConfig",
   "textures": [
     "dirt",
     "dirt",
@@ -9,5 +10,4 @@
     "dirt",
     "dirt"
   ],
-  "isSolid": true,
 }

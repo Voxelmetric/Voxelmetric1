@@ -1,6 +1,7 @@
 {
   "name": "stone",
-  "controller": "CubeBlock",
+  "blockClass": "CubeBlock",
+  "configClass": "CubeBlockConfig",
   "textures": [
     "stone",
     "stone",
@@ -9,5 +10,4 @@
     "stone",
     "stone"
   ],
-  "isSolid": true,
 }

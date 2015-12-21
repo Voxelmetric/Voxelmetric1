@@ -1,6 +1,7 @@
 {
   "name": "leaves",
-  "controller": "CubeBlock",
+  "blockClass": "CubeBlock",
+  "configClass": "CubeBlockConfig",
   "textures": [
     "leaves",
     "leaves",
@@ -9,5 +10,5 @@
     "leaves",
     "leaves"
   ],
-  "isSolid": false
+  "solid": false,
 }

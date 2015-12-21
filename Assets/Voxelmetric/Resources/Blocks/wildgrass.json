@@ -1,8 +1,6 @@
 {
   "name": "wildgrass",
-  "controller": "BlockCrossMesh",
-  "textures": [
-    "wild_grass"
-  ],
-  "isSolid": false
+  "blockClass": "CrossMeshBlock",
+  "configClass": "CrossMeshBlockConfig",
+  "texture": "wild_grass"
 }

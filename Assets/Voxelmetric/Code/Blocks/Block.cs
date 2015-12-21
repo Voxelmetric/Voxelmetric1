@@ -17,17 +17,16 @@ public class Block
     public virtual string       displayName         { get { return name;                            } }
     public virtual World        world               { get { return Voxelmetric.resources.worlds[0]; } }
     public virtual BlockConfig  config              { get { return world.blockIndex.configs[type];  } }
-    public virtual bool         solid               { get { return true;                            } }
-    public virtual bool         transparent         { get { return false;                           } }
-    public virtual bool         canBeWalkedOn       { get { return true;                            } }
-    public virtual bool         canBeWalkedThrough  { get { return false;                           } }
+    public virtual bool         solid               { get { return config.solid;                    } }
+    public virtual bool         canBeWalkedOn       { get { return config.canBeWalkedOn;            } }
+    public virtual bool         canBeWalkedThrough  { get { return config.canBeWalkedThrough;       } }
 
     public virtual bool IsSolid(Direction direction)
     {
-        return true;
+        return solid;
     }
 
-    public virtual void BuildBlock(Chunk chunk, BlockPos localPos, BlockPos globalPos, MeshData meshData, Block block)
+    public virtual void BuildBlock(Chunk chunk, BlockPos localPos, BlockPos globalPos, MeshData meshData)
     {
         PreRender(chunk, localPos, globalPos);
         AddBlockData(chunk, localPos, globalPos, meshData);
@@ -54,7 +53,9 @@ public class Block
 
     public static Block New(int type, World world)
     {
-        return (Block)Activator.CreateInstance(world.blockIndex.GetConfig(type).blockClass);
+        Block block = (Block)Activator.CreateInstance(world.blockIndex.GetConfig(type).blockClass);
+        block.type = (ushort)type;
+        return block;
     }
 
     public override string ToString()

@@ -117,7 +117,6 @@ public class LoadChunks : MonoBehaviour
             {
                 break;
             }
-
             BlockPos pos = chunksToGenerate[0];
             Chunk newChunk = world.CreateChunkAndNeighbors(pos);
 

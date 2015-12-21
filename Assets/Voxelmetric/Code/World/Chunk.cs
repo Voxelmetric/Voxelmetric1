@@ -18,11 +18,6 @@ public class Chunk : MonoBehaviour
     public enum Flag { busy, meshReady, loadStarted, generationInProgress, contentsGenerated, loadComplete, chunkModified, updateSoon, updateNow}
     public Hashtable flags = new Hashtable();
 
-    /// <summary>
-    /// Set to true for chunks that don't have anything in them so they don't run regular updates
-    /// </summary>
-    public bool noUpdate = false;
-
     protected MeshFilter filter;
     protected MeshCollider coll;
 
@@ -38,7 +33,6 @@ public class Chunk : MonoBehaviour
     {
         filter = gameObject.GetComponent<MeshFilter>();
         coll = gameObject.GetComponent<MeshCollider>();
-        noUpdate = false;
 
         gameObject.GetComponent<Renderer>().material.mainTexture = world.textureIndex.atlas;
     }
@@ -189,13 +183,13 @@ public class Chunk : MonoBehaviour
     /// Gets and returns a block from a position within the chunk 
     /// or fetches it from the world
     /// </summary>
-    /// <param name="blockPos">A local block position</param>
+    /// <param name="blockPos">A global block position</param>
     /// <returns>The block at the position</returns>
     public virtual Block GetBlock(BlockPos blockPos)
     {
         if (InRange(blockPos))
         {
-            return FetchBlockFromArray(blockPos);
+            return LocalGetBlock(blockPos - pos);
         }
         else
         {
@@ -209,19 +203,27 @@ public class Chunk : MonoBehaviour
     /// use GetBlock. If the position is lesser or greater than the size of the chunk it will get the value
     /// from the chunk containing the block pos
     /// </summary>
-    /// <param name="blockPos"> A block pos relative to the chunk's position. MUST be a local position or the wrong block will be returned</param>
+    /// <param name="localBlockPos"> A block pos relative to the chunk's position. MUST be a local position or the wrong block will be returned</param>
     /// <returns>the block at the relative position</returns>
-    public virtual Block LocalGetBlock(BlockPos blockPos)
+    public virtual Block LocalGetBlock(BlockPos localBlockPos)
     {
-        if ((blockPos.x < Config.Env.ChunkSize && blockPos.x >= 0) &&
-            (blockPos.y < Config.Env.ChunkSize && blockPos.y >= 0) &&
-            (blockPos.z < Config.Env.ChunkSize && blockPos.z >= 0))
+        if ((localBlockPos.x < Config.Env.ChunkSize && localBlockPos.x >= 0) &&
+            (localBlockPos.y < Config.Env.ChunkSize && localBlockPos.y >= 0) &&
+            (localBlockPos.z < Config.Env.ChunkSize && localBlockPos.z >= 0))
         {
-            return blocks[blockPos.x, blockPos.y, blockPos.z];
+            Block block = blocks[localBlockPos.x, localBlockPos.y, localBlockPos.z];
+            if (block == null)
+            {
+                return Block.Air;
+            }
+            else
+            {
+                return block;
+            }
         }
         else
         {
-            return world.GetBlock(blockPos + pos);
+            return world.GetBlock(localBlockPos + pos);
         }
     }
 
@@ -267,13 +269,13 @@ public class Chunk : MonoBehaviour
         if (InRange(blockPos))
         {
             //Only call create and destroy if this is a different block type, otherwise it's just updating the properties of an existing block
-            if (FetchBlockFromArray(blockPos).type != block.type)
+            if (GetBlock(blockPos).type != block.type)
             {
-                FetchBlockFromArray(blockPos).OnDestroy(this, blockPos, blockPos + pos);
+                GetBlock(blockPos).OnDestroy(this, blockPos, blockPos + pos);
                 block.OnCreate(this, blockPos, blockPos + pos);
             }
 
-            SetBlockInArray(blockPos, block);
+            blocks[blockPos.x - pos.x, blockPos.y - pos.y, blockPos.z - pos.z] = block;
 
             if (setBlockModified)
                 SetBlockModified(blockPos);
@@ -289,21 +291,6 @@ public class Chunk : MonoBehaviour
     }
 
     /// <summary>
-    /// Quick way to return the block at a position in the array
-    /// </summary>
-    protected virtual Block FetchBlockFromArray(BlockPos blockPos)
-    {
-        return blocks[blockPos.x - pos.x, blockPos.y - pos.y, blockPos.z - pos.z];
-    }
-
-    protected virtual void SetBlockInArray(BlockPos blockPos, Block block)
-    {
-        noUpdate = false;
-        block.SetWorld(world.worldIndex);
-        blocks[blockPos.x - pos.x, blockPos.y - pos.y, blockPos.z - pos.z] = block;
-    }
-
-    /// <summary>
     /// Updates the chunk based on its contents
     /// </summary>
     protected virtual void BuildMeshData()
@@ -314,18 +301,13 @@ public class Chunk : MonoBehaviour
             {
                 for (int z = 0; z < Config.Env.ChunkSize; z++)
                 {
-                    blocks[x, y, z].BuildBlock(this, new BlockPos(x, y, z), new BlockPos(x, y, z) + pos, meshData, blocks[x, y, z]);
+                    BlockPos localBlockPos = new BlockPos(x, y, z);
+                    if (LocalGetBlock(localBlockPos).type != 0)
+                    {
+                        LocalGetBlock(localBlockPos).BuildBlock(this, localBlockPos, localBlockPos + pos, meshData);
+                    }
                 }
             }
-        }
-
-        if (meshData.triangles.Count < 0)
-        {
-            noUpdate = true;
-        }
-        else
-        {
-            noUpdate = false;
         }
     }
 
@@ -359,7 +341,6 @@ public class Chunk : MonoBehaviour
     public void ReturnChunkToPool()
     {
         flags.Clear();
-        noUpdate = false;
 
         if (filter.mesh)
             filter.mesh.Clear();

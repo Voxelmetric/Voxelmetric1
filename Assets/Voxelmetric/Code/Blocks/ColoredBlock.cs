@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class BlockColored : BlockSolid {
+public class BlockColored : SolidBlock {
 
     //public string blockName;
     //public TextureCollection textureCollection;
