@@ -1,8 +1,6 @@
 {
   "name": "coloredblock",
-  "controller": "BlockColored",
-  "textures": [
-    "noise"
-  ],
-  "isSolid": true,
+  "blockClass": "ColoredBlock",
+  "configClass": "ColoredBlockConfig",
+  "texture": "noise",
 }

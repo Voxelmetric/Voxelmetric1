@@ -62,7 +62,7 @@ public class VoxelmetricExample : MonoBehaviour
                 return;
             }
 
-            selectedBlockText.text = Voxelmetric.GetBlock(hit).ToString();
+            selectedBlockText.text = Voxelmetric.GetBlock(hit).displayName;
 
             if (Input.GetMouseButtonDown(0))
             {

@@ -13,11 +13,11 @@ public class SurfaceLayer : TerrainLayer
     {
         blockToPlace = Block.New(properties["blockName"], world);
 
-        //if (properties.ContainsKey("blockColors"))
-        //{
-        //    string[] colors = properties["blockColors"].Split(',');
-        //    blockToPlace = BlockColored.SetBlockColor(blockToPlace, byte.Parse(colors[0]), byte.Parse(colors[1]), byte.Parse(colors[2]));
-        //}
+        if (properties.ContainsKey("blockColors"))
+        {
+            string[] colors = properties["blockColors"].Split(',');
+            ((ColoredBlock)blockToPlace).color = new Color(byte.Parse(colors[0]) / 255f, byte.Parse(colors[1]) / 255f, byte.Parse(colors[2]) / 255f);
+        }
     }
 
     public override int GenerateLayer(Chunk[] chunks, int x, int z, int heightSoFar, float strength, bool justGetHeight = false)
