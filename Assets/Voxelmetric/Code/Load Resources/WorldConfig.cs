@@ -20,6 +20,13 @@ public struct WorldConfig
     public bool addAOToMesh;
     public float ambientOcclusionStrength;
 
+    public Type worldBlocksManager;
+    public Type worldChunksHandler;
+    public Type chunkBlocksHandler;
+    public Type chunkRenerer;
+    public Type chunkLogic;
+
+
     // These variables relate to how the textures are loaded and how the atlas is created.
     // There is an issue in that texture indexes are created with these variables but if
     // you create a new world using the same texture folder the new world will use the existing

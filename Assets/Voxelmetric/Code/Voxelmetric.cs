@@ -128,7 +128,7 @@ public static class Voxelmetric
             return false;
 
         BlockPos pos = GetBlockPos(hit, adjacent);
-        chunk.world.SetBlock(pos, block);
+        chunk.world.blocks.Set(pos, block);
 
         //if (Config.Toggle.BlockLighting)
         //{
@@ -140,11 +140,11 @@ public static class Voxelmetric
 
     public static bool SetBlock(BlockPos pos, Block block, World world)
     {
-        Chunk chunk = world.GetChunk(pos);
+        Chunk chunk = world.chunks.Get(pos);
         if (chunk == null)
             return false;
 
-        chunk.world.SetBlock(pos, block);
+        chunk.world.blocks.Set(pos, block);
 
         //if (Config.Toggle.BlockLighting)
         //{
@@ -167,7 +167,7 @@ public static class Voxelmetric
 
     public static Block GetBlock(BlockPos pos, World world)
     {
-        Block block = world.GetBlock(pos);
+        Block block = world.blocks.Get(pos);
 
         return block;
     }
@@ -183,9 +183,9 @@ public static class Voxelmetric
     {
         //Create a saveprogress object with positions of all the chunks in the world
         //Then save each chunk and update the saveprogress's percentage for each save
-        SaveProgress saveProgress = new SaveProgress(world.chunks.Keys);
+        SaveProgress saveProgress = new SaveProgress(world.chunks.posCollection);
         List<Chunk> chunksToSave = new List<Chunk>();
-        chunksToSave.AddRange(world.chunks.Values);
+        chunksToSave.AddRange(world.chunks.chunkCollection);
 
         if (Config.Toggle.UseMultiThreading)
         {
@@ -195,7 +195,7 @@ public static class Voxelmetric
                foreach (var chunk in chunksToSave)
                {
 
-                   while (!chunk.GetFlag(Chunk.Flag.contentsGenerated) || chunk.GetFlag(Chunk.Flag.busy))
+                   while (!chunk.logic.GetFlag(Flag.contentsGenerated) || chunk.logic.GetFlag(Flag.busy))
                    {
                        Thread.Sleep(0);
                    }

@@ -84,7 +84,7 @@ public class TerrainLayer : IComparable
                     if (chunks[i].pos.y + y < endPlaceHeight)
                     {
                         //chunks[i].world.SetBlock(new BlockPos(x, y + chunks[i].pos.y, z), blockToPlace, false, false);
-                        chunks[i].LocalSetBlock(new BlockPos(x - chunks[i].pos.x, y, z - chunks[i].pos.z), blockToPlace);
+                        chunks[i].blocks.LocalSet(new BlockPos(x - chunks[i].pos.x, y, z - chunks[i].pos.z), blockToPlace);
                     }
                     else
                     {

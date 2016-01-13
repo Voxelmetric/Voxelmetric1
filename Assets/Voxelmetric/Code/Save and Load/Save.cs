@@ -23,11 +23,11 @@ public class Save
             //blocks already in the save fie if there is one. Then add 
             Dictionary<BlockPos, Block> blocksDictionary = AddSavedBlocks(chunk);
 
-            foreach(var pos in chunk.modifiedBlocks) {
+            foreach(var pos in chunk.blocks.modifiedBlocks) {
                 //remove any existing blocks in the dictionary as they're
                 //from the existing save and are overwritten
                 blocksDictionary.Remove(pos);
-                blocksDictionary.Add(pos, chunk.GetBlock(pos));
+                blocksDictionary.Add(pos, chunk.blocks.Get(pos));
                 changed = true;
             }
 

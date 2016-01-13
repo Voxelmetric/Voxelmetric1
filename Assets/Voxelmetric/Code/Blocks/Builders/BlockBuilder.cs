@@ -31,87 +31,87 @@ public static class BlockBuilder
         switch (direction)
         {
             case Direction.up:
-                nSolid = chunk.LocalGetBlock(localPos.Add(0, 1, 1)).IsSolid(Direction.south);
-                eSolid = chunk.LocalGetBlock(localPos.Add(1, 1, 0)).IsSolid(Direction.west);
-                sSolid = chunk.LocalGetBlock(localPos.Add(0, 1, -1)).IsSolid(Direction.north);
-                wSolid = chunk.LocalGetBlock(localPos.Add(-1, 1, 0)).IsSolid(Direction.east);
+                nSolid = chunk.blocks.LocalGet(localPos.Add(0, 1, 1)).IsSolid(Direction.south);
+                eSolid = chunk.blocks.LocalGet(localPos.Add(1, 1, 0)).IsSolid(Direction.west);
+                sSolid = chunk.blocks.LocalGet(localPos.Add(0, 1, -1)).IsSolid(Direction.north);
+                wSolid = chunk.blocks.LocalGet(localPos.Add(-1, 1, 0)).IsSolid(Direction.east);
 
-                wnSolid = chunk.LocalGetBlock(localPos.Add(-1, 1, 1)).IsSolid(Direction.east) && chunk.LocalGetBlock(localPos.Add(-1, 1, 1)).IsSolid(Direction.south);
-                neSolid = chunk.LocalGetBlock(localPos.Add(1, 1, 1)).IsSolid(Direction.south) && chunk.LocalGetBlock(localPos.Add(1, 1, 1)).IsSolid(Direction.west);
-                esSolid = chunk.LocalGetBlock(localPos.Add(1, 1, -1)).IsSolid(Direction.west) && chunk.LocalGetBlock(localPos.Add(1, 1, -1)).IsSolid(Direction.north);
-                swSolid = chunk.LocalGetBlock(localPos.Add(-1, 1, -1)).IsSolid(Direction.north) && chunk.LocalGetBlock(localPos.Add(-1, 1, -1)).IsSolid(Direction.east);
+                wnSolid = chunk.blocks.LocalGet(localPos.Add(-1, 1, 1)).IsSolid(Direction.east) && chunk.blocks.LocalGet(localPos.Add(-1, 1, 1)).IsSolid(Direction.south);
+                neSolid = chunk.blocks.LocalGet(localPos.Add(1, 1, 1)).IsSolid(Direction.south) && chunk.blocks.LocalGet(localPos.Add(1, 1, 1)).IsSolid(Direction.west);
+                esSolid = chunk.blocks.LocalGet(localPos.Add(1, 1, -1)).IsSolid(Direction.west) && chunk.blocks.LocalGet(localPos.Add(1, 1, -1)).IsSolid(Direction.north);
+                swSolid = chunk.blocks.LocalGet(localPos.Add(-1, 1, -1)).IsSolid(Direction.north) && chunk.blocks.LocalGet(localPos.Add(-1, 1, -1)).IsSolid(Direction.east);
 
-                //light = BlockDataMap.NonSolid.Light(chunk.LocalGetBlock(localPos.Add(0, 1, 0)))/ 15f;
+                //light = BlockDataMap.NonSolid.Light(chunk.blocks.LocalGet(localPos.Add(0, 1, 0)))/ 15f;
 
                 break;
             case Direction.down:
-                nSolid = chunk.LocalGetBlock(localPos.Add(0, -1, -1)).IsSolid(Direction.south);
-                eSolid = chunk.LocalGetBlock(localPos.Add(1, -1, 0)).IsSolid(Direction.west);
-                sSolid = chunk.LocalGetBlock(localPos.Add(0, -1, 1)).IsSolid(Direction.north);
-                wSolid = chunk.LocalGetBlock(localPos.Add(-1, -1, 0)).IsSolid(Direction.east);
+                nSolid = chunk.blocks.LocalGet(localPos.Add(0, -1, -1)).IsSolid(Direction.south);
+                eSolid = chunk.blocks.LocalGet(localPos.Add(1, -1, 0)).IsSolid(Direction.west);
+                sSolid = chunk.blocks.LocalGet(localPos.Add(0, -1, 1)).IsSolid(Direction.north);
+                wSolid = chunk.blocks.LocalGet(localPos.Add(-1, -1, 0)).IsSolid(Direction.east);
 
-                wnSolid = chunk.LocalGetBlock(localPos.Add(-1, -1, -1)).IsSolid(Direction.east) && chunk.LocalGetBlock(localPos.Add(-1, -1, -1)).IsSolid(Direction.south);
-                neSolid = chunk.LocalGetBlock(localPos.Add(1, -1, -1)).IsSolid(Direction.south) && chunk.LocalGetBlock(localPos.Add(1, -1, -1)).IsSolid(Direction.west);
-                esSolid = chunk.LocalGetBlock(localPos.Add(1, -1, 1)).IsSolid(Direction.west) && chunk.LocalGetBlock(localPos.Add(1, -1, 1)).IsSolid(Direction.north);
-                swSolid = chunk.LocalGetBlock(localPos.Add(-1, -1, 1)).IsSolid(Direction.north) && chunk.LocalGetBlock(localPos.Add(-1, -1, 1)).IsSolid(Direction.east);
+                wnSolid = chunk.blocks.LocalGet(localPos.Add(-1, -1, -1)).IsSolid(Direction.east) && chunk.blocks.LocalGet(localPos.Add(-1, -1, -1)).IsSolid(Direction.south);
+                neSolid = chunk.blocks.LocalGet(localPos.Add(1, -1, -1)).IsSolid(Direction.south) && chunk.blocks.LocalGet(localPos.Add(1, -1, -1)).IsSolid(Direction.west);
+                esSolid = chunk.blocks.LocalGet(localPos.Add(1, -1, 1)).IsSolid(Direction.west) && chunk.blocks.LocalGet(localPos.Add(1, -1, 1)).IsSolid(Direction.north);
+                swSolid = chunk.blocks.LocalGet(localPos.Add(-1, -1, 1)).IsSolid(Direction.north) && chunk.blocks.LocalGet(localPos.Add(-1, -1, 1)).IsSolid(Direction.east);
 
-                //light = BlockDataMap.NonSolid.Light(chunk.LocalGetBlock(localPos.Add(0, -1, 0))) / 15f;
+                //light = BlockDataMap.NonSolid.Light(chunk.blocks.LocalGet(localPos.Add(0, -1, 0))) / 15f;
 
                 break;
             case Direction.north:
-                nSolid = chunk.LocalGetBlock(localPos.Add(1, 0, 1)).IsSolid(Direction.west);
-                eSolid = chunk.LocalGetBlock(localPos.Add(0, 1, 1)).IsSolid(Direction.down);
-                sSolid = chunk.LocalGetBlock(localPos.Add(-1, 0, 1)).IsSolid(Direction.east);
-                wSolid = chunk.LocalGetBlock(localPos.Add(0, -1, 1)).IsSolid(Direction.up);
+                nSolid = chunk.blocks.LocalGet(localPos.Add(1, 0, 1)).IsSolid(Direction.west);
+                eSolid = chunk.blocks.LocalGet(localPos.Add(0, 1, 1)).IsSolid(Direction.down);
+                sSolid = chunk.blocks.LocalGet(localPos.Add(-1, 0, 1)).IsSolid(Direction.east);
+                wSolid = chunk.blocks.LocalGet(localPos.Add(0, -1, 1)).IsSolid(Direction.up);
 
-                esSolid = chunk.LocalGetBlock(localPos.Add(-1, 1, 1)).IsSolid(Direction.east) && chunk.LocalGetBlock(localPos.Add(-1, 1, 1)).IsSolid(Direction.south);
-                neSolid = chunk.LocalGetBlock(localPos.Add(1, 1, 1)).IsSolid(Direction.south) && chunk.LocalGetBlock(localPos.Add(1, 1, 1)).IsSolid(Direction.west);
-                wnSolid = chunk.LocalGetBlock(localPos.Add(1, -1, 1)).IsSolid(Direction.west) && chunk.LocalGetBlock(localPos.Add(1, -1, 1)).IsSolid(Direction.north);
-                swSolid = chunk.LocalGetBlock(localPos.Add(-1, -1, 1)).IsSolid(Direction.north) && chunk.LocalGetBlock(localPos.Add(-1, -1, 1)).IsSolid(Direction.east);
+                esSolid = chunk.blocks.LocalGet(localPos.Add(-1, 1, 1)).IsSolid(Direction.east) && chunk.blocks.LocalGet(localPos.Add(-1, 1, 1)).IsSolid(Direction.south);
+                neSolid = chunk.blocks.LocalGet(localPos.Add(1, 1, 1)).IsSolid(Direction.south) && chunk.blocks.LocalGet(localPos.Add(1, 1, 1)).IsSolid(Direction.west);
+                wnSolid = chunk.blocks.LocalGet(localPos.Add(1, -1, 1)).IsSolid(Direction.west) && chunk.blocks.LocalGet(localPos.Add(1, -1, 1)).IsSolid(Direction.north);
+                swSolid = chunk.blocks.LocalGet(localPos.Add(-1, -1, 1)).IsSolid(Direction.north) && chunk.blocks.LocalGet(localPos.Add(-1, -1, 1)).IsSolid(Direction.east);
 
-                //light = BlockDataMap.NonSolid.Light(chunk.LocalGetBlock(localPos.Add(0, 0, 1))) / 15f;
+                //light = BlockDataMap.NonSolid.Light(chunk.blocks.LocalGet(localPos.Add(0, 0, 1))) / 15f;
 
                 break;
             case Direction.east:
-                nSolid = chunk.LocalGetBlock(localPos.Add(1, 0, -1)).IsSolid(Direction.up);
-                eSolid = chunk.LocalGetBlock(localPos.Add(1, 1, 0)).IsSolid(Direction.west);
-                sSolid = chunk.LocalGetBlock(localPos.Add(1, 0, 1)).IsSolid(Direction.down);
-                wSolid = chunk.LocalGetBlock(localPos.Add(1, -1, 0)).IsSolid(Direction.east);
+                nSolid = chunk.blocks.LocalGet(localPos.Add(1, 0, -1)).IsSolid(Direction.up);
+                eSolid = chunk.blocks.LocalGet(localPos.Add(1, 1, 0)).IsSolid(Direction.west);
+                sSolid = chunk.blocks.LocalGet(localPos.Add(1, 0, 1)).IsSolid(Direction.down);
+                wSolid = chunk.blocks.LocalGet(localPos.Add(1, -1, 0)).IsSolid(Direction.east);
 
-                esSolid = chunk.LocalGetBlock(localPos.Add(1, 1, 1)).IsSolid(Direction.west) && chunk.LocalGetBlock(localPos.Add(1, 1, 1)).IsSolid(Direction.north);
-                neSolid = chunk.LocalGetBlock(localPos.Add(1, 1, -1)).IsSolid(Direction.south) && chunk.LocalGetBlock(localPos.Add(1, 1, -1)).IsSolid(Direction.west);
-                wnSolid = chunk.LocalGetBlock(localPos.Add(1, -1, -1)).IsSolid(Direction.east) && chunk.LocalGetBlock(localPos.Add(1, -1, -1)).IsSolid(Direction.north);
-                swSolid = chunk.LocalGetBlock(localPos.Add(1, -1, 1)).IsSolid(Direction.north) && chunk.LocalGetBlock(localPos.Add(1, -1, 1)).IsSolid(Direction.east);
+                esSolid = chunk.blocks.LocalGet(localPos.Add(1, 1, 1)).IsSolid(Direction.west) && chunk.blocks.LocalGet(localPos.Add(1, 1, 1)).IsSolid(Direction.north);
+                neSolid = chunk.blocks.LocalGet(localPos.Add(1, 1, -1)).IsSolid(Direction.south) && chunk.blocks.LocalGet(localPos.Add(1, 1, -1)).IsSolid(Direction.west);
+                wnSolid = chunk.blocks.LocalGet(localPos.Add(1, -1, -1)).IsSolid(Direction.east) && chunk.blocks.LocalGet(localPos.Add(1, -1, -1)).IsSolid(Direction.north);
+                swSolid = chunk.blocks.LocalGet(localPos.Add(1, -1, 1)).IsSolid(Direction.north) && chunk.blocks.LocalGet(localPos.Add(1, -1, 1)).IsSolid(Direction.east);
 
-                //light = BlockDataMap.NonSolid.Light(chunk.LocalGetBlock(localPos.Add(1, 0, 0))) / 15f;
+                //light = BlockDataMap.NonSolid.Light(chunk.blocks.LocalGet(localPos.Add(1, 0, 0))) / 15f;
 
                 break;
             case Direction.south:
-                nSolid = chunk.LocalGetBlock(localPos.Add(-1, 0, -1)).IsSolid(Direction.down);
-                eSolid = chunk.LocalGetBlock(localPos.Add(0, 1, -1)).IsSolid(Direction.west);
-                sSolid = chunk.LocalGetBlock(localPos.Add(1, 0, -1)).IsSolid(Direction.up);
-                wSolid = chunk.LocalGetBlock(localPos.Add(0, -1, -1)).IsSolid(Direction.south);
+                nSolid = chunk.blocks.LocalGet(localPos.Add(-1, 0, -1)).IsSolid(Direction.down);
+                eSolid = chunk.blocks.LocalGet(localPos.Add(0, 1, -1)).IsSolid(Direction.west);
+                sSolid = chunk.blocks.LocalGet(localPos.Add(1, 0, -1)).IsSolid(Direction.up);
+                wSolid = chunk.blocks.LocalGet(localPos.Add(0, -1, -1)).IsSolid(Direction.south);
 
-                esSolid = chunk.LocalGetBlock(localPos.Add(1, 1, -1)).IsSolid(Direction.west) && chunk.LocalGetBlock(localPos.Add(1, 1, -1)).IsSolid(Direction.north);
-                neSolid = chunk.LocalGetBlock(localPos.Add(-1, 1, -1)).IsSolid(Direction.south) && chunk.LocalGetBlock(localPos.Add(-1, 1, -1)).IsSolid(Direction.west);
-                wnSolid = chunk.LocalGetBlock(localPos.Add(-1, -1, -1)).IsSolid(Direction.east) && chunk.LocalGetBlock(localPos.Add(-1, -1, -1)).IsSolid(Direction.north);
-                swSolid = chunk.LocalGetBlock(localPos.Add(1, -1, -1)).IsSolid(Direction.north) && chunk.LocalGetBlock(localPos.Add(1, -1, -1)).IsSolid(Direction.east);
+                esSolid = chunk.blocks.LocalGet(localPos.Add(1, 1, -1)).IsSolid(Direction.west) && chunk.blocks.LocalGet(localPos.Add(1, 1, -1)).IsSolid(Direction.north);
+                neSolid = chunk.blocks.LocalGet(localPos.Add(-1, 1, -1)).IsSolid(Direction.south) && chunk.blocks.LocalGet(localPos.Add(-1, 1, -1)).IsSolid(Direction.west);
+                wnSolid = chunk.blocks.LocalGet(localPos.Add(-1, -1, -1)).IsSolid(Direction.east) && chunk.blocks.LocalGet(localPos.Add(-1, -1, -1)).IsSolid(Direction.north);
+                swSolid = chunk.blocks.LocalGet(localPos.Add(1, -1, -1)).IsSolid(Direction.north) && chunk.blocks.LocalGet(localPos.Add(1, -1, -1)).IsSolid(Direction.east);
 
-                //light = BlockDataMap.NonSolid.Light(chunk.LocalGetBlock(localPos.Add(0, 0, -1))) / 15f;
+                //light = BlockDataMap.NonSolid.Light(chunk.blocks.LocalGet(localPos.Add(0, 0, -1))) / 15f;
 
                 break;
             case Direction.west:
-                nSolid = chunk.LocalGetBlock(localPos.Add(-1, 0, 1)).IsSolid(Direction.up);
-                eSolid = chunk.LocalGetBlock(localPos.Add(-1, 1, 0)).IsSolid(Direction.west);
-                sSolid = chunk.LocalGetBlock(localPos.Add(-1, 0, -1)).IsSolid(Direction.down);
-                wSolid = chunk.LocalGetBlock(localPos.Add(-1, -1, 0)).IsSolid(Direction.east);
+                nSolid = chunk.blocks.LocalGet(localPos.Add(-1, 0, 1)).IsSolid(Direction.up);
+                eSolid = chunk.blocks.LocalGet(localPos.Add(-1, 1, 0)).IsSolid(Direction.west);
+                sSolid = chunk.blocks.LocalGet(localPos.Add(-1, 0, -1)).IsSolid(Direction.down);
+                wSolid = chunk.blocks.LocalGet(localPos.Add(-1, -1, 0)).IsSolid(Direction.east);
 
-                esSolid = chunk.LocalGetBlock(localPos.Add(-1, 1, -1)).IsSolid(Direction.west) && chunk.LocalGetBlock(localPos.Add(-1, 1, -1)).IsSolid(Direction.north);
-                neSolid = chunk.LocalGetBlock(localPos.Add(-1, 1, 1)).IsSolid(Direction.south) && chunk.LocalGetBlock(localPos.Add(-1, 1, 1)).IsSolid(Direction.west);
-                wnSolid = chunk.LocalGetBlock(localPos.Add(-1, -1, 1)).IsSolid(Direction.east) && chunk.LocalGetBlock(localPos.Add(-1, -1, 1)).IsSolid(Direction.north);
-                swSolid = chunk.LocalGetBlock(localPos.Add(-1, -1, -1)).IsSolid(Direction.north) && chunk.LocalGetBlock(localPos.Add(-1, -1, -1)).IsSolid(Direction.east);
+                esSolid = chunk.blocks.LocalGet(localPos.Add(-1, 1, -1)).IsSolid(Direction.west) && chunk.blocks.LocalGet(localPos.Add(-1, 1, -1)).IsSolid(Direction.north);
+                neSolid = chunk.blocks.LocalGet(localPos.Add(-1, 1, 1)).IsSolid(Direction.south) && chunk.blocks.LocalGet(localPos.Add(-1, 1, 1)).IsSolid(Direction.west);
+                wnSolid = chunk.blocks.LocalGet(localPos.Add(-1, -1, 1)).IsSolid(Direction.east) && chunk.blocks.LocalGet(localPos.Add(-1, -1, 1)).IsSolid(Direction.north);
+                swSolid = chunk.blocks.LocalGet(localPos.Add(-1, -1, -1)).IsSolid(Direction.north) && chunk.blocks.LocalGet(localPos.Add(-1, -1, -1)).IsSolid(Direction.east);
 
-                //light = BlockDataMap.NonSolid.Light(chunk.LocalGetBlock(localPos.Add(-1, 0, 0))) / 15f;
+                //light = BlockDataMap.NonSolid.Light(chunk.blocks.LocalGet(localPos.Add(-1, 0, 0))) / 15f;
 
                 break;
             default:

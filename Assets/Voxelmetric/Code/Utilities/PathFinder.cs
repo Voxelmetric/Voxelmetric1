@@ -224,14 +224,14 @@ public class PathFinder {
 
     public bool IsWalkable(World world, BlockPos pos)
     {
-        Block block = world.GetBlock(pos);
+        Block block = world.blocks.Get(pos);
 
         if (!block.canBeWalkedOn)
             return false;
 
         for (int y = 1; y < entityHeight + 1; y++)
         {
-            block = world.GetBlock(pos.Add(0, y, 0));
+            block = world.blocks.Get(pos.Add(0, y, 0));
 
             if (!block.canBeWalkedThrough)
             {

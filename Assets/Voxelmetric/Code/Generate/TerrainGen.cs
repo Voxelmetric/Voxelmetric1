@@ -34,7 +34,7 @@ public class TerrainGen
         Chunk[] chunks = new Chunk[(world.config.maxY - world.config.minY) / Config.Env.ChunkSize];
         for (int y = world.config.minY; y < world.config.maxY; y += Config.Env.ChunkSize)
         {
-            chunks[(y - world.config.minY) / Config.Env.ChunkSize] = world.GetChunk(new BlockPos(pos.x, y, pos.z)); ;
+            chunks[(y - world.config.minY) / Config.Env.ChunkSize] = world.chunks.Get(new BlockPos(pos.x, y, pos.z)); ;
         }
 
         for (int x = pos.x; x < pos.x + Config.Env.ChunkSize; x++)

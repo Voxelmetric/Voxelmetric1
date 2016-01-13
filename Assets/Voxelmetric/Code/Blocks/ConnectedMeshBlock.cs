@@ -80,7 +80,7 @@ public class BlockConnected : Block
     //        for (int i = 0; i < connectsTo.Length; i++)
     //        {
     //            Direction dir = DirectionUtils.Get(d);
-    //            if (chunk.LocalGetBlock(localPos.Add(dir)).type == connectsTo[i])
+    //            if (chunk.blocks.LocalGet(localPos.Add(dir)).type == connectsTo[i])
     //            {
     //                BuildFace(chunk, localPos, globalPos, meshData, dir, block);
     //                break;

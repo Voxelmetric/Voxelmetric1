@@ -84,6 +84,26 @@ public struct BlockPos
         return new BlockPos(x - pos.x, y - pos.y, z - pos.z);
     }
 
+    public byte[] ToBytes()
+    {
+        byte[] BX = BitConverter.GetBytes(x);
+        byte[] BY = BitConverter.GetBytes(y);
+        byte[] BZ = BitConverter.GetBytes(z);
+
+        return new byte[] {
+            BX[0], BX[1], BX[2], BX[3],
+            BY[0], BY[1], BY[2], BY[3],
+            BZ[0], BZ[1], BZ[2], BZ[3]};
+    }
+
+    public static BlockPos FromBytes(byte[] bytes, int offset)
+    {
+        return new BlockPos(
+                    BitConverter.ToInt32(bytes, offset),
+                    BitConverter.ToInt32(bytes, offset + 4),
+                    BitConverter.ToInt32(bytes, offset + 8));
+    }
+
     //BlockPos and Vector3 can be substituted for one another
     public static implicit operator BlockPos(Vector3 v)
     {

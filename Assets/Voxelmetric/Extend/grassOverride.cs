@@ -16,11 +16,11 @@ public class GrassBlock : CubeBlock
             {
                 for (int z = -1; z <= 1; z++)
                 {
-                    if (chunk.GetBlock(globalPos.Add(x, y, z)).type == chunk.world.blockIndex.GetType("dirt")
-                        && chunk.GetBlock(globalPos.Add(x, y + 1, z)).type == chunk.world.blockIndex.GetType("air"))
+                    if (chunk.blocks.Get(globalPos.Add(x, y, z)).type == chunk.world.blockIndex.GetType("dirt")
+                        && chunk.blocks.Get(globalPos.Add(x, y + 1, z)).type == chunk.world.blockIndex.GetType("air"))
                     {
-                        chunk.SetBlock(globalPos.Add(x, y, z), "grass", false);
-                        chunk.SetFlag(Chunk.Flag.updateSoon, true);
+                        chunk.blocks.Set(globalPos.Add(x, y, z), "grass", false);
+                        chunk.logic.SetFlag(Flag.updateSoon, true);
                     }
                 }
             }

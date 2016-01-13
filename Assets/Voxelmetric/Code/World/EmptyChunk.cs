@@ -3,18 +3,26 @@ using System.Collections;
 
 public class EmptyChunk : Chunk
 {
+    public override void Start()
+    {
+        blocks = new EmptyChunkBlocks(this);
+    }
+}
 
-    public override Block GetBlock(BlockPos blockPos)
+public class EmptyChunkBlocks : ChunkBlocks
+{
+    public EmptyChunkBlocks(Chunk chunk) : base(chunk) { }
+
+    public override Block Get(BlockPos blockPos)
     {
         return Block.Air;
     }
 
-    public override Block LocalGetBlock(BlockPos blockPos)
+    public override Block LocalGet(BlockPos localBlockPos)
     {
         return Block.Air;
     }
 
-    public override void SetBlock(BlockPos blockPos, Block block, bool updateChunk = true, bool setBlockModified = true) { }
-
-    protected override void TimedUpdated() {}
+    public override void Set(BlockPos blockPos, Block block, bool updateChunk = true, bool setBlockModified = true)
+    { }
 }

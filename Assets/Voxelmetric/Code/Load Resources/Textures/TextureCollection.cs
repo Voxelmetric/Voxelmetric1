@@ -40,7 +40,7 @@ public class TextureCollection
     {
         if (usesConnectedTextures)
         {
-            int blockType = chunk.LocalGetBlock(localPos).type;
+            int blockType = chunk.blocks.LocalGet(localPos).type;
 
             bool wn = ConnectedTextures.IsSame(chunk, localPos, -1, 1, direction, blockType);
             bool n = ConnectedTextures.IsSame(chunk, localPos, 0, 1, direction, blockType);

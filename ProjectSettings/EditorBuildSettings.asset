@@ -5,5 +5,7 @@ EditorBuildSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 2
   m_Scenes:
-  - enabled: 0
-    path: Assets/Voxelmetric/scene.unity
+  - enabled: 1
+    path: Assets/Voxelmetric/Examples/listen server.unity
+  - enabled: 1
+    path: Assets/Voxelmetric/Examples/client.unity

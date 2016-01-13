@@ -32,7 +32,8 @@ public class LoadChunks : MonoBehaviour
     // This is useful because world generates the terrain for the column when the top chunk is loaded so this gives
     // the terrain generation a frame on its own
     public bool RenderChunksInSeparateFrame = true;
-    List<BlockPos> chunksToRender = new List<BlockPos>();
+    public List<BlockPos> chunksToRender = new List<BlockPos>();
+    int chunksGenerating;
 
     int deleteTimer = 0;
 
@@ -96,7 +97,7 @@ public class LoadChunks : MonoBehaviour
                 }
 
                 BlockPos pos = chunksToRender[0];
-                world.GetChunk(pos).UpdateChunk();
+                world.chunks.Get(pos).render.UpdateChunk();
                 chunksToRender.RemoveAt(0);
             }
 
@@ -111,6 +112,11 @@ public class LoadChunks : MonoBehaviour
             FindChunksAndLoad();
         }
 
+        if (chunksGenerating > 0)
+        {
+            return;
+        }
+
         for (int i = 0; i < ChunksToLoadPerFrame; i++)
         {
             if (chunksToGenerate.Count == 0)
@@ -118,7 +124,7 @@ public class LoadChunks : MonoBehaviour
                 break;
             }
             BlockPos pos = chunksToGenerate[0];
-            Chunk newChunk = world.CreateChunkAndNeighbors(pos);
+            Chunk newChunk = world.chunks.CreateChunkAndNeighbors(pos);
 
             if (Config.Toggle.UseMultiThreading)
             {
@@ -135,27 +141,22 @@ public class LoadChunks : MonoBehaviour
 
     }
 
+
+
     void DeleteChunks()
     {
         int posX = objectPos.x;
         int posZ = objectPos.z;
 
-        var chunksToDelete = new List<BlockPos>();
-        foreach (var chunk in world.chunks)
+        foreach (var chunkPos in world.chunks.posCollection)
         {
-            BlockPos chunkPos = chunk.Key;
             int xd = posX - chunkPos.x;
             int yd = posZ - chunkPos.z;
 
             if ((xd * xd + yd * yd) > distanceToDeleteInUnitsSquared)
             {
-                chunksToDelete.Add(chunk.Key);
+                world.chunks.Destroy(chunkPos);
             }
-        }
-
-        for(int i = 0; i< chunksToDelete.Count; i++)// (var chunk in chunksToDelete)
-        {
-            world.DestroyChunk(chunksToDelete[i]);
         }
     }
 
@@ -178,11 +179,11 @@ public class LoadChunks : MonoBehaviour
                 continue;
 
             //Get the chunk in the defined position
-            Chunk newChunk = world.GetChunk(newChunkPos);
+            Chunk newChunk = world.chunks.Get(newChunkPos);
 
             //If the chunk already exists and it's already
             //rendered or in queue to be rendered continue
-            if (newChunk != null && newChunk.GetFlag(Chunk.Flag.loadStarted))
+            if (newChunk != null && newChunk.logic.GetFlag(Flag.loadStarted))
                 continue;
 
             for (int y = world.config.minY; y <= world.config.maxY; y += Config.Env.ChunkSize)
@@ -205,34 +206,80 @@ public class LoadChunks : MonoBehaviour
 
         if (chunk.pos.y == config.maxY)
         {
-            for (int x = chunk.pos.x - Config.Env.ChunkSize; x <= chunk.pos.x + Config.Env.ChunkSize; x += Config.Env.ChunkSize)
+            chunksGenerating++;
+            if (!world.isServer)
             {
-                for (int z = chunk.pos.z - Config.Env.ChunkSize; z <= chunk.pos.z + Config.Env.ChunkSize; z += Config.Env.ChunkSize)
+                for (int x = chunk.pos.x - Config.Env.ChunkSize; x <= chunk.pos.x + Config.Env.ChunkSize; x += Config.Env.ChunkSize)
                 {
-                    Chunk genChunk = world.GetChunk(new BlockPos(x, config.maxY, z));
-
-                    if (!genChunk.GetFlag(Chunk.Flag.contentsGenerated) && !genChunk.GetFlag(Chunk.Flag.generationInProgress))
-                    {
-                        genChunk.SetFlag(Chunk.Flag.generationInProgress, true);
-                        terrainGen.GenerateTerrainForChunkColumn(new BlockPos(x, config.maxY, z));
-
-                        for (int i = config.minY; i <= config.maxY; i += Config.Env.ChunkSize)
-                            Serialization.Load(world.GetChunk(new BlockPos(chunk.pos.x, i, chunk.pos.z)));
-
-                        for (int y = config.minY; y <= config.maxY; y += Config.Env.ChunkSize)
-                            world.GetChunk(new BlockPos(x, y, z)).SetFlag(Chunk.Flag.contentsGenerated, true);
-                    }
-                    else if (Config.Toggle.UseMultiThreading)
+                    for (int z = chunk.pos.z - Config.Env.ChunkSize; z <= chunk.pos.z + Config.Env.ChunkSize; z += Config.Env.ChunkSize)
                     {
                         for (int y = config.minY; y <= config.maxY; y += Config.Env.ChunkSize)
                         {
-                            while (!world.GetChunk(new BlockPos(x, y, z)).GetFlag(Chunk.Flag.contentsGenerated))
+                            Chunk genChunk = world.chunks.Get(new BlockPos(x, y, z));
+
+                            if (!genChunk.logic.GetFlag(Flag.contentsGenerated) && !genChunk.logic.GetFlag(Flag.generationInProgress))
+                            {
+                                genChunk.logic.SetFlag(Flag.generationInProgress, true);
+                                world.client.RequestChunk(new BlockPos(x, y, z));
+                            }
+
+                            while (!genChunk.logic.GetFlag(Flag.contentsGenerated))
                             {
                                 Thread.Sleep(0);
                             }
+
                         }
                     }
+                }
 
+                for (int x = chunk.pos.x - Config.Env.ChunkSize; x <= chunk.pos.x + Config.Env.ChunkSize; x += Config.Env.ChunkSize)
+                {
+                    for (int z = chunk.pos.z - Config.Env.ChunkSize; z <= chunk.pos.z + Config.Env.ChunkSize; z += Config.Env.ChunkSize)
+                    {
+                        for (int y = config.minY; y <= config.maxY; y += Config.Env.ChunkSize)
+                        {
+                            Chunk genChunk = world.chunks.Get(new BlockPos(x, y, z));
+                            while (!genChunk.logic.GetFlag(Flag.contentsGenerated))
+                            {
+                                Thread.Sleep(0);
+                            }
+                        } 
+                    }
+                }
+                chunksGenerating--;
+            }
+            else
+            {
+
+                for (int x = chunk.pos.x - Config.Env.ChunkSize; x <= chunk.pos.x + Config.Env.ChunkSize; x += Config.Env.ChunkSize)
+                {
+                    for (int z = chunk.pos.z - Config.Env.ChunkSize; z <= chunk.pos.z + Config.Env.ChunkSize; z += Config.Env.ChunkSize)
+                    {
+                        Chunk genChunk = world.chunks.Get(new BlockPos(x, config.maxY, z));
+
+                        if (!genChunk.logic.GetFlag(Flag.contentsGenerated) && !genChunk.logic.GetFlag(Flag.generationInProgress))
+                        {
+                            genChunk.logic.SetFlag(Flag.generationInProgress, true);
+                            terrainGen.GenerateTerrainForChunkColumn(new BlockPos(x, config.maxY, z));
+
+                            for (int i = config.minY; i <= config.maxY; i += Config.Env.ChunkSize)
+                                Serialization.Load(world.chunks.Get(new BlockPos(chunk.pos.x, i, chunk.pos.z)));
+
+                            for (int y = config.minY; y <= config.maxY; y += Config.Env.ChunkSize)
+                                world.chunks.Get(new BlockPos(x, y, z)).logic.SetFlag(Flag.contentsGenerated, true);
+                        }
+                        else if (Config.Toggle.UseMultiThreading)
+                        {
+                            for (int y = config.minY; y <= config.maxY; y += Config.Env.ChunkSize)
+                            {
+                                while (!world.chunks.Get(new BlockPos(x, y, z)).logic.GetFlag(Flag.contentsGenerated))
+                                {
+                                    Thread.Sleep(0);
+                                }
+                            }
+                        }
+
+                    }
                 }
             }
         }
@@ -242,8 +289,10 @@ public class LoadChunks : MonoBehaviour
             return;
         }
 
+
         for (int i = config.minY; i <= config.maxY; i += Config.Env.ChunkSize)
         {
+            Debug.Log("Rendering " + chunk.pos);
             chunksToRender.Add(new BlockPos(chunk.pos.x, i, chunk.pos.z));
         }
     }

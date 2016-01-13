@@ -388,6 +388,8 @@ MonoBehaviour:
   WaitBetweenDeletes: 20
   ChunksToLoadPerFrame: 9
   RenderChunksInSeparateFrame: 1
+  chunksToRender: []
+  chunksLoading: []
 --- !u!1 &312836251
 GameObject:
   m_ObjectHideFlags: 0
@@ -2019,7 +2021,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   worldConfig: default
-  isServer: 1
+  isServer: 0
+  allowConnections: 1
   worldName: world
   worldIndex: 0
 --- !u!1 &1766354337
