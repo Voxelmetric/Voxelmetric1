@@ -14,9 +14,6 @@ public class VmClient
 
     public bool connected;
 
-    // The response from the remote device.
-    private static string response = string.Empty;
-
     public VmClient(World world)
     {
         this.world = world;

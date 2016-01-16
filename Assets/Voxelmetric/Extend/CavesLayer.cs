@@ -9,7 +9,7 @@ public class CavesLayer : TerrainLayer
         // and it will fetch an element in the config's property object called frequency
     }
 
-    public override int GenerateLayer(Chunk[] chunks, int x, int z, int heightSoFar, float strength, bool justGetHeight = false)
+    public override int GenerateLayer(Chunk chunk, int x, int z, int heightSoFar, float strength, bool justGetHeight = false)
     {
         int caveBottom = GetNoise(x, -1000, z, 500, 70, 1) + world.config.minY;
         int caveHeight = GetNoise(x, 1000, z, 50, 30, 1) + caveBottom;
@@ -22,7 +22,7 @@ public class CavesLayer : TerrainLayer
             int caveTop = caveHeight / 2;
             if (!justGetHeight)
             {
-                SetBlocksColumn(chunks, x, z, caveBottom, caveTop, Block.Air);
+                SetBlocksColumn(chunk, x, z, caveBottom, caveTop, Block.Air);
             }
 
             if (caveTop > heightSoFar && caveBottom < heightSoFar)

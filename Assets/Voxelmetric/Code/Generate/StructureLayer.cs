@@ -18,14 +18,14 @@ public class StructureLayer : TerrainLayer
         structure = (GeneratedStructure)Activator.CreateInstance(structureType);
     }
 
-    public override void GenerateStructures(BlockPos chunkColumnPos)
+    public override void GenerateStructures(Chunk chunk)
     {
         int minX, maxX, minZ, maxZ;
 
-        minX = chunkColumnPos.x - structure.negX;
-        maxX = chunkColumnPos.x + Config.Env.ChunkSize + structure.posX;
-        minZ = chunkColumnPos.z - structure.negZ;
-        maxZ = chunkColumnPos.z + Config.Env.ChunkSize + structure.posZ;
+        minX = chunk.pos.x - structure.negX;
+        maxX = chunk.pos.x + Config.Env.ChunkSize + structure.posX;
+        minZ = chunk.pos.z - structure.negZ;
+        maxZ = chunk.pos.z + Config.Env.ChunkSize + structure.posZ;
 
         for (int x = minX; x < maxX; x++)
         {
@@ -41,8 +41,8 @@ public class StructureLayer : TerrainLayer
                         && pos.Add(0, 0, 1).Random(44, true) > chanceAtPos
                         && pos.Add(0, 0, -1).Random(44, true) > chanceAtPos)
                     {
-                        int height = terrainGen.GenerateTerrainForBlockColumn(x, z, true);
-                        structure.Build(world, chunkColumnPos, new BlockPos(x, height, z), this);
+                        int height = terrainGen.GenerateTerrainForBlockColumn(x, z, true, chunk);
+                        structure.Build(world, chunk, new BlockPos(x, height, z), this);
                     }
                 }
             }

@@ -382,12 +382,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   world: {fileID: 1571917861}
   generateTerrain: 1
-  layerFolder: layers
   chunkLoadRadius: 6
   DistanceToDeleteChunks: 8
   WaitBetweenDeletes: 20
-  ChunksToLoadPerFrame: 9
-  RenderChunksInSeparateFrame: 1
 --- !u!1 &312836251
 GameObject:
   m_ObjectHideFlags: 0
@@ -2020,6 +2017,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   worldConfig: default
   isServer: 1
+  allowConnections: 1
   worldName: world
   worldIndex: 0
 --- !u!1 &1766354337

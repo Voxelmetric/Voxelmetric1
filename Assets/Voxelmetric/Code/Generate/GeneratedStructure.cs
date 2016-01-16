@@ -9,7 +9,7 @@
     public int posZ = 0;
     public int negZ = 0;
 
-    public virtual void Build(World world, BlockPos chunkPos, BlockPos pos, TerrainLayer layer) { }
+    public virtual void Build(World world, Chunk chunk, BlockPos pos, TerrainLayer layer) { }
 
     //public bool ChunkContains(BlockPos chunkPos, BlockPos pos)
     //{

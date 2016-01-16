@@ -1,28 +1,29 @@
 {
   "name": "default",
   "textureFolder": "Textures",
+  "layerFolder": "Layers",
   "blockFolder": "Blocks",
 
-    "meshFolder": "Meshes",
-    "prefabsFolder": "Prefabs",
-    "customTextureAtlasFile": "",
-    "useCollisionMesh": true,
+  "meshFolder": "Meshes",
+  "prefabsFolder": "Prefabs",
+  "customTextureAtlasFile": "",
+  "useCollisionMesh": true,
 
-    "pathToBlockPrefab": "Prefabs/Block",
-    "pathToChunkPrefab": "Prefabs/Chunk",
+  "pathToBlockPrefab": "Prefabs/Block",
+  "pathToChunkPrefab": "Prefabs/Chunk",
 
-    "maxY": 64,
-    "minY": -64,
+  "maxY": 64,
+  "minY": -64,
 
-    "randomUpdateFrequency": 1,
+  "randomUpdateFrequency": 1,
 
-     "addAOToMesh": true,
-     "ambientOcclusionStrength": 0.5,
+   "addAOToMesh": true,
+   "ambientOcclusionStrength": 0.5,
 
-    "textureAtlasPadding": 32,
-    "textureAtlasFiltering": "point",
-    "textureFormat": "ARGB32",
-    "useMipMaps": true,
-    "useCustomTextureAtlas": false,
-    "customTextureAtlasFilePath": "",
+  "textureAtlasPadding": 32,
+  "textureAtlasFiltering": "point",
+  "textureFormat": "ARGB32",
+  "useMipMaps": true,
+  "useCustomTextureAtlas": false,
+  "customTextureAtlasFilePath": "",
 }

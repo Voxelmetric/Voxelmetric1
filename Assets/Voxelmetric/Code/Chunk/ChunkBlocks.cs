@@ -11,6 +11,7 @@ public class ChunkBlocks {
     public List<BlockPos> modifiedBlocks = new List<BlockPos>();
     protected byte[] receiveBuffer;
     protected int receiveIndex;
+    public bool contentsGenerated;
 
     public ChunkBlocks(Chunk chunk)
     {
@@ -20,6 +21,7 @@ public class ChunkBlocks {
     public void ResetContent()
     {
         blocks = new Block[Config.Env.ChunkSize, Config.Env.ChunkSize, Config.Env.ChunkSize];
+        contentsGenerated = false;
     }
 
     /// <summary>
@@ -187,7 +189,6 @@ public class ChunkBlocks {
     {
         GenerateContentsFromBytes();
         chunk.logic.SetFlag(Flag.contentsGenerated, true);
-        chunk.logic.SetFlag(Flag.generationInProgress, false);
         receiveBuffer = null;
         receiveIndex = 0;
     }

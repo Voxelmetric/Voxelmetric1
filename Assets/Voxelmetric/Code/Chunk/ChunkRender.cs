@@ -1,9 +1,10 @@
 ﻿using UnityEngine;
 using System.Threading;
+using System;
 
 public class ChunkRender {
 
-    protected MeshData meshData = new MeshData();
+    public MeshData meshData = new MeshData();
     protected MeshFilter filter;
     protected MeshCollider coll;
 

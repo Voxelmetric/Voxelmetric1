@@ -36,7 +36,7 @@ public class TerrainLayer : IComparable
     protected Noise noiseGen;
     protected int chunksPerColumn;
 
-    public virtual int GenerateLayer(Chunk[] chunks, int x, int z, int heightSoFar, float strength, bool justGetHeight = false)
+    public virtual int GenerateLayer(Chunk chunk, int x, int z, int heightSoFar, float strength, bool justGetHeight = false)
     {
         return heightSoFar;
     }
@@ -51,7 +51,7 @@ public class TerrainLayer : IComparable
     /// parts of the structure within the chunk using GeneratedStructure.
     /// </summary>
     /// <param name="chunkPos">pos of the chunk column</param>
-    public virtual void GenerateStructures(BlockPos chunkPos)
+    public virtual void GenerateStructures(Chunk chunk)
     {
 
     }
@@ -68,31 +68,22 @@ public class TerrainLayer : IComparable
     }
 
     //Sets a column of chunks starting at startPlaceHeight and ending at endPlaceHeight using localSetBlock for speed
-    protected void SetBlocksColumn(Chunk[] chunks, int x, int z, int startPlaceHeight, int endPlaceHeight, Block blockToPlace)
+    protected void SetBlocksColumn(Chunk chunk, int x, int z, int startPlaceHeight, int endPlaceHeight, Block blockToPlace)
     {
-        // Loop through each chunk in the column
-        for (int i = 0; i < chunksPerColumn; i++)
+        if (startPlaceHeight >= chunk.pos.y + Config.Env.ChunkSize || endPlaceHeight < chunk.pos.y)
         {
-            // And for each one loop through its height
-            for (int y = 0; y < Config.Env.ChunkSize; y++)
-            {
-                //and if this is above the starting height
-                if (chunks[i].pos.y + y >= startPlaceHeight)
-                {
-                    // And below or equal to the end height place the block using 
-                    // localSetBlock which is faster than the non-local pos set block
-                    if (chunks[i].pos.y + y < endPlaceHeight)
-                    {
-                        //chunks[i].world.SetBlock(new BlockPos(x, y + chunks[i].pos.y, z), blockToPlace, false, false);
-                        chunks[i].blocks.LocalSet(new BlockPos(x - chunks[i].pos.x, y, z - chunks[i].pos.z), blockToPlace);
-                    }
-                    else
-                    {
-                        // Return early, we've reached the end of the blocks to add
-                        return;
-                    }
-                }
-            }
+            return;
+        }
+
+        int y = startPlaceHeight;
+        if (startPlaceHeight < chunk.pos.y)
+        {
+            y = chunk.pos.y;
+        }
+
+        while (y < chunk.pos.y + Config.Env.ChunkSize && y < endPlaceHeight) {
+            chunk.blocks.LocalSet(new BlockPos(x, y, z) - chunk.pos, blockToPlace);
+            y++;
         }
     }
 

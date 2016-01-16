@@ -5,6 +5,7 @@ public struct WorldConfig
 {
     public string name;
     public string textureFolder;
+    public string layerFolder;
     public string blockFolder;
     public string meshFolder;
     public bool useCollisionMesh;

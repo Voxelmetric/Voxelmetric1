@@ -1,6 +1,4 @@
 ﻿using UnityEngine;
-using System.Threading;
-using System.Collections;
 using System.Collections.Generic;
 
 public class WorldChunks {
@@ -12,8 +10,6 @@ public class WorldChunks {
     public Dictionary<BlockPos, Chunk>.KeyCollection posCollection { get { return chunks.Keys; } }
 
     List<GameObject> chunkPool = new List<GameObject>();
-    List<Chunk> chunksToDelete = new List<Chunk>();
-
     GameObject chunkPrefab;
 
     public WorldChunks(World world) {
@@ -21,18 +17,9 @@ public class WorldChunks {
         chunkPrefab = Resources.Load<GameObject>(world.config.pathToChunkPrefab);
     }
 
-
     /// <summary> Updates chunks and fires frequent events for chunks. Called by world's LateUpdate</summary>
     public void ChunksUpdate()
     {
-        for (int i = 0; i < chunksToDelete.Count; i++)
-        {
-            if (chunksToDelete[i] != null)
-                chunksToDelete[i].ReturnChunkToPool();
-        }
-
-        chunksToDelete.Clear();
-
         foreach (var chunk in chunkCollection)
         {
             chunk.RegularUpdate();
@@ -68,7 +55,7 @@ public class WorldChunks {
         chunks.Remove(pos);
     }
 
-    public Chunk New(BlockPos pos)
+    Chunk New(BlockPos pos)
     {
         Chunk existingChunk = Get(pos);
         if (existingChunk != null)
@@ -100,9 +87,10 @@ public class WorldChunks {
         newChunk.pos = pos;
         newChunk.world = world;
 
+        newChunk.Start();
+
         //Add it to the chunks dictionary with the position as the key
         chunks.Add(pos, newChunk);
-        newChunk.Start();
 
         return newChunk;
     }
@@ -114,12 +102,6 @@ public class WorldChunks {
     public Chunk CreateChunkAndNeighbors(BlockPos pos)
     {
         pos = pos.ContainingChunkCoordinates();
-        Chunk newChunk = New(pos);
-
-        if (newChunk.logic.GetFlag(Flag.loadStarted))
-            return newChunk;
-
-        newChunk.logic.SetFlag(Flag.loadStarted, true);
 
         //Create neighbors
         for (int x = -1; x <= 1; x++)
@@ -128,35 +110,22 @@ public class WorldChunks {
                     if (y >= world.config.minY)
                         New(pos.Add(x * Config.Env.ChunkSize, y * Config.Env.ChunkSize, z * Config.Env.ChunkSize));
 
+        Chunk newChunk = Get(pos);
+        newChunk.StartLoading();
+
         return newChunk;
     }
 
-    /// <summary> Saves the chunk and adds it to a list of chunks to return to the pool</summary>
-    /// <param name="pos">Position of the chunk to destroy</param>
-    public void Destroy(BlockPos pos)
-    {
-        Chunk chunk = null;
-        if (Get(pos))
-        {
-            //if (Config.Toggle.UseMultiThreading)
-            //{
-            //    Thread thread = new Thread(() => {
-            //        if (chunk.logic.GetFlag(Flag.chunkModified))
-            //            Serialization.SaveChunk(chunk);
-
-            //        chunksToDelete.Add(chunk);
-            //    });
-            //    thread.Start();
-            //}
-            //else
-            {
-                //if (chunk.logic.GetFlag(Flag.chunkModified))
-                //    Serialization.SaveChunk(chunk);
-
-                chunksToDelete.Add(chunk);
-            }
-        }
-    }
+    ///// <summary> Saves the chunk and adds it to a list of chunks to return to the pool</summary>
+    ///// <param name="pos">Position of the chunk to destroy</param>
+    //public void Destroy(BlockPos pos)
+    //{
+    //    Chunk chunk = Get(pos);
+    //    if (chunk)
+    //    {
+    //        chunksToDelete.Add(chunk);
+    //    }
+    //}
 
     public void AddToChunkPool(GameObject chunk)
     {

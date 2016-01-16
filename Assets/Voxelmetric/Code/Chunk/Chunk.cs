@@ -1,5 +1,7 @@
 ﻿using UnityEngine;
 
+public enum Stage {created, terrain, createdTerrainBuilt, buildMesh, render, ready, saveAndDelete, delete, deleted }
+
 [RequireComponent(typeof(MeshFilter))]
 [RequireComponent(typeof(MeshRenderer))]
 [RequireComponent(typeof(MeshCollider))]
@@ -11,6 +13,23 @@ public class Chunk : MonoBehaviour
     public ChunkBlocks blocks;
     public ChunkLogic  logic;
     public ChunkRender render;
+
+    public Stage _stage;
+    public Stage stage {
+        get
+        {
+            return _stage;
+        }
+        set
+        {
+            if (_stage != value)
+            {
+                world.chunksLoop.ChunkStageChanged(this, oldStage: _stage, newStage: value);
+                //Debug.Log("moved from " + _stage + " to " + value);
+            }
+            _stage = value;
+        }
+    }
 
     public virtual void Start()
     {
@@ -24,8 +43,16 @@ public class Chunk : MonoBehaviour
             logic = new ChunkLogic(this);
     }
 
+    public virtual void StartLoading()
+    {
+        stage = Stage.terrain;
+    }
+
     public virtual void RegularUpdate()
     {
+        if (stage == Stage.created || stage == Stage.delete)
+            return;
+
         logic.TimedUpdated();
 
         if (logic.GetFlag(Flag.updateNow))
@@ -63,6 +90,8 @@ public class Chunk : MonoBehaviour
         logic.ResetContent();
         render.ResetContent();
         blocks.ResetContent();
+
+        stage = Stage.created;
 
         world.chunks.Remove(pos);
         world.chunks.AddToChunkPool(gameObject);

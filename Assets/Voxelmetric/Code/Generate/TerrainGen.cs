@@ -29,26 +29,20 @@ public class TerrainGen
     World world;
     TerrainLayer[] layers;
 
-    public void GenerateTerrainForChunkColumn(BlockPos pos)
+    public void GenerateTerrainForChunk(Chunk chunk)
     {
-        Chunk[] chunks = new Chunk[(world.config.maxY - world.config.minY) / Config.Env.ChunkSize];
-        for (int y = world.config.minY; y < world.config.maxY; y += Config.Env.ChunkSize)
+        for (int x = chunk.pos.x; x < chunk.pos.x + Config.Env.ChunkSize; x++)
         {
-            chunks[(y - world.config.minY) / Config.Env.ChunkSize] = world.chunks.Get(new BlockPos(pos.x, y, pos.z)); ;
-        }
-
-        for (int x = pos.x; x < pos.x + Config.Env.ChunkSize; x++)
-        {
-            for (int z = pos.z; z < pos.z + Config.Env.ChunkSize; z++)
+            for (int z = chunk.pos.z; z < chunk.pos.z + Config.Env.ChunkSize; z++)
             {
-                GenerateTerrainForBlockColumn(x, z, false, chunks);
+                GenerateTerrainForBlockColumn(x, z, false, chunk);
             }
         }
 
-        GenerateStructuresForChunk(pos);
+        GenerateStructuresForChunk(chunk);
     }
 
-    public int GenerateTerrainForBlockColumn(int x, int z, bool justGetHeight, Chunk[] chunks = null)
+    public int GenerateTerrainForBlockColumn(int x, int z, bool justGetHeight, Chunk chunk)
     {
         int height = world.config.minY;
         for (int i = 0; i < layers.Length; i++)
@@ -61,13 +55,13 @@ public class TerrainGen
 
             if (!layers[i].isStructure)
             {
-                height = layers[i].GenerateLayer(chunks, x, z, height, 1, justGetHeight);
+                height = layers[i].GenerateLayer(chunk, x, z, height, 1, justGetHeight);
             }
         }
         return height;
     }
 
-    public void GenerateStructuresForChunk(BlockPos chunkPos)
+    public void GenerateStructuresForChunk(Chunk chunk)
     {
         for (int i = 0; i < layers.Length; i++)
         {
@@ -77,7 +71,7 @@ public class TerrainGen
 
             if (layers[i].isStructure)
             {
-                layers[i].GenerateStructures(chunkPos);
+                layers[i].GenerateStructures(chunk);
             }
         }
     }

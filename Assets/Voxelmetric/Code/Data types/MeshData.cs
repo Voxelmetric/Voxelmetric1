@@ -13,6 +13,7 @@ public class MeshData
     public List<Vector3> colVertices = new List<Vector3>();
     public List<int> colTriangles = new List<int>();
 
+    //possibly store these in arrays while we wait for the main thread to get to and render them?
 
     public MeshData() { }
 

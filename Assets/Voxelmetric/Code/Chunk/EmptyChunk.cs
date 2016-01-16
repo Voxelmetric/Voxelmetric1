@@ -3,7 +3,7 @@ using System.Collections;
 
 public class EmptyChunk : Chunk
 {
-    public override void Start()
+    public override void StartLoading()
     {
         blocks = new EmptyChunkBlocks(this);
     }

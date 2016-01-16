@@ -19,13 +19,10 @@ public class World : MonoBehaviour {
     // leave empty to override with 
     public string worldName = "world";
 
-    TerrainGen terrainGen;
-    TerrainLayer[] terrainLayers;
     public Noise noise;
-
     public WorldChunks chunks;
     public WorldBlocks blocks;
-
+    public ChunksLoop chunksLoop;
     public VmClient client;
     public VmServer server;
     public VmNetworking networking;
@@ -56,6 +53,13 @@ public class World : MonoBehaviour {
 
         textureIndex = Voxelmetric.resources.GetOrLoadTextureIndex(this);
         blockIndex = Voxelmetric.resources.GetOrLoadBlockIndex(this);
+
+        chunksLoop = new ChunksLoop(this);
+    }
+
+    void Update()
+    {
+        chunksLoop.MainThreadLoop();
     }
 
     void LateUpdate()
@@ -65,6 +69,8 @@ public class World : MonoBehaviour {
 
     void OnApplicationQuit()
     {
+        chunksLoop.isPlaying = false;
+
         if (isServer)
         {
             if (allowConnections)
