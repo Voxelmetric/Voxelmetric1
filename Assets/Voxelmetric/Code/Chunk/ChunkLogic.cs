@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Collections;
 
-public enum Flag { loadStarted, busy, meshReady, contentsGenerated, loadComplete, chunkModified, updateSoon, updateNow }
+public enum Flag { loadStarted, busy, meshReady, loadComplete, chunkModified, updateSoon, updateNow }
 
 public class ChunkLogic {
 

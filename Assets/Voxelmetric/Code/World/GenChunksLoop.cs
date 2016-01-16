@@ -16,7 +16,6 @@ using System;
 /// </summary>
 public class ChunksLoop {
 
-    TerrainGen terrainGen;
     public Dictionary<Stage, List<Chunk>> chunksToGen = new Dictionary<Stage, List<Chunk>>();
     World world;
 
@@ -30,7 +29,6 @@ public class ChunksLoop {
         chunksToGen.Add(Stage.terrain, new List<Chunk>());
         chunksToGen.Add(Stage.buildMesh, new List<Chunk>());
         chunksToGen.Add(Stage.saveAndDelete, new List<Chunk>());
-        terrainGen = new TerrainGen(world, world.config.layerFolder);
 
         loopThread = new Thread(() =>
         {
@@ -39,6 +37,7 @@ public class ChunksLoop {
                 try
                 {
                     Terrain();
+                    SaveAndDelete();
                 }
                 catch (Exception ex)
                 {
@@ -75,30 +74,30 @@ public class ChunksLoop {
             {
                 i += list.Count;
             }
-
-            Debug.Log("Terrain: " + chunksToGen[Stage.terrain].Count + "           Render: " + chunksToGen[Stage.buildMesh].Count + "              save and delete: " + chunksToGen[Stage.saveAndDelete].Count);
-
             return i;
         }
     }
 
     public void MainThreadLoop()
     {
-        //Terrain();
-        //BuildMesh();
+        // eventually we want to handle chunk return to pool and 
+        // adding mesh data to the unity mesh
+        // and maybe even the chunk's regular update func
     }
 
     void Terrain()
     {
         while (chunksToGen[Stage.terrain].Count > 0)
         {
-            if (!chunksToGen[Stage.terrain][0] || chunksToGen[Stage.terrain][0].stage != Stage.terrain)
+            Chunk chunk = chunksToGen[Stage.terrain][0];
+
+            if (!IsCorrectStage(Stage.terrain, chunk))
             {
                 chunksToGen[Stage.terrain].RemoveAt(0);
                 continue;
             }
 
-            Chunk chunk = chunksToGen[Stage.terrain][0];
+            bool chunksAllGenerated = true;
 
             for (int x = -1; x <= 1; x++)
             {
@@ -106,21 +105,20 @@ public class ChunksLoop {
                 {
                     for (int z = -1; z <= 1; z++)
                     {
-                        Chunk chunkToGen = world.chunks.Get(chunk.pos.Add(
-                            x * Config.Env.ChunkSize,
-                            y * Config.Env.ChunkSize,
-                            z * Config.Env.ChunkSize));
-
+                        Chunk chunkToGen = world.chunks.Get(chunk.pos + (new BlockPos(x, y, z) * Config.Env.ChunkSize));
+                        chunkToGen.blocks.GenerateChunkContents();
                         if (!chunkToGen.blocks.contentsGenerated)
                         {
-                            terrainGen.GenerateTerrainForChunk(chunkToGen);
-                            chunkToGen.blocks.contentsGenerated = true;
+                            chunksAllGenerated = false;
                         }
                     }
                 }
             }
 
-            chunk.stage = Stage.buildMesh;
+            if (chunksAllGenerated)
+            {
+                chunk.stage = Stage.buildMesh;
+            }
         }
     }
 
@@ -128,25 +126,14 @@ public class ChunksLoop {
     {
         while (chunksToGen[Stage.buildMesh].Count > 0)
         {
-            if (!chunksToGen[Stage.buildMesh][0] || chunksToGen[Stage.buildMesh][0].stage != Stage.buildMesh)
+            Chunk chunk = chunksToGen[Stage.buildMesh][0];
+            if (!IsCorrectStage(Stage.buildMesh, chunk))
             {
                 chunksToGen[Stage.buildMesh].RemoveAt(0);
                 continue;
             }
 
-            Chunk chunk = chunksToGen[Stage.buildMesh][0];
-                
-            if (chunk.render.meshData.vertices.Count > 0)
-            {
-                Debug.LogError("Tried to build data for a chunk with populated meshdata", chunk);
-            }
-
-            chunk.logic.SetFlag(Flag.busy, true);
             chunk.render.BuildMeshData();
-            chunk.logic.SetFlag(Flag.meshReady, true);
-
-            
-
             chunk.stage = Stage.ready;
         }
     }
@@ -155,7 +142,6 @@ public class ChunksLoop {
     {
         for (int i = 0; i < chunksToGen[Stage.saveAndDelete].Count; i++)
         {
-            Debug.Log("Delete");
             Chunk chunk = chunksToGen[Stage.saveAndDelete][0];
 
             if (chunk.logic.GetFlag(Flag.chunkModified))
@@ -174,5 +160,10 @@ public class ChunksLoop {
         if (chunksToGen.ContainsKey(newStage) &&
             !chunksToGen[newStage].Contains(chunk))
             chunksToGen[newStage].Add(chunk);
+    }
+
+    bool IsCorrectStage(Stage stage, Chunk chunk)
+    {
+        return (chunk != null && chunk.stage == stage);
     }
 }

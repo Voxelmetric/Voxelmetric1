@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-public enum Stage {created, terrain, createdTerrainBuilt, buildMesh, render, ready, saveAndDelete, delete, deleted }
+public enum Stage {created, terrain, buildMesh, render, ready, saveAndDelete, delete, deleted }
 
 [RequireComponent(typeof(MeshFilter))]
 [RequireComponent(typeof(MeshRenderer))]
@@ -25,7 +25,6 @@ public class Chunk : MonoBehaviour
             if (_stage != value)
             {
                 world.chunksLoop.ChunkStageChanged(this, oldStage: _stage, newStage: value);
-                //Debug.Log("moved from " + _stage + " to " + value);
             }
             _stage = value;
         }

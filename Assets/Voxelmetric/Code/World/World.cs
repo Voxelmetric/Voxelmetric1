@@ -26,6 +26,7 @@ public class World : MonoBehaviour {
     public VmClient client;
     public VmServer server;
     public VmNetworking networking;
+    public TerrainGen terrainGen;
 
     [HideInInspector]
     public int worldIndex;
@@ -54,6 +55,7 @@ public class World : MonoBehaviour {
         textureIndex = Voxelmetric.resources.GetOrLoadTextureIndex(this);
         blockIndex = Voxelmetric.resources.GetOrLoadBlockIndex(this);
 
+        terrainGen = new TerrainGen(this, config.layerFolder);
         chunksLoop = new ChunksLoop(this);
     }
 

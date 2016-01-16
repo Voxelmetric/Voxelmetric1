@@ -173,6 +173,16 @@ public struct BlockPos
         return pos1.Add(pos2);
     }
 
+    public static BlockPos operator *(BlockPos pos, int i)
+    {
+        return new BlockPos(pos.x * i, pos.y * i, pos.z * i);
+    }
+
+    public static BlockPos operator *(BlockPos pos1, BlockPos pos2)
+    {
+        return new BlockPos(pos1.x * pos2.x, pos1.y * pos2.y, pos1.z * pos2.z);
+    }
+
     public static bool operator ==(BlockPos pos1, BlockPos pos2)
     {
         return Equals(pos1, pos2);

@@ -156,6 +156,18 @@ public class ChunkBlocks {
         }
     }
 
+    public void GenerateChunkContents()
+    {
+        if (contentsGenerated)
+        {
+            return;
+        }
+
+        chunk.world.terrainGen.GenerateTerrainForChunk(chunk);
+        contentsGenerated = true;
+    }
+
+
     void InitializeChunkDataReceive(int size)
     {
         receiveBuffer = new byte[size];
@@ -188,7 +200,7 @@ public class ChunkBlocks {
     void FinishChunkDataReceive()
     {
         GenerateContentsFromBytes();
-        chunk.logic.SetFlag(Flag.contentsGenerated, true);
+        contentsGenerated = true;
         receiveBuffer = null;
         receiveIndex = 0;
     }

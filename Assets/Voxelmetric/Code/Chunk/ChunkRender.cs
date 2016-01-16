@@ -39,7 +39,6 @@ public class ChunkRender {
                 {
                     chunk.logic.SetFlag(Flag.busy, true);
                     BuildMeshData();
-                    chunk.logic.SetFlag(Flag.meshReady, true);
                 });
                 thread.Start();
             }
@@ -48,7 +47,6 @@ public class ChunkRender {
         {
             chunk.logic.SetFlag(Flag.busy, true);
             BuildMeshData();
-            chunk.logic.SetFlag(Flag.meshReady, true);
         }
     }
 
@@ -70,6 +68,7 @@ public class ChunkRender {
                 }
             }
         }
+        chunk.logic.SetFlag(Flag.meshReady, true);
     }
 
     /// <summary> Sends the calculated mesh information
