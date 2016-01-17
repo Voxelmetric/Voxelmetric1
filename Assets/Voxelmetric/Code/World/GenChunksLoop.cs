@@ -197,20 +197,27 @@ public class ChunksLoop {
     void Delete()
     {
         int index = 0;
-
         while (chunkWorkLists[Stage.delete].Count > index)
         {
             Chunk chunk = chunkWorkLists[Stage.delete][index];
 
-            if (chunk == null)
+            if (!IsCorrectStage(Stage.delete, chunk))
             {
                 chunkWorkLists[Stage.delete].RemoveAt(index);
                 continue;
             }
 
-            chunk.ReturnChunkToPool();
-            //ReturnChunkToPool sets the chunk's stage to created
-            chunk.stage = Stage.created;
+            if (chunk == null)
+            {
+                index++;
+                continue;
+            }
+            else 
+            {
+                chunk.ReturnChunkToPool();
+                //ReturnChunkToPool sets the chunk's stage to created
+            }
+
         }
     }
 
