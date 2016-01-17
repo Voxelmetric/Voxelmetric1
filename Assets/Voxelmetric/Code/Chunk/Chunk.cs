@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-public enum Stage {created, terrain, buildMesh, render, ready, saveAndDelete, delete, deleted }
+public enum Stage {created, terrain, buildMesh, render, ready, saveAndDelete, delete }
 
 [RequireComponent(typeof(MeshFilter))]
 [RequireComponent(typeof(MeshRenderer))]
@@ -82,6 +82,12 @@ public class Chunk : MonoBehaviour
     public void UpdateSoon()
     {
         logic.SetFlag(Flag.updateSoon, true);
+    }
+
+    public void MarkForDeletion()
+    {
+        logic.SetFlag(Flag.markedForDeletion, true);
+        world.chunksLoop.AddToDeletionList(this);
     }
 
     public void ReturnChunkToPool()

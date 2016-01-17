@@ -116,17 +116,6 @@ public class WorldChunks {
         return newChunk;
     }
 
-    ///// <summary> Saves the chunk and adds it to a list of chunks to return to the pool</summary>
-    ///// <param name="pos">Position of the chunk to destroy</param>
-    //public void Destroy(BlockPos pos)
-    //{
-    //    Chunk chunk = Get(pos);
-    //    if (chunk)
-    //    {
-    //        chunksToDelete.Add(chunk);
-    //    }
-    //}
-
     public void AddToChunkPool(GameObject chunk)
     {
         chunk.SetActive(false);

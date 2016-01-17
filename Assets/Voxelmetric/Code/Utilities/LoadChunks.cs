@@ -47,7 +47,7 @@ public class LoadChunks : MonoBehaviour
 
         if (deleteTimer == WaitBetweenDeletes)
         {
-            //DeleteChunks();
+            DeleteChunks();
             deleteTimer = 0;
             return;
         }
@@ -71,7 +71,8 @@ public class LoadChunks : MonoBehaviour
 
             if ((xd * xd + yd * yd) > distanceToDeleteInUnitsSquared)
             {
-                chunk.stage = Stage.saveAndDelete;
+                if(!chunk.logic.GetFlag(Flag.markedForDeletion))
+                    chunk.MarkForDeletion();
             }
         }
     }

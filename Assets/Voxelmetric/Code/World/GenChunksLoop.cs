@@ -16,7 +16,8 @@ using System;
 /// </summary>
 public class ChunksLoop {
 
-    public Dictionary<Stage, List<Chunk>> chunksToGen = new Dictionary<Stage, List<Chunk>>();
+    Dictionary<Stage, List<Chunk>> chunkWorkLists = new Dictionary<Stage, List<Chunk>>();
+    List<Chunk> markedForDeletion = new List<Chunk>();
     World world;
 
     public bool isPlaying = true;
@@ -26,9 +27,10 @@ public class ChunksLoop {
     public ChunksLoop(World world)
     {
         this.world = world;
-        chunksToGen.Add(Stage.terrain, new List<Chunk>());
-        chunksToGen.Add(Stage.buildMesh, new List<Chunk>());
-        chunksToGen.Add(Stage.saveAndDelete, new List<Chunk>());
+        chunkWorkLists.Add(Stage.terrain, new List<Chunk>());
+        chunkWorkLists.Add(Stage.buildMesh, new List<Chunk>());
+        chunkWorkLists.Add(Stage.saveAndDelete, new List<Chunk>());
+        chunkWorkLists.Add(Stage.delete, new List<Chunk>());
 
         loopThread = new Thread(() =>
         {
@@ -37,6 +39,7 @@ public class ChunksLoop {
                 try
                 {
                     Terrain();
+                    CheckChunksMarkedForDeletion();
                     SaveAndDelete();
                 }
                 catch (Exception ex)
@@ -70,7 +73,7 @@ public class ChunksLoop {
         get
         {
             int i = 0;
-            foreach (var list in chunksToGen.Values)
+            foreach (var list in chunkWorkLists.Values)
             {
                 i += list.Count;
             }
@@ -80,20 +83,22 @@ public class ChunksLoop {
 
     public void MainThreadLoop()
     {
-        // eventually we want to handle chunk return to pool and 
-        // adding mesh data to the unity mesh
+        Delete();
+        // eventually we want to handle adding mesh data to the unity mesh
         // and maybe even the chunk's regular update func
     }
 
     void Terrain()
     {
-        while (chunksToGen[Stage.terrain].Count > 0)
+        int index = 0;
+
+        while (chunkWorkLists[Stage.terrain].Count > index)
         {
-            Chunk chunk = chunksToGen[Stage.terrain][0];
+            Chunk chunk = chunkWorkLists[Stage.terrain][index];
 
             if (!IsCorrectStage(Stage.terrain, chunk))
             {
-                chunksToGen[Stage.terrain].RemoveAt(0);
+                chunkWorkLists[Stage.terrain].RemoveAt(index);
                 continue;
             }
 
@@ -119,17 +124,21 @@ public class ChunksLoop {
             {
                 chunk.stage = Stage.buildMesh;
             }
+            else
+            {
+                index++;
+            }
         }
     }
 
     void BuildMesh()
     {
-        while (chunksToGen[Stage.buildMesh].Count > 0)
+        while (chunkWorkLists[Stage.buildMesh].Count > 0)
         {
-            Chunk chunk = chunksToGen[Stage.buildMesh][0];
+            Chunk chunk = chunkWorkLists[Stage.buildMesh][0];
             if (!IsCorrectStage(Stage.buildMesh, chunk))
             {
-                chunksToGen[Stage.buildMesh].RemoveAt(0);
+                chunkWorkLists[Stage.buildMesh].RemoveAt(0);
                 continue;
             }
 
@@ -138,28 +147,90 @@ public class ChunksLoop {
         }
     }
 
+    void CheckChunksMarkedForDeletion()
+    {
+        int index = 0;
+        while (markedForDeletion.Count > index)
+        {
+            if (markedForDeletion[index] == null)
+            {
+                markedForDeletion.RemoveAt(index);
+            }
+
+            if (markedForDeletion[index].blocks.contentsGenerated &&
+                (markedForDeletion[index].stage == Stage.created ||
+                markedForDeletion[index].stage == Stage.ready))
+            {
+                markedForDeletion[index].stage = Stage.saveAndDelete;
+                markedForDeletion.RemoveAt(index);
+            }
+            else
+            {
+                index++;
+                continue;
+            }
+        }
+    }
+
     void SaveAndDelete()
     {
-        for (int i = 0; i < chunksToGen[Stage.saveAndDelete].Count; i++)
+        int index = 0;
+
+        while (chunkWorkLists[Stage.saveAndDelete].Count > index)
         {
-            Chunk chunk = chunksToGen[Stage.saveAndDelete][0];
+            Chunk chunk = chunkWorkLists[Stage.saveAndDelete][index];
+            if (!IsCorrectStage(Stage.saveAndDelete, chunk))
+            {
+                chunkWorkLists[Stage.saveAndDelete].RemoveAt(index);
+                continue;
+            }
 
             if (chunk.logic.GetFlag(Flag.chunkModified))
+            {
                 Serialization.SaveChunk(chunk);
+            }
 
             chunk.stage = Stage.delete;
         }
     }
 
+    void Delete()
+    {
+        int index = 0;
+
+        while (chunkWorkLists[Stage.delete].Count > index)
+        {
+            Chunk chunk = chunkWorkLists[Stage.delete][index];
+
+            if (chunk == null)
+            {
+                chunkWorkLists[Stage.delete].RemoveAt(index);
+                continue;
+            }
+
+            chunk.ReturnChunkToPool();
+            //ReturnChunkToPool sets the chunk's stage to created
+            chunk.stage = Stage.created;
+        }
+    }
+
+    public void AddToDeletionList(Chunk chunk)
+    {
+        if (!markedForDeletion.Contains(chunk))
+        {
+            markedForDeletion.Add(chunk);
+        }
+    }
+
     public void ChunkStageChanged(Chunk chunk, Stage oldStage, Stage newStage)
     {
-        if (chunksToGen.ContainsKey(oldStage) &&
-            chunksToGen[oldStage].Contains(chunk))
-            chunksToGen[oldStage].Remove(chunk);
+        if (chunkWorkLists.ContainsKey(oldStage) &&
+            chunkWorkLists[oldStage].Contains(chunk))
+            chunkWorkLists[oldStage].Remove(chunk);
 
-        if (chunksToGen.ContainsKey(newStage) &&
-            !chunksToGen[newStage].Contains(chunk))
-            chunksToGen[newStage].Add(chunk);
+        if (chunkWorkLists.ContainsKey(newStage) &&
+            !chunkWorkLists[newStage].Contains(chunk))
+            chunkWorkLists[newStage].Add(chunk);
     }
 
     bool IsCorrectStage(Stage stage, Chunk chunk)
