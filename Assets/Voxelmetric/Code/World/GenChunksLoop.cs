@@ -39,8 +39,7 @@ public class ChunksLoop {
                 try
                 {
                     Terrain();
-                    CheckChunksMarkedForDeletion();
-                    SaveAndDelete();
+                    //SaveAndDelete();
                 }
                 catch (Exception ex)
                 {
@@ -72,18 +71,15 @@ public class ChunksLoop {
     {
         get
         {
-            int i = 0;
-            foreach (var list in chunkWorkLists.Values)
-            {
-                i += list.Count;
-            }
+            int i = chunkWorkLists[Stage.buildMesh].Count;
+            i += chunkWorkLists[Stage.terrain].Count;
             return i;
         }
     }
 
     public void MainThreadLoop()
     {
-        Delete();
+        DeleteMarkedChunks();
         // eventually we want to handle adding mesh data to the unity mesh
         // and maybe even the chunk's regular update func
     }
@@ -111,10 +107,13 @@ public class ChunksLoop {
                     for (int z = -1; z <= 1; z++)
                     {
                         Chunk chunkToGen = world.chunks.Get(chunk.pos + (new BlockPos(x, y, z) * Config.Env.ChunkSize));
-                        chunkToGen.blocks.GenerateChunkContents();
-                        if (!chunkToGen.blocks.contentsGenerated)
+                        if (chunkToGen)
                         {
-                            chunksAllGenerated = false;
+                            chunkToGen.blocks.GenerateChunkContents();
+                            if (!chunkToGen.blocks.contentsGenerated)
+                            {
+                                chunksAllGenerated = false;
+                            }
                         }
                     }
                 }
@@ -147,21 +146,26 @@ public class ChunksLoop {
         }
     }
 
-    void CheckChunksMarkedForDeletion()
+    void DeleteMarkedChunks()
     {
         int index = 0;
         while (markedForDeletion.Count > index)
         {
-            if (markedForDeletion[index] == null)
+            Chunk chunk = markedForDeletion[index];
+
+            if (chunk == null)
             {
                 markedForDeletion.RemoveAt(index);
             }
 
-            if (markedForDeletion[index].blocks.contentsGenerated &&
-                (markedForDeletion[index].stage == Stage.created ||
-                markedForDeletion[index].stage == Stage.ready))
+            if (chunk.blocks.contentsGenerated && (chunk.stage == Stage.created || chunk.stage == Stage.ready))
             {
-                markedForDeletion[index].stage = Stage.saveAndDelete;
+                if (chunk.logic.GetFlag(Flag.chunkModified))
+                {
+                    Serialization.SaveChunk(chunk);
+                }
+
+                chunk.ReturnChunkToPool();
                 markedForDeletion.RemoveAt(index);
             }
             else
@@ -169,55 +173,6 @@ public class ChunksLoop {
                 index++;
                 continue;
             }
-        }
-    }
-
-    void SaveAndDelete()
-    {
-        int index = 0;
-
-        while (chunkWorkLists[Stage.saveAndDelete].Count > index)
-        {
-            Chunk chunk = chunkWorkLists[Stage.saveAndDelete][index];
-            if (!IsCorrectStage(Stage.saveAndDelete, chunk))
-            {
-                chunkWorkLists[Stage.saveAndDelete].RemoveAt(index);
-                continue;
-            }
-
-            if (chunk.logic.GetFlag(Flag.chunkModified))
-            {
-                Serialization.SaveChunk(chunk);
-            }
-
-            chunk.stage = Stage.delete;
-        }
-    }
-
-    void Delete()
-    {
-        int index = 0;
-        while (chunkWorkLists[Stage.delete].Count > index)
-        {
-            Chunk chunk = chunkWorkLists[Stage.delete][index];
-
-            if (!IsCorrectStage(Stage.delete, chunk))
-            {
-                chunkWorkLists[Stage.delete].RemoveAt(index);
-                continue;
-            }
-
-            if (chunk == null)
-            {
-                index++;
-                continue;
-            }
-            else 
-            {
-                chunk.ReturnChunkToPool();
-                //ReturnChunkToPool sets the chunk's stage to created
-            }
-
         }
     }
 
