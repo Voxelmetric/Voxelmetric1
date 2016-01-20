@@ -17,20 +17,18 @@ public class WorldBlocks  {
     {
         Chunk containerChunk = world.chunks.Get(pos);
 
+        if (pos.y < world.config.minY)
+        {
+            return Block.Solid;
+        }
+
         if (containerChunk != null)
         {
             return containerChunk.blocks.Get(pos);
         }
         else
         {
-            if (pos.y < world.config.minY)
-            {
-                return Block.Solid;
-            }
-            else
-            {
-                return Block.Air;
-            }
+            return Block.Solid;
         }
     }
 
