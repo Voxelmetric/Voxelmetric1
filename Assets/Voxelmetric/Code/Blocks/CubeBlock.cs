@@ -1,6 +1,8 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System;
 
+[Serializable]
 public class CubeBlock : SolidBlock {
 
     public TextureCollection[] textures { get { return ((CubeBlockConfig)config).textures; } }

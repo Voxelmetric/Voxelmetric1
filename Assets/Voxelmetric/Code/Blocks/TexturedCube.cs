@@ -1,6 +1,8 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System;
 
+[Serializable]
 public class TexturedCube : CubeBlock
 {
     //public string[] textureList = new string[] { "actionmine"};

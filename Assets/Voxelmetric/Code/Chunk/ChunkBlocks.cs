@@ -163,8 +163,20 @@ public class ChunkBlocks {
             return;
         }
 
-        chunk.world.terrainGen.GenerateTerrainForChunk(chunk);
-        contentsGenerated = true;
+        if (chunk.world.isServer)
+        {
+            chunk.world.terrainGen.GenerateTerrainForChunk(chunk);
+            Serialization.Load(chunk);
+
+            contentsGenerated = true;
+        }
+        else
+        {
+            if (receiveBuffer == null)
+            {
+                chunk.world.client.RequestChunk(chunk.pos);
+            }
+        }
     }
 
 

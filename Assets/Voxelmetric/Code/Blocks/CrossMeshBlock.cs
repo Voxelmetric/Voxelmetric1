@@ -1,6 +1,8 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System;
 
+[Serializable]
 public class CrossMeshBlock : Block
 {
     public TextureCollection texture { get { return ((CrossMeshBlockConfig)config).texture; } }

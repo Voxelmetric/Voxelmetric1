@@ -1,6 +1,8 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
+using System;
 
+[Serializable]
 public class CustomMesh : Block {
 
     public CustomMeshBlockConfig customMeshConfig { get { return (CustomMeshBlockConfig)config; } }

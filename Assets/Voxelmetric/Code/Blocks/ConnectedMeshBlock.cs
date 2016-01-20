@@ -1,7 +1,9 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
 using Newtonsoft.Json;
+using System;
 
+[Serializable]
 public class BlockConnected : Block
 {
     //public BlockConnected() : base() { }

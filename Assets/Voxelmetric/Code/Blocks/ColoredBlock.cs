@@ -1,6 +1,8 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System;
 
+[Serializable]
 public class ColoredBlock : SolidBlock {
 
     public Color color;
