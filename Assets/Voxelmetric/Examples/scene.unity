@@ -2017,7 +2017,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   worldConfig: default
   isServer: 1
-  allowConnections: 1
+  allowConnections: 0
   worldName: world
   worldIndex: 0
 --- !u!1 &1766354337
