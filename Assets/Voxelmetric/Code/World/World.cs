@@ -28,6 +28,8 @@ public class World : MonoBehaviour {
     public VmNetworking networking;
     public TerrainGen terrainGen;
 
+    Material chunkMaterial;
+
     [HideInInspector]
     public int worldIndex;
 
@@ -57,16 +59,20 @@ public class World : MonoBehaviour {
 
         terrainGen = new TerrainGen(this, config.layerFolder);
         chunksLoop = new ChunksLoop(this);
+
+
+        gameObject.GetComponent<Renderer>().material.mainTexture = textureIndex.atlas;
+        chunkMaterial = gameObject.GetComponent<Renderer>().material;
     }
 
     void Update()
     {
-    }
-
-    void LateUpdate()
-    {
         chunksLoop.MainThreadLoop();
-        //chunks.ChunksUpdate();
+
+        foreach (var pos in chunks.posCollection)
+        {
+            Graphics.DrawMesh(chunks.Get(pos).render.meshData.mesh, pos, Quaternion.Euler(0, 0, 0), chunkMaterial, 0);
+        }
     }
 
     void OnApplicationQuit()

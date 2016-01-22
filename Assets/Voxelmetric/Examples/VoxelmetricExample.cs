@@ -19,11 +19,6 @@ public class VoxelmetricExample : MonoBehaviour
         blockToPlace = newType;
     }
 
-    void Start()
-    {
-    }
-
-    bool test;
     void Update()
     {
         //Movement
@@ -36,8 +31,8 @@ public class VoxelmetricExample : MonoBehaviour
             transform.localRotation = Quaternion.AngleAxis(rot.x, Vector3.up);
             transform.localRotation *= Quaternion.AngleAxis(rot.y, Vector3.left);
         }
-        transform.position += transform.forward * 50 * Input.GetAxis("Vertical") * Time.deltaTime;
-        transform.position += transform.right * 50 * Input.GetAxis("Horizontal") * Time.deltaTime;
+        transform.position += transform.forward * 40 * Input.GetAxis("Vertical") * Time.deltaTime;
+        transform.position += transform.right * 40 * Input.GetAxis("Horizontal") * Time.deltaTime;
 
         //Save
         if (saveProgress != null)

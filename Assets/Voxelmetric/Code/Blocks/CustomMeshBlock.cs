@@ -10,12 +10,12 @@ public class CustomMesh : Block {
     public override void AddBlockData(Chunk chunk, BlockPos localPos, BlockPos globalPos, MeshData meshData)
     {
         int initialVertCount = meshData.vertices.Count;
-        int colInitialVertCount = meshData.colVertices.Count;
+        //int colInitialVertCount = meshData.colVertices.Count;
 
         for (int i = 0; i < customMeshConfig.verts.Length; i++)
         {
             meshData.AddVertex(customMeshConfig.verts[i] + (Vector3)localPos);
-            meshData.colVertices.Add(customMeshConfig.verts[i] + (Vector3)localPos);
+            //meshData.colVertices.Add(customMeshConfig.verts[i] + (Vector3)localPos);
 
             if (customMeshConfig.uvs.Length == 0)
                 meshData.uv.Add(new Vector2(0, 0));
@@ -45,7 +45,7 @@ public class CustomMesh : Block {
         for (int i = 0; i < customMeshConfig.tris.Length; i++)
         {
             meshData.AddTriangle(customMeshConfig.tris[i] + initialVertCount);
-            meshData.colTriangles.Add(customMeshConfig.tris[i] + colInitialVertCount);
+            //meshData.colTriangles.Add(customMeshConfig.tris[i] + colInitialVertCount);
         }
     }
 

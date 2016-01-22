@@ -13,6 +13,7 @@ public class ChunkBlocks {
     protected int receiveIndex;
     public bool contentsGenerated;
     public bool generationStarted;
+    public bool contentsModified;
 
     public ChunkBlocks(Chunk chunk)
     {
@@ -148,7 +149,7 @@ public class ChunkBlocks {
                 if (!modifiedBlocks.Contains(pos))
                 {
                     modifiedBlocks.Add(pos);
-                    chunk.logic.SetFlag(Flag.chunkModified, true);
+                    chunk.blocks.contentsModified = true;
                 }
             }
         }

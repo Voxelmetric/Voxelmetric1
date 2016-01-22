@@ -30,8 +30,6 @@ public class ChunksLoop {
         this.world = world;
         chunkWorkLists.Add(Stage.terrain, new List<BlockPos>());
         chunkWorkLists.Add(Stage.buildMesh, new List<BlockPos>());
-        //chunkWorkLists.Add(Stage.saveAndDelete, new List<BlockPos>());
-        //chunkWorkLists.Add(Stage.delete, new List<BlockPos>());
         chunkWorkLists.Add(Stage.render, new List<BlockPos>());
 
         loopThread = new Thread(() =>
@@ -92,6 +90,7 @@ public class ChunksLoop {
 
         while (chunkWorkLists[Stage.terrain].Count > index)
         {
+            
             Chunk chunk = world.chunks.Get(chunkWorkLists[Stage.terrain][index]);
 
             if (!IsCorrectStage(Stage.terrain, chunk))
@@ -109,23 +108,19 @@ public class ChunksLoop {
                     for (int z = -1; z <= 1; z++)
                     {
                         Chunk chunkToGen = world.chunks.Get(chunk.pos + (new BlockPos(x, y, z) * Config.Env.ChunkSize));
-                        if (chunkToGen)
+                        if (chunkToGen != null)
                         {
                             chunkToGen.blocks.GenerateChunkContents();
-
                             if (!chunkToGen.blocks.contentsGenerated)
                             {
                                 return;
                             }
-                            //    while (!chunkToGen.blocks.contentsGenerated)
-                            //{
-                            //    Thread.Sleep(0);
-                            //    //chunksAllGenerated = false;
-                            //}
                         }
                     }
                 }
             }
+
+            
 
             if (chunksAllGenerated)
             {
@@ -151,7 +146,6 @@ public class ChunksLoop {
 
             chunk.render.BuildMeshData();
             chunk.stage = Stage.render;
-            //renderMesh.Add(chunk.pos);
         }
     }
 
@@ -168,12 +162,8 @@ public class ChunksLoop {
                 continue;
             }
 
-            chunk.logic.SetFlag(Flag.meshReady, false);
-            chunk.render.RenderMesh();
-            chunk.render.ClearMeshData();
-
+            chunk.render.meshData.CommitMesh();
             chunk.stage = Stage.ready;
-            chunk.logic.SetFlag(Flag.busy, false);
         }
     }
 
@@ -187,12 +177,11 @@ public class ChunksLoop {
             if (chunk != null && chunk.blocks.contentsGenerated &&
                 (chunk.stage == Stage.created || chunk.stage == Stage.ready))
             {
-                if (chunk.logic.GetFlag(Flag.chunkModified))
+                if (chunk.blocks.contentsModified)
                 {
                     Serialization.SaveChunk(chunk);
                 }
-
-                chunk.ReturnChunkToPool();
+                world.chunks.Remove(chunk.pos);
                 markedForDeletion.RemoveAt(index);
             }
             else

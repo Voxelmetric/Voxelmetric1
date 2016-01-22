@@ -7,7 +7,6 @@ public class MeshBuilder {
         (Chunk chunk, BlockPos localPos, BlockPos globalPos, MeshData meshData, TextureCollection texture, bool useOffset = true)
     {
         float halfBlock = (Config.Env.BlockSize / 2) + Config.Env.BlockFacePadding;
-        float colliderOffest = 0.05f * Config.Env.BlockSize;
 
         float blockHeight = 1;
         float offsetX = 0;
@@ -37,8 +36,6 @@ public class MeshBuilder {
 
         //Converting the position to a vector adjusts it based on block size and gives us real world coordinates for x, y and z
         Vector3 vPos = localPos;
-        //Vector3 vPos = (pos - chunk.pos);
-        Vector3 vPosCollider = localPos;
         vPos += new Vector3(offsetX, 0, offsetZ);
 
         meshData.AddVertex(new Vector3(vPos.x - halfBlock, vPos.y - halfBlock, vPos.z + halfBlock));
@@ -72,11 +69,5 @@ public class MeshBuilder {
         meshData.AddQuadTriangles();
         BlockBuilder.BuildTexture(chunk, localPos, globalPos, meshData, Direction.north, texture);
         meshData.AddColors(1, 1, 1, 1, 1);
-
-        meshData.AddVertex(new Vector3(vPosCollider.x - halfBlock, vPosCollider.y - halfBlock + colliderOffest, vPosCollider.z + halfBlock), collisionMesh: true);
-        meshData.AddVertex(new Vector3(vPosCollider.x + halfBlock, vPosCollider.y - halfBlock + colliderOffest, vPosCollider.z + halfBlock), collisionMesh: true);
-        meshData.AddVertex(new Vector3(vPosCollider.x + halfBlock, vPosCollider.y - halfBlock + colliderOffest, vPosCollider.z - halfBlock), collisionMesh: true);
-        meshData.AddVertex(new Vector3(vPosCollider.x - halfBlock, vPosCollider.y - halfBlock + colliderOffest, vPosCollider.z - halfBlock), collisionMesh: true);
-        meshData.AddQuadTriangles(collisionMesh:true);
     }
 }

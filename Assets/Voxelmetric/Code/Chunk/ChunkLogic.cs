@@ -2,14 +2,10 @@
 using System.Collections.Generic;
 using System.Collections;
 
-public enum Flag { busy, meshReady, loadComplete, chunkModified, updateSoon, updateNow, markedForDeletion }
-
 public class ChunkLogic {
 
     protected Chunk chunk;
     protected float randomUpdateTime = 0;
-
-    public Hashtable flags = new Hashtable();
 
     protected List<BlockAndTimer> scheduledUpdates = new List<BlockAndTimer>();
 
@@ -18,41 +14,8 @@ public class ChunkLogic {
         this.chunk = chunk;
     }
 
-    public bool GetFlag(object key)
-    {
-        if (!flags.ContainsKey(key))
-        {
-            return false;
-        }
-        return (bool)flags[key];
-    }
-
-    public T GetFlag<T>(object key) where T : new()
-    {
-        if (!flags.ContainsKey(key))
-        {
-            return new T();
-        }
-        return (T)flags[key];
-    }
-
-    public void SetFlag(object key, object value)
-    {
-        if (flags.ContainsKey(key))
-        {
-            flags.Remove(key);
-        }
-
-        flags.Add(key, value);
-    }
-
     public virtual void TimedUpdated()
     {
-        if (!GetFlag(Flag.loadComplete))
-        {
-            return;
-        }
-
         randomUpdateTime += Time.fixedDeltaTime;
         if (randomUpdateTime >= chunk.world.config.randomUpdateFrequency)
         {
@@ -77,13 +40,6 @@ public class ChunkLogic {
                     i--;
                 }
             }
-
-            if (GetFlag(Flag.updateSoon))
-            {
-                chunk.render.UpdateChunk();
-                SetFlag(Flag.updateSoon, false);
-                SetFlag(Flag.updateNow, false);
-            }
         }
 
     }
@@ -91,12 +47,6 @@ public class ChunkLogic {
     public void AddScheduledUpdate(BlockPos pos, float time)
     {
         scheduledUpdates.Add(new BlockAndTimer(pos, time));
-    }
-
-    public void ResetContent()
-    {
-        flags.Clear();
-        scheduledUpdates.Clear();
     }
 
 }

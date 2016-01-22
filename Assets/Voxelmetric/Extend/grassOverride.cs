@@ -20,7 +20,7 @@ public class GrassBlock : CubeBlock
                         && chunk.blocks.Get(globalPos.Add(x, y + 1, z)).type == chunk.world.blockIndex.GetType("air"))
                     {
                         chunk.blocks.Set(globalPos.Add(x, y, z), "grass", false);
-                        chunk.logic.SetFlag(Flag.updateSoon, true);
+                        chunk.render.needsUpdate = true;
                     }
                 }
             }

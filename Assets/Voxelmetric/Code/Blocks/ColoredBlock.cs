@@ -25,11 +25,6 @@ public class ColoredBlock : SolidBlock {
         meshData.colors.Add(color);
         meshData.colors.Add(color);
         meshData.colors.Add(color);
-
-        if (world.config.useCollisionMesh)
-        {
-            BlockBuilder.BuildCollider(chunk, localPos, globalPos, meshData, direction);
-        }
     }
 
     public override string displayName

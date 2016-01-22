@@ -384,7 +384,6 @@ MonoBehaviour:
   generateTerrain: 1
   chunkLoadRadius: 6
   DistanceToDeleteChunks: 8
-  WaitBetweenDeletes: 20
 --- !u!1 &312836251
 GameObject:
   m_ObjectHideFlags: 0
@@ -2029,6 +2028,7 @@ GameObject:
   m_Component:
   - 4: {fileID: 1766354338}
   - 114: {fileID: 1571917861}
+  - 23: {fileID: 1766354339}
   m_Layer: 0
   m_Name: World
   m_TagString: Untagged
@@ -2048,6 +2048,30 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 3
+--- !u!23 &1766354339
+MeshRenderer:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 1766354337}
+  m_Enabled: 1
+  m_CastShadows: 1
+  m_ReceiveShadows: 1
+  m_Materials:
+  - {fileID: 2100000, guid: 7fa2460a4614b844c9c80d1c0398b97d, type: 2}
+  m_SubsetIndices: 
+  m_StaticBatchRoot: {fileID: 0}
+  m_UseLightProbes: 1
+  m_ReflectionProbeUsage: 1
+  m_ProbeAnchor: {fileID: 0}
+  m_ScaleInLightmap: 1
+  m_PreserveUVs: 0
+  m_ImportantGI: 0
+  m_AutoUVMaxDistance: .5
+  m_AutoUVMaxAngle: 89
+  m_LightmapParameters: {fileID: 0}
+  m_SortingLayerID: 0
+  m_SortingOrder: 0
 --- !u!1 &1845043971
 GameObject:
   m_ObjectHideFlags: 0

@@ -7,7 +7,6 @@ public class LoadChunks : MonoBehaviour
 
     public World world;
     public bool generateTerrain = true;
-    private BlockPos objectPos;
 
     [Range(1, 64)]
     public int chunkLoadRadius = 8;
@@ -27,25 +26,19 @@ public class LoadChunks : MonoBehaviour
 
     void Update()
     {
-        objectPos = transform.position;
-
-        if (world.chunksLoop.ChunksInProgress > 0)
+        if (world.chunksLoop.ChunksInProgress > 32)
         {
             return;
         }
 
-        Profiler.BeginSample("delete");
         DeleteChunks();
-        Profiler.EndSample();
-        Profiler.BeginSample("find and load");
         FindChunksAndLoad();
-        Profiler.EndSample();
     }
 
     void DeleteChunks()
     {
-        int posX = objectPos.x;
-        int posZ = objectPos.z;
+        int posX = Mathf.FloorToInt(transform.position.x);
+        int posZ = Mathf.FloorToInt(transform.position.z);
 
         foreach (var pos in world.chunks.posCollection)
         {
@@ -55,7 +48,6 @@ public class LoadChunks : MonoBehaviour
             if ((xd * xd + yd * yd) > distanceToDeleteInUnitsSquared)
             {
                 Chunk chunk = world.chunks.Get(pos);
-                if(!chunk.logic.GetFlag(Flag.markedForDeletion))
                     chunk.MarkForDeletion();
             }
         }
@@ -67,7 +59,7 @@ public class LoadChunks : MonoBehaviour
         for (int i = 0; i < chunkPositions.Length; i++)
         {
             //Get the position of this gameobject to generate around
-            BlockPos playerPos = objectPos.ContainingChunkCoordinates();
+            BlockPos playerPos = ((BlockPos)transform.position).ContainingChunkCoordinates();
 
             //translate the player position and array position into chunk position
             BlockPos newChunkPos = new BlockPos(
@@ -87,11 +79,7 @@ public class LoadChunks : MonoBehaviour
             for (int y = world.config.minY; y <= world.config.maxY; y += Config.Env.ChunkSize)
                 world.chunks.CreateChunkAndNeighbors(new BlockPos(newChunkPos.x, y, newChunkPos.z));
 
-            Debug.Log(i);
             return;
         }
-
-        Debug.Log(chunkPositions.Length);
-
     }
 }

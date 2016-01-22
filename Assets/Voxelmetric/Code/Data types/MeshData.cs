@@ -7,20 +7,19 @@ public class MeshData
     public List<Vector3> vertices = new List<Vector3>();
     public List<int> triangles = new List<int>();
     public List<Vector2> uv = new List<Vector2>();
-
     public List<Color> colors = new List<Color>();
 
-    public List<Vector3> colVertices = new List<Vector3>();
-    public List<int> colTriangles = new List<int>();
+    Vector3[] verticesArray;
+    int[] trianglesArray;
+    Vector2[] uvArray;
+    Color[] colorsArray;
 
-    //possibly store these in arrays while we wait for the main thread to get to and render them?
+    public Mesh mesh;
 
     public MeshData() { }
 
     public void AddQuadTriangles(bool collisionMesh = false)
     {
-        if (!collisionMesh)
-        {
             triangles.Add(vertices.Count - 4);
             triangles.Add(vertices.Count - 3);
             triangles.Add(vertices.Count - 2);
@@ -28,56 +27,23 @@ public class MeshData
             triangles.Add(vertices.Count - 4);
             triangles.Add(vertices.Count - 2);
             triangles.Add(vertices.Count - 1);
-        }
-        else
-        {
-            colTriangles.Add(colVertices.Count - 4);
-            colTriangles.Add(colVertices.Count - 3);
-            colTriangles.Add(colVertices.Count - 2);
-
-            colTriangles.Add(colVertices.Count - 4);
-            colTriangles.Add(colVertices.Count - 2);
-            colTriangles.Add(colVertices.Count - 1);
-        }
     }
 
     public void AddVertex(Vector3 vertex, bool collisionMesh = false)
     {
-        if (!collisionMesh){
             vertices.Add(vertex);
-        }
-        else
-        {
-            colVertices.Add(vertex);
-        }
-
     }
 
     public void AddTriangle(int tri, bool collisionMesh = false)
     {
-        if (!collisionMesh){
             triangles.Add(tri);
-        }
-        else
-        {
-            colTriangles.Add(tri);
-        }
     }
 
     public void AddTriangle(bool collisionMesh = false)
     {
-        if (!collisionMesh)
-        {
             triangles.Add(vertices.Count - 3);
             triangles.Add(vertices.Count - 2);
             triangles.Add(vertices.Count - 1);
-        }
-        else
-        {
-            colTriangles.Add(colVertices.Count - 3);
-            colTriangles.Add(colVertices.Count - 2);
-            colTriangles.Add(colVertices.Count - 1);
-        }
     }
 
     // Keeping this method even though we're not yet adding anything but 1, 1, 1, 1
@@ -94,13 +60,33 @@ public class MeshData
         colors.Add(new Color(sw, sw, sw));
     }
 
-    public void ClearMesh()
+    public void ConvertToArrays()
     {
+        colorsArray = colors.ToArray();
+        verticesArray = vertices.ToArray();
+        trianglesArray = triangles.ToArray();
+        uvArray = uv.ToArray();
+
         colors.Clear();
         vertices.Clear();
         triangles.Clear();
         uv.Clear();
-        colTriangles.Clear();
-        colVertices.Clear();
+    }
+
+    public void CommitMesh()
+    {
+        Mesh newMesh = new Mesh();
+        newMesh.vertices = verticesArray;
+        newMesh.triangles = trianglesArray;
+        newMesh.colors = colorsArray;
+        newMesh.uv = uvArray;
+        newMesh.RecalculateNormals();
+
+        mesh = newMesh;
+
+        colorsArray = null;
+        verticesArray = null;
+        trianglesArray = null;
+        uvArray = null;
     }
 }

@@ -12,10 +12,6 @@ public class CubeBlock : SolidBlock {
         BlockBuilder.BuildRenderer(chunk, localPos, globalPos, meshData, direction);
         BlockBuilder.BuildTexture(chunk, localPos, globalPos, meshData, direction, textures);
         BlockBuilder.BuildColors(chunk, localPos, globalPos, meshData, direction);
-        if (world.config.useCollisionMesh)
-        {
-            BlockBuilder.BuildCollider(chunk, localPos, globalPos, meshData, direction);
-        }
     }
 
 }

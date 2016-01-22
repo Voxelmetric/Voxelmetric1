@@ -17,8 +17,7 @@ public static class Voxelmetric
         EmptyChunk chunk = original.world.GetComponent<EmptyChunk>();
         if (chunk == null)
         {
-            chunk = (EmptyChunk)original.world.gameObject.AddComponent(typeof(EmptyChunk));
-            chunk.world = original.world;
+            chunk = new EmptyChunk(original.world, new BlockPos());
         }
 
         original.OnCreate(chunk, blockPos - blockPos.ContainingChunkCoordinates(), blockPos);
@@ -35,9 +34,7 @@ public static class Voxelmetric
         EmptyChunk chunk = world.GetComponent<EmptyChunk>();
         if (chunk == null)
         {
-            chunk = (EmptyChunk)world.gameObject.AddComponent(typeof(EmptyChunk));
-            chunk.world = world;
-            chunk.pos = blockPos.ContainingChunkCoordinates();
+            chunk = new EmptyChunk(original.world, blockPos.ContainingChunkCoordinates());
         }
 
         original.OnCreate(chunk, blockPos - blockPos.ContainingChunkCoordinates(), blockPos);
@@ -195,7 +192,7 @@ public static class Voxelmetric
                foreach (var chunk in chunksToSave)
                {
 
-                   while (!chunk.blocks.contentsGenerated || chunk.logic.GetFlag(Flag.busy))
+                   while (!chunk.blocks.contentsGenerated)
                    {
                        Thread.Sleep(0);
                    }

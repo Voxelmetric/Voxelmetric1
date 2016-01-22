@@ -10,11 +10,9 @@ public class WorldChunks {
     public Dictionary<BlockPos, Chunk>.KeyCollection posCollection { get { return chunks.Keys; } }
 
     List<GameObject> chunkPool = new List<GameObject>();
-    GameObject chunkPrefab;
 
     public WorldChunks(World world) {
         this.world = world;
-        chunkPrefab = Resources.Load<GameObject>(world.config.pathToChunkPrefab);
     }
 
     /// <summary> Updates chunks and fires frequent events for chunks. Called by world's LateUpdate</summary>
@@ -60,34 +58,8 @@ public class WorldChunks {
         Chunk existingChunk = Get(pos);
         if (existingChunk != null)
             return existingChunk;
-
-        GameObject newChunkObject;
-        if (chunkPool.Count == 0)
-        {
-            //No chunks in pool, create new
-            newChunkObject = Object.Instantiate(
-                            chunkPrefab, pos,
-                            Quaternion.Euler(Vector3.zero)
-                        ) as GameObject;
-        }
-        else
-        {
-            //Load a chunk from the pool
-            newChunkObject = chunkPool[0];
-            chunkPool.RemoveAt(0);
-            newChunkObject.SetActive(true);
-            newChunkObject.transform.position = pos;
-        }
-
-        newChunkObject.transform.parent = world.gameObject.transform;
-        newChunkObject.transform.name = "Chunk (" + pos + ")";
-
-        Chunk newChunk = newChunkObject.GetComponent<Chunk>();
-
-        newChunk.pos = pos;
-        newChunk.world = world;
-
-        newChunk.Start();
+        
+        Chunk newChunk = new Chunk(world, pos);
 
         //Add it to the chunks dictionary with the position as the key
         chunks.Add(pos, newChunk);
