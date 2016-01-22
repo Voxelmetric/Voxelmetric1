@@ -18,7 +18,7 @@ public class ChunksLoop {
 
     Dictionary<Stage, List<BlockPos>> chunkWorkLists = new Dictionary<Stage, List<BlockPos>>();
     List<BlockPos> markedForDeletion = new List<BlockPos>();
-    List<BlockPos> renderMesh = new List<BlockPos>();
+    //List<BlockPos> renderMesh = new List<BlockPos>();
     World world;
 
     public bool isPlaying = true;
@@ -30,8 +30,9 @@ public class ChunksLoop {
         this.world = world;
         chunkWorkLists.Add(Stage.terrain, new List<BlockPos>());
         chunkWorkLists.Add(Stage.buildMesh, new List<BlockPos>());
-        chunkWorkLists.Add(Stage.saveAndDelete, new List<BlockPos>());
-        chunkWorkLists.Add(Stage.delete, new List<BlockPos>());
+        //chunkWorkLists.Add(Stage.saveAndDelete, new List<BlockPos>());
+        //chunkWorkLists.Add(Stage.delete, new List<BlockPos>());
+        chunkWorkLists.Add(Stage.render, new List<BlockPos>());
 
         loopThread = new Thread(() =>
         {
@@ -121,7 +122,6 @@ public class ChunksLoop {
                             //    Thread.Sleep(0);
                             //    //chunksAllGenerated = false;
                             //}
-                            
                         }
                     }
                 }
@@ -150,17 +150,17 @@ public class ChunksLoop {
             }
 
             chunk.render.BuildMeshData();
-            chunk.stage = Stage.ready;
-            renderMesh.Add(chunk.pos);
+            chunk.stage = Stage.render;
+            //renderMesh.Add(chunk.pos);
         }
     }
 
     void UpdateMeshFilters()
     {
         int index = 0;
-        while (renderMesh.Count > index)
+        while (chunkWorkLists[Stage.render].Count > index)
         {
-            Chunk chunk = world.chunks.Get(renderMesh[index]);
+            Chunk chunk = world.chunks.Get(chunkWorkLists[Stage.render][index]);
 
             if (chunk == null)
             {
@@ -172,7 +172,7 @@ public class ChunksLoop {
             chunk.render.RenderMesh();
             chunk.render.ClearMeshData();
 
-            renderMesh.RemoveAt(index);
+            chunk.stage = Stage.ready;
             chunk.logic.SetFlag(Flag.busy, false);
         }
     }
@@ -184,12 +184,8 @@ public class ChunksLoop {
         {
             Chunk chunk = world.chunks.Get(markedForDeletion[index]);
 
-            if (chunk == null)
-            {
-                markedForDeletion.RemoveAt(index);
-            }
-
-            if (chunk.blocks.contentsGenerated && (chunk.stage == Stage.created || chunk.stage == Stage.ready))
+            if (chunk != null && chunk.blocks.contentsGenerated &&
+                (chunk.stage == Stage.created || chunk.stage == Stage.ready))
             {
                 if (chunk.logic.GetFlag(Flag.chunkModified))
                 {

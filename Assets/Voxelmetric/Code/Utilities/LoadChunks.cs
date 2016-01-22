@@ -18,12 +18,6 @@ public class LoadChunks : MonoBehaviour
     public int DistanceToDeleteChunks = (int)(8 * 1.25f);
     private int distanceToDeleteInUnitsSquared;
 
-    //Every WaitBetweenDeletes frames load chunks will stop to remove chunks beyond DistanceToDeleteChunks
-    [Range(1, 100)]
-    public int WaitBetweenDeletes = 10;
-
-    int deleteTimer = 0;
-
     void Start()
     {
         chunkPositions = ChunkLoadOrder.ChunkPositions(chunkLoadRadius);
@@ -34,29 +28,18 @@ public class LoadChunks : MonoBehaviour
     void Update()
     {
         objectPos = transform.position;
-        ThreadedUpdate();
-    }
 
-    // Update is called once per frame
-    void ThreadedUpdate()
-    {
         if (world.chunksLoop.ChunksInProgress > 0)
         {
             return;
         }
 
-        if (deleteTimer == WaitBetweenDeletes)
-        {
-            DeleteChunks();
-            deleteTimer = 0;
-            return;
-        }
-        else
-        {
-            deleteTimer++;
-        }
-
+        Profiler.BeginSample("delete");
+        DeleteChunks();
+        Profiler.EndSample();
+        Profiler.BeginSample("find and load");
         FindChunksAndLoad();
+        Profiler.EndSample();
     }
 
     void DeleteChunks()
@@ -64,13 +47,14 @@ public class LoadChunks : MonoBehaviour
         int posX = objectPos.x;
         int posZ = objectPos.z;
 
-        foreach (var chunk in world.chunks.chunkCollection)
+        foreach (var pos in world.chunks.posCollection)
         {
-            int xd = posX - chunk.pos.x;
-            int yd = posZ - chunk.pos.z;
+            int xd = posX - pos.x;
+            int yd = posZ - pos.z;
 
             if ((xd * xd + yd * yd) > distanceToDeleteInUnitsSquared)
             {
+                Chunk chunk = world.chunks.Get(pos);
                 if(!chunk.logic.GetFlag(Flag.markedForDeletion))
                     chunk.MarkForDeletion();
             }
@@ -103,7 +87,11 @@ public class LoadChunks : MonoBehaviour
             for (int y = world.config.minY; y <= world.config.maxY; y += Config.Env.ChunkSize)
                 world.chunks.CreateChunkAndNeighbors(new BlockPos(newChunkPos.x, y, newChunkPos.z));
 
+            Debug.Log(i);
             return;
         }
+
+        Debug.Log(chunkPositions.Length);
+
     }
 }

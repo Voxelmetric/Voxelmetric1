@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-public enum Stage {created, terrain, buildMesh, render, ready, saveAndDelete, delete }
+public enum Stage {created, terrain, buildMesh, render, ready }
 
 [RequireComponent(typeof(MeshFilter))]
 [RequireComponent(typeof(MeshRenderer))]
@@ -49,7 +49,7 @@ public class Chunk : MonoBehaviour
 
     public virtual void RegularUpdate()
     {
-        if (stage == Stage.created || stage == Stage.delete)
+        if (stage != Stage.ready)
             return;
 
         logic.TimedUpdated();
@@ -58,7 +58,7 @@ public class Chunk : MonoBehaviour
     /// <summary> Updates the chunk either now or as soon as the chunk is no longer busy </summary>
     public void UpdateNow()
     {
-        logic.SetFlag(Flag.updateNow, true);
+        stage = Stage.buildMesh;
     }
 
     /// <summary> Tells the chunk to update on it's next timed update. Use this for updates where the
