@@ -2,7 +2,6 @@
 using System.Collections;
 using System.Collections.Generic;
 using System;
-using System.Diagnostics;
 
 public class ChunkBlocks {
 
@@ -14,7 +13,6 @@ public class ChunkBlocks {
     protected int receiveIndex;
     public bool contentsGenerated;
     public bool generationStarted;
-    Stopwatch sw;
 
     public ChunkBlocks(Chunk chunk)
     {
@@ -179,7 +177,6 @@ public class ChunkBlocks {
             if (!generationStarted)
             {
                 generationStarted = true;
-                sw.Start();
                 chunk.world.client.RequestChunk(chunk.pos);
             }
         }
@@ -217,9 +214,6 @@ public class ChunkBlocks {
 
     void FinishChunkDataReceive()
     {
-        UnityEngine.Debug.Log(sw.Elapsed);
-        sw.Stop();
-
         GenerateContentsFromBytes();
         contentsGenerated = true;
         receiveBuffer = null;

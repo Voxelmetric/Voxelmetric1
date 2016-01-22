@@ -16,9 +16,9 @@ using System;
 /// </summary>
 public class ChunksLoop {
 
-    Dictionary<Stage, List<Chunk>> chunkWorkLists = new Dictionary<Stage, List<Chunk>>();
-    List<Chunk> markedForDeletion = new List<Chunk>();
-    List<Chunk> renderMesh = new List<Chunk>();
+    Dictionary<Stage, List<BlockPos>> chunkWorkLists = new Dictionary<Stage, List<BlockPos>>();
+    List<BlockPos> markedForDeletion = new List<BlockPos>();
+    List<BlockPos> renderMesh = new List<BlockPos>();
     World world;
 
     public bool isPlaying = true;
@@ -28,10 +28,10 @@ public class ChunksLoop {
     public ChunksLoop(World world)
     {
         this.world = world;
-        chunkWorkLists.Add(Stage.terrain, new List<Chunk>());
-        chunkWorkLists.Add(Stage.buildMesh, new List<Chunk>());
-        chunkWorkLists.Add(Stage.saveAndDelete, new List<Chunk>());
-        chunkWorkLists.Add(Stage.delete, new List<Chunk>());
+        chunkWorkLists.Add(Stage.terrain, new List<BlockPos>());
+        chunkWorkLists.Add(Stage.buildMesh, new List<BlockPos>());
+        chunkWorkLists.Add(Stage.saveAndDelete, new List<BlockPos>());
+        chunkWorkLists.Add(Stage.delete, new List<BlockPos>());
 
         loopThread = new Thread(() =>
         {
@@ -91,7 +91,7 @@ public class ChunksLoop {
 
         while (chunkWorkLists[Stage.terrain].Count > index)
         {
-            Chunk chunk = chunkWorkLists[Stage.terrain][index];
+            Chunk chunk = world.chunks.Get(chunkWorkLists[Stage.terrain][index]);
 
             if (!IsCorrectStage(Stage.terrain, chunk))
             {
@@ -142,7 +142,7 @@ public class ChunksLoop {
     {
         while (chunkWorkLists[Stage.buildMesh].Count > 0)
         {
-            Chunk chunk = chunkWorkLists[Stage.buildMesh][0];
+            Chunk chunk = world.chunks.Get(chunkWorkLists[Stage.buildMesh][0]);
             if (!IsCorrectStage(Stage.buildMesh, chunk))
             {
                 chunkWorkLists[Stage.buildMesh].RemoveAt(0);
@@ -151,7 +151,7 @@ public class ChunksLoop {
 
             chunk.render.BuildMeshData();
             chunk.stage = Stage.ready;
-            renderMesh.Add(chunk);
+            renderMesh.Add(chunk.pos);
         }
     }
 
@@ -160,7 +160,7 @@ public class ChunksLoop {
         int index = 0;
         while (renderMesh.Count > index)
         {
-            Chunk chunk = renderMesh[index];
+            Chunk chunk = world.chunks.Get(renderMesh[index]);
 
             if (chunk == null)
             {
@@ -182,7 +182,7 @@ public class ChunksLoop {
         int index = 0;
         while (markedForDeletion.Count > index)
         {
-            Chunk chunk = markedForDeletion[index];
+            Chunk chunk = world.chunks.Get(markedForDeletion[index]);
 
             if (chunk == null)
             {
@@ -209,21 +209,21 @@ public class ChunksLoop {
 
     public void AddToDeletionList(Chunk chunk)
     {
-        if (!markedForDeletion.Contains(chunk))
+        if (!markedForDeletion.Contains(chunk.pos))
         {
-            markedForDeletion.Add(chunk);
+            markedForDeletion.Add(chunk.pos);
         }
     }
 
     public void ChunkStageChanged(Chunk chunk, Stage oldStage, Stage newStage)
     {
         if (chunkWorkLists.ContainsKey(oldStage) &&
-            chunkWorkLists[oldStage].Contains(chunk))
-            chunkWorkLists[oldStage].Remove(chunk);
+            chunkWorkLists[oldStage].Contains(chunk.pos))
+            chunkWorkLists[oldStage].Remove(chunk.pos);
 
         if (chunkWorkLists.ContainsKey(newStage) &&
-            !chunkWorkLists[newStage].Contains(chunk))
-            chunkWorkLists[newStage].Add(chunk);
+            !chunkWorkLists[newStage].Contains(chunk.pos))
+            chunkWorkLists[newStage].Add(chunk.pos);
     }
 
     bool IsCorrectStage(Stage stage, Chunk chunk)

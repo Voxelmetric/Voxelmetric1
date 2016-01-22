@@ -23,7 +23,7 @@ public class LoadChunks : MonoBehaviour
     public int WaitBetweenDeletes = 10;
 
     int deleteTimer = 0;
-    
+
     void Start()
     {
         chunkPositions = ChunkLoadOrder.ChunkPositions(chunkLoadRadius);
