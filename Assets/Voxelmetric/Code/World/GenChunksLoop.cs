@@ -18,6 +18,7 @@ public class ChunksLoop {
 
     Dictionary<Stage, List<Chunk>> chunkWorkLists = new Dictionary<Stage, List<Chunk>>();
     List<Chunk> markedForDeletion = new List<Chunk>();
+    List<Chunk> renderMesh = new List<Chunk>();
     World world;
 
     public bool isPlaying = true;
@@ -39,7 +40,6 @@ public class ChunksLoop {
                 try
                 {
                     Terrain();
-                    //SaveAndDelete();
                 }
                 catch (Exception ex)
                 {
@@ -80,6 +80,7 @@ public class ChunksLoop {
     public void MainThreadLoop()
     {
         DeleteMarkedChunks();
+        UpdateMeshFilters();
         // eventually we want to handle adding mesh data to the unity mesh
         // and maybe even the chunk's regular update func
     }
@@ -110,10 +111,17 @@ public class ChunksLoop {
                         if (chunkToGen)
                         {
                             chunkToGen.blocks.GenerateChunkContents();
+
                             if (!chunkToGen.blocks.contentsGenerated)
                             {
-                                chunksAllGenerated = false;
+                                return;
                             }
+                            //    while (!chunkToGen.blocks.contentsGenerated)
+                            //{
+                            //    Thread.Sleep(0);
+                            //    //chunksAllGenerated = false;
+                            //}
+                            
                         }
                     }
                 }
@@ -143,6 +151,29 @@ public class ChunksLoop {
 
             chunk.render.BuildMeshData();
             chunk.stage = Stage.ready;
+            renderMesh.Add(chunk);
+        }
+    }
+
+    void UpdateMeshFilters()
+    {
+        int index = 0;
+        while (renderMesh.Count > index)
+        {
+            Chunk chunk = renderMesh[index];
+
+            if (chunk == null)
+            {
+                index++;
+                continue;
+            }
+
+            chunk.logic.SetFlag(Flag.meshReady, false);
+            chunk.render.RenderMesh();
+            chunk.render.ClearMeshData();
+
+            renderMesh.RemoveAt(index);
+            chunk.logic.SetFlag(Flag.busy, false);
         }
     }
 

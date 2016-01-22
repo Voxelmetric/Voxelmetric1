@@ -61,12 +61,12 @@ public class World : MonoBehaviour {
 
     void Update()
     {
-        chunksLoop.MainThreadLoop();
     }
 
     void LateUpdate()
     {
-        chunks.ChunksUpdate();
+        chunksLoop.MainThreadLoop();
+        //chunks.ChunksUpdate();
     }
 
     void OnApplicationQuit()

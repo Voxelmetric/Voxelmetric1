@@ -53,22 +53,6 @@ public class Chunk : MonoBehaviour
             return;
 
         logic.TimedUpdated();
-
-        if (logic.GetFlag(Flag.updateNow))
-        {
-            render.UpdateChunk();
-            logic.SetFlag(Flag.updateNow, false);
-            logic.SetFlag(Flag.updateSoon, false);
-        }
-
-        if (logic.GetFlag(Flag.meshReady))
-        {
-            logic.SetFlag(Flag.meshReady, false);
-            render.RenderMesh();
-            render.ClearMeshData();
-
-            logic.SetFlag(Flag.busy, false);
-        }
     }
 
     /// <summary> Updates the chunk either now or as soon as the chunk is no longer busy </summary>
