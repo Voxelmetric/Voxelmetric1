@@ -10,19 +10,23 @@ public class WorldBlocks  {
         this.world = world;
     }
 
-    /// <summary> Gets the block at pos </summary>
-    /// <param name="pos">Global position of the block</param>
-    /// <returns>The block at the given global coordinates</returns>
+    public Block this[int x, int y, int z]
+    {
+        get { return this[new BlockPos(x, y, z)]; }
+        set { this[new BlockPos(x, y, z)] = value; }
+    }
+
+    public Block this[BlockPos pos]
+    {
+        get { return Get(pos); }
+        set { Set(pos, value, true, true); }
+    }
+
     public Block Get(BlockPos pos)
     {
         Chunk containerChunk = world.chunks.Get(pos);
 
-        if (pos.y < world.config.minY)
-        {
-            return Block.Solid;
-        }
-
-        if (containerChunk != null)
+        if (containerChunk != null && pos.y >= world.config.minY)
         {
             return containerChunk.blocks.Get(pos);
         }
@@ -55,9 +59,34 @@ public class WorldBlocks  {
 
             if (updateChunk)
             {
-                world.chunks.UpdateAdjacent(pos);
+                UpdateAdjacentChunk(pos);
             }
         }
     }
 
+    /// <summary> Updates any chunks neighboring a block position </summary>
+    void UpdateAdjacentChunk(BlockPos pos)
+    {
+        //localPos is the position relative to the chunk's position
+        BlockPos localPos = pos - pos.ContainingChunkCoordinates();
+
+        //Checks to see if the block position is on the border of the chunk 
+        //and if so update the chunk it's touching
+        UpdateIfEqual(localPos.x, 0, pos.Add(-1, 0, 0));
+        UpdateIfEqual(localPos.x, Config.Env.ChunkSize - 1, pos.Add(1, 0, 0));
+        UpdateIfEqual(localPos.y, 0, pos.Add(0, -1, 0));
+        UpdateIfEqual(localPos.y, Config.Env.ChunkSize - 1, pos.Add(0, 1, 0));
+        UpdateIfEqual(localPos.z, 0, pos.Add(0, 0, -1));
+        UpdateIfEqual(localPos.z, Config.Env.ChunkSize - 1, pos.Add(0, 0, 1));
+    }
+
+    void UpdateIfEqual(int value1, int value2, BlockPos pos)
+    {
+        if (value1 == value2)
+        {
+            Chunk chunk = world.chunks.Get(pos);
+            if (chunk != null)
+                chunk.UpdateNow();
+        }
+    }
 }

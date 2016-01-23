@@ -5,90 +5,62 @@ using SimplexNoise;
 
 public class World : MonoBehaviour {
 
-    public string worldConfig;
-
+    public string worldConfig = "default";
     public WorldConfig config;
-    public BlockIndex blockIndex;
-    public TextureIndex textureIndex;
-
-    /// <summary> True if this world is hosted by the player, not someone else </summary>
-    public bool isServer = true;
-    public bool allowConnections = true;
 
     //This world name is used for the save file name and as a seed for random noise
-    // leave empty to override with 
     public string worldName = "world";
 
-    public Noise noise;
     public WorldChunks chunks;
     public WorldBlocks blocks;
-    public ChunksLoop chunksLoop;
-    public VmClient client;
-    public VmServer server;
-    public VmNetworking networking;
-    public TerrainGen terrainGen;
+    public VmNetworking networking = new VmNetworking();
 
-    Material chunkMaterial;
+    public BlockIndex blockIndex;
+    public TextureIndex textureIndex;
+    public ChunksLoop chunksLoop;
+    public TerrainGen terrainGen;
 
     [HideInInspector]
     public int worldIndex;
 
     void Start()
     {
-        config = new ConfigLoader<WorldConfig>(new string[] {"Worlds"}).GetConfig(worldConfig);
-        noise = new Noise(worldName);
+        config = new ConfigLoader<WorldConfig>(new string[] { "Worlds" }).GetConfig(worldConfig);
 
+        networking.StartConnections(this);
         chunks = new WorldChunks(this);
         blocks = new WorldBlocks(this);
-        networking = new VmNetworking();
 
-        if (!isServer)
-        {
-            client = new VmClient(this);
-        }
-        else if(allowConnections)
-        {
-            server = new VmServer(this);
-        }
-
-        worldIndex = Voxelmetric.resources.worlds.Count;
-        Voxelmetric.resources.AddWorld(this);
+        worldIndex = Voxelmetric.resources.AddWorld(this);
 
         textureIndex = Voxelmetric.resources.GetOrLoadTextureIndex(this);
         blockIndex = Voxelmetric.resources.GetOrLoadBlockIndex(this);
-
         terrainGen = new TerrainGen(this, config.layerFolder);
-        chunksLoop = new ChunksLoop(this);
-
 
         gameObject.GetComponent<Renderer>().material.mainTexture = textureIndex.atlas;
-        chunkMaterial = gameObject.GetComponent<Renderer>().material;
+
+        chunksLoop = new ChunksLoop(this);
     }
 
     void Update()
     {
         chunksLoop.MainThreadLoop();
-
-        foreach (var pos in chunks.posCollection)
-        {
-            Graphics.DrawMesh(chunks.Get(pos).render.meshData.mesh, pos, Quaternion.Euler(0, 0, 0), chunkMaterial, 0);
-        }
     }
 
     void OnApplicationQuit()
     {
         chunksLoop.isPlaying = false;
 
-        if (isServer)
+        if (networking.isServer)
         {
-            if (allowConnections)
+            if (networking.allowConnections)
             {
-                server.DisconnectClients();
+                networking.server.DisconnectClients();
             }
         }
         else
         {
-            client.Disconnect();
+            networking.client.Disconnect();
         }
     }
 }

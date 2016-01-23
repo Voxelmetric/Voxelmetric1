@@ -8,10 +8,11 @@ public class VoxelmetricResources {
 
     public List<World> worlds = new List<World>();
 
-    public void AddWorld(World world)
+    public int AddWorld(World world)
     {
         //TODO make this use the first free index to handle deleting worlds
         worlds.Add(world);
+        return worlds.IndexOf(world);
     }
 
     // Worlds can use different block and texture indexes or share them so they are mapped here to

@@ -1,10 +1,11 @@
 ﻿using UnityEngine;
-using System.Collections;
+using System;
 using System.Collections.Generic;
 
 public class TextureIndex {
 
     WorldConfig config;
+    TextureConfig[] configs;
 
     public TextureIndex(WorldConfig config)
     {
@@ -15,6 +16,7 @@ public class TextureIndex {
     // Texture atlas
     public Dictionary<string, TextureCollection> textures = new Dictionary<string, TextureCollection>();
 
+    [HideInInspector]
     public Texture2D atlas;
 
     void LoadTextureIndex()
@@ -26,7 +28,11 @@ public class TextureIndex {
             return;
         }
 
-        TextureConfig[] configs = LoadAllTextures();
+        if (configs == null)
+        {
+            configs = LoadAllTextures();
+        }
+
         List<Texture2D> individualTextures = new List<Texture2D>();
         for (int i = 0; i < configs.Length; i++)
         {
@@ -92,7 +98,8 @@ public class TextureIndex {
     void UseCustomTextureAtlas()
     {
         atlas = Resources.Load<Texture2D>(config.customTextureAtlasFile);
-        TextureConfig[] configs = new ConfigLoader<TextureConfig>(new string[] { config.textureFolder }).AllConfigs();
+
+        configs = new ConfigLoader<TextureConfig>(new string[] { config.textureFolder }).AllConfigs();
 
         for (int i = 0; i < configs.Length; i++)
         {

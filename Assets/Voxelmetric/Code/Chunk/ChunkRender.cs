@@ -4,8 +4,16 @@ using System;
 
 public class ChunkRender {
 
-    public MeshData meshData = new MeshData();
+    protected MeshData meshData = new MeshData();
     protected Chunk chunk;
+
+    public Mesh mesh
+    {
+        get
+        {
+            return meshData.mesh;
+        }
+    }
 
     public bool needsUpdate;
 
@@ -18,6 +26,8 @@ public class ChunkRender {
     /// <summary> Updates the chunk based on its contents </summary>
     public virtual void BuildMeshData()
     {
+
+
         for (int x = 0; x < Config.Env.ChunkSize; x++)
         {
             for (int y = 0; y < Config.Env.ChunkSize; y++)
@@ -33,6 +43,11 @@ public class ChunkRender {
             }
         }
         meshData.ConvertToArrays();
+    }
+
+    public virtual void BuildMesh()
+    {
+        meshData.CommitMesh();
     }
 
 }

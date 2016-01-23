@@ -13,7 +13,7 @@ public class TerrainLayer : IComparable
         layerName = config.name;
         isStructure = config.structure != null;
         this.world = world;
-        noiseGen = world.noise;
+        noiseGen = terrainGen.noise;
         chunksPerColumn = (world.config.maxY - world.config.minY) / Config.Env.ChunkSize;
         index = config.index;
 

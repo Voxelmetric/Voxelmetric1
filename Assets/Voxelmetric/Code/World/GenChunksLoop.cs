@@ -18,16 +18,19 @@ public class ChunksLoop {
 
     Dictionary<Stage, List<BlockPos>> chunkWorkLists = new Dictionary<Stage, List<BlockPos>>();
     List<BlockPos> markedForDeletion = new List<BlockPos>();
-    //List<BlockPos> renderMesh = new List<BlockPos>();
+
     World world;
 
     public bool isPlaying = true;
     public Thread loopThread;
     public Thread renderThread;
+    Material chunkMaterial;
 
     public ChunksLoop(World world)
     {
         this.world = world;
+        chunkMaterial = world.gameObject.GetComponent<Renderer>().material;
+
         chunkWorkLists.Add(Stage.terrain, new List<BlockPos>());
         chunkWorkLists.Add(Stage.buildMesh, new List<BlockPos>());
         chunkWorkLists.Add(Stage.render, new List<BlockPos>());
@@ -36,14 +39,7 @@ public class ChunksLoop {
         {
             while (isPlaying)
             {
-                try
-                {
-                    Terrain();
-                }
-                catch (Exception ex)
-                {
-                    Debug.Log(ex);
-                }
+                try { Terrain(); } catch (Exception ex) { Debug.Log(ex); }
             }
         });
 
@@ -51,14 +47,7 @@ public class ChunksLoop {
        {
            while (isPlaying)
            {
-               try
-               {
-                   BuildMesh();
-               }
-               catch (Exception ex)
-               {
-                   Debug.Log(ex);
-               }
+               try { BuildMesh(); } catch (Exception ex) { Debug.Log(ex); }
            }
        });
 
@@ -80,8 +69,7 @@ public class ChunksLoop {
     {
         DeleteMarkedChunks();
         UpdateMeshFilters();
-        // eventually we want to handle adding mesh data to the unity mesh
-        // and maybe even the chunk's regular update func
+        DrawChunkMeshes();
     }
 
     void Terrain()
@@ -113,6 +101,7 @@ public class ChunksLoop {
                             chunkToGen.blocks.GenerateChunkContents();
                             if (!chunkToGen.blocks.contentsGenerated)
                             {
+                                //chunksAllGenerated = false;
                                 return;
                             }
                         }
@@ -162,7 +151,7 @@ public class ChunksLoop {
                 continue;
             }
 
-            chunk.render.meshData.CommitMesh();
+            chunk.render.BuildMesh();
             chunk.stage = Stage.ready;
         }
     }
@@ -189,6 +178,14 @@ public class ChunksLoop {
                 index++;
                 continue;
             }
+        }
+    }
+
+    public void DrawChunkMeshes()
+    {
+        foreach (var pos in world.chunks.posCollection)
+        {
+            Graphics.DrawMesh(world.chunks[pos].render.mesh, pos, Quaternion.Euler(0, 0, 0), chunkMaterial, 0);
         }
     }
 

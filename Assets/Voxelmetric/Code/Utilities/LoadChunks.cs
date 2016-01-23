@@ -77,7 +77,7 @@ public class LoadChunks : MonoBehaviour
                 continue;
 
             for (int y = world.config.minY; y <= world.config.maxY; y += Config.Env.ChunkSize)
-                world.chunks.CreateChunkAndNeighbors(new BlockPos(newChunkPos.x, y, newChunkPos.z));
+                world.chunks.New(new BlockPos(newChunkPos.x, y, newChunkPos.z));
 
             return;
         }

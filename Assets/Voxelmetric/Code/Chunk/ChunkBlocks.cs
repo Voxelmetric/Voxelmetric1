@@ -137,11 +137,11 @@ public class ChunkBlocks {
     public void BlockModified(BlockPos pos)
     {
         //If this is the server log the changed block so that it can be saved
-        if (chunk.world.isServer)
+        if (chunk.world.networking.isServer)
         {
-            if (chunk.world.allowConnections)
+            if (chunk.world.networking.allowConnections)
             {
-                chunk.world.server.BroadcastChange(pos, Get(pos), -1);
+                chunk.world.networking.server.BroadcastChange(pos, Get(pos), -1);
             }
 
             if (!modifiedBlocks.Contains(pos))
@@ -155,7 +155,7 @@ public class ChunkBlocks {
         }
         else // if this is not the server send the change to the server to sync
         {
-            chunk.world.client.BroadcastChange(pos, Get(pos));
+            chunk.world.networking.client.BroadcastChange(pos, Get(pos));
         }
     }
 
@@ -166,7 +166,7 @@ public class ChunkBlocks {
             return;
         }
 
-        if (chunk.world.isServer)
+        if (chunk.world.networking.isServer)
         {
             chunk.world.terrainGen.GenerateTerrainForChunk(chunk);
             Serialization.Load(chunk);
@@ -178,7 +178,7 @@ public class ChunkBlocks {
             if (!generationStarted)
             {
                 generationStarted = true;
-                chunk.world.client.RequestChunk(chunk.pos);
+                chunk.world.networking.client.RequestChunk(chunk.pos);
             }
         }
     }
@@ -233,7 +233,6 @@ public class ChunkBlocks {
                 {
                     block = LocalGet(new BlockPos(x, y, z));
                     buffer.AddRange(block.ToByteArray());
-                    //later must also byte the blocks data and add it
                 }
             }
         }

@@ -5,9 +5,15 @@ using SimplexNoise;
 
 public class TerrainGen
 {
+    public Noise noise;
+    World world;
+    TerrainLayer[] layers;
+
     public TerrainGen(World world, string layerFolder)
     {
         this.world = world;
+        noise = new Noise(world.name);
+
         ConfigLoader<LayerConfig> layerConfigs = new ConfigLoader<LayerConfig>(new string[] { layerFolder });
 
         layers = new TerrainLayer[layerConfigs.AllConfigs().Length];
@@ -25,9 +31,6 @@ public class TerrainGen
         //Sort the layers by index
         Array.Sort(layers);
     }
-
-    World world;
-    TerrainLayer[] layers;
 
     public void GenerateTerrainForChunk(Chunk chunk)
     {
