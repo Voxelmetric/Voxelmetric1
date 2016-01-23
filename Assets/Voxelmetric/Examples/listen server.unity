@@ -2179,6 +2179,7 @@ MonoBehaviour:
   networking:
     isServer: 1
     allowConnections: 1
+    serverIPAdress: 192.168.0.2
     serverPort: 11000
   worldIndex: 0
 --- !u!23 &1838897666

@@ -24,8 +24,6 @@ public class VmServer {
         {
             serverSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
 
-            //Changed to GetHostAddresses from:
-            //serverSocket.Bind(new IPEndPoint(Dns.Resolve(Dns.GetHostName()).AddressList[0], 11000));
             serverSocket.Bind(new IPEndPoint(Dns.GetHostAddresses(Dns.GetHostName())[0], 11000));
             serverSocket.Listen(0);
             serverSocket.BeginAccept(new AsyncCallback(OnJoinServer), null);
