@@ -15,22 +15,22 @@ public class VmNetworking {
 
     public void StartConnections(World world)
     {
-        string[] ipSplit = serverIPAdress.Split('.');
-        if (ipSplit.Length < 4)
-        {
-            Debug.LogError("ip must be 4 period separated integers");
-            return;
-        }
-
-        byte[] ipComponents = new byte[4];
-        for (int i = 0; i < 4; i++)
-        {
-            ipComponents[i] = byte.Parse(ipSplit[i]);
-        }
-        serverIP = new IPAddress(ipComponents);
-
         if (!isServer)
         {
+            string[] ipSplit = serverIPAdress.Split('.');
+            if (ipSplit.Length < 4)
+            {
+                Debug.LogError("ip must be 4 period separated integers");
+                return;
+            }
+
+            byte[] ipComponents = new byte[4];
+            for (int i = 0; i < 4; i++)
+            {
+                ipComponents[i] = byte.Parse(ipSplit[i]);
+            }
+            serverIP = new IPAddress(ipComponents);
+
             client = new VmClient(world);
         }
         else if (allowConnections)
