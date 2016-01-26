@@ -12,29 +12,29 @@ public class BlockIndex {
 
     public BlockIndex(string blockFolder, World world){
 
+        // Add the static solid void block type
+        AddBlockType(new BlockConfig()
+        {
+            name = "void",
+            type = 0,
+            world = world,
+            blockClass = typeof(Block),
+            solid = true,
+            canBeWalkedOn = false,
+            transparent = false,
+            canBeWalkedThrough = false,
+        });
+
         // Add the static air block type
         AddBlockType(new BlockConfig() {
             name = "air",
-            type = 0,
+            type = 1,
             world = world,
             blockClass = typeof(Block),
             solid = false,
             canBeWalkedOn = false,
             transparent = true,
             canBeWalkedThrough = true,
-        });
-
-        // Add the static solid block type
-        AddBlockType(new BlockConfig()
-        {
-            name = "solid",
-            type = 1,
-            world = world,
-            blockClass = typeof(Block),
-            solid = true,
-            canBeWalkedOn = true,
-            transparent = false,
-            canBeWalkedThrough = false,
         });
 
         // If you want to add block types with a different method

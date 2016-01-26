@@ -10,8 +10,8 @@ namespace Config
         // Padding added to the size of block faces to fix floating point issues 
         // where tiny gaps can appear between block faces
         public static float BlockFacePadding = 0.0005f;
-        public static Block Air = new Block(0);
-        public static Block Solid = new Block(1);
+        public static Block Void = new Block(0);
+        public static Block Air = new Block(1);
     }
 
     public static class Directories

@@ -32,7 +32,7 @@ public class WorldBlocks  {
         }
         else
         {
-            return Block.Solid;
+            return Block.Void;
         }
     }
 

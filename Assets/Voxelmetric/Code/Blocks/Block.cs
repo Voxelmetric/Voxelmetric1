@@ -65,7 +65,7 @@ public class Block
 
     // Static block types: These are always added as 0 and 1 in the block index
     public static Block Air { get { return Config.Env.Air; } }
-    public static Block Solid { get { return Config.Env.Solid; } }
+    public static Block Void { get { return Config.Env.Void; } }
 
     public int RestoreBlockData(byte[] data, int offset)
     {
