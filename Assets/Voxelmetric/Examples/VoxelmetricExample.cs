@@ -8,6 +8,7 @@ public class VoxelmetricExample : MonoBehaviour
     public string blockToPlace = "air";
     public Text selectedBlockText;
     public Text saveProgressText;
+    public World world;
 
     BlockPos pfStart;
     BlockPos pfStop;
@@ -44,71 +45,60 @@ public class VoxelmetricExample : MonoBehaviour
             saveProgressText.text = "Save";
         }
 
-        //Blocks
-        RaycastHit hit;
-
         var mousePos = Camera.main.ScreenToWorldPoint(new Vector3(Input.mousePosition.x, Input.mousePosition.y, 10));
-        if (Physics.Raycast(Camera.main.transform.position, mousePos - Camera.main.transform.position, out hit, 100))
+
+        VmRaycastHit hit = Voxelmetric.Raycast(new Ray(Camera.main.transform.position, mousePos - Camera.main.transform.position), world, 1000);
+
+        selectedBlockText.text = Voxelmetric.GetBlock(hit.blockPos, world).displayName;
+
+        if (Input.GetMouseButtonDown(0))
         {
-            Chunk chunk = hit.collider.GetComponent<Chunk>();
-
-            if (chunk == null)
+            if (hit.block.type != Block.Void.type)
             {
-                return;
-            }
-
-            selectedBlockText.text = Voxelmetric.GetBlock(hit).displayName;
-
-            if (Input.GetMouseButtonDown(0))
-            {
-
                 bool adjacent = true;
-                if (Block.New(blockToPlace, chunk.world).type == Block.Air.type)
+                if (Block.New(blockToPlace, world).type == Block.Air.type)
                 {
                     adjacent = false;
                 }
 
-                if (Physics.Raycast(Camera.main.transform.position, mousePos - Camera.main.transform.position, out hit, 100))
+                if (adjacent)
                 {
-                    // Creates a game object block at the click pos:
-                    // Voxelmetric.CreateGameObjectBlock(Voxelmetric.GetBlockPos(hit, adjacent), hit.collider.gameObject.GetComponent<Chunk>().world, hit.point, new Quaternion());
-                    Voxelmetric.SetBlock(hit, Block.New(blockToPlace, chunk.world), adjacent);
+                    Voxelmetric.SetBlock(hit.adjacentPos, Block.New(blockToPlace, world), world);
                 }
-            }
-
-            if (Input.GetKeyDown(KeyCode.I))
-            {
-                if (Physics.Raycast(Camera.main.transform.position, mousePos - Camera.main.transform.position, out hit, 100))
+                else
                 {
-                    pfStart = Voxelmetric.GetBlockPos(hit);
+                    Voxelmetric.SetBlock(hit.blockPos, Block.New(blockToPlace, world), world);
                 }
-            }
-
-            if (Input.GetKeyDown(KeyCode.O))
-            {
-                if (Physics.Raycast(Camera.main.transform.position, mousePos - Camera.main.transform.position, out hit, 100))
-                {
-                    pfStop = Voxelmetric.GetBlockPos(hit);
-                }
-            }
-
-            if (Input.GetKeyDown(KeyCode.P))
-            {
-                pf = new PathFinder(pfStart, pfStop, Voxelmetric.resources.worlds[0], 2);
-                Debug.Log(pf.path.Count);
-            }
-
-            if (pf != null && pf.path.Count != 0)
-            {
-                for (int i = 0; i < pf.path.Count - 1; i++)
-                    Debug.DrawLine(pf.path[i].Add(0, 1, 0), pf.path[i + 1].Add(0, 1, 0));
             }
         }
+
+        if (Input.GetKeyDown(KeyCode.I))
+        {
+                pfStart = hit.blockPos;
+        }
+
+        if (Input.GetKeyDown(KeyCode.O))
+        {
+            pfStop = hit.blockPos;
+        }
+
+        if (Input.GetKeyDown(KeyCode.P))
+        {
+            pf = new PathFinder(pfStart, pfStop, world, 2);
+            Debug.Log(pf.path.Count);
+        }
+
+        if (pf != null && pf.path.Count != 0)
+        {
+            for (int i = 0; i < pf.path.Count - 1; i++)
+                Debug.DrawLine(pf.path[i].Add(0, 1, 0), pf.path[i + 1].Add(0, 1, 0));
+        }
+
     }
 
     public void SaveAll()
     {
-        saveProgress = Voxelmetric.SaveAll(Voxelmetric.resources.worlds[0]);
+        saveProgress = Voxelmetric.SaveAll(world);
     }
 
     public string SaveStatus()
