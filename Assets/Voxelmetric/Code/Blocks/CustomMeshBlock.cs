@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System;
 
 [Serializable]
-public class CustomMesh : Block {
+public class CustomMeshBlock : Block {
 
     public CustomMeshBlockConfig customMeshConfig { get { return (CustomMeshBlockConfig)config; } }
 
