@@ -6,12 +6,19 @@ public class VmRaycast
     {
         // Position as we work through the raycast, starts at origin and gets updated as it reaches each block boundary on the route
         Vector3 pos = ray.origin;
-        // BlockPos to check if the block should be returned
-        BlockPos bPos = pos;
-        BlockPos adjacentBPos = pos;
-
         //Normalized direction of the ray
         Vector3 dir = ray.direction.normalized;
+
+        //Transform the ray to match the rotation and position of the world:
+        pos -= world.transform.position;
+        pos = Quaternion.Inverse(world.gameObject.transform.rotation) * pos;
+        dir = Quaternion.Inverse(world.transform.rotation) * dir;
+
+        // BlockPos to check if the block should be returned
+        BlockPos bPos = pos;
+        //Block pos that gets set to one block behind the hit block, useful for placing blocks at the hit location
+        BlockPos adjacentBPos = pos;
+
         // Positive copy of the direction
         Vector3 dirP = new Vector3(MakePositive(dir.x), MakePositive(dir.y), MakePositive(dir.z));
         // The sign of the direction
@@ -25,7 +32,7 @@ public class VmRaycast
         //The block at bPos
         Block hitBlock = world.blocks[bPos];
         //Color debugLineColor = Color.magenta; //debug
-        while (hitBlock.type == Block.Air.type && Vector3.Distance(ray.origin, pos) < range)
+        while (!hitBlock.RaycastHit(pos, dir, bPos) && Vector3.Distance(ray.origin, pos) < range)
         {
             // Get the nearest upcoming boundary for each direction
             boundary.x = MakeBoundary(dirS.x, pos.x);
@@ -77,7 +84,6 @@ public class VmRaycast
             // The while loop then evaluates if hitblock is a viable block to stop on and
             // if not does it all again starting from the new position
         }
-
         return new VmRaycastHit()
         {
             block = hitBlock,

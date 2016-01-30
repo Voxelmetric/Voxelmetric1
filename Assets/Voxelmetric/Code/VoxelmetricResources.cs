@@ -8,11 +8,25 @@ public class VoxelmetricResources {
 
     public List<World> worlds = new List<World>();
 
-    public int AddWorld(World world)
+    public byte AddWorld(World world)
     {
-        //TODO make this use the first free index to handle deleting worlds
+        for (int i = 0; i < worlds.Count; i++)
+        {
+            if (worlds[i] == null)
+            {
+                worlds[i] = world;
+                return (byte)i;
+            }
+        }
+
+        if (worlds.Count > byte.MaxValue)
+        {
+            Debug.LogError("More than 255 worlds are not supported");
+            return 0;
+        }
+
         worlds.Add(world);
-        return worlds.IndexOf(world);
+        return (byte)(worlds.Count - 1);
     }
 
     // Worlds can use different block and texture indexes or share them so they are mapped here to

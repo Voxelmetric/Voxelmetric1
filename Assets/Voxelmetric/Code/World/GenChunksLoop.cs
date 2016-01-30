@@ -185,7 +185,7 @@ public class ChunksLoop {
     {
         foreach (var pos in world.chunks.posCollection)
         {
-            Graphics.DrawMesh(world.chunks[pos].render.mesh, pos, Quaternion.Euler(0, 0, 0), chunkMaterial, 0);
+            Graphics.DrawMesh(world.chunks[pos].render.mesh, (world.transform.rotation * pos) + world.transform.position, world.transform.rotation, chunkMaterial, 0);
         }
     }
 

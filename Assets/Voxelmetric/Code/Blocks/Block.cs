@@ -12,10 +12,11 @@ public class Block
     }
 
     public ushort type;
+    public byte worldIndex;
 
     public virtual string       name                { get { return config.name;                     } }
     public virtual string       displayName         { get { return name;                            } }
-    public virtual World        world               { get { return Voxelmetric.resources.worlds[0]; } }
+    public virtual World        world               { get { return Voxelmetric.resources.worlds[worldIndex]; } }
     public virtual BlockConfig  config              { get { return world.blockIndex.configs[type];  } }
     public virtual bool         solid               { get { return config.solid;                    } }
     public virtual bool         canBeWalkedOn       { get { return config.canBeWalkedOn;            } }
@@ -40,11 +41,7 @@ public class Block
     public virtual void OnDestroy       (Chunk chunk, BlockPos localPos, BlockPos globalPos) { }
     public virtual void RandomUpdate    (Chunk chunk, BlockPos localPos, BlockPos globalPos) { }
     public virtual void ScheduledUpdate (Chunk chunk, BlockPos localPos, BlockPos globalPos) { }
-
-    public void SetWorld(int index)
-    {
-
-    }
+    public virtual bool RaycastHit(Vector3 pos, Vector3 dir, BlockPos bPos) { return solid; } 
 
     public static Block New(string name, World world)
     {
@@ -55,6 +52,7 @@ public class Block
     {
         Block block = (Block)Activator.CreateInstance(world.blockIndex.GetConfig(type).blockClass);
         block.type = (ushort)type;
+        block.worldIndex = world.worldIndex;
         return block;
     }
 

@@ -21,7 +21,7 @@ public class World : MonoBehaviour {
     public TerrainGen terrainGen;
 
     [HideInInspector]
-    public int worldIndex;
+    public byte worldIndex;
 
     void Start()
     {
