@@ -1,0 +1,13 @@
+{
+  "name": "connected",
+  "blockClass": "CubeBlock",
+  "configClass": "CubeBlockConfig",
+  "textures": [
+    "connected",
+    "connected",
+    "connected",
+    "connected",
+    "connected",
+    "connected"
+  ],
+}
