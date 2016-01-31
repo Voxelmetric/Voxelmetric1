@@ -35,24 +35,27 @@ public class ChunksLoop {
         chunkWorkLists.Add(Stage.buildMesh, new List<BlockPos>());
         chunkWorkLists.Add(Stage.render, new List<BlockPos>());
 
-        loopThread = new Thread(() =>
+        if (Config.Toggle.UseMultiThreading)
         {
-            while (isPlaying)
+            loopThread = new Thread(() =>
             {
-                try { Terrain(); } catch (Exception ex) { Debug.Log(ex); }
-            }
-        });
+                while (isPlaying)
+                {
+                    try { Terrain(); } catch (Exception ex) { Debug.Log(ex); }
+                }
+            });
 
-        renderThread = new Thread(() =>
-       {
-           while (isPlaying)
+            renderThread = new Thread(() =>
            {
-               try { BuildMesh(); } catch (Exception ex) { Debug.Log(ex); }
-           }
-       });
+               while (isPlaying)
+               {
+                   try { BuildMesh(); } catch (Exception ex) { Debug.Log(ex); }
+               }
+           });
 
-        loopThread.Start();
-        renderThread.Start();
+            loopThread.Start();
+            renderThread.Start();
+        }
     }
 
     public int ChunksInProgress
@@ -67,6 +70,12 @@ public class ChunksLoop {
 
     public void MainThreadLoop()
     {
+        if (!Config.Toggle.UseMultiThreading)
+        {
+            Terrain();
+            BuildMesh();
+        }
+
         DeleteMarkedChunks();
         UpdateMeshFilters();
         DrawChunkMeshes();
@@ -78,7 +87,6 @@ public class ChunksLoop {
 
         while (chunkWorkLists[Stage.terrain].Count > index)
         {
-            
             Chunk chunk = world.chunks.Get(chunkWorkLists[Stage.terrain][index]);
 
             if (!IsCorrectStage(Stage.terrain, chunk))
@@ -119,6 +127,11 @@ public class ChunksLoop {
             {
                 index++;
             }
+
+            if (!Config.Toggle.UseMultiThreading)
+            {
+                return;
+            }
         }
     }
 
@@ -135,6 +148,11 @@ public class ChunksLoop {
 
             chunk.render.BuildMeshData();
             chunk.stage = Stage.render;
+
+            if (!Config.Toggle.UseMultiThreading)
+            {
+                return;
+            }
         }
     }
 
