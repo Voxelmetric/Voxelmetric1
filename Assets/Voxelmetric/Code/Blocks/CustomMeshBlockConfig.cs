@@ -8,9 +8,6 @@ public class CustomMeshBlockConfig: BlockConfig
 {
     public TextureCollection[] textures;
 
-    public string meshFileName;
-    public Vector3 meshOffset;
-
     public int[] tris;
     public Vector3[] verts;
     public Vector2[] uvs;
@@ -24,14 +21,15 @@ public class CustomMeshBlockConfig: BlockConfig
         solid = _GetPropertyFromConfig(config, "solid", false);
         texture = world.textureIndex.GetTextureCollection(_GetPropertyFromConfig(config, "texture", ""));
 
+        Vector3 meshOffset;
         meshOffset.x = float.Parse(_GetPropertyFromConfig(config, "meshXOffset", "0"));
         meshOffset.y = float.Parse(_GetPropertyFromConfig(config, "meshYOffset", "0"));
         meshOffset.z = float.Parse(_GetPropertyFromConfig(config, "meshZOffset", "0"));
 
-        SetUpMesh(world.config.meshFolder + "/" + _GetPropertyFromConfig(config, "meshFileLocation", ""), meshOffset);
+        SetUpMesh(world.config.meshFolder + "/" + _GetPropertyFromConfig(config, "meshFileLocation", ""), meshOffset, out tris, out verts, out uvs);
     }
 
-    public void SetUpMesh(string meshLocation, Vector3 positionOffset)
+    protected void SetUpMesh(string meshLocation, Vector3 positionOffset, out int[] trisOut, out Vector3[] vertsOut, out Vector2[] uvsOut)
     {
         GameObject meshGO = (GameObject)Resources.Load(meshLocation);
 
@@ -59,8 +57,8 @@ public class CustomMeshBlockConfig: BlockConfig
             }
         }
 
-        this.tris = tris.ToArray();
-        this.verts = verts.ToArray();
-        this.uvs = uvs.ToArray();
+        trisOut = tris.ToArray();
+        vertsOut = verts.ToArray();
+        uvsOut = uvs.ToArray();
     }
 }

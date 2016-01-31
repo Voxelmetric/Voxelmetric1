@@ -18,7 +18,7 @@ public class MeshData
 
     public MeshData() { }
 
-    public void AddQuadTriangles(bool collisionMesh = false)
+    public void AddQuadTriangles()
     {
             triangles.Add(vertices.Count - 4);
             triangles.Add(vertices.Count - 3);
@@ -29,21 +29,50 @@ public class MeshData
             triangles.Add(vertices.Count - 1);
     }
 
-    public void AddVertex(Vector3 vertex, bool collisionMesh = false)
+    public void AddVertex(Vector3 vertex)
     {
             vertices.Add(vertex);
     }
 
-    public void AddTriangle(int tri, bool collisionMesh = false)
+    public void AddTriangle(int tri)
     {
             triangles.Add(tri);
     }
 
-    public void AddTriangle(bool collisionMesh = false)
+    public void AddTriangle()
     {
             triangles.Add(vertices.Count - 3);
             triangles.Add(vertices.Count - 2);
             triangles.Add(vertices.Count - 1);
+    }
+
+    public void AddMesh(int[] tris, Vector3[] verts, Vector2[] uvs, Rect texture, Vector3 offset)
+    {
+        int initialVertCount = vertices.Count;
+
+        for (int i = 0; i < verts.Length; i++)
+        {
+            AddVertex(verts[i] + offset);
+
+            if (uvs.Length == 0)
+                uv.Add(new Vector2(0, 0));
+
+            //Coloring of blocks is not yet implemented so just pass in full brightness
+            colors.Add(new Color(1, 1, 1, 1));
+        }
+
+        for (int i = 0; i < uvs.Length; i++)
+        {
+            uv.Add(new Vector2(
+                (uvs[i].x * texture.width) + texture.x,
+                (uvs[i].y * texture.height) + texture.y)
+            );
+        }
+
+        for (int i = 0; i < tris.Length; i++)
+        {
+            AddTriangle(tris[i] + initialVertCount);
+        }
     }
 
     // Keeping this method even though we're not yet adding anything but 1, 1, 1, 1
