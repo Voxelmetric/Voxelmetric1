@@ -2,8 +2,6 @@
 using System;
 using System.Net;
 using System.Net.Sockets;
-using System.Text;
-using System.Threading;
 
 public class VmClient
 {
@@ -23,7 +21,7 @@ public class VmClient
     private void ConnectToServer()
     {
         clientSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-        clientSocket.BeginConnect(new IPEndPoint(world.networking.serverIP, world.networking.serverPort),
+        clientSocket.BeginConnect(new IPEndPoint(Dns.GetHostAddresses(Dns.GetHostName())[0], 8000),
             new AsyncCallback(OnConnect), null);
     }
     

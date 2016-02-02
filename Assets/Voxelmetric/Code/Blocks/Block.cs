@@ -61,6 +61,11 @@ public class Block
         return name;
     }
 
+    public override bool Equals(object obj) { return obj != null && GetHashCode() == ((Block)obj).GetHashCode(); }
+
+    //Override this to create a hash of the block type and the block's data
+    public override int GetHashCode() { return type * 227; }
+
     // Static block types: These are always added as 0 and 1 in the block index
     public static Block Air { get { return Config.Env.Air; } }
     public static Block Void { get { return Config.Env.Void; } }

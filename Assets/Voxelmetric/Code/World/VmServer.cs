@@ -24,10 +24,9 @@ public class VmServer {
         {
             serverSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
 
-            serverSocket.Bind(new IPEndPoint(Dns.GetHostAddresses(Dns.GetHostName())[0], 11000));
+            serverSocket.Bind(new IPEndPoint(Dns.GetHostAddresses(Dns.GetHostName())[0], 8000));
             serverSocket.Listen(0);
             serverSocket.BeginAccept(new AsyncCallback(OnJoinServer), null);
-
         }
         catch (Exception ex)
         {

@@ -225,6 +225,12 @@ public class ChunkBlocks {
     {
         List<byte> buffer = new List<byte>();
         Block block;
+        Block lastBlock = null;
+
+        byte[] blockData;
+        short sameBlockCount = 1000;
+        int countIndex = 0;
+
         for (int x = 0; x < Config.Env.ChunkSize; x++)
         {
             for (int y = 0; y < Config.Env.ChunkSize; y++)
@@ -232,7 +238,27 @@ public class ChunkBlocks {
                 for (int z = 0; z < Config.Env.ChunkSize; z++)
                 {
                     block = LocalGet(new BlockPos(x, y, z));
-                    buffer.AddRange(block.ToByteArray());
+                    blockData = block.ToByteArray();
+
+                    if (block.Equals(lastBlock))
+                    {
+                        //if this is the same as the last block added increase the count
+                        sameBlockCount++;
+                        byte[] shortAsBytes = ShortToBytes(sameBlockCount);
+                        buffer[countIndex] = shortAsBytes[0];
+                        buffer[countIndex + 1] = shortAsBytes[1];
+                    }
+                    else
+                    {
+                        //Add 1 as a short (2 bytes) 
+                        countIndex = buffer.Count;
+                        sameBlockCount = 1;
+                        buffer.AddRange(ShortToBytes(1));
+                        //Then add the block data
+                        buffer.AddRange(blockData);
+                        lastBlock = block;
+                    }
+
                 }
             }
         }
@@ -240,20 +266,36 @@ public class ChunkBlocks {
         return buffer.ToArray();
     }
 
+    byte[] ShortToBytes(short s)
+    {
+        return BitConverter.GetBytes(s);
+    }
+
     void GenerateContentsFromBytes()
     {
         int i = 0;
-        Block block;
+        Block block = null;
+        short blockCount = 0;
+
         for (int x = 0; x < Config.Env.ChunkSize; x++)
         {
             for (int y = 0; y < Config.Env.ChunkSize; y++)
             {
                 for (int z = 0; z < Config.Env.ChunkSize; z++)
                 {
-                    block = Block.New(BitConverter.ToUInt16(receiveBuffer, i), chunk.world);
-                    i += 2;
-                    i += block.RestoreBlockData(receiveBuffer, i);
+                    if (blockCount == 0)
+                    {
+                        blockCount = BitConverter.ToInt16(receiveBuffer, i);
+                        i += 2;
+
+                        block = Block.New(BitConverter.ToUInt16(receiveBuffer, i), chunk.world);
+                        i += 2;
+                        i += block.RestoreBlockData(receiveBuffer, i);
+
+                    }
+
                     LocalSet(new BlockPos(x, y, z), block);
+                    blockCount--;
                 }
             }
         }
