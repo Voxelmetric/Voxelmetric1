@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-public enum Stage {created, terrain, buildMesh, render, ready }
+public enum Stage {created, terrain, buildMesh, priorityBuildMesh, render, ready }
 
 public class Chunk
 {
@@ -57,6 +57,11 @@ public class Chunk
 
     /// <summary> Updates the chunk either now or as soon as the chunk is no longer busy </summary>
     public void UpdateNow()
+    {
+        stage = Stage.priorityBuildMesh;
+    }
+
+    public void UpdateSoon()
     {
         stage = Stage.buildMesh;
     }

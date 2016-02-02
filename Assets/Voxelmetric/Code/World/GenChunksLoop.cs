@@ -30,9 +30,10 @@ public class ChunksLoop {
     {
         this.world = world;
         chunkMaterial = world.gameObject.GetComponent<Renderer>().material;
-
+        
         chunkWorkLists.Add(Stage.terrain, new List<BlockPos>());
         chunkWorkLists.Add(Stage.buildMesh, new List<BlockPos>());
+        chunkWorkLists.Add(Stage.priorityBuildMesh, new List<BlockPos>());
         chunkWorkLists.Add(Stage.render, new List<BlockPos>());
 
         if (Config.Toggle.UseMultiThreading)
@@ -76,9 +77,17 @@ public class ChunksLoop {
             BuildMesh();
         }
 
+        Profiler.BeginSample("DeleteMarkedChunks");
         DeleteMarkedChunks();
+        Profiler.EndSample();
+
+        Profiler.BeginSample("UpdateMeshFilters");
         UpdateMeshFilters();
+        Profiler.EndSample();
+
+        Profiler.BeginSample("DrawChunkMeshes");
         DrawChunkMeshes();
+        Profiler.EndSample();
     }
 
     void Terrain()
@@ -139,21 +148,36 @@ public class ChunksLoop {
     {
         while (chunkWorkLists[Stage.buildMesh].Count > 0)
         {
-            Chunk chunk = world.chunks.Get(chunkWorkLists[Stage.buildMesh][0]);
-            if (!IsCorrectStage(Stage.buildMesh, chunk))
+            if (chunkWorkLists[Stage.priorityBuildMesh].Count > 0)
             {
-                chunkWorkLists[Stage.buildMesh].RemoveAt(0);
-                continue;
+                break;
             }
 
-            chunk.render.BuildMeshData();
-            chunk.stage = Stage.render;
+            BuildMesh(Stage.buildMesh);
 
             if (!Config.Toggle.UseMultiThreading)
             {
-                return;
+                break;
             }
         }
+
+        while (chunkWorkLists[Stage.priorityBuildMesh].Count > 0)
+        {
+            BuildMesh(Stage.priorityBuildMesh);
+        }
+    }
+
+    void BuildMesh(Stage stage)
+    {
+        Chunk chunk = world.chunks.Get(chunkWorkLists[stage][0]);
+        if (!IsCorrectStage(stage, chunk))
+        {
+            chunkWorkLists[stage].RemoveAt(0);
+            return;
+        }
+
+        chunk.render.BuildMeshData();
+        chunk.stage = Stage.render;
     }
 
     void UpdateMeshFilters()
@@ -203,7 +227,10 @@ public class ChunksLoop {
     {
         foreach (var pos in world.chunks.posCollection)
         {
-            Graphics.DrawMesh(world.chunks[pos].render.mesh, (world.transform.rotation * pos) + world.transform.position, world.transform.rotation, chunkMaterial, 0);
+            if (world.chunks[pos].render.mesh != null && world.chunks[pos].render.mesh.vertexCount != 0)
+            {
+                Graphics.DrawMesh(world.chunks[pos].render.mesh, (world.transform.rotation * pos) + world.transform.position, world.transform.rotation, chunkMaterial, 0);
+            }
         }
     }
 
