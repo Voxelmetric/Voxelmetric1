@@ -218,7 +218,7 @@ public class VmServer {
 
     public void ReceiveChange(BlockPos pos, Block block, int id)
     {
-        world.blocks.Set(pos, block, updateChunk: true, setBlockModified: false);
+        world.blocks.Set(pos, block, updateChunk: true, setBlockModified: true);
         BroadcastChange(pos, block, id);
     }
 }
