@@ -6,8 +6,8 @@ public class WorldChunks {
     World world;
 
     Dictionary<BlockPos, Chunk> chunks = new Dictionary<BlockPos, Chunk>();
-    public Dictionary<BlockPos, Chunk>.ValueCollection chunkCollection { get { return chunks.Values; } }
-    public Dictionary<BlockPos, Chunk>.KeyCollection posCollection { get { return chunks.Keys; } }
+    public ICollection<Chunk> chunkCollection { get { return chunks.Values; } }
+    public ICollection<BlockPos> posCollection { get { return chunks.Keys; } }
 
     public WorldChunks(World world) {
         this.world = world;
@@ -27,11 +27,12 @@ public class WorldChunks {
     /// <param name="pos">Position of the chunk or of a block within the chunk</param>
     /// <returns>The chunk that contains the given block position or null if there is none</returns>
     public Chunk Get(BlockPos pos) {
-        pos = pos.ContainingChunkCoordinates();
+        return ChunkGet(pos.ContainingChunkCoordinates());
+    }
 
+    public Chunk ChunkGet(BlockPos chunkPos) {
         Chunk containerChunk = null;
-        chunks.TryGetValue(pos, out containerChunk);
-
+        chunks.TryGetValue(chunkPos, out containerChunk);
         return containerChunk;
     }
 

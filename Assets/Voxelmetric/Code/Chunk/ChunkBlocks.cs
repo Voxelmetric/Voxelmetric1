@@ -2,6 +2,8 @@
 using System.Collections;
 using System.Collections.Generic;
 using System;
+using System.Text;
+using System.Threading;
 
 public class ChunkBlocks {
 
@@ -15,9 +17,30 @@ public class ChunkBlocks {
     public bool generationStarted;
     public bool contentsModified;
 
+    private static byte[] emptyBytes;
+
+    public static byte[] EmptyBytes {
+        get {
+            if (emptyBytes == null)
+                emptyBytes = new byte[16384];
+            return emptyBytes;
+        }
+    }
+
     public ChunkBlocks(Chunk chunk)
     {
         this.chunk = chunk;
+    }
+
+    public override string ToString() {
+        StringBuilder sb = new StringBuilder();
+        sb.Append("contentsGenerated=");
+        sb.Append(contentsGenerated.ToString());
+        sb.Append(", generationStarted=");
+        sb.Append(generationStarted.ToString());
+        sb.Append(", contentsModified=");
+        sb.Append(contentsModified.ToString());
+        return sb.ToString();
     }
 
     public void ResetContent()
@@ -59,19 +82,21 @@ public class ChunkBlocks {
             (localBlockPos.y < Config.Env.ChunkSize && localBlockPos.y >= 0) &&
             (localBlockPos.z < Config.Env.ChunkSize && localBlockPos.z >= 0))
         {
-            Block block = blocks[localBlockPos.x, localBlockPos.y, localBlockPos.z];
-            if (block == null)
-            {
-                return Block.Air;
-            }
-            else
-            {
-                return block;
-            }
+            return LocalGetL(localBlockPos);
         }
         else
         {
             return chunk.world.blocks.Get(localBlockPos + chunk.pos);
+        }
+    }
+
+    public Block LocalGetL(BlockPos localBlockPos)
+    {
+        Block block = blocks[localBlockPos.x, localBlockPos.y, localBlockPos.z];
+        if (block == null) {
+            return chunk.world.Air;
+        } else {
+            return block;
         }
     }
 
@@ -159,44 +184,28 @@ public class ChunkBlocks {
         }
     }
 
-    public void GenerateChunkContents()
+    private bool debugRecieve = false;
+
+    void InitializeChunkDataReceive(int index, int size)
     {
-        if (contentsGenerated)
-        {
-            return;
-        }
-
-        if (chunk.world.networking.isServer)
-        {
-            chunk.world.terrainGen.GenerateTerrainForChunk(chunk);
-            Serialization.Load(chunk);
-
-            contentsGenerated = true;
-        }
-        else
-        {
-            if (!generationStarted)
-            {
-                generationStarted = true;
-                chunk.world.networking.client.RequestChunk(chunk.pos);
-            }
-        }
-    }
-
-
-    void InitializeChunkDataReceive(int size)
-    {
+        receiveIndex = index;
         receiveBuffer = new byte[size];
-        receiveIndex = 0;
     }
 
     public void ReceiveChunkData(byte[] buffer)
     {
+        int index = BitConverter.ToInt32(buffer, VmServer.headerSize);
+        int size = BitConverter.ToInt32(buffer, VmServer.headerSize + 4);
+        if (debugRecieve)
+            Debug.Log("ChunkBlocks.ReceiveChunkData (" + Thread.CurrentThread.ManagedThreadId + "): " + chunk.pos
+                //+ ", buffer=" + buffer.Length
+                + ", index=" + index
+                + ", size=" + size);
         if (receiveBuffer == null)
         {
-            InitializeChunkDataReceive(BitConverter.ToInt32(buffer, 13));
+            InitializeChunkDataReceive(index, size);
         }
-        TranscribeChunkData(buffer, 17);
+        TranscribeChunkData(buffer, VmServer.leaderSize);
     }
 
     void TranscribeChunkData(byte[] buffer, int offset)
@@ -207,6 +216,9 @@ public class ChunkBlocks {
 
             if (receiveIndex == receiveBuffer.Length)
             {
+                if (debugRecieve)
+                    Debug.Log("ChunkBlocks.TranscribeChunkData (" + Thread.CurrentThread.ManagedThreadId + "): " + chunk.pos
+                        + ", receiveIndex=" + receiveIndex);
                 FinishChunkDataReceive();
                 return;
             }
@@ -219,6 +231,9 @@ public class ChunkBlocks {
         contentsGenerated = true;
         receiveBuffer = null;
         receiveIndex = 0;
+        if (debugRecieve)
+            Debug.Log("ChunkBlocks.FinishChunkDataReceive (" + Thread.CurrentThread.ManagedThreadId + "): " + chunk.pos
+                + ", contentsGenerated=" + contentsGenerated);
     }
 
     public byte[] ToBytes()

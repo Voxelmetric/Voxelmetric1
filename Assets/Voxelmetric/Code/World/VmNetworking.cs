@@ -10,7 +10,7 @@ public class VmNetworking {
     public VmServer server;
 
     //public string serverIPAdress;
-    //public IPAddress serverIP;
+    public IPAddress serverIP;
     //public int serverPort = 11000;
 
     public const int bufferLength = 1024;
@@ -40,12 +40,22 @@ public class VmNetworking {
             //    ipComponents[i] = byte.Parse(ipSplit[i]);
             //}
             //serverIP = new IPAddress(ipComponents);
-            client = new VmClient(world);
+            client = new VmClient(world, serverIP);
         }
         else if (allowConnections)
         {
             server = new VmServer(world);
         }
     }
-    
+
+    public void EndConnections() {
+        if (client != null) {
+            client.Disconnect();
+            client = null;
+        }
+        if (server != null) {
+            server.Disconnect();
+            server = null;
+        }
+    }
 }

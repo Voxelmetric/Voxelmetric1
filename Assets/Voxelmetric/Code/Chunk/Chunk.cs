@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System.Text;
+using UnityEngine;
 
 public enum Stage {created, terrain, buildMesh, priorityBuildMesh, render, ready }
 
@@ -40,6 +41,22 @@ public class Chunk
 
         if (logic == null)
             logic = new ChunkLogic(this);
+    }
+
+    public override string ToString() {
+        StringBuilder sb = new StringBuilder();
+        sb.Append(world.name);
+        sb.Append(", ");
+        sb.Append(pos.ToString());
+        sb.Append(", stage=");
+        sb.Append(_stage.ToString());
+        sb.Append(", blocks=");
+        sb.Append(blocks.ToString());
+        sb.Append(", logic=");
+        sb.Append(logic.ToString());
+        sb.Append(", render=");
+        sb.Append(render.ToString());
+        return sb.ToString();
     }
 
     public virtual void StartLoading()

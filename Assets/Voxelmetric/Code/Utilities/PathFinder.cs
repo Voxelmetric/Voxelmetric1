@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
 using System.Threading;
+using System;
 
 public class PathFinder {
 
@@ -45,15 +46,17 @@ public class PathFinder {
     {
         status = Status.working;
         this.range = range;
-        startLocation = start.Add(Direction.down);
-        targetLocation = target.Add(Direction.down);
+        /*startLocation = start.Add(Direction.down);
+        targetLocation = target.Add(Direction.down);*/
+        startLocation = start;
+        targetLocation = target;
         distanceFromStartToTarget = Distance(startLocation, targetLocation);
         this.world = world;
         this.entityHeight = entityHeight;
 
         open.Add(startLocation, new Heuristics(0, distanceFromStartToTarget, startLocation));
 
-        if (Config.Toggle.UseMultiThreading)
+        if (world.UseMultiThreading)
         {
             Thread thread = new Thread(() =>
            {
@@ -66,10 +69,17 @@ public class PathFinder {
         }
         else
         {
-            //while (status == Status.working)
-            //{
-            //    update();
-            //}
+            //TODO
+            DateTime startTime = DateTime.Now;
+            int steps = 0;
+            while (status == Status.working)
+            {
+                update();
+                ++steps;
+            }
+            DateTime endTime = DateTime.Now;
+            var duration = endTime - startTime;
+            //Debug.Log("PathFinder: " + steps + " took " + duration);
         }
     }
 
@@ -200,7 +210,7 @@ public class PathFinder {
                             adjacentPositions[i]),
                             pos);
 
-                if (IsWalkable(world, adjacentPositions[i]))
+                if (world.IsWalkable(adjacentPositions[i], entityHeight))
                 {
 
                     Heuristics existingTile;
@@ -219,27 +229,6 @@ public class PathFinder {
             }
 
         }
-
-    }
-
-    public bool IsWalkable(World world, BlockPos pos)
-    {
-        Block block = world.blocks.Get(pos);
-
-        if (!block.canBeWalkedOn)
-            return false;
-
-        for (int y = 1; y < entityHeight + 1; y++)
-        {
-            block = world.blocks.Get(pos.Add(0, y, 0));
-
-            if (!block.canBeWalkedThrough)
-            {
-                return false;
-            }
-        }
-
-        return true;
 
     }
 

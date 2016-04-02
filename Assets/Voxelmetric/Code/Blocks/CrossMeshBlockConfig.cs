@@ -10,5 +10,7 @@ public class CrossMeshBlockConfig: BlockConfig
         base.SetUp(config, world);
         texture = world.textureIndex.GetTextureCollection(_GetPropertyFromConfig(config, "texture", ""));
         solid = _GetPropertyFromConfig(config, "solid", false);
+        canBeWalkedOn = _GetPropertyFromConfig(config, "canBeWalkedOn", defaultValue: false);
+        canBeWalkedThrough = _GetPropertyFromConfig(config, "canBeWalkedThrough", defaultValue: true);
     }
 }

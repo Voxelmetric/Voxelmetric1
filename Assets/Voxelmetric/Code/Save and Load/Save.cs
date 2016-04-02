@@ -14,64 +14,44 @@ public class Save
 
     public bool changed = false;
 
-    public Save(Chunk chunk)
-    {
+    [NonSerialized()] private Chunk chunk;
 
-        try
-        {
-            //Because existing saved blocks aren't marked as modified we have to add the
-            //blocks already in the save fie if there is one. Then add 
-            Dictionary<BlockPos, Block> blocksDictionary = AddSavedBlocks(chunk);
+    public Chunk Chunk { get { return chunk; } }
 
-            foreach(var pos in chunk.blocks.modifiedBlocks) {
-                //remove any existing blocks in the dictionary as they're
-                //from the existing save and are overwritten
-                blocksDictionary.Remove(pos);
-                blocksDictionary.Add(pos, chunk.blocks.Get(pos));
-                changed = true;
-            }
-
-            blocks = new Block[blocksDictionary.Keys.Count];
-            positions = new BlockPos[blocksDictionary.Keys.Count];
-
-            int index = 0;
-
-            foreach (var pair in blocksDictionary)
-            {
-                blocks[index] = pair.Value;
-                positions[index] = pair.Key;
-                index++;
-            }
-
-        }
-        catch (Exception ex)
-        {
-            Debug.LogError(ex);
-        }
-
-    }
-
-    Dictionary<BlockPos, Block> AddSavedBlocks(Chunk chunk){
-        string saveFile = Serialization.SaveLocation(chunk.world.worldName);
-        saveFile += Serialization.FileName(chunk.pos);
+    public Save(Chunk chunk, Save existing) {
+        this.chunk = chunk;
 
         Dictionary<BlockPos, Block> blocksDictionary = new Dictionary<BlockPos, Block>();
 
-        if (!File.Exists(saveFile))
-            return blocksDictionary;
-
-        IFormatter formatter = new BinaryFormatter();
-        FileStream stream = new FileStream(saveFile, FileMode.Open);
-
-        Save save = (Save)formatter.Deserialize(stream);
-
-        for (int i = 0; i< save.blocks.Length; i++)
-        {
-            blocksDictionary.Add(save.positions[i], save.blocks[i]);
+        if (existing != null) {
+            //Because existing saved blocks aren't marked as modified we have to add the
+            //blocks already in the save file if there is one.
+            existing.AddBlocks(blocksDictionary);
         }
 
-        stream.Close();
+        // Then add modified blocks from this chunk
+        foreach (var pos in chunk.blocks.modifiedBlocks) {
+            //remove any existing blocks in the dictionary as they're
+            //from the existing save and are overwritten
+            blocksDictionary.Remove(pos);
+            blocksDictionary.Add(pos, chunk.blocks.Get(pos));
+            changed = true;
+        }
 
-        return blocksDictionary;
+        blocks = new Block[blocksDictionary.Keys.Count];
+        positions = new BlockPos[blocksDictionary.Keys.Count];
+
+        int index = 0;
+        foreach (var pair in blocksDictionary) {
+            blocks[index] = pair.Value;
+            positions[index] = pair.Key;
+            index++;
+        }
+    }
+
+    private void AddBlocks(Dictionary<BlockPos, Block> blocksDictionary) {
+        for (int i = 0; i < blocks.Length; i++) {
+            blocksDictionary.Add(positions[i], blocks[i]);
+        }
     }
 }
