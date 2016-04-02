@@ -24,7 +24,6 @@ public class VmServer {
 
     public VmServer(World world)
     {
-        bool debug = false;
         this.world = world;
 
         try
@@ -33,9 +32,9 @@ public class VmServer {
             serverSocket = new Socket(addressFamily, SocketType.Stream, ProtocolType.Tcp);
 
             string serverName = Dns.GetHostName();
-            if ( debug ) Debug.Log("serverName='" + serverName + "'");
+            if (debugServer) Debug.Log("serverName='" + serverName + "'");
             foreach (IPAddress serverAddress in Dns.GetHostAddresses(serverName)) {
-                if (debug) Debug.Log("serverAddress='" + serverAddress + "', AddressFamily=" + serverAddress.AddressFamily);
+                if (debugServer) Debug.Log("serverAddress='" + serverAddress + "', AddressFamily=" + serverAddress.AddressFamily);
                 if (serverAddress.AddressFamily !=  addressFamily)
                     continue;
                 serverIP = serverAddress;
