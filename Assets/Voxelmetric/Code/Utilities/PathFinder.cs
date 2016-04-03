@@ -69,17 +69,10 @@ public class PathFinder {
         }
         else
         {
-            //TODO
-            DateTime startTime = DateTime.Now;
-            int steps = 0;
             while (status == Status.working)
             {
                 update();
-                ++steps;
             }
-            DateTime endTime = DateTime.Now;
-            var duration = endTime - startTime;
-            //Debug.Log("PathFinder: " + steps + " took " + duration);
         }
     }
 

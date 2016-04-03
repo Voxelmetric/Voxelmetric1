@@ -140,7 +140,6 @@ public class World : MonoBehaviour {
     /// <param name="pos"></param>
     /// <returns></returns>
     public bool findGroundPos(ref Vector3 pos, int entityHeight) {
-        Vector3 posOrg = pos;
         BlockPos blockPosOrg = getBlockPos(pos);
         
         int offset = 0, maxOffset = 1024;
