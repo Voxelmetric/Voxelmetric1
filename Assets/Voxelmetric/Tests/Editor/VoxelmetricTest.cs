@@ -36,7 +36,7 @@ public class VoxelmetricTest {
     public void NetworkingTest() {
         // NOTE: VmClient and VmServer are threaded anyway
         bool useMultiThreading = false; // Config.Toggle.UseMultiThreadingDefault
-        bool debug = true;
+        bool debug = false;
 
         List<World> worlds = new List<World>();
         try {
@@ -418,6 +418,7 @@ public class VoxelmetricTest {
             stageChunks.Clear();
             foreach (var chunk in world.chunks.chunkCollection)
                 stageChunks[chunk.stage].Add(chunk);
+            if (debug) DebugChunks("final chunks", world.chunks.chunkCollection);
             if (useMultiThreading) {
                 Assert.AreEqual(2, stageChunks.Count, "Edit stageChunks.Count");
                 Assert.AreEqual(25, stageChunks[Stage.created].Count, "Edit stageChunks[Stage.created]");

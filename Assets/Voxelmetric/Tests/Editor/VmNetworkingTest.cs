@@ -88,7 +88,7 @@ public class VmNetworkingTest {
     [Test]
     public void ThreadingTest()
     {
-        bool debug = true;
+        bool debug = false;
 
         List<VmNetworking> networkings = new List<VmNetworking>();
         try {
