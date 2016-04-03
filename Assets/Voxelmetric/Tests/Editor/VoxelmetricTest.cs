@@ -355,23 +355,30 @@ public class VoxelmetricTest {
 
             // Save before anything is changed
             SaveProgress saveProgress = Voxelmetric.SaveAll(world);
-            /*while (saveProgress.GetProgress() < 100) {
-                Thread.Sleep(1);
-            }*/
+            if (useMultiThreading)
+                AssertWaitForSave(saveProgress, new TimeSpan(0, 0, 2)); // 2s should be way long enough
+
             //TODO Check for dirty chunk (should be 0 here)
             Assert.AreEqual(27, saveProgress.totalChunksToSave);
             Assert.AreEqual(100, saveProgress.GetProgress());
             Assert.AreEqual(0, saveProgress.ErrorChunks.Count());
 
-            if (!useMultiThreading) {
+            if (useMultiThreading) {
+                // Need to just wait for the threads to do their work
+                Thread.Sleep(100); // 100 ms should be plenty of time
+
+                // Run for a while to load some chunks
+                //for (int i = 0; i<100; ++i)
+                //    world.chunksLoop.MainThreadLoop();
+            } else {
                 // Generate a mesh
                 world.chunksLoop.BuildMesh();
-
-                // Update test info
-                stageChunks.Clear();
-                foreach (var chunk in world.chunks.chunkCollection)
-                    stageChunks[chunk.stage].Add(chunk);
             }
+
+            // Update test info
+            stageChunks.Clear();
+            foreach (var chunk in world.chunks.chunkCollection)
+                stageChunks[chunk.stage].Add(chunk);
 
             // Check that meshes got generated
             Assert.AreEqual(2, stageChunks.Count, "BuildMesh stageChunks.Count");
@@ -394,6 +401,9 @@ public class VoxelmetricTest {
 
             // Save again
             saveProgress = Voxelmetric.SaveAll(world);
+            if (useMultiThreading)
+                AssertWaitForSave(saveProgress, new TimeSpan(0, 0, 2)); // 2s should be way long enough
+
             //TODO Check for dirty chunk (should be >0 here)
             Assert.AreEqual(27, saveProgress.totalChunksToSave);
             Assert.AreEqual(100, saveProgress.GetProgress());
@@ -426,6 +436,15 @@ public class VoxelmetricTest {
             //world.chunksLoop.BuildMesh();
         } finally {
             world.StopWorld();
+        }
+    }
+
+    private static void AssertWaitForSave(SaveProgress saveProgress, TimeSpan timeout) {
+        Stopwatch stopwatch = Stopwatch.StartNew();
+        while (saveProgress.GetProgress() < 100) {
+            Thread.Sleep(10);
+            if (stopwatch.Elapsed > timeout)
+                Assert.Fail("SaveAll took too long");
         }
     }
 }
