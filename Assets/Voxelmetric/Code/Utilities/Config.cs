@@ -4,8 +4,9 @@ namespace Config
 {
     public static class Env
     {
-        public static int ChunkSize = 16;
-        public static float BlockSize = 1f;
+        public const int ChunkPower = 4;
+        public const int ChunkSize = 1 << 4;
+        public const float BlockSize = 1f;
 
         // Padding added to the size of block faces to fix floating point issues 
         // where tiny gaps can appear between block faces
