@@ -67,7 +67,7 @@ public class VoxelmetricResources {
         }
 
         blockIndex = new BlockIndex(world.config.blockFolder, world);
-        blockIndexes.Add(world.config.textureFolder, blockIndex);
+        blockIndexes.Add(world.config.blockFolder, blockIndex);
         return blockIndex;
     }
 
