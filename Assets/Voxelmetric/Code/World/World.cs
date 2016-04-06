@@ -23,18 +23,17 @@ public class World : MonoBehaviour {
     [HideInInspector]
     public byte worldIndex;
 
-    void Start()
-    {
-        config = new ConfigLoader<WorldConfig>(new string[] { "Worlds" }).GetConfig(worldConfig);
-
-        networking.StartConnections(this);
+    public World() {
         chunks = new WorldChunks(this);
         blocks = new WorldBlocks(this);
+    }
 
-        worldIndex = Voxelmetric.resources.AddWorld(this);
+    void Start()
+    {
+        Configure();
 
-        textureIndex = Voxelmetric.resources.GetOrLoadTextureIndex(this);
-        blockIndex = Voxelmetric.resources.GetOrLoadBlockIndex(this);
+        networking.StartConnections(this);
+
         terrainGen = new TerrainGen(this, config.layerFolder);
 
         gameObject.GetComponent<Renderer>().material.mainTexture = textureIndex.atlas;
@@ -50,17 +49,14 @@ public class World : MonoBehaviour {
     void OnApplicationQuit()
     {
         chunksLoop.isPlaying = false;
-
-        if (networking.isServer)
-        {
-            if (networking.allowConnections)
-            {
-                networking.server.DisconnectClients();
-            }
-        }
-        else
-        {
-            networking.client.Disconnect();
-        }
+        networking.EndConnections();
     }
+
+    public void Configure() {
+        config = new ConfigLoader<WorldConfig>(new string[] { "Worlds" }).GetConfig(worldConfig);
+        worldIndex = Voxelmetric.resources.AddWorld(this);
+        textureIndex = Voxelmetric.resources.GetOrLoadTextureIndex(this);
+        blockIndex = Voxelmetric.resources.GetOrLoadBlockIndex(this);
+    }
+
 }

@@ -35,6 +35,11 @@ public class WorldChunks {
         return containerChunk;
     }
 
+    public void Set(BlockPos pos, Chunk chunk) {
+        pos = pos.ContainingChunkCoordinates();
+        chunks[pos] = chunk;
+    }
+
     public void Remove(BlockPos pos)
     {
         chunks.Remove(pos);
