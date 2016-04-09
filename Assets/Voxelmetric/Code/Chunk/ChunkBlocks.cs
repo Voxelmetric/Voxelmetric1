@@ -182,30 +182,6 @@ public class ChunkBlocks {
         }
     }
 
-    public void GenerateChunkContents()
-    {
-        if (contentsGenerated)
-        {
-            return;
-        }
-
-        if (chunk.world.networking.isServer)
-        {
-            chunk.world.terrainGen.GenerateTerrainForChunk(chunk);
-            Serialization.Load(chunk);
-
-            contentsGenerated = true;
-        }
-        else
-        {
-            if (!generationStarted)
-            {
-                generationStarted = true;
-                chunk.world.networking.client.RequestChunk(chunk.pos);
-            }
-        }
-    }
-
     private bool debugRecieve = false;
 
     void InitializeChunkDataReceive(int index, int size)

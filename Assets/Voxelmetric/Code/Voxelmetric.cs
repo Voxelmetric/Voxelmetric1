@@ -100,7 +100,7 @@ public static class Voxelmetric
 		List<Chunk> chunksToSave = new List<Chunk> ();
 		chunksToSave.AddRange (world.chunks.chunkCollection);
 
-		if (Config.Toggle.UseMultiThreading) {
+        if (world.UseMultiThreading) {
 			Thread thread = new Thread (() =>
 			{
 

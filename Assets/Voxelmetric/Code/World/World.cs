@@ -22,6 +22,14 @@ public class World : MonoBehaviour {
 
     [HideInInspector]
     public byte worldIndex;
+    public bool delayStart;
+    //Multi threading must be disabled on web builds
+    public bool useMultiThreading;
+
+    private Coroutine terrainLoopCoroutine;
+    private Coroutine buildMeshLoopCoroutine;
+
+    public bool UseMultiThreading { get { return useMultiThreading; } }
 
     public World() {
         chunks = new WorldChunks(this);
@@ -30,26 +38,27 @@ public class World : MonoBehaviour {
 
     void Start()
     {
-        Configure();
-
-        networking.StartConnections(this);
-
-        terrainGen = new TerrainGen(this, config.layerFolder);
-
-        gameObject.GetComponent<Renderer>().material.mainTexture = textureIndex.atlas;
-
-        chunksLoop = new ChunksLoop(this);
+        if (!delayStart)
+            StartWorld();
     }
 
     void Update()
     {
-        chunksLoop.MainThreadLoop();
+        if (chunksLoop != null) {
+            if (!useMultiThreading) {
+                if (terrainLoopCoroutine == null)
+                    terrainLoopCoroutine = StartCoroutine(chunksLoop.TerrainLoopCoroutine());
+                if (buildMeshLoopCoroutine == null)
+                    buildMeshLoopCoroutine = StartCoroutine(chunksLoop.BuildMeshLoopCoroutine());
+            }
+
+            chunksLoop.MainThreadLoop();
+        }
     }
 
     void OnApplicationQuit()
     {
-        chunksLoop.isPlaying = false;
-        networking.EndConnections();
+        StopWorld();
     }
 
     public void Configure() {
@@ -57,6 +66,30 @@ public class World : MonoBehaviour {
         worldIndex = Voxelmetric.resources.AddWorld(this);
         textureIndex = Voxelmetric.resources.GetOrLoadTextureIndex(this);
         blockIndex = Voxelmetric.resources.GetOrLoadBlockIndex(this);
+    }
+
+    public void StartWorld() {
+        if (chunksLoop != null)
+            return;
+        Configure();
+
+        networking.StartConnections(this);
+
+        terrainGen = new TerrainGen(this, config.layerFolder);
+
+        var renderer = gameObject.GetComponent<Renderer>();
+        if (renderer != null)
+            renderer.material.mainTexture = textureIndex.atlas;
+
+        chunksLoop = new ChunksLoop(this);
+    }
+
+    public void StopWorld() {
+        if (chunksLoop == null)
+            return;
+        chunksLoop.Stop();
+        networking.EndConnections();
+        chunksLoop = null;
     }
 
 }
