@@ -137,7 +137,7 @@ public class ChunksLoop {
                             var enumerator = chunkToGen.world.terrainGen.GenerateTerrainForChunkCoroutine(chunkToGen);
                             while (enumerator.MoveNext())
                                 yield return enumerator.Current;
-                            Serialization.Load(chunkToGen);
+                            Serialization.LoadChunk(chunkToGen);
                             chunkToGen.blocks.contentsGenerated = true;
                         } else {
                             if (!chunkToGen.blocks.generationStarted) {

@@ -85,7 +85,7 @@ public class ChunkBlocks {
             Block block = blocks[localBlockPos.x, localBlockPos.y, localBlockPos.z];
             if (block == null)
             {
-                return Block.Air;
+                return chunk.world.Air;
             }
             else
             {

@@ -20,8 +20,6 @@ public class World : MonoBehaviour {
     public ChunksLoop chunksLoop;
     public TerrainGen terrainGen;
 
-    [HideInInspector]
-    public byte worldIndex;
     public bool delayStart;
     //Multi threading must be disabled on web builds
     public bool useMultiThreading;
@@ -29,7 +27,26 @@ public class World : MonoBehaviour {
     private Coroutine terrainLoopCoroutine;
     private Coroutine buildMeshLoopCoroutine;
 
+    private Block voidBlock;
+    private Block airBlock;
+
     public bool UseMultiThreading { get { return useMultiThreading; } }
+
+    public Block Void {
+        get {
+            if (voidBlock == null)
+                voidBlock = Block.New(Block.VoidType, this);
+            return voidBlock;
+        }
+    }
+
+    public Block Air {
+        get {
+            if (airBlock == null)
+                airBlock = Block.New(Block.AirType, this);
+            return airBlock;
+        }
+    }
 
     public World() {
         chunks = new WorldChunks(this);
@@ -63,7 +80,6 @@ public class World : MonoBehaviour {
 
     public void Configure() {
         config = new ConfigLoader<WorldConfig>(new string[] { "Worlds" }).GetConfig(worldConfig);
-        worldIndex = Voxelmetric.resources.AddWorld(this);
         textureIndex = Voxelmetric.resources.GetOrLoadTextureIndex(this);
         blockIndex = Voxelmetric.resources.GetOrLoadBlockIndex(this);
     }

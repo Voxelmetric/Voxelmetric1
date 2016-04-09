@@ -1,6 +1,8 @@
 ﻿using UnityEngine;
 using System.Threading;
 using System.Collections.Generic;
+using System;
+using System.Runtime.Serialization;
 
 public static class Voxelmetric
 {
@@ -11,10 +13,10 @@ public static class Voxelmetric
 	{
 		BlockPos blockPos = new BlockPos ();
 
-		if (original == Block.Air)
+		if (original.type == Block.AirType)
 			return null;
 
-		EmptyChunk chunk = original.world.GetComponent<EmptyChunk> ();
+        EmptyChunk chunk = null;// original.world.GetComponent<EmptyChunk> ();
 		if (chunk == null) {
 			chunk = new EmptyChunk (original.world, new BlockPos ());
 		}
@@ -27,7 +29,7 @@ public static class Voxelmetric
 	public static GameObject CreateGameObjectBlock (BlockPos blockPos, World world, Vector3 position, Quaternion rotation)
 	{
 		Block original = GetBlock (blockPos, world);
-		if (original == Block.Air)
+		if (original.type == Block.AirType)
 			return null;
 
 		EmptyChunk chunk = world.GetComponent<EmptyChunk> ();
@@ -110,16 +112,19 @@ public static class Voxelmetric
 						Thread.Sleep (0);
 					}
 
-					Serialization.SaveChunk (chunk);
-
-					saveProgress.SaveCompleteForChunk (chunk.pos);
+                    if (!Serialization.SaveChunk(chunk))
+                        saveProgress.SaveErrorForChunk(chunk.pos);
+                    else
+                        saveProgress.SaveCompleteForChunk(chunk.pos);
 				}
 			});
-			thread.Start ();
+			thread.Start();
 		} else {
 			foreach (var chunk in chunksToSave) {
-				Serialization.SaveChunk (chunk);
-				saveProgress.SaveCompleteForChunk (chunk.pos);
+				if ( !Serialization.SaveChunk(chunk) )
+                    saveProgress.SaveErrorForChunk(chunk.pos);
+                else
+                    saveProgress.SaveCompleteForChunk(chunk.pos);
 			}
 		}
 

@@ -53,10 +53,10 @@ public class VoxelmetricExample : MonoBehaviour
 
         if (Input.GetMouseButtonDown(0))
         {
-            if (hit.block.type != Block.Void.type)
+            if (hit.block.type != Block.VoidType)
             {
                 bool adjacent = true;
-                if (Block.New(blockToPlace, world).type == Block.Air.type)
+                if (Block.New(blockToPlace, world).type == Block.AirType)
                 {
                     adjacent = false;
                 }
