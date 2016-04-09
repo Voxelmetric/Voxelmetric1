@@ -6,8 +6,8 @@ public class WorldChunks {
     World world;
 
     Dictionary<BlockPos, Chunk> chunks = new Dictionary<BlockPos, Chunk>();
-    public Dictionary<BlockPos, Chunk>.ValueCollection chunkCollection { get { return chunks.Values; } }
-    public Dictionary<BlockPos, Chunk>.KeyCollection posCollection { get { return chunks.Keys; } }
+    public ICollection<Chunk> chunkCollection { get { return chunks.Values; } }
+    public ICollection<BlockPos> posCollection { get { return chunks.Keys; } }
 
     public WorldChunks(World world) {
         this.world = world;

@@ -53,7 +53,7 @@ public class PathFinder {
 
         open.Add(startLocation, new Heuristics(0, distanceFromStartToTarget, startLocation));
 
-        if (Config.Toggle.UseMultiThreading)
+        if (world.UseMultiThreading)
         {
             Thread thread = new Thread(() =>
            {
@@ -66,10 +66,10 @@ public class PathFinder {
         }
         else
         {
-            //while (status == Status.working)
-            //{
-            //    update();
-            //}
+            while (status == Status.working)
+            {
+                update();
+            }
         }
     }
 

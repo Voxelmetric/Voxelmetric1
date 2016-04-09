@@ -5,6 +5,10 @@ using UnityEngine;
 [Serializable]
 public class Block
 {
+    // Static block types: These are always added as 0 and 1 in the block index
+    public static readonly int VoidType = 0;
+    public static readonly int AirType = 1;
+
     public Block() { }
     public Block(int type)
     {
@@ -14,10 +18,17 @@ public class Block
     public ushort type;
     public byte worldIndex;
 
+    [NonSerialized()] private BlockConfig cachedConfig;
+    [NonSerialized()] public World world;
+
     public virtual string       name                { get { return config.name;                     } }
     public virtual string       displayName         { get { return name;                            } }
-    public virtual World        world               { get { return Voxelmetric.resources.worlds[worldIndex]; } }
-    public virtual BlockConfig  config              { get { return world.blockIndex.configs[type];  } }
+    public virtual BlockConfig  config              { get {
+            if (cachedConfig == null || cachedConfig.type != type)
+                cachedConfig = world.blockIndex.configs[type];
+            return cachedConfig;
+        }
+    }
     public virtual bool         solid               { get { return config.solid;                    } }
     public virtual bool         canBeWalkedOn       { get { return config.canBeWalkedOn;            } }
     public virtual bool         canBeWalkedThrough  { get { return config.canBeWalkedThrough;       } }
@@ -52,7 +63,7 @@ public class Block
     {
         Block block = (Block)Activator.CreateInstance(world.blockIndex.GetConfig(type).blockClass);
         block.type = (ushort)type;
-        block.worldIndex = world.worldIndex;
+        block.world = world;
         return block;
     }
 
@@ -65,10 +76,6 @@ public class Block
 
     //Override this to create a hash of the block type and the block's data
     public override int GetHashCode() { return type * 227; }
-
-    // Static block types: These are always added as 0 and 1 in the block index
-    public static Block Air { get { return Config.Env.Air; } }
-    public static Block Void { get { return Config.Env.Void; } }
 
     public int RestoreBlockData(byte[] data, int offset)
     {

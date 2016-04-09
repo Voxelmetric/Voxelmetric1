@@ -21,6 +21,17 @@ public class TestUtils {
         return world;
     }
 
+    /// <summary>
+    /// Create a colored world object for testing
+    /// </summary>
+    /// <returns></returns>
+    public static World CreateWorldColored() {
+        World world = CreateWorldObject();
+        world.worldConfig = "colored";
+        world.worldName = "coloredTest";
+        return world;
+    }
+
     private static World CreateWorldObject() {
         var gameObject = new GameObject();
         return gameObject.AddComponent<World>();
@@ -97,7 +108,7 @@ public class TestUtils {
         Block[] rndBlocks = new Block[blockTypes];
         for (int type = 0; type < blockTypes; ++type) {
             Block block = new Block(type);
-            block.worldIndex = world.worldIndex;
+            block.world = world;
             rndBlocks[type] = block;
         }
 
@@ -113,7 +124,7 @@ public class TestUtils {
         Assert.IsNotNull(config.blockClass, "config.blockClass");
 
         Block block = new Block(type);
-        block.worldIndex = world.worldIndex;
+        block.world = world;
 
         foreach (BlockPos localPos in LocalPosns)
             chunk.blocks.LocalSet(localPos, block);

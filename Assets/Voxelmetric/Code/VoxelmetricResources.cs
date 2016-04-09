@@ -6,29 +6,6 @@ public class VoxelmetricResources {
 
     public System.Random random = new System.Random();
 
-    public List<World> worlds = new List<World>();
-
-    public byte AddWorld(World world)
-    {
-        for (int i = 0; i < worlds.Count; i++)
-        {
-            if (worlds[i] == null)
-            {
-                worlds[i] = world;
-                return (byte)i;
-            }
-        }
-
-        if (worlds.Count > byte.MaxValue)
-        {
-            Debug.LogError("More than 255 worlds are not supported");
-            return 0;
-        }
-
-        worlds.Add(world);
-        return (byte)(worlds.Count - 1);
-    }
-
     // Worlds can use different block and texture indexes or share them so they are mapped here to
     // the folders they're loaded from so that a world can create a new index or if it uses the same
     // folder to fetch and index it can return an existing index and avoid building it again

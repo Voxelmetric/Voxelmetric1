@@ -22,7 +22,7 @@ public class CavesLayer : TerrainLayer
             int caveTop = caveHeight / 2;
             if (!justGetHeight)
             {
-                SetBlocksColumn(chunk, x, z, caveBottom, caveTop, Block.Air);
+                SetBlocksColumn(chunk, x, z, caveBottom, caveTop, chunk.world.Air);
             }
 
             if (caveTop > heightSoFar && caveBottom < heightSoFar)

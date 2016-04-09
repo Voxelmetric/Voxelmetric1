@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System;
+using System.Text;
 using System.Threading;
 
 public class ChunkBlocks {
@@ -29,6 +30,17 @@ public class ChunkBlocks {
     public ChunkBlocks(Chunk chunk)
     {
         this.chunk = chunk;
+    }
+
+    public override string ToString() {
+        StringBuilder sb = new StringBuilder();
+        sb.Append("contentsGenerated=");
+        sb.Append(contentsGenerated.ToString());
+        sb.Append(", generationStarted=");
+        sb.Append(generationStarted.ToString());
+        sb.Append(", contentsModified=");
+        sb.Append(contentsModified.ToString());
+        return sb.ToString();
     }
 
     public void ResetContent()
@@ -73,7 +85,7 @@ public class ChunkBlocks {
             Block block = blocks[localBlockPos.x, localBlockPos.y, localBlockPos.z];
             if (block == null)
             {
-                return Block.Air;
+                return chunk.world.Air;
             }
             else
             {
@@ -167,30 +179,6 @@ public class ChunkBlocks {
         else // if this is not the server send the change to the server to sync
         {
             chunk.world.networking.client.BroadcastChange(pos, Get(pos));
-        }
-    }
-
-    public void GenerateChunkContents()
-    {
-        if (contentsGenerated)
-        {
-            return;
-        }
-
-        if (chunk.world.networking.isServer)
-        {
-            chunk.world.terrainGen.GenerateTerrainForChunk(chunk);
-            Serialization.Load(chunk);
-
-            contentsGenerated = true;
-        }
-        else
-        {
-            if (!generationStarted)
-            {
-                generationStarted = true;
-                chunk.world.networking.client.RequestChunk(chunk.pos);
-            }
         }
     }
 

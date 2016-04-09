@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 public class VoxelmetricExample : MonoBehaviour
@@ -16,8 +17,16 @@ public class VoxelmetricExample : MonoBehaviour
 
     SaveProgress saveProgress;
 
+    private EventSystem eventSystem;
+
     public void SetType(string newType){
         blockToPlace = newType;
+    }
+
+    void Start() {
+        rot.y = 360f - transform.localEulerAngles.x;
+        rot.x = transform.localEulerAngles.y;
+        eventSystem = FindObjectOfType<EventSystem>();
     }
 
     void Update()
@@ -51,12 +60,12 @@ public class VoxelmetricExample : MonoBehaviour
 
         selectedBlockText.text = Voxelmetric.GetBlock(hit.blockPos, world).displayName;
 
-        if (Input.GetMouseButtonDown(0))
+        if (Input.GetMouseButtonDown(0) && !eventSystem.IsPointerOverGameObject())
         {
-            if (hit.block.type != Block.Void.type)
+            if (hit.block.type != Block.VoidType)
             {
                 bool adjacent = true;
-                if (Block.New(blockToPlace, world).type == Block.Air.type)
+                if (Block.New(blockToPlace, world).type == Block.AirType)
                 {
                     adjacent = false;
                 }
