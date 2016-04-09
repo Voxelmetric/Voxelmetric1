@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System;
+using System.Text;
 using System.Threading;
 
 public class ChunkBlocks {
@@ -29,6 +30,17 @@ public class ChunkBlocks {
     public ChunkBlocks(Chunk chunk)
     {
         this.chunk = chunk;
+    }
+
+    public override string ToString() {
+        StringBuilder sb = new StringBuilder();
+        sb.Append("contentsGenerated=");
+        sb.Append(contentsGenerated.ToString());
+        sb.Append(", generationStarted=");
+        sb.Append(generationStarted.ToString());
+        sb.Append(", contentsModified=");
+        sb.Append(contentsModified.ToString());
+        return sb.ToString();
     }
 
     public void ResetContent()
