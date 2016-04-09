@@ -20,6 +20,11 @@ public class VoxelmetricExample : MonoBehaviour
         blockToPlace = newType;
     }
 
+    void Start() {
+        rot.y = 360f - transform.localEulerAngles.x;
+        rot.x = transform.localEulerAngles.y;
+    }
+
     void Update()
     {
         //Movement
