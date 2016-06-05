@@ -137,6 +137,7 @@ public class ChunkBlocks {
     /// <param name="blockPos">Block position</param>
     /// <param name="newBlock">Block to place at the given location</param>
     /// <param name="updateChunk">Optional parameter, set to false to keep the chunk unupdated despite the change</param>
+    /// <param name="setBlockModified">Optional parameter, set to true to mark chunk data as modified</param>
     public virtual void Set(BlockPos blockPos, Block newBlock, bool updateChunk = true, bool setBlockModified = true)
     {
         if (InRange(blockPos))

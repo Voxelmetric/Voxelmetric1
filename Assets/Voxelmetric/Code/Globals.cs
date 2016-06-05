@@ -6,76 +6,48 @@ namespace Assets.Voxelmetric.Code
     public static class Globals
     {
         // Thread pool
-        private static ThreadPool s_threadPool;
-        public static ThreadPool WorkPool
-        {
-            get
-            {
-                return s_threadPool;
-            }
-        }
+        public static ThreadPool WorkPool { get; private set; }
 
         public static void InitWorkPool()
         {
-            if (s_threadPool == null)
+            if (WorkPool == null)
             {
-                s_threadPool = new ThreadPool();
-                s_threadPool.Start();
+                WorkPool = new ThreadPool();
+                WorkPool.Start();
             }
         }
 
         // Task pool for IO-related tasks
-        private static TaskPool s_IOPool;
-        public static TaskPool IOPool
-        {
-            get
-            {
-                return s_IOPool;
-            }
-        }
+        public static TaskPool IOPool { get; private set; }
 
         public static void InitIOPool()
         {
-            if(s_IOPool == null)
+            if(IOPool == null)
             {
-                s_IOPool = new TaskPool();
-                s_IOPool.Start();
+                IOPool = new TaskPool();
+                IOPool.Start();
             }
         }
 
         // Task pool for network-related tasks
-        private static TaskPool s_NetworkPool;
-        public static TaskPool NetworkPool
-        {
-            get
-            {
-                return s_NetworkPool;
-            }
-        }
+        public static TaskPool NetworkPool { get; private set; }
 
         public static void InitNetworkPool()
         {
-            if (s_NetworkPool == null)
+            if (NetworkPool == null)
             {
-                s_NetworkPool = new TaskPool();
-                s_NetworkPool.Start();
+                NetworkPool = new TaskPool();
+                NetworkPool.Start();
             }
         }
 
         // Global object pools
-        private static GlobalPools s_memPools;
-        public static GlobalPools MemPools
-        {
-            get
-            {
-                return s_memPools;
-            }
-        }
+        public static GlobalPools MemPools { get; private set; }
 
         public static void InitMemPools()
         {
-            if (s_memPools == null)
-                s_memPools = new GlobalPools();
+            if (MemPools == null)
+                MemPools = new GlobalPools();
         }
     }
 }

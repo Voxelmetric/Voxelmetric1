@@ -6,10 +6,10 @@ public class GlobalObjects : MonoBehaviour {
 
     void Awake()
     {
-        Globals.InitMemPools();
+        Globals.InitWorkPool();
         Globals.InitIOPool();
         Globals.InitNetworkPool();
-        Globals.InitWorkPool();
+        Globals.InitMemPools();
     }
 	
 	void Update ()

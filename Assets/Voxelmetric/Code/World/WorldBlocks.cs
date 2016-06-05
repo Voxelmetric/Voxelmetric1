@@ -41,6 +41,7 @@
     /// <param name="pos">Global position of the block</param>
     /// <param name="block">The block be placed</param>
     /// <param name="updateChunk">Optional parameter, set to false not update the chunk despite the change</param>
+    /// <param name="setBlockModified">Optional parameter, set to true to mark chunk data as modified</param>
     public void Set(BlockPos pos, Block block, bool updateChunk = true, bool setBlockModified = true)
     {
         Chunk chunk = world.chunks.Get(pos);

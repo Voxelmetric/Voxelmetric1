@@ -397,7 +397,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   world: {fileID: 1995405189}
-  generateTerrain: 1
   chunkLoadRadius: 12
   DistanceToDeleteChunks: 14
 --- !u!1 &312836251

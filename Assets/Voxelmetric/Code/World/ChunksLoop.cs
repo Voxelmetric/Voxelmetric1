@@ -111,6 +111,7 @@ public class ChunksLoop {
                         chunkToGen.blocks.generationStarted = true;
                         WorkPoolManager.Add(
                             new ThreadItem(
+                                chunkToGen.ThreadId,
                                 arg =>
                                 {
                                     Chunk ch = (Chunk)arg;
@@ -224,6 +225,7 @@ public class ChunksLoop {
             chunk.blocks.meshStarted = true;
             WorkPoolManager.Add(
                 new ThreadItem(
+                    chunk.ThreadId,
                     arg =>
                     {
                         Chunk ch = (Chunk)arg;
