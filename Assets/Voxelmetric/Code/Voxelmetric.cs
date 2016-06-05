@@ -18,7 +18,7 @@ public static class Voxelmetric
 
         EmptyChunk chunk = null;// original.world.GetComponent<EmptyChunk> ();
 		if (chunk == null) {
-			chunk = new EmptyChunk (original.world, new BlockPos ());
+			chunk = EmptyChunk.Create(original.world, new BlockPos ());
 		}
 
 		original.OnCreate (chunk, blockPos - blockPos.ContainingChunkCoordinates (), blockPos);
@@ -34,7 +34,7 @@ public static class Voxelmetric
 
 		EmptyChunk chunk = world.GetComponent<EmptyChunk> ();
 		if (chunk == null) {
-			chunk = new EmptyChunk (original.world, blockPos.ContainingChunkCoordinates ());
+			chunk = EmptyChunk.Create(original.world, blockPos.ContainingChunkCoordinates ());
 		}
 
 		original.OnCreate (chunk, blockPos - blockPos.ContainingChunkCoordinates (), blockPos);
@@ -42,7 +42,7 @@ public static class Voxelmetric
 		return GOFromBlock (original, blockPos, position, rotation, chunk);
 	}
 
-	static GameObject GOFromBlock (Block original, BlockPos blockPos, Vector3 position, Quaternion rotation, Chunk chunk)
+    private static GameObject GOFromBlock (Block original, BlockPos blockPos, Vector3 position, Quaternion rotation, Chunk chunk)
 	{
 		GameObject go = (GameObject)GameObject.Instantiate (Resources.Load<GameObject> (chunk.world.config.pathToBlockPrefab), position, rotation);
 		go.transform.localScale = new Vector3 (Config.Env.BlockSize, Config.Env.BlockSize, Config.Env.BlockSize);

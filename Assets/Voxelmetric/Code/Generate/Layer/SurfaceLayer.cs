@@ -1,39 +1,34 @@
 ﻿using System;
 using SimplexNoise;
 using UnityEngine;
-public class RandomLayer: TerrainLayer
+public class SurfaceLayer : TerrainLayer
 {
+    // Right now this acts just like additive layer but always set to one block thickness
+    // but it's a placeholder so that in the future we can do things like blend surface layers
+    // between separate biomes
+
     Block blockToPlace;
-    float chance;
 
     protected override void SetUp(LayerConfig config)
     {
-        // Config files for random layers MUST define these properties
-        blockToPlace = Block.New(properties["blockName"], world);
+        blockToPlace = Block.Create(properties["blockName"], world);
 
         if (properties.ContainsKey("blockColors"))
         {
             string[] colors = properties["blockColors"].Split(',');
             ((ColoredBlock)blockToPlace).color = new Color(byte.Parse(colors[0]) / 255f, byte.Parse(colors[1]) / 255f, byte.Parse(colors[2]) / 255f);
         }
-
-        chance = float.Parse(properties["chance"]);
     }
 
     public override int GenerateLayer(Chunk chunk, int x, int z, int heightSoFar, float strength, bool justGetHeight = false)
     {
-        float posChance = new BlockPos(x, heightSoFar + 1, z).Random(200);
 
-        if (chance > posChance)
+        //If we're not just getting the height apply the changes
+        if (!justGetHeight)
         {
-            if (!justGetHeight)
-                SetBlocksColumn(chunk, x, z, heightSoFar, heightSoFar + 1, blockToPlace);
+            SetBlocksColumn(chunk, x, z, heightSoFar, heightSoFar + 1, blockToPlace);
+        }
 
-            return heightSoFar + 1;
-        }
-        else
-        {
-            return heightSoFar;
-        }
+        return heightSoFar + 1;
     }
 }

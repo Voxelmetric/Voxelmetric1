@@ -13,7 +13,7 @@ public class AdditiveLayer: TerrainLayer
     protected override void SetUp(LayerConfig config)
     {
         // Config files for additive layers MUST define these properties
-        blockToPlace = Block.New(properties["blockName"], world);
+        blockToPlace = Block.Create(properties["blockName"], world);
 
         if (properties.ContainsKey("blockColors"))
         {

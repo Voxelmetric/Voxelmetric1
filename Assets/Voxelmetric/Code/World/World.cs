@@ -19,8 +19,7 @@ public class World : MonoBehaviour {
     public TextureIndex textureIndex;
     public ChunksLoop chunksLoop;
     public TerrainGen terrainGen;
-
-    public bool delayStart;
+    
     //Multi threading must be disabled on web builds
     public bool useMultiThreading;
 
@@ -35,7 +34,7 @@ public class World : MonoBehaviour {
     public Block Void {
         get {
             if (voidBlock == null)
-                voidBlock = Block.New(Block.VoidType, this);
+                voidBlock = Block.Create(Block.VoidType, this);
             return voidBlock;
         }
     }
@@ -43,7 +42,7 @@ public class World : MonoBehaviour {
     public Block Air {
         get {
             if (airBlock == null)
-                airBlock = Block.New(Block.AirType, this);
+                airBlock = Block.Create(Block.AirType, this);
             return airBlock;
         }
     }
@@ -55,8 +54,7 @@ public class World : MonoBehaviour {
 
     void Start()
     {
-        if (!delayStart)
-            StartWorld();
+        StartWorld();
     }
 
     void Update()

@@ -17,13 +17,13 @@ public class VmNetworkingTest {
         world.Configure();
 
         BlockPos chunkPos = new BlockPos(0, 0, 0);
-        Chunk fromChunk = new Chunk(world, chunkPos);
+        Chunk fromChunk = Chunk.Create(world, chunkPos);
         TestUtils.SetChunkBlocksRandom(fromChunk, new System.Random(444));
         
         if (debug) TestUtils.DebugBlockCounts("fromChunk", TestUtils.FindChunkBlockCounts(fromChunk));
 
         byte[] chunkData = fromChunk.blocks.ToBytes();
-        Chunk toChunk = new Chunk(world, chunkPos);
+        Chunk toChunk = Chunk.Create(world, chunkPos);
 
         const int headerSize = VmServer.headerSize;
         const int leaderSize = VmServer.leaderSize;
@@ -82,14 +82,14 @@ public class VmNetworkingTest {
 
             // Setup a chunk with random blocks on the server
             BlockPos chunkPos = new BlockPos(0, 0, 0);
-            Chunk serverChunk = new Chunk(serverWorld, chunkPos);
+            Chunk serverChunk = Chunk.Create(serverWorld, chunkPos);
             var rand = new System.Random(444);
             TestUtils.SetChunkBlocksRandom(serverChunk, rand);
             serverWorld.chunks.Set(chunkPos, serverChunk);
 
             // Setup air chunks on the client
             foreach (var pos in chunkPosns) {
-                Chunk chunk = new Chunk(clientWorld, pos);
+                Chunk chunk = Chunk.Create(clientWorld, pos);
                 TestUtils.SetChunkBlocks(chunk, Block.AirType);
                 clientWorld.chunks.Set(pos, chunk);
             }

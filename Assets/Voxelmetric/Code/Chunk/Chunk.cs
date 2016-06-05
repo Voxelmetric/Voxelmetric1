@@ -28,19 +28,24 @@ public class Chunk
         }
     }
 
-    public Chunk(World world, BlockPos pos)
+    protected Chunk()
+    {
+        render = new ChunkRender(this);
+        blocks = new ChunkBlocks(this);
+        logic = new ChunkLogic(this);
+    }
+
+    protected virtual void Init(World world, BlockPos pos)
     {
         this.world = world;
         this.pos = pos;
+    }
 
-        if (render == null)
-            render = new ChunkRender(this);
-
-        if (blocks == null)
-            blocks = new ChunkBlocks(this);
-
-        if (logic == null)
-            logic = new ChunkLogic(this);
+    public static Chunk Create(World world, BlockPos pos)
+    {
+        Chunk chunk = new Chunk();
+        chunk.Init(world, pos);
+        return chunk;
     }
 
     public override string ToString() {

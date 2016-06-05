@@ -4,12 +4,13 @@ using System.Collections.Generic;
 using System;
 using System.Text;
 using System.Threading;
+using Assets.Voxelmetric.Code.Common;
 
 public class ChunkBlocks {
 
     protected Chunk chunk;
 
-    protected Block[,,] blocks = new Block[Config.Env.ChunkSize, Config.Env.ChunkSize, Config.Env.ChunkSize];
+    protected Block[] blocks = Helpers.CreateArray1D<Block>(Config.Env.ChunkVolume);
     public List<BlockPos> modifiedBlocks = new List<BlockPos>();
     protected byte[] receiveBuffer;
     protected int receiveIndex;
@@ -32,6 +33,20 @@ public class ChunkBlocks {
         this.chunk = chunk;
     }
 
+    public Block this[int x, int y, int z]
+    {
+        get
+        {
+            int index = Helpers.GetChunkIndex1DFrom3D(x, y, z);
+            return blocks[index];
+        }
+        set
+        {
+            int index = Helpers.GetChunkIndex1DFrom3D(x, y, z);
+            blocks[index] = value;
+        }
+    }
+
     public override string ToString() {
         StringBuilder sb = new StringBuilder();
         sb.Append("contentsGenerated=");
@@ -43,9 +58,9 @@ public class ChunkBlocks {
         return sb.ToString();
     }
 
-    public void ResetContent()
+    public void Reset()
     {
-        blocks = new Block[Config.Env.ChunkSize, Config.Env.ChunkSize, Config.Env.ChunkSize];
+        blocks = Helpers.CreateArray1D<Block>(Config.Env.ChunkVolume);
         contentsGenerated = false;
         generationStarted = false;
     }
@@ -82,15 +97,8 @@ public class ChunkBlocks {
             (localBlockPos.y < Config.Env.ChunkSize && localBlockPos.y >= 0) &&
             (localBlockPos.z < Config.Env.ChunkSize && localBlockPos.z >= 0))
         {
-            Block block = blocks[localBlockPos.x, localBlockPos.y, localBlockPos.z];
-            if (block == null)
-            {
-                return chunk.world.Air;
-            }
-            else
-            {
-                return block;
-            }
+            Block block = this[localBlockPos.x, localBlockPos.y, localBlockPos.z];
+            return block ?? chunk.world.Air;
         }
         else
         {
@@ -100,7 +108,7 @@ public class ChunkBlocks {
 
     public virtual void Set(BlockPos blockPos, string block, bool updateChunk = true, bool setBlockModified = true)
     {
-        Set(blockPos, Block.New(block, chunk.world), updateChunk, setBlockModified);
+        Set(blockPos, Block.Create(block, chunk.world), updateChunk, setBlockModified);
     }
 
     /// <summary> Sets the block at the given position </summary>
@@ -118,7 +126,7 @@ public class ChunkBlocks {
                 block.OnCreate(chunk, blockPos, blockPos + chunk.pos);
             }
 
-            blocks[blockPos.x - chunk.pos.x, blockPos.y - chunk.pos.y, blockPos.z - chunk.pos.z] = block;
+            this[blockPos.x-chunk.pos.x, blockPos.y-chunk.pos.y, blockPos.z-chunk.pos.z] = block;
 
             if (setBlockModified)
                 BlockModified(blockPos);
@@ -146,7 +154,7 @@ public class ChunkBlocks {
             (blockPos.y < Config.Env.ChunkSize && blockPos.y >= 0) &&
             (blockPos.z < Config.Env.ChunkSize && blockPos.z >= 0))
         {
-            blocks[blockPos.x, blockPos.y, blockPos.z] = block;
+            this[blockPos.x, blockPos.y, blockPos.z] = block;
         }
     }
 
@@ -184,7 +192,7 @@ public class ChunkBlocks {
 
     private bool debugRecieve = false;
 
-    void InitializeChunkDataReceive(int index, int size)
+    private void InitializeChunkDataReceive(int index, int size)
     {
         receiveIndex = index;
         receiveBuffer = new byte[size];
@@ -206,7 +214,7 @@ public class ChunkBlocks {
         TranscribeChunkData(buffer, VmServer.leaderSize);
     }
 
-    void TranscribeChunkData(byte[] buffer, int offset)
+    private void TranscribeChunkData(byte[] buffer, int offset)
     {
         for (int o = offset; o < buffer.Length; o++) {
             receiveBuffer[receiveIndex] = buffer[o];
@@ -223,7 +231,7 @@ public class ChunkBlocks {
         }
     }
 
-    void FinishChunkDataReceive()
+    private void FinishChunkDataReceive()
     {
         GenerateContentsFromBytes();
         contentsGenerated = true;
@@ -257,7 +265,7 @@ public class ChunkBlocks {
                     {
                         //if this is the same as the last block added increase the count
                         sameBlockCount++;
-                        byte[] shortAsBytes = ShortToBytes(sameBlockCount);
+                        byte[] shortAsBytes = BitConverter.GetBytes(sameBlockCount);
                         buffer[countIndex] = shortAsBytes[0];
                         buffer[countIndex + 1] = shortAsBytes[1];
                     }
@@ -266,7 +274,7 @@ public class ChunkBlocks {
                         //Add 1 as a short (2 bytes) 
                         countIndex = buffer.Count;
                         sameBlockCount = 1;
-                        buffer.AddRange(ShortToBytes(1));
+                        buffer.AddRange(BitConverter.GetBytes(1));
                         //Then add the block data
                         buffer.AddRange(blockData);
                         lastBlock = block;
@@ -279,12 +287,7 @@ public class ChunkBlocks {
         return buffer.ToArray();
     }
 
-    byte[] ShortToBytes(short s)
-    {
-        return BitConverter.GetBytes(s);
-    }
-
-    void GenerateContentsFromBytes()
+    private void GenerateContentsFromBytes()
     {
         int i = 0;
         Block block = null;
@@ -301,7 +304,7 @@ public class ChunkBlocks {
                         blockCount = BitConverter.ToInt16(receiveBuffer, i);
                         i += 2;
 
-                        block = Block.New(BitConverter.ToUInt16(receiveBuffer, i), chunk.world);
+                        block = Block.Create(BitConverter.ToUInt16(receiveBuffer, i), chunk.world);
                         i += 2;
                         i += block.RestoreBlockData(receiveBuffer, i);
 

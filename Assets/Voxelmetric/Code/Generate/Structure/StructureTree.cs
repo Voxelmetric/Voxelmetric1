@@ -25,7 +25,7 @@ public class StructureTree: GeneratedStructure {
                 {
                     if (pos.Add(x, y, z) < chunk.pos + new BlockPos(Config.Env.ChunkSize, Config.Env.ChunkSize, Config.Env.ChunkSize) && pos.Add(x, y, z) >= chunk.pos)
                     {
-                        Block block = Block.New("leaves", world);
+                        Block block = Block.Create("leaves", world);
                         world.blocks.Set(pos.Add(x, y, z), block, updateChunk: false, setBlockModified: false);
                     }
                 }
@@ -36,7 +36,7 @@ public class StructureTree: GeneratedStructure {
             if (pos.Add(0, y, 0) < chunk.pos + new BlockPos(Config.Env.ChunkSize, Config.Env.ChunkSize, Config.Env.ChunkSize)
                 && pos.Add(0, y, 0) >= chunk.pos)
             {
-                Block block = Block.New("log", world);
+                Block block = Block.Create("log", world);
                 world.blocks.Set(pos.Add(0, y, 0), block, updateChunk: false, setBlockModified: false);
             }
         }

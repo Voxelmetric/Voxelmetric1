@@ -38,7 +38,7 @@ public class WorldBlocks  {
 
     public void Set(BlockPos pos, string block, bool updateChunk = true, bool setBlockModified = true)
     {
-        Set(pos, Block.New(block, world), updateChunk, setBlockModified);
+        Set(pos, Block.Create(block, world), updateChunk, setBlockModified);
     }
 
     /// <summary>

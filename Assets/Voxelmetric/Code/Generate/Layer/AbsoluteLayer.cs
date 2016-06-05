@@ -14,7 +14,7 @@ public class AbsoluteLayer : TerrainLayer
     protected override void SetUp(LayerConfig config)
     {
         // Config files for absolute layers MUST define these properties
-        blockToPlace = Block.New(properties["blockName"], world);
+        blockToPlace = Block.Create(properties["blockName"], world);
 
         if (properties.ContainsKey("blockColors"))
         {

@@ -312,10 +312,10 @@ public class VoxelmetricTest {
             }
 
             // Change a block to air
-            Voxelmetric.SetBlock(editPosns[0], Block.New(airName, world), world);
+            Voxelmetric.SetBlock(editPosns[0], Block.Create(airName, world), world);
 
             // Place a block
-            Voxelmetric.SetBlock(editPosns[1], Block.New(placeName, world), world);
+            Voxelmetric.SetBlock(editPosns[1], Block.Create(placeName, world), world);
 
             // Save again
             saveProgress = Voxelmetric.SaveAll(world);

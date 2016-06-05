@@ -65,18 +65,18 @@ public class VoxelmetricExample : MonoBehaviour
             if (hit.block.type != Block.VoidType)
             {
                 bool adjacent = true;
-                if (Block.New(blockToPlace, world).type == Block.AirType)
+                if (Block.Create(blockToPlace, world).type == Block.AirType)
                 {
                     adjacent = false;
                 }
 
                 if (adjacent)
                 {
-                    Voxelmetric.SetBlock(hit.adjacentPos, Block.New(blockToPlace, world), world);
+                    Voxelmetric.SetBlock(hit.adjacentPos, Block.Create(blockToPlace, world), world);
                 }
                 else
                 {
-                    Voxelmetric.SetBlock(hit.blockPos, Block.New(blockToPlace, world), world);
+                    Voxelmetric.SetBlock(hit.blockPos, Block.Create(blockToPlace, world), world);
                 }
             }
         }

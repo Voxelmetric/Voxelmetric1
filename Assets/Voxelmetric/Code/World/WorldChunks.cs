@@ -65,7 +65,7 @@ public class WorldChunks {
 
                         if (Get(newChunkPos) == null)
                         {
-                            chunks.Add(newChunkPos, new Chunk(world, newChunkPos));
+                            chunks.Add(newChunkPos, Chunk.Create(world, newChunkPos));
                         }
                     }
                 }

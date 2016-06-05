@@ -3,7 +3,12 @@ using System.Collections;
 
 public class EmptyChunk : Chunk
 {
-    public EmptyChunk(World world, BlockPos pos) : base(world, pos) { }
+    public new static EmptyChunk Create(World world, BlockPos pos)
+    {
+        EmptyChunk chunk = new EmptyChunk();
+        chunk.Init(world, pos);
+        return chunk;
+    }
 
     public override void StartLoading()
     {

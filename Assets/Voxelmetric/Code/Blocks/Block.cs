@@ -54,12 +54,12 @@ public class Block
     public virtual void ScheduledUpdate (Chunk chunk, BlockPos localPos, BlockPos globalPos) { }
     public virtual bool RaycastHit(Vector3 pos, Vector3 dir, BlockPos bPos) { return solid; } 
 
-    public static Block New(string name, World world)
+    public static Block Create(string name, World world)
     {
-        return New(world.blockIndex.GetType(name), world);
+        return Create(world.blockIndex.GetType(name), world);
     }
 
-    public static Block New(int type, World world)
+    public static Block Create(int type, World world)
     {
         Block block = (Block)Activator.CreateInstance(world.blockIndex.GetConfig(type).blockClass);
         block.type = (ushort)type;

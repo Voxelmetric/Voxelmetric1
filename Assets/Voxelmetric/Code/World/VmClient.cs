@@ -141,7 +141,7 @@ public class VmClient : VmSocketState.IMessageHandler
             case VmNetworking.SendBlockChange:
                 BlockPos pos = BlockPos.FromBytes(receivedData, 1);
                 ushort type = BitConverter.ToUInt16(receivedData, 13);
-                ReceiveChange(pos, Block.New(type, world));
+                ReceiveChange(pos, Block.Create(type, world));
                 break;
             case VmNetworking.transmitChunkData:
                 ReceiveChunk(receivedData);
