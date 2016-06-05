@@ -1,5 +1,6 @@
 using UnityEngine;
 using System;
+using Assets.Voxelmetric.Code;
 
 [Serializable]
 public static class BlockBuilder
@@ -129,14 +130,18 @@ public static class BlockBuilder
     public static void BuildTexture(Chunk chunk, BlockPos localPos, BlockPos globalPos, MeshData meshData, Direction direction, TextureCollection textureCollection)
     {
         Rect texture = textureCollection.GetTexture(chunk, localPos, globalPos, direction);
-        Vector2[] UVs = new Vector2[4];
+        ;
+        Vector2[] UVs = Globals.Pools.PopVector2Array(4);
 
         UVs[0] = new Vector2(texture.x + texture.width, texture.y);
         UVs[1] = new Vector2(texture.x + texture.width, texture.y + texture.height);
         UVs[2] = new Vector2(texture.x, texture.y + texture.height);
         UVs[3] = new Vector2(texture.x, texture.y);
 
-        meshData.uv.AddRange(UVs);
+        for (int i = 0; i < 4; i++)
+            meshData.uv.Add(UVs[i]);
+
+        Globals.Pools.PushVector2Array(UVs);
     }
 
     public static void BuildTexture(Chunk chunk, BlockPos localPos, BlockPos globalPos, MeshData meshData, Direction direction, TextureCollection[] textureCollections)
@@ -163,21 +168,22 @@ public static class BlockBuilder
             case Direction.west:
                 texture = textureCollections[5].GetTexture(chunk, localPos, globalPos, direction);
                 break;
-            default:
-                break;
         }
 
-        Vector2[] UVs = new Vector2[4];
+        Vector2[] UVs = Globals.Pools.PopVector2Array(4);
 
         UVs[0] = new Vector2(texture.x + texture.width, texture.y);
         UVs[1] = new Vector2(texture.x + texture.width, texture.y + texture.height);
         UVs[2] = new Vector2(texture.x, texture.y + texture.height);
         UVs[3] = new Vector2(texture.x, texture.y);
 
-        meshData.uv.AddRange(UVs);
+        for (int i = 0; i < 4; i++)
+            meshData.uv.Add(UVs[i]);
+
+        Globals.Pools.PushVector2Array(UVs);
     }
 
-    static void AddQuadToMeshData(Chunk chunk, BlockPos localPos, BlockPos globalPos, MeshData meshData, Direction direction)
+    private static void AddQuadToMeshData(Chunk chunk, BlockPos localPos, BlockPos globalPos, MeshData meshData, Direction direction)
     {
         //Adding a tiny overlap between block meshes may solve floating point imprecision
         //errors causing pixel size gaps between blocks when looking closely
@@ -233,7 +239,7 @@ public static class BlockBuilder
         meshData.AddQuadTriangles();
     }
 
-    static void AddColorsAO(MeshData meshData, bool wnSolid, bool nSolid, bool neSolid, bool eSolid, bool esSolid, bool sSolid, bool swSolid, bool wSolid, float strength)
+    private static void AddColorsAO(MeshData meshData, bool wnSolid, bool nSolid, bool neSolid, bool eSolid, bool esSolid, bool sSolid, bool swSolid, bool wSolid, float strength)
     {
         float ne = 1;
         float es = 1;

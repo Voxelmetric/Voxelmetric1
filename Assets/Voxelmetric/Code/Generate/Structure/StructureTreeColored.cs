@@ -1,7 +1,4 @@
-﻿using UnityEngine;
-using SimplexNoise;
-
-public class StructureTreeColored : GeneratedStructure
+﻿public class StructureTreeColored : GeneratedStructure
 {
 
     public StructureTreeColored()

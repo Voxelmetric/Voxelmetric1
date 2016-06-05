@@ -1,8 +1,6 @@
 ﻿using UnityEngine;
 using System.Threading;
 using System.Collections.Generic;
-using System;
-using System.Runtime.Serialization;
 
 public static class Voxelmetric
 {

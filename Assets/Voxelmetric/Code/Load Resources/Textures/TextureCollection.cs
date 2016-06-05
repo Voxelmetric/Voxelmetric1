@@ -1,6 +1,5 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
-using SimplexNoise;
 
 public class TextureCollection
 {

@@ -1,6 +1,4 @@
 ﻿using UnityEngine;
-using System.Threading;
-using System.Collections.Generic;
 
 public class LoadChunks : MonoBehaviour
 {

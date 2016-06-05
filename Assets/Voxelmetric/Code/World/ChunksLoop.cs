@@ -203,7 +203,7 @@ public class ChunksLoop {
         chunk.stage = Stage.render;
     }
 
-    void UpdateMeshFilters()
+    private void UpdateMeshFilters()
     {
         int index = 0;
         while (chunkWorkLists[Stage.render].Count > index)
@@ -221,7 +221,7 @@ public class ChunksLoop {
         }
     }
 
-    void DeleteMarkedChunks()
+    private void DeleteMarkedChunks()
     {
         int index = 0;
         while (markedForDeletion.Count > index)
@@ -276,7 +276,7 @@ public class ChunksLoop {
             chunkWorkLists[newStage].Add(chunk.pos);
     }
 
-    bool IsCorrectStage(Stage stage, Chunk chunk)
+    private static bool IsCorrectStage(Stage stage, Chunk chunk)
     {
         return (chunk != null && chunk.stage == stage);
     }

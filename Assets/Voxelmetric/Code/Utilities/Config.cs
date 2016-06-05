@@ -2,7 +2,7 @@
 {
     public static class Env
     {
-        public const int ChunkPower = 5;
+        public const int ChunkPower = 4;
         public const int ChunkPower2 = 2*ChunkPower;
         public const int ChunkSize = 1 << ChunkPower;
         public const int ChunkMask = ChunkSize-1;

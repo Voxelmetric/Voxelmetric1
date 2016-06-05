@@ -1,6 +1,4 @@
-﻿using UnityEngine;
-
-public class CavesLayer : TerrainLayer
+﻿public class CavesLayer : TerrainLayer
 {
     protected override void SetUp(LayerConfig config)
     {

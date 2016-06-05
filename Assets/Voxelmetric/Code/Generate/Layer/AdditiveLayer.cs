@@ -1,6 +1,4 @@
-﻿using System;
-using SimplexNoise;
-using UnityEngine;
+﻿using UnityEngine;
 public class AdditiveLayer: TerrainLayer
 {
     Block blockToPlace;

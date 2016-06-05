@@ -99,10 +99,12 @@ public class PathFinder {
 
     }
 
-    void ProcessBest()
+    private static BlockPos FailedPos = new BlockPos(0, int.MaxValue, 0);
+
+    private void ProcessBest()
     {
         float shortestDist = (distanceFromStartToTarget*maxDistToTravelMultiplier) + maxDistToTravelAfterDirect;
-        BlockPos bestPos = new BlockPos(0,10000,0);
+        BlockPos bestPos = FailedPos;
 
         foreach (var tile in open)
         {
@@ -123,7 +125,7 @@ public class PathFinder {
             return;
         }
 
-        if (bestPos.Equals(new BlockPos(0, 10000, 0)))
+        if (bestPos.Equals(FailedPos))
         {
             status = Status.failed;
         }
@@ -131,7 +133,7 @@ public class PathFinder {
         ProcessTile(bestPos);
     }
 
-    void ProcessTile(BlockPos pos)
+    private void ProcessTile(BlockPos pos)
     {
         Heuristics h = new Heuristics();
         bool exists = open.TryGetValue(pos, out h);
@@ -145,7 +147,7 @@ public class PathFinder {
         CheckAdjacent(pos, h);
     }
 
-    void CheckAdjacent(BlockPos pos, Heuristics dist)
+    private void CheckAdjacent(BlockPos pos, Heuristics dist)
     {
         List<BlockPos> adjacentPositions = new List<BlockPos>();
         List<float> distanceFromStart= new List<float>();

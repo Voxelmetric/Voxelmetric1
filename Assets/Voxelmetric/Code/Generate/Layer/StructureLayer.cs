@@ -1,5 +1,4 @@
 ﻿using System;
-using SimplexNoise;
 using UnityEngine;
 public class StructureLayer : TerrainLayer
 {

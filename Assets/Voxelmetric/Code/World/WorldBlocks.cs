@@ -1,7 +1,4 @@
-﻿using UnityEngine;
-using System.Collections;
-
-public class WorldBlocks  {
+﻿public class WorldBlocks  {
 
     World world;
 

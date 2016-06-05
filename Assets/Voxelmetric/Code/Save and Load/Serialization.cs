@@ -1,10 +1,8 @@
 ﻿using UnityEngine;
-using System.Collections;
 using System.IO;
 using System;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Runtime.Serialization;
-using System.Collections.Generic;
 
 public static class Serialization
 {

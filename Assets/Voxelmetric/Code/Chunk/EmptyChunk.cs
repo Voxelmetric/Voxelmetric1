@@ -1,7 +1,4 @@
-﻿using UnityEngine;
-using System.Collections;
-
-public class EmptyChunk : Chunk
+﻿public class EmptyChunk : Chunk
 {
     public new static EmptyChunk Create(World world, BlockPos pos)
     {

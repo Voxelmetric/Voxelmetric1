@@ -23,7 +23,8 @@ public class VoxelmetricExample : MonoBehaviour
         blockToPlace = newType;
     }
 
-    void Start() {
+    void Start()
+    {
         rot.y = 360f - transform.localEulerAngles.x;
         rot.x = transform.localEulerAngles.y;
         eventSystem = FindObjectOfType<EventSystem>();

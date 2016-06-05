@@ -1,6 +1,4 @@
-﻿using System;
-using SimplexNoise;
-using UnityEngine;
+﻿using UnityEngine;
 public class SurfaceLayer : TerrainLayer
 {
     // Right now this acts just like additive layer but always set to one block thickness

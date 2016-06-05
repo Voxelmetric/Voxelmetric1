@@ -1,7 +1,5 @@
-﻿using UnityEngine;
-using System.Threading;
-using System.Collections.Generic;
-using SimplexNoise;
+﻿using Assets.Voxelmetric.Code;
+using UnityEngine;
 
 public class World : MonoBehaviour {
 
@@ -77,12 +75,15 @@ public class World : MonoBehaviour {
     }
 
     public void Configure() {
-        config = new ConfigLoader<WorldConfig>(new string[] { "Worlds" }).GetConfig(worldConfig);
+        config = new ConfigLoader<WorldConfig>(new[] { "Worlds" }).GetConfig(worldConfig);
         textureIndex = Voxelmetric.resources.GetOrLoadTextureIndex(this);
         blockIndex = Voxelmetric.resources.GetOrLoadBlockIndex(this);
     }
 
-    public void StartWorld() {
+    public void StartWorld()
+    {
+        Globals.InitPools();
+
         if (chunksLoop != null)
             return;
         Configure();

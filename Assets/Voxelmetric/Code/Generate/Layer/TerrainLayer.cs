@@ -1,7 +1,6 @@
 ﻿using SimplexNoise;
 using System.Collections.Generic;
 using UnityEngine;
-using System.Collections;
 using System;
 
 public class TerrainLayer : IComparable
