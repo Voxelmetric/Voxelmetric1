@@ -24,11 +24,13 @@ public class ChunkRender {
     {
         foreach (BlockPos localBlockPos in new BlockPosEnumerable(Config.Env.ChunkSizePos))
         {
-            if (chunk.blocks.LocalGet(localBlockPos).type == 0)
+            Block block = chunk.blocks.LocalGet(localBlockPos);
+            if (block.type == 0)
                 continue;
 
-            chunk.blocks.LocalGet(localBlockPos).BuildBlock(chunk, localBlockPos, localBlockPos + chunk.pos, meshData);
+            block.BuildBlock(chunk, localBlockPos, localBlockPos + chunk.pos, meshData);
         }
+
         meshData.ConvertToArrays();
     }
 

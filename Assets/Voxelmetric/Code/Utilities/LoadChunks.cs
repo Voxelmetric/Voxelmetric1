@@ -3,7 +3,6 @@
 public class LoadChunks : MonoBehaviour
 {
     public World world;
-    public bool generateTerrain = true;
 
     [Range(4, 64)]
     public int chunkLoadRadius = 8;
@@ -32,7 +31,7 @@ public class LoadChunks : MonoBehaviour
         FindChunksAndLoad();
     }
 
-    void DeleteChunks()
+    private void DeleteChunks()
     {
         int posX = Mathf.FloorToInt(transform.position.x);
         int posZ = Mathf.FloorToInt(transform.position.z);
@@ -45,12 +44,12 @@ public class LoadChunks : MonoBehaviour
             if ((xd * xd + yd * yd) > distanceToDeleteInUnitsSquared)
             {
                 Chunk chunk = world.chunks.Get(pos);
-                    chunk.MarkForDeletion();
+                chunk.MarkForDeletion();
             }
         }
     }
 
-    void FindChunksAndLoad()
+    private void FindChunksAndLoad()
     {
         //Cycle through the array of positions
         for (int i = 0; i < chunkPositions.Length; i++)
@@ -76,7 +75,7 @@ public class LoadChunks : MonoBehaviour
             for (int y = world.config.minY; y <= world.config.maxY; y += Config.Env.ChunkSize)
                 world.chunks.New(new BlockPos(newChunkPos.x, y, newChunkPos.z));
 
-            //return;
+            return;
         }
     }
 }

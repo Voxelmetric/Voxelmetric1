@@ -6,7 +6,6 @@ public class BlockPosEnumerable : IEnumerable<BlockPos> {
     private readonly BlockPos start;
     private readonly BlockPos end;
     private readonly BlockPos step;
-    private readonly bool includesEnd;
 
     public BlockPosEnumerable(BlockPos end, bool includesEnd = false) :
             this(BlockPos.zero, end, includesEnd) {

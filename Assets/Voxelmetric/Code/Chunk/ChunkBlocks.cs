@@ -4,6 +4,7 @@ using System;
 using System.Text;
 using System.Threading;
 using Assets.Voxelmetric.Code.Common;
+using UnityEngine.Assertions;
 
 public class ChunkBlocks {
 
@@ -49,6 +50,20 @@ public class ChunkBlocks {
         set
         {
             int index = Helpers.GetChunkIndex1DFrom3D(x, y, z);
+            blocks[index] = value;
+        }
+    }
+
+    public Block this[int index]
+    {
+        get
+        {
+            Assert.IsTrue(index>0 && index<=Config.Env.ChunkVolume);
+            return blocks[index];
+        }
+        set
+        {
+            Assert.IsTrue(index > 0 && index <= Config.Env.ChunkVolume);
             blocks[index] = value;
         }
     }
@@ -120,20 +135,21 @@ public class ChunkBlocks {
 
     /// <summary> Sets the block at the given position </summary>
     /// <param name="blockPos">Block position</param>
-    /// <param name="block">Block to place at the given location</param>
+    /// <param name="newBlock">Block to place at the given location</param>
     /// <param name="updateChunk">Optional parameter, set to false to keep the chunk unupdated despite the change</param>
-    public virtual void Set(BlockPos blockPos, Block block, bool updateChunk = true, bool setBlockModified = true)
+    public virtual void Set(BlockPos blockPos, Block newBlock, bool updateChunk = true, bool setBlockModified = true)
     {
         if (InRange(blockPos))
         {
             //Only call create and destroy if this is a different block type, otherwise it's just updating the properties of an existing block
-            if (Get(blockPos).type != block.type)
+            Block block = Get(blockPos);
+            if (block.type != newBlock.type)
             {
-                Get(blockPos).OnDestroy(chunk, blockPos, blockPos + chunk.pos);
-                block.OnCreate(chunk, blockPos, blockPos + chunk.pos);
+                block.OnDestroy(chunk, blockPos, blockPos + chunk.pos);
+                newBlock.OnCreate(chunk, blockPos, blockPos + chunk.pos);
             }
 
-            this[blockPos.x-chunk.pos.x, blockPos.y-chunk.pos.y, blockPos.z-chunk.pos.z] = block;
+            this[blockPos.x-chunk.pos.x, blockPos.y-chunk.pos.y, blockPos.z-chunk.pos.z] = newBlock;
 
             if (setBlockModified)
                 BlockModified(blockPos);
@@ -144,7 +160,7 @@ public class ChunkBlocks {
         else
         {
             //if the block is out of range set it through world
-            chunk.world.blocks.Set(blockPos, block, updateChunk);
+            chunk.world.blocks.Set(blockPos, newBlock, updateChunk);
         }
     }
 
@@ -155,6 +171,7 @@ public class ChunkBlocks {
     /// using the world.
     /// </summary>
     /// <param name="blockPos"> A block pos relative to the chunk's position.</param>
+    /// <param name="block">Block to place at the given location</param>
     public virtual void LocalSet(BlockPos blockPos, Block block)
     {
         if ((blockPos.x < Config.Env.ChunkSize && blockPos.x >= 0) &&
@@ -181,14 +198,11 @@ public class ChunkBlocks {
             {
                 chunk.world.networking.server.BroadcastChange(pos, Get(pos), -1);
             }
-
+            
             if (!modifiedBlocks.Contains(pos))
             {
-                if (!modifiedBlocks.Contains(pos))
-                {
-                    modifiedBlocks.Add(pos);
-                    chunk.blocks.contentsModified = true;
-                }
+                modifiedBlocks.Add(pos);
+                chunk.blocks.contentsModified = true;
             }
         }
         else // if this is not the server send the change to the server to sync
@@ -214,10 +228,9 @@ public class ChunkBlocks {
                 //+ ", buffer=" + buffer.Length
                 + ", index=" + index
                 + ", size=" + size);
+
         if (receiveBuffer == null)
-        {
             InitializeChunkDataReceive(index, size);
-        }
         TranscribeChunkData(buffer, VmServer.leaderSize);
     }
 
@@ -233,6 +246,7 @@ public class ChunkBlocks {
                 if (debugRecieve)
                     Debug.Log("ChunkBlocks.TranscribeChunkData (" + Thread.CurrentThread.ManagedThreadId + "): " + chunk.pos
                         + ", receiveIndex=" + receiveIndex);
+
                 FinishChunkDataReceive();
                 return;
             }
@@ -264,16 +278,14 @@ public class ChunkBlocks {
         byte[] blockData;
         short sameBlockCount = 1000;
         int countIndex = 0;
-
-        for (int x = 0; x < Config.Env.ChunkSize; x++)
+        
+        for (int y = 0; y < Config.Env.ChunkSize; y++)
         {
-            for (int y = 0; y < Config.Env.ChunkSize; y++)
+            for (int z = 0; z < Config.Env.ChunkSize; z++)
             {
-                for (int z = 0; z < Config.Env.ChunkSize; z++)
+                for (int x = 0; x < Config.Env.ChunkSize; x++)
                 {
                     block = LocalGet(new BlockPos(x, y, z));
-                    blockData = block.ToByteArray();
-
                     if (block.Equals(lastBlock))
                     {
                         //if this is the same as the last block added increase the count
@@ -284,6 +296,8 @@ public class ChunkBlocks {
                     }
                     else
                     {
+                        blockData = block.ToByteArray();
+
                         //Add 1 as a short (2 bytes) 
                         countIndex = buffer.Count;
                         sameBlockCount = 1;
@@ -305,12 +319,12 @@ public class ChunkBlocks {
         int i = 0;
         Block block = null;
         short blockCount = 0;
-
-        for (int x = 0; x < Config.Env.ChunkSize; x++)
+        
+        for (int y = 0; y < Config.Env.ChunkSize; y++)
         {
-            for (int y = 0; y < Config.Env.ChunkSize; y++)
+            for (int z = 0; z < Config.Env.ChunkSize; z++)
             {
-                for (int z = 0; z < Config.Env.ChunkSize; z++)
+                for (int x = 0; x < Config.Env.ChunkSize; x++)
                 {
                     if (blockCount == 0)
                     {

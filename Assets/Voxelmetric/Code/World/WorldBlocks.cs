@@ -22,15 +22,10 @@
     public Block Get(BlockPos pos)
     {
         Chunk containerChunk = world.chunks.Get(pos);
-
         if (containerChunk != null && pos.y >= world.config.minY)
-        {
             return containerChunk.blocks.Get(pos);
-        }
-        else
-        {
-            return world.Void;
-        }
+
+        return world.Void;
     }
 
     public void Set(BlockPos pos, string block, bool updateChunk = true, bool setBlockModified = true)
@@ -49,20 +44,17 @@
     public void Set(BlockPos pos, Block block, bool updateChunk = true, bool setBlockModified = true)
     {
         Chunk chunk = world.chunks.Get(pos);
-
         if (chunk != null)
         {
             chunk.blocks.Set(pos, block, updateChunk, setBlockModified);
 
             if (updateChunk)
-            {
                 UpdateAdjacentChunk(pos);
-            }
         }
     }
 
     /// <summary> Updates any chunks neighboring a block position </summary>
-    void UpdateAdjacentChunk(BlockPos pos)
+    private void UpdateAdjacentChunk(BlockPos pos)
     {
         //localPos is the position relative to the chunk's position
         BlockPos localPos = pos - pos.ContainingChunkCoordinates();
@@ -70,14 +62,14 @@
         //Checks to see if the block position is on the border of the chunk 
         //and if so update the chunk it's touching
         UpdateIfEqual(localPos.x, 0, pos.Add(-1, 0, 0));
-        UpdateIfEqual(localPos.x, Config.Env.ChunkSize - 1, pos.Add(1, 0, 0));
+        UpdateIfEqual(localPos.x, Config.Env.ChunkMask, pos.Add(1, 0, 0));
         UpdateIfEqual(localPos.y, 0, pos.Add(0, -1, 0));
-        UpdateIfEqual(localPos.y, Config.Env.ChunkSize - 1, pos.Add(0, 1, 0));
+        UpdateIfEqual(localPos.y, Config.Env.ChunkMask, pos.Add(0, 1, 0));
         UpdateIfEqual(localPos.z, 0, pos.Add(0, 0, -1));
-        UpdateIfEqual(localPos.z, Config.Env.ChunkSize - 1, pos.Add(0, 0, 1));
+        UpdateIfEqual(localPos.z, Config.Env.ChunkMask, pos.Add(0, 0, 1));
     }
 
-    void UpdateIfEqual(int value1, int value2, BlockPos pos)
+    private void UpdateIfEqual(int value1, int value2, BlockPos pos)
     {
         if (value1 == value2)
         {
