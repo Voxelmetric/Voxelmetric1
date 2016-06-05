@@ -20,6 +20,6 @@ public class ColorSerializationSurrogate : ISerializationSurrogate
         color.g = info.GetSingle("g");
         color.b = info.GetSingle("b");
         color.a = info.GetSingle("a");
-        return null;
+        return color;
     }
 }

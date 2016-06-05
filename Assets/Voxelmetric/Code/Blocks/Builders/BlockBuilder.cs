@@ -130,7 +130,6 @@ public static class BlockBuilder
     public static void BuildTexture(Chunk chunk, BlockPos localPos, BlockPos globalPos, MeshData meshData, Direction direction, TextureCollection textureCollection)
     {
         Rect texture = textureCollection.GetTexture(chunk, localPos, globalPos, direction);
-        ;
         Vector2[] UVs = Globals.MemPools.PopVector2Array(4);
 
         UVs[0] = new Vector2(texture.x + texture.width, texture.y);
