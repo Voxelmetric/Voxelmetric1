@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace Assets.Voxelmetric.Code.Common.Threading.Managers
 {
-    public static class WorkPoolManager
+    public static class NetworkPoolManager
     {
         private static readonly List<ThreadItem> WorkItems = new List<ThreadItem>();
 
@@ -17,22 +17,19 @@ namespace Assets.Voxelmetric.Code.Common.Threading.Managers
             // Commit all the work we have
             if (Config.Core.UseMultiThreading)
             {
-                ThreadPool pool = Globals.WorkPool;
+                TaskPool pool = Globals.NetworkPool;
 
-                for (int i = 0; i<WorkItems.Count; i++)
+                for (int i = 0; i < WorkItems.Count; i++)
                 {
                     var item = WorkItems[i];
-                    if(item.ThreadID>=0)
-                        pool.AddItem(item.ThreadID, item.Action, item.Arg);
-                    else
-                        pool.AddItem(item.Action, item.Arg);
+                    pool.AddItem(item.Action, item.Arg);
                 }
 
-                //Debug.Log("WorkPool tasks: " + pool.Size);
+                //Debug.Log("NetworkPool tasks: " + pool.Size);
             }
             else
             {
-                for (int i = 0; i<WorkItems.Count; i++)
+                for (int i = 0; i < WorkItems.Count; i++)
                 {
                     var item = WorkItems[i];
                     item.Action(item.Arg);
@@ -42,5 +39,5 @@ namespace Assets.Voxelmetric.Code.Common.Threading.Managers
             // Remove processed work items
             WorkItems.Clear();
         }
-    }  
+    }
 }

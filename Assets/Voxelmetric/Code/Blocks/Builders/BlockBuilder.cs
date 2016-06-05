@@ -131,7 +131,7 @@ public static class BlockBuilder
     {
         Rect texture = textureCollection.GetTexture(chunk, localPos, globalPos, direction);
         ;
-        Vector2[] UVs = Globals.Pools.PopVector2Array(4);
+        Vector2[] UVs = Globals.MemPools.PopVector2Array(4);
 
         UVs[0] = new Vector2(texture.x + texture.width, texture.y);
         UVs[1] = new Vector2(texture.x + texture.width, texture.y + texture.height);
@@ -141,7 +141,7 @@ public static class BlockBuilder
         for (int i = 0; i < 4; i++)
             meshData.uv.Add(UVs[i]);
 
-        Globals.Pools.PushVector2Array(UVs);
+        Globals.MemPools.PushVector2Array(UVs);
     }
 
     public static void BuildTexture(Chunk chunk, BlockPos localPos, BlockPos globalPos, MeshData meshData, Direction direction, TextureCollection[] textureCollections)
@@ -170,7 +170,7 @@ public static class BlockBuilder
                 break;
         }
 
-        Vector2[] UVs = Globals.Pools.PopVector2Array(4);
+        Vector2[] UVs = Globals.MemPools.PopVector2Array(4);
 
         UVs[0] = new Vector2(texture.x + texture.width, texture.y);
         UVs[1] = new Vector2(texture.x + texture.width, texture.y + texture.height);
@@ -180,7 +180,7 @@ public static class BlockBuilder
         for (int i = 0; i < 4; i++)
             meshData.uv.Add(UVs[i]);
 
-        Globals.Pools.PushVector2Array(UVs);
+        Globals.MemPools.PushVector2Array(UVs);
     }
 
     private static void AddQuadToMeshData(Chunk chunk, BlockPos localPos, BlockPos globalPos, MeshData meshData, Direction direction)

@@ -13,8 +13,15 @@ public class ChunkBlocks {
     public List<BlockPos> modifiedBlocks = new List<BlockPos>();
     protected byte[] receiveBuffer;
     protected int receiveIndex;
-    public bool contentsGenerated;
+
     public bool generationStarted;
+    public bool contentsRequestCompleted;
+    public bool loadRequested;
+    public bool contentsGenerated;
+
+    public bool meshStarted;
+    public bool meshCompleted;
+    
     public bool contentsModified;
 
     private static byte[] emptyBytes;
@@ -22,7 +29,7 @@ public class ChunkBlocks {
     public static byte[] EmptyBytes {
         get {
             if (emptyBytes == null)
-                emptyBytes = new byte[16384];
+                emptyBytes = new byte[16384]; // TODO: Validate whether this is fine
             return emptyBytes;
         }
     }
@@ -60,26 +67,29 @@ public class ChunkBlocks {
     public void Reset()
     {
         blocks = Helpers.CreateArray1D<Block>(Config.Env.ChunkVolume);
-        contentsGenerated = false;
+
         generationStarted = false;
+        contentsRequestCompleted = false;
+        loadRequested = false;
+        contentsGenerated = false;
+
+        meshStarted = false;
+        meshCompleted = false;
+
+        contentsModified = false;
     }
 
     /// <summary>
-    /// Gets and returns a block from a position within the chunk 
-    /// or fetches it from the world
+    /// Gets and returns a block from a position within the chunk or fetches it from the world
     /// </summary>
     /// <param name="blockPos">A global block position</param>
     /// <returns>The block at the position</returns>
     public virtual Block Get(BlockPos blockPos)
     {
         if (InRange(blockPos))
-        {
             return LocalGet(blockPos - chunk.pos);
-        }
-        else
-        {
-            return chunk.world.blocks.Get(blockPos);
-        }
+
+        return chunk.world.blocks.Get(blockPos);
     }
 
     /// <summary>
@@ -99,10 +109,8 @@ public class ChunkBlocks {
             Block block = this[localBlockPos.x, localBlockPos.y, localBlockPos.z];
             return block ?? chunk.world.Air;
         }
-        else
-        {
-            return chunk.world.blocks.Get(localBlockPos + chunk.pos);
-        }
+
+        return chunk.world.blocks.Get(localBlockPos + chunk.pos);
     }
 
     public virtual void Set(BlockPos blockPos, string block, bool updateChunk = true, bool setBlockModified = true)
@@ -215,7 +223,8 @@ public class ChunkBlocks {
 
     private void TranscribeChunkData(byte[] buffer, int offset)
     {
-        for (int o = offset; o < buffer.Length; o++) {
+        for (int o = offset; o < buffer.Length; o++)
+        {
             receiveBuffer[receiveIndex] = buffer[o];
             receiveIndex++;
 
@@ -233,12 +242,17 @@ public class ChunkBlocks {
     private void FinishChunkDataReceive()
     {
         GenerateContentsFromBytes();
+
         contentsGenerated = true;
+        contentsRequestCompleted = true;
+        loadRequested = true;
+
         receiveBuffer = null;
         receiveIndex = 0;
+
         if (debugRecieve)
-            Debug.Log("ChunkBlocks.FinishChunkDataReceive (" + Thread.CurrentThread.ManagedThreadId + "): " + chunk.pos
-                + ", contentsGenerated=" + contentsGenerated);
+            Debug.Log("ChunkBlocks.FinishChunkDataReceive ("+Thread.CurrentThread.ManagedThreadId+"): "+chunk.pos
+                      +", contentsGenerated="+contentsGenerated);
     }
 
     public byte[] ToBytes()

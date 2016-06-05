@@ -10,6 +10,7 @@ GameObject:
   - 4: {fileID: 479208}
   - 114: {fileID: 11498696}
   - 23: {fileID: 2362656}
+  - 114: {fileID: 11405022}
   m_Layer: 0
   m_Name: World
   m_TagString: Untagged
@@ -26,6 +27,7 @@ Transform:
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 0
@@ -47,12 +49,25 @@ MeshRenderer:
   m_ProbeAnchor: {fileID: 0}
   m_ScaleInLightmap: 1
   m_PreserveUVs: 0
+  m_IgnoreNormalsForChartDetection: 0
   m_ImportantGI: 0
-  m_AutoUVMaxDistance: .5
+  m_MinimumChartSize: 4
+  m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 0
   m_SortingOrder: 0
+--- !u!114 &11405022
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 104736}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 550551e7adc57544fb97244192196808, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!114 &11498696
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -69,9 +84,7 @@ MonoBehaviour:
   networking:
     isServer: 1
     allowConnections: 0
-    serverIPAdress: 
-    serverPort: 11000
-  worldIndex: 0
+  useMultiThreading: 0
 --- !u!1001 &100100000
 Prefab:
   m_ObjectHideFlags: 1

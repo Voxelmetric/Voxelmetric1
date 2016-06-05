@@ -1,6 +1,4 @@
 ﻿using UnityEngine;
-using System.Collections;
-using System.Diagnostics;
 
 public class ChunkRender {
 
@@ -15,8 +13,6 @@ public class ChunkRender {
         }
     }
 
-    public bool needsUpdate;
-
     public ChunkRender(Chunk chunk)
     {
         this.chunk = chunk;
@@ -24,28 +20,16 @@ public class ChunkRender {
 
 
     /// <summary> Updates the chunk based on its contents </summary>
-    public virtual IEnumerator BuildMeshDataCoroutine()
+    public virtual void BuildMeshData()
     {
-        long maxTime = 5; // Limit to 5 milliseconds
-        int numDone = 0, numCheck = 64;
-        Stopwatch stopwatch = Stopwatch.StartNew();
-        foreach (BlockPos localBlockPos in new BlockPosEnumerable(Config.Env.ChunkSizePos)) {
-            if (chunk.blocks.LocalGet(localBlockPos).type==0)
+        foreach (BlockPos localBlockPos in new BlockPosEnumerable(Config.Env.ChunkSizePos))
+        {
+            if (chunk.blocks.LocalGet(localBlockPos).type == 0)
                 continue;
 
             chunk.blocks.LocalGet(localBlockPos).BuildBlock(chunk, localBlockPos, localBlockPos + chunk.pos, meshData);
-
-            ++numDone;
-            if (numDone % numCheck == 0) {
-                if (stopwatch.ElapsedMilliseconds >= maxTime) {
-                    stopwatch.Reset();
-                    yield return null;
-                    stopwatch.Start();
-                }
-            }
         }
         meshData.ConvertToArrays();
-        yield return null;
     }
 
     public virtual void BuildMesh()

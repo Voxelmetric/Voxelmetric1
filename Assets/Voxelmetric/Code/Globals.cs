@@ -11,12 +11,16 @@ namespace Assets.Voxelmetric.Code
         {
             get
             {
-                if (s_threadPool == null)
-                {
-                    s_threadPool = new ThreadPool();
-                    s_threadPool.Start();
-                }
                 return s_threadPool;
+            }
+        }
+
+        public static void InitWorkPool()
+        {
+            if (s_threadPool == null)
+            {
+                s_threadPool = new ThreadPool();
+                s_threadPool.Start();
             }
         }
 
@@ -26,29 +30,52 @@ namespace Assets.Voxelmetric.Code
         {
             get
             {
-                if (s_IOPool == null)
-                {
-                    s_IOPool = new TaskPool();
-                    s_IOPool.Start();
-                }
                 return s_IOPool;
             }
         }
 
-        // Global object pools
-        private static GlobalPools s_pools;
-        public static GlobalPools Pools
+        public static void InitIOPool()
         {
-            get
+            if(s_IOPool == null)
             {
-                return s_pools;
+                s_IOPool = new TaskPool();
+                s_IOPool.Start();
             }
         }
 
-        public static void InitPools()
+        // Task pool for network-related tasks
+        private static TaskPool s_NetworkPool;
+        public static TaskPool NetworkPool
         {
-            if (s_pools == null)
-                s_pools = new GlobalPools();
+            get
+            {
+                return s_NetworkPool;
+            }
+        }
+
+        public static void InitNetworkPool()
+        {
+            if (s_NetworkPool == null)
+            {
+                s_NetworkPool = new TaskPool();
+                s_NetworkPool.Start();
+            }
+        }
+
+        // Global object pools
+        private static GlobalPools s_memPools;
+        public static GlobalPools MemPools
+        {
+            get
+            {
+                return s_memPools;
+            }
+        }
+
+        public static void InitMemPools()
+        {
+            if (s_memPools == null)
+                s_memPools = new GlobalPools();
         }
     }
 }

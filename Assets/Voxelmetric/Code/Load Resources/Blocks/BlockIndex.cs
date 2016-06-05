@@ -78,7 +78,7 @@ public class BlockIndex {
     }
 
     //World is only needed for setting up the textures
-    void GetBlocksFromConfigs(World world, string blockFolder) {
+    private void GetBlocksFromConfigs(World world, string blockFolder) {
 
         var configFiles = UnityEngine.Resources.LoadAll<TextAsset>(blockFolder);
 
@@ -103,27 +103,19 @@ public class BlockIndex {
     {
         int type;
         if (names.TryGetValue(name, out type))
-        {
             return type;
-        }
-        else
-        {
-            Debug.LogWarning("Block not found: " + name);
-            return 0;
-        }
+
+        Debug.LogWarning("Block not found: " + name);
+        return 0;
     }
 
     public BlockConfig GetConfig(int index)
     {
         BlockConfig config;
         if (configs.TryGetValue(index, out config))
-        {
             return config;
-        }
-        else
-        {
-            Debug.LogWarning("Config not found: " + index);
-            return null;
-        }
+
+        Debug.LogWarning("Config not found: " + index);
+        return null;
     }
 }

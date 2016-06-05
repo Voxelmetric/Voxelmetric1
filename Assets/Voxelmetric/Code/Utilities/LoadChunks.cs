@@ -2,16 +2,15 @@
 
 public class LoadChunks : MonoBehaviour
 {
-
     public World world;
     public bool generateTerrain = true;
 
-    [Range(1, 64)]
+    [Range(4, 64)]
     public int chunkLoadRadius = 8;
     BlockPos[] chunkPositions;
 
     //The distance is measured in chunks
-    [Range(1, 64)]
+    [Range(4, 64)]
     public int DistanceToDeleteChunks = (int)(8 * 1.25f);
     private int distanceToDeleteInUnitsSquared;
 
@@ -77,7 +76,7 @@ public class LoadChunks : MonoBehaviour
             for (int y = world.config.minY; y <= world.config.maxY; y += Config.Env.ChunkSize)
                 world.chunks.New(new BlockPos(newChunkPos.x, y, newChunkPos.z));
 
-            return;
+            //return;
         }
     }
 }

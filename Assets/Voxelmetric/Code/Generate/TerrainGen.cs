@@ -57,6 +57,18 @@ public class TerrainGen
         yield return null;
     }
 
+    public void GenerateTerrainForChunk(Chunk chunk)
+    {
+        for (int x = chunk.pos.x; x < chunk.pos.x + Config.Env.ChunkSize; x++)
+        {
+            for (int z = chunk.pos.z; z < chunk.pos.z + Config.Env.ChunkSize; z++)
+            {
+                GenerateTerrainForBlockColumn(x, z, false, chunk);
+            }
+        }
+        GenerateStructuresForChunk(chunk);
+    }
+
     public int GenerateTerrainForBlockColumn(int x, int z, bool justGetHeight, Chunk chunk)
     {
         int height = world.config.minY;

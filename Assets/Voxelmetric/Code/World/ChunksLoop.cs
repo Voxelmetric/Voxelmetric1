@@ -1,8 +1,7 @@
-﻿using System.Collections;
-using System.Threading;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
-using System;
+using Assets.Voxelmetric.Code.Common.Threading;
+using Assets.Voxelmetric.Code.Common.Threading.Managers;
 
 /// <summary>
 /// This class runs constantly running generation jobs for chunks. When chunks are added to one of the
@@ -20,10 +19,6 @@ public class ChunksLoop {
     private List<BlockPos> markedForDeletion = new List<BlockPos>();
 
     private World world;
-
-    private bool isPlaying = true;
-    private Thread loopThread;
-    private Thread renderThread;
 
     private Material chunkMaterial;
 
@@ -46,35 +41,22 @@ public class ChunksLoop {
         chunkWorkLists.Add(Stage.buildMesh, new List<BlockPos>());
         chunkWorkLists.Add(Stage.priorityBuildMesh, new List<BlockPos>());
         chunkWorkLists.Add(Stage.render, new List<BlockPos>());
-
-        if (world.UseMultiThreading) {
-            loopThread = new Thread(() => {
-                try {
-                    CoroutineUtils.DoCoroutine(TerrainLoopCoroutine());
-                } catch (Exception ex) {
-                    Debug.Log(ex);
-                }
-            });
-
-            renderThread = new Thread(() => {
-                try {
-                    CoroutineUtils.DoCoroutine(BuildMeshLoopCoroutine());
-                } catch (Exception ex) {
-                    Debug.Log(ex);
-                }
-            });
-
-            loopThread.Start();
-            renderThread.Start();
-        }
     }
 
-    public void Stop() {
-        isPlaying = false;
+    public void Stop()
+    {
     }
 
     public void MainThreadLoop()
     {
+        Profiler.BeginSample("UpdateTerrain");
+        UpdateTerrain();
+        Profiler.EndSample();
+
+        Profiler.BeginSample("UpdateMeshes");
+        UpdateMeshes();
+        Profiler.EndSample();
+
         Profiler.BeginSample("DeleteMarkedChunks");
         DeleteMarkedChunks();
         Profiler.EndSample();
@@ -88,119 +70,169 @@ public class ChunksLoop {
         Profiler.EndSample();
     }
 
-    public void Terrain()
+    private void UpdateTerrain()
     {
-        CoroutineUtils.DoCoroutine(TerrainCoroutine());
-    }
+        var workList = chunkWorkLists[Stage.terrain];
+        for (int i=0; i<workList.Count;)
+        {
+            Chunk chunk = world.chunks.Get(workList[i]);
 
-    public IEnumerator TerrainLoopCoroutine() {
-        while (isPlaying) {
-            var enumerator = TerrainCoroutine();
-            while (enumerator.MoveNext())
-                yield return enumerator.Current;
-            yield return null;
+            if (!IsCorrectStage(Stage.terrain, chunk))
+            {
+                workList.RemoveAt(i);
+                continue;
+            }
+            
+            // Proceed with the next stage
+            if (BuildTerrain(chunk))
+                chunk.stage = Stage.buildMesh;
+            else
+                i++;
         }
     }
 
-    public void BuildMesh() {
-        CoroutineUtils.DoCoroutine(BuildMeshCoroutine());
-    }
-
-    public IEnumerator BuildMeshLoopCoroutine() {
-        while (isPlaying) {
-            var enumerator = BuildMeshCoroutine();
-            while (enumerator.MoveNext())
-                yield return enumerator.Current;
-            yield return null;
-        }
-    }
-
-    private IEnumerator TerrainCoroutine()
+    private bool BuildTerrain(Chunk chunk)
     {
-        int index = 0;
+        List<Chunk> generatedChunks = new List<Chunk>();
+        foreach (BlockPos posChunk in new BlockPosEnumerable(chunk.pos - Config.Env.ChunkSizePos,
+                                                             chunk.pos + Config.Env.ChunkSizePos,
+                                                             Config.Env.ChunkSizePos, true))
+        {
+            Chunk chunkToGen = world.chunks.Get(posChunk);
+            if (chunkToGen == null)
+                continue;
 
-        while (chunkWorkLists[Stage.terrain].Count > index) {
-            Chunk chunk = world.chunks.Get(chunkWorkLists[Stage.terrain][index]);
+            if (!chunkToGen.blocks.contentsGenerated)
+            {
+                if (chunkToGen.world.networking.isServer)
+                {
+                    if (!chunkToGen.blocks.generationStarted)
+                    {
+                        chunkToGen.blocks.generationStarted = true;
+                        WorkPoolManager.Add(
+                            new ThreadItem(
+                                arg =>
+                                {
+                                    Chunk ch = (Chunk)arg;
+                                    ch.world.terrainGen.GenerateTerrainForChunk(ch);
+                                    ch.blocks.contentsRequestCompleted = true;
+                                },
+                                chunkToGen
+                                )
+                            );
+                    }
 
-            if (!IsCorrectStage(Stage.terrain, chunk)) {
-                chunkWorkLists[Stage.terrain].RemoveAt(index);
+                    if (chunkToGen.blocks.contentsRequestCompleted && !chunkToGen.blocks.loadRequested)
+                    {
+                        chunkToGen.blocks.loadRequested = true;
+                        IOPoolManager.Add(
+                            new ThreadItem(
+                                arg =>
+                                {
+                                    Chunk ch = (Chunk)arg;
+                                    Serialization.LoadChunk(ch);
+                                    ch.blocks.contentsGenerated = true;
+
+                                },
+                                chunkToGen
+                                )
+                            );
+                    }
+
+                    if (chunkToGen.blocks.contentsGenerated)
+                        generatedChunks.Add(chunkToGen);
+                }
+                else
+                {
+                    if (!chunkToGen.blocks.generationStarted)
+                    {
+                        chunkToGen.blocks.generationStarted = true;
+                        NetworkPoolManager.Add(
+                            new ThreadItem(
+                                arg =>
+                                {
+                                    Chunk ch = (Chunk)arg;
+                                    ch.world.networking.client.RequestChunk(ch.pos);
+                                }, chunkToGen
+                                ));
+
+                    }
+                }
+            }
+        }
+
+        // Let's wait until all neighbors are generated
+        bool chunksAllGenerated = true;
+        foreach (Chunk chunkToGen in generatedChunks)
+        {
+            if (!chunkToGen.blocks.contentsGenerated)
+            {
+                chunksAllGenerated = false;
+                break;
+            }
+        }
+        return chunksAllGenerated;
+    }
+
+    private void UpdateMeshes()
+    {
+        var workListBuildMesh = chunkWorkLists[Stage.buildMesh];
+        var workListBuildPriorityMesh = chunkWorkLists[Stage.priorityBuildMesh];
+
+        for (int i = 0; i<workListBuildMesh.Count;)
+        {
+            if (workListBuildPriorityMesh.Count>0)
+                break;
+
+            Chunk chunk = world.chunks.Get(workListBuildMesh[0]);
+            if (!IsCorrectStage(Stage.buildMesh, chunk))
+            {
+                workListBuildMesh.RemoveAt(0);
                 continue;
             }
 
-            List<Chunk> generatedChunks = new List<Chunk>();
-            foreach (BlockPos posChunk in new BlockPosEnumerable(chunk.pos - Config.Env.ChunkSizePos,
-                    chunk.pos + Config.Env.ChunkSizePos, Config.Env.ChunkSizePos, true)) {
-                Chunk chunkToGen = world.chunks.Get(posChunk);
-                if (chunkToGen != null) {
-                    if (!chunkToGen.blocks.contentsGenerated) {
-                        if (chunkToGen.world.networking.isServer) {
-                            var enumerator = chunkToGen.world.terrainGen.GenerateTerrainForChunkCoroutine(chunkToGen);
-                            while (enumerator.MoveNext())
-                                yield return enumerator.Current;
-                            Serialization.LoadChunk(chunkToGen);
-                            chunkToGen.blocks.contentsGenerated = true;
-                        } else {
-                            if (!chunkToGen.blocks.generationStarted) {
-                                chunkToGen.blocks.generationStarted = true;
-                                chunkToGen.world.networking.client.RequestChunk(chunkToGen.pos);
-                            }
-                        }
-                    }
-                    generatedChunks.Add(chunkToGen);
-                }
-            }
-            
-            bool chunksAllGenerated = true;
-            foreach (Chunk chunkToGen in generatedChunks) {
-                if (!chunkToGen.blocks.contentsGenerated) {
-                    //chunksAllGenerated = false;
-                }
-            }
+            BuildMesh(chunk);
 
-            if (chunksAllGenerated) {
-                chunk.stage = Stage.buildMesh;
-            } else {
-                index++;
-            }
+            if (chunk.blocks.meshCompleted)
+                chunk.stage = Stage.render;
+            else
+                i++;
         }
-        yield return null;
-    }
 
-    private IEnumerator BuildMeshCoroutine()
-    {
-        while (chunkWorkLists[Stage.buildMesh].Count > 0)
+        for (int i = 0; i<workListBuildPriorityMesh.Count;)
         {
-            if (chunkWorkLists[Stage.priorityBuildMesh].Count > 0)
+            Chunk chunk = world.chunks.Get(workListBuildPriorityMesh[0]);
+            if (!IsCorrectStage(Stage.priorityBuildMesh, chunk))
             {
-                break;
+                workListBuildPriorityMesh.RemoveAt(0);
+                continue;
             }
 
-            var enumerator = BuildMeshCoroutine(Stage.buildMesh);
-            while (enumerator.MoveNext())
-                yield return enumerator.Current;
-        }
+            BuildMesh(chunk);
 
-        while (chunkWorkLists[Stage.priorityBuildMesh].Count > 0)
-        {
-            var enumerator = BuildMeshCoroutine(Stage.priorityBuildMesh);
-            while (enumerator.MoveNext())
-                yield return enumerator.Current;
+            if (chunk.blocks.meshCompleted)
+                chunk.stage = Stage.render;
+            else
+                i++;
         }
     }
 
-    private IEnumerator BuildMeshCoroutine(Stage stage)
+    private static void BuildMesh(Chunk chunk)
     {
-        Chunk chunk = world.chunks.Get(chunkWorkLists[stage][0]);
-        if (!IsCorrectStage(stage, chunk))
+        if (!chunk.blocks.meshStarted)
         {
-            chunkWorkLists[stage].RemoveAt(0);
-            yield break;
+            chunk.blocks.meshStarted = true;
+            WorkPoolManager.Add(
+                new ThreadItem(
+                    arg =>
+                    {
+                        Chunk ch = (Chunk)arg;
+                        ch.render.BuildMeshData();
+                        ch.blocks.meshCompleted = true;
+                    },
+                    chunk)
+                );
         }
-
-        var enumerator = chunk.render.BuildMeshDataCoroutine();
-        while (enumerator.MoveNext())
-            yield return enumerator.Current;
-        chunk.stage = Stage.render;
     }
 
     private void UpdateMeshFilters()
@@ -241,18 +273,19 @@ public class ChunksLoop {
             else
             {
                 index++;
-                continue;
             }
         }
     }
 
     public void DrawChunkMeshes()
     {
+        Transform trans = world.transform;
         foreach (var pos in world.chunks.posCollection)
         {
-            if (world.chunks[pos].render.mesh != null && world.chunks[pos].render.mesh.vertexCount != 0)
+            Mesh mesh = world.chunks[pos].render.mesh;
+            if (mesh != null && mesh.vertexCount != 0)
             {
-                Graphics.DrawMesh(world.chunks[pos].render.mesh, (world.transform.rotation * pos) + world.transform.position, world.transform.rotation, chunkMaterial, 0);
+                Graphics.DrawMesh(mesh, (trans.rotation * pos) + trans.position, trans.rotation, chunkMaterial, 0);
             }
         }
     }
@@ -267,17 +300,25 @@ public class ChunksLoop {
 
     public void ChunkStageChanged(Chunk chunk, Stage oldStage, Stage newStage)
     {
-        if (chunkWorkLists.ContainsKey(oldStage) &&
-            chunkWorkLists[oldStage].Contains(chunk.pos))
-            chunkWorkLists[oldStage].Remove(chunk.pos);
+        List<BlockPos> list;
+        // Remove old state is possible
+        if (chunkWorkLists.TryGetValue(oldStage, out list) && list.Contains(chunk.pos))
+            list.Remove(chunk.pos);
+        // Add new state if possible
+        if (chunkWorkLists.TryGetValue(newStage, out list) && !list.Contains(chunk.pos))
+        {
+            if (newStage==Stage.buildMesh || newStage==Stage.priorityBuildMesh)
+            {
+                chunk.blocks.meshStarted = false;
+                chunk.blocks.meshCompleted = false;
+            }
 
-        if (chunkWorkLists.ContainsKey(newStage) &&
-            !chunkWorkLists[newStage].Contains(chunk.pos))
-            chunkWorkLists[newStage].Add(chunk.pos);
+            list.Add(chunk.pos);
+        }
     }
 
     private static bool IsCorrectStage(Stage stage, Chunk chunk)
     {
-        return (chunk != null && chunk.stage == stage);
+        return chunk!=null && chunk.stage==stage;
     }
 }

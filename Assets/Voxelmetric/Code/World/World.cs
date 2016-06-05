@@ -1,5 +1,4 @@
-﻿using Assets.Voxelmetric.Code;
-using UnityEngine;
+﻿using UnityEngine;
 
 public class World : MonoBehaviour {
 
@@ -20,10 +19,7 @@ public class World : MonoBehaviour {
     
     //Multi threading must be disabled on web builds
     public bool useMultiThreading;
-
-    private Coroutine terrainLoopCoroutine;
-    private Coroutine buildMeshLoopCoroutine;
-
+    
     private Block voidBlock;
     private Block airBlock;
 
@@ -57,14 +53,8 @@ public class World : MonoBehaviour {
 
     void Update()
     {
-        if (chunksLoop != null) {
-            if (!useMultiThreading) {
-                if (terrainLoopCoroutine == null)
-                    terrainLoopCoroutine = StartCoroutine(chunksLoop.TerrainLoopCoroutine());
-                if (buildMeshLoopCoroutine == null)
-                    buildMeshLoopCoroutine = StartCoroutine(chunksLoop.BuildMeshLoopCoroutine());
-            }
-
+        if (chunksLoop != null)
+        {
             chunksLoop.MainThreadLoop();
         }
     }
@@ -82,8 +72,6 @@ public class World : MonoBehaviour {
 
     public void StartWorld()
     {
-        Globals.InitPools();
-
         if (chunksLoop != null)
             return;
         Configure();
