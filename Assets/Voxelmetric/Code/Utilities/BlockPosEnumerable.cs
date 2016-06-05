@@ -24,10 +24,12 @@ public class BlockPosEnumerable : IEnumerable<BlockPos> {
             this.end += step;
     }
 
-    public IEnumerator<BlockPos> GetEnumerator() {
-        for (int x = start.x; x < end.x; x += step.x) {
-            for (int y = start.y; y < end.y; y += step.y) {
-                for (int z = start.z; z < end.z; z += step.z) {
+    public IEnumerator<BlockPos> GetEnumerator()
+    {
+        for (int y = start.y; y < end.y; y += step.y) {
+            for (int z = start.z; z < end.z; z += step.z) {
+                for (int x = start.x; x < end.x; x += step.x)
+                {
                     yield return new BlockPos(x, y, z);
                 }
             }
