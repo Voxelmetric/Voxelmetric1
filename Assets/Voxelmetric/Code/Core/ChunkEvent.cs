@@ -64,9 +64,11 @@ namespace Voxelmetric.Code.Core
                 {
                     ChunkEvent l = m_listeners[i];
 
-                    // Do not register if already registred
-                    if (l == listener)
+                    if (l==listener)
+                    {
+                        m_listeners[i] = null;
                         return true;
+                    }
                 }
 
                 return false;
