@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using Assets.Voxelmetric.Code.Common.Memory;
+using Voxelmetric.Code.Common.Memory;
 
-namespace Assets.Voxelmetric.Code.Common.MemoryPooling
+namespace Voxelmetric.Code.Common.MemoryPooling
 {
     public abstract class AObjectPool
     {

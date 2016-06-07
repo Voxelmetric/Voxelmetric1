@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace Assets.Voxelmetric.Code.Common.Memory
+namespace Voxelmetric.Code.Common.Memory
 {
     public sealed class ArrayPool<T>: IArrayPool<T>
     {

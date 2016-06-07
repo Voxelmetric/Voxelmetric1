@@ -1,30 +1,34 @@
-﻿using UnityEngine;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Collections.Generic;
+using UnityEngine;
+using Voxelmetric.Code.Data_types;
 
-public static class ChunkLoadOrder
+namespace Voxelmetric.Code.Utilities
 {
-    public static BlockPos[] ChunkPositions(int chunkLoadRadius)
+    public static class ChunkLoadOrder
     {
-        var chunkLoads = new List<BlockPos>();
-        for (int x = -chunkLoadRadius; x <= chunkLoadRadius; x++)
+        public static BlockPos[] ChunkPositions(int chunkLoadRadius)
         {
-            for (int z = -chunkLoadRadius; z <= chunkLoadRadius; z++)
+            var chunkLoads = new List<BlockPos>();
+            for (int x = -chunkLoadRadius; x <= chunkLoadRadius; x++)
             {
-                chunkLoads.Add(new BlockPos(x, 0, z));
+                for (int z = -chunkLoadRadius; z <= chunkLoadRadius; z++)
+                {
+                    chunkLoads.Add(new BlockPos(x, 0, z));
+                }
             }
-        }
 
-        // limit how far away the blocks can be to achieve a circular loading pattern
-        float maxRadius = chunkLoadRadius * 1.55f;
+            // limit how far away the blocks can be to achieve a circular loading pattern
+            float maxRadius = chunkLoadRadius * 1.55f;
 
-        //sort 2d vectors by closeness to center
-        return chunkLoads
+            //sort 2d vectors by closeness to center
+            return chunkLoads
                 .Where(pos => Mathf.Abs(pos.x) + Mathf.Abs(pos.z) < maxRadius)
                 .OrderBy(pos => Mathf.Abs(pos.x) + Mathf.Abs(pos.z)) //smallest magnitude vectors first
                 .ThenBy(pos => Mathf.Abs(pos.x)) //make sure not to process e.g (-10,0) before (5,5)
                 .ThenBy(pos => Mathf.Abs(pos.z))
                 .ToArray();
-    }
+        }
 
+    }
 }

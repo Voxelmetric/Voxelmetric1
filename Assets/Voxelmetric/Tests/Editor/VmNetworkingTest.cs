@@ -1,6 +1,11 @@
 ﻿using NUnit.Framework;
 using System.Threading;
 using System;
+using Voxelmetric.Code.Blocks;
+using Voxelmetric.Code.Core;
+using Voxelmetric.Code.Data_types;
+using Voxelmetric.Code.Utilities;
+using Voxelmetric.Code.VM;
 
 public class VmNetworkingTest {
 
@@ -53,7 +58,7 @@ public class VmNetworkingTest {
     public void TCPTest() {
         bool debug = false;
 
-        var chunkSizePos = BlockPos.one * Config.Env.ChunkSize;
+        var chunkSizePos = BlockPos.one * Env.ChunkSize;
         BlockPosEnumerable chunkPosns = new BlockPosEnumerable(-chunkSizePos, chunkSizePos, chunkSizePos, true);
 
         VmServer server = null;

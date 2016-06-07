@@ -1,122 +1,129 @@
 ﻿using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
+using Voxelmetric.Code.Core;
+using Voxelmetric.Code.Data_types;
+using Voxelmetric.Code.Serialization;
+using Voxelmetric.Code.Utilities;
 
-public class VoxelmetricExample : MonoBehaviour
+namespace Voxelmetric.Examples
 {
-    Vector2 rot;
-
-    public string blockToPlace = "air";
-    public Text selectedBlockText;
-    public Text saveProgressText;
-    public World world;
-
-    BlockPos pfStart;
-    BlockPos pfStop;
-    public PathFinder pf;
-
-    SaveProgress saveProgress;
-
-    private EventSystem eventSystem;
-
-    public void SetType(string newType){
-        blockToPlace = newType;
-    }
-
-    void Start()
+    public class VoxelmetricExample : MonoBehaviour
     {
-        rot.y = 360f - transform.localEulerAngles.x;
-        rot.x = transform.localEulerAngles.y;
-        eventSystem = FindObjectOfType<EventSystem>();
-    }
+        Vector2 rot;
 
-    void Update()
-    {
-        //Movement
-        if (Input.GetMouseButton(1))
-        {
-            rot = new Vector2(
-                rot.x + Input.GetAxis("Mouse X") * 3,
-                rot.y + Input.GetAxis("Mouse Y") * 3);
+        public string blockToPlace = "air";
+        public Text selectedBlockText;
+        public Text saveProgressText;
+        public World world;
 
-            transform.localRotation = Quaternion.AngleAxis(rot.x, Vector3.up);
-            transform.localRotation *= Quaternion.AngleAxis(rot.y, Vector3.left);
-        }
-        transform.position += transform.forward * 40 * Input.GetAxis("Vertical") * Time.deltaTime;
-        transform.position += transform.right * 40 * Input.GetAxis("Horizontal") * Time.deltaTime;
+        BlockPos pfStart;
+        BlockPos pfStop;
+        public PathFinder pf;
 
-        //Save
-        if (saveProgress != null)
-        {
-            saveProgressText.text = SaveStatus();
-        }
-        else
-        {
-            saveProgressText.text = "Save";
+        SaveProgress saveProgress;
+
+        private EventSystem eventSystem;
+
+        public void SetType(string newType){
+            blockToPlace = newType;
         }
 
-        var mousePos = Camera.main.ScreenToWorldPoint(new Vector3(Input.mousePosition.x, Input.mousePosition.y, 10));
-
-        VmRaycastHit hit = Voxelmetric.Raycast(new Ray(Camera.main.transform.position, mousePos - Camera.main.transform.position), world, 1000);
-
-        selectedBlockText.text = Voxelmetric.GetBlock(hit.blockPos, world).displayName;
-
-        if (Input.GetMouseButtonDown(0) && !eventSystem.IsPointerOverGameObject())
+        void Start()
         {
-            if (hit.block.type != Block.VoidType)
+            rot.y = 360f - transform.localEulerAngles.x;
+            rot.x = transform.localEulerAngles.y;
+            eventSystem = FindObjectOfType<EventSystem>();
+        }
+
+        void Update()
+        {
+            //Movement
+            if (Input.GetMouseButton(1))
             {
-                bool adjacent = true;
-                if (Block.Create(blockToPlace, world).type == Block.AirType)
-                {
-                    adjacent = false;
-                }
+                rot = new Vector2(
+                    rot.x + Input.GetAxis("Mouse X") * 3,
+                    rot.y + Input.GetAxis("Mouse Y") * 3);
 
-                if (adjacent)
+                transform.localRotation = Quaternion.AngleAxis(rot.x, Vector3.up);
+                transform.localRotation *= Quaternion.AngleAxis(rot.y, Vector3.left);
+            }
+            transform.position += transform.forward * 40 * Input.GetAxis("Vertical") * Time.deltaTime;
+            transform.position += transform.right * 40 * Input.GetAxis("Horizontal") * Time.deltaTime;
+
+            //Save
+            if (saveProgress != null)
+            {
+                saveProgressText.text = SaveStatus();
+            }
+            else
+            {
+                saveProgressText.text = "Save";
+            }
+
+            var mousePos = Camera.main.ScreenToWorldPoint(new Vector3(Input.mousePosition.x, Input.mousePosition.y, 10));
+
+            VmRaycastHit hit = Code.Voxelmetric.Raycast(new Ray(Camera.main.transform.position, mousePos - Camera.main.transform.position), world, 1000);
+
+            selectedBlockText.text = Code.Voxelmetric.GetBlock(hit.blockPos, world).displayName;
+
+            if (Input.GetMouseButtonDown(0) && !eventSystem.IsPointerOverGameObject())
+            {
+                if (hit.block.type != Block.VoidType)
                 {
-                    Voxelmetric.SetBlock(hit.adjacentPos, Block.Create(blockToPlace, world), world);
-                }
-                else
-                {
-                    Voxelmetric.SetBlock(hit.blockPos, Block.Create(blockToPlace, world), world);
+                    bool adjacent = true;
+                    if (Block.Create(blockToPlace, world).type == Block.AirType)
+                    {
+                        adjacent = false;
+                    }
+
+                    if (adjacent)
+                    {
+                        Code.Voxelmetric.SetBlock(hit.adjacentPos, Block.Create(blockToPlace, world), world);
+                    }
+                    else
+                    {
+                        Code.Voxelmetric.SetBlock(hit.blockPos, Block.Create(blockToPlace, world), world);
+                    }
                 }
             }
-        }
 
-        if (Input.GetKeyDown(KeyCode.I))
-        {
+            if (Input.GetKeyDown(KeyCode.I))
+            {
                 pfStart = hit.blockPos;
+            }
+
+            if (Input.GetKeyDown(KeyCode.O))
+            {
+                pfStop = hit.blockPos;
+            }
+
+            if (Input.GetKeyDown(KeyCode.P))
+            {
+                pf = new PathFinder(pfStart, pfStop, world, 2);
+                Debug.Log(pf.path.Count);
+            }
+
+            if (pf != null && pf.path.Count != 0)
+            {
+                for (int i = 0; i < pf.path.Count - 1; i++)
+                    Debug.DrawLine(pf.path[i].Add(0, 1, 0), pf.path[i + 1].Add(0, 1, 0));
+            }
+
         }
 
-        if (Input.GetKeyDown(KeyCode.O))
+        public void SaveAll()
         {
-            pfStop = hit.blockPos;
+            saveProgress = Code.Voxelmetric.SaveAll(world);
         }
 
-        if (Input.GetKeyDown(KeyCode.P))
+        public string SaveStatus()
         {
-            pf = new PathFinder(pfStart, pfStop, world, 2);
-            Debug.Log(pf.path.Count);
-        }
+            if (saveProgress == null)
+                return "";
 
-        if (pf != null && pf.path.Count != 0)
-        {
-            for (int i = 0; i < pf.path.Count - 1; i++)
-                Debug.DrawLine(pf.path[i].Add(0, 1, 0), pf.path[i + 1].Add(0, 1, 0));
+            return saveProgress.GetProgress() + "%";
         }
 
     }
-
-    public void SaveAll()
-    {
-        saveProgress = Voxelmetric.SaveAll(world);
-    }
-
-    public string SaveStatus()
-    {
-        if (saveProgress == null)
-            return "";
-
-        return saveProgress.GetProgress() + "%";
-    }
-
 }

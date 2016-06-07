@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Assets.Voxelmetric.Code.Common.Threading
+namespace Voxelmetric.Code.Common.Threading
 {
     public struct ThreadItem
     {

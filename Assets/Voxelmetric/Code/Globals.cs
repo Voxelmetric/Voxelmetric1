@@ -1,7 +1,7 @@
-﻿using Assets.Voxelmetric.Code.Common.MemoryPooling;
-using Assets.Voxelmetric.Code.Common.Threading;
+﻿using Voxelmetric.Code.Common.MemoryPooling;
+using Voxelmetric.Code.Common.Threading;
 
-namespace Assets.Voxelmetric.Code
+namespace Voxelmetric.Code
 {
     public static class Globals
     {
@@ -26,18 +26,6 @@ namespace Assets.Voxelmetric.Code
             {
                 IOPool = new TaskPool();
                 IOPool.Start();
-            }
-        }
-
-        // Task pool for network-related tasks
-        public static TaskPool NetworkPool { get; private set; }
-
-        public static void InitNetworkPool()
-        {
-            if (NetworkPool == null)
-            {
-                NetworkPool = new TaskPool();
-                NetworkPool.Start();
             }
         }
 

@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using NUnit.Framework;
+using Voxelmetric.Code.Utilities;
 
 public class CoroutineUtilsTest {
 

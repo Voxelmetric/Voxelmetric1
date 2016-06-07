@@ -1,5 +1,7 @@
 ﻿using NUnit.Framework;
 using UnityEngine;
+using Voxelmetric.Code.Data_types;
+using Voxelmetric.Code.Utilities;
 
 public class BlockPosTest {
     [Test]
@@ -19,7 +21,7 @@ public class BlockPosTest {
 
     //returns the position of the chunk containing this block
     private static BlockPos ExpContainingChunkCoordinates(BlockPos pos) {
-        int chunkSize = Config.Env.ChunkSize;
+        int chunkSize = Env.ChunkSize;
 
         int cx = Mathf.FloorToInt(pos.x / (float)chunkSize) * chunkSize;
         int cy = Mathf.FloorToInt(pos.y / (float)chunkSize) * chunkSize;

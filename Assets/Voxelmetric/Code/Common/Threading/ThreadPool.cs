@@ -1,9 +1,9 @@
 ﻿using System;
 using UnityEngine;
-using Assets.Voxelmetric.Code.Common.MemoryPooling;
 using UnityEngine.Assertions;
+using Voxelmetric.Code.Common.MemoryPooling;
 
-namespace Assets.Voxelmetric.Code.Common.Threading
+namespace Voxelmetric.Code.Common.Threading
 {
     public class ThreadPool
     {

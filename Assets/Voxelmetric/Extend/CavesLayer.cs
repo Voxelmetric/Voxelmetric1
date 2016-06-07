@@ -1,4 +1,8 @@
-﻿public class CavesLayer : TerrainLayer
+﻿using Voxelmetric.Code.Core;
+using Voxelmetric.Code.Load_Resources;
+
+
+public class CavesLayer : TerrainLayer
 {
     protected override void SetUp(LayerConfig config)
     {

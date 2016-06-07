@@ -1,10 +1,9 @@
 ﻿using System;
-using Assets.Voxelmetric.Code.Common;
-using Assets.Voxelmetric.Code.Common.Memory;
 using UnityEngine;
 using UnityEngine.Assertions;
+using Voxelmetric.Code.Common.Memory;
 
-namespace Assets.Voxelmetric.Code.Utilities.MemoryPooling
+namespace Voxelmetric.Code.Common.MemoryPooling
 {
     [AddComponentMenu("VoxelMetric/Singleton/GameObjectProvider")]
     public sealed class GameObjectProvider: MonoSingleton<GameObjectProvider>

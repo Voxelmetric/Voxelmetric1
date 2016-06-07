@@ -1,136 +1,125 @@
-﻿using UnityEngine;
-using System.Threading;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using UnityEngine;
+using Voxelmetric.Code.Core;
+using Voxelmetric.Code.Data_types;
+using Voxelmetric.Code.Serialization;
+using Voxelmetric.Code.Utilities;
 
-public static class Voxelmetric
+namespace Voxelmetric.Code
 {
-	//Used as a manager class with references to classes treated like singletons
-	public static VoxelmetricResources resources = new VoxelmetricResources ();
+    public static class Voxelmetric
+    {
+        //Used as a manager class with references to classes treated like singletons
+        public static VoxelmetricResources resources = new VoxelmetricResources ();
 
-	public static GameObject CreateGameObjectBlock (Block original, Vector3 position, Quaternion rotation)
-	{
-		BlockPos blockPos = new BlockPos ();
+        public static GameObject CreateGameObjectBlock (Block original, Vector3 position, Quaternion rotation)
+        {
+            BlockPos blockPos = new BlockPos ();
 
-		if (original.type == Block.AirType)
-			return null;
+            if (original.type == Block.AirType)
+                return null;
 
-        EmptyChunk chunk = null;// original.world.GetComponent<EmptyChunk> ();
-		if (chunk == null) {
-			chunk = EmptyChunk.Create(original.world, new BlockPos ());
-		}
+            EmptyChunk chunk = null;// original.world.GetComponent<EmptyChunk> ();
+            if (chunk == null) {
+                chunk = EmptyChunk.Create(original.world, new BlockPos ());
+            }
 
-		original.OnCreate (chunk, blockPos - blockPos.ContainingChunkCoordinates (), blockPos);
+            original.OnCreate (chunk, blockPos - blockPos.ContainingChunkCoordinates (), blockPos);
 
-		return GOFromBlock (original, blockPos, position, rotation, chunk);
-	}
+            return GOFromBlock (original, blockPos, position, rotation, chunk);
+        }
 
-	public static GameObject CreateGameObjectBlock (BlockPos blockPos, World world, Vector3 position, Quaternion rotation)
-	{
-		Block original = GetBlock (blockPos, world);
-		if (original.type == Block.AirType)
-			return null;
+        public static GameObject CreateGameObjectBlock (BlockPos blockPos, World world, Vector3 position, Quaternion rotation)
+        {
+            Block original = GetBlock (blockPos, world);
+            if (original.type == Block.AirType)
+                return null;
 
-		EmptyChunk chunk = world.GetComponent<EmptyChunk> ();
-		if (chunk == null) {
-			chunk = EmptyChunk.Create(original.world, blockPos.ContainingChunkCoordinates ());
-		}
+            EmptyChunk chunk = world.GetComponent<EmptyChunk> ();
+            if (chunk == null) {
+                chunk = EmptyChunk.Create(original.world, blockPos.ContainingChunkCoordinates ());
+            }
 
-		original.OnCreate (chunk, blockPos - blockPos.ContainingChunkCoordinates (), blockPos);
+            original.OnCreate (chunk, blockPos - blockPos.ContainingChunkCoordinates (), blockPos);
 
-		return GOFromBlock (original, blockPos, position, rotation, chunk);
-	}
+            return GOFromBlock (original, blockPos, position, rotation, chunk);
+        }
 
-    private static GameObject GOFromBlock (Block original, BlockPos blockPos, Vector3 position, Quaternion rotation, Chunk chunk)
-	{
-		GameObject go = (GameObject)GameObject.Instantiate (Resources.Load<GameObject> (chunk.world.config.pathToBlockPrefab), position, rotation);
-		go.transform.localScale = new Vector3 (Config.Env.BlockSize, Config.Env.BlockSize, Config.Env.BlockSize);
+        private static GameObject GOFromBlock (Block original, BlockPos blockPos, Vector3 position, Quaternion rotation, Chunk chunk)
+        {
+            GameObject go = (GameObject)GameObject.Instantiate (Resources.Load<GameObject> (chunk.world.config.pathToBlockPrefab), position, rotation);
+            go.transform.localScale = new Vector3 (Env.BlockSize, Env.BlockSize, Env.BlockSize);
 
-		MeshData meshData = new MeshData ();
+            MeshData meshData = new MeshData ();
 
-		original.AddBlockData (chunk, blockPos, blockPos, meshData);
-		for (int i = 0; i < meshData.vertices.Count; i++) {
-			meshData.vertices [i] -= (Vector3)blockPos;
-		}
+            original.AddBlockData (chunk, blockPos, blockPos, meshData);
+            for (int i = 0; i < meshData.vertices.Count; i++) {
+                meshData.vertices [i] -= (Vector3)blockPos;
+            }
 
-		Mesh mesh = new Mesh ();
-		mesh.vertices = meshData.vertices.ToArray ();
-		mesh.triangles = meshData.triangles.ToArray ();
+            Mesh mesh = new Mesh ();
+            mesh.vertices = meshData.vertices.ToArray ();
+            mesh.triangles = meshData.triangles.ToArray ();
+            mesh.colors = meshData.colors.ToArray ();
+            mesh.uv = meshData.uv.ToArray ();
+            mesh.RecalculateNormals ();
 
-		mesh.colors = meshData.colors.ToArray ();
+            go.GetComponent<Renderer> ().material.mainTexture = chunk.world.textureIndex.atlas;
+            go.GetComponent<MeshFilter> ().mesh = mesh;
 
-		mesh.uv = meshData.uv.ToArray ();
-		mesh.RecalculateNormals ();
+            return go;
+        }
 
-		go.GetComponent<Renderer> ().material.mainTexture = chunk.world.textureIndex.atlas;
-		go.GetComponent<MeshFilter> ().mesh = mesh;
+        public static bool SetBlock (BlockPos pos, Block block, World world)
+        {
+            Chunk chunk = world.chunks.Get (pos);
+            if (chunk == null)
+                return false;
 
-		return go;
-	}
+            chunk.world.blocks.Set (pos, block);
 
-	public static bool SetBlock (BlockPos pos, Block block, World world)
-	{
-		Chunk chunk = world.chunks.Get (pos);
-		if (chunk == null)
-			return false;
+            return true;
+        }
 
-		chunk.world.blocks.Set (pos, block);
+        public static Block GetBlock (BlockPos pos, World world)
+        {
+            Block block = world.blocks.Get (pos);
 
-		return true;
-	}
+            return block;
+        }
 
-	public static Block GetBlock (BlockPos pos, World world)
-	{
-		Block block = world.blocks.Get (pos);
+        /// <summary>
+        /// Saves all chunks currently loaded, if UseMultiThreading is enabled it saves the chunks
+        ///  asynchronously and the SaveProgress object returned will show the progress
+        /// </summary>
+        /// <param name="world">Optional parameter for the world to save chunks for, if left
+        /// empty it will use the world Singleton instead</param>
+        /// <returns>A SaveProgress object to monitor the save.</returns>
+        public static SaveProgress SaveAll (World world)
+        {
+            //Create a saveprogress object with positions of all the chunks in the world
+            //Then save each chunk and update the saveprogress's percentage for each save
+            SaveProgress saveProgress = new SaveProgress (world.chunks.posCollection);
+            List<Chunk> chunksToSave = new List<Chunk> ();
+            chunksToSave.AddRange (world.chunks.chunkCollection);
 
-		return block;
-	}
+            foreach (var chunk in chunksToSave)
+            {
+                chunk.RequestSaveData();
 
-	/// <summary>
-	/// Saves all chunks currently loaded, if UseMultiThreading is enabled it saves the chunks
-	///  asynchronously and the SaveProgress object returned will show the progress
-	/// </summary>
-	/// <param name="world">Optional parameter for the world to save chunks for, if left
-	/// empty it will use the world Singleton instead</param>
-	/// <returns>A SaveProgress object to monitor the save.</returns>
-	public static SaveProgress SaveAll (World world)
-	{
-		//Create a saveprogress object with positions of all the chunks in the world
-		//Then save each chunk and update the saveprogress's percentage for each save
-		SaveProgress saveProgress = new SaveProgress (world.chunks.posCollection);
-		List<Chunk> chunksToSave = new List<Chunk> ();
-		chunksToSave.AddRange (world.chunks.chunkCollection);
-
-        if (world.UseMultiThreading) {
-			Thread thread = new Thread (() =>
-			{
-
-				foreach (var chunk in chunksToSave) {
-
-					while (!chunk.blocks.contentsGenerated) {
-						Thread.Sleep (0);
-					}
-
-                    if (!Serialization.SaveChunk(chunk))
-                        saveProgress.SaveErrorForChunk(chunk.pos);
-                    else
-                        saveProgress.SaveCompleteForChunk(chunk.pos);
-				}
-			});
-			thread.Start();
-		} else {
-			foreach (var chunk in chunksToSave) {
-				if ( !Serialization.SaveChunk(chunk) )
+                // TODO! Make saveProgress work with the new system
+                /*if (!Serialization.SaveChunk(chunk))
                     saveProgress.SaveErrorForChunk(chunk.pos);
                 else
-                    saveProgress.SaveCompleteForChunk(chunk.pos);
-			}
-		}
+                    saveProgress.SaveCompleteForChunk(chunk.pos);*/
+            }
 
-		return saveProgress;
-	}
+            return saveProgress;
+        }
 
-    public static VmRaycastHit Raycast(Ray ray, World world, float range = 10000f)
-    {
-        return VmRaycast.Raycast(ray, world, range);
+        public static VmRaycastHit Raycast(Ray ray, World world, float range = 10000f)
+        {
+            return VmRaycast.Raycast(ray, world, range);
+        }
     }
 }

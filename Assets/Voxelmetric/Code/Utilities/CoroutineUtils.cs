@@ -1,11 +1,14 @@
 ﻿using System.Collections;
 
-public class CoroutineUtils {
+namespace Voxelmetric.Code.Utilities
+{
+    public static class CoroutineUtils {
 
-    public static void DoCoroutine(IEnumerator enumerator) {
-        while (enumerator.MoveNext()) {
-            var current = enumerator.Current;
+        public static void DoCoroutine(IEnumerator enumerator) {
+            while (enumerator.MoveNext()) {
+                var current = enumerator.Current;
+            }
         }
-    }
 
+    }
 }

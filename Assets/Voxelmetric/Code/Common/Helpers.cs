@@ -1,4 +1,6 @@
-﻿namespace Assets.Voxelmetric.Code.Common
+﻿using Voxelmetric.Code.Utilities;
+
+namespace Voxelmetric.Code.Common
 {
     public static class Helpers
     {
@@ -14,7 +16,7 @@
 
         public static int GetChunkIndex1DFrom3D(int x, int y, int z)
         {
-            return x + (z << Config.Env.ChunkPower) + (y << Config.Env.ChunkPower2);
+            return x + (z << Env.ChunkPower) + (y << Env.ChunkPower2);
         }
 
         public static void GetIndex2DFrom1D(int index, out int x, out int z, int sizeX)
@@ -32,9 +34,9 @@
 
         public static void GetChunkIndex3DFrom1D(int index, out int x, out int y, out int z)
         {
-            x = index & Config.Env.ChunkMask;
-            y = index >> Config.Env.ChunkPower2;
-            z = (index >> Config.Env.ChunkPower) & Config.Env.ChunkMask;
+            x = index & Env.ChunkMask;
+            y = index >> Env.ChunkPower2;
+            z = (index >> Env.ChunkPower) & Env.ChunkMask;
         }
 
         public static T[] CreateArray1D<T>(int size)

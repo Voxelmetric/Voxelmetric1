@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Assets.Voxelmetric.Code.Common.Memory
+namespace Voxelmetric.Code.Common.Memory
 {
     public sealed class ObjectPoolAllocator<T> where T: class
     {

@@ -1,6 +1,6 @@
-﻿using Assets.Voxelmetric.Code;
-using Assets.Voxelmetric.Code.Common.Threading.Managers;
-using UnityEngine;
+﻿using UnityEngine;
+using Voxelmetric.Code;
+using Voxelmetric.Code.Common.Threading.Managers;
 
 public class GlobalObjects : MonoBehaviour {
 
@@ -8,14 +8,12 @@ public class GlobalObjects : MonoBehaviour {
     {
         Globals.InitWorkPool();
         Globals.InitIOPool();
-        Globals.InitNetworkPool();
         Globals.InitMemPools();
     }
 	
 	void Update ()
     {
         IOPoolManager.Commit();
-	    NetworkPoolManager.Commit();
         WorkPoolManager.Commit();
 	}
 }

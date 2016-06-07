@@ -1,8 +1,10 @@
 ﻿using System.Collections.Generic;
-using Assets.Voxelmetric.Code.Common.Memory;
 using UnityEngine;
+using Voxelmetric.Code.Common.Memory;
+using Voxelmetric.Code.Core;
+using Voxelmetric.Code.Data_types;
 
-namespace Assets.Voxelmetric.Code.Common.MemoryPooling
+namespace Voxelmetric.Code.Common.MemoryPooling
 {
     /// <summary>
     ///     Global object pools for often used heap objects.

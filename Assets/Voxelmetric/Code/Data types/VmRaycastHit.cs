@@ -1,12 +1,16 @@
 ﻿using UnityEngine;
+using Voxelmetric.Code.Core;
 
-public struct VmRaycastHit
+namespace Voxelmetric.Code.Data_types
 {
-    public BlockPos blockPos;
-    public BlockPos adjacentPos;
-    public Vector3 dir;
-    public float distance;
-    public Block block;
-    public World world;
-    public Vector3 scenePos;
+    public struct VmRaycastHit
+    {
+        public BlockPos blockPos;
+        public BlockPos adjacentPos;
+        public Vector3 dir;
+        public float distance;
+        public Block block;
+        public World world;
+        public Vector3 scenePos;
+    }
 }

@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
-using UnityEngine;
 
-namespace Assets.Voxelmetric.Code.Common.Threading.Managers
+namespace Voxelmetric.Code.Common.Threading.Managers
 {
     public static class WorkPoolManager
     {
@@ -15,7 +14,7 @@ namespace Assets.Voxelmetric.Code.Common.Threading.Managers
         public static void Commit()
         {
             // Commit all the work we have
-            if (Config.Core.UseMultiThreading)
+            if (Utilities.Core.UseMultiThreading)
             {
                 ThreadPool pool = Globals.WorkPool;
 

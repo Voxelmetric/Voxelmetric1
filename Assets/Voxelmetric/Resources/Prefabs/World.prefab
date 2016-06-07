@@ -11,6 +11,7 @@ GameObject:
   - 114: {fileID: 11498696}
   - 23: {fileID: 2362656}
   - 114: {fileID: 11405022}
+  - 114: {fileID: 11406898}
   m_Layer: 0
   m_Name: World
   m_TagString: Untagged
@@ -68,6 +69,25 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 550551e7adc57544fb97244192196808, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &11406898
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 104736}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5c799a13cb78b7842a0dfae6417b1ece, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  DestroyOnLoad: 0
+  ObjectPools:
+  - Name: Block
+    Prefab: {fileID: 150658, guid: f6c03f5bf077f7c45a9b8f4d521fe536, type: 2}
+    InitialSize: 2048
+  - Name: CustomMesh
+    Prefab: {fileID: 100002, guid: cff7141e7c83e7d4a8f9174acaf8663b, type: 3}
+    InitialSize: 2048
 --- !u!114 &11498696
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -76,7 +96,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 104736}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d2da8c6b21a10564cbffd7e51b5ecc72, type: 3}
+  m_Script: {fileID: 11500000, guid: ecee43494f86ea941b01b535fa1815c9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   worldConfig: default
@@ -84,6 +104,7 @@ MonoBehaviour:
   networking:
     isServer: 1
     allowConnections: 0
+  chunkMaterial: {fileID: 0}
   useMultiThreading: 0
 --- !u!1001 &100100000
 Prefab:

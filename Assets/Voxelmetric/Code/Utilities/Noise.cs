@@ -28,9 +28,10 @@
 
 // Some changes made by Alexander Stavrinou to support generating a
 // permutation array from a seed. 
+
 using System;
 
-namespace SimplexNoise
+namespace Voxelmetric.Code.Utilities
 {
     /// <summary>
     /// Implementation of the Perlin simplex noise, an improved Perlin noise algorithm.

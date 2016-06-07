@@ -3,6 +3,10 @@ using System.Collections.Generic;
 using System.Text;
 using NUnit.Framework;
 using UnityEngine;
+using Voxelmetric.Code.Blocks;
+using Voxelmetric.Code.Core;
+using Voxelmetric.Code.Data_types;
+using Voxelmetric.Code.Utilities;
 
 /// <summary>
 /// Testing utilities
@@ -72,7 +76,7 @@ public class TestUtils {
         Debug.Log(sb.ToString());
     }
 
-    public static readonly BlockPosEnumerable LocalPosns = new BlockPosEnumerable(BlockPos.one * Config.Env.ChunkSize);
+    public static readonly BlockPosEnumerable LocalPosns = new BlockPosEnumerable(BlockPos.one * Env.ChunkSize);
 
     public static AutoDictionary<string, int> FindWorldBlockCounts(World world) {
         var worldBlockCounts = new AutoDictionary<string, int>();

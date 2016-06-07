@@ -1,11 +1,14 @@
-﻿public struct BlockAndTimer
+﻿namespace Voxelmetric.Code.Data_types
 {
-    public BlockPos pos;
-    public float time;
-
-    public BlockAndTimer(BlockPos pos, float time)
+    public struct BlockAndTimer
     {
-        this.pos = pos;
-        this.time = time;
+        public BlockPos pos;
+        public float time;
+
+        public BlockAndTimer(BlockPos pos, float time)
+        {
+            this.pos = pos;
+            this.time = time;
+        }
     }
 }

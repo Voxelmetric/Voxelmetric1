@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading;
-using Assets.Voxelmetric.Code.Common.MemoryPooling;
 using UnityEngine;
+using Voxelmetric.Code.Common.MemoryPooling;
 
-namespace Assets.Voxelmetric.Code.Common.Threading
+namespace Voxelmetric.Code.Common.Threading
 {
     public sealed class TaskPool: IDisposable
     {

@@ -1,59 +1,62 @@
 ﻿using System.Collections.Generic;
-using UnityEngine;
 using Newtonsoft.Json;
+using UnityEngine;
 
-public class ConfigLoader<T>
+namespace Voxelmetric.Code.Load_Resources
 {
-    Dictionary<string, T> configs = new Dictionary<string, T>();
-    string[] configFolders;
-
-    public ConfigLoader(string[] folders)
+    public class ConfigLoader<T>
     {
-        configFolders = folders;
-    }
+        Dictionary<string, T> configs = new Dictionary<string, T>();
+        string[] configFolders;
 
-    void LoadConfigs()
-    {
-        foreach (var configFolder in configFolders)
+        public ConfigLoader(string[] folders)
         {
-            var configFiles = UnityEngine.Resources.LoadAll<TextAsset>(configFolder);
+            configFolders = folders;
+        }
 
-            foreach (var configFile in configFiles)
+        void LoadConfigs()
+        {
+            foreach (var configFolder in configFolders)
             {
-                T config = JsonConvert.DeserializeObject<T>(configFile.text);
-                if(!configs.ContainsKey(config.ToString()))
-                    configs.Add(config.ToString(), config);
+                var configFiles = UnityEngine.Resources.LoadAll<TextAsset>(configFolder);
+
+                foreach (var configFile in configFiles)
+                {
+                    T config = JsonConvert.DeserializeObject<T>(configFile.text);
+                    if(!configs.ContainsKey(config.ToString()))
+                        configs.Add(config.ToString(), config);
+                }
             }
         }
-    }
 
-    public T GetConfig(string configName)
-    {
-        if (configs.Keys.Count == 0)
+        public T GetConfig(string configName)
         {
-            LoadConfigs();
+            if (configs.Keys.Count == 0)
+            {
+                LoadConfigs();
+            }
+
+            T conf;
+            if (configs.TryGetValue(configName, out conf))
+            {
+                return conf;
+            }
+            else
+            {
+                Debug.LogError("Config not found for " + configName + ". Using defaults");
+                return conf;
+            }
         }
 
-        T conf;
-        if (configs.TryGetValue(configName, out conf))
+        public T[] AllConfigs()
         {
-            return conf;
+            if (this.configs.Keys.Count == 0)
+            {
+                LoadConfigs();
+            }
+            T[] configValues = new T[configs.Count];
+            configs.Values.CopyTo(configValues, 0);
+            return configValues;
         }
-        else
-        {
-            Debug.LogError("Config not found for " + configName + ". Using defaults");
-            return conf;
-        }
-    }
-
-    public T[] AllConfigs()
-    {
-        if (this.configs.Keys.Count == 0)
-        {
-            LoadConfigs();
-        }
-        T[] configValues = new T[configs.Count];
-        configs.Values.CopyTo(configValues, 0);
-        return configValues;
     }
 }

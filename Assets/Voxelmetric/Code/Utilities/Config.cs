@@ -1,8 +1,10 @@
-﻿namespace Config
+﻿using Voxelmetric.Code.Data_types;
+
+namespace Voxelmetric.Code.Utilities
 {
     public static class Env
     {
-        public const int ChunkPower = 5;
+        public const int ChunkPower = 4;
         public const int ChunkPower2 = 2*ChunkPower;
         public const int ChunkSize = 1 << ChunkPower;
         public const int ChunkMask = ChunkSize-1;
@@ -18,7 +20,7 @@
 
     public static class Core
     {
-        public static bool UseMultiThreading = true;
+        public static bool UseMultiThreading = false;//true;
     }
 
     public static class Directories
