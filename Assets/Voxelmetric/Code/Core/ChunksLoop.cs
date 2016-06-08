@@ -46,7 +46,9 @@ namespace Voxelmetric.Code.Core
 
             foreach (BlockPos pos in markedForDeletion)
             {
+                Chunk chunk = world.chunks.Get(pos);
                 world.chunks.Remove(pos);
+                Chunk.Remove(chunk);
             }
             markedForDeletion.Clear();
         }

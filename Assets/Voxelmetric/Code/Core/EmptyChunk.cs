@@ -6,9 +6,16 @@ namespace Voxelmetric.Code.Core
     {
         public new static EmptyChunk Create(World world, BlockPos pos)
         {
-            EmptyChunk chunk = new EmptyChunk();
+            EmptyChunk chunk = Globals.MemPools.EmptyChunkPool.Pop();
             chunk.Init(world, pos);
             return chunk;
+        }
+
+        public new static void Remove(Chunk chunk)
+        {
+            EmptyChunk emptyChunk = (EmptyChunk)chunk;
+            emptyChunk.Reset();
+            Globals.MemPools.EmptyChunkPool.Push(emptyChunk);
         }
 
         public override void RequestGenerate()

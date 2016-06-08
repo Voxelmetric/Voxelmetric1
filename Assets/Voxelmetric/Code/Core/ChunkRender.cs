@@ -22,6 +22,12 @@ namespace Voxelmetric.Code.Core
 
         public void Reset()
         {
+            if (meshData.mesh!=null)
+            {
+                meshData.mesh.Clear(false);
+                meshData.mesh = null;
+            }
+            
         }
 
         /// <summary> Updates the chunk based on its contents </summary>

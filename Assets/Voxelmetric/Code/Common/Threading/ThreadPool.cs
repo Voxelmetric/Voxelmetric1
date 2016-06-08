@@ -25,7 +25,7 @@ namespace Voxelmetric.Code.Common.Threading
             // NOTE: Normally, I would simply call CreateAndInitArray1D, however, any attempt to allocate memory
             // for TaskPool in this contructor ends up with Unity3D crashing :(
 
-            Debug.Log("Threadpool created with " + threadCnt + " threads");
+            //Debug.Log("Threadpool created with " + threadCnt + " threads");
         }
 
         public int GetThreadIDFromIndex(int index)

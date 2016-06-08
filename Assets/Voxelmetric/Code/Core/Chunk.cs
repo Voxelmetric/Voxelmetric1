@@ -50,12 +50,19 @@ namespace Voxelmetric.Code.Core
 
         public static Chunk Create(World world, BlockPos pos)
         {
-            Chunk chunk = new Chunk();
+            Chunk chunk = Globals.MemPools.ChunkPool.Pop();
             chunk.Init(world, pos);
             return chunk;
         }
 
-        protected Chunk()
+        public static void Remove(Chunk chunk)
+        {
+            chunk.Reset();
+            chunk.world = null;
+            Globals.MemPools.ChunkPool.Push(chunk);
+        }
+
+        public Chunk()
         {
             // Associate Chunk with a certain thread and make use of its memory pool
             // This is necessary in order to have lock-free caches
@@ -92,21 +99,21 @@ namespace Voxelmetric.Code.Core
             blocks.Reset();
             logic.Reset();
             render.Reset();
+
+            Clear();
         }
 
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append(world.name);
-            sb.Append(", ");
             sb.Append(pos);
-            sb.Append(", NT=");
+            sb.Append(", N=");
             sb.Append(m_notifyStates);
-            sb.Append(", PT=");
+            sb.Append(", P=");
             sb.Append(m_pendingStates);
-            sb.Append(", RT=");
+            sb.Append(", R=");
             sb.Append(m_refreshStates);
-            sb.Append(", CT=");
+            sb.Append(", C=");
             sb.Append(m_completedStates);
             sb.Append(", blocks=");
             sb.Append(blocks);
@@ -502,8 +509,9 @@ namespace Voxelmetric.Code.Core
             m_pendingStates = m_pendingStates.Reset(CurrStateLoadData);
 
             // Nothing here for us to do if the Chunk was not changed
-            if (m_completedStates.Check(CurrStateLoadData) && !m_refreshStates.Check(CurrStateLoadData))
+            if (m_completedStates.Check(CurrStateLoadData))
             {
+                m_refreshStates = m_refreshStates.Reset(CurrStateLoadData);
                 OnLoadDataDone(this);
                 return false;
             }
@@ -514,7 +522,6 @@ namespace Voxelmetric.Code.Core
             m_taskRunning = true;
             IOPoolManager.Add(
                 new ThreadItem(
-                    ThreadID,
                     arg =>
                     {
                         Chunk chunk = (Chunk)arg;
@@ -526,20 +533,10 @@ namespace Voxelmetric.Code.Core
             return true;
         }
 
-        #endregion Finalize Chunk data
+        #endregion Load chunk data
 
         #region Save chunk data
-
-        private struct SSerializeWorkItem
-        {
-            public readonly Chunk Chunk;
-
-            public SSerializeWorkItem(Chunk chunk)
-            {
-                Chunk = chunk;
-            }
-        }
-
+        
         private static readonly ChunkState CurrStateSaveData = ChunkState.SaveData;
 
         private static void OnSaveData(Chunk chunk)
@@ -560,13 +557,9 @@ namespace Voxelmetric.Code.Core
 
         private bool SaveData()
         {
-            // If Chunk was generated...
-            if (m_completedStates.Check(ChunkState.Generate))
-            {
-                // ...  we need to wait until blueprints are generated and Chunk is finalized
-                if (!m_completedStates.Check(ChunkState.LoadData))
-                    return true;
-            }
+            // We need to wait until chunk is generated and data finalized
+            if (!m_completedStates.Check(ChunkState.Generate) || !m_completedStates.Check(ChunkState.LoadData))
+                return true;
 
             m_pendingStates = m_pendingStates.Reset(CurrStateSaveData);
 
@@ -580,22 +573,21 @@ namespace Voxelmetric.Code.Core
             m_refreshStates = m_refreshStates.Reset(CurrStateSaveData);
             m_completedStates = m_completedStates.Reset(CurrStateSaveData);
 
-            SSerializeWorkItem workItem = new SSerializeWorkItem(this);
-
             m_taskRunning = true;
-            IOPoolManager.Add(new ThreadItem(
-                                  arg =>
-                                  {
-                                      SSerializeWorkItem item = (SSerializeWorkItem)arg;
-                                      OnSaveData(item.Chunk);
-                                  },
-                                  workItem)
+            IOPoolManager.Add(
+                new ThreadItem(
+                    arg =>
+                    {
+                        Chunk chunk = (Chunk)arg;
+                        OnSaveData(chunk);
+                    },
+                    this)
                 );
 
             return true;
         }
 
-        #endregion Serialize Chunk
+        #endregion Save chunk data
 
         #region Generate vertices
 
@@ -681,6 +673,7 @@ namespace Voxelmetric.Code.Core
         #region Remove chunk
 
         private static readonly ChunkState CurrStateRemoveChunk = ChunkState.Remove;
+        private static readonly ChunkState NextStateRemoveChunk = ChunkState.Idle;
 
         private bool RemoveChunk()
         {
@@ -702,15 +695,13 @@ namespace Voxelmetric.Code.Core
                 if (!m_completedStates.Check(ChunkState.SaveData))
                     return false;
 
+                m_pendingStates = m_pendingStates.Reset(CurrStateRemoveChunk);
+
                 SubscribeNeighbors(this, false);
             }
-            else
-            // No work on chunk started yet. Reset its' state completely
-            {
-                m_pendingStates = m_pendingStates.Reset();
-                m_completedStates = m_completedStates.Reset();
-            }
 
+            m_refreshStates = m_refreshStates.Reset(CurrStateRemoveChunk);
+            m_notifyStates = NextStateRemoveChunk;
             m_completedStates = m_completedStates.Set(CurrStateRemoveChunk);
             return true;
         }
@@ -731,13 +722,13 @@ namespace Voxelmetric.Code.Core
 
         private static void SubscribeTwoNeighbors(Chunk chunk, BlockPos neighborPos, bool subscribe)
         {
-            Chunk neighbor = chunk.world.chunks.Get(neighborPos);
+            /*Chunk neighbor = chunk.world.chunks.Get(neighborPos);
             if (neighbor != null)
             {
                 // Subscribe with each other
                 neighbor.Subscribe(chunk, subscribe);
                 chunk.Subscribe(neighbor, subscribe);
-            }
+            }*/
         }
     }
 }
