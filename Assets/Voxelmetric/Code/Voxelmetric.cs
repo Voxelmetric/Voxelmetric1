@@ -2,7 +2,6 @@
 using UnityEngine;
 using Voxelmetric.Code.Core;
 using Voxelmetric.Code.Data_types;
-using Voxelmetric.Code.Serialization;
 using Voxelmetric.Code.Utilities;
 
 namespace Voxelmetric.Code

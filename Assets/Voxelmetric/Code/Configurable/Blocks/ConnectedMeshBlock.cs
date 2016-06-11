@@ -28,6 +28,7 @@ public class ConnectedMeshBlock: CustomMeshBlock
     {
         Rect texture;
         DrawCallBatcher batcher = chunk.render.batcher;
+        chunk.poolAllocatedVertices = false;
 
         for (int d = 0; d<6; d++)
         {
