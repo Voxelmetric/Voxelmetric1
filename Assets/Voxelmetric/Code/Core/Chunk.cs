@@ -24,7 +24,7 @@ namespace Voxelmetric.Code.Core
         public ChunkBlocks blocks;
         public ChunkLogic logic;
         public ChunkRender render;
-
+        
         public bool poolAllocatedVertices;
 
         //! Specifies whether there's a task running on this Chunk
@@ -39,6 +39,8 @@ namespace Voxelmetric.Code.Core
         private ChunkState m_refreshStates;
         //! Tasks already executed
         private ChunkState m_completedStates;
+        //! If true, removal of chunk has been requested and no further requests are going to be accepted
+        private bool m_removalRequested;
 
         //! A list of event requiring counter
         //private readonly ChunkEvent[] m_buildEvents = new ChunkEvent[6];
@@ -92,6 +94,7 @@ namespace Voxelmetric.Code.Core
             m_pendingStates = m_pendingStates.Reset();
             m_refreshStates = m_refreshStates.Reset();
             m_completedStates = m_completedStates.Reset();
+            m_removalRequested = false;
 
             m_genericWorkItems.Clear();
             m_genericWorkItemsLeftToProcess = 0;
@@ -153,6 +156,10 @@ namespace Voxelmetric.Code.Core
 
         public void RequestRemoval()
         {
+            if (m_removalRequested)
+                return;
+            m_removalRequested = true;
+
             RefreshState(ChunkState.SaveData);
             RefreshState(ChunkState.Remove);
         }        
@@ -532,7 +539,7 @@ namespace Voxelmetric.Code.Core
 
         private static void OnSaveData(Chunk chunk)
         {
-            Serialization.Serialization.SaveChunk(chunk);
+            //Serialization.Serialization.SaveChunk(chunk);
 
             lock (chunk.m_lock)
             {
@@ -593,7 +600,6 @@ namespace Voxelmetric.Code.Core
         }
 
         private static readonly ChunkState CurrStateGenerateVertices = ChunkState.BuildVertices;
-        private static readonly ChunkState NextStateGenerateVertices = ChunkState.Idle;
 
         private static void OnGenerateVerices(Chunk chunk)
         {
@@ -608,12 +614,11 @@ namespace Voxelmetric.Code.Core
         private static void OnGenerateVerticesDone(Chunk chunk)
         {
             chunk.m_completedStates = chunk.m_completedStates.Set(CurrStateGenerateVertices);
-            chunk.m_notifyStates = NextStateGenerateVertices;
             chunk.m_taskRunning = false;
         }
 
         /// <summary>
-        ///     Build this minichunk's render buffers
+        ///     Build this chunk's geometry
         /// </summary>
         private bool GenerateVertices()
         {
@@ -665,7 +670,6 @@ namespace Voxelmetric.Code.Core
         #region Remove chunk
 
         private static readonly ChunkState CurrStateRemoveChunk = ChunkState.Remove;
-        private static readonly ChunkState NextStateRemoveChunk = ChunkState.Idle;
 
         private bool RemoveChunk()
         {
@@ -693,7 +697,6 @@ namespace Voxelmetric.Code.Core
             }
 
             m_refreshStates = m_refreshStates.Reset(CurrStateRemoveChunk);
-            m_notifyStates = NextStateRemoveChunk;
             m_completedStates = m_completedStates.Set(CurrStateRemoveChunk);
             return true;
         }

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Assertions;
 using Voxelmetric.Code.Builders;
@@ -119,6 +120,10 @@ namespace Voxelmetric.Code.Rendering
                 Assert.IsTrue(go!=null);
                 if (go!=null)
                 {
+#if DEBUG
+                    go.name = m_chunk.pos.ToString();
+#endif
+
                     Mesh mesh = Globals.MemPools.MeshPool.Pop();
                     Assert.IsTrue(mesh.vertices.Length<=0);
                     m_meshBuilder.BuildMesh(mesh, m_renderBuffers[i]);
