@@ -79,6 +79,7 @@ MonoBehaviour:
     allowConnections: 0
   chunkMaterial: {fileID: 2100000, guid: 7fa2460a4614b844c9c80d1c0398b97d, type: 2}
   useMultiThreading: 0
+  UseFrustumCulling: 1
 --- !u!1001 &100100000
 Prefab:
   m_ObjectHideFlags: 1

@@ -10,12 +10,12 @@ public class GlobalObjects : MonoBehaviour {
         Globals.InitIOPool();
         Globals.InitMemPools();
     }
-	
+
 	void Update ()
     {
         IOPoolManager.Commit();
-        WorkPoolManager.Commit();
+	    WorkPoolManager.Commit();
 
-        Debug.Log(Globals.MemPools.ToString());
+	    //Debug.Log(Globals.MemPools.ToString());
     }
 }

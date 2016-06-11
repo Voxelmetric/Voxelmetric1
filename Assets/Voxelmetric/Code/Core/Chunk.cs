@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using System.Threading;
+using UnityEngine;
 using UnityEngine.Assertions;
 using Voxelmetric.Code.Common.Events;
 using Voxelmetric.Code.Common.Extensions;
@@ -27,6 +28,9 @@ namespace Voxelmetric.Code.Core
         
         public bool poolAllocatedVertices;
 
+        //! Bounding box in world coordinates
+        public Bounds WorldBounds { get; private set; }
+
         //! Specifies whether there's a task running on this Chunk
         private bool m_taskRunning;
         private object m_lock;
@@ -51,6 +55,15 @@ namespace Voxelmetric.Code.Core
         private int m_genericWorkItemsLeftToProcess;
         
         public int ThreadID { get; private set; }
+
+        //! Says whether or not the chunk is visible
+        public bool Visible
+        {
+            get { return render.batcher.IsVisible(); }
+            set { render.batcher.SetVisible(value); }
+        }
+        //! Says whether or not building of geometry can be triggered
+        public bool PossiblyVisible { get; set; }
 
         public static Chunk CreateChunk(World world, BlockPos pos)
         {
@@ -85,6 +98,12 @@ namespace Voxelmetric.Code.Core
             this.world = world;
             this.pos = pos;
 
+            const int size = Env.ChunkSize;
+            WorldBounds = new Bounds(
+                new Vector3(pos.x + size/2, pos.y + size / 2, pos.z + size / 2),
+                new Vector3(size, size, size)
+                );
+
             Reset();
         }
 
@@ -106,6 +125,9 @@ namespace Voxelmetric.Code.Core
             poolAllocatedVertices = true;
 
             m_taskRunning = false;
+
+            Visible = false;
+            PossiblyVisible = false;
 
             Clear();
         }
@@ -208,14 +230,18 @@ namespace Voxelmetric.Code.Core
             ProcessNotifyState();
             if (m_pendingStates.Check(ChunkState.Remove) && RemoveChunk())
                 return;
+            
+            // In order to save performance, chunk and geometry are only generated only if necessary
+            if (PossiblyVisible)
+            {
+                ProcessNotifyState();
+                if (m_pendingStates.Check(ChunkState.Generate) && GenerateData())
+                    return;
 
-            ProcessNotifyState();
-            if (m_pendingStates.Check(ChunkState.Generate) && GenerateData())
-                return;
-
-            ProcessNotifyState();
-            if (m_pendingStates.Check(ChunkState.BuildVertices) && GenerateVertices())
-                return;
+                ProcessNotifyState();
+                if (m_pendingStates.Check(ChunkState.BuildVertices) && GenerateVertices())
+                    return;
+            }
         }
 
         private void ProcessNotifyState()

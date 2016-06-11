@@ -29,7 +29,9 @@ namespace Voxelmetric.Code.Core
         public bool useMultiThreading;
     
         private Block voidBlock;
-        private Block airBlock;        
+        private Block airBlock;
+        
+        public bool UseFrustumCulling;
 
         public bool UseMultiThreading { get { return useMultiThreading; } }
 
