@@ -1,4 +1,5 @@
-﻿using Voxelmetric.Code.Data_types;
+﻿using Voxelmetric.Code.Common;
+using Voxelmetric.Code.Data_types;
 using Voxelmetric.Code.Rendering;
 using Voxelmetric.Code.Utilities;
 
@@ -28,8 +29,12 @@ namespace Voxelmetric.Code.Core
         /// <summary> Updates the chunk based on its contents </summary>
         public void BuildMeshData()
         {
-            foreach (BlockPos localBlockPos in new BlockPosEnumerable(Env.ChunkSizePos))
+            for (int i = 0; i<Env.ChunkVolume; i++)
             {
+                int x, y, z;
+                Helpers.GetChunkIndex3DFrom1D(i, out x, out y, out z);
+                BlockPos localBlockPos = new BlockPos(x, y, z);
+
                 Block block = chunk.blocks.LocalGet(localBlockPos);
                 if (block.type==0)
                     continue;

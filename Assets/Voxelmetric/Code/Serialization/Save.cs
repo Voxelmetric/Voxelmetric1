@@ -29,7 +29,9 @@ namespace Voxelmetric.Code.Serialization
             }
 
             // Then add modified blocks from this chunk
-            foreach (var pos in chunk.blocks.modifiedBlocks) {
+            for (int i = 0; i<chunk.blocks.modifiedBlocks.Count; i++)
+            {
+                var pos = chunk.blocks.modifiedBlocks[i];
                 //remove any existing blocks in the dictionary as they're
                 //from the existing save and are overwritten
                 blocksDictionary.Remove(pos);

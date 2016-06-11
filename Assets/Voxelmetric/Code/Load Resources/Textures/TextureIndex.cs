@@ -127,9 +127,9 @@ namespace Voxelmetric.Code.Load_Resources.Textures
             }
         }
 
-        TextureConfig[] LoadAllTextures()
+        private TextureConfig[] LoadAllTextures()
         {
-            TextureConfig[] configs = new ConfigLoader<TextureConfig>(new string[] { config.textureFolder }).AllConfigs();
+            TextureConfig[] allConfigs = new ConfigLoader<TextureConfig>(new string[] { config.textureFolder }).AllConfigs();
 
             // Load all files in Textures folder
             Texture2D[] sourceTextures = Resources.LoadAll<Texture2D>(config.textureFolder);
@@ -139,16 +139,16 @@ namespace Voxelmetric.Code.Load_Resources.Textures
                 sourceTexturesLookup.Add(texture.name, texture);
             }
 
-            for (int i = 0; i < configs.Length; i++)
+            for (int i = 0; i < allConfigs.Length; i++)
             {
-                for (int n = 0; n < configs[i].textures.Length; n++)
+                for (int n = 0; n < allConfigs[i].textures.Length; n++)
                 {
-                    configs[i].textures[n].texture2d = Texture2DFromConfig(configs[i].textures[n], sourceTexturesLookup);
+                    allConfigs[i].textures[n].texture2d = Texture2DFromConfig(allConfigs[i].textures[n], sourceTexturesLookup);
                 }
 
-                if (configs[i].connectedTextures) {
+                if (allConfigs[i].connectedTextures) {
                     //Create all 48 possibilities from the 5 supplied textures
-                    Texture2D[] newTextures = ConnectedTextures.ConnectedTexturesFromBaseTextures(configs[i].textures);
+                    Texture2D[] newTextures = ConnectedTextures.ConnectedTexturesFromBaseTextures(allConfigs[i].textures);
                     TextureConfig.Texture[] connectedTextures = new TextureConfig.Texture[48];
 
                     for (int x = 0; x < newTextures.Length; x++)
@@ -157,11 +157,11 @@ namespace Voxelmetric.Code.Load_Resources.Textures
                         connectedTextures[x].texture2d = newTextures[x];
                     }
 
-                    configs[i].textures = connectedTextures;
+                    allConfigs[i].textures = connectedTextures;
                 }
             }
 
-            return configs;
+            return allConfigs;
         }
 
         Texture2D Texture2DFromConfig(TextureConfig.Texture texture, Dictionary<string, Texture2D> sourceTexturesLookup) {

@@ -44,8 +44,9 @@ namespace Voxelmetric.Code.Core
                     markedForDeletion.Add(chunk.pos);
             }
 
-            foreach (BlockPos pos in markedForDeletion)
+            for (int i = 0; i<markedForDeletion.Count; i++)
             {
+                BlockPos pos = markedForDeletion[i];
                 Chunk chunk = world.chunks.Get(pos);
                 world.chunks.Remove(pos);
                 Chunk.RemoveChunk(chunk);
