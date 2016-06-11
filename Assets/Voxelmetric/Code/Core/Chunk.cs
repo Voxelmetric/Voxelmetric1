@@ -100,7 +100,7 @@ namespace Voxelmetric.Code.Core
             logic.Reset();
             render.Reset();
 
-            poolAllocatedVertices = false;
+            poolAllocatedVertices = true;
 
             m_taskRunning = false;
 
