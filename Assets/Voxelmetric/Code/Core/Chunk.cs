@@ -707,7 +707,7 @@ namespace Voxelmetric.Code.Core
             if (Interlocked.CompareExchange(ref m_genericWorkItemsLeftToProcess, 0, 0)!=0)
             {
                 Assert.IsTrue(false);
-                return false;
+                return true;
             }
 
             // If chunk was generated we need to wait for other states with higher priority to finish first
@@ -715,11 +715,11 @@ namespace Voxelmetric.Code.Core
             {
                 // LoadData need to finish first
                 if (!m_completedStates.Check(ChunkState.LoadData))
-                    return false;
+                    return true;
 
                 // Wait for serialization to finish as well
                 if (!m_completedStates.Check(ChunkState.SaveData))
-                    return false;
+                    return true;
 
                 m_pendingStates = m_pendingStates.Reset(CurrStateRemoveChunk);
 
