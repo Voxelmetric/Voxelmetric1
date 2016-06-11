@@ -18,7 +18,6 @@ public class CustomMeshBlock : Block {
             texture = new Rect();
 
         DrawCallBatcher batcher = chunk.render.batcher;
-        chunk.poolAllocatedVertices = false;
         batcher.BuildMesh(customMeshConfig.tris, customMeshConfig.verts, texture);
     }
 

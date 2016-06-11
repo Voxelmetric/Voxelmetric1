@@ -20,17 +20,17 @@ namespace Voxelmetric.Code.Builders
             Vector3[] vertices = Globals.MemPools.PopVector3Array(size);
             Vector2[] uvs = Globals.MemPools.PopVector2Array(size);
             Color32[] colors = Globals.MemPools.PopColor32Array(size);
-            //Vector3[] normals = Globals.MemPools.PopVector3Array(size);
+            Vector3[] normals = Globals.MemPools.PopVector3Array(size);
             Vector4[] tangents = Globals.MemPools.PopVector4Array(size);
 
             // Fill buffers with data
             for (int i = 0; i<size; i++)
             {
-                VertexData vertexData = buffer.Vertices[i];
+                VertexDataFixed vertexData = buffer.Vertices[i];
                 vertices[i] = vertexData.Vertex;
                 uvs[i] = vertexData.UV;
                 colors[i] = vertexData.Color;
-                //normals[i] = vertexData.Normal;
+                normals[i] = vertexData.Normal;
                 tangents[i] = vertexData.Tangent;
             }
 
@@ -42,7 +42,7 @@ namespace Voxelmetric.Code.Builders
                 vertices[i] = Vector3.zero;
                 uvs[i] = Vector2.zero;
                 colors[i] = Color.clear;
-                //normals[i] = Vector3.zero;
+                normals[i] = Vector3.zero;
                 tangents[i] = Vector4.zero;
             }
 
@@ -50,7 +50,7 @@ namespace Voxelmetric.Code.Builders
             mesh.vertices = vertices;
             mesh.uv = uvs;
             mesh.colors32 = colors;
-            //mesh.normals = normals;
+            mesh.normals = normals;
             mesh.tangents = tangents;
             mesh.SetTriangles(buffer.Triangles, 0);
             mesh.RecalculateNormals();
@@ -60,7 +60,7 @@ namespace Voxelmetric.Code.Builders
             Globals.MemPools.PushVector3Array(vertices);
             Globals.MemPools.PushVector2Array(uvs);
             Globals.MemPools.PushColor32Array(colors);
-            //Globals.MemPools.PushVector3Array(normals);
+            Globals.MemPools.PushVector3Array(normals);
             Globals.MemPools.PushVector4Array(tangents);
         }
 

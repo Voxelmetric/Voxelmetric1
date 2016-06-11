@@ -49,12 +49,12 @@ namespace Voxelmetric.Code.Common.Extensions
         /// <summary>
         ///     Adds the vertices to the render buffer.
         /// </summary>
-        public static void AddVertices(this RenderBuffer target, VertexData[] vertices)
+        public static void AddVertices(this RenderBuffer target, VertexDataFixed[] vertices)
         {
             target.Vertices.AddRange(vertices);
         }
 
-        public static void AddVertex(this RenderBuffer target, VertexData vertex)
+        public static void AddVertex(this RenderBuffer target, ref VertexDataFixed vertex)
         {
             target.Vertices.Add(vertex);
         }
@@ -73,9 +73,9 @@ namespace Voxelmetric.Code.Common.Extensions
                 int i2 = triangles[t + 1];
                 int i3 = triangles[t + 2];
 
-                VertexData vd1 = vertices[i1];
-                VertexData vd2 = vertices[i2];
-                VertexData vd3 = vertices[i3];
+                VertexDataFixed vd1 = vertices[i1];
+                VertexDataFixed vd2 = vertices[i2];
+                VertexDataFixed vd3 = vertices[i3];
 
                 Vector3 v1 = vd1.Vertex;
                 Vector3 v2 = vd2.Vertex;
@@ -117,7 +117,7 @@ namespace Voxelmetric.Code.Common.Extensions
 
             for (int v = 0; v < vertices.Count; ++v)
             {
-                VertexData vd = vertices[v];
+                VertexDataFixed vd = vertices[v];
 
                 Vector3 n = vd.Normal;
                 Vector3 t = tan1[v];

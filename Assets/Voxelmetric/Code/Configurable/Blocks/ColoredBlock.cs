@@ -15,6 +15,7 @@ public class ColoredBlock : SolidBlock {
     protected override void BuildFace(Chunk chunk, BlockPos localPos, BlockPos globalPos, Direction direction)
     {
         VertexData[] vertexData = chunk.pools.PopVertexDataArray(4);
+        VertexDataFixed[] vertexDataFixed = chunk.pools.PopVertexDataFixedArray(4);
         {
             for (int i = 0; i < 4; i++)
                 vertexData[i] = chunk.pools.PopVertexData();
@@ -22,7 +23,21 @@ public class ColoredBlock : SolidBlock {
             BlockBuilder.PrepareVertices(chunk, localPos, globalPos, vertexData, direction);
             BlockBuilder.PrepareTexture(chunk, localPos, globalPos, vertexData, direction, texture);
             BlockBuilder.SetColors(vertexData, ref color);
+
+            for (int i = 0; i<4; i++)
+            {
+                vertexDataFixed[i].Color = vertexData[i].Color;
+                vertexDataFixed[i].Normal = vertexData[i].Normal;
+                vertexDataFixed[i].Tangent = vertexData[i].Tangent;
+                vertexDataFixed[i].Vertex = vertexData[i].Vertex;
+                vertexDataFixed[i].UV = vertexData[i].UV;
+            }
+            chunk.render.batcher.AddFace(vertexDataFixed, DirectionUtils.Backface(direction));
+
+            for (int i = 0; i < 4; i++)
+                chunk.pools.PushVertexData(vertexData[i]);
         }
+        chunk.pools.PushVertexDataFixedArray(vertexDataFixed);
         chunk.pools.PushVertexDataArray(vertexData);
     }
 

@@ -7,7 +7,7 @@ namespace Voxelmetric.Code.Rendering
     /// </summary>
     public class RenderBuffer
     {
-        public readonly List<VertexData> Vertices = new List<VertexData>();
+        public readonly List<VertexDataFixed> Vertices = new List<VertexDataFixed>();
         public readonly List<int> Triangles = new List<int>();
         
         /// <summary>

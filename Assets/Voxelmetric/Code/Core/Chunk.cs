@@ -25,8 +25,6 @@ namespace Voxelmetric.Code.Core
         public ChunkBlocks blocks;
         public ChunkLogic logic;
         public ChunkRender render;
-        
-        public bool poolAllocatedVertices;
 
         //! Bounding box in world coordinates
         public Bounds WorldBounds { get; private set; }
@@ -128,8 +126,6 @@ namespace Voxelmetric.Code.Core
             blocks.Reset();
             logic.Reset();
             render.Reset();
-
-            poolAllocatedVertices = true;
 
             m_taskRunning = false;
 

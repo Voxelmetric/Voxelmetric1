@@ -9,12 +9,12 @@ public class CustomMeshBlockConfig: BlockConfig
     public TextureCollection[] textures;
 
     public int[] tris { get { return m_triangles; } }
-    public VertexData[] verts { get { return m_vertices; } }
+    public VertexDataFixed[] verts { get { return m_vertices; } }
 
     public TextureCollection texture;
 
     private int[] m_triangles;
-    private VertexData[] m_vertices;
+    private VertexDataFixed[] m_vertices;
 
     public override void SetUp(Hashtable config, World world)
     {
@@ -31,7 +31,7 @@ public class CustomMeshBlockConfig: BlockConfig
         SetUpMesh(world.config.meshFolder + "/" + _GetPropertyFromConfig(config, "meshFileLocation", ""), meshOffset, out m_triangles, out m_vertices);
     }
 
-    protected static void SetUpMesh(string meshLocation, Vector3 positionOffset, out int[] trisOut, out VertexData[] vertsOut)
+    protected static void SetUpMesh(string meshLocation, Vector3 positionOffset, out int[] trisOut, out VertexDataFixed[] vertsOut)
     {
         GameObject meshGO = (GameObject)Resources.Load(meshLocation);
 
@@ -47,7 +47,7 @@ public class CustomMeshBlockConfig: BlockConfig
         }
 
         trisOut = new int[triangleCnt];
-        vertsOut = new VertexData[vertexCnt];
+        vertsOut = new VertexDataFixed[vertexCnt];
 
         int ti=0, vi=0;
 
@@ -57,7 +57,7 @@ public class CustomMeshBlockConfig: BlockConfig
 
             for (int i = 0; i < mesh.vertices.Length; i++, vi++)
             {
-                vertsOut[vi] = new VertexData
+                vertsOut[vi] = new VertexDataFixed
                 {
                     Vertex = mesh.vertices[i]+positionOffset,
                     UV = mesh.uv[i],

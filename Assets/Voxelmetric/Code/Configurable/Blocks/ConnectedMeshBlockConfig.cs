@@ -9,7 +9,7 @@ using Voxelmetric.Code.Rendering;
 public class ConnectedMeshBlockConfig : CustomMeshBlockConfig
 {
     public readonly Dictionary<Direction, int[]> directionalTris = new Dictionary<Direction, int[]>();
-    public readonly Dictionary<Direction, VertexData[]> directionalVerts = new Dictionary<Direction, VertexData[]>();
+    public readonly Dictionary<Direction, VertexDataFixed[]> directionalVerts = new Dictionary<Direction, VertexDataFixed[]>();
     public readonly Dictionary<Direction, TextureCollection> directionalTextures = new Dictionary<Direction, TextureCollection>();
 
     public int[] connectsToTypes;
@@ -37,7 +37,7 @@ public class ConnectedMeshBlockConfig : CustomMeshBlockConfig
             offset.z = float.Parse(_GetPropertyFromConfig(config, direction + "ZOffset", "0"));
 
             int[] newTris;
-            VertexData[] newVerts;
+            VertexDataFixed[] newVerts;
             string meshLocation = world.config.meshFolder + "/" + _GetPropertyFromConfig(config, direction + "FileLocation", "");
 
             SetUpMesh(meshLocation, offset, out newTris, out newVerts);

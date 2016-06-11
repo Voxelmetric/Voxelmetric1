@@ -243,8 +243,6 @@ namespace Voxelmetric.Code.Blocks.Builders
                     Debug.LogError("Direction not recognized");
                     break;
             }
-
-            chunk.render.batcher.AddFace(vertexData, DirectionUtils.Backface(direction));
         }
 
         private static void SetColorsAO(VertexData[] vertexData, bool wnSolid, bool nSolid, bool neSolid, bool eSolid, bool esSolid, bool sSolid, bool swSolid, bool wSolid, float strength)

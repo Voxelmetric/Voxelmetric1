@@ -13,9 +13,12 @@ namespace Voxelmetric.Code.Common.MemoryPooling
     {
         private readonly ObjectPool<VertexData> m_vertexDataPool =
             new ObjectPool<VertexData>(ch => new VertexData(), 65535, false);
-
+        
         private readonly Dictionary<int, IArrayPool<VertexData>> m_vertexDataArrayPools =
             new Dictionary<int, IArrayPool<VertexData>>(128);
+
+        private readonly Dictionary<int, IArrayPool<VertexDataFixed>> m_vertexDataFixedArrayPools =
+            new Dictionary<int, IArrayPool<VertexDataFixed>>(128);
 
         private readonly Dictionary<int, IArrayPool<BlockData>> m_blockDataArrayPools =
             new Dictionary<int, IArrayPool<BlockData>>(128);
@@ -34,6 +37,11 @@ namespace Voxelmetric.Code.Common.MemoryPooling
         public VertexData[] PopVertexDataArray(int size)
         {
             return PopArray(size, m_vertexDataArrayPools);
+        }
+
+        public VertexDataFixed[] PopVertexDataFixedArray(int size)
+        {
+            return PopArray(size, m_vertexDataFixedArrayPools);
         }
 
         public BlockData[] PopBlockDataArray(int size)
@@ -59,6 +67,11 @@ namespace Voxelmetric.Code.Common.MemoryPooling
         public void PushVertexDataArray(VertexData[] arr)
         {
             PushArray(arr, m_vertexDataArrayPools);
+        }
+
+        public void PushVertexDataFixedArray(VertexDataFixed[] arr)
+        {
+            PushArray(arr, m_vertexDataFixedArrayPools);
         }
 
         public void PushBlockDataArray(BlockData[] arr)

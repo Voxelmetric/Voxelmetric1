@@ -42,9 +42,10 @@ namespace Voxelmetric.Code.Blocks.Builders
             //Converting the position to a vector adjusts it based on block size and gives us real world coordinates for x, y and z
             Vector3 vPos = localPos;
             vPos += new Vector3(offsetX, 0, offsetZ);
-            
+
             {
                 VertexData[] vertexData = chunk.pools.PopVertexDataArray(4);
+                VertexDataFixed[] vertexDataFixed = chunk.pools.PopVertexDataFixedArray(4);
                 {
                     for (int i = 0; i<4; i++)
                         vertexData[i] = chunk.pools.PopVertexData();
@@ -55,13 +56,27 @@ namespace Voxelmetric.Code.Blocks.Builders
                     vertexData[3].Vertex = new Vector3(vPos.x+halfBlock, vPos.y-halfBlock, vPos.z-halfBlock);
                     BlockBuilder.PrepareTexture(chunk, localPos, globalPos, vertexData, Direction.north, texture);
                     BlockBuilder.SetColors(vertexData, 1, 1, 1, 1, 1);
-                    chunk.render.batcher.AddFace(vertexData, false);
+
+                    for (int i = 0; i < 4; i++)
+                    {
+                        vertexDataFixed[i].Color = vertexData[i].Color;
+                        vertexDataFixed[i].Normal = vertexData[i].Normal;
+                        vertexDataFixed[i].Tangent = vertexData[i].Tangent;
+                        vertexDataFixed[i].Vertex = vertexData[i].Vertex;
+                        vertexDataFixed[i].UV = vertexData[i].UV;
+                    }
+                    chunk.render.batcher.AddFace(vertexDataFixed, false);
+
+                    for (int i = 0; i < 4; i++)
+                        chunk.pools.PushVertexData(vertexData[i]);
                 }
+                chunk.pools.PushVertexDataFixedArray(vertexDataFixed);
                 chunk.pools.PushVertexDataArray(vertexData);
             }
 
             {
                 VertexData[] vertexData = chunk.pools.PopVertexDataArray(4);
+                VertexDataFixed[] vertexDataFixed = chunk.pools.PopVertexDataFixedArray(4);
                 {
                     for (int i = 0; i<4; i++)
                         vertexData[i] = chunk.pools.PopVertexData();
@@ -72,13 +87,27 @@ namespace Voxelmetric.Code.Blocks.Builders
                     vertexData[3].Vertex = new Vector3(vPos.x-halfBlock, vPos.y-halfBlock, vPos.z+halfBlock);
                     BlockBuilder.PrepareTexture(chunk, localPos, globalPos, vertexData, Direction.north, texture);
                     BlockBuilder.SetColors(vertexData, 1, 1, 1, 1, 1);
-                    chunk.render.batcher.AddFace(vertexData, false);
+
+                    for (int i = 0; i < 4; i++)
+                    {
+                        vertexDataFixed[i].Color = vertexData[i].Color;
+                        vertexDataFixed[i].Normal = vertexData[i].Normal;
+                        vertexDataFixed[i].Tangent = vertexData[i].Tangent;
+                        vertexDataFixed[i].Vertex = vertexData[i].Vertex;
+                        vertexDataFixed[i].UV = vertexData[i].UV;
+                    }
+                    chunk.render.batcher.AddFace(vertexDataFixed, false);
+                    
+                    for (int i = 0; i < 4; i++)
+                        chunk.pools.PushVertexData(vertexData[i]);
                 }
+                chunk.pools.PushVertexDataFixedArray(vertexDataFixed);
                 chunk.pools.PushVertexDataArray(vertexData);
             }
 
             {
                 VertexData[] vertexData = chunk.pools.PopVertexDataArray(4);
+                VertexDataFixed[] vertexDataFixed = chunk.pools.PopVertexDataFixedArray(4);
                 {
                     for (int i = 0; i<4; i++)
                         vertexData[i] = chunk.pools.PopVertexData();
@@ -89,13 +118,27 @@ namespace Voxelmetric.Code.Blocks.Builders
                     vertexData[3].Vertex = new Vector3(vPos.x-halfBlock, vPos.y-halfBlock, vPos.z-halfBlock);
                     BlockBuilder.PrepareTexture(chunk, localPos, globalPos, vertexData, Direction.north, texture);
                     BlockBuilder.SetColors(vertexData, 1, 1, 1, 1, 1);
-                    chunk.render.batcher.AddFace(vertexData, false);
+
+                    for (int i = 0; i < 4; i++)
+                    {
+                        vertexDataFixed[i].Color = vertexData[i].Color;
+                        vertexDataFixed[i].Normal = vertexData[i].Normal;
+                        vertexDataFixed[i].Tangent = vertexData[i].Tangent;
+                        vertexDataFixed[i].Vertex = vertexData[i].Vertex;
+                        vertexDataFixed[i].UV = vertexData[i].UV;
+                    }
+                    chunk.render.batcher.AddFace(vertexDataFixed, false);
+
+                    for (int i = 0; i < 4; i++)
+                        chunk.pools.PushVertexData(vertexData[i]);
                 }
+                chunk.pools.PushVertexDataFixedArray(vertexDataFixed);
                 chunk.pools.PushVertexDataArray(vertexData);
             }
 
             {
                 VertexData[] vertexData = chunk.pools.PopVertexDataArray(4);
+                VertexDataFixed[] vertexDataFixed = chunk.pools.PopVertexDataFixedArray(4);
                 {
                     for (int i = 0; i<4; i++)
                         vertexData[i] = chunk.pools.PopVertexData();
@@ -106,8 +149,21 @@ namespace Voxelmetric.Code.Blocks.Builders
                     vertexData[3].Vertex = new Vector3(vPos.x+halfBlock, vPos.y-halfBlock, vPos.z+halfBlock);
                     BlockBuilder.PrepareTexture(chunk, localPos, globalPos, vertexData, Direction.north, texture);
                     BlockBuilder.SetColors(vertexData, 1, 1, 1, 1, 1);
-                    chunk.render.batcher.AddFace(vertexData, false);
+
+                    for (int i = 0; i < 4; i++)
+                    {
+                        vertexDataFixed[i].Color = vertexData[i].Color;
+                        vertexDataFixed[i].Normal = vertexData[i].Normal;
+                        vertexDataFixed[i].Tangent = vertexData[i].Tangent;
+                        vertexDataFixed[i].Vertex = vertexData[i].Vertex;
+                        vertexDataFixed[i].UV = vertexData[i].UV;
+                    }
+                    chunk.render.batcher.AddFace(vertexDataFixed, false);
+
+                    for (int i = 0; i < 4; i++)
+                        chunk.pools.PushVertexData(vertexData[i]);
                 }
+                chunk.pools.PushVertexDataFixedArray(vertexDataFixed);
                 chunk.pools.PushVertexDataArray(vertexData);
             }
         }

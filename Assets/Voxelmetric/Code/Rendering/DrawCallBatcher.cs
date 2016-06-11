@@ -50,26 +50,32 @@ namespace Voxelmetric.Code.Rendering
             m_visible = false;
         }
 
-        public void BuildMesh(int[] tris, VertexData[] verts, Rect texture)
+        public void BuildMesh(int[] tris, VertexDataFixed[] verts, Rect texture)
         {
             RenderBuffer buffer = m_renderBuffers[m_renderBuffers.Count - 1];
 
-            for (int i = 0; i < verts.Length; i++)
+            for (int i = 0; i<verts.Length; i++)
             {
                 // If there are too many vertices we need to create a new separate buffer for them
-                if (buffer.Vertices.Count + 1 > 65000)
+                if (buffer.Vertices.Count+1>65000)
                 {
                     buffer = new RenderBuffer();
                     m_renderBuffers.Add(buffer);
                 }
 
-                buffer.AddVertex(verts[i]);
-
-                // Adjust UV coordinates based on provided texture atlas
-                buffer.Vertices[buffer.Vertices.Count-1].UV = new Vector2(
-                    (verts[i].UV.x*texture.width)+texture.x,
-                    (verts[i].UV.y*texture.height)+texture.y
-                    );
+                VertexDataFixed v = new VertexDataFixed()
+                {
+                    Color = verts[i].Color,
+                    Normal = verts[i].Normal,
+                    Tangent = verts[i].Tangent,
+                    // Adjust UV coordinates based on provided texture atlas
+                    UV = new Vector2(
+                        (verts[i].UV.x*texture.width)+texture.x,
+                        (verts[i].UV.y*texture.height)+texture.y
+                        ),
+                    Vertex = verts[i].Vertex
+                };
+                buffer.AddVertex(ref v);
             }
 
             for (int i = 0; i < tris.Length; i++)
@@ -81,7 +87,7 @@ namespace Voxelmetric.Code.Rendering
         /// </summary>
         /// <param name="vertexData"> An array of 4 vertices forming the face</param>
         /// <param name="backFace">Order in which vertices are considered to be oriented. If true, this is a backface (counter clockwise)</param>
-        public void AddFace(VertexData[] vertexData, bool backFace)
+        public void AddFace(VertexDataFixed[] vertexData, bool backFace)
         {
             Assert.IsTrue(vertexData.Length>=4);
 
@@ -95,10 +101,10 @@ namespace Voxelmetric.Code.Rendering
             }
 
             // Add data to the render buffer            
-            buffer.AddVertex(vertexData[0]);
-            buffer.AddVertex(vertexData[1]);
-            buffer.AddVertex(vertexData[2]);
-            buffer.AddVertex(vertexData[3]);
+            buffer.AddVertex(ref vertexData[0]);
+            buffer.AddVertex(ref vertexData[1]);
+            buffer.AddVertex(ref vertexData[2]);
+            buffer.AddVertex(ref vertexData[3]);
             buffer.AddIndices(buffer.Vertices.Count, backFace);
         }
 
@@ -115,6 +121,8 @@ namespace Voxelmetric.Code.Rendering
 
             for (int i = 0; i<m_renderBuffers.Count; i++)
             {
+                RenderBuffer buffer = m_renderBuffers[i];
+                
                 var go = GameObjectProvider.PopObject(GOPChunk);
                 Assert.IsTrue(go!=null);
                 if (go!=null)
@@ -125,7 +133,7 @@ namespace Voxelmetric.Code.Rendering
 
                     Mesh mesh = Globals.MemPools.MeshPool.Pop();
                     Assert.IsTrue(mesh.vertices.Length<=0);
-                    m_meshBuilder.BuildMesh(mesh, m_renderBuffers[i]);
+                    m_meshBuilder.BuildMesh(mesh, buffer);
 
                     MeshFilter filter = go.GetComponent<MeshFilter>();
                     filter.sharedMesh = null;
@@ -140,34 +148,8 @@ namespace Voxelmetric.Code.Rendering
                     m_drawCalls.Add(go);
                     m_drawCallRenderers.Add(renderer);
                 }
-            }
 
-            // Make vertex data available again. We need to make this a task because our pooling system works on a per-thread
-            // basis. Therefore, all Push()-es need to be called on the same thread as their respective Pop()-s.
-            if (m_chunk.poolAllocatedVertices)
-            {
-                m_chunk.EnqueueGenericTask(
-                    () =>
-                    {
-                        LocalPools pools = m_chunk.pools;
-
-                        for (int i = 0; i<m_renderBuffers.Count; i++)
-                        {
-                            RenderBuffer buffer = m_renderBuffers[i];
-                            for (int v = 0; v<buffer.Vertices.Count; v++)
-                                pools.PushVertexData(buffer.Vertices[v]);
-
-                            buffer.Clear();
-                        }
-                    });
-            }
-            else
-            {
-                for (int i = 0; i<m_renderBuffers.Count; i++)
-                {
-                    RenderBuffer buffer = m_renderBuffers[i];
-                    buffer.Clear();
-                }
+                buffer.Clear();
             }
         }
 
