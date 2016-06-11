@@ -46,6 +46,9 @@ namespace Voxelmetric.Code.Core
         //! If true, removal of chunk has been requested and no further requests are going to be accepted
         private bool m_removalRequested;
 
+        //! State to notify external listeners about
+        private ChunkStateExternal m_stateExternal;
+
         //! A list of event requiring counter
         //private readonly ChunkEvent[] m_buildEvents = new ChunkEvent[6];
 
@@ -53,7 +56,9 @@ namespace Voxelmetric.Code.Core
         private readonly List<Action> m_genericWorkItems = new List<Action>();
         //! Number of generic tasks waiting to be finished
         private int m_genericWorkItemsLeftToProcess;
-        
+
+        //! ThreadID associated with this chunk. Used when working with object pools in MT environment. Resources
+        //! need to be release where they were allocated. Thanks to this, associated containers could be made lock-free
         public int ThreadID { get; private set; }
 
         //! Says whether or not the chunk is visible
@@ -114,6 +119,8 @@ namespace Voxelmetric.Code.Core
             m_refreshStates = m_refreshStates.Reset();
             m_completedStates = m_completedStates.Reset();
             m_removalRequested = false;
+
+            m_stateExternal = ChunkStateExternal.None;
 
             m_genericWorkItems.Clear();
             m_genericWorkItemsLeftToProcess = 0;
@@ -212,6 +219,14 @@ namespace Voxelmetric.Code.Core
                     return;
             }
 
+            if (m_stateExternal!=ChunkStateExternal.None)
+            {
+                // Notify everyone listening
+                NotifyAll(m_stateExternal);
+
+                m_stateExternal = ChunkStateExternal.None;
+            }
+
             // Go from the least important bit to most important one. If a given bit it set
             // we execute the task tied with it
 
@@ -275,20 +290,14 @@ namespace Voxelmetric.Code.Core
             return m_completedStates.Check(ChunkState.Remove);
         }
 
-        public bool IsFinished()
+        public bool IsFinished
         {
-            lock (m_lock)
-            {
-                return IsFinished_Internal();
-            }
+            get { lock (m_lock) return IsFinished_Internal(); }
         }
 
-        public bool IsFinalized()
+        public bool IsSavePossible
         {
-            lock (m_lock)
-            {
-                return m_completedStates.Check(ChunkState.LoadData);
-            }
+            get { lock (m_lock) { return !m_removalRequested && m_completedStates.Check(ChunkState.Generate|ChunkState.LoadData); } }
         }
 
         private bool IsExecutingTask_Internal()
@@ -296,12 +305,9 @@ namespace Voxelmetric.Code.Core
             return m_taskRunning;
         }
 
-        public bool IsExecutingTask()
+        public bool IsExecutingTask
         {
-            lock (m_lock)
-            {
-                return IsExecutingTask_Internal();
-            }
+            get { lock (m_lock) return IsExecutingTask_Internal(); }
         }
 
         public override void OnNotified(IEventSource<ChunkState> source, ChunkState state)
@@ -579,6 +585,7 @@ namespace Voxelmetric.Code.Core
 
         private static void OnSaveDataDone(Chunk chunk)
         {
+            chunk.m_stateExternal = ChunkStateExternal.Saved;
             chunk.m_completedStates = chunk.m_completedStates.Set(CurrStateSaveData);
             chunk.m_taskRunning = false;
         }
@@ -750,9 +757,9 @@ namespace Voxelmetric.Code.Core
             /*Chunk neighbor = chunk.world.chunks.Get(neighborPos);
             if (neighbor != null)
             {
-                // Subscribe with each other
-                neighbor.Subscribe(chunk, subscribe);
-                chunk.Subscribe(neighbor, subscribe);
+                // Subscribe with each other. Passing Idle as event - it is ignored in this case anyway
+                neighbor.Subscribe(chunk, ChunkState.Idle, subscribe);
+                chunk.Subscribe(neighbor, ChunkState.Idle, subscribe);
             }*/
         }
     }

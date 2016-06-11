@@ -4,8 +4,8 @@
     {
         //! Unsubscribes all listeners
         void Clear();
-        //! Registers caller for receiving notification from parent
-        bool Subscribe(IEventListener<TEvent> listener, bool register);
+        //! Registers listener to receive a certain kind of notifications from source
+        bool Subscribe(IEventListener<TEvent> listener, TEvent evt, bool register);
         //! Notifies subscribers about something (implementation specific)	
         void NotifyAll(TEvent evt);
         //! Notifies one specific subscriber

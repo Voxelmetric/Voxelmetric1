@@ -52,14 +52,7 @@ namespace Voxelmetric.Examples
             transform.position += transform.right * 40 * Input.GetAxis("Horizontal") * Time.deltaTime;
 
             //Save
-            if (saveProgress != null)
-            {
-                saveProgressText.text = SaveStatus();
-            }
-            else
-            {
-                saveProgressText.text = "Save";
-            }
+            saveProgressText.text = saveProgress != null ? SaveStatus() : "Save";
 
             var mousePos = Camera.main.ScreenToWorldPoint(new Vector3(Input.mousePosition.x, Input.mousePosition.y, 10));
 
@@ -71,20 +64,9 @@ namespace Voxelmetric.Examples
             {
                 if (hit.block.type != Block.VoidType)
                 {
-                    bool adjacent = true;
-                    if (Block.Create(blockToPlace, world).type == Block.AirType)
-                    {
-                        adjacent = false;
-                    }
-
-                    if (adjacent)
-                    {
-                        Code.Voxelmetric.SetBlock(hit.adjacentPos, Block.Create(blockToPlace, world), world);
-                    }
-                    else
-                    {
-                        Code.Voxelmetric.SetBlock(hit.blockPos, Block.Create(blockToPlace, world), world);
-                    }
+                    Block block = Block.Create(blockToPlace, world);
+                    bool adjacent = block.type!=Block.AirType;
+                    Code.Voxelmetric.SetBlock(adjacent ? hit.adjacentPos : hit.blockPos, block, world);
                 }
             }
 
@@ -109,12 +91,12 @@ namespace Voxelmetric.Examples
                 for (int i = 0; i < pf.path.Count - 1; i++)
                     Debug.DrawLine(pf.path[i].Add(0, 1, 0), pf.path[i + 1].Add(0, 1, 0));
             }
-
         }
 
         public void SaveAll()
         {
-            saveProgress = Code.Voxelmetric.SaveAll(world);
+            var chunksToSave = Code.Voxelmetric.SaveAll(world);
+            saveProgress = new SaveProgress(chunksToSave);
         }
 
         public string SaveStatus()

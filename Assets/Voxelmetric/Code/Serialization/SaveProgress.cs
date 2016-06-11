@@ -1,25 +1,35 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
-using Voxelmetric.Code.Data_types;
+using UnityEngine.Assertions;
+using Voxelmetric.Code.Common.Events;
+using Voxelmetric.Code.Core;
 
 namespace Voxelmetric.Code.Serialization
 {
-    public class SaveProgress
+    public class SaveProgress: IEventListener<ChunkStateExternal>
     {
-        private List<BlockPos> chunksToSave = new List<BlockPos>();
+        private List<Chunk> chunksToSave = new List<Chunk>();
         public readonly int totalChunksToSave = 0;
         private int progress = 0;
-
-        private List<BlockPos> errorChunks = new List<BlockPos>();
-
-        public IEnumerable<BlockPos> ErrorChunks { get { return errorChunks; } }
-
-        public SaveProgress(ICollection<BlockPos> chunks)
+        
+        public SaveProgress(ICollection<Chunk> chunks)
         {
-            chunksToSave.AddRange(chunks);
-            totalChunksToSave = chunks.Count;
-            if (chunksToSave.Count == 0)
+            if(chunks.Count<=0)
+            {
                 progress = 100;
+                return;
+            }
+
+            chunksToSave.AddRange(chunks);
+            totalChunksToSave = chunksToSave.Count;
+
+            // Register at each chunk
+            for (int i = 0; i<chunksToSave.Count; i++)
+            {
+                Chunk chunk = chunksToSave[i];
+                chunk.Subscribe(this, ChunkStateExternal.Saved, true);
+            }
         }
 
         public int GetProgress()
@@ -27,17 +37,25 @@ namespace Voxelmetric.Code.Serialization
             return progress;
         }
 
-        public void SaveErrorForChunk(BlockPos pos)
+        private void SaveCompleteForChunk(Chunk chunk)
         {
-            errorChunks.Add(pos);
-            SaveCompleteForChunk(pos);
+            chunksToSave.Remove(chunk);
+            progress = Mathf.FloorToInt((totalChunksToSave - chunksToSave.Count) / (float)totalChunksToSave * 100);
         }
 
-        public void SaveCompleteForChunk(BlockPos pos)
+        void IEventListener<ChunkStateExternal>.OnNotified(IEventSource<ChunkStateExternal> source, ChunkStateExternal evt)
         {
-            chunksToSave.Remove(pos.ContainingChunkCoordinates());
-            progress = Mathf.FloorToInt(((totalChunksToSave - chunksToSave.Count) / ((float)totalChunksToSave)) * 100);
-        }
+            // Unsubscribe from any further events
+            Chunk chunk = source as Chunk;
+            chunk.Subscribe(this, evt, false);
 
+            Assert.IsTrue(evt==ChunkStateExternal.Saved);
+            if (evt==ChunkStateExternal.Saved)
+            {
+                if (!chunksToSave.Contains(chunk))
+                    return;
+                SaveCompleteForChunk(chunk);
+            }
+        }
     }
 }

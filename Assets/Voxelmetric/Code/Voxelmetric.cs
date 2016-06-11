@@ -31,32 +31,28 @@ namespace Voxelmetric.Code
         }
 
         /// <summary>
-        /// Saves all chunks currently loaded, if UseMultiThreading is enabled it saves the chunks
-        ///  asynchronously and the SaveProgress object returned will show the progress
+        /// Sends a save request to all chunk currently loaded
         /// </summary>
-        /// <param name="world">Optional parameter for the world to save chunks for, if left
-        /// empty it will use the world Singleton instead</param>
-        /// <returns>A SaveProgress object to monitor the save.</returns>
-        public static SaveProgress SaveAll (World world)
+        /// <param name="world">World holding chunks</param>
+        /// <returns>List of chunks waiting to be saved.</returns>
+        public static List<Chunk> SaveAll (World world)
         {
-            //Create a saveprogress object with positions of all the chunks in the world
-            //Then save each chunk and update the saveprogress's percentage for each save
-            SaveProgress saveProgress = new SaveProgress (world.chunks.posCollection);
+            if (world==null)
+                return null;
+            
             List<Chunk> chunksToSave = new List<Chunk> ();
-            chunksToSave.AddRange (world.chunks.chunkCollection);
 
-            foreach (var chunk in chunksToSave)
+            foreach (Chunk chunk in world.chunks.chunkCollection)
             {
-                chunk.RequestSaveData();
+                // Ignore chunks that can't be saved at the moment
+                if (!chunk.IsSavePossible)
+                    continue;
 
-                // TODO! Make saveProgress work with the new system
-                /*if (!Serialization.SaveChunk(chunk))
-                    saveProgress.SaveErrorForChunk(chunk.pos);
-                else
-                    saveProgress.SaveCompleteForChunk(chunk.pos);*/
+                chunksToSave.Add(chunk);
+                chunk.RequestSaveData();
             }
 
-            return saveProgress;
+            return chunksToSave;
         }
 
         public static VmRaycastHit Raycast(Ray ray, World world, float range = 10000f)

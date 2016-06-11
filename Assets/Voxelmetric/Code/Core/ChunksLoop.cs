@@ -46,7 +46,7 @@ namespace Voxelmetric.Code.Core
         {
             foreach (Chunk chunk in world.chunks.chunkCollection)
             {
-                if (chunk.IsFinished())
+                if (chunk.IsFinished)
                 {
                     markedForDeletion.Add(chunk.pos);
                     continue;
