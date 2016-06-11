@@ -50,31 +50,21 @@ namespace Voxelmetric.Code.Utilities
 
         private void CreateChunks()
         {
-            //Cycle through the array of positions
+            // Cycle through the array of positions
             for (int i = 0; i < chunkPositions.Length; i++)
             {
-                //Get the position of this gameobject to generate around
+                // Get the position of this gameobject to generate around
                 BlockPos playerPos = ((BlockPos)transform.position).ContainingChunkCoordinates();
 
-                //translate the player position and array position into chunk position
+                // Translate the player position and array position into chunk position
                 BlockPos newChunkPos = new BlockPos(
-                    chunkPositions[i].x * Env.ChunkSize + playerPos.x,
+                    chunkPositions[i].x*Env.ChunkSize+playerPos.x,
                     0,
-                    chunkPositions[i].z * Env.ChunkSize + playerPos.z
+                    chunkPositions[i].z*Env.ChunkSize+playerPos.z
                     );
 
-                //Get the chunk in the defined position
-                Chunk newChunk = world.chunks.Get(newChunkPos);
-
-                //If the chunk already exists and it's already
-                //rendered or in queue to be rendered continue
-                if (newChunk != null)
-                    continue;
-
-                for (int y = world.config.minY; y <= world.config.maxY; y += Env.ChunkSize)
-                    world.chunks.Create(new BlockPos(newChunkPos.x, y, newChunkPos.z));
-
-                return;
+                for (int y = world.config.minY; y<=world.config.maxY; y += Env.ChunkSize)
+                    world.chunks.CreateChunk(new BlockPos(newChunkPos.x, newChunkPos.y + y, newChunkPos.z));
             }
         }
     }

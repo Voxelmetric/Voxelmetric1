@@ -64,6 +64,8 @@ namespace Voxelmetric.Code.Core
                     ChunkEvent l = m_listeners[i];
                     if (l==null)
                     {
+                        ++Listeners;
+                        Assert.IsTrue(Listeners<=6);
                         m_listeners[i] = chunkListener;
                         return true;
                     }
@@ -82,6 +84,8 @@ namespace Voxelmetric.Code.Core
 
                     if (l==listener)
                     {
+                        --Listeners;
+                        Assert.IsTrue(Listeners >= 0);
                         m_listeners[i] = null;
                         return true;
                     }

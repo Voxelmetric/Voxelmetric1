@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using Voxelmetric.Code.Data_types;
+using Voxelmetric.Code.Load_Resources;
 using Voxelmetric.Code.Utilities;
 
 namespace Voxelmetric.Code.Core
@@ -58,36 +59,27 @@ namespace Voxelmetric.Code.Core
             chunks.Remove(pos);
         }
 
-        /// <summary> Instantiates a chunk and chunks at all positions surrounding it </summary>
+        /// <summary>Instantiates a chunk at a given possiion</summary>
         /// <param name="pos">The world position to create this chunk.</param>
-        /// <returns>The chunk created in the center<returns>
-        public void Create(BlockPos pos)
+        /// <returns>A new chunk<returns>
+        public Chunk CreateChunk(BlockPos pos)
         {
-            pos = pos.ContainingChunkCoordinates();
+            // Let's keep it withing allowed world bounds
+            BlockPos chunkPos = pos.ContainingChunkCoordinates();
+            if (chunkPos.y>world.config.maxY || chunkPos.y<world.config.minY)
+                return null;
 
-            //Create neighbors
-            for (int x = -1; x<=1; x++)
-            {
-                for (int z = -1; z<=1; z++)
-                {
-                    for (int y = -1; y<=1; y++)
-                    {
-                        int yy = y*Env.ChunkSize;
-                        if (yy<world.config.minY || yy>world.config.maxY)
-                            continue;
+            // Don't recreate the chunk if it already exists
+            Chunk chunk = Get(chunkPos);
+            if(chunk!=null)
+                return chunk;
 
-                        BlockPos newChunkPos = pos.Add(x*Env.ChunkSize, yy, z*Env.ChunkSize);
-                        if (Get(newChunkPos)==null)
-                        {
-                            Chunk newChunk = Chunk.CreateChunk(world, newChunkPos);
-                            chunks.Add(newChunkPos, newChunk);
-                            newChunk.RequestGenerate();
-                        }
-                    }
-                }
-            }
+            // Create a new chunk
+            chunk = Chunk.CreateChunk(world, chunkPos);
+            chunks.Add(chunkPos, chunk);
+            chunk.RequestGenerate();
+            return chunk;
         }
-
         
     }
 }

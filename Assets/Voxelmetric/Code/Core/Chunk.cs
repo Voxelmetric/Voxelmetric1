@@ -47,9 +47,6 @@ namespace Voxelmetric.Code.Core
         //! State to notify external listeners about
         private ChunkStateExternal m_stateExternal;
 
-        //! A list of event requiring counter
-        //private readonly ChunkEvent[] m_buildEvents = new ChunkEvent[6];
-
         //! A list of generic tasks a Chunk has to perform
         private readonly List<Action> m_genericWorkItems = new List<Action>();
         //! Number of generic tasks waiting to be finished
@@ -263,21 +260,8 @@ namespace Voxelmetric.Code.Core
         {
             if (m_notifyStates==ChunkState.Idle)
                 return;
-
-            // Notify neighbors about our state
-            switch (m_notifyStates)
-            {
-                // Building of vertices is related to all neighbors.
-                // We can build only if we have notification from all neighbors
-                /*case ChunkState.BuildVertices:
-                    NotifyAll(m_notifyTasks);
-                    break;*/
-                // All other states are related to chunk itself
-                default:
-                    OnNotified(this, m_notifyStates);
-                    break;
-            }
-
+            
+            OnNotified(this, m_notifyStates);
             m_notifyStates = ChunkState.Idle;
         }
 
@@ -295,7 +279,7 @@ namespace Voxelmetric.Code.Core
         {
             get { lock (m_lock) { return !m_removalRequested && m_completedStates.Check(ChunkState.Generate|ChunkState.LoadData); } }
         }
-
+        
         private bool IsExecutingTask_Internal()
         {
             return m_taskRunning;
@@ -308,15 +292,7 @@ namespace Voxelmetric.Code.Core
 
         public override void OnNotified(IEventSource<ChunkState> source, ChunkState state)
         {
-            /*if (state==ChunkState.BuildVertices)
-            {
-                ChunkEvent src = (ChunkEvent)source;
-                // Only accept the if it comes from 6 valid listeners
-                if (Listeners!=6)
-                    return;
-            }*/
-
-            // Queue operation
+            // Enqueue the request
             m_pendingStates = m_pendingStates.Set(state);
         }
 
@@ -476,8 +452,6 @@ namespace Voxelmetric.Code.Core
 
             m_taskRunning = true;
 
-            SubscribeNeighbors(this, true);
-
             if (world.networking.isServer)
             {
                 // Let server generate chunk data
@@ -548,7 +522,7 @@ namespace Voxelmetric.Code.Core
 
             m_refreshStates = m_refreshStates.Reset(CurrStateLoadData);
             m_completedStates = m_completedStates.Reset(CurrStateLoadData);
-
+            
             m_taskRunning = true;
             IOPoolManager.Add(
                 new TaskPoolItem(
@@ -620,6 +594,19 @@ namespace Voxelmetric.Code.Core
 
         #endregion Save chunk data
 
+        private bool SynchronizeChunk()
+        {
+            return AreNeighborsReady();
+            /*if (Listeners != 6)
+            {
+                SubscribeNeighbors(this, true);
+                if (Listeners != 6)
+                    return false;
+            }
+
+            return true;*/
+        }
+
         #region Generate vertices
 
         private struct SGenerateVerticesWorkItem
@@ -660,6 +647,9 @@ namespace Voxelmetric.Code.Core
             string.Format("[{0},{1},{2}] - GenerateVertices set sooner than LoadData completed. Pending:{3}, Completed:{4}", Pos.X, Pos.Y, Pos.Z, m_pendingTasks, m_completedTasks)
             );*/
             if (!m_completedStates.Check(ChunkState.LoadData))
+                return true;
+
+            if (!SynchronizeChunk())
                 return true;
 
             m_pendingStates = m_pendingStates.Reset(CurrStateGenerateVertices);
@@ -736,6 +726,30 @@ namespace Voxelmetric.Code.Core
 
         #endregion Remove chunk
 
+        private bool AreNeighborsReady()
+        {
+            if (!IsNeighborReady(new BlockPos(pos.x + Env.ChunkSize, pos.y, pos.z)))
+                return false;
+            if (!IsNeighborReady(new BlockPos(pos.x - Env.ChunkSize, pos.y, pos.z)))
+                return false;
+            if (!IsNeighborReady(new BlockPos(pos.x, pos.y + Env.ChunkSize, pos.z)))
+                return false;
+            if (!IsNeighborReady(new BlockPos(pos.x, pos.y - Env.ChunkSize, pos.z)))
+                return false;
+            if (!IsNeighborReady(new BlockPos(pos.x, pos.y, pos.z + Env.ChunkSize)))
+                return false;
+            if (!IsNeighborReady(new BlockPos(pos.x, pos.y, pos.z - Env.ChunkSize)))
+                return false;
+
+            return true;
+        }
+
+        private bool IsNeighborReady(BlockPos pos)
+        {
+            Chunk neighbor = world.chunks.Get(pos);
+            return neighbor!=null && neighbor.m_completedStates.Check(ChunkState.LoadData);
+        }
+
         private static void SubscribeNeighbors(Chunk chunk, bool subscribe)
         {
             BlockPos pos = chunk.pos;
@@ -745,18 +759,17 @@ namespace Voxelmetric.Code.Core
             SubscribeTwoNeighbors(chunk, new BlockPos(pos.x, pos.y - Env.ChunkSize, pos.z), subscribe);
             SubscribeTwoNeighbors(chunk, new BlockPos(pos.x, pos.y, pos.z + Env.ChunkSize), subscribe);
             SubscribeTwoNeighbors(chunk, new BlockPos(pos.x, pos.y, pos.z - Env.ChunkSize), subscribe);
-
         }
 
         private static void SubscribeTwoNeighbors(Chunk chunk, BlockPos neighborPos, bool subscribe)
         {
-            /*Chunk neighbor = chunk.world.chunks.Get(neighborPos);
+            Chunk neighbor = chunk.world.chunks.Get(neighborPos);
             if (neighbor != null)
             {
                 // Subscribe with each other. Passing Idle as event - it is ignored in this case anyway
                 neighbor.Subscribe(chunk, ChunkState.Idle, subscribe);
                 chunk.Subscribe(neighbor, ChunkState.Idle, subscribe);
-            }*/
+            }
         }
     }
 }
