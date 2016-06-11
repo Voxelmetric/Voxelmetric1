@@ -30,10 +30,11 @@ namespace Voxelmetric.Code.Core
             {
                 randomUpdateTime = 0;
 
-                BlockPos randomPos = chunk.pos;
-                randomPos.x += Voxelmetric.resources.random.Next(0, Env.ChunkMask);
-                randomPos.y += Voxelmetric.resources.random.Next(0, Env.ChunkMask);
-                randomPos.z += Voxelmetric.resources.random.Next(0, Env.ChunkMask);
+                BlockPos randomPos = new BlockPos(
+                    chunk.pos.x+Voxelmetric.resources.random.Next(0, Env.ChunkMask),
+                    chunk.pos.y+Voxelmetric.resources.random.Next(0, Env.ChunkMask),
+                    chunk.pos.z+Voxelmetric.resources.random.Next(0, Env.ChunkMask)
+                    );
 
                 chunk.blocks.Get(randomPos).RandomUpdate(chunk, randomPos, randomPos+chunk.pos);
 

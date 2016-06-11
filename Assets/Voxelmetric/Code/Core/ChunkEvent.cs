@@ -56,7 +56,12 @@ namespace Voxelmetric.Code.Core
                     // Do not register if already registred
                     if (l==listener)
                         return false;
+                }
 
+                // Subscribe in the first free slot
+                for (int i = 0; i < m_listeners.Length; i++)
+                {
+                    ChunkEvent l = m_listeners[i];
                     if (l==null)
                     {
                         m_listeners[i] = chunkListener;
