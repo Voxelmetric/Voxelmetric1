@@ -215,12 +215,20 @@ namespace Voxelmetric.Code.Core
             // Go from the least important bit to most important one. If a given bit it set
             // we execute the task tied with it
 
-            ProcessNotifyState();
-            if (m_pendingStates.Check(ChunkState.GenericWork) && PerformGenericWork())
-                return;
+            if (PossiblyVisible)
+            {
+                // In order to save performance, we generate chunk data on-demand - when the chunk can be seen
+                ProcessNotifyState();
+                if (m_pendingStates.Check(ChunkState.Generate) && GenerateData())
+                    return;
+            }
 
             ProcessNotifyState();
             if (m_pendingStates.Check(ChunkState.LoadData) && LoadData())
+                return;
+
+            ProcessNotifyState();
+            if (m_pendingStates.Check(ChunkState.GenericWork) && PerformGenericWork())
                 return;
 
             ProcessNotifyState();
@@ -231,13 +239,9 @@ namespace Voxelmetric.Code.Core
             if (m_pendingStates.Check(ChunkState.Remove) && RemoveChunk())
                 return;
             
-            // In order to save performance, chunk and geometry are only generated only if necessary
+            // In order to save performance, we generate geometry on-demand - when the chunk can be seen
             if (PossiblyVisible)
             {
-                ProcessNotifyState();
-                if (m_pendingStates.Check(ChunkState.Generate) && GenerateData())
-                    return;
-
                 ProcessNotifyState();
                 if (m_pendingStates.Check(ChunkState.BuildVertices) && GenerateVertices())
                     return;
