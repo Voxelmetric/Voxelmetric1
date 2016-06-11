@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using UnityEngine;
 
 namespace Voxelmetric.Code.Common.Threading.Managers
 {
@@ -60,8 +61,6 @@ namespace Voxelmetric.Code.Common.Threading.Managers
                     tp.AddItemUnsafe(item.Action, item.Arg);
                 }
                 tp.Unlock();
-
-                //Debug.Log("WorkPool tasks: " + pool.Size);
             }
             else
             {
@@ -71,6 +70,8 @@ namespace Voxelmetric.Code.Common.Threading.Managers
                     item.Action(item.Arg);
                 }
             }
+
+            //Debug.Log("WorkPool tasks: " + WorkItems.Count);
 
             // Remove processed work items
             WorkItems.Clear();

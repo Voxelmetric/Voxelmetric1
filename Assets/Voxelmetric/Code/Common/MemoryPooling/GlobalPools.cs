@@ -12,7 +12,7 @@ namespace Voxelmetric.Code.Common.MemoryPooling
     public class GlobalPools: AObjectPool
     {
         public readonly ObjectPool<Chunk> ChunkPool =
-            new ObjectPool<Chunk>(ch => new Chunk(), 128, false);
+            new ObjectPool<Chunk>(ch => new Chunk(), 1024, false);
 
         public readonly ObjectPool<Mesh> MeshPool =
             new ObjectPool<Mesh>(m => new Mesh(), 128, false);

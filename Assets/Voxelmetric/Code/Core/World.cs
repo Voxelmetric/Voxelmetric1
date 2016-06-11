@@ -46,13 +46,15 @@ namespace Voxelmetric.Code.Core
             }
         }
 
-        public World() {
+        void Awake()
+        {
             chunks = new WorldChunks(this);
             blocks = new WorldBlocks(this);
         }
 
         void Start()
         {
+            Profiler.maxNumberOfSamplesPerFrame = 1000000;
             StartWorld();
         }
 

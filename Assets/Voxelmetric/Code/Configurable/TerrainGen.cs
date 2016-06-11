@@ -50,16 +50,15 @@ public class TerrainGen
         int height = world.config.minY;
         for (int i = 0; i < layers.Length; i++)
         {
-            if (layers[i] == null)
+            TerrainLayer layer = layers[i];
+            if (layer == null)
             {
-                Debug.LogError("Layer name '" + layers[i] + "' in layer order didn't match a valid layer");
+                Debug.LogError("Layer name '" + layer + "' in layer order didn't match a valid layer");
                 continue;
             }
 
-            if (!layers[i].isStructure)
-            {
+            if (!layer.isStructure)
                 height = layers[i].GenerateLayer(chunk, x, z, height, 1, justGetHeight);
-            }
         }
         return height;
     }
@@ -68,14 +67,11 @@ public class TerrainGen
     {
         for (int i = 0; i < layers.Length; i++)
         {
-
-            if (layers[i] == null)
+            TerrainLayer layer = layers[i];
+            if (layer == null || !layer.isStructure)
                 continue;
 
-            if (layers[i].isStructure)
-            {
-                layers[i].GenerateStructures(chunk);
-            }
+            layer.GenerateStructures(chunk);
         }
     }
 

@@ -397,7 +397,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   world: {fileID: 1856110255}
-  chunkLoadRadius: 6
+  ChunkLoadRadius: 6
   DistanceToDeleteChunks: 8
 --- !u!1 &312836251
 GameObject:
@@ -2464,7 +2464,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &2107006772
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -7,27 +7,33 @@ namespace Voxelmetric.Code.Utilities
     public class LoadChunks : MonoBehaviour
     {
         public World world;
+        BlockPos[] m_chunkPositions;
 
-        [Range(4, 64)]
-        public int chunkLoadRadius = 8;
-        BlockPos[] chunkPositions;
+        // Distance in chunks for loading chunks
+        [Range(4, 62)]
+        public int ChunkLoadRadius = 6;
+        // Distance in chunks for unloading chunks
+        [Range(5, 64)]
+        public int DistanceToDeleteChunks = 5;
 
-        //The distance is measured in chunks
-        [Range(4, 64)]
-        public int DistanceToDeleteChunks = (int)(8 * 1.25f);
-        private int distanceToDeleteInUnitsSquared;
-
-        void Start()
+        void Awake()
         {
-            chunkPositions = ChunkLoadOrder.ChunkPositions(chunkLoadRadius);
-            distanceToDeleteInUnitsSquared = (int)(DistanceToDeleteChunks * Env.ChunkSize * Env.BlockSize);
-            distanceToDeleteInUnitsSquared *= distanceToDeleteInUnitsSquared;
+            m_chunkPositions = ChunkLoadOrder.ChunkPositions(ChunkLoadRadius);
         }
 
         void Update()
         {
+            UpdateDistanceToDelete();
+
             DeleteChunks();
             CreateChunks();
+        }
+
+        private void UpdateDistanceToDelete()
+        {
+            // Make sure the value is always correct
+            if (DistanceToDeleteChunks<=ChunkLoadRadius)
+                DistanceToDeleteChunks = ChunkLoadRadius+1;
         }
 
         private void DeleteChunks()
@@ -37,10 +43,9 @@ namespace Voxelmetric.Code.Utilities
 
             foreach (var pos in world.chunks.posCollection)
             {
-                int xd = posX - pos.x;
-                int yd = posZ - pos.z;
-
-                if ((xd * xd + yd * yd) > distanceToDeleteInUnitsSquared)
+                int xd = Mathf.Abs((posX - pos.x)>>Env.ChunkPower);
+                int zd = Mathf.Abs((posZ - pos.z)>>Env.ChunkPower);
+                if (xd*xd+zd*zd>=DistanceToDeleteChunks*DistanceToDeleteChunks)
                 {
                     Chunk chunk = world.chunks.Get(pos);
                     chunk.RequestRemoval();
@@ -51,16 +56,16 @@ namespace Voxelmetric.Code.Utilities
         private void CreateChunks()
         {
             // Cycle through the array of positions
-            for (int i = 0; i < chunkPositions.Length; i++)
+            for (int i = 0; i < m_chunkPositions.Length; i++)
             {
                 // Get the position of this gameobject to generate around
                 BlockPos playerPos = ((BlockPos)transform.position).ContainingChunkCoordinates();
 
                 // Translate the player position and array position into chunk position
                 BlockPos newChunkPos = new BlockPos(
-                    chunkPositions[i].x*Env.ChunkSize+playerPos.x,
+                    m_chunkPositions[i].x*Env.ChunkSize+playerPos.x,
                     0,
-                    chunkPositions[i].z*Env.ChunkSize+playerPos.z
+                    m_chunkPositions[i].z*Env.ChunkSize+playerPos.z
                     );
 
                 for (int y = world.config.minY; y<=world.config.maxY; y += Env.ChunkSize)

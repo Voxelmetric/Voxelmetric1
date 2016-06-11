@@ -1,7 +1,5 @@
 ﻿using System.Collections.Generic;
 using Voxelmetric.Code.Data_types;
-using Voxelmetric.Code.Load_Resources;
-using Voxelmetric.Code.Utilities;
 
 namespace Voxelmetric.Code.Core
 {
@@ -73,7 +71,7 @@ namespace Voxelmetric.Code.Core
             Chunk chunk = Get(chunkPos);
             if(chunk!=null)
                 return chunk;
-
+            
             // Create a new chunk
             chunk = Chunk.CreateChunk(world, chunkPos);
             chunks.Add(chunkPos, chunk);
