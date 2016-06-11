@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Text;
 using UnityEngine;
 using Voxelmetric.Code.Common.Memory;
 using Voxelmetric.Code.Core;
@@ -68,6 +69,22 @@ namespace Voxelmetric.Code.Common.MemoryPooling
             PushArray(arr, m_color32ArrayPools);
         }
 
-        
+        public override string ToString()
+        {
+            StringBuilder sb = new StringBuilder();
+            sb.Append("ChunkPool=");
+            sb.Append(ChunkPool.Capacity);
+            sb.Append(",MeshPool=");
+            sb.Append(MeshPool.Capacity);
+            sb.Append(",Vec2Arr=");
+            sb.Append(m_vector2ArrayPools.Count);
+            sb.Append(",Vec3Arr=");
+            sb.Append(m_vector3ArrayPools.Count);
+            sb.Append(",Vec4Arr=");
+            sb.Append(m_vector4ArrayPools.Count);
+            sb.Append(",ColorArr=");
+            sb.Append(m_color32ArrayPools.Count);
+            return sb.ToString();
+        }
     }
 }

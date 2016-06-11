@@ -15,5 +15,7 @@ public class GlobalObjects : MonoBehaviour {
     {
         IOPoolManager.Commit();
         WorkPoolManager.Commit();
-	}
+
+        Debug.Log(Globals.MemPools.ToString());
+    }
 }

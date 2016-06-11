@@ -18,6 +18,10 @@ namespace Voxelmetric.Code.Common.Memory
         //! If true object pool will try to release some of the unused memory if the difference in currently used size and capacity of pool is too big
         private readonly bool m_autoReleaseMemory;
 
+        public int Capacity {
+            get { return m_objects.Count; }
+        }
+
         public ObjectPool(Func<T, T> objectAllocator, int initialSize, bool autoReleaseMememory)
         {
             m_objectAllocator = new ObjectPoolAllocator<T>(objectAllocator);
