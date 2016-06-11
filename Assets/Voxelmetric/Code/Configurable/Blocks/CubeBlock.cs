@@ -23,13 +23,7 @@ public class CubeBlock : SolidBlock {
             BlockBuilder.PrepareColors(chunk, localPos, globalPos, vertexData, direction);
 
             for (int i = 0; i < 4; i++)
-            {
-                vertexDataFixed[i].Color = vertexData[i].Color;
-                vertexDataFixed[i].Normal = vertexData[i].Normal;
-                vertexDataFixed[i].Tangent = vertexData[i].Tangent;
-                vertexDataFixed[i].Vertex = vertexData[i].Vertex;
-                vertexDataFixed[i].UV = vertexData[i].UV;
-            }
+                vertexDataFixed[i] = VertexDataUtils.ClassToStruct(vertexData[i]);
             chunk.render.batcher.AddFace(vertexDataFixed, DirectionUtils.Backface(direction));
 
             for (int i = 0; i < 4; i++)
