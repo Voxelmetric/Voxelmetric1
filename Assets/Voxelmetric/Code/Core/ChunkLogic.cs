@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 using Voxelmetric.Code.Data_types;
+using Voxelmetric.Code.Utilities;
 
 namespace Voxelmetric.Code.Core
 {
@@ -30,9 +31,9 @@ namespace Voxelmetric.Code.Core
                 randomUpdateTime = 0;
 
                 BlockPos randomPos = chunk.pos;
-                randomPos.x += Voxelmetric.resources.random.Next(0, 16);
-                randomPos.y += Voxelmetric.resources.random.Next(0, 16);
-                randomPos.z += Voxelmetric.resources.random.Next(0, 16);
+                randomPos.x += Voxelmetric.resources.random.Next(0, Env.ChunkMask);
+                randomPos.y += Voxelmetric.resources.random.Next(0, Env.ChunkMask);
+                randomPos.z += Voxelmetric.resources.random.Next(0, Env.ChunkMask);
 
                 chunk.blocks.Get(randomPos).RandomUpdate(chunk, randomPos, randomPos+chunk.pos);
 
