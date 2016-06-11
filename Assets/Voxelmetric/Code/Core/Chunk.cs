@@ -539,7 +539,7 @@ namespace Voxelmetric.Code.Core
 
         private static void OnSaveData(Chunk chunk)
         {
-            //Serialization.Serialization.SaveChunk(chunk);
+            Serialization.Serialization.SaveChunk(chunk);
 
             lock (chunk.m_lock)
             {
