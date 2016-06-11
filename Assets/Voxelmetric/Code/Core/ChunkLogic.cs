@@ -1,16 +1,14 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
-using Voxelmetric.Code.Core.Interface;
 using Voxelmetric.Code.Data_types;
 
 namespace Voxelmetric.Code.Core
 {
-    public class ChunkLogic: IChunkLogic
+    public sealed class ChunkLogic
     {
-
-        protected Chunk chunk;
-        protected float randomUpdateTime;
-        protected List<BlockAndTimer> scheduledUpdates = new List<BlockAndTimer>();
+        private Chunk chunk;
+        private float randomUpdateTime;
+        private readonly List<BlockAndTimer> scheduledUpdates = new List<BlockAndTimer>();
 
         public ChunkLogic(Chunk chunk)
         {
@@ -24,7 +22,7 @@ namespace Voxelmetric.Code.Core
             scheduledUpdates.Clear();
         }
 
-        public virtual void TimedUpdated()
+        public void TimedUpdated()
         {
             randomUpdateTime += Time.fixedDeltaTime;
             if (randomUpdateTime>=chunk.world.config.randomUpdateFrequency)

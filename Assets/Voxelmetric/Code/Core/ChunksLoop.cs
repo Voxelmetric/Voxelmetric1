@@ -48,7 +48,7 @@ namespace Voxelmetric.Code.Core
             {
                 Chunk chunk = world.chunks.Get(pos);
                 world.chunks.Remove(pos);
-                Chunk.Remove(chunk);
+                Chunk.RemoveChunk(chunk);
             }
             markedForDeletion.Clear();
         }

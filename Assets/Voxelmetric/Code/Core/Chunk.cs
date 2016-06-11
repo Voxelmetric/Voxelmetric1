@@ -13,7 +13,7 @@ using Voxelmetric.Code.Utilities;
 
 namespace Voxelmetric.Code.Core
 {
-    public class Chunk: ChunkEvent
+    public sealed class Chunk: ChunkEvent
     {
         private static int s_id = 0;
 
@@ -50,14 +50,14 @@ namespace Voxelmetric.Code.Core
         
         public int ThreadID { get; private set; }
 
-        public static Chunk Create(World world, BlockPos pos)
+        public static Chunk CreateChunk(World world, BlockPos pos)
         {
             Chunk chunk = Globals.MemPools.ChunkPool.Pop();
             chunk.Init(world, pos);
             return chunk;
         }
 
-        public static void Remove(Chunk chunk)
+        public static void RemoveChunk(Chunk chunk)
         {
             chunk.Reset();
             chunk.world = null;
@@ -78,7 +78,7 @@ namespace Voxelmetric.Code.Core
             m_lock = new object();
         }
 
-        protected virtual void Init(World world, BlockPos pos)
+        private void Init(World world, BlockPos pos)
         {
             this.world = world;
             this.pos = pos;
@@ -86,7 +86,7 @@ namespace Voxelmetric.Code.Core
             Reset();
         }
 
-        protected virtual void Reset()
+        private void Reset()
         {
             m_notifyStates = m_notifyStates.Reset();
             m_pendingStates = m_pendingStates.Reset();
@@ -128,7 +128,7 @@ namespace Voxelmetric.Code.Core
             return sb.ToString();
         }
 
-        protected virtual void UpdateLogic()
+        private void UpdateLogic()
         {
             if (!m_completedStates.Check(ChunkState.LoadData))
                 return;
@@ -136,17 +136,12 @@ namespace Voxelmetric.Code.Core
             logic.TimedUpdated();
         }
 
-        public virtual void RequestGenerate()
+        public void RequestGenerate()
         {
             RefreshState(ChunkState.Generate);
         }
-
+        
         public void RequestBuildVertices()
-        {
-            RefreshState(ChunkState.BuildVertices);
-        }
-
-        public void RequestBuildVerticesNow()
         {
             RefreshState(ChunkState.BuildVertices);
         }

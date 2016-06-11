@@ -79,7 +79,7 @@ namespace Voxelmetric.Code.Core
                         BlockPos newChunkPos = pos.Add(x*Env.ChunkSize, yy, z*Env.ChunkSize);
                         if (Get(newChunkPos)==null)
                         {
-                            Chunk newChunk = Chunk.Create(world, newChunkPos);
+                            Chunk newChunk = Chunk.CreateChunk(world, newChunkPos);
                             chunks.Add(newChunkPos, newChunk);
                             newChunk.RequestGenerate();
                         }

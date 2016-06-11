@@ -11,15 +11,14 @@ using Voxelmetric.Code.VM;
 
 namespace Voxelmetric.Code.Core
 {
-    public class ChunkBlocks
+    public sealed class ChunkBlocks
     {
-        protected Chunk chunk;
+        private Chunk chunk;
+        private readonly Block[] blocks = Helpers.CreateArray1D<Block>(Env.ChunkVolume);
+        private byte[] receiveBuffer;
+        private int receiveIndex;
 
-        protected Block[] blocks = Helpers.CreateArray1D<Block>(Env.ChunkVolume);
-        public List<BlockPos> modifiedBlocks = new List<BlockPos>();
-        protected byte[] receiveBuffer;
-        protected int receiveIndex;
-
+        public readonly List<BlockPos> modifiedBlocks = new List<BlockPos>();
         public bool contentsModified;
 
         private static byte[] emptyBytes;
@@ -79,6 +78,7 @@ namespace Voxelmetric.Code.Core
         {
             Array.Clear(blocks, 0, blocks.Length);
             contentsModified = false;
+            modifiedBlocks.Clear();
         }
 
         /// <summary>
@@ -86,7 +86,7 @@ namespace Voxelmetric.Code.Core
         /// </summary>
         /// <param name="blockPos">A global block position</param>
         /// <returns>The block at the position</returns>
-        public virtual Block Get(BlockPos blockPos)
+        public Block Get(BlockPos blockPos)
         {
             if (InRange(blockPos))
                 return LocalGet(blockPos-chunk.pos);
@@ -102,7 +102,7 @@ namespace Voxelmetric.Code.Core
         /// </summary>
         /// <param name="localBlockPos"> A block pos relative to the chunk's position. MUST be a local position or the wrong block will be returned</param>
         /// <returns>the block at the relative position</returns>
-        public virtual Block LocalGet(BlockPos localBlockPos)
+        public Block LocalGet(BlockPos localBlockPos)
         {
             if ((localBlockPos.x<Env.ChunkSize && localBlockPos.x>=0) &&
                 (localBlockPos.y<Env.ChunkSize && localBlockPos.y>=0) &&
@@ -115,7 +115,7 @@ namespace Voxelmetric.Code.Core
             return chunk.world.blocks.Get(localBlockPos+chunk.pos);
         }
 
-        public virtual void Set(BlockPos blockPos, string block, bool updateChunk = true, bool setBlockModified = true)
+        public void Set(BlockPos blockPos, string block, bool updateChunk = true, bool setBlockModified = true)
         {
             Set(blockPos, Block.Create(block, chunk.world), updateChunk, setBlockModified);
         }
@@ -125,7 +125,7 @@ namespace Voxelmetric.Code.Core
         /// <param name="newBlock">Block to place at the given location</param>
         /// <param name="updateChunk">Optional parameter, set to false to keep the chunk unupdated despite the change</param>
         /// <param name="setBlockModified">Optional parameter, set to true to mark chunk data as modified</param>
-        public virtual void Set(BlockPos blockPos, Block newBlock, bool updateChunk = true, bool setBlockModified = true)
+        public void Set(BlockPos blockPos, Block newBlock, bool updateChunk = true, bool setBlockModified = true)
         {
             if (InRange(blockPos))
             {
@@ -143,7 +143,7 @@ namespace Voxelmetric.Code.Core
                     BlockModified(blockPos);
 
                 if (updateChunk)
-                    chunk.RequestBuildVerticesNow();
+                    chunk.RequestBuildVertices();
             }
             else
             {
@@ -160,7 +160,7 @@ namespace Voxelmetric.Code.Core
         /// </summary>
         /// <param name="blockPos"> A block pos relative to the chunk's position.</param>
         /// <param name="block">Block to place at the given location</param>
-        public virtual void LocalSet(BlockPos blockPos, Block block)
+        public void LocalSet(BlockPos blockPos, Block block)
         {
             if ((blockPos.x<Env.ChunkSize && blockPos.x>=0) &&
                 (blockPos.y<Env.ChunkSize && blockPos.y>=0) &&

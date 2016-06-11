@@ -1,14 +1,13 @@
-﻿using Voxelmetric.Code.Core.Interface;
-using Voxelmetric.Code.Data_types;
+﻿using Voxelmetric.Code.Data_types;
 using Voxelmetric.Code.Rendering;
 using Voxelmetric.Code.Utilities;
 
 namespace Voxelmetric.Code.Core
 {
-    public class ChunkRender: IChunkRender
+    public class ChunkRender
     {
-        protected DrawCallBatcher m_drawCallBatcher;
-        protected Chunk chunk;
+        private Chunk chunk;
+        private DrawCallBatcher m_drawCallBatcher;
 
         public DrawCallBatcher batcher
         {

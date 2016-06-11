@@ -32,6 +32,6 @@ public class GrassBlock : CubeBlock
             }
         }
 
-        chunk.RequestBuildVerticesNow();
+        chunk.RequestBuildVertices();
     }
 }

@@ -81,7 +81,7 @@ namespace Voxelmetric.Code.Core
             {
                 Chunk chunk = world.chunks.Get(pos);
                 if (chunk != null)
-                    chunk.RequestBuildVerticesNow();
+                    chunk.RequestBuildVertices();
             }
         }
     }
