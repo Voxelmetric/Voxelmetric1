@@ -4,6 +4,7 @@ using Voxelmetric.Code.Blocks.Builders;
 using Voxelmetric.Code.Core;
 using Voxelmetric.Code.Data_types;
 using Voxelmetric.Code.Load_Resources.Textures;
+using Voxelmetric.Code.Rendering;
 
 [Serializable]
 public class ColoredBlock : SolidBlock {
@@ -11,25 +12,18 @@ public class ColoredBlock : SolidBlock {
     public Color color;
     public TextureCollection texture { get { return ((ColoredBlockConfig)config).texture; } }
 
-    public override void BuildFace(Chunk chunk, BlockPos localPos, BlockPos globalPos, MeshData meshData, Direction direction)
+    protected override void BuildFace(Chunk chunk, BlockPos localPos, BlockPos globalPos, Direction direction)
     {
-        BlockBuilder.BuildRenderer(chunk, localPos, globalPos, meshData, direction);
+        VertexData[] vertexData = chunk.pools.PopVertexDataArray(4);
+        {
+            for (int i = 0; i < 4; i++)
+                vertexData[i] = chunk.pools.PopVertexData();
 
-        Rect textureRect = texture.GetTexture(chunk, localPos, globalPos, direction);
-
-        Vector2[] UVs = chunk.pools.PopVector2Array(4);
-        UVs[0] = new Vector2(textureRect.x + textureRect.width, textureRect.y);
-        UVs[1] = new Vector2(textureRect.x + textureRect.width, textureRect.y + textureRect.height);
-        UVs[2] = new Vector2(textureRect.x, textureRect.y + textureRect.height);
-        UVs[3] = new Vector2(textureRect.x, textureRect.y);
-        for(int i=0;i<4; i++)
-            meshData.uv.Add(UVs[i]);
-        chunk.pools.PushVector2Array(UVs);
-
-        meshData.colors.Add(color);
-        meshData.colors.Add(color);
-        meshData.colors.Add(color);
-        meshData.colors.Add(color);
+            BlockBuilder.PrepareVertices(chunk, localPos, globalPos, vertexData, direction);
+            BlockBuilder.PrepareTexture(chunk, localPos, globalPos, vertexData, direction, texture);
+            BlockBuilder.SetColors(vertexData, ref color);
+        }
+        chunk.pools.PushVertexDataArray(vertexData);
     }
 
     public override string displayName

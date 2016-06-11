@@ -2,14 +2,14 @@
 using Voxelmetric.Code.Core;
 using Voxelmetric.Code.Data_types;
 using Voxelmetric.Code.Load_Resources.Textures;
+using Voxelmetric.Code.Rendering;
 using Voxelmetric.Code.Utilities;
 
 namespace Voxelmetric.Code.Blocks.Builders
 {
-    public class MeshBuilder {
+    public static class MeshBuilder {
 
-        public static void CrossMeshRenderer
-            (Chunk chunk, BlockPos localPos, BlockPos globalPos, MeshData meshData, TextureCollection texture, bool useOffset = true)
+        public static void CrossMeshRenderer(Chunk chunk, BlockPos localPos, BlockPos globalPos, TextureCollection texture, bool useOffset = true)
         {
             float halfBlock = (Env.BlockSize / 2) + Env.BlockFacePadding;
 
@@ -42,38 +42,74 @@ namespace Voxelmetric.Code.Blocks.Builders
             //Converting the position to a vector adjusts it based on block size and gives us real world coordinates for x, y and z
             Vector3 vPos = localPos;
             vPos += new Vector3(offsetX, 0, offsetZ);
+            
+            {
+                VertexData[] vertexData = chunk.pools.PopVertexDataArray(4);
+                {
+                    for (int i = 0; i<4; i++)
+                        vertexData[i] = chunk.pools.PopVertexData();
 
-            meshData.AddVertex(new Vector3(vPos.x - halfBlock, vPos.y - halfBlock, vPos.z + halfBlock));
-            meshData.AddVertex(new Vector3(vPos.x - halfBlock, vPos.y - halfBlock + blockHeight, vPos.z + halfBlock));
-            meshData.AddVertex(new Vector3(vPos.x + halfBlock, vPos.y - halfBlock + blockHeight, vPos.z - halfBlock));
-            meshData.AddVertex(new Vector3(vPos.x + halfBlock, vPos.y - halfBlock, vPos.z - halfBlock));
-            meshData.AddQuadTriangles();
-            BlockBuilder.BuildTexture(chunk, localPos, globalPos, meshData, Direction.north, texture);
-            meshData.AddColors(1, 1, 1, 1, 1);
+                    vertexData[0].Vertex = new Vector3(vPos.x-halfBlock, vPos.y-halfBlock, vPos.z+halfBlock);
+                    vertexData[1].Vertex = new Vector3(vPos.x-halfBlock, vPos.y-halfBlock+blockHeight, vPos.z+halfBlock);
+                    vertexData[2].Vertex = new Vector3(vPos.x+halfBlock, vPos.y-halfBlock+blockHeight, vPos.z-halfBlock);
+                    vertexData[3].Vertex = new Vector3(vPos.x+halfBlock, vPos.y-halfBlock, vPos.z-halfBlock);
+                    BlockBuilder.PrepareTexture(chunk, localPos, globalPos, vertexData, Direction.north, texture);
+                    BlockBuilder.SetColors(vertexData, 1, 1, 1, 1, 1);
+                    chunk.render.batcher.AddFace(vertexData, false);
+                }
+                chunk.pools.PushVertexDataArray(vertexData);
+            }
 
-            meshData.AddVertex(new Vector3(vPos.x + halfBlock, vPos.y - halfBlock, vPos.z - halfBlock));
-            meshData.AddVertex(new Vector3(vPos.x + halfBlock, vPos.y - halfBlock + blockHeight, vPos.z - halfBlock));
-            meshData.AddVertex(new Vector3(vPos.x - halfBlock, vPos.y - halfBlock + blockHeight, vPos.z + halfBlock));
-            meshData.AddVertex(new Vector3(vPos.x - halfBlock, vPos.y - halfBlock, vPos.z + halfBlock));
-            meshData.AddQuadTriangles();
-            BlockBuilder.BuildTexture(chunk, localPos, globalPos, meshData, Direction.north, texture);
-            meshData.AddColors(1, 1, 1, 1, 1);
+            {
+                VertexData[] vertexData = chunk.pools.PopVertexDataArray(4);
+                {
+                    for (int i = 0; i<4; i++)
+                        vertexData[i] = chunk.pools.PopVertexData();
 
-            meshData.AddVertex(new Vector3(vPos.x + halfBlock, vPos.y - halfBlock, vPos.z + halfBlock));
-            meshData.AddVertex(new Vector3(vPos.x + halfBlock, vPos.y - halfBlock + blockHeight, vPos.z + halfBlock));
-            meshData.AddVertex(new Vector3(vPos.x - halfBlock, vPos.y - halfBlock + blockHeight, vPos.z - halfBlock));
-            meshData.AddVertex(new Vector3(vPos.x - halfBlock, vPos.y - halfBlock, vPos.z - halfBlock));
-            meshData.AddQuadTriangles();
-            BlockBuilder.BuildTexture(chunk, localPos, globalPos, meshData, Direction.north, texture);
-            meshData.AddColors(1, 1, 1, 1, 1);
+                    vertexData[0].Vertex = new Vector3(vPos.x+halfBlock, vPos.y-halfBlock, vPos.z-halfBlock);
+                    vertexData[1].Vertex = new Vector3(vPos.x+halfBlock, vPos.y-halfBlock+blockHeight, vPos.z-halfBlock);
+                    vertexData[2].Vertex = new Vector3(vPos.x-halfBlock, vPos.y-halfBlock+blockHeight, vPos.z+halfBlock);
+                    vertexData[3].Vertex = new Vector3(vPos.x-halfBlock, vPos.y-halfBlock, vPos.z+halfBlock);
+                    BlockBuilder.PrepareTexture(chunk, localPos, globalPos, vertexData, Direction.north, texture);
+                    BlockBuilder.SetColors(vertexData, 1, 1, 1, 1, 1);
+                    chunk.render.batcher.AddFace(vertexData, false);
+                }
+                chunk.pools.PushVertexDataArray(vertexData);
+            }
 
-            meshData.AddVertex(new Vector3(vPos.x - halfBlock, vPos.y - halfBlock, vPos.z - halfBlock));
-            meshData.AddVertex(new Vector3(vPos.x - halfBlock, vPos.y - halfBlock + blockHeight, vPos.z - halfBlock));
-            meshData.AddVertex(new Vector3(vPos.x + halfBlock, vPos.y - halfBlock + blockHeight, vPos.z + halfBlock));
-            meshData.AddVertex(new Vector3(vPos.x + halfBlock, vPos.y - halfBlock, vPos.z + halfBlock));
-            meshData.AddQuadTriangles();
-            BlockBuilder.BuildTexture(chunk, localPos, globalPos, meshData, Direction.north, texture);
-            meshData.AddColors(1, 1, 1, 1, 1);
+            {
+                VertexData[] vertexData = chunk.pools.PopVertexDataArray(4);
+                {
+                    for (int i = 0; i<4; i++)
+                        vertexData[i] = chunk.pools.PopVertexData();
+
+                    vertexData[0].Vertex = new Vector3(vPos.x+halfBlock, vPos.y-halfBlock, vPos.z+halfBlock);
+                    vertexData[1].Vertex = new Vector3(vPos.x+halfBlock, vPos.y-halfBlock+blockHeight, vPos.z+halfBlock);
+                    vertexData[2].Vertex = new Vector3(vPos.x-halfBlock, vPos.y-halfBlock+blockHeight, vPos.z-halfBlock);
+                    vertexData[3].Vertex = new Vector3(vPos.x-halfBlock, vPos.y-halfBlock, vPos.z-halfBlock);
+                    BlockBuilder.PrepareTexture(chunk, localPos, globalPos, vertexData, Direction.north, texture);
+                    BlockBuilder.SetColors(vertexData, 1, 1, 1, 1, 1);
+                    chunk.render.batcher.AddFace(vertexData, false);
+                }
+                chunk.pools.PushVertexDataArray(vertexData);
+            }
+
+            {
+                VertexData[] vertexData = chunk.pools.PopVertexDataArray(4);
+                {
+                    for (int i = 0; i<4; i++)
+                        vertexData[i] = chunk.pools.PopVertexData();
+
+                    vertexData[0].Vertex = new Vector3(vPos.x-halfBlock, vPos.y-halfBlock, vPos.z-halfBlock);
+                    vertexData[1].Vertex = new Vector3(vPos.x-halfBlock, vPos.y-halfBlock+blockHeight, vPos.z-halfBlock);
+                    vertexData[2].Vertex = new Vector3(vPos.x+halfBlock, vPos.y-halfBlock+blockHeight, vPos.z+halfBlock);
+                    vertexData[3].Vertex = new Vector3(vPos.x+halfBlock, vPos.y-halfBlock, vPos.z+halfBlock);
+                    BlockBuilder.PrepareTexture(chunk, localPos, globalPos, vertexData, Direction.north, texture);
+                    BlockBuilder.SetColors(vertexData, 1, 1, 1, 1, 1);
+                    chunk.render.batcher.AddFace(vertexData, false);
+                }
+                chunk.pools.PushVertexDataArray(vertexData);
+            }
         }
     }
 }

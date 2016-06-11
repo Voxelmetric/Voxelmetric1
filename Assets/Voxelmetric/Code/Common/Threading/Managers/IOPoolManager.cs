@@ -4,9 +4,9 @@ namespace Voxelmetric.Code.Common.Threading.Managers
 {
     public static class IOPoolManager
     {
-        private static readonly List<ThreadItem> WorkItems = new List<ThreadItem>();
+        private static readonly List<TaskPoolItem> WorkItems = new List<TaskPoolItem>();
 
-        public static void Add(ThreadItem action)
+        public static void Add(TaskPoolItem action)
         {
             WorkItems.Add(action);
         }

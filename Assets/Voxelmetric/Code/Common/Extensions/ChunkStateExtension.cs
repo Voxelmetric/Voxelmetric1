@@ -1,4 +1,6 @@
-﻿namespace Voxelmetric.Code.Core
+﻿using Voxelmetric.Code.Core;
+
+namespace Voxelmetric.Code.Common.Extensions
 {
     public static class ChunkStateExtension
     {

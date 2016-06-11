@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.Text;
 using System.Threading;
-using UnityEngine;
 using UnityEngine.Assertions;
 using Voxelmetric.Code.Common.Events;
+using Voxelmetric.Code.Common.Extensions;
 using Voxelmetric.Code.Common.MemoryPooling;
 using Voxelmetric.Code.Common.Threading;
 using Voxelmetric.Code.Common.Threading.Managers;
@@ -24,6 +24,8 @@ namespace Voxelmetric.Code.Core
         public ChunkBlocks blocks;
         public ChunkLogic logic;
         public ChunkRender render;
+
+        public bool poolAllocatedVertices;
 
         //! Specifies whether there's a task running on this Chunk
         private bool m_taskRunning;
@@ -86,8 +88,6 @@ namespace Voxelmetric.Code.Core
 
         protected virtual void Reset()
         {
-            m_taskRunning = false;
-
             m_notifyStates = m_notifyStates.Reset();
             m_pendingStates = m_pendingStates.Reset();
             m_refreshStates = m_refreshStates.Reset();
@@ -99,6 +99,10 @@ namespace Voxelmetric.Code.Core
             blocks.Reset();
             logic.Reset();
             render.Reset();
+
+            poolAllocatedVertices = false;
+
+            m_taskRunning = false;
 
             Clear();
         }
@@ -168,14 +172,6 @@ namespace Voxelmetric.Code.Core
             {
                 m_completedStates = m_completedStates.Reset(ChunkState.BuildVertices);
                 render.BuildMesh();
-            }
-
-            // Draw chunk mesh if it is available
-            Transform trans = world.transform;
-            Mesh mesh = render.mesh;
-            if (mesh!=null && mesh.vertexCount!=0)
-            {
-                Graphics.DrawMesh(mesh, (trans.rotation*pos)+trans.position, trans.rotation, world.chunkMaterial, 0);
             }
         }
 
@@ -375,7 +371,7 @@ namespace Voxelmetric.Code.Core
                 SGenericWorkItem workItem = new SGenericWorkItem(this, m_genericWorkItems[i]);
 
                 WorkPoolManager.Add(
-                    new ThreadItem(
+                    new ThreadPoolItem(
                         ThreadID,
                         arg =>
                         {
@@ -452,7 +448,7 @@ namespace Voxelmetric.Code.Core
             {
                 // Let server generate chunk data
                 WorkPoolManager.Add(
-                    new ThreadItem(
+                    new ThreadPoolItem(
                         ThreadID,
                         arg =>
                         {
@@ -497,12 +493,12 @@ namespace Voxelmetric.Code.Core
 
         private bool LoadData()
         {
-            Assert.IsTrue(
+            /*Assert.IsTrue(
                 m_completedStates.Check(ChunkState.Generate),
                 string.Format(
                     "[{0},{1},{2}] - LoadData set sooner than Generate completed. Pending:{3}, Completed:{4}", pos.x,
                     pos.y, pos.z, m_pendingStates, m_completedStates)
-                );
+                );*/
             if (!m_completedStates.Check(ChunkState.Generate))
                 return true;
 
@@ -521,7 +517,7 @@ namespace Voxelmetric.Code.Core
 
             m_taskRunning = true;
             IOPoolManager.Add(
-                new ThreadItem(
+                new TaskPoolItem(
                     arg =>
                     {
                         Chunk chunk = (Chunk)arg;
@@ -575,7 +571,7 @@ namespace Voxelmetric.Code.Core
 
             m_taskRunning = true;
             IOPoolManager.Add(
-                new ThreadItem(
+                new TaskPoolItem(
                     arg =>
                     {
                         Chunk chunk = (Chunk)arg;
@@ -650,14 +646,15 @@ namespace Voxelmetric.Code.Core
                 var workItem = new SGenerateVerticesWorkItem(this);
 
                 m_taskRunning = true;
-                WorkPoolManager.Add(new ThreadItem(
-                                        ThreadID,
-                                        arg =>
-                                        {
-                                            SGenerateVerticesWorkItem item = (SGenerateVerticesWorkItem)arg;
-                                            OnGenerateVerices(item.Chunk);
-                                        },
-                                        workItem)
+                WorkPoolManager.Add(
+                    new ThreadPoolItem(
+                        ThreadID,
+                        arg =>
+                        {
+                            SGenerateVerticesWorkItem item = (SGenerateVerticesWorkItem)arg;
+                            OnGenerateVerices(item.Chunk);
+                        },
+                        workItem)
                     );
                 /*}
             else

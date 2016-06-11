@@ -3,6 +3,7 @@ using UnityEngine;
 using Voxelmetric.Code.Core;
 using Voxelmetric.Code.Data_types;
 using Voxelmetric.Code.Load_Resources.Textures;
+using Voxelmetric.Code.Rendering;
 using Voxelmetric.Code.Utilities;
 
 namespace Voxelmetric.Code.Blocks.Builders
@@ -10,12 +11,12 @@ namespace Voxelmetric.Code.Blocks.Builders
     [Serializable]
     public static class BlockBuilder
     {
-        public static void BuildRenderer(Chunk chunk, BlockPos localPos, BlockPos globalPos, MeshData meshData, Direction direction)
+        public static void PrepareVertices(Chunk chunk, BlockPos localPos, BlockPos globalPos, VertexData[] vertexData, Direction direction)
         {
-            AddQuadToMeshData(chunk, localPos, globalPos, meshData, direction);
+            PrepareFace(chunk, localPos, globalPos, vertexData, direction);
         }
 
-        public static void BuildColors(Chunk chunk, BlockPos localPos, BlockPos globalPos, MeshData meshData, Direction direction)
+        public static void PrepareColors(Chunk chunk, BlockPos localPos, BlockPos globalPos, VertexData[] vertexData, Direction direction)
         {
             bool nSolid = false;
             bool eSolid = false;
@@ -30,6 +31,7 @@ namespace Voxelmetric.Code.Blocks.Builders
             //float light = 0;
 
             ChunkBlocks blocks = chunk.blocks;
+            Block block;
 
             switch (direction)
             {
@@ -39,13 +41,16 @@ namespace Voxelmetric.Code.Blocks.Builders
                     sSolid = blocks.LocalGet(localPos.Add(0, 1, -1)).IsSolid(Direction.north);
                     wSolid = blocks.LocalGet(localPos.Add(-1, 1, 0)).IsSolid(Direction.east);
 
-                    wnSolid = blocks.LocalGet(localPos.Add(-1, 1, 1)).IsSolid(Direction.east) && blocks.LocalGet(localPos.Add(-1, 1, 1)).IsSolid(Direction.south);
-                    neSolid = blocks.LocalGet(localPos.Add(1, 1, 1)).IsSolid(Direction.south) && blocks.LocalGet(localPos.Add(1, 1, 1)).IsSolid(Direction.west);
-                    esSolid = blocks.LocalGet(localPos.Add(1, 1, -1)).IsSolid(Direction.west) && blocks.LocalGet(localPos.Add(1, 1, -1)).IsSolid(Direction.north);
-                    swSolid = blocks.LocalGet(localPos.Add(-1, 1, -1)).IsSolid(Direction.north) && blocks.LocalGet(localPos.Add(-1, 1, -1)).IsSolid(Direction.east);
+                    block = blocks.LocalGet(localPos.Add(-1, 1, 1));
+                    wnSolid = block.IsSolid(Direction.east) && block.IsSolid(Direction.south);
+                    block = blocks.LocalGet(localPos.Add(1, 1, 1));
+                    neSolid = block.IsSolid(Direction.south) && block.IsSolid(Direction.west);
+                    block = blocks.LocalGet(localPos.Add(1, 1, -1));
+                    esSolid = block.IsSolid(Direction.west) && block.IsSolid(Direction.north);
+                    block = blocks.LocalGet(localPos.Add(-1, 1, -1));
+                    swSolid = block.IsSolid(Direction.north) && block.IsSolid(Direction.east);
 
                     //light = BlockDataMap.NonSolid.Light(blocks.LocalGet(localPos.Add(0, 1, 0)))/ 15f;
-
                     break;
                 case Direction.down:
                     nSolid = blocks.LocalGet(localPos.Add(0, -1, -1)).IsSolid(Direction.south);
@@ -53,13 +58,16 @@ namespace Voxelmetric.Code.Blocks.Builders
                     sSolid = blocks.LocalGet(localPos.Add(0, -1, 1)).IsSolid(Direction.north);
                     wSolid = blocks.LocalGet(localPos.Add(-1, -1, 0)).IsSolid(Direction.east);
 
-                    wnSolid = blocks.LocalGet(localPos.Add(-1, -1, -1)).IsSolid(Direction.east) && blocks.LocalGet(localPos.Add(-1, -1, -1)).IsSolid(Direction.south);
-                    neSolid = blocks.LocalGet(localPos.Add(1, -1, -1)).IsSolid(Direction.south) && blocks.LocalGet(localPos.Add(1, -1, -1)).IsSolid(Direction.west);
-                    esSolid = blocks.LocalGet(localPos.Add(1, -1, 1)).IsSolid(Direction.west) && blocks.LocalGet(localPos.Add(1, -1, 1)).IsSolid(Direction.north);
-                    swSolid = blocks.LocalGet(localPos.Add(-1, -1, 1)).IsSolid(Direction.north) && blocks.LocalGet(localPos.Add(-1, -1, 1)).IsSolid(Direction.east);
+                    block = blocks.LocalGet(localPos.Add(-1, -1, -1));
+                    wnSolid = block.IsSolid(Direction.east) && block.IsSolid(Direction.south);
+                    block = blocks.LocalGet(localPos.Add(1, -1, -1));
+                    neSolid = block.IsSolid(Direction.south) && block.IsSolid(Direction.west);
+                    block = blocks.LocalGet(localPos.Add(1, -1, 1));
+                    esSolid = block.IsSolid(Direction.west) && block.IsSolid(Direction.north);
+                    block = blocks.LocalGet(localPos.Add(-1, -1, 1));
+                    swSolid = block.IsSolid(Direction.north) && block.IsSolid(Direction.east);
 
                     //light = BlockDataMap.NonSolid.Light(blocks.LocalGet(localPos.Add(0, -1, 0))) / 15f;
-
                     break;
                 case Direction.north:
                     nSolid = blocks.LocalGet(localPos.Add(1, 0, 1)).IsSolid(Direction.west);
@@ -67,13 +75,16 @@ namespace Voxelmetric.Code.Blocks.Builders
                     sSolid = blocks.LocalGet(localPos.Add(-1, 0, 1)).IsSolid(Direction.east);
                     wSolid = blocks.LocalGet(localPos.Add(0, -1, 1)).IsSolid(Direction.up);
 
-                    esSolid = blocks.LocalGet(localPos.Add(-1, 1, 1)).IsSolid(Direction.east) && blocks.LocalGet(localPos.Add(-1, 1, 1)).IsSolid(Direction.south);
-                    neSolid = blocks.LocalGet(localPos.Add(1, 1, 1)).IsSolid(Direction.south) && blocks.LocalGet(localPos.Add(1, 1, 1)).IsSolid(Direction.west);
-                    wnSolid = blocks.LocalGet(localPos.Add(1, -1, 1)).IsSolid(Direction.west) && blocks.LocalGet(localPos.Add(1, -1, 1)).IsSolid(Direction.north);
-                    swSolid = blocks.LocalGet(localPos.Add(-1, -1, 1)).IsSolid(Direction.north) && blocks.LocalGet(localPos.Add(-1, -1, 1)).IsSolid(Direction.east);
+                    block = blocks.LocalGet(localPos.Add(-1, 1, 1));
+                    esSolid = block.IsSolid(Direction.east) && block.IsSolid(Direction.south);
+                    block = blocks.LocalGet(localPos.Add(1, 1, 1));
+                    neSolid = block.IsSolid(Direction.south) && block.IsSolid(Direction.west);
+                    block = blocks.LocalGet(localPos.Add(1, -1, 1));
+                    wnSolid = block.IsSolid(Direction.west) && block.IsSolid(Direction.north);
+                    block = blocks.LocalGet(localPos.Add(-1, -1, 1));
+                    swSolid = block.IsSolid(Direction.north) && block.IsSolid(Direction.east);
 
                     //light = BlockDataMap.NonSolid.Light(blocks.LocalGet(localPos.Add(0, 0, 1))) / 15f;
-
                     break;
                 case Direction.east:
                     nSolid = blocks.LocalGet(localPos.Add(1, 0, -1)).IsSolid(Direction.up);
@@ -81,13 +92,16 @@ namespace Voxelmetric.Code.Blocks.Builders
                     sSolid = blocks.LocalGet(localPos.Add(1, 0, 1)).IsSolid(Direction.down);
                     wSolid = blocks.LocalGet(localPos.Add(1, -1, 0)).IsSolid(Direction.east);
 
-                    esSolid = blocks.LocalGet(localPos.Add(1, 1, 1)).IsSolid(Direction.west) && blocks.LocalGet(localPos.Add(1, 1, 1)).IsSolid(Direction.north);
-                    neSolid = blocks.LocalGet(localPos.Add(1, 1, -1)).IsSolid(Direction.south) && blocks.LocalGet(localPos.Add(1, 1, -1)).IsSolid(Direction.west);
-                    wnSolid = blocks.LocalGet(localPos.Add(1, -1, -1)).IsSolid(Direction.east) && blocks.LocalGet(localPos.Add(1, -1, -1)).IsSolid(Direction.north);
-                    swSolid = blocks.LocalGet(localPos.Add(1, -1, 1)).IsSolid(Direction.north) && blocks.LocalGet(localPos.Add(1, -1, 1)).IsSolid(Direction.east);
+                    block = blocks.LocalGet(localPos.Add(1, 1, 1));
+                    esSolid = block.IsSolid(Direction.west) && block.IsSolid(Direction.north);
+                    block = blocks.LocalGet(localPos.Add(1, 1, -1));
+                    neSolid = block.IsSolid(Direction.south) && block.IsSolid(Direction.west);
+                    block = blocks.LocalGet(localPos.Add(1, -1, -1));
+                    wnSolid = block.IsSolid(Direction.east) && block.IsSolid(Direction.north);
+                    block = blocks.LocalGet(localPos.Add(1, -1, 1));
+                    swSolid = block.IsSolid(Direction.north) && block.IsSolid(Direction.east);
 
                     //light = BlockDataMap.NonSolid.Light(blocks.LocalGet(localPos.Add(1, 0, 0))) / 15f;
-
                     break;
                 case Direction.south:
                     nSolid = blocks.LocalGet(localPos.Add(-1, 0, -1)).IsSolid(Direction.down);
@@ -95,13 +109,16 @@ namespace Voxelmetric.Code.Blocks.Builders
                     sSolid = blocks.LocalGet(localPos.Add(1, 0, -1)).IsSolid(Direction.up);
                     wSolid = blocks.LocalGet(localPos.Add(0, -1, -1)).IsSolid(Direction.south);
 
-                    esSolid = blocks.LocalGet(localPos.Add(1, 1, -1)).IsSolid(Direction.west) && blocks.LocalGet(localPos.Add(1, 1, -1)).IsSolid(Direction.north);
-                    neSolid = blocks.LocalGet(localPos.Add(-1, 1, -1)).IsSolid(Direction.south) && blocks.LocalGet(localPos.Add(-1, 1, -1)).IsSolid(Direction.west);
-                    wnSolid = blocks.LocalGet(localPos.Add(-1, -1, -1)).IsSolid(Direction.east) && blocks.LocalGet(localPos.Add(-1, -1, -1)).IsSolid(Direction.north);
-                    swSolid = blocks.LocalGet(localPos.Add(1, -1, -1)).IsSolid(Direction.north) && blocks.LocalGet(localPos.Add(1, -1, -1)).IsSolid(Direction.east);
+                    block = blocks.LocalGet(localPos.Add(1, 1, -1));
+                    esSolid = block.IsSolid(Direction.west) && block.IsSolid(Direction.north);
+                    block = blocks.LocalGet(localPos.Add(-1, 1, -1));
+                    neSolid = block.IsSolid(Direction.south) && block.IsSolid(Direction.west);
+                    block = blocks.LocalGet(localPos.Add(-1, -1, -1));
+                    wnSolid = block.IsSolid(Direction.east) && block.IsSolid(Direction.north);
+                    block = blocks.LocalGet(localPos.Add(1, -1, -1));
+                    swSolid = block.IsSolid(Direction.north) && block.IsSolid(Direction.east);
 
                     //light = BlockDataMap.NonSolid.Light(blocks.LocalGet(localPos.Add(0, 0, -1))) / 15f;
-
                     break;
                 case Direction.west:
                     nSolid = blocks.LocalGet(localPos.Add(-1, 0, 1)).IsSolid(Direction.up);
@@ -109,46 +126,40 @@ namespace Voxelmetric.Code.Blocks.Builders
                     sSolid = blocks.LocalGet(localPos.Add(-1, 0, -1)).IsSolid(Direction.down);
                     wSolid = blocks.LocalGet(localPos.Add(-1, -1, 0)).IsSolid(Direction.east);
 
-                    esSolid = blocks.LocalGet(localPos.Add(-1, 1, -1)).IsSolid(Direction.west) && blocks.LocalGet(localPos.Add(-1, 1, -1)).IsSolid(Direction.north);
-                    neSolid = blocks.LocalGet(localPos.Add(-1, 1, 1)).IsSolid(Direction.south) && blocks.LocalGet(localPos.Add(-1, 1, 1)).IsSolid(Direction.west);
-                    wnSolid = blocks.LocalGet(localPos.Add(-1, -1, 1)).IsSolid(Direction.east) && blocks.LocalGet(localPos.Add(-1, -1, 1)).IsSolid(Direction.north);
-                    swSolid = blocks.LocalGet(localPos.Add(-1, -1, -1)).IsSolid(Direction.north) && blocks.LocalGet(localPos.Add(-1, -1, -1)).IsSolid(Direction.east);
+                    block = blocks.LocalGet(localPos.Add(-1, 1, -1));
+                    esSolid = block.IsSolid(Direction.west) && block.IsSolid(Direction.north);
+                    block = blocks.LocalGet(localPos.Add(-1, 1, 1));
+                    neSolid = block.IsSolid(Direction.south) && block.IsSolid(Direction.west);
+                    block = blocks.LocalGet(localPos.Add(-1, -1, 1));
+                    wnSolid = block.IsSolid(Direction.east) && block.IsSolid(Direction.north);
+                    block = blocks.LocalGet(localPos.Add(-1, -1, -1));
+                    swSolid = block.IsSolid(Direction.north) && block.IsSolid(Direction.east);
 
                     //light = BlockDataMap.NonSolid.Light(blocks.LocalGet(localPos.Add(-1, 0, 0))) / 15f;
-
-                    break;
-                default:
-                    Debug.LogError("Direction not recognized");
                     break;
             }
 
             if (chunk.world.config.addAOToMesh)
             {
-                AddColorsAO(meshData, wnSolid, nSolid, neSolid, eSolid, esSolid, sSolid, swSolid, wSolid, chunk.world.config.ambientOcclusionStrength);
+                SetColorsAO(vertexData, wnSolid, nSolid, neSolid, eSolid, esSolid, sSolid, swSolid, wSolid, chunk.world.config.ambientOcclusionStrength);
             }
             else
             {
-                meshData.AddColors(1, 1, 1, 1, 1);
+                SetColors(vertexData, 1, 1, 1, 1, 1);
             }
         }
 
-        public static void BuildTexture(Chunk chunk, BlockPos localPos, BlockPos globalPos, MeshData meshData, Direction direction, TextureCollection textureCollection)
+        public static void PrepareTexture(Chunk chunk, BlockPos localPos, BlockPos globalPos, VertexData[] vertexData, Direction direction, TextureCollection textureCollection)
         {
             Rect texture = textureCollection.GetTexture(chunk, localPos, globalPos, direction);
-            Vector2[] UVs = chunk.pools.PopVector2Array(4);
 
-            UVs[0] = new Vector2(texture.x + texture.width, texture.y);
-            UVs[1] = new Vector2(texture.x + texture.width, texture.y + texture.height);
-            UVs[2] = new Vector2(texture.x, texture.y + texture.height);
-            UVs[3] = new Vector2(texture.x, texture.y);
-
-            for (int i = 0; i < 4; i++)
-                meshData.uv.Add(UVs[i]);
-
-            chunk.pools.PushVector2Array(UVs);
+            vertexData[0].UV = new Vector2(texture.x + texture.width, texture.y);
+            vertexData[1].UV = new Vector2(texture.x + texture.width, texture.y + texture.height);
+            vertexData[2].UV = new Vector2(texture.x, texture.y + texture.height);
+            vertexData[3].UV = new Vector2(texture.x, texture.y);
         }
 
-        public static void BuildTexture(Chunk chunk, BlockPos localPos, BlockPos globalPos, MeshData meshData, Direction direction, TextureCollection[] textureCollections)
+        public static void PrepareTexture(Chunk chunk, BlockPos localPos, BlockPos globalPos, VertexData[] vertexData, Direction direction, TextureCollection[] textureCollections)
         {
             Rect texture = new Rect();
 
@@ -173,21 +184,14 @@ namespace Voxelmetric.Code.Blocks.Builders
                     texture = textureCollections[5].GetTexture(chunk, localPos, globalPos, direction);
                     break;
             }
-
-            Vector2[] UVs = chunk.pools.PopVector2Array(4);
-
-            UVs[0] = new Vector2(texture.x + texture.width, texture.y);
-            UVs[1] = new Vector2(texture.x + texture.width, texture.y + texture.height);
-            UVs[2] = new Vector2(texture.x, texture.y + texture.height);
-            UVs[3] = new Vector2(texture.x, texture.y);
-
-            for (int i = 0; i < 4; i++)
-                meshData.uv.Add(UVs[i]);
-
-            chunk.pools.PushVector2Array(UVs);
+            
+            vertexData[0].UV = new Vector2(texture.x + texture.width, texture.y);
+            vertexData[1].UV = new Vector2(texture.x + texture.width, texture.y + texture.height);
+            vertexData[2].UV = new Vector2(texture.x, texture.y + texture.height);
+            vertexData[3].UV = new Vector2(texture.x, texture.y);
         }
 
-        private static void AddQuadToMeshData(Chunk chunk, BlockPos localPos, BlockPos globalPos, MeshData meshData, Direction direction)
+        private static void PrepareFace(Chunk chunk, BlockPos localPos, BlockPos globalPos, VertexData[] vertexData, Direction direction)
         {
             //Adding a tiny overlap between block meshes may solve floating point imprecision
             //errors causing pixel size gaps between blocks when looking closely
@@ -200,50 +204,50 @@ namespace Voxelmetric.Code.Blocks.Builders
             switch (direction)
             {
                 case Direction.up:
-                    meshData.AddVertex(new Vector3(vPos.x - halfBlock, vPos.y + halfBlock, vPos.z + halfBlock));
-                    meshData.AddVertex(new Vector3(vPos.x + halfBlock, vPos.y + halfBlock, vPos.z + halfBlock));
-                    meshData.AddVertex(new Vector3(vPos.x + halfBlock, vPos.y + halfBlock, vPos.z - halfBlock));
-                    meshData.AddVertex(new Vector3(vPos.x - halfBlock, vPos.y + halfBlock, vPos.z - halfBlock));
+                    vertexData[0].Vertex = new Vector3(vPos.x - halfBlock, vPos.y + halfBlock, vPos.z + halfBlock);
+                    vertexData[1].Vertex = new Vector3(vPos.x + halfBlock, vPos.y + halfBlock, vPos.z + halfBlock);
+                    vertexData[2].Vertex = new Vector3(vPos.x + halfBlock, vPos.y + halfBlock, vPos.z - halfBlock);
+                    vertexData[3].Vertex = new Vector3(vPos.x - halfBlock, vPos.y + halfBlock, vPos.z - halfBlock);
                     break;
                 case Direction.down:
-                    meshData.AddVertex(new Vector3(vPos.x - halfBlock, vPos.y - halfBlock, vPos.z - halfBlock));
-                    meshData.AddVertex(new Vector3(vPos.x + halfBlock, vPos.y - halfBlock, vPos.z - halfBlock));
-                    meshData.AddVertex(new Vector3(vPos.x + halfBlock, vPos.y - halfBlock, vPos.z + halfBlock));
-                    meshData.AddVertex(new Vector3(vPos.x - halfBlock, vPos.y - halfBlock, vPos.z + halfBlock));
+                    vertexData[0].Vertex = new Vector3(vPos.x - halfBlock, vPos.y - halfBlock, vPos.z - halfBlock);
+                    vertexData[1].Vertex = new Vector3(vPos.x + halfBlock, vPos.y - halfBlock, vPos.z - halfBlock);
+                    vertexData[2].Vertex = new Vector3(vPos.x + halfBlock, vPos.y - halfBlock, vPos.z + halfBlock);
+                    vertexData[3].Vertex = new Vector3(vPos.x - halfBlock, vPos.y - halfBlock, vPos.z + halfBlock);
                     break;
                 case Direction.north:
-                    meshData.AddVertex(new Vector3(vPos.x + halfBlock, vPos.y - halfBlock, vPos.z + halfBlock));
-                    meshData.AddVertex(new Vector3(vPos.x + halfBlock, vPos.y + halfBlock, vPos.z + halfBlock));
-                    meshData.AddVertex(new Vector3(vPos.x - halfBlock, vPos.y + halfBlock, vPos.z + halfBlock));
-                    meshData.AddVertex(new Vector3(vPos.x - halfBlock, vPos.y - halfBlock, vPos.z + halfBlock));
+                    vertexData[0].Vertex = new Vector3(vPos.x + halfBlock, vPos.y - halfBlock, vPos.z + halfBlock);
+                    vertexData[1].Vertex = new Vector3(vPos.x + halfBlock, vPos.y + halfBlock, vPos.z + halfBlock);
+                    vertexData[2].Vertex = new Vector3(vPos.x - halfBlock, vPos.y + halfBlock, vPos.z + halfBlock);
+                    vertexData[3].Vertex = new Vector3(vPos.x - halfBlock, vPos.y - halfBlock, vPos.z + halfBlock);
                     break;
                 case Direction.east:
-                    meshData.AddVertex(new Vector3(vPos.x + halfBlock, vPos.y - halfBlock, vPos.z - halfBlock));
-                    meshData.AddVertex(new Vector3(vPos.x + halfBlock, vPos.y + halfBlock, vPos.z - halfBlock));
-                    meshData.AddVertex(new Vector3(vPos.x + halfBlock, vPos.y + halfBlock, vPos.z + halfBlock));
-                    meshData.AddVertex(new Vector3(vPos.x + halfBlock, vPos.y - halfBlock, vPos.z + halfBlock));
+                    vertexData[0].Vertex = new Vector3(vPos.x + halfBlock, vPos.y - halfBlock, vPos.z - halfBlock);
+                    vertexData[1].Vertex = new Vector3(vPos.x + halfBlock, vPos.y + halfBlock, vPos.z - halfBlock);
+                    vertexData[2].Vertex = new Vector3(vPos.x + halfBlock, vPos.y + halfBlock, vPos.z + halfBlock);
+                    vertexData[3].Vertex = new Vector3(vPos.x + halfBlock, vPos.y - halfBlock, vPos.z + halfBlock);
                     break;
                 case Direction.south:
-                    meshData.AddVertex(new Vector3(vPos.x - halfBlock, vPos.y - halfBlock, vPos.z - halfBlock));
-                    meshData.AddVertex(new Vector3(vPos.x - halfBlock, vPos.y + halfBlock, vPos.z - halfBlock));
-                    meshData.AddVertex(new Vector3(vPos.x + halfBlock, vPos.y + halfBlock, vPos.z - halfBlock));
-                    meshData.AddVertex(new Vector3(vPos.x + halfBlock, vPos.y - halfBlock, vPos.z - halfBlock));
+                    vertexData[0].Vertex = new Vector3(vPos.x - halfBlock, vPos.y - halfBlock, vPos.z - halfBlock);
+                    vertexData[1].Vertex = new Vector3(vPos.x - halfBlock, vPos.y + halfBlock, vPos.z - halfBlock);
+                    vertexData[2].Vertex = new Vector3(vPos.x + halfBlock, vPos.y + halfBlock, vPos.z - halfBlock);
+                    vertexData[3].Vertex = new Vector3(vPos.x + halfBlock, vPos.y - halfBlock, vPos.z - halfBlock);
                     break;
                 case Direction.west:
-                    meshData.AddVertex(new Vector3(vPos.x - halfBlock, vPos.y - halfBlock, vPos.z + halfBlock));
-                    meshData.AddVertex(new Vector3(vPos.x - halfBlock, vPos.y + halfBlock, vPos.z + halfBlock));
-                    meshData.AddVertex(new Vector3(vPos.x - halfBlock, vPos.y + halfBlock, vPos.z - halfBlock));
-                    meshData.AddVertex(new Vector3(vPos.x - halfBlock, vPos.y - halfBlock, vPos.z - halfBlock));
+                    vertexData[0].Vertex = new Vector3(vPos.x - halfBlock, vPos.y - halfBlock, vPos.z + halfBlock);
+                    vertexData[1].Vertex = new Vector3(vPos.x - halfBlock, vPos.y + halfBlock, vPos.z + halfBlock);
+                    vertexData[2].Vertex = new Vector3(vPos.x - halfBlock, vPos.y + halfBlock, vPos.z - halfBlock);
+                    vertexData[3].Vertex = new Vector3(vPos.x - halfBlock, vPos.y - halfBlock, vPos.z - halfBlock);
                     break;
                 default:
                     Debug.LogError("Direction not recognized");
                     break;
             }
 
-            meshData.AddQuadTriangles();
+            chunk.render.batcher.AddFace(vertexData, DirectionUtils.Backface(direction));
         }
 
-        private static void AddColorsAO(MeshData meshData, bool wnSolid, bool nSolid, bool neSolid, bool eSolid, bool esSolid, bool sSolid, bool swSolid, bool wSolid, float strength)
+        private static void SetColorsAO(VertexData[] vertexData, bool wnSolid, bool nSolid, bool neSolid, bool eSolid, bool esSolid, bool sSolid, bool swSolid, bool wSolid, float strength)
         {
             float ne = 1;
             float es = 1;
@@ -288,7 +292,28 @@ namespace Voxelmetric.Code.Blocks.Builders
             if (esSolid)
                 es -= strength;
 
-            meshData.AddColors(ne, es, sw, wn, 1);
+            SetColors(vertexData, ne, es, sw, wn, 1);
+        }
+
+        public static void SetColors(VertexData[] data, float ne, float es, float sw, float wn, float light)
+        {
+            wn = (wn * light);
+            ne = (ne * light);
+            es = (es * light);
+            sw = (sw * light);
+
+            data[0].Color = new Color(wn, wn, wn);
+            data[1].Color = new Color(ne, ne, ne);
+            data[2].Color = new Color(es, es, es);
+            data[3].Color = new Color(sw, sw, sw);
+        }
+
+        public static void SetColors(VertexData[] data, ref Color color)
+        {
+            data[0].Color = color;
+            data[1].Color = color;
+            data[2].Color = color;
+            data[3].Color = color;
         }
     }
 }

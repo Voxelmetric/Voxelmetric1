@@ -1,18 +1,20 @@
 ﻿using UnityEngine;
 using System.Collections;
-using System.Collections.Generic;
 using Voxelmetric.Code.Core;
 using Voxelmetric.Code.Load_Resources.Textures;
+using Voxelmetric.Code.Rendering;
 
 public class CustomMeshBlockConfig: BlockConfig
 {
     public TextureCollection[] textures;
 
-    public int[] tris;
-    public Vector3[] verts;
-    public Vector2[] uvs;
+    public int[] tris { get { return m_triangles; } }
+    public VertexData[] verts { get { return m_vertices; } }
 
     public TextureCollection texture;
+
+    private int[] m_triangles;
+    private VertexData[] m_vertices;
 
     public override void SetUp(Hashtable config, World world)
     {
@@ -26,39 +28,46 @@ public class CustomMeshBlockConfig: BlockConfig
         meshOffset.y = float.Parse(_GetPropertyFromConfig(config, "meshYOffset", "0"));
         meshOffset.z = float.Parse(_GetPropertyFromConfig(config, "meshZOffset", "0"));
 
-        SetUpMesh(world.config.meshFolder + "/" + _GetPropertyFromConfig(config, "meshFileLocation", ""), meshOffset, out tris, out verts, out uvs);
+        SetUpMesh(world.config.meshFolder + "/" + _GetPropertyFromConfig(config, "meshFileLocation", ""), meshOffset, out m_triangles, out m_vertices);
     }
 
-    protected void SetUpMesh(string meshLocation, Vector3 positionOffset, out int[] trisOut, out Vector3[] vertsOut, out Vector2[] uvsOut)
+    protected static void SetUpMesh(string meshLocation, Vector3 positionOffset, out int[] trisOut, out VertexData[] vertsOut)
     {
         GameObject meshGO = (GameObject)Resources.Load(meshLocation);
 
-        List<Vector3> verts = new List<Vector3>();
-        List<int> tris = new List<int>();
-        List<Vector2> uvs = new List<Vector2>();
+        int vertexCnt = 0;
+        int triangleCnt = 0;
+
+        for (int GOIndex = 0; GOIndex<meshGO.transform.childCount; GOIndex++)
+        {
+            Mesh mesh = meshGO.transform.GetChild(GOIndex).GetComponent<MeshFilter>().sharedMesh;
+
+            vertexCnt += mesh.vertices.Length;
+            triangleCnt += mesh.triangles.Length;
+        }
+
+        trisOut = new int[triangleCnt];
+        vertsOut = new VertexData[vertexCnt];
+
+        int ti=0, vi=0;
 
         for (int GOIndex = 0; GOIndex < meshGO.transform.childCount; GOIndex++)
         {
             Mesh mesh = meshGO.transform.GetChild(GOIndex).GetComponent<MeshFilter>().sharedMesh;
 
-            for (int i = 0; i < mesh.vertices.Length; i++)
+            for (int i = 0; i < mesh.vertices.Length; i++, vi++)
             {
-                verts.Add(mesh.vertices[i] + positionOffset);
+                vertsOut[vi] = new VertexData
+                {
+                    Vertex = mesh.vertices[i]+positionOffset,
+                    UV = mesh.uv[i],
+                    //Coloring of blocks is not yet implemented so just pass in full brightness
+                    Color = new Color32(1, 1, 1, 1)
+                };
             }
 
-            for (int i = 0; i < mesh.triangles.Length; i++)
-            {
-                tris.Add(mesh.triangles[i]);
-            }
-
-            for (int i = 0; i < mesh.uv.Length; i++)
-            {
-                uvs.Add(mesh.uv[i]);
-            }
+            for (int i = 0; i < mesh.triangles.Length; i++, ti++)
+                trisOut[ti] = mesh.triangles[i];
         }
-
-        trisOut = tris.ToArray();
-        vertsOut = verts.ToArray();
-        uvsOut = uvs.ToArray();
     }
 }

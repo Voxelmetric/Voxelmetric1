@@ -1,33 +1,29 @@
-﻿using UnityEngine;
-using Voxelmetric.Code.Core.Interface;
+﻿using Voxelmetric.Code.Core.Interface;
 using Voxelmetric.Code.Data_types;
+using Voxelmetric.Code.Rendering;
 using Voxelmetric.Code.Utilities;
 
 namespace Voxelmetric.Code.Core
 {
     public class ChunkRender: IChunkRender
     {
-        protected MeshData meshData = new MeshData();
+        protected DrawCallBatcher m_drawCallBatcher;
         protected Chunk chunk;
 
-        public Mesh mesh
+        public DrawCallBatcher batcher
         {
-            get { return meshData.mesh; }
+            get { return m_drawCallBatcher; }
         }
 
         public ChunkRender(Chunk chunk)
         {
             this.chunk = chunk;
+            m_drawCallBatcher = new DrawCallBatcher(Globals.CubeMeshBuilder, this.chunk);
         }
 
         public void Reset()
         {
-            if (meshData.mesh!=null)
-            {
-                meshData.mesh.Clear(false);
-                meshData.mesh = null;
-            }
-            
+            m_drawCallBatcher.Clear();
         }
 
         /// <summary> Updates the chunk based on its contents </summary>
@@ -39,15 +35,13 @@ namespace Voxelmetric.Code.Core
                 if (block.type==0)
                     continue;
 
-                block.BuildBlock(chunk, localBlockPos, localBlockPos+chunk.pos, meshData);
+                block.BuildBlock(chunk, localBlockPos, localBlockPos+chunk.pos);
             }
-
-            meshData.ConvertToArrays();
         }
 
         public void BuildMesh()
         {
-            meshData.CommitMesh();
+            m_drawCallBatcher.Commit();
         }
     }
 }

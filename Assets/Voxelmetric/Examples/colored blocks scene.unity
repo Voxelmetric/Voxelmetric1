@@ -917,15 +917,23 @@ Prefab:
       objectReference: {fileID: 0}
     - target: {fileID: 479208, guid: 28fc5073d6f2b5b42acaec530dd745cd, type: 2}
       propertyPath: m_RootOrder
-      value: 5
+      value: 4
       objectReference: {fileID: 0}
     - target: {fileID: 11498696, guid: 28fc5073d6f2b5b42acaec530dd745cd, type: 2}
       propertyPath: useMultiThreading
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 104736, guid: 28fc5073d6f2b5b42acaec530dd745cd, type: 2}
       propertyPath: m_Name
       value: Voxelmetric World
+      objectReference: {fileID: 0}
+    - target: {fileID: 11498696, guid: 28fc5073d6f2b5b42acaec530dd745cd, type: 2}
+      propertyPath: chunkMaterial
+      value: 
+      objectReference: {fileID: 2100000, guid: 7fa2460a4614b844c9c80d1c0398b97d, type: 2}
+    - target: {fileID: 11406898, guid: 28fc5073d6f2b5b42acaec530dd745cd, type: 2}
+      propertyPath: ObjectPools.Array.data[0].Name
+      value: Chunk
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: 28fc5073d6f2b5b42acaec530dd745cd, type: 2}
@@ -935,7 +943,7 @@ MonoBehaviour:
   m_PrefabParentObject: {fileID: 11498696, guid: 28fc5073d6f2b5b42acaec530dd745cd,
     type: 2}
   m_PrefabInternal: {fileID: 838321169}
-  m_Script: {fileID: 11500000, guid: d2da8c6b21a10564cbffd7e51b5ecc72, type: 3}
+  m_Script: {fileID: 11500000, guid: ecee43494f86ea941b01b535fa1815c9, type: 3}
 --- !u!1 &842839157
 GameObject:
   m_ObjectHideFlags: 0
@@ -2374,7 +2382,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   world: {fileID: 838321170}
-  generateTerrain: 1
   chunkLoadRadius: 6
   DistanceToDeleteChunks: 8
 --- !u!81 &1929481914

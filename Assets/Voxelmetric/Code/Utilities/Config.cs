@@ -20,7 +20,7 @@ namespace Voxelmetric.Code.Utilities
 
     public static class Core
     {
-        public static bool UseMultiThreading = true;
+        public static readonly bool UseMultiThreading = true;
     }
 
     public static class Directories

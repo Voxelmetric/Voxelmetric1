@@ -1,5 +1,4 @@
 ﻿using System;
-using UnityEngine;
 using UnityEngine.Assertions;
 using Voxelmetric.Code.Common.MemoryPooling;
 
@@ -28,6 +27,12 @@ namespace Voxelmetric.Code.Common.Threading
             //Debug.Log("Threadpool created with " + threadCnt + " threads");
         }
 
+        public int GenerateThreadID()
+        {
+            m_nextThreadIndex = GetThreadIDFromIndex(m_nextThreadIndex + 1);
+            return m_nextThreadIndex;
+        }
+
         public int GetThreadIDFromIndex(int index)
         {
             return Helpers.Mod(index, m_pools.Length);
@@ -37,6 +42,11 @@ namespace Voxelmetric.Code.Common.Threading
         {
             int id = GetThreadIDFromIndex(index);
             return m_pools[id].Pools;
+        }
+
+        public TaskPool GetTaskPool(int index)
+        {
+            return m_pools[index];
         }
 
         public void Start()
@@ -54,8 +64,8 @@ namespace Voxelmetric.Code.Common.Threading
 
         public void AddItem(Action<object> action)
         {
-            m_nextThreadIndex = GetThreadIDFromIndex(m_nextThreadIndex+1);
-            m_pools[m_nextThreadIndex].AddItem(action);
+            int threadID = GenerateThreadID();
+            m_pools[threadID].AddItem(action);
         }
 
         public void AddItem(int threadID, Action<object> action)
@@ -67,8 +77,8 @@ namespace Voxelmetric.Code.Common.Threading
 
         public void AddItem(Action<object> action, object arg)
         {
-            m_nextThreadIndex = GetThreadIDFromIndex(m_nextThreadIndex+1);
-            m_pools[m_nextThreadIndex].AddItem(action, arg);
+            int threadID = GenerateThreadID();
+            m_pools[threadID].AddItem(action, arg);
         }
 
         public void AddItem(int threadID, Action<object> action, object arg)
@@ -77,7 +87,7 @@ namespace Voxelmetric.Code.Common.Threading
             Assert.IsTrue(threadID>=0 && threadID<m_pools.Length);
             m_pools[threadID].AddItem(action, arg);
         }
-
+        
         public int Size
         {
             get

@@ -4,28 +4,62 @@ namespace Voxelmetric.Code.Common.Threading.Managers
 {
     public static class WorkPoolManager
     {
-        private static readonly List<ThreadItem> WorkItems = new List<ThreadItem>();
+        private static readonly List<ThreadPoolItem> WorkItems = new List<ThreadPoolItem>();
 
-        public static void Add(ThreadItem action)
+        public static void Add(ThreadPoolItem action)
         {
             WorkItems.Add(action);
         }
 
         public static void Commit()
         {
+            if (WorkItems.Count<=0)
+                return;
+
             // Commit all the work we have
             if (Utilities.Core.UseMultiThreading)
             {
                 ThreadPool pool = Globals.WorkPool;
+                
+                // Sort our work items by threadID
+                WorkItems.Sort((x,y)=>x.ThreadID.CompareTo(y.ThreadID));
 
-                for (int i = 0; i<WorkItems.Count; i++)
+                // Commit items to their respective task thread.
+                // Instead of commiting tasks one by one, we take them all and commit
+                // them at once
+                TaskPool tp;
+                int from = 0, to = 0;
+                for (int i = 0; i<WorkItems.Count-1; i++)
                 {
-                    var item = WorkItems[i];
-                    if(item.ThreadID>=0)
-                        pool.AddItem(item.ThreadID, item.Action, item.Arg);
-                    else
-                        pool.AddItem(item.Action, item.Arg);
+                    ThreadPoolItem curr = WorkItems[i];
+                    ThreadPoolItem next = WorkItems[i+1];
+                    if (curr.ThreadID==next.ThreadID)
+                    {
+                        to = i+1;
+                        continue;
+                    }
+
+                    tp = pool.GetTaskPool(curr.ThreadID);
+                    tp.Lock();
+                    for (int j = from; j<=to; j++)
+                    {
+                        ThreadPoolItem item = WorkItems[j];
+                        tp.AddItemUnsafe(item.Action, item.Arg);
+                    }
+                    tp.Unlock();
+
+                    from = i+1;
+                    to = from;
                 }
+                    
+                tp = pool.GetTaskPool(WorkItems[from].ThreadID);
+                tp.Lock();
+                for (int j = from; j<=to; j++)
+                {
+                    ThreadPoolItem item = WorkItems[j];
+                    tp.AddItemUnsafe(item.Action, item.Arg);
+                }
+                tp.Unlock();
 
                 //Debug.Log("WorkPool tasks: " + pool.Size);
             }

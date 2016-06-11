@@ -7,7 +7,7 @@ public class SolidBlock : Block
 {
     public virtual bool solidTowardsSameType { get { return ((SolidBlockConfig)config).solidTowardsSameType; } }
 
-    public override void AddBlockData(Chunk chunk, BlockPos localPos, BlockPos globalPos, MeshData meshData)
+    public override void AddBlockData(Chunk chunk, BlockPos localPos, BlockPos globalPos)
     {
         for (int d = 0; d < 6; d++)
         {
@@ -17,15 +17,12 @@ public class SolidBlock : Block
             {
                 if (solid || !solidTowardsSameType || adjacentBlock.type != type)
                 {
-                    BuildFace(chunk, localPos, globalPos, meshData, dir);
+                    BuildFace(chunk, localPos, globalPos, dir);
                 }
             }
         }
-
-        BuildAlways(chunk, localPos, globalPos, meshData);
     }
 
-    public virtual void BuildFace(Chunk chunk, BlockPos localPos, BlockPos globalPos, MeshData meshData, Direction direction) { }
-    public virtual void BuildAlways(Chunk chunk, BlockPos localPos, BlockPos globalPos, MeshData meshData) { }
+    protected virtual void BuildFace(Chunk chunk, BlockPos localPos, BlockPos globalPos, Direction direction) { }
 
 }

@@ -19,17 +19,17 @@ public class TexturedCube : CubeBlock
     //    base.SetUpController(config, world);
     //}
 
-    //public override void BuildFace(Chunk chunk, BlockPos localPos, BlockPos globalPos, MeshData meshData, Direction direction, Block block)
+    //public override void BuildFace(Chunk chunk, BlockPos localPos, BlockPos globalPos, VertexData vertexData, Direction direction, Block block)
     //{
-    //    BlockBuilder.BuildRenderer(chunk, localPos, globalPos, meshData, direction);
-    //    BlockBuilder.BuildTexture(chunk, localPos, globalPos, meshData, direction, new TextureCollection[] {
+    //    BlockBuilder.BuildRenderer(chunk, localPos, globalPos, vertexData, direction);
+    //    BlockBuilder.BuildTexture(chunk, localPos, globalPos, vertexData, direction, new TextureCollection[] {
     //        textureCollections[block.data], textureCollections[block.data], textureCollections[block.data],
     //        textureCollections[block.data], textureCollections[block.data], textureCollections[block.data]
     //    });
-    //    BlockBuilder.BuildColors(chunk, localPos, globalPos, meshData, direction);
+    //    BlockBuilder.BuildColors(chunk, localPos, globalPos, vertexData, direction);
     //    if (block.world.config.useCollisionMesh)
     //    {
-    //        BlockBuilder.BuildCollider(chunk, localPos, globalPos, meshData, direction);
+    //        BlockBuilder.BuildCollider(chunk, localPos, globalPos, vertexData, direction);
     //    }
     //}
 }

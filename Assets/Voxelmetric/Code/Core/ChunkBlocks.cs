@@ -77,8 +77,7 @@ namespace Voxelmetric.Code.Core
 
         public void Reset()
         {
-            blocks = Helpers.CreateArray1D<Block>(Env.ChunkVolume);
-            
+            Array.Clear(blocks, 0, blocks.Length);
             contentsModified = false;
         }
 

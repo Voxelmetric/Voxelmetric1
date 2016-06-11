@@ -1979,6 +1979,10 @@ Prefab:
       propertyPath: networking.isServer
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 11406898, guid: 28fc5073d6f2b5b42acaec530dd745cd, type: 2}
+      propertyPath: ObjectPools.Array.data[0].Name
+      value: Chunk
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: 28fc5073d6f2b5b42acaec530dd745cd, type: 2}
   m_IsPrefabParent: 0
@@ -1987,7 +1991,7 @@ MonoBehaviour:
   m_PrefabParentObject: {fileID: 11498696, guid: 28fc5073d6f2b5b42acaec530dd745cd,
     type: 2}
   m_PrefabInternal: {fileID: 1492031508}
-  m_Script: {fileID: 11500000, guid: d2da8c6b21a10564cbffd7e51b5ecc72, type: 3}
+  m_Script: {fileID: 11500000, guid: ecee43494f86ea941b01b535fa1815c9, type: 3}
 --- !u!1 &1545198196
 GameObject:
   m_ObjectHideFlags: 0
@@ -2172,7 +2176,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   world: {fileID: 1492031509}
-  generateTerrain: 1
   chunkLoadRadius: 6
   DistanceToDeleteChunks: 8
 --- !u!81 &1825079403

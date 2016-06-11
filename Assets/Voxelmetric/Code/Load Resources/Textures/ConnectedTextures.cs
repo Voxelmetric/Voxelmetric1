@@ -5,7 +5,7 @@ using Voxelmetric.Code.Data_types;
 
 namespace Voxelmetric.Code.Load_Resources.Textures
 {
-    public class ConnectedTextures {
+    public static class ConnectedTextures {
 
         public static bool IsSame(Chunk chunk, BlockPos localPos, int h, int v, Direction forwards, int type)
         {

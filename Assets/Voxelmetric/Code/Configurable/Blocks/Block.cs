@@ -39,14 +39,14 @@ public class Block
         return solid;
     }
 
-    public virtual void BuildBlock(Chunk chunk, BlockPos localPos, BlockPos globalPos, MeshData meshData)
+    public virtual void BuildBlock(Chunk chunk, BlockPos localPos, BlockPos globalPos)
     {
         PreRender(chunk, localPos, globalPos);
-        AddBlockData(chunk, localPos, globalPos, meshData);
+        AddBlockData(chunk, localPos, globalPos);
         PostRender(chunk, localPos, globalPos);
     }
 
-    public virtual void AddBlockData    (Chunk chunk, BlockPos localPos, BlockPos globalPos, MeshData meshData) { }
+    public virtual void AddBlockData    (Chunk chunk, BlockPos localPos, BlockPos globalPos) { }
     public virtual void OnCreate        (Chunk chunk, BlockPos localPos, BlockPos globalPos) { }
     public virtual void PreRender       (Chunk chunk, BlockPos localPos, BlockPos globalPos) { }
     public virtual void PostRender      (Chunk chunk, BlockPos localPos, BlockPos globalPos) { }

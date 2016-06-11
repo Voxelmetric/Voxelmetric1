@@ -29,9 +29,10 @@ namespace Voxelmetric.Code.Core
         public bool useMultiThreading;
     
         private Block voidBlock;
-        private Block airBlock;
+        private Block airBlock;        
 
         public bool UseMultiThreading { get { return useMultiThreading; } }
+
 
         public Block Void {
             get {
@@ -76,6 +77,8 @@ namespace Voxelmetric.Code.Core
             config = new ConfigLoader<WorldConfig>(new[] { "Worlds" }).GetConfig(worldConfig);
             textureIndex = Voxelmetric.resources.GetOrLoadTextureIndex(this);
             blockIndex = Voxelmetric.resources.GetOrLoadBlockIndex(this);
+
+            chunkMaterial.mainTexture = textureIndex.atlas;
         }
 
         public void StartWorld()
@@ -87,14 +90,6 @@ namespace Voxelmetric.Code.Core
             networking.StartConnections(this);
 
             terrainGen = new TerrainGen(this, config.layerFolder);
-
-            var renderer = gameObject.GetComponent<Renderer>();
-            if (renderer!=null)
-            {
-                chunkMaterial = renderer.material;
-                chunkMaterial.mainTexture = textureIndex.atlas;
-            }
-
             chunksLoop = new ChunksLoop(this);
         }
 

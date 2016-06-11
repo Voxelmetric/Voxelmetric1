@@ -1,4 +1,5 @@
-﻿using Voxelmetric.Code.Common.MemoryPooling;
+﻿using Voxelmetric.Code.Builders;
+using Voxelmetric.Code.Common.MemoryPooling;
 using Voxelmetric.Code.Common.Threading;
 
 namespace Voxelmetric.Code
@@ -26,6 +27,16 @@ namespace Voxelmetric.Code
             {
                 IOPool = new TaskPool();
                 IOPool.Start();
+            }
+        }
+
+        // Mesh builder
+        private static readonly IMeshBuilder s_cubeMeshBuilder = new CubeMeshBuilder();
+        public static IMeshBuilder CubeMeshBuilder
+        {
+            get
+            {
+                return s_cubeMeshBuilder;
             }
         }
 

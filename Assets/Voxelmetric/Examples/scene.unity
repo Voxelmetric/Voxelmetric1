@@ -397,8 +397,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   world: {fileID: 1856110255}
-  chunkLoadRadius: 12
-  DistanceToDeleteChunks: 14
+  chunkLoadRadius: 6
+  DistanceToDeleteChunks: 8
 --- !u!1 &312836251
 GameObject:
   m_ObjectHideFlags: 0
@@ -993,12 +993,24 @@ Prefab:
       objectReference: {fileID: 0}
     - target: {fileID: 479208, guid: 28fc5073d6f2b5b42acaec530dd745cd, type: 2}
       propertyPath: m_RootOrder
-      value: 5
+      value: 4
       objectReference: {fileID: 0}
     - target: {fileID: 104736, guid: 28fc5073d6f2b5b42acaec530dd745cd, type: 2}
       propertyPath: m_Name
       value: Voxelmetric World
       objectReference: {fileID: 0}
+    - target: {fileID: 11406898, guid: 28fc5073d6f2b5b42acaec530dd745cd, type: 2}
+      propertyPath: ObjectPools.Array.data[0].Name
+      value: Chunk
+      objectReference: {fileID: 0}
+    - target: {fileID: 11498696, guid: 28fc5073d6f2b5b42acaec530dd745cd, type: 2}
+      propertyPath: useMultiThreading
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 11498696, guid: 28fc5073d6f2b5b42acaec530dd745cd, type: 2}
+      propertyPath: chunkMaterial
+      value: 
+      objectReference: {fileID: 2100000, guid: 7fa2460a4614b844c9c80d1c0398b97d, type: 2}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: 28fc5073d6f2b5b42acaec530dd745cd, type: 2}
   m_IsPrefabParent: 0

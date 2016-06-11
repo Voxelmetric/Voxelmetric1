@@ -11,7 +11,7 @@ namespace Voxelmetric.Code.Common.Threading
         //! Each thread contains an object pool
         public LocalPools Pools { get; private set; }
 
-        private List<ThreadItem> m_items; // list of tasks
+        private List<TaskPoolItem> m_items; // list of tasks
         private readonly object m_lock = new object();
 
         private readonly AutoResetEvent m_event; // event for notifing worker thread about work
@@ -23,7 +23,7 @@ namespace Voxelmetric.Code.Common.Threading
         {
             Pools = new LocalPools();
 
-            m_items = new List<ThreadItem>();
+            m_items = new List<TaskPoolItem>();
             m_event = new AutoResetEvent(false);
             m_thread = new Thread(ThreadFunc)
             {
@@ -79,7 +79,7 @@ namespace Voxelmetric.Code.Common.Threading
             // Add task to task list and notify the worker thread
             lock (m_lock)
             {
-                m_items.Add(new ThreadItem(action, null));
+                m_items.Add(new TaskPoolItem(action, null));
             }
             m_event.Set();
         }
@@ -93,14 +93,45 @@ namespace Voxelmetric.Code.Common.Threading
             // Add task to task list and notify the worker thread
             lock (m_lock)
             {
-                m_items.Add(new ThreadItem(action, arg));
+                m_items.Add(new TaskPoolItem(action, arg));
             }
+            m_event.Set();
+        }
+
+        public void AddItemUnsafe(Action<object> action)
+        {
+            // Do not add new action in we re stopped or action is invalid
+            if (action == null || m_stop)
+                return;
+
+            // Add task to task list and notify the worker thread
+            m_items.Add(new TaskPoolItem(action, null));
+        }
+
+        public void AddItemUnsafe(Action<object> action, object arg)
+        {
+            // Do not add new action in we re stopped or action is invalid
+            if (action == null || m_stop)
+                return;
+
+            // Add task to task list and notify the worker thread
+            m_items.Add(new TaskPoolItem(action, arg));
+        }
+
+        public void Lock()
+        {
+            Monitor.Enter(m_lock);
+        }
+
+        public void Unlock()
+        {
+            Monitor.Exit(m_lock);
             m_event.Set();
         }
 
         private void ThreadFunc()
         {
-            var actions = new List<ThreadItem>();
+            var actions = new List<TaskPoolItem>();
 
             while (!m_stop)
             {
@@ -112,18 +143,19 @@ namespace Voxelmetric.Code.Common.Threading
                     actions = tmp;
                 }
 
+
                 // Execute all tasks in a row
                 for (int i = 0; i < actions.Count; i++)
                 {
                     // Execute the action
                     // Note, it's up to action to provide exception handling
-                    ThreadItem item = actions[i];
+                    TaskPoolItem poolItem = actions[i];
 
 #if DEBUG
                     try
                     {
 #endif
-                        item.Action(item.Arg);
+                        poolItem.Action(poolItem.Arg);
 #if DEBUG
                     }
                     catch (Exception ex)

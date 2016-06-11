@@ -11,65 +11,7 @@ namespace Voxelmetric.Code
     {
         //Used as a manager class with references to classes treated like singletons
         public static VoxelmetricResources resources = new VoxelmetricResources ();
-
-        public static GameObject CreateGameObjectBlock (Block original, Vector3 position, Quaternion rotation)
-        {
-            BlockPos blockPos = new BlockPos ();
-
-            if (original.type == Block.AirType)
-                return null;
-
-            EmptyChunk chunk = null;// original.world.GetComponent<EmptyChunk> ();
-            if (chunk == null) {
-                chunk = EmptyChunk.Create(original.world, new BlockPos ());
-            }
-
-            original.OnCreate (chunk, blockPos - blockPos.ContainingChunkCoordinates (), blockPos);
-
-            return GOFromBlock (original, blockPos, position, rotation, chunk);
-        }
-
-        public static GameObject CreateGameObjectBlock (BlockPos blockPos, World world, Vector3 position, Quaternion rotation)
-        {
-            Block original = GetBlock (blockPos, world);
-            if (original.type == Block.AirType)
-                return null;
-
-            EmptyChunk chunk = world.GetComponent<EmptyChunk> ();
-            if (chunk == null) {
-                chunk = EmptyChunk.Create(original.world, blockPos.ContainingChunkCoordinates ());
-            }
-
-            original.OnCreate (chunk, blockPos - blockPos.ContainingChunkCoordinates (), blockPos);
-
-            return GOFromBlock (original, blockPos, position, rotation, chunk);
-        }
-
-        private static GameObject GOFromBlock (Block original, BlockPos blockPos, Vector3 position, Quaternion rotation, Chunk chunk)
-        {
-            GameObject go = (GameObject)GameObject.Instantiate (Resources.Load<GameObject> (chunk.world.config.pathToBlockPrefab), position, rotation);
-            go.transform.localScale = new Vector3 (Env.BlockSize, Env.BlockSize, Env.BlockSize);
-
-            MeshData meshData = new MeshData ();
-
-            original.AddBlockData (chunk, blockPos, blockPos, meshData);
-            for (int i = 0; i < meshData.vertices.Count; i++) {
-                meshData.vertices [i] -= (Vector3)blockPos;
-            }
-
-            Mesh mesh = new Mesh ();
-            mesh.vertices = meshData.vertices.ToArray ();
-            mesh.triangles = meshData.triangles.ToArray ();
-            mesh.colors = meshData.colors.ToArray ();
-            mesh.uv = meshData.uv.ToArray ();
-            mesh.RecalculateNormals ();
-
-            go.GetComponent<Renderer> ().material.mainTexture = chunk.world.textureIndex.atlas;
-            go.GetComponent<MeshFilter> ().mesh = mesh;
-
-            return go;
-        }
-
+        
         public static bool SetBlock (BlockPos pos, Block block, World world)
         {
             Chunk chunk = world.chunks.Get (pos);

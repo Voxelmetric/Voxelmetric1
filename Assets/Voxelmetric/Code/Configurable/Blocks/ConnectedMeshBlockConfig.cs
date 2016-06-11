@@ -4,13 +4,13 @@ using System.Collections.Generic;
 using Voxelmetric.Code.Core;
 using Voxelmetric.Code.Data_types;
 using Voxelmetric.Code.Load_Resources.Textures;
+using Voxelmetric.Code.Rendering;
 
 public class ConnectedMeshBlockConfig : CustomMeshBlockConfig
 {
-    public Dictionary<Direction, int[]> directionalTris = new Dictionary<Direction, int[]>();
-    public Dictionary<Direction, Vector3[]> directionalVerts = new Dictionary<Direction, Vector3[]>();
-    public Dictionary<Direction, Vector2[]> directionalUvs = new Dictionary<Direction, Vector2[]>();
-    public Dictionary<Direction, TextureCollection> directionalTextures = new Dictionary<Direction, TextureCollection>();
+    public readonly Dictionary<Direction, int[]> directionalTris = new Dictionary<Direction, int[]>();
+    public readonly Dictionary<Direction, VertexData[]> directionalVerts = new Dictionary<Direction, VertexData[]>();
+    public readonly Dictionary<Direction, TextureCollection> directionalTextures = new Dictionary<Direction, TextureCollection>();
 
     public int[] connectsToTypes;
     public string[] connectsToNames;
@@ -27,9 +27,7 @@ public class ConnectedMeshBlockConfig : CustomMeshBlockConfig
         {
             Direction direction = DirectionUtils.Get(dir);
             if (_GetPropertyFromConfig(config, direction + "FileLocation", "") == "")
-            {
                 continue;
-            }
 
             directionalTextures.Add(direction, world.textureIndex.GetTextureCollection(_GetPropertyFromConfig(config, direction + "Texture", "")));
 
@@ -39,15 +37,13 @@ public class ConnectedMeshBlockConfig : CustomMeshBlockConfig
             offset.z = float.Parse(_GetPropertyFromConfig(config, direction + "ZOffset", "0"));
 
             int[] newTris;
-            Vector3[] newVerts;
-            Vector2[] newUvs;
+            VertexData[] newVerts;
             string meshLocation = world.config.meshFolder + "/" + _GetPropertyFromConfig(config, direction + "FileLocation", "");
 
-            SetUpMesh(meshLocation, offset, out newTris, out newVerts, out newUvs);
+            SetUpMesh(meshLocation, offset, out newTris, out newVerts);
 
             directionalTris.Add(direction, newTris);
             directionalVerts.Add(direction, newVerts);
-            directionalUvs.Add(direction, newUvs);
         }
 
     }
