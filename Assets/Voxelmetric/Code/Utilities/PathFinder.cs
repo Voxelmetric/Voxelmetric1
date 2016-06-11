@@ -1,6 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.Threading;
 using UnityEngine;
+using Voxelmetric.Code.Common.Threading;
+using Voxelmetric.Code.Common.Threading.Managers;
 using Voxelmetric.Code.Core;
 using Voxelmetric.Code.Data_types;
 
@@ -57,35 +59,27 @@ namespace Voxelmetric.Code.Utilities
 
             open.Add(startLocation, new Heuristics(0, distanceFromStartToTarget, startLocation));
 
-            if (world.UseMultiThreading)
-            {
-                Thread thread = new Thread(() =>
-                                           {
-                                               while (status == Status.working)
-                                               {
-                                                   update();
-                                               }
-                                           });
-                thread.Start();
-            }
-            else
-            {
-                while (status == Status.working)
-                {
-                    update();
-                }
-            }
+            WorkPoolManager.Add(
+                new ThreadPoolItem(
+                    Globals.WorkPool,
+                    arg =>
+                    {
+                        PathFinder pf = arg as PathFinder;
+                        pf.ComputePath();
+                    },
+                    this
+                ));
         }
 
-        public void update()
+        private void ComputePath()
         {
-            if (status == Status.working)
+            while (status == Status.working)
             {
                 ProcessBest();
             }
         }
 
-        void PathComplete(BlockPos lastTile)
+        private void PathComplete(BlockPos lastTile)
         {
             Heuristics pos;
             closed.TryGetValue(lastTile, out pos);
@@ -251,7 +245,6 @@ namespace Voxelmetric.Code.Utilities
 
         public static float Distance(BlockPos a, BlockPos b)
         {
-
             var x = a.x - b.x;
             var y = a.y - b.y;
             var z = a.z - b.z;

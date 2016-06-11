@@ -10,7 +10,7 @@ using Voxelmetric.Code.Load_Resources.Blocks;
 [Serializable]
 public class GrassBlock : CubeBlock
 {
-    //On random update spread grass to any nearby dirt blocks on the surface
+    //On random Update spread grass to any nearby dirt blocks on the surface
     public override void RandomUpdate(Chunk chunk, BlockPos localPos, BlockPos globalPos)
     {
         ChunkBlocks blocks = chunk.blocks;

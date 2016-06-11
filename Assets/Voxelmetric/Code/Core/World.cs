@@ -24,17 +24,11 @@ namespace Voxelmetric.Code.Core
         public TerrainGen terrainGen;
 
         public Material chunkMaterial;
-
-        //Multi threading must be disabled on web builds
-        public bool useMultiThreading;
     
         private Block voidBlock;
         private Block airBlock;
         
         public bool UseFrustumCulling;
-
-        public bool UseMultiThreading { get { return useMultiThreading; } }
-
 
         public Block Void {
             get {

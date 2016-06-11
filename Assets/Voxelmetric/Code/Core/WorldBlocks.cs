@@ -40,12 +40,12 @@ namespace Voxelmetric.Code.Core
 
         /// <summary>
         /// Gets the chunk and sets the block at the given coordinates, updates the chunk and its
-        /// neighbors if the update chunk flag is true or not set. Uses global coordinates, to use
+        /// neighbors if the Update chunk flag is true or not set. Uses global coordinates, to use
         /// local coordinates use the chunk's SetBlock function.
         /// </summary>
         /// <param name="pos">Global position of the block</param>
         /// <param name="block">The block be placed</param>
-        /// <param name="updateChunk">Optional parameter, set to false not update the chunk despite the change</param>
+        /// <param name="updateChunk">Optional parameter, set to false not Update the chunk despite the change</param>
         /// <param name="setBlockModified">Optional parameter, set to true to mark chunk data as modified</param>
         public void Set(BlockPos pos, Block block, bool updateChunk = true, bool setBlockModified = true)
         {
@@ -66,7 +66,7 @@ namespace Voxelmetric.Code.Core
             BlockPos localPos = pos - pos.ContainingChunkCoordinates();
 
             //Checks to see if the block position is on the border of the chunk 
-            //and if so update the chunk it's touching
+            //and if so Update the chunk it's touching
             UpdateIfEqual(localPos.x, 0, pos.Add(-1, 0, 0));
             UpdateIfEqual(localPos.x, Env.ChunkMask, pos.Add(1, 0, 0));
             UpdateIfEqual(localPos.y, 0, pos.Add(0, -1, 0));
