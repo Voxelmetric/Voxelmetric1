@@ -38,6 +38,10 @@ namespace Voxelmetric.Code.Core
             UpdateChunks();
         }
 
+        // The ugliest thing... Until I come with an idea of how to efficiently detect whether a chunk is partialy
+        // inside camera frustum, all chunks are going to be marked as potentially visible on the first run
+        private bool m_firstRun = true;
+
         private void UpdateChunks()
         {
             foreach (Chunk chunk in world.chunks.chunkCollection)
@@ -52,7 +56,7 @@ namespace Voxelmetric.Code.Core
                 // Update visibility information
                 if (world.UseFrustumCulling)
                 {
-                    bool isInsideFrustum = IsChunkInViewFrustum(chunk);
+                    bool isInsideFrustum = IsChunkInViewFrustum(chunk) || m_firstRun;
                     chunk.Visible = isInsideFrustum;
                     chunk.PossiblyVisible = isInsideFrustum;
                 }
@@ -65,6 +69,8 @@ namespace Voxelmetric.Code.Core
                 // Process the chunk
                 chunk.UpdateChunk();
             }
+
+            m_firstRun = false;
 
             for (int i = 0; i<markedForDeletion.Count; i++)
             {

@@ -79,6 +79,8 @@ namespace Voxelmetric.Code.Utilities
         private void OnDrawGizmosSelected()
         {
             int size = Mathf.FloorToInt(Env.ChunkSize*Env.BlockSize);
+            int halfSize = size>>1;
+            int quaterSize = size>>2;
 
             int posX = Mathf.FloorToInt(transform.position.x);
             int posZ = Mathf.FloorToInt(transform.position.z);
@@ -103,9 +105,9 @@ namespace Voxelmetric.Code.Utilities
                             Gizmos.color = Color.red;
                             Gizmos.DrawWireCube(
                                 new Vector3(
-                                    chunk.pos.x+(size>>1),
+                                    chunk.pos.x+halfSize,
                                     0,
-                                    chunk.pos.z+(size>>1)),
+                                    chunk.pos.z+halfSize),
                                 new Vector3(size-0.05f, 0, size-0.05f)
                                 );
                         }
@@ -114,10 +116,23 @@ namespace Voxelmetric.Code.Utilities
                             Gizmos.color = Color.green;
                             Gizmos.DrawWireCube(
                                 new Vector3(
-                                    chunk.pos.x+(size>>1),
+                                    chunk.pos.x+halfSize,
                                     0,
-                                    chunk.pos.z+(size>>1)),
+                                    chunk.pos.z+halfSize),
                                 new Vector3(size-0.05f, 0, size-0.05f)
+                                );
+                        }
+
+                        // Show generated chunks
+                        if(chunk.IsGenerated_Internal())
+                        {
+                            Gizmos.color = Color.magenta;
+                            Gizmos.DrawWireCube(
+                                new Vector3(
+                                    chunk.pos.x+halfSize,
+                                    0,
+                                    chunk.pos.z+halfSize),
+                                new Vector3(quaterSize-0.05f, 0, quaterSize-0.05f)
                                 );
                         }
                     }

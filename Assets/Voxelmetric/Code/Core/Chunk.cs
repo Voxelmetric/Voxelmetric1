@@ -288,6 +288,11 @@ namespace Voxelmetric.Code.Core
             get { lock (m_lock) return IsFinished_Internal(); }
         }
 
+        public bool IsGenerated_Internal()
+        {
+            return m_completedStates.Check(ChunkState.Generate);
+        }
+
         public bool IsSavePossible
         {
             get { lock (m_lock) { return !m_removalRequested && m_completedStates.Check(ChunkState.Generate|ChunkState.LoadData); } }
