@@ -18,13 +18,13 @@ namespace Voxelmetric.Code.Core
     {
         private static int s_id = 0;
 
-        public World world;
-        public BlockPos pos;
-        public LocalPools pools;
+        public World world { get; private set; }
+        public BlockPos pos { get; private set; }
+        public LocalPools pools { get; private set; }
 
-        public ChunkBlocks blocks;
-        public ChunkLogic logic;
-        public ChunkRender render;
+        public ChunkBlocks blocks { get; private set; }
+        public ChunkLogic logic { get; private set; }
+        public ChunkRender render { get; private set; }
 
         //! Bounding box in world coordinates
         public Bounds WorldBounds { get; private set; }
@@ -100,15 +100,22 @@ namespace Voxelmetric.Code.Core
 
             const int size = Env.ChunkSize;
             WorldBounds = new Bounds(
-                new Vector3(pos.x + size/2, pos.y + size / 2, pos.z + size / 2),
+                new Vector3(pos.x+size/2, pos.y+size/2, pos.z+size/2),
                 new Vector3(size, size, size)
                 );
 
             Reset();
+
+            // Subscribe neighbors
+            SubscribeNeighbors(true);
+            // Request this chunk to be generated
+            OnNotified(this, ChunkState.Generate);
         }
 
         private void Reset()
         {
+            SubscribeNeighbors(false);
+
             m_notifyStates = m_notifyStates.Reset();
             m_pendingStates = m_pendingStates.Reset();
             m_refreshStates = m_refreshStates.Reset();
@@ -163,11 +170,6 @@ namespace Voxelmetric.Code.Core
 
             logic.TimedUpdated();
         }
-
-        public void RequestGenerate()
-        {
-            OnNotified(this, ChunkState.Generate);
-        }
         
         public void RequestBuildVertices()
         {
@@ -192,7 +194,7 @@ namespace Voxelmetric.Code.Core
         public void UpdateChunk()
         {
             ProcessPendingTasks();
-            UpdateLogic();
+            //UpdateLogic();
 
             // Build chunk mesh
             if (m_completedStates.Check(ChunkState.BuildVertices))
@@ -456,7 +458,7 @@ namespace Voxelmetric.Code.Core
                 OnGenerateDataDone(this);
                 return false;
             }
-
+            
             m_pendingStates = m_pendingStates.Reset(CurrStateGenerateData);
             m_refreshStates = m_pendingStates.Reset(CurrStateGenerateData);
             m_completedStates = m_completedStates.Reset(CurrStateGenerateData);
@@ -607,15 +609,19 @@ namespace Voxelmetric.Code.Core
 
         private bool SynchronizeChunk()
         {
-            return AreNeighborsReady();
-            /*if (Listeners != 6)
+            // 6 neighbors are necessary
+            if (ListenerCount!=6)
+                return false;
+
+            // All neighbors have to have their data loaded
+            foreach (var chunkEvent in Listeners)
             {
-                SubscribeNeighbors(this, true);
-                if (Listeners != 6)
+                var chunk = (Chunk)chunkEvent;
+                if (!chunk.m_completedStates.Check(ChunkState.LoadData))
                     return false;
             }
 
-            return true;*/
+            return true;
         }
 
         #region Generate vertices
@@ -726,8 +732,6 @@ namespace Voxelmetric.Code.Core
                     return true;
 
                 m_pendingStates = m_pendingStates.Reset(CurrStateRemoveChunk);
-
-                SubscribeNeighbors(this, false);
             }
 
             m_refreshStates = m_refreshStates.Reset(CurrStateRemoveChunk);
@@ -736,50 +740,25 @@ namespace Voxelmetric.Code.Core
         }
 
         #endregion Remove chunk
-
-        private bool AreNeighborsReady()
+        
+        private void SubscribeNeighbors(bool subscribe)
         {
-            if (!IsNeighborReady(new BlockPos(pos.x + Env.ChunkSize, pos.y, pos.z)))
-                return false;
-            if (!IsNeighborReady(new BlockPos(pos.x - Env.ChunkSize, pos.y, pos.z)))
-                return false;
-            if (!IsNeighborReady(new BlockPos(pos.x, pos.y + Env.ChunkSize, pos.z)))
-                return false;
-            if (!IsNeighborReady(new BlockPos(pos.x, pos.y - Env.ChunkSize, pos.z)))
-                return false;
-            if (!IsNeighborReady(new BlockPos(pos.x, pos.y, pos.z + Env.ChunkSize)))
-                return false;
-            if (!IsNeighborReady(new BlockPos(pos.x, pos.y, pos.z - Env.ChunkSize)))
-                return false;
-
-            return true;
+            SubscribeTwoNeighbors(new BlockPos(pos.x + Env.ChunkSize, pos.y, pos.z), subscribe);
+            SubscribeTwoNeighbors(new BlockPos(pos.x - Env.ChunkSize, pos.y, pos.z), subscribe);
+            SubscribeTwoNeighbors(new BlockPos(pos.x, pos.y + Env.ChunkSize, pos.z), subscribe);
+            SubscribeTwoNeighbors(new BlockPos(pos.x, pos.y - Env.ChunkSize, pos.z), subscribe);
+            SubscribeTwoNeighbors(new BlockPos(pos.x, pos.y, pos.z + Env.ChunkSize), subscribe);
+            SubscribeTwoNeighbors(new BlockPos(pos.x, pos.y, pos.z - Env.ChunkSize), subscribe);
         }
 
-        private bool IsNeighborReady(BlockPos pos)
+        private void SubscribeTwoNeighbors(BlockPos neighborPos, bool subscribe)
         {
-            Chunk neighbor = world.chunks.Get(pos);
-            return neighbor!=null && neighbor.m_completedStates.Check(ChunkState.LoadData);
-        }
-
-        private static void SubscribeNeighbors(Chunk chunk, bool subscribe)
-        {
-            BlockPos pos = chunk.pos;
-            SubscribeTwoNeighbors(chunk, new BlockPos(pos.x + Env.ChunkSize, pos.y, pos.z), subscribe);
-            SubscribeTwoNeighbors(chunk, new BlockPos(pos.x - Env.ChunkSize, pos.y, pos.z), subscribe);
-            SubscribeTwoNeighbors(chunk, new BlockPos(pos.x, pos.y + Env.ChunkSize, pos.z), subscribe);
-            SubscribeTwoNeighbors(chunk, new BlockPos(pos.x, pos.y - Env.ChunkSize, pos.z), subscribe);
-            SubscribeTwoNeighbors(chunk, new BlockPos(pos.x, pos.y, pos.z + Env.ChunkSize), subscribe);
-            SubscribeTwoNeighbors(chunk, new BlockPos(pos.x, pos.y, pos.z - Env.ChunkSize), subscribe);
-        }
-
-        private static void SubscribeTwoNeighbors(Chunk chunk, BlockPos neighborPos, bool subscribe)
-        {
-            Chunk neighbor = chunk.world.chunks.Get(neighborPos);
+            Chunk neighbor = world.chunks.Get(neighborPos);
             if (neighbor != null)
             {
                 // Subscribe with each other. Passing Idle as event - it is ignored in this case anyway
-                neighbor.Subscribe(chunk, ChunkState.Idle, subscribe);
-                chunk.Subscribe(neighbor, ChunkState.Idle, subscribe);
+                neighbor.Subscribe(this, ChunkState.Idle, subscribe);
+                Subscribe(neighbor, ChunkState.Idle, subscribe);
             }
         }
     }

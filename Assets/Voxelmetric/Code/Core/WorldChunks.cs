@@ -52,9 +52,10 @@ namespace Voxelmetric.Code.Core
             chunks[pos] = chunk;
         }
 
-        public void Remove(BlockPos pos)
+        public void Remove(Chunk chunk)
         {
-            chunks.Remove(pos);
+            Chunk.RemoveChunk(chunk);
+            chunks.Remove(chunk.pos);
         }
 
         /// <summary>Instantiates a chunk at a given possiion</summary>
@@ -75,7 +76,6 @@ namespace Voxelmetric.Code.Core
             // Create a new chunk
             chunk = Chunk.CreateChunk(world, chunkPos);
             chunks.Add(chunkPos, chunk);
-            chunk.RequestGenerate();
             return chunk;
         }
         

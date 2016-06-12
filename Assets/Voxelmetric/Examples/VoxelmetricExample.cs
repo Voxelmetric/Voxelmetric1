@@ -49,8 +49,10 @@ namespace Voxelmetric.Examples
                 transform.localRotation = Quaternion.AngleAxis(rot.x, Vector3.up);
                 transform.localRotation *= Quaternion.AngleAxis(rot.y, Vector3.left);
             }
-            transform.position += transform.forward * 40 * Input.GetAxis("Vertical") * Time.deltaTime;
-            transform.position += transform.right * 40 * Input.GetAxis("Horizontal") * Time.deltaTime;
+
+            bool turbo = Input.GetKeyDown(KeyCode.LeftShift) || Input.GetKeyDown(KeyCode.RightShift);
+            transform.position += transform.forward * 40 * (turbo ? 2 : 1) * Input.GetAxis("Vertical") * Time.deltaTime;
+            transform.position += transform.right * 40 * (turbo ? 2 : 1) * Input.GetAxis("Horizontal") * Time.deltaTime;
 
             //Save
             saveProgressText.text = saveProgress != null ? SaveStatus() : "Save";

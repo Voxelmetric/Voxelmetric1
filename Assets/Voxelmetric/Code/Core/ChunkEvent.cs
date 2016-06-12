@@ -11,15 +11,16 @@ namespace Voxelmetric.Code.Core
         IEventSource<ChunkStateExternal>
     {
         //! List of chunk listeners
-        private readonly ChunkEvent[] m_listeners;
+        protected ChunkEvent[] Listeners { get; private set; }
         //! Number of registered listeners
-        protected int Listeners { get; private set; }
+        protected int ListenerCount { get; private set; }
+
         //! List of external listeners
         private readonly Dictionary<ChunkStateExternal, List<IEventListener<ChunkStateExternal>>> m_listenersExternal;
 
         protected ChunkEvent()
         {
-            m_listeners = Helpers.CreateArray1D<ChunkEvent>(6);
+            Listeners = Helpers.CreateArray1D<ChunkEvent>(6);
             m_listenersExternal = new Dictionary<ChunkStateExternal, List<IEventListener<ChunkStateExternal>>>
             {
                 {ChunkStateExternal.Saved, new List<IEventListener<ChunkStateExternal>>()}
@@ -30,9 +31,9 @@ namespace Voxelmetric.Code.Core
 
         public void Clear()
         {
-            Listeners = 0;
-            for (int i = 0; i < m_listeners.Length; i++)
-                m_listeners[i] = null;
+            ListenerCount = 0;
+            for (int i = 0; i < Listeners.Length; i++)
+                Listeners[i] = null;
 
             foreach (var pair in m_listenersExternal)
                 pair.Value.Clear();
@@ -49,9 +50,9 @@ namespace Voxelmetric.Code.Core
             if (registerListener)
             {
                 // Make sure this section is not registered yet
-                for (int i = 0; i<m_listeners.Length; i++)
+                for (int i = 0; i<Listeners.Length; i++)
                 {
-                    ChunkEvent l = m_listeners[i];
+                    ChunkEvent l = Listeners[i];
 
                     // Do not register if already registred
                     if (l==listener)
@@ -59,14 +60,14 @@ namespace Voxelmetric.Code.Core
                 }
 
                 // Subscribe in the first free slot
-                for (int i = 0; i < m_listeners.Length; i++)
+                for (int i = 0; i < Listeners.Length; i++)
                 {
-                    ChunkEvent l = m_listeners[i];
+                    ChunkEvent l = Listeners[i];
                     if (l==null)
                     {
-                        ++Listeners;
-                        Assert.IsTrue(Listeners<=6);
-                        m_listeners[i] = chunkListener;
+                        ++ListenerCount;
+                        Assert.IsTrue(ListenerCount<=6);
+                        Listeners[i] = chunkListener;
                         return true;
                     }
                 }
@@ -78,15 +79,15 @@ namespace Voxelmetric.Code.Core
             else
             {
                 // Only unregister already registered sections
-                for (int i = 0; i < m_listeners.Length; i++)
+                for (int i = 0; i < Listeners.Length; i++)
                 {
-                    ChunkEvent l = m_listeners[i];
+                    ChunkEvent l = Listeners[i];
 
                     if (l==listener)
                     {
-                        --Listeners;
-                        Assert.IsTrue(Listeners >= 0);
-                        m_listeners[i] = null;
+                        --ListenerCount;
+                        Assert.IsTrue(ListenerCount >= 0);
+                        Listeners[i] = null;
                         return true;
                     }
                 }
@@ -98,9 +99,9 @@ namespace Voxelmetric.Code.Core
         public void NotifyAll(ChunkState state)
         {
             // Notify each registered listener
-            for (int i = 0; i < m_listeners.Length; i++)
+            for (int i = 0; i < Listeners.Length; i++)
             {
-                ChunkEvent l = m_listeners[i];
+                ChunkEvent l = Listeners[i];
                 if (l != null)
                    l.OnNotified(this, state);
             }
@@ -109,9 +110,9 @@ namespace Voxelmetric.Code.Core
         public void NotifyOne(IEventListener<ChunkState> listener, ChunkState state)
         {
             // Notify one of the listeners
-            for (int i = 0; i < m_listeners.Length; i++)
+            for (int i = 0; i < Listeners.Length; i++)
             {
-                ChunkEvent l = m_listeners[i];
+                ChunkEvent l = Listeners[i];
                 if (l==listener)
                 {
                     l.OnNotified(this, state);

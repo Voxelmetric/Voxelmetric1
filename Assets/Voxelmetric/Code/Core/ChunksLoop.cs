@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 using Voxelmetric.Code.Common.Math;
-using Voxelmetric.Code.Data_types;
 
 namespace Voxelmetric.Code.Core
 {
@@ -18,7 +17,7 @@ namespace Voxelmetric.Code.Core
     public class ChunksLoop
     {
         private World world;
-        private readonly List<BlockPos> markedForDeletion = new List<BlockPos>();
+        private readonly List<Chunk> markedForDeletion = new List<Chunk>();
         private Plane[] m_cameraPlanes = new Plane[6];
 
         public ChunksLoop(World world)
@@ -46,7 +45,7 @@ namespace Voxelmetric.Code.Core
                 // Chunks marked as finished should be removed from the world
                 if (chunk.IsFinished)
                 {
-                    markedForDeletion.Add(chunk.pos);
+                    markedForDeletion.Add(chunk);
                     continue;
                 }
 
@@ -69,10 +68,8 @@ namespace Voxelmetric.Code.Core
 
             for (int i = 0; i<markedForDeletion.Count; i++)
             {
-                BlockPos pos = markedForDeletion[i];
-                Chunk chunk = world.chunks.Get(pos);
-                world.chunks.Remove(pos);
-                Chunk.RemoveChunk(chunk);
+                Chunk chunk = markedForDeletion[i];
+                world.chunks.Remove(chunk);
             }
             markedForDeletion.Clear();
         }
