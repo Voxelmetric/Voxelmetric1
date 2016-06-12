@@ -32,26 +32,25 @@ namespace Voxelmetric.Code.Core
 
         public void Update()
         {
-            Profiler.BeginSample("CameraPlanes");
             // Recalculate camera frustum planes
             Geometry.CalculateFrustumPlanes(Camera.main, ref m_cameraPlanes);
-            Profiler.EndSample();
 
-            Profiler.BeginSample("UpdateTerrain");
-            UpdateTerrain();
-            Profiler.EndSample();
+            // Process chunks
+            UpdateChunks();
         }
 
-        private void UpdateTerrain()
+        private void UpdateChunks()
         {
             foreach (Chunk chunk in world.chunks.chunkCollection)
             {
+                // Chunks marked as finished should be removed from the world
                 if (chunk.IsFinished)
                 {
                     markedForDeletion.Add(chunk.pos);
                     continue;
                 }
 
+                // Update visibility information
                 if (world.UseFrustumCulling)
                 {
                     bool isInsideFrustum = IsChunkInViewFrustum(chunk);
@@ -64,6 +63,7 @@ namespace Voxelmetric.Code.Core
                     chunk.PossiblyVisible = true;
                 }
 
+                // Process the chunk
                 chunk.UpdateChunk();
             }
 
@@ -77,7 +77,7 @@ namespace Voxelmetric.Code.Core
             markedForDeletion.Clear();
         }
 
-        private bool IsChunkInViewFrustum(Chunk chunk)
+        public bool IsChunkInViewFrustum(Chunk chunk)
         {
             // Check if the chunk lies within camera planes
             return !world.UseFrustumCulling || GeometryUtility.TestPlanesAABB(m_cameraPlanes, chunk.WorldBounds);

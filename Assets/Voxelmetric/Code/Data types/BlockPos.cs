@@ -133,9 +133,9 @@ namespace Voxelmetric.Code.Data_types
         public static implicit operator BlockPos(Vector3 v)
         {
             BlockPos blockPos = new BlockPos(
-                Mathf.RoundToInt(v.x / Env.BlockSize),
-                Mathf.RoundToInt(v.y / Env.BlockSize),
-                Mathf.RoundToInt(v.z / Env.BlockSize)
+                Mathf.RoundToInt(v.x * Env.BlockSizeInv),
+                Mathf.RoundToInt(v.y * Env.BlockSizeInv),
+                Mathf.RoundToInt(v.z * Env.BlockSizeInv)
                 );
 
             return blockPos;

@@ -152,10 +152,13 @@ namespace Voxelmetric.Code.Core
             sb.Append(render);
             return sb.ToString();
         }
-
+        
         private void UpdateLogic()
         {
-            if (!m_completedStates.Check(ChunkState.LoadData))
+            // Do not update chunk until it has all its data prepared
+            if (!m_completedStates.Check(ChunkState.Generate) ||
+                !m_completedStates.Check(ChunkState.LoadData)
+                )
                 return;
 
             logic.TimedUpdated();
@@ -163,7 +166,7 @@ namespace Voxelmetric.Code.Core
 
         public void RequestGenerate()
         {
-            RefreshState(ChunkState.Generate);
+            OnNotified(this, ChunkState.Generate);
         }
         
         public void RequestBuildVertices()
@@ -183,8 +186,8 @@ namespace Voxelmetric.Code.Core
             m_removalRequested = true;
 
             RefreshState(ChunkState.SaveData);
-            RefreshState(ChunkState.Remove);
-        }        
+            OnNotified(this, ChunkState.Remove);
+        }
 
         public void UpdateChunk()
         {
@@ -198,7 +201,6 @@ namespace Voxelmetric.Code.Core
                 render.BuildMesh();
             }
         }
-
         private void ProcessPendingTasks()
         {
             lock (m_lock)
@@ -219,40 +221,49 @@ namespace Voxelmetric.Code.Core
 
                 m_stateExternal = ChunkStateExternal.None;
             }
+            
+            // If removal was requested before we got to generating the chunk at all we can safely mark
+            // it as removed right away
+            if (m_removalRequested && !m_completedStates.Check(ChunkState.Generate))
+            {
+                m_completedStates = m_completedStates.Set(ChunkState.Remove);
+                return;
+            }
 
             // Go from the least important bit to most important one. If a given bit it set
             // we execute the task tied with it
-
-            if (PossiblyVisible)
             {
                 // In order to save performance, we generate chunk data on-demand - when the chunk can be seen
+                if (PossiblyVisible)
+                {
+                    ProcessNotifyState();
+                    if (m_pendingStates.Check(ChunkState.Generate) && GenerateData())
+                        return;
+                }
+
                 ProcessNotifyState();
-                if (m_pendingStates.Check(ChunkState.Generate) && GenerateData())
+                if (m_pendingStates.Check(ChunkState.LoadData) && LoadData())
                     return;
-            }
 
-            ProcessNotifyState();
-            if (m_pendingStates.Check(ChunkState.LoadData) && LoadData())
-                return;
-
-            ProcessNotifyState();
-            if (m_pendingStates.Check(ChunkState.GenericWork) && PerformGenericWork())
-                return;
-
-            ProcessNotifyState();
-            if (m_pendingStates.Check(ChunkState.SaveData) && SaveData())
-                return;
-
-            ProcessNotifyState();
-            if (m_pendingStates.Check(ChunkState.Remove) && RemoveChunk())
-                return;
-            
-            // In order to save performance, we generate geometry on-demand - when the chunk can be seen
-            if (PossiblyVisible)
-            {
                 ProcessNotifyState();
-                if (m_pendingStates.Check(ChunkState.BuildVertices) && GenerateVertices())
+                if (m_pendingStates.Check(ChunkState.GenericWork) && PerformGenericWork())
                     return;
+
+                ProcessNotifyState();
+                if (m_pendingStates.Check(ChunkState.SaveData) && SaveData())
+                    return;
+
+                ProcessNotifyState();
+                if (m_pendingStates.Check(ChunkState.Remove) && RemoveChunk())
+                    return;
+
+                // In order to save performance, we generate geometry on-demand - when the chunk can be seen
+                if (PossiblyVisible)
+                {
+                    ProcessNotifyState();
+                    if (m_pendingStates.Check(ChunkState.BuildVertices) && GenerateVertices())
+                        return;
+                }
             }
         }
 

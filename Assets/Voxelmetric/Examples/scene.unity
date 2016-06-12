@@ -399,6 +399,8 @@ MonoBehaviour:
   world: {fileID: 1856110255}
   ChunkLoadRadius: 6
   DistanceToDeleteChunks: 8
+  Diag_DrawWorldBounds: 0
+  Diag_DrawLoadRange: 0
 --- !u!1 &312836251
 GameObject:
   m_ObjectHideFlags: 0

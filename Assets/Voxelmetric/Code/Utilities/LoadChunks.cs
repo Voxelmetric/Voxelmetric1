@@ -16,6 +16,9 @@ namespace Voxelmetric.Code.Utilities
         [Range(5, 64)]
         public int DistanceToDeleteChunks = 5;
 
+        public bool Diag_DrawWorldBounds = false;
+        public bool Diag_DrawLoadRange = false;
+
         void Awake()
         {
             m_chunkPositions = ChunkLoadOrder.ChunkPositions(ChunkLoadRadius);
@@ -55,12 +58,12 @@ namespace Voxelmetric.Code.Utilities
 
         private void CreateChunks()
         {
+            // Get the position of this gameobject to generate around
+            BlockPos playerPos = ((BlockPos)transform.position).ContainingChunkCoordinates();
+
             // Cycle through the array of positions
             for (int i = 0; i < m_chunkPositions.Length; i++)
             {
-                // Get the position of this gameobject to generate around
-                BlockPos playerPos = ((BlockPos)transform.position).ContainingChunkCoordinates();
-
                 // Translate the player position and array position into chunk position
                 BlockPos newChunkPos = new BlockPos(
                     m_chunkPositions[i].x*Env.ChunkSize+playerPos.x,
@@ -70,6 +73,55 @@ namespace Voxelmetric.Code.Utilities
 
                 for (int y = world.config.minY; y<=world.config.maxY; y += Env.ChunkSize)
                     world.chunks.CreateChunk(new BlockPos(newChunkPos.x, newChunkPos.y + y, newChunkPos.z));
+            }
+        }
+
+        private void OnDrawGizmosSelected()
+        {
+            int size = Mathf.FloorToInt(Env.ChunkSize*Env.BlockSize);
+
+            int posX = Mathf.FloorToInt(transform.position.x);
+            int posZ = Mathf.FloorToInt(transform.position.z);
+
+            if (world!=null && world.chunks!=null && (Diag_DrawWorldBounds || Diag_DrawLoadRange))
+            {
+                foreach (Chunk chunk in world.chunks.chunkCollection)
+                {
+                    if (Diag_DrawWorldBounds)
+                    {
+                        Gizmos.color = Color.blue;
+                        Gizmos.DrawWireCube(chunk.WorldBounds.center, chunk.WorldBounds.size);
+                    }
+
+                    if (Diag_DrawLoadRange)
+                    {
+                        BlockPos pos = chunk.pos;
+                        int xd = Mathf.Abs((posX-pos.x)>>Env.ChunkPower);
+                        int zd = Mathf.Abs((posZ-pos.z)>>Env.ChunkPower);
+                        if (xd*xd+zd*zd>=DistanceToDeleteChunks*DistanceToDeleteChunks)
+                        {
+                            Gizmos.color = Color.red;
+                            Gizmos.DrawWireCube(
+                                new Vector3(
+                                    chunk.pos.x+(size>>1),
+                                    0,
+                                    chunk.pos.z+(size>>1)),
+                                new Vector3(size-0.05f, 0, size-0.05f)
+                                );
+                        }
+                        else
+                        {
+                            Gizmos.color = Color.green;
+                            Gizmos.DrawWireCube(
+                                new Vector3(
+                                    chunk.pos.x+(size>>1),
+                                    0,
+                                    chunk.pos.z+(size>>1)),
+                                new Vector3(size-0.05f, 0, size-0.05f)
+                                );
+                        }
+                    }
+                }
             }
         }
     }

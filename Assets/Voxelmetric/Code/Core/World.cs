@@ -6,8 +6,8 @@ using Voxelmetric.Code.VM;
 
 namespace Voxelmetric.Code.Core
 {
-    public class World : MonoBehaviour {
-
+    public class World : MonoBehaviour
+    {
         public string worldConfig = "default";
         public WorldConfig config;
 
@@ -30,16 +30,20 @@ namespace Voxelmetric.Code.Core
         
         public bool UseFrustumCulling;
 
-        public Block Void {
-            get {
+        public Block Void
+        {
+            get
+            {
                 if (voidBlock == null)
                     voidBlock = Block.Create(Block.VoidType, this);
                 return voidBlock;
             }
         }
 
-        public Block Air {
-            get {
+        public Block Air
+        {
+            get
+            {
                 if (airBlock == null)
                     airBlock = Block.Create(Block.AirType, this);
                 return airBlock;
@@ -71,7 +75,8 @@ namespace Voxelmetric.Code.Core
             StopWorld();
         }
 
-        public void Configure() {
+        public void Configure()
+        {
             config = new ConfigLoader<WorldConfig>(new[] { "Worlds" }).GetConfig(worldConfig);
             textureIndex = Voxelmetric.resources.GetOrLoadTextureIndex(this);
             blockIndex = Voxelmetric.resources.GetOrLoadBlockIndex(this);
@@ -91,13 +96,14 @@ namespace Voxelmetric.Code.Core
             chunksLoop = new ChunksLoop(this);
         }
 
-        public void StopWorld() {
+        public void StopWorld()
+        {
             if (chunksLoop == null)
                 return;
+
             chunksLoop.Stop();
             networking.EndConnections();
             chunksLoop = null;
         }
-
     }
 }

@@ -9,6 +9,7 @@ namespace Voxelmetric.Code.Utilities
         public const int ChunkSize = 1 << ChunkPower;
         public const int ChunkMask = ChunkSize-1;
         public const float BlockSize = 1f;
+        public const float BlockSizeInv = 1f/BlockSize;
         public const int ChunkVolume = ChunkSize*ChunkSize*ChunkSize;
 
         public static readonly BlockPos ChunkSizePos = BlockPos.one * ChunkSize;
