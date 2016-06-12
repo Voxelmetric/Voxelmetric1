@@ -194,7 +194,7 @@ namespace Voxelmetric.Code.Core
         public void UpdateChunk()
         {
             ProcessPendingTasks();
-            //UpdateLogic();
+            UpdateLogic();
 
             // Build chunk mesh
             if (m_completedStates.Check(ChunkState.BuildVertices))
