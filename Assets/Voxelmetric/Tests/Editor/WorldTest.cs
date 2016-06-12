@@ -11,8 +11,8 @@ public class WorldTest {
         world.Configure();
         Assert.IsNotNull(world.config, "world.config");
         Assert.IsNotNull(world.config.blockFolder, "world.config.blockFolder");
-        Assert.IsNotNull(world.textureIndex, "world.textureIndex");
-        Assert.IsNotNull(world.blockIndex, "world.blockIndex");
+        Assert.IsNotNull(world.textureProvider, "world.textureIndex");
+        Assert.IsNotNull(world.blockProvider, "world.blockIndex");
     }
 
 }

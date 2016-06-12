@@ -25,7 +25,6 @@ namespace Voxelmetric.Code
         public static Block GetBlock (BlockPos pos, World world)
         {
             Block block = world.blocks.Get (pos);
-
             return block;
         }
 

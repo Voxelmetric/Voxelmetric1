@@ -1,5 +1,6 @@
 ﻿using Voxelmetric.Code.Core;
 using Voxelmetric.Code.Load_Resources;
+using Voxelmetric.Code.Load_Resources.Blocks;
 
 
 public class CavesLayer : TerrainLayer
@@ -23,9 +24,7 @@ public class CavesLayer : TerrainLayer
             caveBottom -= caveHeight / 2;
             int caveTop = caveHeight / 2;
             if (!justGetHeight)
-            {
-                SetBlocksColumn(chunk, x, z, caveBottom, caveTop, chunk.world.Air);
-            }
+                SetBlocksColumn(chunk, x, z, caveBottom, caveTop, chunk.world.blockProvider.BlockTypes[BlockProvider.AirType]);
 
             if (caveTop > heightSoFar && caveBottom < heightSoFar)
                 return caveBottom;

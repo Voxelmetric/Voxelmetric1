@@ -18,37 +18,14 @@ namespace Voxelmetric.Code.Core
         public WorldBlocks blocks;
         public VmNetworking networking = new VmNetworking();
 
-        public BlockIndex blockIndex;
-        public TextureIndex textureIndex;
+        public BlockProvider blockProvider;
+        public TextureProvider textureProvider;
         public ChunksLoop chunksLoop;
         public TerrainGen terrainGen;
 
         public Material chunkMaterial;
-    
-        private Block voidBlock;
-        private Block airBlock;
         
         public bool UseFrustumCulling;
-
-        public Block Void
-        {
-            get
-            {
-                if (voidBlock == null)
-                    voidBlock = Block.Create(BlockIndex.VoidType, this);
-                return voidBlock;
-            }
-        }
-
-        public Block Air
-        {
-            get
-            {
-                if (airBlock == null)
-                    airBlock = Block.Create(BlockIndex.AirType, this);
-                return airBlock;
-            }
-        }
 
         void Awake()
         {
@@ -58,16 +35,14 @@ namespace Voxelmetric.Code.Core
 
         void Start()
         {
-            Profiler.maxNumberOfSamplesPerFrame = 1000000;
+            Profiler.maxNumberOfSamplesPerFrame = Mathf.Max(Profiler.maxNumberOfSamplesPerFrame, 1000000);
             StartWorld();
         }
 
         void Update()
         {
             if (chunksLoop != null)
-            {
                 chunksLoop.Update();
-            }
         }
 
         void OnApplicationQuit()
@@ -78,25 +53,29 @@ namespace Voxelmetric.Code.Core
         public void Configure()
         {
             config = new ConfigLoader<WorldConfig>(new[] { "Worlds" }).GetConfig(worldConfig);
-            textureIndex = Voxelmetric.resources.GetOrLoadTextureIndex(this);
-            blockIndex = Voxelmetric.resources.GetOrLoadBlockIndex(this);
 
-            chunkMaterial.mainTexture = textureIndex.atlas;
+            textureProvider = Voxelmetric.resources.GetTextureProvider(this);
+            textureProvider.Init(config);
+
+            blockProvider = Voxelmetric.resources.GetBlockProvider(this);
+            blockProvider.Init(config.blockFolder, this);
+
+            chunkMaterial.mainTexture = textureProvider.atlas;
         }
 
-        public void StartWorld()
+        private void StartWorld()
         {
             if (chunksLoop != null)
                 return;
+
             Configure();
 
             networking.StartConnections(this);
-
             terrainGen = new TerrainGen(this, config.layerFolder);
             chunksLoop = new ChunksLoop(this);
         }
 
-        public void StopWorld()
+        private void StopWorld()
         {
             if (chunksLoop == null)
                 return;

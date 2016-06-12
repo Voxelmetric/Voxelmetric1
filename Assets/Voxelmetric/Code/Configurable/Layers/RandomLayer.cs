@@ -11,7 +11,7 @@ public class RandomLayer: TerrainLayer
     protected override void SetUp(LayerConfig config)
     {
         // Config files for random layers MUST define these properties
-        blockToPlace = Block.Create(properties["blockName"], world);
+        blockToPlace = world.blockProvider.GetBlock(properties["blockName"]);
 
         if (properties.ContainsKey("blockColors"))
         {

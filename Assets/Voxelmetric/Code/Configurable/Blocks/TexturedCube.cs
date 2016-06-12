@@ -1,7 +1,4 @@
-﻿using System;
-
-[Serializable]
-public class TexturedCube : CubeBlock
+﻿public class TexturedCube : CubeBlock
 {
     //public string[] textureList = new string[] { "actionmine"};
     //public TextureCollection[] textureCollections;

@@ -1,10 +1,8 @@
 ﻿using UnityEngine;
-using System;
 using Voxelmetric.Code.Core;
 using Voxelmetric.Code.Data_types;
 using Voxelmetric.Code.Rendering;
 
-[Serializable]
 public class ConnectedMeshBlock: CustomMeshBlock
 {
     public ConnectedMeshBlockConfig connectedMeshConfig
@@ -19,7 +17,7 @@ public class ConnectedMeshBlock: CustomMeshBlock
             connectedMeshConfig.connectsToTypes = new int[connectedMeshConfig.connectsToNames.Length];
             for (int i = 0; i<connectedMeshConfig.connectsToNames.Length; i++)
             {
-                connectedMeshConfig.connectsToTypes[i] = chunk.world.blockIndex.names[connectedMeshConfig.connectsToNames[i]];
+                connectedMeshConfig.connectsToTypes[i] = chunk.world.blockProvider.GetType(connectedMeshConfig.connectsToNames[i]);
             }
         }
     }

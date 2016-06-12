@@ -105,7 +105,7 @@ public class TestUtils {
 
         for (int type = 0; type < blockTypes; ++type)
         {
-            var config = world.blockIndex.GetConfig(type);
+            var config = world.blockProvider.GetConfig(type);
             Assert.IsNotNull(config, "config");
             Assert.IsNotNull(config.blockClass, "config.blockClass");
 
@@ -120,7 +120,7 @@ public class TestUtils {
     public static void SetChunkBlocks(Chunk chunk, int type) {
         World world = chunk.world;
 
-        var config = world.blockIndex.GetConfig(type);
+        var config = world.blockProvider.GetConfig(type);
         Assert.IsNotNull(config, "config");
         Assert.IsNotNull(config.blockClass, "config.blockClass");
 

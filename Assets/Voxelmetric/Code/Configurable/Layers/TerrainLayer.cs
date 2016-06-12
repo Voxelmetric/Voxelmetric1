@@ -73,9 +73,7 @@ public class TerrainLayer : IComparable
     protected void SetBlocksColumn(Chunk chunk, int x, int z, int startPlaceHeight, int endPlaceHeight, Block blockToPlace)
     {
         if (startPlaceHeight >= chunk.pos.y + Env.ChunkSize || endPlaceHeight < chunk.pos.y)
-        {
             return;
-        }
 
         int y = startPlaceHeight;
         if (startPlaceHeight < chunk.pos.y)

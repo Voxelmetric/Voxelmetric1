@@ -16,7 +16,7 @@ public class CubeBlockConfig: SolidBlockConfig
 
         for (int i = 0; i < 6; i++)
         {
-            textures[i] = world.textureIndex.GetTextureCollection(textureNames[i].ToObject<string>());
+            textures[i] = world.textureProvider.GetTextureCollection(textureNames[i].ToObject<string>());
         }
     }
 }

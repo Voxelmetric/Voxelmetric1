@@ -1,11 +1,9 @@
-﻿using System;
-using Voxelmetric.Code.Configurable.Blocks.Utilities;
+﻿using Voxelmetric.Code.Configurable.Blocks.Utilities;
 using Voxelmetric.Code.Core;
 using Voxelmetric.Code.Data_types;
 using Voxelmetric.Code.Load_Resources.Textures;
 using Voxelmetric.Code.Rendering;
 
-[Serializable]
 public class CubeBlock : SolidBlock {
 
     public TextureCollection[] textures { get { return ((CubeBlockConfig)config).textures; } }

@@ -7,16 +7,25 @@ using Voxelmetric.Code.Core;
 
 namespace Voxelmetric.Code.Load_Resources.Blocks
 {
-    public class BlockIndex
+    public class BlockProvider
     {
         // Static block types: These are always added as 0 and 1 in the block index
-        public static readonly int VoidType = 0;
-        public static readonly int AirType = 1;
+        public static readonly ushort VoidType = 0;
+        public static readonly ushort AirType = 1;
 
-        public readonly List<BlockConfig> configs = new List<BlockConfig>();
-        public readonly Dictionary<string, int> names = new Dictionary<string, int>();
+        private Block[] m_blockTypes;
+        private readonly List<BlockConfig> m_configs;
+        private readonly Dictionary<string, int> m_names;
 
-        public BlockIndex(string blockFolder, World world)
+        public Block[] BlockTypes { get { return m_blockTypes;} }
+
+        public BlockProvider()
+        {
+            m_names = new Dictionary<string, int>();
+            m_configs = new List<BlockConfig>();
+        }
+
+        public void Init(string blockFolder, World world)
         {
             // Add the static solid void block type
             AddBlockType(new BlockConfig
@@ -44,6 +53,26 @@ namespace Voxelmetric.Code.Load_Resources.Blocks
             
             // Add all the block definitions defined in the config files
             ProcessConfigs(world, blockFolder);
+
+            // Build block type lookup table
+            m_blockTypes = new Block[m_configs.Count];
+            for (int i = 0; i< m_configs.Count; i++)
+            {
+                BlockConfig config = m_configs[i];
+
+                Block block = (Block)Activator.CreateInstance(config.blockClass);
+                block.config = config;
+                block.type = (ushort)i;
+                m_blockTypes[i] = block;
+            }
+
+            // Once all blocks are set up, call OnInit on them. It is necessary to do it in a separate loop
+            // in order to ensure there will be no dependency issues.
+            for (int i = 0; i < m_blockTypes.Length; i++)
+            {
+                Block block = m_blockTypes[i];
+                block.OnInit();
+            }
         }
 
         // World is only needed for setting up the textures
@@ -74,7 +103,7 @@ namespace Voxelmetric.Code.Load_Resources.Blocks
         private bool VerifyBlockConfig(BlockConfig config)
         {
             // Unique identifier of block type
-            if (names.ContainsKey(config.name))
+            if (m_names.ContainsKey(config.name))
             {
                 Debug.LogErrorFormat("Two blocks with the name {0} are defined", config.name);
                 return false;
@@ -104,28 +133,38 @@ namespace Voxelmetric.Code.Load_Resources.Blocks
         /// <returns>The index of the block</returns>
         private void AddBlockType(BlockConfig config)
         {
-            config.type = configs.Count;
-            configs.Add(config);
-            names.Add(config.name, config.type);
+            config.type = m_configs.Count;
+            m_configs.Add(config);
+            m_names.Add(config.name, config.type);
         }
 
         public int GetType(string name)
         {
             int type;
-            if (names.TryGetValue(name, out type))
+            if (m_names.TryGetValue(name, out type))
                 return type;
 
             Debug.LogError("Block not found: " + name);
             return 0; // Return void type
         }
 
+        public Block GetBlock(string name)
+        {
+            int type;
+            if (m_names.TryGetValue(name, out type))
+                return BlockTypes[type];
+
+            Debug.LogError("Block not found: " + name);
+            return BlockTypes[0]; // Return void type
+        }
+
         public BlockConfig GetConfig(int type)
         {
-            if (type>=0 && type<configs.Count)
-                return configs[type];
+            if (type>=0 && type<m_configs.Count)
+                return m_configs[type];
 
             Debug.LogError("Config not found: "+type);
-            return configs[0]; // Return void config
+            return m_configs[0]; // Return void config
         }
     }
 }

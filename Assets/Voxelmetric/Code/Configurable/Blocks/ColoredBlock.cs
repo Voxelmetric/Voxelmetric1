@@ -1,12 +1,10 @@
 ﻿using UnityEngine;
-using System;
 using Voxelmetric.Code.Configurable.Blocks.Utilities;
 using Voxelmetric.Code.Core;
 using Voxelmetric.Code.Data_types;
 using Voxelmetric.Code.Load_Resources.Textures;
 using Voxelmetric.Code.Rendering;
 
-[Serializable]
 public class ColoredBlock : SolidBlock {
 
     public Color color;

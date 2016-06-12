@@ -2,8 +2,8 @@
 using Voxelmetric.Code.Data_types;
 using Voxelmetric.Code.Utilities;
 
-public class StructureTree: GeneratedStructure {
-
+public class StructureTree: GeneratedStructure
+{
     public StructureTree()
     {
         negX = 3;
@@ -16,18 +16,19 @@ public class StructureTree: GeneratedStructure {
 
     public override void Build(World world, Chunk chunk, BlockPos pos, TerrainLayer layer)
     {
-        int leaves = layer.GetNoise(pos.x, 0, pos.z, 1f, 2, 1) +1;
+        Block leaves = world.blockProvider.GetBlock("leaves");
+        Block log = world.blockProvider.GetBlock("log");
 
-        for (int x = -leaves; x <= leaves; x++)
+        int leavesRange = layer.GetNoise(pos.x, 0, pos.z, 1f, 2, 1) +1;
+        for (int x = -leavesRange; x <= leavesRange; x++)
         {
             for (int y = 3; y <= 6; y++)
             {
-                for (int z = -leaves; z <= leaves; z++)
+                for (int z = -leavesRange; z <= leavesRange; z++)
                 {
                     if (pos.Add(x, y, z) < chunk.pos + new BlockPos(Env.ChunkSize, Env.ChunkSize, Env.ChunkSize) && pos.Add(x, y, z) >= chunk.pos)
                     {
-                        Block block = Block.Create("leaves", world);
-                        world.blocks.Set(pos.Add(x, y, z), block, updateChunk: false, setBlockModified: false);
+                        world.blocks.Set(pos.Add(x, y, z), leaves, false, false);
                     }
                 }
             }
@@ -37,8 +38,7 @@ public class StructureTree: GeneratedStructure {
             if (pos.Add(0, y, 0) < chunk.pos + new BlockPos(Env.ChunkSize, Env.ChunkSize, Env.ChunkSize)
                 && pos.Add(0, y, 0) >= chunk.pos)
             {
-                Block block = Block.Create("log", world);
-                world.blocks.Set(pos.Add(0, y, 0), block, updateChunk: false, setBlockModified: false);
+                world.blocks.Set(pos.Add(0, y, 0), log, false, false);
             }
         }
     }

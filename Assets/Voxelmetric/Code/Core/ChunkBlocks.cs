@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Text;
 using System.Threading;
 using UnityEngine;
-using UnityEngine.Assertions;
 using Voxelmetric.Code.Common;
 using Voxelmetric.Code.Data_types;
+using Voxelmetric.Code.Load_Resources.Blocks;
 using Voxelmetric.Code.Utilities;
 using Voxelmetric.Code.VM;
 
@@ -14,7 +14,7 @@ namespace Voxelmetric.Code.Core
     public sealed class ChunkBlocks
     {
         private Chunk chunk;
-        private readonly Block[] blocks = Helpers.CreateArray1D<Block>(Env.ChunkVolume);
+        private readonly BlockData[] blocks = Helpers.CreateArray1D<BlockData>(Env.ChunkVolume);
         private byte[] receiveBuffer;
         private int receiveIndex;
 
@@ -38,7 +38,7 @@ namespace Voxelmetric.Code.Core
             this.chunk = chunk;
         }
 
-        public Block this[int x, int y, int z]
+        public BlockData this[int x, int y, int z]
         {
             get
             {
@@ -48,20 +48,6 @@ namespace Voxelmetric.Code.Core
             set
             {
                 int index = Helpers.GetChunkIndex1DFrom3D(x, y, z);
-                blocks[index] = value;
-            }
-        }
-
-        public Block this[int index]
-        {
-            get
-            {
-                Assert.IsTrue(index>0 && index<=Env.ChunkVolume);
-                return blocks[index];
-            }
-            set
-            {
-                Assert.IsTrue(index>0 && index<=Env.ChunkVolume);
                 blocks[index] = value;
             }
         }
@@ -76,7 +62,9 @@ namespace Voxelmetric.Code.Core
 
         public void Reset()
         {
-            Array.Clear(blocks, 0, blocks.Length);
+            for(int i=0; i<blocks.Length; i++)
+                blocks[i] = new BlockData(BlockProvider.AirType);
+
             contentsModified = false;
             modifiedBlocks.Clear();
         }
@@ -94,6 +82,14 @@ namespace Voxelmetric.Code.Core
             return chunk.world.blocks.Get(blockPos);
         }
 
+        public BlockData GetBlockData(BlockPos blockPos)
+        {
+            if (InRange(blockPos))
+                return LocalGetBlockData(blockPos - chunk.pos);
+
+            return chunk.world.blocks.GetBlockData(blockPos);
+        }
+
         /// <summary>
         /// This function takes a block position relative to the chunk's position. It is slightly faster
         /// than the GetBlock function so use this if you already have a local position available otherwise
@@ -108,16 +104,25 @@ namespace Voxelmetric.Code.Core
                 (localBlockPos.y<Env.ChunkSize && localBlockPos.y>=0) &&
                 (localBlockPos.z<Env.ChunkSize && localBlockPos.z>=0))
             {
-                Block block = this[localBlockPos.x, localBlockPos.y, localBlockPos.z];
-                return block ?? chunk.world.Air;
+                BlockData bd = this[localBlockPos.x, localBlockPos.y, localBlockPos.z];
+                return bd.Type==BlockProvider.VoidType
+                           ? chunk.world.blockProvider.BlockTypes[BlockProvider.AirType]
+                           : chunk.world.blockProvider.BlockTypes[bd.Type];
             }
 
             return chunk.world.blocks.Get(localBlockPos+chunk.pos);
         }
 
-        public void Set(BlockPos blockPos, string block, bool updateChunk = true, bool setBlockModified = true)
+        public BlockData LocalGetBlockData(BlockPos localBlockPos)
         {
-            Set(blockPos, Block.Create(block, chunk.world), updateChunk, setBlockModified);
+            if ((localBlockPos.x < Env.ChunkSize && localBlockPos.x >= 0) &&
+                (localBlockPos.y < Env.ChunkSize && localBlockPos.y >= 0) &&
+                (localBlockPos.z < Env.ChunkSize && localBlockPos.z >= 0))
+            {
+                return this[localBlockPos.x, localBlockPos.y, localBlockPos.z];
+            }
+
+            return chunk.world.blocks.GetBlockData(localBlockPos + chunk.pos);
         }
 
         /// <summary> Sets the block at the given position </summary>
@@ -137,7 +142,7 @@ namespace Voxelmetric.Code.Core
                     newBlock.OnCreate(chunk, blockPos, blockPos+chunk.pos);
                 }
 
-                this[blockPos.x-chunk.pos.x, blockPos.y-chunk.pos.y, blockPos.z-chunk.pos.z] = newBlock;
+                this[blockPos.x-chunk.pos.x, blockPos.y-chunk.pos.y, blockPos.z-chunk.pos.z] = new BlockData(newBlock.type);
 
                 if (setBlockModified)
                     BlockModified(blockPos);
@@ -166,7 +171,7 @@ namespace Voxelmetric.Code.Core
                 (blockPos.y<Env.ChunkSize && blockPos.y>=0) &&
                 (blockPos.z<Env.ChunkSize && blockPos.z>=0))
             {
-                this[blockPos.x, blockPos.y, blockPos.z] = block;
+                this[blockPos.x, blockPos.y, blockPos.z] = new BlockData(block.type);
             }
         }
 
@@ -183,9 +188,7 @@ namespace Voxelmetric.Code.Core
             if (chunk.world.networking.isServer)
             {
                 if (chunk.world.networking.allowConnections)
-                {
                     chunk.world.networking.server.BroadcastChange(pos, Get(pos), -1);
-                }
 
                 if (!modifiedBlocks.Contains(pos))
                 {
@@ -219,6 +222,7 @@ namespace Voxelmetric.Code.Core
 
             if (receiveBuffer==null)
                 InitializeChunkDataReceive(index, size);
+
             TranscribeChunkData(buffer, VmServer.leaderSize);
         }
 
@@ -282,7 +286,8 @@ namespace Voxelmetric.Code.Core
                         }
                         else
                         {
-                            blockData = block.ToByteArray();
+                            BlockData bd = new BlockData(block.type);
+                            blockData = bd.ToByteArray();
 
                             //Add 1 as a short (2 bytes) 
                             countIndex = buffer.Count;
@@ -316,11 +321,12 @@ namespace Voxelmetric.Code.Core
                         {
                             blockCount = BitConverter.ToInt16(receiveBuffer, i);
                             i += 2;
-
-                            block = Block.Create(BitConverter.ToUInt16(receiveBuffer, i), chunk.world);
+                            
+                            ushort type = BitConverter.ToUInt16(receiveBuffer, i);
+                            BlockData bd = new BlockData(type);
+                            block = chunk.world.blockProvider.BlockTypes[type];
                             i += 2;
-                            i += block.RestoreBlockData(receiveBuffer, i);
-
+                            i += bd.RestoreBlockData(receiveBuffer, i);
                         }
 
                         LocalSet(new BlockPos(x, y, z), block);

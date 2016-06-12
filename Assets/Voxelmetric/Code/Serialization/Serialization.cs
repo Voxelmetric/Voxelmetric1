@@ -53,8 +53,12 @@ namespace Voxelmetric.Code.Serialization
 
             // Once the blocks in the save are added they're marked as unmodified so
             // as not to trigger a new save on unload unless new blocks are added.
-            for (int i = 0; i < save.blocks.Length; i++)
-                chunk.blocks.Set(save.positions[i], save.blocks[i], false, false);
+            for (int i = 0; i<save.blocks.Length; i++)
+            {
+                int type = save.blocks[i].Type;
+                Block block = chunk.world.blockProvider.BlockTypes[type];
+                chunk.blocks.Set(save.positions[i], block, false, false);
+            }
 
             return true;
         }

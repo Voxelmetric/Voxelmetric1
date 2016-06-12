@@ -91,7 +91,7 @@ public class VmNetworkingTest {
             // Setup air chunks on the client
             foreach (var pos in chunkPosns) {
                 Chunk chunk = Chunk.CreateChunk(clientWorld, pos);
-                TestUtils.SetChunkBlocks(chunk, BlockIndex.AirType);
+                TestUtils.SetChunkBlocks(chunk, BlockProvider.AirType);
                 clientWorld.chunks.Set(pos, chunk);
             }
 

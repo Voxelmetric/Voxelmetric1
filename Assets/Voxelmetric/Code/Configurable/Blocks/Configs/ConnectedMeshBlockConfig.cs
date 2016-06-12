@@ -29,7 +29,7 @@ public class ConnectedMeshBlockConfig : CustomMeshBlockConfig
             if (_GetPropertyFromConfig(config, direction + "FileLocation", "") == "")
                 continue;
 
-            directionalTextures.Add(direction, world.textureIndex.GetTextureCollection(_GetPropertyFromConfig(config, direction + "Texture", "")));
+            directionalTextures.Add(direction, world.textureProvider.GetTextureCollection(_GetPropertyFromConfig(config, direction + "Texture", "")));
 
             Vector3 offset;
             offset.x = float.Parse(_GetPropertyFromConfig(config, direction + "XOffset", "0"));

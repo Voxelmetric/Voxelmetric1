@@ -170,10 +170,10 @@ namespace Voxelmetric.Code.VM
 
         public void BroadcastChange(BlockPos pos, Block block, int excludedUser)
         {
-            lock(clients) {
-                if (clients.Count == 0) {
+            lock(clients)
+            {
+                if (clients.Count == 0)
                     return;
-                }
 
                 byte[] data = new byte[15];
 
@@ -181,24 +181,24 @@ namespace Voxelmetric.Code.VM
                 pos.ToBytes().CopyTo(data, 1);
                 BitConverter.GetBytes(block.type).CopyTo(data, 13);
 
-                foreach (var client in clients.Values) {
-                    if (excludedUser == -1 || client.ID != excludedUser) {
+                foreach (var client in clients.Values)
+                {
+                    if (excludedUser == -1 || client.ID != excludedUser)
                         client.Send(data);
-                    }
                 }
             }
         }
 
         public void ReceiveChange(BlockPos pos, int type, int id)
         {
-            Block block = Block.Create(type, world);
-            world.blocks.Set(pos, block, updateChunk: true, setBlockModified: true);
+            Block block = world.blockProvider.BlockTypes[type];
+            world.blocks.Set(pos, block, true, true);
             BroadcastChange(pos, block, id);
         }
     }
 
-    internal class ClientConnection : VmSocketState.IMessageHandler {
-
+    internal class ClientConnection : VmSocketState.IMessageHandler
+    {
         private int id;
         private Socket socket;
         private VmServer server;

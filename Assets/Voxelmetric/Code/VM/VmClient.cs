@@ -144,7 +144,7 @@ namespace Voxelmetric.Code.VM
                 case VmNetworking.SendBlockChange:
                     BlockPos pos = BlockPos.FromBytes(receivedData, 1);
                     ushort type = BitConverter.ToUInt16(receivedData, 13);
-                    ReceiveChange(pos, Block.Create(type, world));
+                    ReceiveChange(pos, world.blockProvider.BlockTypes[type]);
                     break;
                 case VmNetworking.transmitChunkData:
                     ReceiveChunk(receivedData);

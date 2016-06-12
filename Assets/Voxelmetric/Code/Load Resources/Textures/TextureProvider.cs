@@ -3,24 +3,29 @@ using UnityEngine;
 
 namespace Voxelmetric.Code.Load_Resources.Textures
 {
-    public class TextureIndex {
-
+    public class TextureProvider
+    {
         WorldConfig config;
         TextureConfig[] configs;
 
-        public TextureIndex(WorldConfig config)
+        // Texture atlas
+        public readonly Dictionary<string, TextureCollection> textures;
+
+        [HideInInspector]
+        public Texture2D atlas;
+        
+        public TextureProvider()
+        {
+            textures = new Dictionary<string, TextureCollection>();
+        }
+
+        public void Init(WorldConfig config)
         {
             this.config = config;
             LoadTextureIndex();
         }
 
-        // Texture atlas
-        public Dictionary<string, TextureCollection> textures = new Dictionary<string, TextureCollection>();
-
-        [HideInInspector]
-        public Texture2D atlas;
-
-        void LoadTextureIndex()
+        private void LoadTextureIndex()
         {
             // If you're using a pre defined texture atlas return now, don't try to generate a new one
             if (config.useCustomTextureAtlas)
@@ -30,9 +35,7 @@ namespace Voxelmetric.Code.Load_Resources.Textures
             }
 
             if (configs == null)
-            {
                 configs = LoadAllTextures();
-            }
 
             List<Texture2D> individualTextures = new List<Texture2D>();
             for (int i = 0; i < configs.Length; i++)
@@ -80,13 +83,10 @@ namespace Voxelmetric.Code.Load_Resources.Textures
                     collection.AddTexture(texture, connectedTextureType, configs[i].textures[j].weight);
 
                     if (configs[i].textures[j].repeatingTexture)
-                    {
                         repeatingTextures.Add(rects[index]);
-                    }
                     else
-                    {
                         nonrepeatingTextures.Add(rects[index]);
-                    }
+
                     index++;
                 }
             }
@@ -96,11 +96,11 @@ namespace Voxelmetric.Code.Load_Resources.Textures
         }
 
         //This function is used if you've made your own texture atlas and the configs just specify where the textures are
-        void UseCustomTextureAtlas()
+        private void UseCustomTextureAtlas()
         {
             atlas = Resources.Load<Texture2D>(config.customTextureAtlasFile);
 
-            configs = new ConfigLoader<TextureConfig>(new string[] { config.textureFolder }).AllConfigs();
+            configs = new ConfigLoader<TextureConfig>(new[] { config.textureFolder }).AllConfigs();
 
             for (int i = 0; i < configs.Length; i++)
             {
@@ -118,9 +118,7 @@ namespace Voxelmetric.Code.Load_Resources.Textures
 
                     int connectedTextureType = -1;
                     if (configs[i].connectedTextures)
-                    {
                         connectedTextureType = configs[i].textures[j].connectedType;
-                    }
 
                     collection.AddTexture(texture, connectedTextureType, configs[i].textures[j].weight);
                 }
@@ -129,24 +127,22 @@ namespace Voxelmetric.Code.Load_Resources.Textures
 
         private TextureConfig[] LoadAllTextures()
         {
-            TextureConfig[] allConfigs = new ConfigLoader<TextureConfig>(new string[] { config.textureFolder }).AllConfigs();
+            TextureConfig[] allConfigs = new ConfigLoader<TextureConfig>(new[] { config.textureFolder }).AllConfigs();
 
             // Load all files in Textures folder
             Texture2D[] sourceTextures = Resources.LoadAll<Texture2D>(config.textureFolder);
 
             Dictionary<string, Texture2D> sourceTexturesLookup = new Dictionary<string, Texture2D>();
-            foreach (var texture in sourceTextures) {
+            foreach (var texture in sourceTextures)
                 sourceTexturesLookup.Add(texture.name, texture);
-            }
 
             for (int i = 0; i < allConfigs.Length; i++)
             {
                 for (int n = 0; n < allConfigs[i].textures.Length; n++)
-                {
                     allConfigs[i].textures[n].texture2d = Texture2DFromConfig(allConfigs[i].textures[n], sourceTexturesLookup);
-                }
 
-                if (allConfigs[i].connectedTextures) {
+                if (allConfigs[i].connectedTextures)
+                {
                     //Create all 48 possibilities from the 5 supplied textures
                     Texture2D[] newTextures = ConnectedTextures.ConnectedTexturesFromBaseTextures(allConfigs[i].textures);
                     TextureConfig.Texture[] connectedTextures = new TextureConfig.Texture[48];
@@ -164,37 +160,32 @@ namespace Voxelmetric.Code.Load_Resources.Textures
             return allConfigs;
         }
 
-        Texture2D Texture2DFromConfig(TextureConfig.Texture texture, Dictionary<string, Texture2D> sourceTexturesLookup) {
+        private Texture2D Texture2DFromConfig(TextureConfig.Texture texture, Dictionary<string, Texture2D> sourceTexturesLookup)
+        {
             Texture2D file;
-            if (!sourceTexturesLookup.TryGetValue(texture.file, out file)){
+            if (!sourceTexturesLookup.TryGetValue(texture.file, out file))
+            {
                 Debug.LogError("Config referred to nonexistent file: " + texture.file);
                 return null;
             }
 
             //No width or height means this texture is the whole file
             if (texture.width == 0 && texture.height == 0)
-            {
                 return file;
-            }
-            else //If theres a width and a height fetch the pixels specified by the rect as a texture
-            {
-                Texture2D newTexture = new Texture2D(texture.width, texture.height, config.textureFormat, file.mipmapCount < 1);
-                newTexture.SetPixels(0, 0, texture.width, texture.height, file.GetPixels(texture.xPos, texture.yPos, texture.width, texture.height));
-                return newTexture;
-            }
+            
+            //If theres a width and a height fetch the pixels specified by the rect as a texture
+            Texture2D newTexture = new Texture2D(texture.width, texture.height, config.textureFormat, file.mipmapCount < 1);
+            newTexture.SetPixels(0, 0, texture.width, texture.height, file.GetPixels(texture.xPos, texture.yPos, texture.width, texture.height));
+            return newTexture;
         }
 
         public TextureCollection GetTextureCollection(string textureName)
         {
             if (textures.Keys.Count == 0)
-            {
                 LoadTextureIndex();
-            }
 
             TextureCollection collection;
-
             textures.TryGetValue(textureName, out collection);
-
             return collection;
         }
 

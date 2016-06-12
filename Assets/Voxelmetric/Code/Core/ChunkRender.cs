@@ -37,7 +37,7 @@ namespace Voxelmetric.Code.Core
                 BlockPos localBlockPos = new BlockPos(x, y, z);
 
                 Block block = chunk.blocks.LocalGet(localBlockPos);
-                if (block.type==BlockIndex.VoidType)
+                if (block.type==BlockProvider.VoidType)
                     continue;
 
                 block.BuildBlock(chunk, localBlockPos, localBlockPos+chunk.pos);

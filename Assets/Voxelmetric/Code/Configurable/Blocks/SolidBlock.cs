@@ -1,8 +1,6 @@
-﻿using System;
-using Voxelmetric.Code.Core;
+﻿using Voxelmetric.Code.Core;
 using Voxelmetric.Code.Data_types;
 
-[Serializable]
 public class SolidBlock : Block
 {
     public virtual bool solidTowardsSameType { get { return ((SolidBlockConfig)config).solidTowardsSameType; } }

@@ -9,7 +9,7 @@ namespace Voxelmetric.Code.Serialization
     public class Save
     {
         public BlockPos[] positions = new BlockPos[0];
-        public Block[] blocks = new Block[0];
+        public BlockData[] blocks = new BlockData[0];
 
         public bool changed = false;
 
@@ -21,7 +21,7 @@ namespace Voxelmetric.Code.Serialization
         {
             this.chunk = chunk;
 
-            Dictionary<BlockPos, Block> blocksDictionary = new Dictionary<BlockPos, Block>();
+            Dictionary<BlockPos, BlockData> blocksDictionary = new Dictionary<BlockPos, BlockData>();
 
             if (existing != null) {
                 //Because existing saved blocks aren't marked as modified we have to add the
@@ -36,11 +36,11 @@ namespace Voxelmetric.Code.Serialization
                 //remove any existing blocks in the dictionary as they're
                 //from the existing save and are overwritten
                 blocksDictionary.Remove(pos);
-                blocksDictionary.Add(pos, chunk.blocks.Get(pos));
+                blocksDictionary.Add(pos, new BlockData(chunk.blocks.Get(pos).type));
                 changed = true;
             }
 
-            blocks = new Block[blocksDictionary.Keys.Count];
+            blocks = new BlockData[blocksDictionary.Keys.Count];
             positions = new BlockPos[blocksDictionary.Keys.Count];
 
             int index = 0;
@@ -52,7 +52,7 @@ namespace Voxelmetric.Code.Serialization
             }
         }
 
-        private void AddBlocks(Dictionary<BlockPos, Block> blocksDictionary)
+        private void AddBlocks(Dictionary<BlockPos, BlockData> blocksDictionary)
         {
             for (int i = 0; i < blocks.Length; i++)
             {

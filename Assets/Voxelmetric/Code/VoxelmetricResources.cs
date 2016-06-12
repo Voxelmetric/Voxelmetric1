@@ -5,9 +5,9 @@ using Voxelmetric.Code.Load_Resources.Textures;
 
 namespace Voxelmetric.Code
 {
-    public class VoxelmetricResources {
-
-        public System.Random random = new System.Random();
+    public class VoxelmetricResources
+    {
+        public readonly System.Random random = new System.Random();
 
         // Worlds can use different block and texture indexes or share them so they are mapped here to
         // the folders they're loaded from so that a world can create a new index or if it uses the same
@@ -16,39 +16,35 @@ namespace Voxelmetric.Code
         /// <summary>
         /// A map of texture indexes with the folder they're built from
         /// </summary>
-        public Dictionary<string, TextureIndex> textureIndexes = new Dictionary<string, TextureIndex>();
+        public readonly Dictionary<string, TextureProvider> TextureProviders = new Dictionary<string, TextureProvider>();
 
-        public TextureIndex GetOrLoadTextureIndex(World world)
+        public TextureProvider GetTextureProvider(World world)
         {
             //Check for the folder in the dictionary and if it doesn't exist create it
-            TextureIndex textureIndex;
-            if (textureIndexes.TryGetValue(world.config.textureFolder, out textureIndex))
-            {
-                return textureIndex;
-            }
+            TextureProvider textureProvider;
+            if (TextureProviders.TryGetValue(world.config.textureFolder, out textureProvider))
+                return textureProvider;
 
-            textureIndex = new TextureIndex(world.config);
-            textureIndexes.Add(world.config.textureFolder, textureIndex);
-            return textureIndex;
+            textureProvider = new TextureProvider();
+            TextureProviders.Add(world.config.textureFolder, textureProvider);
+            return textureProvider;
         }
 
         /// <summary>
         /// A map of block indexes with the folder they're built from
         /// </summary>
-        public Dictionary<string, BlockIndex> blockIndexes = new Dictionary<string, BlockIndex>();
+        public readonly Dictionary<string, BlockProvider> BlockProviders = new Dictionary<string, BlockProvider>();
 
-        public BlockIndex GetOrLoadBlockIndex(World world)
+        public BlockProvider GetBlockProvider(World world)
         {
             //Check for the folder in the dictionary and if it doesn't exist create it
-            BlockIndex blockIndex;
-            if (blockIndexes.TryGetValue(world.config.blockFolder, out blockIndex))
-            {
-                return blockIndex;
-            }
+            BlockProvider blockProvider;
+            if (BlockProviders.TryGetValue(world.config.blockFolder, out blockProvider))
+                return blockProvider;
 
-            blockIndex = new BlockIndex(world.config.blockFolder, world);
-            blockIndexes.Add(world.config.blockFolder, blockIndex);
-            return blockIndex;
+            blockProvider = new BlockProvider();
+            BlockProviders.Add(world.config.blockFolder, blockProvider);
+            return blockProvider;
         }
 
     }

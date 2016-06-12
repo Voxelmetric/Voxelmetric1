@@ -1,4 +1,5 @@
 ﻿using Voxelmetric.Code.Data_types;
+using Voxelmetric.Code.Load_Resources.Blocks;
 using Voxelmetric.Code.Utilities;
 
 namespace Voxelmetric.Code.Core
@@ -10,12 +11,6 @@ namespace Voxelmetric.Code.Core
         public WorldBlocks(World world)
         {
             this.world = world;
-        }
-
-        public Block this[int x, int y, int z]
-        {
-            get { return this[new BlockPos(x, y, z)]; }
-            set { this[new BlockPos(x, y, z)] = value; }
         }
 
         public Block this[BlockPos pos]
@@ -30,12 +25,16 @@ namespace Voxelmetric.Code.Core
             if (containerChunk != null && pos.y >= world.config.minY)
                 return containerChunk.blocks.Get(pos);
 
-            return world.Void;
+            return world.blockProvider.BlockTypes[BlockProvider.VoidType];
         }
 
-        public void Set(BlockPos pos, string block, bool updateChunk = true, bool setBlockModified = true)
+        public BlockData GetBlockData(BlockPos pos)
         {
-            Set(pos, Block.Create(block, world), updateChunk, setBlockModified);
+            Chunk containerChunk = world.chunks.Get(pos);
+            if (containerChunk != null && pos.y >= world.config.minY)
+                return containerChunk.blocks.GetBlockData(pos);
+
+            return new BlockData(BlockProvider.VoidType);
         }
 
         /// <summary>

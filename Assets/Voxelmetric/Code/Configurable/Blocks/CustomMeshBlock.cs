@@ -1,10 +1,8 @@
 ﻿using UnityEngine;
-using System;
 using Voxelmetric.Code.Core;
 using Voxelmetric.Code.Data_types;
 using Voxelmetric.Code.Rendering;
 
-[Serializable]
 public class CustomMeshBlock : Block {
 
     public CustomMeshBlockConfig customMeshConfig { get { return (CustomMeshBlockConfig)config; } }

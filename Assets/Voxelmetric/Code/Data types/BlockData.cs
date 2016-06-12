@@ -1,90 +1,52 @@
 ﻿using System;
 using System.Runtime.InteropServices;
-using UnityEngine;
 
 namespace Voxelmetric.Code.Data_types
 {
     [Serializable]
     [StructLayout(LayoutKind.Sequential)]
-    public struct BlockData
+    public struct BlockData: IComparable<BlockData>, IEquatable<BlockData>
     {
-        int data;
+        private readonly ushort m_data;
 
-        public byte this[int index]
+        public BlockData(ushort type)
         {
-            get
-            {
-                switch (index)
-                {
-                    case 0:
-                        return (byte)((data & 0x000000FF));
-                    case 1:
-                        return (byte)((data & 0x0000FF00) >> 8);
-                    case 2:
-                        return (byte)((data & 0x00FF0000) >> 16);
-                    case 3:
-                        return (byte)((data & 0xFF000000) >> 24);
-                    default:
-                        Debug.LogWarning("block data index out of range");
-                        return 0;
-                }
-            }
-            set
-            {
-                byte[] bytes = new byte[4];
-                for (int i = 0; i < 4; i++) { bytes[i] = this[i]; }
-                bytes[index] = value;
-
-                data = bytes[0] | (bytes[1] << 8) | (bytes[2] << 16) | (bytes[3] << 24);
-            }
+            m_data = type;
         }
 
-        public bool this[int byteIndex, int boolIndex]
+        public ushort Type
         {
-            get
-            {
-                return ((this[byteIndex] >> boolIndex) & 0x1) == 1;
-            }
-            set
-            {
-                int byteAtIndex = this[byteIndex];
-            
-                int mask = (1 << boolIndex);
-                if (value)
-                {
-                    byteAtIndex |= mask;
-                }
-                else
-                {
-                    byteAtIndex &= ~mask;
-                }
-
-                this[byteIndex] = (byte)byteAtIndex;
-            }
+            get { return m_data; }
         }
 
-        public static implicit operator int(BlockData bd)
+        public int RestoreBlockData(byte[] data, int offset)
         {
-            return bd.data;
+            return 0;
         }
 
-        public static implicit operator BlockData(int i)
+        public byte[] ToByteArray()
         {
-            return new BlockData {data = i};
+            return BitConverter.GetBytes(m_data);
         }
 
-        public bool GetBit(int index, bool value)
+        public int CompareTo(BlockData other)
         {
-            return ((data >> index) & 0x1) == 1;
+            return other.m_data==m_data ? 0 : 1;
         }
 
-        public void SetBit(int index, bool value)
+        public bool Equals(BlockData other)
         {
-            int mask = (1 << index);
-            if (value)
-                data |= mask;
-            else
-                data &= ~mask;
+            return other.m_data==m_data;
+        }
+
+        public override bool Equals(object obj)
+        {
+            return obj != null && GetHashCode() == ((BlockData)obj).GetHashCode();
+        }
+
+        public override int GetHashCode()
+        {
+            return m_data.GetHashCode();
         }
     }
 }
