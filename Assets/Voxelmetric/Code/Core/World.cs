@@ -35,7 +35,7 @@ namespace Voxelmetric.Code.Core
             get
             {
                 if (voidBlock == null)
-                    voidBlock = Block.Create(Block.VoidType, this);
+                    voidBlock = Block.Create(BlockIndex.VoidType, this);
                 return voidBlock;
             }
         }
@@ -45,7 +45,7 @@ namespace Voxelmetric.Code.Core
             get
             {
                 if (airBlock == null)
-                    airBlock = Block.Create(Block.AirType, this);
+                    airBlock = Block.Create(BlockIndex.AirType, this);
                 return airBlock;
             }
         }

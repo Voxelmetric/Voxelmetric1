@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Runtime.InteropServices;
 using UnityEngine;
-using Voxelmetric.Code.Utilities;
 
 namespace Voxelmetric.Code.Data_types
 {
@@ -66,14 +65,12 @@ namespace Voxelmetric.Code.Data_types
 
         public static implicit operator int(BlockData bd)
         {
-            return (int)bd.data;
+            return bd.data;
         }
 
         public static implicit operator BlockData(int i)
         {
-            BlockData newBD = new BlockData();
-            newBD.data = i;
-            return newBD;
+            return new BlockData {data = i};
         }
 
         public bool GetBit(int index, bool value)
@@ -85,34 +82,9 @@ namespace Voxelmetric.Code.Data_types
         {
             int mask = (1 << index);
             if (value)
-            {
                 data |= mask;
-            }
             else
-            {
                 data &= ~mask;
-            }
         }
-
-        public int World()
-        {
-            if (Toggle.UseMultipleWorlds)
-            {
-                return this[3];
-            }
-            else
-            {
-                return 0;
-            }
-        }
-
-        public void SetWorld(int index)
-        {
-            if (Toggle.UseMultipleWorlds)
-            {
-                this[3] = (byte)index;
-            }
-        }
-
     }
 }

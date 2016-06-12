@@ -12,16 +12,35 @@ using Voxelmetric.Code.Core;
 /// </summary>
 public class BlockConfig
 {
-    public int type;
+    //! Block type. Set externally by BlockIndex class when config is loaded
+    public int type=-1;
     public World world;
 
+    #region Parameters read from config
+
+    //! Unique identifier of block config
     public string name;
+
+    private string m_className;
+    public string className
+    {
+        get { return m_className; }
+        set
+        {
+            m_className = value;
+            blockClass = Type.GetType(value + ", " + typeof(Block).Assembly, false);
+        }
+    }
+
     public Type blockClass;
+
     public bool solid;
     public bool transparent;
     public bool canBeWalkedOn;
     public bool canBeWalkedThrough;
 
+    #endregion
+    
     /// <summary>
     /// Assigns the variables in the config from a hashtable. When overriding this
     /// remember to call the base function first.
@@ -31,11 +50,9 @@ public class BlockConfig
     public virtual void SetUp(Hashtable config, World world)
     {
         this.world = world;
-        type = _GetPropertyFromConfig(config, "type", defaultValue: -1);
+        
         name = _GetPropertyFromConfig(config, "name", defaultValue: "block");
-
-        string blockClassName = _GetPropertyFromConfig(config, "blockClass", defaultValue: "Block");
-        blockClass = Type.GetType(blockClassName + ", " + typeof(Block).Assembly, false);
+        className = _GetPropertyFromConfig(config, "blockClass", defaultValue: "Block");
 
         solid = _GetPropertyFromConfig(config, "solid", defaultValue: true);
         transparent = _GetPropertyFromConfig(config, "transparent", defaultValue: false);
@@ -51,12 +68,8 @@ public class BlockConfig
     protected static T _GetPropertyFromConfig<T>(Hashtable config, object key, T defaultValue)
     {
         if (config.ContainsKey(key))
-        {
             return (T)config[key];
-        }
-        else
-        {
-            return defaultValue;
-        }
+
+        return defaultValue;
     }
 }

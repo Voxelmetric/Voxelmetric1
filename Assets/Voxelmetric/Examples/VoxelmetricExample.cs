@@ -3,6 +3,7 @@ using UnityEngine.EventSystems;
 using UnityEngine.UI;
 using Voxelmetric.Code.Core;
 using Voxelmetric.Code.Data_types;
+using Voxelmetric.Code.Load_Resources.Blocks;
 using Voxelmetric.Code.Serialization;
 using Voxelmetric.Code.Utilities;
 
@@ -62,10 +63,10 @@ namespace Voxelmetric.Examples
 
             if (Input.GetMouseButtonDown(0) && !eventSystem.IsPointerOverGameObject())
             {
-                if (hit.block.type != Block.VoidType)
+                if (hit.block.type != BlockIndex.VoidType)
                 {
                     Block block = Block.Create(blockToPlace, world);
-                    bool adjacent = block.type!=Block.AirType;
+                    bool adjacent = block.type != BlockIndex.AirType;
                     Code.Voxelmetric.SetBlock(adjacent ? hit.adjacentPos : hit.blockPos, block, world);
                 }
             }

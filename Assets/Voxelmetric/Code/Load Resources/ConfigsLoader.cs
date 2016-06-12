@@ -18,8 +18,7 @@ namespace Voxelmetric.Code.Load_Resources
         {
             foreach (var configFolder in configFolders)
             {
-                var configFiles = UnityEngine.Resources.LoadAll<TextAsset>(configFolder);
-
+                var configFiles = Resources.LoadAll<TextAsset>(configFolder);
                 foreach (var configFile in configFiles)
                 {
                     T config = JsonConvert.DeserializeObject<T>(configFile.text);
@@ -32,28 +31,21 @@ namespace Voxelmetric.Code.Load_Resources
         public T GetConfig(string configName)
         {
             if (configs.Keys.Count == 0)
-            {
                 LoadConfigs();
-            }
 
             T conf;
             if (configs.TryGetValue(configName, out conf))
-            {
                 return conf;
-            }
-            else
-            {
-                Debug.LogError("Config not found for " + configName + ". Using defaults");
-                return conf;
-            }
+
+            Debug.LogError("Config not found for " + configName + ". Using defaults");
+            return conf;
         }
 
         public T[] AllConfigs()
         {
-            if (this.configs.Keys.Count == 0)
-            {
+            if (configs.Keys.Count == 0)
                 LoadConfigs();
-            }
+
             T[] configValues = new T[configs.Count];
             configs.Values.CopyTo(configValues, 0);
             return configValues;

@@ -1,35 +1,45 @@
 ﻿using System;
+using System.Runtime.Serialization;
 using UnityEngine;
+using UnityEngine.Assertions;
 using Voxelmetric.Code.Core;
 using Voxelmetric.Code.Data_types;
 
 [Serializable]
-public class Block
+public class Block: ISerializable
 {
-    // Static block types: These are always added as 0 and 1 in the block index
-    public static readonly int VoidType = 0;
-    public static readonly int AirType = 1;
+    public ushort type;
+    public BlockConfig config { get; set; }
 
-    public Block() { }
-    public Block(int type)
+    public Block()
     {
-        this.type = (ushort)type;
+        type = 0;
+        config = null;
     }
 
-    public ushort type;
-    public byte worldIndex;
+    public Block(int type, BlockConfig config)
+    {
+        Assert.IsTrue(config != null);
+        this.type = (ushort)type;
+        this.config = config;
+    }
 
-    [NonSerialized()] private BlockConfig cachedConfig;
-    [NonSerialized()] public World world;
+    // Deserialization
+    public Block(SerializationInfo info, StreamingContext text) : this()
+    {
+        World world = text.Context as World;
+        type = info.GetUInt16("type");
+        config = world.blockIndex.GetConfig(type);
+    }
+
+    // Serialization
+    public void GetObjectData(SerializationInfo info, StreamingContext context)
+    {
+        info.AddValue("type", type);
+    }
 
     public virtual string       name                { get { return config.name;                     } }
     public virtual string       displayName         { get { return name;                            } }
-    public virtual BlockConfig  config              { get {
-            if (cachedConfig == null || cachedConfig.type != type)
-                cachedConfig = world.blockIndex.configs[type];
-            return cachedConfig;
-        }
-    }
     public virtual bool         solid               { get { return config.solid;                    } }
     public virtual bool         canBeWalkedOn       { get { return config.canBeWalkedOn;            } }
     public virtual bool         canBeWalkedThrough  { get { return config.canBeWalkedThrough;       } }
@@ -62,9 +72,11 @@ public class Block
 
     public static Block Create(int type, World world)
     {
-        Block block = (Block)Activator.CreateInstance(world.blockIndex.GetConfig(type).blockClass);
+        BlockConfig config = world.blockIndex.GetConfig(type);
+        Assert.IsTrue(config!=null);
+        Block block = (Block)Activator.CreateInstance(config.blockClass);
         block.type = (ushort)type;
-        block.world = world;
+        block.config = config;
         return block;
     }
 

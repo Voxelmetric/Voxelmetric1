@@ -1,5 +1,6 @@
 ﻿using Voxelmetric.Code.Common;
 using Voxelmetric.Code.Data_types;
+using Voxelmetric.Code.Load_Resources.Blocks;
 using Voxelmetric.Code.Rendering;
 using Voxelmetric.Code.Utilities;
 
@@ -36,7 +37,7 @@ namespace Voxelmetric.Code.Core
                 BlockPos localBlockPos = new BlockPos(x, y, z);
 
                 Block block = chunk.blocks.LocalGet(localBlockPos);
-                if (block.type==Block.VoidType)
+                if (block.type==BlockIndex.VoidType)
                     continue;
 
                 block.BuildBlock(chunk, localBlockPos, localBlockPos+chunk.pos);

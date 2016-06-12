@@ -3,6 +3,7 @@ using System.Threading;
 using System;
 using Voxelmetric.Code.Core;
 using Voxelmetric.Code.Data_types;
+using Voxelmetric.Code.Load_Resources.Blocks;
 using Voxelmetric.Code.Utilities;
 using Voxelmetric.Code.VM;
 
@@ -90,7 +91,7 @@ public class VmNetworkingTest {
             // Setup air chunks on the client
             foreach (var pos in chunkPosns) {
                 Chunk chunk = Chunk.CreateChunk(clientWorld, pos);
-                TestUtils.SetChunkBlocks(chunk, Block.AirType);
+                TestUtils.SetChunkBlocks(chunk, BlockIndex.AirType);
                 clientWorld.chunks.Set(pos, chunk);
             }
 

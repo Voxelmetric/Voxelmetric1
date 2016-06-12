@@ -101,16 +101,15 @@ public class TestUtils {
         World world = chunk.world;
 
         const int blockTypes = 2;
-        for (int type = 0; type < blockTypes; ++type) {
+        Block[] rndBlocks = new Block[blockTypes];
+
+        for (int type = 0; type < blockTypes; ++type)
+        {
             var config = world.blockIndex.GetConfig(type);
             Assert.IsNotNull(config, "config");
             Assert.IsNotNull(config.blockClass, "config.blockClass");
-        }
 
-        Block[] rndBlocks = new Block[blockTypes];
-        for (int type = 0; type < blockTypes; ++type) {
-            Block block = new Block(type);
-            block.world = world;
+            Block block = new Block(type, config);
             rndBlocks[type] = block;
         }
 
@@ -125,8 +124,7 @@ public class TestUtils {
         Assert.IsNotNull(config, "config");
         Assert.IsNotNull(config.blockClass, "config.blockClass");
 
-        Block block = new Block(type);
-        block.world = world;
+        Block block = new Block(type, config);
 
         foreach (BlockPos localPos in LocalPosns)
             chunk.blocks.LocalSet(localPos, block);

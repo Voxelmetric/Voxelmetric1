@@ -17,7 +17,8 @@ namespace Voxelmetric.Code.Serialization
 
         public Chunk Chunk { get { return chunk; } }
 
-        public Save(Chunk chunk, Save existing) {
+        public Save(Chunk chunk, Save existing)
+        {
             this.chunk = chunk;
 
             Dictionary<BlockPos, Block> blocksDictionary = new Dictionary<BlockPos, Block>();
@@ -43,15 +44,18 @@ namespace Voxelmetric.Code.Serialization
             positions = new BlockPos[blocksDictionary.Keys.Count];
 
             int index = 0;
-            foreach (var pair in blocksDictionary) {
+            foreach (var pair in blocksDictionary)
+            {
                 blocks[index] = pair.Value;
                 positions[index] = pair.Key;
                 index++;
             }
         }
 
-        private void AddBlocks(Dictionary<BlockPos, Block> blocksDictionary) {
-            for (int i = 0; i < blocks.Length; i++) {
+        private void AddBlocks(Dictionary<BlockPos, Block> blocksDictionary)
+        {
+            for (int i = 0; i < blocks.Length; i++)
+            {
                 blocksDictionary.Add(positions[i], blocks[i]);
             }
         }
