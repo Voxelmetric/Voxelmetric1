@@ -12,8 +12,6 @@ namespace Voxelmetric.Code.Builders
         /// </summary>
         public void BuildMesh(Mesh mesh, Rendering.RenderBuffer buffer)
         {
-            if(mesh.vertices.Length>0)
-                Debug.LogError("nie som prazdy");
             int size = buffer.Vertices.Count;
 
             // Avoid allocations by retrieving buffers from the pool

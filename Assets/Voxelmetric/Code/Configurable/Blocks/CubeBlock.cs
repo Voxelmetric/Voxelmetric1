@@ -1,5 +1,5 @@
 ﻿using System;
-using Voxelmetric.Code.Blocks.Builders;
+using Voxelmetric.Code.Configurable.Blocks.Utilities;
 using Voxelmetric.Code.Core;
 using Voxelmetric.Code.Data_types;
 using Voxelmetric.Code.Load_Resources.Textures;
@@ -18,9 +18,9 @@ public class CubeBlock : SolidBlock {
             for (int i = 0; i<4; i++)
                 vertexData[i] = chunk.pools.PopVertexData();
 
-            BlockBuilder.PrepareVertices(chunk, localPos, globalPos, vertexData, direction);
-            BlockBuilder.PrepareTexture(chunk, localPos, globalPos, vertexData, direction, textures);
-            BlockBuilder.PrepareColors(chunk, localPos, globalPos, vertexData, direction);
+            BlockUtils.PrepareVertices(chunk, localPos, globalPos, vertexData, direction);
+            BlockUtils.PrepareTexture(chunk, localPos, globalPos, vertexData, direction, textures);
+            BlockUtils.PrepareColors(chunk, localPos, globalPos, vertexData, direction);
 
             for (int i = 0; i < 4; i++)
                 vertexDataFixed[i] = VertexDataUtils.ClassToStruct(vertexData[i]);

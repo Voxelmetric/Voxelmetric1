@@ -50,7 +50,7 @@ namespace Voxelmetric.Code.Rendering
             m_visible = false;
         }
 
-        public void BuildMesh(int[] tris, VertexDataFixed[] verts, Rect texture)
+        public void AddMeshData(int[] tris, VertexDataFixed[] verts, Rect texture)
         {
             RenderBuffer buffer = m_renderBuffers[m_renderBuffers.Count - 1];
 

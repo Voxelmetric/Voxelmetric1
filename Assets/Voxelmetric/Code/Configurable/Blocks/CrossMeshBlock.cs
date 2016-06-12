@@ -1,5 +1,5 @@
 ﻿using System;
-using Voxelmetric.Code.Blocks.Builders;
+using Voxelmetric.Code.Configurable.Blocks.Utilities;
 using Voxelmetric.Code.Core;
 using Voxelmetric.Code.Data_types;
 using Voxelmetric.Code.Load_Resources.Textures;
@@ -11,6 +11,6 @@ public class CrossMeshBlock : Block
 
     public override void AddBlockData(Chunk chunk, BlockPos localPos, BlockPos globalPos)
     {
-        MeshBuilder.CrossMeshRenderer(chunk, localPos, globalPos, texture);
+        MeshUtils.BuildCrossMesh(chunk, localPos, globalPos, texture);
     }
 }

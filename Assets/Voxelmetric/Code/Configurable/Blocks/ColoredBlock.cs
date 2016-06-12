@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 using System;
-using Voxelmetric.Code.Blocks.Builders;
+using Voxelmetric.Code.Configurable.Blocks.Utilities;
 using Voxelmetric.Code.Core;
 using Voxelmetric.Code.Data_types;
 using Voxelmetric.Code.Load_Resources.Textures;
@@ -20,9 +20,9 @@ public class ColoredBlock : SolidBlock {
             for (int i = 0; i < 4; i++)
                 vertexData[i] = chunk.pools.PopVertexData();
 
-            BlockBuilder.PrepareVertices(chunk, localPos, globalPos, vertexData, direction);
-            BlockBuilder.PrepareTexture(chunk, localPos, globalPos, vertexData, direction, texture);
-            BlockBuilder.SetColors(vertexData, ref color);
+            BlockUtils.PrepareVertices(chunk, localPos, globalPos, vertexData, direction);
+            BlockUtils.PrepareTexture(chunk, localPos, globalPos, vertexData, direction, texture);
+            BlockUtils.SetColors(vertexData, ref color);
             
             for (int i = 0; i<4; i++)
                 vertexDataFixed[i]= VertexDataUtils.ClassToStruct(vertexData[i]);

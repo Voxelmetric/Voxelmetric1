@@ -2433,8 +2433,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   world: {fileID: 838321170}
-  chunkLoadRadius: 6
+  ChunkLoadRadius: 6
   DistanceToDeleteChunks: 8
+  Diag_DrawWorldBounds: 0
+  Diag_DrawLoadRange: 0
 --- !u!81 &1929481914
 AudioListener:
   m_ObjectHideFlags: 0

@@ -15,7 +15,7 @@ public class TerrainGen
         this.world = world;
         noise = new Noise(world.name);
 
-        ConfigLoader<LayerConfig> layerConfigs = new ConfigLoader<LayerConfig>(new string[] { layerFolder });
+        ConfigLoader<LayerConfig> layerConfigs = new ConfigLoader<LayerConfig>(new[] { layerFolder });
 
         layers = new TerrainLayer[layerConfigs.AllConfigs().Length];
         for (int i = 0; i < layerConfigs.AllConfigs().Length; i++)
@@ -39,13 +39,13 @@ public class TerrainGen
         {
             for (int z = chunk.pos.z; z < chunk.pos.z + Env.ChunkSize; z++)
             {
-                GenerateTerrainForBlockColumn(x, z, false, chunk);
+                GenerateTerrainForBlockColumn(chunk, x, z, false);
             }
         }
         GenerateStructuresForChunk(chunk);
     }
 
-    public int GenerateTerrainForBlockColumn(int x, int z, bool justGetHeight, Chunk chunk)
+    public int GenerateTerrainForBlockColumn(Chunk chunk, int x, int z, bool justGetHeight)
     {
         int height = world.config.minY;
         for (int i = 0; i < layers.Length; i++)

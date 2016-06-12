@@ -39,7 +39,7 @@ public class ConnectedMeshBlock: CustomMeshBlock
                 chunk.blocks.LocalGet(localPos+dir).IsSolid(DirectionUtils.Opposite(dir)))
             {
                 texture = connectedMeshConfig.texture.GetTexture(chunk, localPos, globalPos, dir);
-                batcher.BuildMesh(connectedMeshConfig.directionalTris[dir], connectedMeshConfig.directionalVerts[dir], texture);
+                batcher.AddMeshData(connectedMeshConfig.directionalTris[dir], connectedMeshConfig.directionalVerts[dir], texture);
             }
             else if (connectedMeshConfig.connectsToTypes.Length!=0)
             {
@@ -49,7 +49,7 @@ public class ConnectedMeshBlock: CustomMeshBlock
                     if (neighborType==connectedMeshConfig.connectsToTypes[i])
                     {
                         texture = connectedMeshConfig.texture.GetTexture(chunk, localPos, globalPos, dir);
-                        batcher.BuildMesh(connectedMeshConfig.directionalTris[dir], connectedMeshConfig.directionalVerts[dir], texture);
+                        batcher.AddMeshData(connectedMeshConfig.directionalTris[dir], connectedMeshConfig.directionalVerts[dir], texture);
                         break;
                     }
                 }
@@ -57,6 +57,6 @@ public class ConnectedMeshBlock: CustomMeshBlock
         }
 
         texture = customMeshConfig.texture.GetTexture(chunk, localPos, globalPos, Direction.down);
-        batcher.BuildMesh(customMeshConfig.tris, customMeshConfig.verts, texture);
+        batcher.AddMeshData(customMeshConfig.tris, customMeshConfig.verts, texture);
     }
 }

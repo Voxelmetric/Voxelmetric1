@@ -45,7 +45,7 @@ public class StructureLayer : TerrainLayer
                         && pos.Add(0, 0, 1).Random(44, true) > chanceAtPos
                         && pos.Add(0, 0, -1).Random(44, true) > chanceAtPos)
                     {
-                        int height = terrainGen.GenerateTerrainForBlockColumn(x, z, true, chunk);
+                        int height = terrainGen.GenerateTerrainForBlockColumn(chunk, x, z, true);
                         structure.Build(world, chunk, new BlockPos(x, height, z), this);
                     }
                 }

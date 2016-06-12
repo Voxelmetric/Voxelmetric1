@@ -1,4 +1,3 @@
-using System;
 using UnityEngine;
 using Voxelmetric.Code.Core;
 using Voxelmetric.Code.Data_types;
@@ -6,16 +5,10 @@ using Voxelmetric.Code.Load_Resources.Textures;
 using Voxelmetric.Code.Rendering;
 using Voxelmetric.Code.Utilities;
 
-namespace Voxelmetric.Code.Blocks.Builders
+namespace Voxelmetric.Code.Configurable.Blocks.Utilities
 {
-    [Serializable]
-    public static class BlockBuilder
+    public static class BlockUtils
     {
-        public static void PrepareVertices(Chunk chunk, BlockPos localPos, BlockPos globalPos, VertexData[] vertexData, Direction direction)
-        {
-            PrepareFace(chunk, localPos, globalPos, vertexData, direction);
-        }
-
         public static void PrepareColors(Chunk chunk, BlockPos localPos, BlockPos globalPos, VertexData[] vertexData, Direction direction)
         {
             bool nSolid = false;
@@ -191,7 +184,7 @@ namespace Voxelmetric.Code.Blocks.Builders
             vertexData[3].UV = new Vector2(texture.x, texture.y);
         }
 
-        private static void PrepareFace(Chunk chunk, BlockPos localPos, BlockPos globalPos, VertexData[] vertexData, Direction direction)
+        public static void PrepareVertices(Chunk chunk, BlockPos localPos, BlockPos globalPos, VertexData[] vertexData, Direction direction)
         {
             //Adding a tiny overlap between block meshes may solve floating point imprecision
             //errors causing pixel size gaps between blocks when looking closely

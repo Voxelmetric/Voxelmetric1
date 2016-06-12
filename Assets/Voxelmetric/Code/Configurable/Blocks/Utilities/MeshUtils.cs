@@ -5,11 +5,11 @@ using Voxelmetric.Code.Load_Resources.Textures;
 using Voxelmetric.Code.Rendering;
 using Voxelmetric.Code.Utilities;
 
-namespace Voxelmetric.Code.Blocks.Builders
+namespace Voxelmetric.Code.Configurable.Blocks.Utilities
 {
-    public static class MeshBuilder {
+    public static class MeshUtils {
 
-        public static void CrossMeshRenderer(Chunk chunk, BlockPos localPos, BlockPos globalPos, TextureCollection texture, bool useOffset = true)
+        public static void BuildCrossMesh(Chunk chunk, BlockPos localPos, BlockPos globalPos, TextureCollection texture, bool useOffset = true)
         {
             float halfBlock = (Env.BlockSize / 2) + Env.BlockFacePadding;
 
@@ -54,8 +54,8 @@ namespace Voxelmetric.Code.Blocks.Builders
                     vertexData[1].Vertex = new Vector3(vPos.x-halfBlock, vPos.y-halfBlock+blockHeight, vPos.z+halfBlock);
                     vertexData[2].Vertex = new Vector3(vPos.x+halfBlock, vPos.y-halfBlock+blockHeight, vPos.z-halfBlock);
                     vertexData[3].Vertex = new Vector3(vPos.x+halfBlock, vPos.y-halfBlock, vPos.z-halfBlock);
-                    BlockBuilder.PrepareTexture(chunk, localPos, globalPos, vertexData, Direction.north, texture);
-                    BlockBuilder.SetColors(vertexData, 1, 1, 1, 1, 1);
+                    BlockUtils.PrepareTexture(chunk, localPos, globalPos, vertexData, Direction.north, texture);
+                    BlockUtils.SetColors(vertexData, 1, 1, 1, 1, 1);
 
                     for (int i = 0; i < 4; i++)
                         vertexDataFixed[i] = VertexDataUtils.ClassToStruct(vertexData[i]);
@@ -79,8 +79,8 @@ namespace Voxelmetric.Code.Blocks.Builders
                     vertexData[1].Vertex = new Vector3(vPos.x+halfBlock, vPos.y-halfBlock+blockHeight, vPos.z-halfBlock);
                     vertexData[2].Vertex = new Vector3(vPos.x-halfBlock, vPos.y-halfBlock+blockHeight, vPos.z+halfBlock);
                     vertexData[3].Vertex = new Vector3(vPos.x-halfBlock, vPos.y-halfBlock, vPos.z+halfBlock);
-                    BlockBuilder.PrepareTexture(chunk, localPos, globalPos, vertexData, Direction.north, texture);
-                    BlockBuilder.SetColors(vertexData, 1, 1, 1, 1, 1);
+                    BlockUtils.PrepareTexture(chunk, localPos, globalPos, vertexData, Direction.north, texture);
+                    BlockUtils.SetColors(vertexData, 1, 1, 1, 1, 1);
 
                     for (int i = 0; i < 4; i++)
                         vertexDataFixed[i] = VertexDataUtils.ClassToStruct(vertexData[i]);
@@ -104,8 +104,8 @@ namespace Voxelmetric.Code.Blocks.Builders
                     vertexData[1].Vertex = new Vector3(vPos.x+halfBlock, vPos.y-halfBlock+blockHeight, vPos.z+halfBlock);
                     vertexData[2].Vertex = new Vector3(vPos.x-halfBlock, vPos.y-halfBlock+blockHeight, vPos.z-halfBlock);
                     vertexData[3].Vertex = new Vector3(vPos.x-halfBlock, vPos.y-halfBlock, vPos.z-halfBlock);
-                    BlockBuilder.PrepareTexture(chunk, localPos, globalPos, vertexData, Direction.north, texture);
-                    BlockBuilder.SetColors(vertexData, 1, 1, 1, 1, 1);
+                    BlockUtils.PrepareTexture(chunk, localPos, globalPos, vertexData, Direction.north, texture);
+                    BlockUtils.SetColors(vertexData, 1, 1, 1, 1, 1);
 
                     for (int i = 0; i < 4; i++)
                         vertexDataFixed[i] = VertexDataUtils.ClassToStruct(vertexData[i]);
@@ -129,8 +129,8 @@ namespace Voxelmetric.Code.Blocks.Builders
                     vertexData[1].Vertex = new Vector3(vPos.x-halfBlock, vPos.y-halfBlock+blockHeight, vPos.z-halfBlock);
                     vertexData[2].Vertex = new Vector3(vPos.x+halfBlock, vPos.y-halfBlock+blockHeight, vPos.z+halfBlock);
                     vertexData[3].Vertex = new Vector3(vPos.x+halfBlock, vPos.y-halfBlock, vPos.z+halfBlock);
-                    BlockBuilder.PrepareTexture(chunk, localPos, globalPos, vertexData, Direction.north, texture);
-                    BlockBuilder.SetColors(vertexData, 1, 1, 1, 1, 1);
+                    BlockUtils.PrepareTexture(chunk, localPos, globalPos, vertexData, Direction.north, texture);
+                    BlockUtils.SetColors(vertexData, 1, 1, 1, 1, 1);
 
                     for (int i = 0; i < 4; i++)
                         vertexDataFixed[i] = VertexDataUtils.ClassToStruct(vertexData[i]);
