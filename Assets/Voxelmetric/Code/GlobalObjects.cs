@@ -16,8 +16,6 @@ namespace Voxelmetric.Code
         {
             IOPoolManager.Commit();
             WorkPoolManager.Commit();
-
-            //Debug.Log(Globals.MemPools.ToString());
         }
     }
 }

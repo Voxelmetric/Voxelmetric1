@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Text;
 using UnityEngine;
 using UnityEngine.Assertions;
 using Voxelmetric.Code.Common.Memory;
@@ -10,6 +11,8 @@ namespace Voxelmetric.Code.Common.MemoryPooling
     {
         private GameObject m_go;
         public ObjectPoolEntry [] ObjectPools = new ObjectPoolEntry [0];
+
+        private readonly StringBuilder m_stringBuilder = new StringBuilder();
 
         // Called after the singleton instance is created
         private void Awake()
@@ -60,6 +63,16 @@ namespace Voxelmetric.Code.Common.MemoryPooling
                 throw new InvalidOperationException(string.Format("Object pool {0} does not exist", poolName));
 
             return pool.Pop();
+        }
+
+        public override string ToString()
+        {
+            m_stringBuilder.Remove(0, m_stringBuilder.Length);
+
+            m_stringBuilder.Append("ObjectPools ");
+            foreach (var entry in ObjectPools)
+                m_stringBuilder.AppendFormat("{0},", entry);
+            return m_stringBuilder.ToString();
         }
 
         [Serializable]
@@ -124,6 +137,11 @@ namespace Voxelmetric.Code.Common.MemoryPooling
                 go.SetActive(true);
 
                 return go;
+            }
+            
+            public override string ToString()
+            {
+                return string.Format("{0}={1}", Name, Cache.Capacity);
             }
         }
     }

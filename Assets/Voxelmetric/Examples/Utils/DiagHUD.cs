@@ -4,6 +4,7 @@ using System.Text;
 using UnityEngine;
 using Assets.Engine.Scripts.Common.Extensions;
 using Voxelmetric.Code;
+using Voxelmetric.Code.Common.MemoryPooling;
 using Voxelmetric.Code.Core;
 
 namespace Assets.Client.Scripts.Misc
@@ -20,12 +21,12 @@ namespace Assets.Client.Scripts.Misc
         private float m_lastCollectNum = 0;
         private float m_delta = 0;
         private float m_lastDeltaTime = 0;
-        private int m_allocRate = 0;
-        private int m_lastAllocMemory = 0;
+        private long m_allocRate = 0;
+        private long m_lastAllocMemory = 0;
         private float m_lastAllocSet = -9999;
-        private int m_allocMem = 0;
-        private int m_collectAlloc = 0;
-        private int m_peakAlloc = 0;
+        private long m_allocMem = 0;
+        private long m_collectAlloc = 0;
+        private long m_peakAlloc = 0;
 
         private readonly StringBuilder m_text = new StringBuilder();
 
@@ -56,14 +57,14 @@ namespace Assets.Client.Scripts.Misc
                     m_collectAlloc = m_allocMem;
                 }
 
-                m_allocMem = (int)GC.GetTotalMemory(false);
+                m_allocMem = GC.GetTotalMemory(false);
 
                 m_peakAlloc = m_allocMem > m_peakAlloc ? m_allocMem : m_peakAlloc;
 
                 if (!(Time.realtimeSinceStartup - m_lastAllocSet > 0.3f))
                     yield return new WaitForSeconds(1.0f);
 
-                int diff = m_allocMem - m_lastAllocMemory;
+                long diff = m_allocMem - m_lastAllocMemory;
                 m_lastAllocMemory = m_allocMem;
                 m_lastAllocSet = Time.realtimeSinceStartup;
 
@@ -103,8 +104,13 @@ namespace Assets.Client.Scripts.Misc
             m_text.AppendFormat("ThreadPool items {0}\n", Globals.WorkPool.Size);
             m_text.AppendFormat("TaskPool items {0}\n", Globals.IOPool.Size);
 
-            GUI.Box(new Rect(5, 5, 300, 160), "");
-            GUI.Label(new Rect(10, 5, 1000, 200), m_text.ToString());
+            m_text.AppendLine(Globals.MemPools.ToString());
+            m_text.AppendLine(GameObjectProvider.Instance.ToString());
+
+            const int width = 350;
+            const int height = 200;
+            GUI.Box(new Rect(Screen.width-width, Screen.height-height, width, height), "");
+            GUI.Label(new Rect(Screen.width-width+10, Screen.height-height+10, width-10, height-10), m_text.ToString());
         }
     }
 }

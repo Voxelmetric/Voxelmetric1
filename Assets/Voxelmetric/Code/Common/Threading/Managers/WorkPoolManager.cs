@@ -70,9 +70,7 @@ namespace Voxelmetric.Code.Common.Threading.Managers
                     item.Action(item.Arg);
                 }
             }
-
-            //Debug.Log("WorkPool tasks: " + WorkItems.Count);
-
+            
             // Remove processed work items
             WorkItems.Clear();
         }

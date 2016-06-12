@@ -23,8 +23,6 @@ namespace Voxelmetric.Code.Common.Threading.Managers
                     var item = WorkItems[i];
                     pool.AddItem(item.Action, item.Arg);
                 }
-
-                //Debug.Log("IOPool tasks: " + pool.Size);
             }
             else
             {
