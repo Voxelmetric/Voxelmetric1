@@ -7,11 +7,13 @@ public class Block
 {
     public ushort type;
     public BlockConfig config;
+    public WorldBlocks blocks;
 
     public Block()
     {
         type = 0;
         config = null;
+        blocks = null;
     }
 
     public Block(int type, BlockConfig config)
@@ -19,6 +21,7 @@ public class Block
         Assert.IsTrue(config != null);
         this.type = (ushort)type;
         this.config = config;
+        blocks = config.world.blocks;
     }
     
     public virtual string       name                { get { return config.name;                     } }

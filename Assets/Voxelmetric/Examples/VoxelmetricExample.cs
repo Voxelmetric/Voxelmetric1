@@ -43,16 +43,17 @@ namespace Voxelmetric.Examples
             if (Input.GetMouseButton(1))
             {
                 rot = new Vector2(
-                    rot.x + Input.GetAxis("Mouse X") * 3,
-                    rot.y + Input.GetAxis("Mouse Y") * 3);
+                    rot.x+Input.GetAxis("Mouse X")*3,
+                    rot.y+Input.GetAxis("Mouse Y")*3
+                    );
 
                 transform.localRotation = Quaternion.AngleAxis(rot.x, Vector3.up);
                 transform.localRotation *= Quaternion.AngleAxis(rot.y, Vector3.left);
             }
 
             bool turbo = Input.GetKeyDown(KeyCode.LeftShift) || Input.GetKeyDown(KeyCode.RightShift);
-            transform.position += transform.forward * 40 * (turbo ? 2 : 1) * Input.GetAxis("Vertical") * Time.deltaTime;
-            transform.position += transform.right * 40 * (turbo ? 2 : 1) * Input.GetAxis("Horizontal") * Time.deltaTime;
+            transform.position += transform.forward * 40 * (turbo ? 3 : 1) * Input.GetAxis("Vertical") * Time.deltaTime;
+            transform.position += transform.right * 40 * (turbo ? 3 : 1) * Input.GetAxis("Horizontal") * Time.deltaTime;
 
             //Save
             saveProgressText.text = saveProgress != null ? SaveStatus() : "Save";
@@ -61,15 +62,15 @@ namespace Voxelmetric.Examples
 
             VmRaycastHit hit = Code.Voxelmetric.Raycast(new Ray(Camera.main.transform.position, mousePos - Camera.main.transform.position), world, 1000);
 
-            selectedBlockText.text = Code.Voxelmetric.GetBlock(hit.blockPos, world).displayName;
+            selectedBlockText.text = Code.Voxelmetric.GetBlock(world, hit.blockPos).displayName;
 
             if (Input.GetMouseButtonDown(0) && !eventSystem.IsPointerOverGameObject())
             {
                 if (hit.block.type != BlockProvider.AirType)
                 {
-                    Block block = world.blockProvider.GetBlock(blockToPlace);
-                    bool adjacent = block.type != BlockProvider.AirType;
-                    Code.Voxelmetric.SetBlock(adjacent ? hit.adjacentPos : hit.blockPos, block, world);
+                    ushort type = world.blockProvider.GetType(blockToPlace);
+                    bool adjacent = type != BlockProvider.AirType;
+                    Code.Voxelmetric.SetBlock(world, adjacent ? hit.adjacentPos : hit.blockPos, new BlockData(type));
                 }
             }
 

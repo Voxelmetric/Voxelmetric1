@@ -14,13 +14,13 @@ namespace Voxelmetric.Code.Load_Resources.Blocks
 
         private Block[] m_blockTypes;
         private readonly List<BlockConfig> m_configs;
-        private readonly Dictionary<string, int> m_names;
+        private readonly Dictionary<string, ushort> m_names;
 
         public Block[] BlockTypes { get { return m_blockTypes;} }
 
         public BlockProvider()
         {
-            m_names = new Dictionary<string, int>();
+            m_names = new Dictionary<string, ushort>();
             m_configs = new List<BlockConfig>();
         }
 
@@ -48,8 +48,9 @@ namespace Voxelmetric.Code.Load_Resources.Blocks
                 BlockConfig config = m_configs[i];
 
                 Block block = (Block)Activator.CreateInstance(config.blockClass);
-                block.config = config;
                 block.type = (ushort)i;
+                block.config = config;
+                block.blocks = config.world.blocks;
                 m_blockTypes[i] = block;
             }
 
@@ -122,12 +123,12 @@ namespace Voxelmetric.Code.Load_Resources.Blocks
         {
             config.type = m_configs.Count;
             m_configs.Add(config);
-            m_names.Add(config.name, config.type);
+            m_names.Add(config.name, (ushort)config.type);
         }
 
-        public int GetType(string name)
+        public ushort GetType(string name)
         {
-            int type;
+            ushort type;
             if (m_names.TryGetValue(name, out type))
                 return type;
 
@@ -137,7 +138,7 @@ namespace Voxelmetric.Code.Load_Resources.Blocks
 
         public Block GetBlock(string name)
         {
-            int type;
+            ushort type;
             if (m_names.TryGetValue(name, out type))
                 return BlockTypes[type];
 
@@ -145,9 +146,9 @@ namespace Voxelmetric.Code.Load_Resources.Blocks
             return BlockTypes[AirType];
         }
 
-        public BlockConfig GetConfig(int type)
+        public BlockConfig GetConfig(ushort type)
         {
-            if (type>=0 && type<m_configs.Count)
+            if (type<m_configs.Count)
                 return m_configs[type];
 
             Debug.LogError("Config not found: "+type);

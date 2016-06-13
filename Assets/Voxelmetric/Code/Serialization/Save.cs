@@ -11,7 +11,7 @@ namespace Voxelmetric.Code.Serialization
         public BlockPos[] positions = new BlockPos[0];
         public BlockData[] blocks = new BlockData[0];
 
-        public bool changed = false;
+        public readonly bool changed = false;
 
         [NonSerialized()] private Chunk chunk;
 
@@ -23,7 +23,8 @@ namespace Voxelmetric.Code.Serialization
 
             Dictionary<BlockPos, BlockData> blocksDictionary = new Dictionary<BlockPos, BlockData>();
 
-            if (existing != null) {
+            if (existing != null)
+            {
                 //Because existing saved blocks aren't marked as modified we have to add the
                 //blocks already in the save file if there is one.
                 existing.AddBlocks(blocksDictionary);
@@ -36,7 +37,7 @@ namespace Voxelmetric.Code.Serialization
                 //remove any existing blocks in the dictionary as they're
                 //from the existing save and are overwritten
                 blocksDictionary.Remove(pos);
-                blocksDictionary.Add(pos, new BlockData(chunk.blocks.Get(pos).type));
+                blocksDictionary.Add(pos, chunk.blocks.Get(pos));
                 changed = true;
             }
 

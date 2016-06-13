@@ -30,23 +30,25 @@ namespace Voxelmetric.Code.Core
             {
                 randomUpdateTime = 0;
 
-                BlockPos randomPos = new BlockPos(
-                    chunk.pos.x+Voxelmetric.resources.random.Next(0, Env.ChunkMask),
-                    chunk.pos.y+Voxelmetric.resources.random.Next(0, Env.ChunkMask),
-                    chunk.pos.z+Voxelmetric.resources.random.Next(0, Env.ChunkMask)
+                BlockPos randomBlockPos = new BlockPos(
+                    Voxelmetric.resources.random.Next(0, Env.ChunkMask),
+                    Voxelmetric.resources.random.Next(0, Env.ChunkMask),
+                    Voxelmetric.resources.random.Next(0, Env.ChunkMask)
                     );
 
-                chunk.blocks.Get(randomPos).RandomUpdate(chunk, randomPos, randomPos+chunk.pos);
+                chunk.blocks.GetBlock(randomBlockPos).RandomUpdate(chunk, randomBlockPos, randomBlockPos+chunk.pos);
 
-                //Process Scheduled Updates
+                // Process Scheduled Updates
                 for (int i = 0; i<scheduledUpdates.Count; i++)
                 {
-                    scheduledUpdates[i] = new BlockAndTimer(scheduledUpdates[i].pos,
-                                                            scheduledUpdates[i].time-
-                                                            chunk.world.config.randomUpdateFrequency);
+                    scheduledUpdates[i] = new BlockAndTimer(
+                        scheduledUpdates[i].pos,
+                        scheduledUpdates[i].time-chunk.world.config.randomUpdateFrequency
+                        );
+
                     if (scheduledUpdates[i].time<=0)
                     {
-                        Block block = chunk.blocks.Get(scheduledUpdates[i].pos);
+                        Block block = chunk.blocks.GetBlock(scheduledUpdates[i].pos);
                         block.ScheduledUpdate(chunk, scheduledUpdates[i].pos, scheduledUpdates[i].pos+chunk.pos);
                         scheduledUpdates.RemoveAt(i);
                         i--;
@@ -56,9 +58,9 @@ namespace Voxelmetric.Code.Core
 
         }
 
-        public void AddScheduledUpdate(BlockPos pos, float time)
+        public void AddScheduledUpdate(BlockPos blockPos, float time)
         {
-            scheduledUpdates.Add(new BlockAndTimer(pos, time));
+            scheduledUpdates.Add(new BlockAndTimer(blockPos, time));
         }
     }
 }

@@ -42,16 +42,16 @@ namespace Voxelmetric.Code.Load_Resources.Textures
         {
             if (usesConnectedTextures)
             {
-                int blockType = chunk.blocks.LocalGet(localPos).type;
+                int blockType = chunk.world.blocks.Get(globalPos).Type;
 
-                bool wn = ConnectedTextures.IsSame(chunk, localPos, -1, 1, direction, blockType);
-                bool n = ConnectedTextures.IsSame(chunk, localPos, 0, 1, direction, blockType);
-                bool ne = ConnectedTextures.IsSame(chunk, localPos, 1, 1, direction, blockType);
-                bool w = ConnectedTextures.IsSame(chunk, localPos, -1, 0, direction, blockType);
-                bool e = ConnectedTextures.IsSame(chunk, localPos, 1, 0, direction, blockType);
-                bool es = ConnectedTextures.IsSame(chunk, localPos, 1, -1, direction, blockType);
-                bool s = ConnectedTextures.IsSame(chunk, localPos, 0, -1, direction, blockType);
-                bool sw = ConnectedTextures.IsSame(chunk, localPos, -1, -1, direction, blockType);
+                bool wn = ConnectedTextures.IsSame(chunk, globalPos, -1, 1, direction, blockType);
+                bool n = ConnectedTextures.IsSame(chunk, globalPos, 0, 1, direction, blockType);
+                bool ne = ConnectedTextures.IsSame(chunk, globalPos, 1, 1, direction, blockType);
+                bool w = ConnectedTextures.IsSame(chunk, globalPos, -1, 0, direction, blockType);
+                bool e = ConnectedTextures.IsSame(chunk, globalPos, 1, 0, direction, blockType);
+                bool es = ConnectedTextures.IsSame(chunk, globalPos, 1, -1, direction, blockType);
+                bool s = ConnectedTextures.IsSame(chunk, globalPos, 0, -1, direction, blockType);
+                bool sw = ConnectedTextures.IsSame(chunk, globalPos, -1, -1, direction, blockType);
 
                 return connectedTextures[ConnectedTextures.GetTexture(n, e, s, w, wn, ne, es, sw)];
             }

@@ -4,8 +4,8 @@ using Voxelmetric.Code.Utilities;
 
 namespace Voxelmetric.Code.Core
 {
-    public class WorldBlocks  {
-
+    public class WorldBlocks
+    {
         World world;
 
         public WorldBlocks(World world)
@@ -13,87 +13,90 @@ namespace Voxelmetric.Code.Core
             this.world = world;
         }
 
-        public Block this[BlockPos pos]
+        /// <summary>
+        /// Gets the chunk and retrives the block data at the given coordinates
+        /// </summary>
+        /// <param name="pos">Global position of the block data</param>
+        public BlockData Get(BlockPos pos)
         {
-            get { return Get(pos); }
-            set { Set(pos, value, true, true); }
-        }
+            Chunk chunk = world.chunks.Get(pos);
+            if (chunk != null && pos.y>=world.config.minY)
+            {
+                BlockPos blockPos = new BlockPos(
+                    pos.x & Env.ChunkMask,
+                    pos.y & Env.ChunkMask,
+                    pos.z & Env.ChunkMask
+                    );
 
-        public Block Get(BlockPos pos)
-        {
-            Chunk containerChunk = world.chunks.Get(pos);
-            if (containerChunk != null && pos.y >= world.config.minY)
-                return containerChunk.blocks.Get(pos);
-
-            return world.blockProvider.BlockTypes[BlockProvider.AirType];
-        }
-
-        public BlockData GetBlockData(BlockPos pos)
-        {
-            Chunk containerChunk = world.chunks.Get(pos);
-            if (containerChunk != null && pos.y >= world.config.minY)
-                return containerChunk.blocks.GetBlockData(pos);
+                return chunk.blocks.Get(blockPos);
+            }
 
             return new BlockData(BlockProvider.AirType);
         }
 
         /// <summary>
-        /// Gets the chunk and sets the block at the given coordinates, updates the chunk and its
-        /// neighbors if the Update chunk flag is true or not set. Uses global coordinates, to use
-        /// local coordinates use the chunk's SetBlock function.
+        /// Gets the chunk and retrives the block at the given coordinates
         /// </summary>
         /// <param name="pos">Global position of the block</param>
-        /// <param name="block">The block be placed</param>
+        public Block GetBlock(BlockPos pos)
+        {
+            Chunk chunk = world.chunks.Get(pos);
+            if (chunk != null && pos.y>=world.config.minY)
+            {
+                BlockPos blockPos = new BlockPos(
+                    pos.x & Env.ChunkMask,
+                    pos.y & Env.ChunkMask,
+                    pos.z & Env.ChunkMask
+                    );
+
+                BlockData blockData = chunk.blocks.Get(blockPos);
+                return world.blockProvider.BlockTypes[blockData.Type];
+            }
+
+            return world.blockProvider.BlockTypes[BlockProvider.AirType];
+        }
+
+        /// <summary>
+        /// Gets the chunk and sets the block data at the given coordinates
+        /// </summary>
+        /// <param name="pos">Global position of the block</param>
+        /// <param name="blockData">The block be placed</param>
+        public void Set(BlockPos pos, BlockData blockData)
+        {
+            Chunk chunk = world.chunks.Get(pos);
+            if (chunk==null)
+                return;
+
+            BlockPos blockPos = new BlockPos(
+                pos.x & Env.ChunkMask,
+                pos.y & Env.ChunkMask,
+                pos.z & Env.ChunkMask
+                );
+
+            chunk.blocks.Set(blockPos, blockData);
+        }
+
+        /// <summary>
+        /// Gets the chunk and sets the block data at the given coordinates, updates the chunk and its
+        /// neighbors if the Update chunk flag is true or not set.
+        /// </summary>
+        /// <param name="pos">Global position of the block</param>
+        /// <param name="blockData">The block be placed</param>
         /// <param name="updateChunk">Optional parameter, set to false not Update the chunk despite the change</param>
         /// <param name="setBlockModified">Optional parameter, set to true to mark chunk data as modified</param>
-        public void Set(BlockPos pos, Block block, bool updateChunk = true, bool setBlockModified = true)
+        public void Modify(BlockPos pos, BlockData blockData, bool updateChunk = true, bool setBlockModified = true)
         {
             Chunk chunk = world.chunks.Get(pos);
-            if (chunk != null)
-            {
-                chunk.blocks.Set(pos, block, updateChunk, setBlockModified);
+            if (chunk==null)
+                return;
 
-                if (updateChunk)
-                    UpdateAdjacentChunk(pos);
-            }
-        }
+            BlockPos blockPos = new BlockPos(
+                pos.x & Env.ChunkMask,
+                pos.y & Env.ChunkMask,
+                pos.z & Env.ChunkMask
+                );
 
-        public void SetBlockData(BlockPos pos, BlockData blockData, bool updateChunk = true, bool setBlockModified = true)
-        {
-            Chunk chunk = world.chunks.Get(pos);
-            if (chunk != null)
-            {
-                chunk.blocks.SetBlockData(pos, blockData, updateChunk, setBlockModified);
-
-                if (updateChunk)
-                    UpdateAdjacentChunk(pos);
-            }
-        }
-
-        /// <summary> Updates any chunks neighboring a block position </summary>
-        private void UpdateAdjacentChunk(BlockPos pos)
-        {
-            //localPos is the position relative to the chunk's position
-            BlockPos localPos = pos - pos.ContainingChunkCoordinates();
-
-            //Checks to see if the block position is on the border of the chunk 
-            //and if so Update the chunk it's touching
-            UpdateIfEqual(localPos.x, 0, pos.Add(-1, 0, 0));
-            UpdateIfEqual(localPos.x, Env.ChunkMask, pos.Add(1, 0, 0));
-            UpdateIfEqual(localPos.y, 0, pos.Add(0, -1, 0));
-            UpdateIfEqual(localPos.y, Env.ChunkMask, pos.Add(0, 1, 0));
-            UpdateIfEqual(localPos.z, 0, pos.Add(0, 0, -1));
-            UpdateIfEqual(localPos.z, Env.ChunkMask, pos.Add(0, 0, 1));
-        }
-
-        private void UpdateIfEqual(int value1, int value2, BlockPos pos)
-        {
-            if (value1 == value2)
-            {
-                Chunk chunk = world.chunks.Get(pos);
-                if (chunk != null)
-                    chunk.RequestBuildVertices();
-            }
+            chunk.blocks.Modify(blockPos, blockData, updateChunk, setBlockModified);
         }
     }
 }

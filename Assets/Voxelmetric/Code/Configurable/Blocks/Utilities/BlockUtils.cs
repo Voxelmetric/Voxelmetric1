@@ -23,112 +23,112 @@ namespace Voxelmetric.Code.Configurable.Blocks.Utilities
 
             //float light = 0;
 
-            ChunkBlocks blocks = chunk.blocks;
+            WorldBlocks blocks = chunk.world.blocks;
             Block block;
 
             switch (direction)
             {
                 case Direction.up:
-                    nSolid = blocks.LocalGet(localPos.Add(0, 1, 1)).IsSolid(Direction.south);
-                    eSolid = blocks.LocalGet(localPos.Add(1, 1, 0)).IsSolid(Direction.west);
-                    sSolid = blocks.LocalGet(localPos.Add(0, 1, -1)).IsSolid(Direction.north);
-                    wSolid = blocks.LocalGet(localPos.Add(-1, 1, 0)).IsSolid(Direction.east);
+                    nSolid = blocks.GetBlock(globalPos.Add(0, 1, 1)).IsSolid(Direction.south);
+                    eSolid = blocks.GetBlock(globalPos.Add(1, 1, 0)).IsSolid(Direction.west);
+                    sSolid = blocks.GetBlock(globalPos.Add(0, 1, -1)).IsSolid(Direction.north);
+                    wSolid = blocks.GetBlock(globalPos.Add(-1, 1, 0)).IsSolid(Direction.east);
 
-                    block = blocks.LocalGet(localPos.Add(-1, 1, 1));
+                    block = blocks.GetBlock(globalPos.Add(-1, 1, 1));
                     wnSolid = block.IsSolid(Direction.east) && block.IsSolid(Direction.south);
-                    block = blocks.LocalGet(localPos.Add(1, 1, 1));
+                    block = blocks.GetBlock(globalPos.Add(1, 1, 1));
                     neSolid = block.IsSolid(Direction.south) && block.IsSolid(Direction.west);
-                    block = blocks.LocalGet(localPos.Add(1, 1, -1));
+                    block = blocks.GetBlock(globalPos.Add(1, 1, -1));
                     esSolid = block.IsSolid(Direction.west) && block.IsSolid(Direction.north);
-                    block = blocks.LocalGet(localPos.Add(-1, 1, -1));
+                    block = blocks.GetBlock(globalPos.Add(-1, 1, -1));
                     swSolid = block.IsSolid(Direction.north) && block.IsSolid(Direction.east);
 
-                    //light = BlockDataMap.NonSolid.Light(blocks.LocalGet(localPos.Add(0, 1, 0)))/ 15f;
+                    //light = BlockDataMap.NonSolid.Light(blocks.GetBlock(globalPos.Add(0, 1, 0)))/ 15f;
                     break;
                 case Direction.down:
-                    nSolid = blocks.LocalGet(localPos.Add(0, -1, -1)).IsSolid(Direction.south);
-                    eSolid = blocks.LocalGet(localPos.Add(1, -1, 0)).IsSolid(Direction.west);
-                    sSolid = blocks.LocalGet(localPos.Add(0, -1, 1)).IsSolid(Direction.north);
-                    wSolid = blocks.LocalGet(localPos.Add(-1, -1, 0)).IsSolid(Direction.east);
+                    nSolid = blocks.GetBlock(globalPos.Add(0, -1, -1)).IsSolid(Direction.south);
+                    eSolid = blocks.GetBlock(globalPos.Add(1, -1, 0)).IsSolid(Direction.west);
+                    sSolid = blocks.GetBlock(globalPos.Add(0, -1, 1)).IsSolid(Direction.north);
+                    wSolid = blocks.GetBlock(globalPos.Add(-1, -1, 0)).IsSolid(Direction.east);
 
-                    block = blocks.LocalGet(localPos.Add(-1, -1, -1));
+                    block = blocks.GetBlock(globalPos.Add(-1, -1, -1));
                     wnSolid = block.IsSolid(Direction.east) && block.IsSolid(Direction.south);
-                    block = blocks.LocalGet(localPos.Add(1, -1, -1));
+                    block = blocks.GetBlock(globalPos.Add(1, -1, -1));
                     neSolid = block.IsSolid(Direction.south) && block.IsSolid(Direction.west);
-                    block = blocks.LocalGet(localPos.Add(1, -1, 1));
+                    block = blocks.GetBlock(globalPos.Add(1, -1, 1));
                     esSolid = block.IsSolid(Direction.west) && block.IsSolid(Direction.north);
-                    block = blocks.LocalGet(localPos.Add(-1, -1, 1));
+                    block = blocks.GetBlock(globalPos.Add(-1, -1, 1));
                     swSolid = block.IsSolid(Direction.north) && block.IsSolid(Direction.east);
 
-                    //light = BlockDataMap.NonSolid.Light(blocks.LocalGet(localPos.Add(0, -1, 0))) / 15f;
+                    //light = BlockDataMap.NonSolid.Light(blocks.GetBlock(globalPos.Add(0, -1, 0))) / 15f;
                     break;
                 case Direction.north:
-                    nSolid = blocks.LocalGet(localPos.Add(1, 0, 1)).IsSolid(Direction.west);
-                    eSolid = blocks.LocalGet(localPos.Add(0, 1, 1)).IsSolid(Direction.down);
-                    sSolid = blocks.LocalGet(localPos.Add(-1, 0, 1)).IsSolid(Direction.east);
-                    wSolid = blocks.LocalGet(localPos.Add(0, -1, 1)).IsSolid(Direction.up);
+                    nSolid = blocks.GetBlock(globalPos.Add(1, 0, 1)).IsSolid(Direction.west);
+                    eSolid = blocks.GetBlock(globalPos.Add(0, 1, 1)).IsSolid(Direction.down);
+                    sSolid = blocks.GetBlock(globalPos.Add(-1, 0, 1)).IsSolid(Direction.east);
+                    wSolid = blocks.GetBlock(globalPos.Add(0, -1, 1)).IsSolid(Direction.up);
 
-                    block = blocks.LocalGet(localPos.Add(-1, 1, 1));
+                    block = blocks.GetBlock(globalPos.Add(-1, 1, 1));
                     esSolid = block.IsSolid(Direction.east) && block.IsSolid(Direction.south);
-                    block = blocks.LocalGet(localPos.Add(1, 1, 1));
+                    block = blocks.GetBlock(globalPos.Add(1, 1, 1));
                     neSolid = block.IsSolid(Direction.south) && block.IsSolid(Direction.west);
-                    block = blocks.LocalGet(localPos.Add(1, -1, 1));
+                    block = blocks.GetBlock(globalPos.Add(1, -1, 1));
                     wnSolid = block.IsSolid(Direction.west) && block.IsSolid(Direction.north);
-                    block = blocks.LocalGet(localPos.Add(-1, -1, 1));
+                    block = blocks.GetBlock(globalPos.Add(-1, -1, 1));
                     swSolid = block.IsSolid(Direction.north) && block.IsSolid(Direction.east);
 
-                    //light = BlockDataMap.NonSolid.Light(blocks.LocalGet(localPos.Add(0, 0, 1))) / 15f;
+                    //light = BlockDataMap.NonSolid.Light(blocks.GetBlock(globalPos.Add(0, 0, 1))) / 15f;
                     break;
                 case Direction.east:
-                    nSolid = blocks.LocalGet(localPos.Add(1, 0, -1)).IsSolid(Direction.up);
-                    eSolid = blocks.LocalGet(localPos.Add(1, 1, 0)).IsSolid(Direction.west);
-                    sSolid = blocks.LocalGet(localPos.Add(1, 0, 1)).IsSolid(Direction.down);
-                    wSolid = blocks.LocalGet(localPos.Add(1, -1, 0)).IsSolid(Direction.east);
+                    nSolid = blocks.GetBlock(globalPos.Add(1, 0, -1)).IsSolid(Direction.up);
+                    eSolid = blocks.GetBlock(globalPos.Add(1, 1, 0)).IsSolid(Direction.west);
+                    sSolid = blocks.GetBlock(globalPos.Add(1, 0, 1)).IsSolid(Direction.down);
+                    wSolid = blocks.GetBlock(globalPos.Add(1, -1, 0)).IsSolid(Direction.east);
 
-                    block = blocks.LocalGet(localPos.Add(1, 1, 1));
+                    block = blocks.GetBlock(globalPos.Add(1, 1, 1));
                     esSolid = block.IsSolid(Direction.west) && block.IsSolid(Direction.north);
-                    block = blocks.LocalGet(localPos.Add(1, 1, -1));
+                    block = blocks.GetBlock(globalPos.Add(1, 1, -1));
                     neSolid = block.IsSolid(Direction.south) && block.IsSolid(Direction.west);
-                    block = blocks.LocalGet(localPos.Add(1, -1, -1));
+                    block = blocks.GetBlock(globalPos.Add(1, -1, -1));
                     wnSolid = block.IsSolid(Direction.east) && block.IsSolid(Direction.north);
-                    block = blocks.LocalGet(localPos.Add(1, -1, 1));
+                    block = blocks.GetBlock(globalPos.Add(1, -1, 1));
                     swSolid = block.IsSolid(Direction.north) && block.IsSolid(Direction.east);
 
-                    //light = BlockDataMap.NonSolid.Light(blocks.LocalGet(localPos.Add(1, 0, 0))) / 15f;
+                    //light = BlockDataMap.NonSolid.Light(blocks.GetBlock(globalPos.Add(1, 0, 0))) / 15f;
                     break;
                 case Direction.south:
-                    nSolid = blocks.LocalGet(localPos.Add(-1, 0, -1)).IsSolid(Direction.down);
-                    eSolid = blocks.LocalGet(localPos.Add(0, 1, -1)).IsSolid(Direction.west);
-                    sSolid = blocks.LocalGet(localPos.Add(1, 0, -1)).IsSolid(Direction.up);
-                    wSolid = blocks.LocalGet(localPos.Add(0, -1, -1)).IsSolid(Direction.south);
+                    nSolid = blocks.GetBlock(globalPos.Add(-1, 0, -1)).IsSolid(Direction.down);
+                    eSolid = blocks.GetBlock(globalPos.Add(0, 1, -1)).IsSolid(Direction.west);
+                    sSolid = blocks.GetBlock(globalPos.Add(1, 0, -1)).IsSolid(Direction.up);
+                    wSolid = blocks.GetBlock(globalPos.Add(0, -1, -1)).IsSolid(Direction.south);
 
-                    block = blocks.LocalGet(localPos.Add(1, 1, -1));
+                    block = blocks.GetBlock(globalPos.Add(1, 1, -1));
                     esSolid = block.IsSolid(Direction.west) && block.IsSolid(Direction.north);
-                    block = blocks.LocalGet(localPos.Add(-1, 1, -1));
+                    block = blocks.GetBlock(globalPos.Add(-1, 1, -1));
                     neSolid = block.IsSolid(Direction.south) && block.IsSolid(Direction.west);
-                    block = blocks.LocalGet(localPos.Add(-1, -1, -1));
+                    block = blocks.GetBlock(globalPos.Add(-1, -1, -1));
                     wnSolid = block.IsSolid(Direction.east) && block.IsSolid(Direction.north);
-                    block = blocks.LocalGet(localPos.Add(1, -1, -1));
+                    block = blocks.GetBlock(globalPos.Add(1, -1, -1));
                     swSolid = block.IsSolid(Direction.north) && block.IsSolid(Direction.east);
 
-                    //light = BlockDataMap.NonSolid.Light(blocks.LocalGet(localPos.Add(0, 0, -1))) / 15f;
+                    //light = BlockDataMap.NonSolid.Light(blocks.GetBlock(globalPos.Add(0, 0, -1))) / 15f;
                     break;
                 case Direction.west:
-                    nSolid = blocks.LocalGet(localPos.Add(-1, 0, 1)).IsSolid(Direction.up);
-                    eSolid = blocks.LocalGet(localPos.Add(-1, 1, 0)).IsSolid(Direction.west);
-                    sSolid = blocks.LocalGet(localPos.Add(-1, 0, -1)).IsSolid(Direction.down);
-                    wSolid = blocks.LocalGet(localPos.Add(-1, -1, 0)).IsSolid(Direction.east);
+                    nSolid = blocks.GetBlock(globalPos.Add(-1, 0, 1)).IsSolid(Direction.up);
+                    eSolid = blocks.GetBlock(globalPos.Add(-1, 1, 0)).IsSolid(Direction.west);
+                    sSolid = blocks.GetBlock(globalPos.Add(-1, 0, -1)).IsSolid(Direction.down);
+                    wSolid = blocks.GetBlock(globalPos.Add(-1, -1, 0)).IsSolid(Direction.east);
 
-                    block = blocks.LocalGet(localPos.Add(-1, 1, -1));
+                    block = blocks.GetBlock(globalPos.Add(-1, 1, -1));
                     esSolid = block.IsSolid(Direction.west) && block.IsSolid(Direction.north);
-                    block = blocks.LocalGet(localPos.Add(-1, 1, 1));
+                    block = blocks.GetBlock(globalPos.Add(-1, 1, 1));
                     neSolid = block.IsSolid(Direction.south) && block.IsSolid(Direction.west);
-                    block = blocks.LocalGet(localPos.Add(-1, -1, 1));
+                    block = blocks.GetBlock(globalPos.Add(-1, -1, 1));
                     wnSolid = block.IsSolid(Direction.east) && block.IsSolid(Direction.north);
-                    block = blocks.LocalGet(localPos.Add(-1, -1, -1));
+                    block = blocks.GetBlock(globalPos.Add(-1, -1, -1));
                     swSolid = block.IsSolid(Direction.north) && block.IsSolid(Direction.east);
 
-                    //light = BlockDataMap.NonSolid.Light(blocks.LocalGet(localPos.Add(-1, 0, 0))) / 15f;
+                    //light = BlockDataMap.NonSolid.Light(blocks.GetBlock(globalPos.Add(-1, 0, 0))) / 15f;
                     break;
             }
 

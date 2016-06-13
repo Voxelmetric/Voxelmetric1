@@ -10,8 +10,8 @@ using Voxelmetric.Code.Data_types;
 
 namespace Voxelmetric.Code.VM
 {
-    public class VmServer {
-
+    public class VmServer
+    {
         protected World world;
         private IPAddress serverIP;
         private Socket serverSocket;
@@ -23,9 +23,11 @@ namespace Voxelmetric.Code.VM
 
         public IPAddress ServerIP { get { return serverIP; } }
 
-        public int ClientCount {
+        public int ClientCount
+        {
             get {
-                lock (clients) {
+                lock (clients)
+                {
                     return clients.Count;
                 }
             }
@@ -52,7 +54,7 @@ namespace Voxelmetric.Code.VM
                 IPEndPoint serverEndPoint = new IPEndPoint(serverIP, 8000);
                 serverSocket.Bind(serverEndPoint);
                 serverSocket.Listen(0);
-                serverSocket.BeginAccept(new AsyncCallback(OnJoinServer), null);
+                serverSocket.BeginAccept(OnJoinServer, null);
             }
             catch (Exception ex)
             {
@@ -76,7 +78,7 @@ namespace Voxelmetric.Code.VM
                     nextId++;
                 }
 
-                serverSocket.BeginAccept(new AsyncCallback(OnJoinServer), null);
+                serverSocket.BeginAccept(OnJoinServer, null);
             }
             catch (Exception ex)
             {
@@ -84,19 +86,23 @@ namespace Voxelmetric.Code.VM
             }
         }
 
-        internal void RemoveClient(int id) {
-            lock(clients) {
+        internal void RemoveClient(int id)
+        {
+            lock(clients)
+            {
                 clients[id] = null;
             }
         }
 
         public void Disconnect()
         {
-            lock(clients) {
+            lock(clients)
+            {
                 var clientConnections = clients.Values.ToList();
                 foreach (var client in clientConnections)
                     client.Disconnect();
             }
+
             if (serverSocket != null) {// && serverSocket.Connected) {
                 //serverSocket.Shutdown(SocketShutdown.Both);
                 serverSocket.Close();
@@ -106,7 +112,8 @@ namespace Voxelmetric.Code.VM
 
         public void SendToClient(byte[] data, int client)
         {
-            lock (clients) {
+            lock (clients)
+            {
                 ClientConnection clientConnection = clients[client];
                 if ( clientConnection != null )
                     clientConnection.Send(data);
@@ -116,20 +123,27 @@ namespace Voxelmetric.Code.VM
         public void RequestChunk(BlockPos pos, int id)
         {
             Chunk chunk = null;
-            if (world == null) {
+            if (world == null)
+            {
                 Debug.LogError("VmServer.RequestChunk (" + Thread.CurrentThread.ManagedThreadId + "): "
                                + " world not set (" + pos + ", " + id + ")");
-            } else
+            }
+            else
                 chunk = world.chunks.Get(pos);
+
             byte[] data;
+
             //for now return an empty chunk if it isn't yet loaded
             // Todo: load the chunk then send it to the player
-            if (chunk == null) {
+            if (chunk == null)
+            {
                 Debug.LogError("VmServer.RequestChunk (" + Thread.CurrentThread.ManagedThreadId + "): "
                                + "Could not find chunk for " + pos);
                 data = ChunkBlocks.EmptyBytes;
-            } else
+            }
+            else
                 data = chunk.blocks.ToBytes();
+
             if ( debugServer )
                 Debug.Log("VmServer.RequestChunk (" + Thread.CurrentThread.ManagedThreadId + "): " + id
                           + " " + pos);
@@ -142,7 +156,8 @@ namespace Voxelmetric.Code.VM
         protected void SendChunk(BlockPos pos, byte[] chunkData, int id)
         {
             int chunkDataIndex = 0;
-            while (chunkDataIndex < chunkData.Length) {
+            while (chunkDataIndex < chunkData.Length)
+            {
                 byte[] message = new byte[VmNetworking.bufferLength];
                 message[0] = VmNetworking.transmitChunkData;
                 pos.ToBytes().CopyTo(message, 1);
@@ -155,20 +170,20 @@ namespace Voxelmetric.Code.VM
                               + ", chunkData.Length=" + chunkData.Length
                               + ", buffer=" + message.Length);
 
-                for (int i = leaderSize; i < message.Length; i++) {
+                for (int i = leaderSize; i < message.Length; i++)
+                {
                     message[i] = chunkData[chunkDataIndex];
                     chunkDataIndex++;
 
-                    if (chunkDataIndex >= chunkData.Length) {
+                    if (chunkDataIndex >= chunkData.Length)
                         break;
-                    }
                 }
 
                 SendToClient(message, id);
             }
         }
 
-        public void BroadcastChange(BlockPos pos, Block block, int excludedUser)
+        public void BroadcastChange(BlockPos pos, BlockData blockData, int excludedUser)
         {
             lock(clients)
             {
@@ -179,7 +194,7 @@ namespace Voxelmetric.Code.VM
 
                 data[0] = VmNetworking.SendBlockChange;
                 pos.ToBytes().CopyTo(data, 1);
-                BitConverter.GetBytes(block.type).CopyTo(data, 13);
+                BitConverter.GetBytes(blockData.Type).CopyTo(data, 13);
 
                 foreach (var client in clients.Values)
                 {
@@ -189,11 +204,11 @@ namespace Voxelmetric.Code.VM
             }
         }
 
-        public void ReceiveChange(BlockPos pos, int type, int id)
+        public void ReceiveChange(BlockPos pos, ushort type, int id)
         {
-            Block block = world.blockProvider.BlockTypes[type];
-            world.blocks.Set(pos, block, true, true);
-            BroadcastChange(pos, block, id);
+            BlockData blockData = new BlockData(type);
+            world.blocks.Modify(pos, blockData, true, true);
+            BroadcastChange(pos, blockData, id);
         }
     }
 
@@ -207,7 +222,8 @@ namespace Voxelmetric.Code.VM
 
         public int ID { get { return id; } }
 
-        public ClientConnection(int id, Socket socket, VmServer server) {
+        public ClientConnection(int id, Socket socket, VmServer server)
+        {
             this.id = id;
             this.socket = socket;
             this.server = server;
@@ -216,19 +232,22 @@ namespace Voxelmetric.Code.VM
                           + "Client " + id + " has connected");
 
             VmSocketState socketState = new VmSocketState(this);
-            socket.BeginReceive(socketState.buffer, 0, VmNetworking.bufferLength, SocketFlags.None, new AsyncCallback(OnReceiveFromClient), socketState);
+            socket.BeginReceive(socketState.buffer, 0, VmNetworking.bufferLength, SocketFlags.None, OnReceiveFromClient, socketState);
         }
 
-        private void OnReceiveFromClient(IAsyncResult ar) {
+        private void OnReceiveFromClient(IAsyncResult ar)
+        {
             try {
-                if (socket == null || !socket.Connected) {
+                if (socket == null || !socket.Connected)
+                {
                     Debug.Log("ClientConnection.OnReceiveFromClient (" + Thread.CurrentThread.ManagedThreadId + "): "
                               + "client message rejected because connection was shutdown or not started");
                     return;
                 }
-                int received = socket.EndReceive(ar);
 
-                if (received == 0) {
+                int received = socket.EndReceive(ar);
+                if (received == 0)
+                {
                     Disconnect();
                     return;
                 }
@@ -238,16 +257,21 @@ namespace Voxelmetric.Code.VM
 
                 VmSocketState socketState = ar.AsyncState as VmSocketState;
                 socketState.Receive(received, 0);
-                if (socket != null && socket.Connected) {// Should be able to use a mutex but unity doesn't seem to like it
-                    socket.BeginReceive(socketState.buffer, 0, VmNetworking.bufferLength, SocketFlags.None, new AsyncCallback(OnReceiveFromClient), socketState);
+
+                if (socket != null && socket.Connected)
+                {
+                    // Should be able to use a mutex but unity doesn't seem to like it
+                    socket.BeginReceive(socketState.buffer, 0, VmNetworking.bufferLength, SocketFlags.None, OnReceiveFromClient, socketState);
                 }
             } catch (Exception ex) {
                 Debug.LogError(ex);
             }
         }
 
-        public int GetExpectedSize(byte type) {
-            switch (type) {
+        public int GetExpectedSize(byte type)
+        {
+            switch (type)
+            {
                 case VmNetworking.SendBlockChange:
                     return 17;
                 case VmNetworking.RequestChunkData:
@@ -257,13 +281,15 @@ namespace Voxelmetric.Code.VM
             }
         }
 
-        public void HandleMessage(byte[] receivedData) {
+        public void HandleMessage(byte[] receivedData)
+        {
             BlockPos pos;
 
-            switch (receivedData[0]) {
+            switch (receivedData[0])
+            {
                 case VmNetworking.SendBlockChange:
                     pos = BlockPos.FromBytes(receivedData, 1);
-                    int type = BitConverter.ToUInt16(receivedData, 13);
+                    ushort type = BitConverter.ToUInt16(receivedData, 13);
                     server.ReceiveChange(pos, type, id);
                     break;
                 case VmNetworking.RequestChunkData:
@@ -278,15 +304,17 @@ namespace Voxelmetric.Code.VM
             }
         }
 
-        public void Send(byte[] buffer) {
+        public void Send(byte[] buffer)
+        {
             try {
-                socket.BeginSend(buffer, 0, buffer.Length, SocketFlags.None, new AsyncCallback(OnSend), socket);
+                socket.BeginSend(buffer, 0, buffer.Length, SocketFlags.None, OnSend, socket);
             } catch (Exception ex) {
                 Debug.LogError(ex);
             }
         }
 
-        private void OnSend(IAsyncResult ar) {
+        private void OnSend(IAsyncResult ar)
+        {
             try {
                 socket.EndSend(ar);
             } catch (Exception ex) {
@@ -294,7 +322,8 @@ namespace Voxelmetric.Code.VM
             }
         }
 
-        public void Disconnect() {
+        public void Disconnect()
+        {
             if (debugClientConnection)
                 Debug.Log("ClientConnection.Disconnect (" + Thread.CurrentThread.ManagedThreadId + "): "
                           + "Client " + id + " has disconnected");

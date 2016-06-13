@@ -75,7 +75,7 @@ namespace Voxelmetric.Code.Core
             for (int i = 0; i<markedForDeletion.Count; i++)
             {
                 Chunk chunk = markedForDeletion[i];
-                world.chunks.Remove(chunk);
+                world.chunks.RemoveChunk(chunk);
             }
             markedForDeletion.Clear();
         }

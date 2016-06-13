@@ -10,21 +10,15 @@ namespace Voxelmetric.Code
     {
         //Used as a manager class with references to classes treated like singletons
         public static VoxelmetricResources resources = new VoxelmetricResources ();
-        
-        public static bool SetBlock (BlockPos pos, Block block, World world)
+
+        public static void SetBlock(World world, BlockPos pos, BlockData blockData)
         {
-            Chunk chunk = world.chunks.Get (pos);
-            if (chunk == null)
-                return false;
-
-            chunk.world.blocks.Set (pos, block);
-
-            return true;
+            world.blocks.Modify(pos, blockData);
         }
 
-        public static Block GetBlock (BlockPos pos, World world)
+        public static Block GetBlock(World world, BlockPos pos)
         {
-            Block block = world.blocks.Get (pos);
+            Block block = world.blocks.GetBlock(pos);
             return block;
         }
 

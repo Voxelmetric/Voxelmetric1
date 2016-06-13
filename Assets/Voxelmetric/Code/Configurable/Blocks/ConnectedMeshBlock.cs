@@ -34,14 +34,14 @@ public class ConnectedMeshBlock: CustomMeshBlock
                 continue;
 
             if (connectedMeshConfig.connectsToSolid &&
-                chunk.blocks.LocalGet(localPos+dir).IsSolid(DirectionUtils.Opposite(dir)))
+                blocks.GetBlock(globalPos + dir).IsSolid(DirectionUtils.Opposite(dir)))
             {
                 texture = connectedMeshConfig.texture.GetTexture(chunk, localPos, globalPos, dir);
                 batcher.AddMeshData(connectedMeshConfig.directionalTris[dir], connectedMeshConfig.directionalVerts[dir], texture);
             }
             else if (connectedMeshConfig.connectsToTypes.Length!=0)
             {
-                int neighborType = chunk.blocks.LocalGet(localPos.Add(dir)).type;
+                int neighborType = blocks.Get(globalPos.Add(dir)).Type;
                 for (int i = 0; i<connectedMeshConfig.connectsToTypes.Length; i++)
                 {
                     if (neighborType==connectedMeshConfig.connectsToTypes[i])

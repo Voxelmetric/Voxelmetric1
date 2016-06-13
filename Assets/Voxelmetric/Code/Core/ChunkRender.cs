@@ -36,7 +36,7 @@ namespace Voxelmetric.Code.Core
                 Helpers.GetChunkIndex3DFrom1D(i, out x, out y, out z);
                 BlockPos localBlockPos = new BlockPos(x, y, z);
 
-                Block block = chunk.blocks.LocalGet(localBlockPos);
+                Block block = chunk.blocks.GetBlock(localBlockPos);
                 if (block.type==BlockProvider.AirType)
                     continue;
 

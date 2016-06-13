@@ -5,7 +5,6 @@ using System.Threading;
 using UnityEngine;
 using Voxelmetric.Code.Common;
 using Voxelmetric.Code.Data_types;
-using Voxelmetric.Code.Load_Resources.Blocks;
 using Voxelmetric.Code.Utilities;
 using Voxelmetric.Code.VM;
 
@@ -38,20 +37,6 @@ namespace Voxelmetric.Code.Core
             this.chunk = chunk;
         }
 
-        public BlockData this[int x, int y, int z]
-        {
-            get
-            {
-                int index = Helpers.GetChunkIndex1DFrom3D(x, y, z);
-                return blocks[index];
-            }
-            set
-            {
-                int index = Helpers.GetChunkIndex1DFrom3D(x, y, z);
-                blocks[index] = value;
-            }
-        }
-
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
@@ -69,172 +54,102 @@ namespace Voxelmetric.Code.Core
         }
 
         /// <summary>
-        /// Gets and returns a block from a position within the chunk or fetches it from the world
+        /// Gets and returns block data at a position within the chunk
         /// </summary>
-        /// <param name="blockPos">A global block position</param>
+        /// <param name="pos">A local block position</param>
         /// <returns>The block at the position</returns>
-        public Block Get(BlockPos blockPos)
+        public BlockData Get(BlockPos pos)
         {
-            if (InRange(blockPos))
-                return LocalGet(blockPos-chunk.pos);
-
-            return chunk.world.blocks.Get(blockPos);
-        }
-
-        public BlockData GetBlockData(BlockPos blockPos)
-        {
-            if (InRange(blockPos))
-                return LocalGetBlockData(blockPos - chunk.pos);
-
-            return chunk.world.blocks.GetBlockData(blockPos);
+            int index = Helpers.GetChunkIndex1DFrom3D(pos.x, pos.y, pos.z);
+            return blocks[index];
         }
 
         /// <summary>
-        /// This function takes a block position relative to the chunk's position. It is slightly faster
-        /// than the GetBlock function so use this if you already have a local position available otherwise
-        /// use GetBlock. If the position is lesser or greater than the size of the chunk it will get the value
-        /// from the chunk containing the block pos
+        /// Gets and returns a block from a position within the chunk
         /// </summary>
-        /// <param name="localBlockPos"> A block pos relative to the chunk's position. MUST be a local position or the wrong block will be returned</param>
-        /// <returns>the block at the relative position</returns>
-        public Block LocalGet(BlockPos localBlockPos)
+        /// <param name="pos">A local block position</param>
+        /// <returns>The block at the position</returns>
+        public Block GetBlock(BlockPos pos)
         {
-            if ((localBlockPos.x<Env.ChunkSize && localBlockPos.x>=0) &&
-                (localBlockPos.y<Env.ChunkSize && localBlockPos.y>=0) &&
-                (localBlockPos.z<Env.ChunkSize && localBlockPos.z>=0))
-            {
-                BlockData bd = this[localBlockPos.x, localBlockPos.y, localBlockPos.z];
-                return chunk.world.blockProvider.BlockTypes[bd.Type];
-            }
-
-            return chunk.world.blocks.Get(localBlockPos+chunk.pos);
+            int index = Helpers.GetChunkIndex1DFrom3D(pos.x, pos.y, pos.z);
+            return chunk.world.blockProvider.BlockTypes[blocks[index].Type];
         }
 
-        public BlockData LocalGetBlockData(BlockPos localBlockPos)
+        /// <summary>
+        /// Sets the block at the given position
+        /// </summary>
+        /// <param name="pos">A local block position</param>
+        public void Set(BlockPos pos, BlockData blockData)
         {
-            if ((localBlockPos.x < Env.ChunkSize && localBlockPos.x >= 0) &&
-                (localBlockPos.y < Env.ChunkSize && localBlockPos.y >= 0) &&
-                (localBlockPos.z < Env.ChunkSize && localBlockPos.z >= 0))
-            {
-                return this[localBlockPos.x, localBlockPos.y, localBlockPos.z];
-            }
-
-            return chunk.world.blocks.GetBlockData(localBlockPos + chunk.pos);
+            int index = Helpers.GetChunkIndex1DFrom3D(pos.x, pos.y, pos.z);
+            blocks[index] = blockData;
         }
 
-        /// <summary> Sets the block at the given position </summary>
-        /// <param name="blockPos">Block position</param>
-        /// <param name="newBlock">Block to place at the given location</param>
+        /// <summary>
+        /// Sets the block at the given position
+        /// </summary>
+        /// <param name="pos">A local block position</param>
+        /// <param name="blockData">BlockData to place at the given location</param>
         /// <param name="updateChunk">Optional parameter, set to false to keep the chunk unupdated despite the change</param>
         /// <param name="setBlockModified">Optional parameter, set to true to mark chunk data as modified</param>
-        public void Set(BlockPos blockPos, Block newBlock, bool updateChunk = true, bool setBlockModified = true)
+        public void Modify(BlockPos pos, BlockData blockData, bool updateChunk = true, bool setBlockModified = true)
         {
-            if (InRange(blockPos))
+            int index = Helpers.GetChunkIndex1DFrom3D(pos.x, pos.y, pos.z);
+
+            BlockPos globalPos = pos+chunk.pos;
+
+            //Only call create and destroy if this is a different block type, otherwise it's just updating the properties of an existing block
+            BlockData oldBlockData = blocks[index];
+            if (oldBlockData.Type != blockData.Type)
             {
-                //Only call create and destroy if this is a different block type, otherwise it's just updating the properties of an existing block
-                Block block = Get(blockPos);
-                if (block.type!=newBlock.type)
+                Block oldBlock = chunk.world.blockProvider.BlockTypes[oldBlockData.Type];
+                Block newBlock = chunk.world.blockProvider.BlockTypes[blockData.Type];
+                oldBlock.OnDestroy(chunk, pos, globalPos);
+                newBlock.OnCreate(chunk, pos, globalPos);
+            }
+
+            blocks[index] = blockData;
+            
+            // TODO: Queue changes
+            if (setBlockModified)
+                BlockModified(pos, globalPos, blockData);
+
+            if (updateChunk)
+            {
+                chunk.RequestBuildVertices();
+
+                // If it is an edge position, notify neighbor as well
+                // Iterate over neighbors and decide which ones should be notified to rebuild
+                for (int i = 0; i < chunk.Listeners.Length; i++)
                 {
-                    block.OnDestroy(chunk, blockPos, blockPos+chunk.pos);
-                    newBlock.OnCreate(chunk, blockPos, blockPos+chunk.pos);
+                    ChunkEvent listener = chunk.Listeners[i];
+                    if (listener == null)
+                        continue;
+                    
+                    // TODO: Only notify neighbors that really need it
+                    Chunk listenerChunk = (Chunk)listener;
+                    listenerChunk.RequestBuildVertices();
                 }
-
-                this[blockPos.x-chunk.pos.x, blockPos.y-chunk.pos.y, blockPos.z-chunk.pos.z] = new BlockData(newBlock.type);
-
-                if (setBlockModified)
-                    BlockModified(blockPos);
-
-                if (updateChunk)
-                    chunk.RequestBuildVertices();
-            }
-            else
-            {
-                //if the block is out of range set it through world
-                chunk.world.blocks.Set(blockPos, newBlock, updateChunk);
             }
         }
 
-        public void SetBlockData(BlockPos blockPos, BlockData newBlockData, bool updateChunk = true, bool setBlockModified = true)
-        {
-            if (InRange(blockPos))
-            {
-                //Only call create and destroy if this is a different block type, otherwise it's just updating the properties of an existing block
-                BlockData blockData = GetBlockData(blockPos);
-                if (blockData.Type != newBlockData.Type)
-                {
-                    Block oldBlock = chunk.world.blockProvider.BlockTypes[blockData.Type];
-                    Block newBlock = chunk.world.blockProvider.BlockTypes[blockData.Type];
-                    oldBlock.OnDestroy(chunk, blockPos, blockPos + chunk.pos);
-                    newBlock.OnCreate(chunk, blockPos, blockPos + chunk.pos);
-                }
-
-                this[blockPos.x - chunk.pos.x, blockPos.y - chunk.pos.y, blockPos.z - chunk.pos.z] = newBlockData;
-
-                if (setBlockModified)
-                    BlockModified(blockPos);
-
-                if (updateChunk)
-                    chunk.RequestBuildVertices();
-            }
-            else
-            {
-                //if the block is out of range set it through world
-                chunk.world.blocks.SetBlockData(blockPos, newBlockData, updateChunk);
-            }
-        }
-
-        /// <summary>
-        /// This function takes a block position relative to the chunk's position. It is slightly faster
-        /// than the SetBlock function so use this if you already have a local position available otherwise
-        /// use SetBlock. If the position is lesser or greater than the size of the chunk it will call setblock
-        /// using the world.
-        /// </summary>
-        /// <param name="blockPos"> A block pos relative to the chunk's position.</param>
-        /// <param name="block">Block to place at the given location</param>
-        public void LocalSet(BlockPos blockPos, Block block)
-        {
-            if ((blockPos.x<Env.ChunkSize && blockPos.x>=0) &&
-                (blockPos.y<Env.ChunkSize && blockPos.y>=0) &&
-                (blockPos.z<Env.ChunkSize && blockPos.z>=0))
-            {
-                this[blockPos.x, blockPos.y, blockPos.z] = new BlockData(block.type);
-            }
-        }
-
-        public void LocalSetBlockData(BlockPos blockPos, BlockData blockData)
-        {
-            if ((blockPos.x < Env.ChunkSize && blockPos.x >= 0) &&
-                (blockPos.y < Env.ChunkSize && blockPos.y >= 0) &&
-                (blockPos.z < Env.ChunkSize && blockPos.z >= 0))
-            {
-                this[blockPos.x, blockPos.y, blockPos.z] = blockData;
-            }
-        }
-
-        /// <summary> Returns true if the block local block position is contained in the chunk boundaries </summary>
-        /// <param name="blockPos">A block position</param>
-        public bool InRange(BlockPos blockPos)
-        {
-            return (blockPos.ContainingChunkCoordinates()==chunk.pos);
-        }
-
-        public void BlockModified(BlockPos pos)
+        public void BlockModified(BlockPos localPos, BlockPos globalPos, BlockData blockData)
         {
             //If this is the server log the changed block so that it can be saved
             if (chunk.world.networking.isServer)
             {
                 if (chunk.world.networking.allowConnections)
-                    chunk.world.networking.server.BroadcastChange(pos, Get(pos), -1);
+                    chunk.world.networking.server.BroadcastChange(globalPos, blockData, -1);
 
-                if (!modifiedBlocks.Contains(pos))
+                if (!modifiedBlocks.Contains(localPos))
                 {
-                    modifiedBlocks.Add(pos);
+                    modifiedBlocks.Add(localPos);
                     chunk.blocks.contentsModified = true;
                 }
             }
             else // if this is not the server send the change to the server to sync
             {
-                chunk.world.networking.client.BroadcastChange(pos, Get(pos));
+                chunk.world.networking.client.BroadcastChange(globalPos, blockData);
             }
         }
 
@@ -298,11 +213,11 @@ namespace Voxelmetric.Code.Core
         public byte[] ToBytes()
         {
             List<byte> buffer = new List<byte>();
-            Block block;
-            Block lastBlock = null;
+            BlockData blockData;
+            BlockData lastBlockData = new BlockData(1);
 
-            byte[] blockData;
-            short sameBlockCount = 1000;
+            byte[] data;
+            short sameBlockCount = 0;
             int countIndex = 0;
 
             for (int y = 0; y<Env.ChunkSize; y++)
@@ -311,27 +226,30 @@ namespace Voxelmetric.Code.Core
                 {
                     for (int x = 0; x<Env.ChunkSize; x++)
                     {
-                        block = LocalGet(new BlockPos(x, y, z));
-                        if (block.Equals(lastBlock))
+                        int index = Helpers.GetChunkIndex1DFrom3D(x, y, z);
+                        blockData = blocks[index];
+
+                        if (blockData.Equals(lastBlockData))
                         {
                             //if this is the same as the last block added increase the count
-                            sameBlockCount++;
+                            ++sameBlockCount;
                             byte[] shortAsBytes = BitConverter.GetBytes(sameBlockCount);
                             buffer[countIndex] = shortAsBytes[0];
                             buffer[countIndex+1] = shortAsBytes[1];
                         }
                         else
                         {
-                            BlockData bd = new BlockData(block.type);
-                            blockData = bd.ToByteArray();
+                            BlockData bd = new BlockData(blockData.Type);
+                            data = bd.ToByteArray();
 
                             //Add 1 as a short (2 bytes) 
                             countIndex = buffer.Count;
                             sameBlockCount = 1;
                             buffer.AddRange(BitConverter.GetBytes(1));
                             //Then add the block data
-                            buffer.AddRange(blockData);
-                            lastBlock = block;
+                            buffer.AddRange(data);
+
+                            lastBlockData = blockData;
                         }
 
                     }
@@ -344,7 +262,7 @@ namespace Voxelmetric.Code.Core
         private void GenerateContentsFromBytes()
         {
             int i = 0;
-            Block block = null;
+            BlockData blockData = new BlockData(0);
             short blockCount = 0;
 
             for (int y = 0; y<Env.ChunkSize; y++)
@@ -359,13 +277,12 @@ namespace Voxelmetric.Code.Core
                             i += 2;
                             
                             ushort type = BitConverter.ToUInt16(receiveBuffer, i);
-                            BlockData bd = new BlockData(type);
-                            block = chunk.world.blockProvider.BlockTypes[type];
+                            blockData = new BlockData(type);
                             i += 2;
-                            i += bd.RestoreBlockData(receiveBuffer, i);
+                            i += blockData.RestoreBlockData(receiveBuffer, i);
                         }
 
-                        LocalSet(new BlockPos(x, y, z), block);
+                        Set(new BlockPos(x, y, z), blockData);
                         blockCount--;
                     }
                 }

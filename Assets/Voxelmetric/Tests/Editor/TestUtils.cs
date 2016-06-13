@@ -91,7 +91,7 @@ public class TestUtils {
     public static AutoDictionary<string, int> FindChunkBlockCounts(Chunk chunk) {
         AutoDictionary<string, int> chunkBlockCounts = new AutoDictionary<string, int>();
         foreach (BlockPos localPos in LocalPosns) {
-            Block block = chunk.blocks.LocalGet(localPos);
+            Block block = chunk.blocks.GetBlock(localPos);
             chunkBlockCounts[block.name]++;
         }
         return chunkBlockCounts;
@@ -100,10 +100,10 @@ public class TestUtils {
     public static void SetChunkBlocksRandom(Chunk chunk, System.Random rand) {
         World world = chunk.world;
 
-        const int blockTypes = 2;
+        const ushort blockTypes = 2;
         Block[] rndBlocks = new Block[blockTypes];
 
-        for (int type = 0; type < blockTypes; ++type)
+        for (ushort type = 0; type < blockTypes; ++type)
         {
             var config = world.blockProvider.GetConfig(type);
             Assert.IsNotNull(config, "config");
@@ -114,10 +114,10 @@ public class TestUtils {
         }
 
         foreach (BlockPos localPos in LocalPosns)
-            chunk.blocks.LocalSet(localPos, rndBlocks[rand.Next(2)]);
+            chunk.blocks.Set(localPos, new BlockData(rndBlocks[rand.Next(2)].type));
     }
 
-    public static void SetChunkBlocks(Chunk chunk, int type) {
+    public static void SetChunkBlocks(Chunk chunk, ushort type) {
         World world = chunk.world;
 
         var config = world.blockProvider.GetConfig(type);
@@ -127,13 +127,13 @@ public class TestUtils {
         Block block = new Block(type, config);
 
         foreach (BlockPos localPos in LocalPosns)
-            chunk.blocks.LocalSet(localPos, block);
+            chunk.blocks.Set(localPos, new BlockData(block.type));
     }
 
     public static void AssertEqualContents(Chunk expected, Chunk actual, string message) {
         foreach (BlockPos localPos in LocalPosns) {
-            Block expBlock = expected.blocks.LocalGet(localPos);
-            Block actBlock = actual.blocks.LocalGet(localPos);
+            Block expBlock = expected.blocks.GetBlock(localPos);
+            Block actBlock = actual.blocks.GetBlock(localPos);
             Assert.AreEqual(expBlock.type, actBlock.type, message + " type at " + localPos);
         }
     }

@@ -43,11 +43,6 @@ public class TerrainLayer : IComparable
         return heightSoFar;
     }
 
-    int temp(int x, int z, int heightSoFar, float strength, World world, Noise noise, bool justGetHeight = false)
-    {
-        return 0;
-    }
-
     /// <summary>
     /// Called once for each chunk column. Should generate any 
     /// parts of the structure within the chunk using GeneratedStructure.
@@ -63,26 +58,25 @@ public class TerrainLayer : IComparable
         float noise = (noiseGen.Generate(x / scale, y / scale, z / scale) + 1f);
         noise *= (max / 2f);
 
-        if(power!=1)
+        if (power!=1)
             noise = Mathf.Pow(noise, power);
 
         return Mathf.FloorToInt(noise);
     }
 
     //Sets a column of chunks starting at startPlaceHeight and ending at endPlaceHeight using localSetBlock for speed
-    protected void SetBlocksColumn(Chunk chunk, int x, int z, int startPlaceHeight, int endPlaceHeight, Block blockToPlace)
+    protected static void SetBlocksColumn(Chunk chunk, int x, int z, int startPlaceHeight, int endPlaceHeight, Block blockToPlace)
     {
         if (startPlaceHeight >= chunk.pos.y + Env.ChunkSize || endPlaceHeight < chunk.pos.y)
             return;
 
         int y = startPlaceHeight;
         if (startPlaceHeight < chunk.pos.y)
-        {
             y = chunk.pos.y;
-        }
 
-        while (y < chunk.pos.y + Env.ChunkSize && y < endPlaceHeight) {
-            chunk.blocks.LocalSet(new BlockPos(x, y, z) - chunk.pos, blockToPlace);
+        while (y < chunk.pos.y + Env.ChunkSize && y < endPlaceHeight)
+        {
+            chunk.world.blocks.Set(new BlockPos(x, y, z), new BlockData(blockToPlace.type));
             y++;
         }
     }
@@ -90,7 +84,7 @@ public class TerrainLayer : IComparable
     // implement IComparable interface
     public int CompareTo(object obj)
     {
-        return index.CompareTo((obj as TerrainLayer).index);
+        return index.CompareTo(((TerrainLayer)obj).index);
     }
 
 }

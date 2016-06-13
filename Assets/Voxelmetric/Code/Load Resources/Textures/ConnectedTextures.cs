@@ -7,29 +7,29 @@ namespace Voxelmetric.Code.Load_Resources.Textures
 {
     public static class ConnectedTextures {
 
-        public static bool IsSame(Chunk chunk, BlockPos localPos, int h, int v, Direction forwards, int type)
+        public static bool IsSame(Chunk chunk, BlockPos globalsPos, int h, int v, Direction forwards, int type)
         {
-            return chunk.blocks.LocalGet(RelativePos(localPos, h, v, forwards)).type == type;
+            return chunk.world.blocks.Get(RelativePos(globalsPos, h, v, forwards)).Type == type;
         }
 
-        public static BlockPos RelativePos(BlockPos localPos, int h, int v, Direction forwards)
+        public static BlockPos RelativePos(BlockPos pos, int h, int v, Direction forwards)
         {
             switch (forwards)
             {
                 case Direction.up:
-                    return localPos.Add(v, 0, h);
+                    return pos.Add(v, 0, h);
                 case Direction.down:
-                    return localPos.Add(v, 0, -h);
+                    return pos.Add(v, 0, -h);
                 case Direction.north:
-                    return localPos.Add(h, v, 0);
+                    return pos.Add(h, v, 0);
                 case Direction.south:
-                    return localPos.Add(-h, v, 0);
+                    return pos.Add(-h, v, 0);
                 case Direction.east:
-                    return localPos.Add(0, v, -h);
+                    return pos.Add(0, v, -h);
                 case Direction.west:
-                    return localPos.Add(0, v, h);
+                    return pos.Add(0, v, h);
                 default:
-                    return localPos;
+                    return pos;
             }
         }
 

@@ -10,7 +10,7 @@ public class SolidBlock : Block
         for (int d = 0; d < 6; d++)
         {
             Direction dir = DirectionUtils.Get(d);
-            Block adjacentBlock = chunk.blocks.LocalGet(localPos.Add(dir));
+            Block adjacentBlock = blocks.GetBlock(globalPos.Add(dir));
             if (!adjacentBlock.IsSolid(DirectionUtils.Opposite(dir)))
             {
                 if (solid || !solidTowardsSameType || adjacentBlock.type != type)

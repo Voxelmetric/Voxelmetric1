@@ -55,9 +55,8 @@ namespace Voxelmetric.Code.Serialization
             // as not to trigger a new save on unload unless new blocks are added.
             for (int i = 0; i<save.blocks.Length; i++)
             {
-                int type = save.blocks[i].Type;
-                Block block = chunk.world.blockProvider.BlockTypes[type];
-                chunk.blocks.Set(save.positions[i], block, false, false);
+                ushort type = save.blocks[i].Type;
+                chunk.blocks.Set(save.positions[i], new BlockData(type));
             }
 
             return true;

@@ -209,7 +209,7 @@ public class VoxelmetricTest {
 
     private static void AppendBlockPosns(Chunk chunk, string blockName, List<BlockPos> blockPosns) {
         foreach (BlockPos localPos in TestUtils.LocalPosns) {
-            Block block = chunk.blocks.LocalGet(localPos);
+            Block block = chunk.blocks.GetBlock(localPos);
             if (block.name == blockName) {
                 blockPosns.Add(chunk.pos + localPos);
             }

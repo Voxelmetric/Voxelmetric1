@@ -31,7 +31,8 @@ namespace Voxelmetric.Code.VM
         {
             clientSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
 
-            if (serverIP == null) {
+            if (serverIP == null)
+            {
                 string serverName = Dns.GetHostName();
                 Debug.Log("serverName='" + serverName + "'");
                 IPAddress serverAddress = Dns.GetHostAddresses(serverName)[0];
@@ -40,23 +41,25 @@ namespace Voxelmetric.Code.VM
             }
             IPEndPoint serverEndPoint = new IPEndPoint(serverIP, 8000);
 
-            clientSocket.BeginConnect(serverEndPoint, new AsyncCallback(OnConnect), null);
+            clientSocket.BeginConnect(serverEndPoint, OnConnect, null);
         }
     
         private void OnConnect(IAsyncResult ar)
         {
             try {
 
-                if (clientSocket == null || !clientSocket.Connected) {
+                if (clientSocket == null || !clientSocket.Connected)
+                {
                     Debug.Log("VmClient.OnConnect (" + Thread.CurrentThread.ManagedThreadId + "): "
                               + "server connection rejected because connection was shutdown or not started");
                     return;
                 }
+
                 clientSocket.EndConnect(ar);
                 connected = true;
 
                 VmSocketState socketState = new VmSocketState(this);
-                clientSocket.BeginReceive(socketState.buffer, 0, VmNetworking.bufferLength, SocketFlags.None, new AsyncCallback(OnReceiveFromServer), socketState);
+                clientSocket.BeginReceive(socketState.buffer, 0, VmNetworking.bufferLength, SocketFlags.None, OnReceiveFromServer, socketState);
             }
             catch (Exception ex)
             {
@@ -73,8 +76,8 @@ namespace Voxelmetric.Code.VM
                               + "server message rejected because connection was shutdown or not started");
                     return;
                 }
-                int received = clientSocket.EndReceive(ar);
 
+                int received = clientSocket.EndReceive(ar);
                 if (received == 0)
                 {
                     Debug.Log("disconnected from server");
@@ -87,8 +90,10 @@ namespace Voxelmetric.Code.VM
 
                 VmSocketState socketState = ar.AsyncState as VmSocketState;
                 socketState.Receive(received, 0);
-                if (clientSocket != null && clientSocket.Connected) { // Should be able to use a mutex but unity doesn't seem to like it
-                    clientSocket.BeginReceive(socketState.buffer, 0, VmNetworking.bufferLength, SocketFlags.None, new AsyncCallback(OnReceiveFromServer), socketState);
+                if (clientSocket != null && clientSocket.Connected)
+                {
+                    // Should be able to use a mutex but unity doesn't seem to like it
+                    clientSocket.BeginReceive(socketState.buffer, 0, VmNetworking.bufferLength, SocketFlags.None, OnReceiveFromServer, socketState);
                 }
             }
             catch (Exception ex)
@@ -99,12 +104,12 @@ namespace Voxelmetric.Code.VM
 
         private void Send(byte[] buffer)
         {
-            if (!connected) {
+            if (!connected)
                 return;
-            }
+
             try
             {
-                clientSocket.BeginSend(buffer, 0, buffer.Length, SocketFlags.None, new AsyncCallback(OnSend), null);
+                clientSocket.BeginSend(buffer, 0, buffer.Length, SocketFlags.None, OnSend, null);
             }
             catch (Exception ex)
             {
@@ -119,15 +124,18 @@ namespace Voxelmetric.Code.VM
                 clientSocket.EndSend(ar);
                 if ( debugClient )
                     Debug.Log("VmClient.OnSend (" + Thread.CurrentThread.ManagedThreadId + "): send ended");
-            } catch (Exception ex) 
+            }
+            catch (Exception ex) 
             {
                 Debug.LogError(ex);
                 Disconnect();
             }
         }
 
-        public int GetExpectedSize(byte messageType) {
-            switch (messageType) {
+        public int GetExpectedSize(byte messageType)
+        {
+            switch (messageType)
+            {
                 case VmNetworking.SendBlockChange:
                     return 15;
                 case VmNetworking.transmitChunkData:
@@ -139,12 +147,14 @@ namespace Voxelmetric.Code.VM
             }
         }
 
-        public void HandleMessage(byte[] receivedData) {
-            switch (receivedData[0]) {
+        public void HandleMessage(byte[] receivedData)
+        {
+            switch (receivedData[0])
+            {
                 case VmNetworking.SendBlockChange:
                     BlockPos pos = BlockPos.FromBytes(receivedData, 1);
                     ushort type = BitConverter.ToUInt16(receivedData, 13);
-                    ReceiveChange(pos, world.blockProvider.BlockTypes[type]);
+                    ReceiveChange(pos, new BlockData(type));
                     break;
                 case VmNetworking.transmitChunkData:
                     ReceiveChunk(receivedData);
@@ -168,30 +178,33 @@ namespace Voxelmetric.Code.VM
             BlockPos pos = BlockPos.FromBytes(data, 1);
             Chunk chunk = world.chunks.Get(pos);
             // for now just issue an error if it isn't yet loaded
-            if (chunk == null) {
+            if (chunk == null)
+            {
                 Debug.LogError("VmClient.ReceiveChunk (" + Thread.CurrentThread.ManagedThreadId + "): "
                                + "Could not find chunk for " + pos);
-            } else
+            }
+            else
                 chunk.blocks.ReceiveChunkData(data);
         }
 
-        public void BroadcastChange(BlockPos pos, Block block)
+        public void BroadcastChange(BlockPos pos, BlockData blockData)
         {
             byte[] data = new byte[GetExpectedSize(VmNetworking.SendBlockChange)];
 
-            data[0] = VmNetworking.SendBlockChange;
-            pos.ToBytes().CopyTo(data, 1);
-            BitConverter.GetBytes(block.type).CopyTo(data, 13);
+            data[0] = VmNetworking.SendBlockChange; // 1 B
+            pos.ToBytes().CopyTo(data, 1); // 3*4B = 12 B
+            BitConverter.GetBytes(blockData.Type).CopyTo(data, 13); // 2 B
 
             Send(data);
         }
 
-        private void ReceiveChange(BlockPos pos, Block block)
+        private void ReceiveChange(BlockPos pos, BlockData block)
         {
-            world.blocks.Set(pos, block, updateChunk: true, setBlockModified: false);
+            world.blocks.Modify(pos, block, true, false);
         }
 
-        public void Disconnect() {
+        public void Disconnect()
+        {
             if (clientSocket != null)// && clientSocket.Connected)
             {
                 //clientSocket.Shutdown(SocketShutdown.Both);

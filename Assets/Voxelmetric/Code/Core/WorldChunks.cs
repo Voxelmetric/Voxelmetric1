@@ -22,17 +22,7 @@ namespace Voxelmetric.Code.Core
         {
             this.world = world;
         }
-
-        public Chunk this[int x, int y, int z]
-        {
-            get { return this[new BlockPos(x, y, z)]; }
-        }
-
-        public Chunk this[BlockPos pos]
-        {
-            get { return Get(pos); }
-        }
-
+        
         /// <summary> Returns the chunk at the given position </summary>
         /// <param name="pos">Position of the chunk or of a block within the chunk</param>
         /// <returns>The chunk that contains the given block position or null if there is none</returns>
@@ -52,7 +42,7 @@ namespace Voxelmetric.Code.Core
             chunks[pos] = chunk;
         }
 
-        public void Remove(Chunk chunk)
+        public void RemoveChunk(Chunk chunk)
         {
             Chunk.RemoveChunk(chunk);
             chunks.Remove(chunk.pos);
