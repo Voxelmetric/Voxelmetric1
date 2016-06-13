@@ -65,7 +65,7 @@ namespace Voxelmetric.Examples
 
             if (Input.GetMouseButtonDown(0) && !eventSystem.IsPointerOverGameObject())
             {
-                if (hit.block.type != BlockProvider.VoidType)
+                if (hit.block.type != BlockProvider.AirType)
                 {
                     Block block = world.blockProvider.GetBlock(blockToPlace);
                     bool adjacent = block.type != BlockProvider.AirType;

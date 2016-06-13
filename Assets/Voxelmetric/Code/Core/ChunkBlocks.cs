@@ -62,8 +62,7 @@ namespace Voxelmetric.Code.Core
 
         public void Reset()
         {
-            for(int i=0; i<blocks.Length; i++)
-                blocks[i] = new BlockData(BlockProvider.AirType);
+            Array.Clear(blocks, 0, blocks.Length);
 
             contentsModified = false;
             modifiedBlocks.Clear();
@@ -105,9 +104,7 @@ namespace Voxelmetric.Code.Core
                 (localBlockPos.z<Env.ChunkSize && localBlockPos.z>=0))
             {
                 BlockData bd = this[localBlockPos.x, localBlockPos.y, localBlockPos.z];
-                return bd.Type==BlockProvider.VoidType
-                           ? chunk.world.blockProvider.BlockTypes[BlockProvider.AirType]
-                           : chunk.world.blockProvider.BlockTypes[bd.Type];
+                return chunk.world.blockProvider.BlockTypes[bd.Type];
             }
 
             return chunk.world.blocks.Get(localBlockPos+chunk.pos);

@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 using Voxelmetric.Code.Core;
 using Voxelmetric.Code.Data_types;
 
@@ -24,7 +25,7 @@ namespace Voxelmetric.Code.Utilities
             BlockPos adjacentBPos = pos;
 
             // Positive copy of the direction
-            Vector3 dirP = new Vector3(MakePositive(dir.x), MakePositive(dir.y), MakePositive(dir.z));
+            Vector3 dirP = new Vector3(Math.Abs(dir.x), Math.Abs(dir.y), Math.Abs(dir.z));
             // The sign of the direction
             BlockPos dirS = new Vector3(dir.x > 0 ? 1 : -1, dir.y > 0 ? 1 : -1, dir.z > 0 ? 1 : -1);
 
@@ -45,7 +46,7 @@ namespace Voxelmetric.Code.Utilities
 
                 //Find the distance to each boundary and make the number positive
                 dist = boundary - pos;
-                dist = new Vector3(MakePositive(dist.x), MakePositive(dist.y), MakePositive(dist.z));
+                dist = new Vector3(Math.Abs(dist.x), Math.Abs(dist.y), Math.Abs(dist.z));
                 // Divide the distance by the strength of the corresponding direction, the
                 // lowest number will be the boundary we will hit first. This is like distance
                 // over speed = time where dirP is the speed and the it's time to reach the boundary
@@ -102,59 +103,33 @@ namespace Voxelmetric.Code.Utilities
 
         //Resolve a component of a vector3 into an int for a blockPos by using the sign
         // of the corresponding direction to decide if the position is on a boundary
-        static int ResolveBlockPos(float pos, int dirS)
+        private static int ResolveBlockPos(float pos, int dirS)
         {
             float fPos = pos + 0.5f;
             int iPos = (int)fPos;
 
-            if (fPos == iPos)
+            if (Math.Abs(fPos-iPos)<0.001f)
             {
                 if (dirS == 1)
-                {
                     return iPos;
-                }
-                else
-                {
-                    return iPos - 1;
-                }
+
+                return iPos - 1;
             }
-            else
-            {
-                return Mathf.RoundToInt(pos);
-            }
+
+            return Mathf.RoundToInt(pos);
         }
 
         // Returns the nearest boundary to pos
-        static float MakeBoundary(int dirS, float pos)
+        private static float MakeBoundary(int dirS, float pos)
         {
-            int result;
             pos += 0.5f;
 
-            if (dirS == -1)
-            {
-                result = Mathf.FloorToInt(pos);
-            }
-            else
-            {
-                result = Mathf.CeilToInt(pos);
-            }
+            int result = dirS == -1 ? Mathf.FloorToInt(pos) : Mathf.CeilToInt(pos);
 
-            if (result == pos)
-            {
+            if (Math.Abs(result-pos)<0.001f)
                 result += dirS;
-            }
 
             return result - 0.5f;
         }
-
-        //returns f as a positive number
-        static float MakePositive(float f)
-        {
-            if (f < 0)
-                return -f;
-
-            return f;
-        }
-
     }
 }

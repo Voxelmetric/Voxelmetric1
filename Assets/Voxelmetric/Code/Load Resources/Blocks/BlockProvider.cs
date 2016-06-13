@@ -9,9 +9,8 @@ namespace Voxelmetric.Code.Load_Resources.Blocks
 {
     public class BlockProvider
     {
-        // Static block types: These are always added as 0 and 1 in the block index
-        public static readonly ushort VoidType = 0;
-        public static readonly ushort AirType = 1;
+        // Air type block will always be present
+        public static readonly ushort AirType = 0;
 
         private Block[] m_blockTypes;
         private readonly List<BlockConfig> m_configs;
@@ -27,18 +26,6 @@ namespace Voxelmetric.Code.Load_Resources.Blocks
 
         public void Init(string blockFolder, World world)
         {
-            // Add the static solid void block type
-            AddBlockType(new BlockConfig
-            {
-                name = "void",
-                className = "Block",
-                world = world,
-                solid = true,
-                canBeWalkedOn = false,
-                transparent = false,
-                canBeWalkedThrough = false,
-            });
-
             // Add the static air block type
             AddBlockType(new BlockConfig
             {
@@ -145,7 +132,7 @@ namespace Voxelmetric.Code.Load_Resources.Blocks
                 return type;
 
             Debug.LogError("Block not found: " + name);
-            return 0; // Return void type
+            return AirType;
         }
 
         public Block GetBlock(string name)
@@ -155,7 +142,7 @@ namespace Voxelmetric.Code.Load_Resources.Blocks
                 return BlockTypes[type];
 
             Debug.LogError("Block not found: " + name);
-            return BlockTypes[0]; // Return void type
+            return BlockTypes[AirType];
         }
 
         public BlockConfig GetConfig(int type)
@@ -164,7 +151,7 @@ namespace Voxelmetric.Code.Load_Resources.Blocks
                 return m_configs[type];
 
             Debug.LogError("Config not found: "+type);
-            return m_configs[0]; // Return void config
+            return m_configs[AirType];
         }
     }
 }

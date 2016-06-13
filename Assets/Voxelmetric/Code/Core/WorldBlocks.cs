@@ -25,7 +25,7 @@ namespace Voxelmetric.Code.Core
             if (containerChunk != null && pos.y >= world.config.minY)
                 return containerChunk.blocks.Get(pos);
 
-            return world.blockProvider.BlockTypes[BlockProvider.VoidType];
+            return world.blockProvider.BlockTypes[BlockProvider.AirType];
         }
 
         public BlockData GetBlockData(BlockPos pos)
@@ -34,7 +34,7 @@ namespace Voxelmetric.Code.Core
             if (containerChunk != null && pos.y >= world.config.minY)
                 return containerChunk.blocks.GetBlockData(pos);
 
-            return new BlockData(BlockProvider.VoidType);
+            return new BlockData(BlockProvider.AirType);
         }
 
         /// <summary>
