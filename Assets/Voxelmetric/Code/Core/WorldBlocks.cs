@@ -58,6 +58,18 @@ namespace Voxelmetric.Code.Core
             }
         }
 
+        public void SetBlockData(BlockPos pos, BlockData blockData, bool updateChunk = true, bool setBlockModified = true)
+        {
+            Chunk chunk = world.chunks.Get(pos);
+            if (chunk != null)
+            {
+                chunk.blocks.SetBlockData(pos, blockData, updateChunk, setBlockModified);
+
+                if (updateChunk)
+                    UpdateAdjacentChunk(pos);
+            }
+        }
+
         /// <summary> Updates any chunks neighboring a block position </summary>
         private void UpdateAdjacentChunk(BlockPos pos)
         {

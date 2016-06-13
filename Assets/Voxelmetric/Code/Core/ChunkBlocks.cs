@@ -154,6 +154,35 @@ namespace Voxelmetric.Code.Core
             }
         }
 
+        public void SetBlockData(BlockPos blockPos, BlockData newBlockData, bool updateChunk = true, bool setBlockModified = true)
+        {
+            if (InRange(blockPos))
+            {
+                //Only call create and destroy if this is a different block type, otherwise it's just updating the properties of an existing block
+                BlockData blockData = GetBlockData(blockPos);
+                if (blockData.Type != newBlockData.Type)
+                {
+                    Block oldBlock = chunk.world.blockProvider.BlockTypes[blockData.Type];
+                    Block newBlock = chunk.world.blockProvider.BlockTypes[blockData.Type];
+                    oldBlock.OnDestroy(chunk, blockPos, blockPos + chunk.pos);
+                    newBlock.OnCreate(chunk, blockPos, blockPos + chunk.pos);
+                }
+
+                this[blockPos.x - chunk.pos.x, blockPos.y - chunk.pos.y, blockPos.z - chunk.pos.z] = newBlockData;
+
+                if (setBlockModified)
+                    BlockModified(blockPos);
+
+                if (updateChunk)
+                    chunk.RequestBuildVertices();
+            }
+            else
+            {
+                //if the block is out of range set it through world
+                chunk.world.blocks.SetBlockData(blockPos, newBlockData, updateChunk);
+            }
+        }
+
         /// <summary>
         /// This function takes a block position relative to the chunk's position. It is slightly faster
         /// than the SetBlock function so use this if you already have a local position available otherwise
@@ -169,6 +198,16 @@ namespace Voxelmetric.Code.Core
                 (blockPos.z<Env.ChunkSize && blockPos.z>=0))
             {
                 this[blockPos.x, blockPos.y, blockPos.z] = new BlockData(block.type);
+            }
+        }
+
+        public void LocalSetBlockData(BlockPos blockPos, BlockData blockData)
+        {
+            if ((blockPos.x < Env.ChunkSize && blockPos.x >= 0) &&
+                (blockPos.y < Env.ChunkSize && blockPos.y >= 0) &&
+                (blockPos.z < Env.ChunkSize && blockPos.z >= 0))
+            {
+                this[blockPos.x, blockPos.y, blockPos.z] = blockData;
             }
         }
 

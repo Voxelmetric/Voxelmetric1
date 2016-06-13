@@ -9,13 +9,13 @@ public class GrassBlock: CubeBlock
 {
     private BlockData dirt;
     private BlockData air;
-    private Block grass;
+    private BlockData grass;
 
     public override void OnInit()
     {
         dirt = new BlockData(config.world.blockProvider.GetBlock("dirt").type);
         air = new BlockData(config.world.blockProvider.GetBlock("air").type);
-        grass = config.world.blockProvider.GetBlock("grass");
+        grass = new BlockData(config.world.blockProvider.GetBlock("grass").type);
     }
 
     // On random Update spread grass to any nearby dirt blocks on the surface
@@ -29,10 +29,11 @@ public class GrassBlock: CubeBlock
             {
                 for (int z = -1; z <= 1; z++)
                 {
-                    if (blocks.GetBlockData(globalPos.Add(x, y, z)).Equals(dirt) &&
+                    BlockPos newPos = globalPos.Add(x, y, z);
+                    if (blocks.GetBlockData(newPos).Equals(dirt) &&
                         blocks.GetBlockData(globalPos.Add(x, y+1, z)).Equals(air))
                     {
-                        blocks.Set(globalPos.Add(x, y, z), grass, false);
+                        blocks.SetBlockData(newPos, grass, false);
                     }
                 }
             }
