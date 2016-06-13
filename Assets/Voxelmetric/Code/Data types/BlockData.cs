@@ -4,8 +4,8 @@ using System.Runtime.InteropServices;
 namespace Voxelmetric.Code.Data_types
 {
     [Serializable]
-    [StructLayout(LayoutKind.Sequential)]
-    public struct BlockData: IComparable<BlockData>, IEquatable<BlockData>
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    public struct BlockData: IEquatable<BlockData>
     {
         private readonly ushort m_data;
 
@@ -28,12 +28,7 @@ namespace Voxelmetric.Code.Data_types
         {
             return BitConverter.GetBytes(m_data);
         }
-
-        public int CompareTo(BlockData other)
-        {
-            return other.m_data==m_data ? 0 : 1;
-        }
-
+        
         public bool Equals(BlockData other)
         {
             return other.m_data==m_data;
