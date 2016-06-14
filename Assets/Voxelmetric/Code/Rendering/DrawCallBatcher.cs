@@ -50,9 +50,11 @@ namespace Voxelmetric.Code.Rendering
             m_visible = false;
         }
 
-        public void AddMeshData(int[] tris, VertexDataFixed[] verts, Rect texture)
+        public void AddMeshData(int[] tris, VertexDataFixed[] verts, Rect texture, Vector3 offset)
         {
             RenderBuffer buffer = m_renderBuffers[m_renderBuffers.Count - 1];
+
+            int initialVertCount = buffer.Vertices.Count;
 
             for (int i = 0; i<verts.Length; i++)
             {
@@ -73,13 +75,13 @@ namespace Voxelmetric.Code.Rendering
                         (verts[i].UV.x*texture.width)+texture.x,
                         (verts[i].UV.y*texture.height)+texture.y
                         ),
-                    Vertex = verts[i].Vertex
+                    Vertex = verts[i].Vertex + offset
                 };
                 buffer.AddVertex(ref v);
             }
-
+            
             for (int i = 0; i < tris.Length; i++)
-                buffer.AddIndices(buffer.Vertices.Count, false);
+                buffer.AddIndex(tris[i] + initialVertCount);
         }
 
         /// <summary>

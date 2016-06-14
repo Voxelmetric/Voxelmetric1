@@ -46,6 +46,11 @@ namespace Voxelmetric.Code.Common.Extensions
             }*/
         }
 
+        public static void AddIndex(this RenderBuffer target, int offset)
+        {
+            target.Triangles.Add(offset);
+        }
+
         /// <summary>
         ///     Adds the vertices to the render buffer.
         /// </summary>

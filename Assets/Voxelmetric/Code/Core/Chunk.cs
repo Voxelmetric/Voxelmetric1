@@ -191,7 +191,7 @@ namespace Voxelmetric.Code.Core
                 m_completedStates.Check(ChunkState.LoadData)
                 )
             {
-                logic.Update();
+                //logic.Update();
                 blocks.Update();
             }
 

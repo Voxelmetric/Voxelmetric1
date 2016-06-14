@@ -16,7 +16,7 @@ public class CustomMeshBlock : Block {
             texture = new Rect();
 
         DrawCallBatcher batcher = chunk.render.batcher;
-        batcher.AddMeshData(customMeshConfig.tris, customMeshConfig.verts, texture);
+        batcher.AddMeshData(customMeshConfig.tris, customMeshConfig.verts, texture, localPos);
     }
 
 }
