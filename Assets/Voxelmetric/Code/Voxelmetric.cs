@@ -13,7 +13,7 @@ namespace Voxelmetric.Code
 
         public static void SetBlock(World world, BlockPos pos, BlockData blockData)
         {
-            world.blocks.Modify(pos, blockData);
+            world.blocks.Modify(pos, blockData, true);
         }
 
         public static Block GetBlock(World world, BlockPos pos)

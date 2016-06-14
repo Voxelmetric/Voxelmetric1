@@ -15,7 +15,11 @@ namespace Voxelmetric.Code.Core
     {
         private Chunk chunk;
         private readonly BlockData[] blocks = Helpers.CreateArray1D<BlockData>(Env.ChunkVolume);
-        
+
+
+        //! Queue of setBlock operations to execute
+        private readonly List<SetBlockContext> m_setBlockQueue = new List<SetBlockContext>();
+
         private byte[] receiveBuffer;
         private int receiveIndex;
 
@@ -57,6 +61,119 @@ namespace Voxelmetric.Code.Core
             modifiedBlocks.Clear();
 
             NonEmptyBlocks = 0;
+        }
+
+        public void Update()
+        {
+            if (m_setBlockQueue.Count<=0)
+                return;
+
+            chunk.RequestBuildVertices();
+
+            int rebuildMask = 0;
+
+            // Modify blocks
+            for (int j = 0; j < m_setBlockQueue.Count; j++)
+            {
+                SetBlockContext context = m_setBlockQueue[j];
+
+                // Update non-empty block count
+                if (context.Block.Type == BlockProvider.AirType)
+                    --NonEmptyBlocks;
+                else
+                    ++NonEmptyBlocks;
+
+                int x, y, z;
+                Helpers.GetChunkIndex3DFrom1D(context.Index, out x, out y, out z);
+
+                BlockPos pos = new BlockPos(x, y, z);
+                BlockPos globalPos = pos + chunk.pos;
+
+                BlockData oldBlockData = blocks[context.Index];
+
+                Block oldBlock = chunk.world.blockProvider.BlockTypes[oldBlockData.Type];
+                Block newBlock = chunk.world.blockProvider.BlockTypes[context.Block.Type];
+                oldBlock.OnDestroy(chunk, pos, globalPos);
+                newBlock.OnCreate(chunk, pos, globalPos);
+
+                blocks[context.Index] = context.Block;
+
+                if (context.SetBlockModified)
+                    BlockModified(pos, globalPos, context.Block);
+                
+                if (
+                    // Only check neighbors if it is still needed
+                    rebuildMask == 0x3f ||
+                    // Only check neighbors when it is a change of a block on a chunk's edge
+                    (((pos.x+1)&Env.ChunkMask)>1 &&
+                     ((pos.y+1)&Env.ChunkMask)>1 &&
+                     ((pos.z+1)&Env.ChunkMask)>1)
+                    )
+                    continue;
+                    
+                int cx = chunk.pos.x;
+                int cy = chunk.pos.y;
+                int cz = chunk.pos.z;
+
+                // If it is an edge position, notify neighbor as well
+                // Iterate over neighbors and decide which ones should be notified to rebuild
+                for (int i = 0; i < chunk.Listeners.Length; i++)
+                {
+                    ChunkEvent listener = chunk.Listeners[i];
+                    if (listener == null)
+                        continue;
+
+                    // No further checks needed once we know all neighbors need to be notified
+                    if (rebuildMask==0x3f)
+                        break;
+
+                    Chunk listenerChunk = (Chunk)listener;
+
+                    int lx = listenerChunk.pos.x;
+                    int ly = listenerChunk.pos.y;
+                    int lz = listenerChunk.pos.z;
+
+                    if ((ly == cy || lz == cz) &&
+                        (
+                            // Section to the left
+                            ((pos.x == 0) && (lx + Env.ChunkSize == cx)) ||
+                            // Section to the right
+                            ((pos.x == Env.ChunkMask) && (lx - Env.ChunkSize == cx))
+                        ))
+                        rebuildMask = rebuildMask | (1 << i);
+
+                    if ((lx == cx || lz == cz) &&
+                        (
+                            // Section to the bottom
+                            ((pos.y == 0) && (ly + Env.ChunkSize == cy)) ||
+                            // Section to the top
+                            ((pos.y == Env.ChunkMask) && (ly - Env.ChunkSize == cy))
+                        ))
+                        rebuildMask = rebuildMask | (1 << i);
+
+                    if ((ly == cy || lx == cx) &&
+                        (
+                            // Section to the back
+                            ((pos.z == 0) && (lz + Env.ChunkSize == cz)) ||
+                            // Section to the front
+                            ((pos.z == Env.ChunkMask) && (lz - Env.ChunkSize == cz))
+                        ))
+                        rebuildMask = rebuildMask | (1 << i);
+                }
+            }
+
+            m_setBlockQueue.Clear();
+
+            // Notify neighbors that they need to rebuilt their geometry
+            if (rebuildMask > 0)
+            {
+                for (int j = 0; j < chunk.Listeners.Length; j++)
+                {
+                    Chunk listener = (Chunk)chunk.Listeners[j];
+                    if (listener != null && ((rebuildMask >> j) & 1) != 0)
+                        listener.RequestBuildVertices();
+                }
+            }
         }
 
         /// <summary>
@@ -118,9 +235,8 @@ namespace Voxelmetric.Code.Core
         /// </summary>
         /// <param name="pos">A local block position</param>
         /// <param name="blockData">BlockData to place at the given location</param>
-        /// <param name="updateChunk">Optional parameter, set to false to keep the chunk unupdated despite the change</param>
-        /// <param name="setBlockModified">Optional parameter, set to true to mark chunk data as modified</param>
-        public void Modify(BlockPos pos, BlockData blockData, bool updateChunk = true, bool setBlockModified = true)
+        /// <param name="setBlockModified">Set to true to mark chunk data as modified</param>
+        public void Modify(BlockPos pos, BlockData blockData, bool setBlockModified)
         {
             int index = Helpers.GetChunkIndex1DFrom3D(pos.x, pos.y, pos.z);
 
@@ -129,95 +245,7 @@ namespace Voxelmetric.Code.Core
             if (oldBlockData.Type==blockData.Type)
                 return;
 
-            // Update non-empty block count
-            if (blockData.Type == BlockProvider.AirType)
-                --NonEmptyBlocks;
-            else
-                ++NonEmptyBlocks;
-
-            BlockPos globalPos = pos+chunk.pos;
-            
-            Block oldBlock = chunk.world.blockProvider.BlockTypes[oldBlockData.Type];
-            Block newBlock = chunk.world.blockProvider.BlockTypes[blockData.Type];
-            oldBlock.OnDestroy(chunk, pos, globalPos);
-            newBlock.OnCreate(chunk, pos, globalPos);
-
-            blocks[index] = blockData;
-            
-            // TODO: Queue changes
-            if (setBlockModified)
-                BlockModified(pos, globalPos, blockData);
-
-            if (updateChunk)
-            {
-                chunk.RequestBuildVertices();
-
-                // Only check neighbors when its an inner edge block
-                if (
-                    ((pos.x+1)&Env.ChunkMask)>1 &&
-                    ((pos.y+1)&Env.ChunkMask)>1 &&
-                    ((pos.z+1)&Env.ChunkMask)>1
-                    )
-                    return;
-
-                int rebuildMask = 0;
-
-                int cx = chunk.pos.x;
-                int cy = chunk.pos.y;
-                int cz = chunk.pos.z;
-
-                // If it is an edge position, notify neighbor as well
-                // Iterate over neighbors and decide which ones should be notified to rebuild
-                for (int i = 0; i<chunk.Listeners.Length; i++)
-                {
-                    ChunkEvent listener = chunk.Listeners[i];
-                    if (listener==null)
-                        continue;
-
-                    Chunk listenerChunk = (Chunk)listener;
-
-                    int lx = listenerChunk.pos.x;
-                    int ly = listenerChunk.pos.y;
-                    int lz = listenerChunk.pos.z;
-
-                    if ((ly==cy || lz==cz) &&
-                        (
-                            // Section to the left
-                            ((pos.x==0) && (lx+Env.ChunkSize==cx)) ||
-                            // Section to the right
-                            ((pos.x==Env.ChunkMask) && (lx-Env.ChunkSize==cx))
-                        ))
-                        rebuildMask = rebuildMask|(1<<i);
-
-                    if ((lx==cx || lz==cz) &&
-                        (
-                            // Section to the bottom
-                            ((pos.y==0) && (ly+Env.ChunkSize==cy)) ||
-                            // Section to the top
-                            ((pos.y==Env.ChunkMask) && (ly-Env.ChunkSize==cy))
-                        ))
-                        rebuildMask = rebuildMask|(1<<i);
-
-                    if ((ly==cy || lx==cx) &&
-                        (
-                            // Section to the back
-                            ((pos.z==0) && (lz+Env.ChunkSize==cz)) ||
-                            // Section to the front
-                            ((pos.z==Env.ChunkMask) && (lz-Env.ChunkSize==cz))
-                        ))
-                        rebuildMask = rebuildMask|(1<<i);
-                }
-
-                if (rebuildMask>0)
-                {
-                    for (int j = 0; j<chunk.Listeners.Length; j++)
-                    {
-                        Chunk listener = (Chunk)chunk.Listeners[j];
-                        if (listener!=null && ((rebuildMask>>j)&1)!=0)
-                            listener.RequestBuildVertices();
-                    }
-                }
-            }
+            m_setBlockQueue.Add(new SetBlockContext(index, blockData, setBlockModified));
         }
 
         public void BlockModified(BlockPos localPos, BlockPos globalPos, BlockData blockData)

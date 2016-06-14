@@ -23,7 +23,7 @@ namespace Voxelmetric.Code.Core
             scheduledUpdates.Clear();
         }
 
-        public void TimedUpdated()
+        public void Update()
         {
             randomUpdateTime += Time.fixedDeltaTime;
             if (randomUpdateTime>=chunk.world.config.randomUpdateFrequency)

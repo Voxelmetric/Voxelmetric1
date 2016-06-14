@@ -31,8 +31,7 @@ public class GrassBlock: CubeBlock
                     if (blocks.Get(newPos).Equals(dirt) &&
                         blocks.Get(globalPos.Add(x, y+1, z)).Equals(air))
                     {
-                        // Update the chunk however, dont propage over the network
-                        blocks.Modify(newPos, grass, true, false);
+                        blocks.Modify(newPos, grass, true);
                     }
                 }
             }

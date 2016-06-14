@@ -82,9 +82,8 @@ namespace Voxelmetric.Code.Core
         /// </summary>
         /// <param name="pos">Global position of the block</param>
         /// <param name="blockData">The block be placed</param>
-        /// <param name="updateChunk">Optional parameter, set to false not Update the chunk despite the change</param>
-        /// <param name="setBlockModified">Optional parameter, set to true to mark chunk data as modified</param>
-        public void Modify(BlockPos pos, BlockData blockData, bool updateChunk = true, bool setBlockModified = true)
+        /// <param name="setBlockModified">Set to true to mark chunk data as modified</param>
+        public void Modify(BlockPos pos, BlockData blockData, bool setBlockModified)
         {
             Chunk chunk = world.chunks.Get(pos);
             if (chunk==null)
@@ -96,7 +95,7 @@ namespace Voxelmetric.Code.Core
                 pos.z & Env.ChunkMask
                 );
 
-            chunk.blocks.Modify(blockPos, blockData, updateChunk, setBlockModified);
+            chunk.blocks.Modify(blockPos, blockData, setBlockModified);
         }
     }
 }

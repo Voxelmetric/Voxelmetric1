@@ -207,7 +207,7 @@ namespace Voxelmetric.Code.VM
         public void ReceiveChange(BlockPos pos, ushort type, int id)
         {
             BlockData blockData = new BlockData(type);
-            world.blocks.Modify(pos, blockData, true, true);
+            world.blocks.Modify(pos, blockData, true);
             BroadcastChange(pos, blockData, id);
         }
     }

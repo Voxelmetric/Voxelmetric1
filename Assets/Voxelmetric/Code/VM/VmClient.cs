@@ -200,7 +200,7 @@ namespace Voxelmetric.Code.VM
 
         private void ReceiveChange(BlockPos pos, BlockData block)
         {
-            world.blocks.Modify(pos, block, true, false);
+            world.blocks.Modify(pos, block, false);
         }
 
         public void Disconnect()

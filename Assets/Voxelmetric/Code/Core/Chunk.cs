@@ -160,17 +160,6 @@ namespace Voxelmetric.Code.Core
             return sb.ToString();
         }
         
-        private void UpdateLogic()
-        {
-            // Do not update chunk until it has all its data prepared
-            if (!m_completedStates.Check(ChunkState.Generate) ||
-                !m_completedStates.Check(ChunkState.LoadData)
-                )
-                return;
-
-            logic.TimedUpdated();
-        }
-        
         public void RequestBuildVertices()
         {
             RefreshState(ChunkState.BuildVertices);
@@ -194,7 +183,17 @@ namespace Voxelmetric.Code.Core
         public void UpdateChunk()
         {
             ProcessPendingTasks();
-            UpdateLogic();
+            
+            if (
+                // Do not update our chunk when there is a task executed to avoid data/geometry corruption
+                !IsExecutingTask &&
+                // Do not update our chunk until it has all its data prepared
+                m_completedStates.Check(ChunkState.LoadData)
+                )
+            {
+                logic.Update();
+                blocks.Update();
+            }
 
             // Build chunk mesh
             if (m_completedStates.Check(ChunkState.BuildVertices))
