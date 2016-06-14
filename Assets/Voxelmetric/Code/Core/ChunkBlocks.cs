@@ -118,7 +118,15 @@ namespace Voxelmetric.Code.Core
             {
                 chunk.RequestBuildVertices();
 
-                int subscribersMask = 0;
+                // Only check neighbors when its an inner edge block
+                if (
+                    ((pos.x+1)&Env.ChunkMask)>1 &&
+                    ((pos.y+1)&Env.ChunkMask)>1 &&
+                    ((pos.z+1)&Env.ChunkMask)>1
+                    )
+                    return;
+
+                int rebuildMask = 0;
 
                 int cx = chunk.pos.x;
                 int cy = chunk.pos.y;
@@ -131,7 +139,7 @@ namespace Voxelmetric.Code.Core
                     ChunkEvent listener = chunk.Listeners[i];
                     if (listener==null)
                         continue;
-                    
+
                     Chunk listenerChunk = (Chunk)listener;
 
                     int lx = listenerChunk.pos.x;
@@ -145,7 +153,7 @@ namespace Voxelmetric.Code.Core
                             // Section to the right
                             ((pos.x==Env.ChunkMask) && (lx-Env.ChunkSize==cx))
                         ))
-                        subscribersMask = subscribersMask|(1<<i);
+                        rebuildMask = rebuildMask|(1<<i);
 
                     if ((lx==cx || lz==cz) &&
                         (
@@ -154,7 +162,7 @@ namespace Voxelmetric.Code.Core
                             // Section to the top
                             ((pos.y==Env.ChunkMask) && (ly-Env.ChunkSize==cy))
                         ))
-                        subscribersMask = subscribersMask|(1<<i);
+                        rebuildMask = rebuildMask|(1<<i);
 
                     if ((ly==cy || lx==cx) &&
                         (
@@ -163,15 +171,15 @@ namespace Voxelmetric.Code.Core
                             // Section to the front
                             ((pos.z==Env.ChunkMask) && (lz-Env.ChunkSize==cz))
                         ))
-                        subscribersMask = subscribersMask|(1<<i);
+                        rebuildMask = rebuildMask|(1<<i);
                 }
 
-                if (subscribersMask>0)
+                if (rebuildMask>0)
                 {
                     for (int j = 0; j<chunk.Listeners.Length; j++)
                     {
                         Chunk listener = (Chunk)chunk.Listeners[j];
-                        if (listener!=null && ((subscribersMask>>j)&1)!=0)
+                        if (listener!=null && ((rebuildMask>>j)&1)!=0)
                             listener.RequestBuildVertices();
                     }
                 }
