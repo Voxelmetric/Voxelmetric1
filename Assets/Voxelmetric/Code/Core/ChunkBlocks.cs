@@ -5,6 +5,7 @@ using System.Threading;
 using UnityEngine;
 using Voxelmetric.Code.Common;
 using Voxelmetric.Code.Data_types;
+using Voxelmetric.Code.Load_Resources.Blocks;
 using Voxelmetric.Code.Utilities;
 using Voxelmetric.Code.VM;
 
@@ -14,6 +15,7 @@ namespace Voxelmetric.Code.Core
     {
         private Chunk chunk;
         private readonly BlockData[] blocks = Helpers.CreateArray1D<BlockData>(Env.ChunkVolume);
+        
         private byte[] receiveBuffer;
         private int receiveIndex;
 
@@ -21,7 +23,6 @@ namespace Voxelmetric.Code.Core
         public bool contentsModified;
 
         private static byte[] emptyBytes;
-
         public static byte[] EmptyBytes
         {
             get
@@ -31,6 +32,9 @@ namespace Voxelmetric.Code.Core
                 return emptyBytes;
             }
         }
+
+        //! Number of blocks which are not air (non-empty blocks)
+        public int NonEmptyBlocks { get; private set; }
 
         public ChunkBlocks(Chunk chunk)
         {
@@ -51,6 +55,8 @@ namespace Voxelmetric.Code.Core
 
             contentsModified = false;
             modifiedBlocks.Clear();
+
+            NonEmptyBlocks = 0;
         }
 
         /// <summary>
@@ -82,6 +88,18 @@ namespace Voxelmetric.Code.Core
         public void Set(BlockPos pos, BlockData blockData)
         {
             int index = Helpers.GetChunkIndex1DFrom3D(pos.x, pos.y, pos.z);
+
+            // Nothing for us to do if block did not change
+            BlockData oldBlockData = blocks[index];
+            if (oldBlockData.Type==blockData.Type)
+                return;
+
+            // Update non-empty block count
+            if (blockData.Type==BlockProvider.AirType)
+                --NonEmptyBlocks;
+            else
+                ++NonEmptyBlocks;
+
             blocks[index] = blockData;
         }
 
@@ -100,6 +118,12 @@ namespace Voxelmetric.Code.Core
             BlockData oldBlockData = blocks[index];
             if (oldBlockData.Type==blockData.Type)
                 return;
+
+            // Update non-empty block count
+            if (blockData.Type == BlockProvider.AirType)
+                --NonEmptyBlocks;
+            else
+                ++NonEmptyBlocks;
 
             BlockPos globalPos = pos+chunk.pos;
             

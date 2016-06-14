@@ -686,8 +686,8 @@ namespace Voxelmetric.Code.Core
             m_refreshStates = m_refreshStates.Reset(CurrStateGenerateVertices);
             m_completedStates = m_completedStates.Reset(CurrStateGenerateVertices);
 
-            /*if (NonEmptyBlocks > 0)
-            {*/
+            if (blocks.NonEmptyBlocks > 0)
+            {
                 var workItem = new SGenerateVerticesWorkItem(this);
 
                 m_taskRunning = true;
@@ -701,11 +701,11 @@ namespace Voxelmetric.Code.Core
                         },
                         workItem)
                     );
-                /*}
+                }
             else
             {
                 OnGenerateVerticesDone(this);
-            }*/
+            }
 
             return true;
         }
