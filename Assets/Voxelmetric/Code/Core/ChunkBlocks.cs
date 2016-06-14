@@ -96,17 +96,17 @@ namespace Voxelmetric.Code.Core
         {
             int index = Helpers.GetChunkIndex1DFrom3D(pos.x, pos.y, pos.z);
 
-            BlockPos globalPos = pos+chunk.pos;
-
-            //Only call create and destroy if this is a different block type, otherwise it's just updating the properties of an existing block
+            // Nothing for us to do if block did not change
             BlockData oldBlockData = blocks[index];
-            if (oldBlockData.Type != blockData.Type)
-            {
-                Block oldBlock = chunk.world.blockProvider.BlockTypes[oldBlockData.Type];
-                Block newBlock = chunk.world.blockProvider.BlockTypes[blockData.Type];
-                oldBlock.OnDestroy(chunk, pos, globalPos);
-                newBlock.OnCreate(chunk, pos, globalPos);
-            }
+            if (oldBlockData.Type==blockData.Type)
+                return;
+
+            BlockPos globalPos = pos+chunk.pos;
+            
+            Block oldBlock = chunk.world.blockProvider.BlockTypes[oldBlockData.Type];
+            Block newBlock = chunk.world.blockProvider.BlockTypes[blockData.Type];
+            oldBlock.OnDestroy(chunk, pos, globalPos);
+            newBlock.OnCreate(chunk, pos, globalPos);
 
             blocks[index] = blockData;
             
@@ -118,17 +118,62 @@ namespace Voxelmetric.Code.Core
             {
                 chunk.RequestBuildVertices();
 
+                int subscribersMask = 0;
+
+                int cx = chunk.pos.x;
+                int cy = chunk.pos.y;
+                int cz = chunk.pos.z;
+
                 // If it is an edge position, notify neighbor as well
                 // Iterate over neighbors and decide which ones should be notified to rebuild
-                for (int i = 0; i < chunk.Listeners.Length; i++)
+                for (int i = 0; i<chunk.Listeners.Length; i++)
                 {
                     ChunkEvent listener = chunk.Listeners[i];
-                    if (listener == null)
+                    if (listener==null)
                         continue;
                     
-                    // TODO: Only notify neighbors that really need it
                     Chunk listenerChunk = (Chunk)listener;
-                    listenerChunk.RequestBuildVertices();
+
+                    int lx = listenerChunk.pos.x;
+                    int ly = listenerChunk.pos.y;
+                    int lz = listenerChunk.pos.z;
+
+                    if ((ly==cy || lz==cz) &&
+                        (
+                            // Section to the left
+                            ((pos.x==0) && (lx+Env.ChunkSize==cx)) ||
+                            // Section to the right
+                            ((pos.x==Env.ChunkMask) && (lx-Env.ChunkSize==cx))
+                        ))
+                        subscribersMask = subscribersMask|(1<<i);
+
+                    if ((lx==cx || lz==cz) &&
+                        (
+                            // Section to the bottom
+                            ((pos.y==0) && (ly+Env.ChunkSize==cy)) ||
+                            // Section to the top
+                            ((pos.y==Env.ChunkMask) && (ly-Env.ChunkSize==cy))
+                        ))
+                        subscribersMask = subscribersMask|(1<<i);
+
+                    if ((ly==cy || lx==cx) &&
+                        (
+                            // Section to the back
+                            ((pos.z==0) && (lz+Env.ChunkSize==cz)) ||
+                            // Section to the front
+                            ((pos.z==Env.ChunkMask) && (lz-Env.ChunkSize==cz))
+                        ))
+                        subscribersMask = subscribersMask|(1<<i);
+                }
+
+                if (subscribersMask>0)
+                {
+                    for (int j = 0; j<chunk.Listeners.Length; j++)
+                    {
+                        Chunk listener = (Chunk)chunk.Listeners[j];
+                        if (listener!=null && ((subscribersMask>>j)&1)!=0)
+                            listener.RequestBuildVertices();
+                    }
                 }
             }
         }
