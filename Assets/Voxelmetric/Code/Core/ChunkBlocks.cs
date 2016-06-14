@@ -60,7 +60,7 @@ namespace Voxelmetric.Code.Core
         }
 
         /// <summary>
-        /// Gets and returns block data at a position within the chunk
+        /// Returns block data from a position within the chunk
         /// </summary>
         /// <param name="pos">A local block position</param>
         /// <returns>The block at the position</returns>
@@ -71,13 +71,23 @@ namespace Voxelmetric.Code.Core
         }
 
         /// <summary>
-        /// Gets and returns a block from a position within the chunk
+        /// Returns a block from a position within the chunk
         /// </summary>
         /// <param name="pos">A local block position</param>
         /// <returns>The block at the position</returns>
         public Block GetBlock(BlockPos pos)
         {
             int index = Helpers.GetChunkIndex1DFrom3D(pos.x, pos.y, pos.z);
+            return chunk.world.blockProvider.BlockTypes[blocks[index].Type];
+        }
+
+        /// <summary>
+        /// Returns a block from a position within the chunk
+        /// </summary>
+        /// <param name="index">Index to internal block buffer</param>
+        /// <returns>The block at the position</returns>
+        public Block GetBlock(int index)
+        {
             return chunk.world.blockProvider.BlockTypes[blocks[index].Type];
         }
 
