@@ -13,10 +13,9 @@ namespace Voxelmetric.Code.Core
 {
     public sealed class ChunkBlocks
     {
-        private Chunk chunk;
+        public Chunk chunk { get; private set; }
         private readonly BlockData[] blocks = Helpers.CreateArray1D<BlockData>(Env.ChunkVolume);
-
-
+        
         //! Queue of setBlock operations to execute
         private readonly List<SetBlockContext> m_setBlockQueue = new List<SetBlockContext>();
 

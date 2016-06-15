@@ -3,14 +3,12 @@ using Voxelmetric.Code.Rendering;
 
 namespace Voxelmetric.Code.Builders
 {
-    public class CubeMeshBuilder: IMeshBuilder
+    public class UnityMeshBuilder
     {
-        #region IMeshBuilder implementation
-
         /// <summary>
         ///     Copy the data to a Unity mesh
         /// </summary>
-        public void BuildMesh(Mesh mesh, Rendering.RenderBuffer buffer)
+        public static void BuildMesh(Mesh mesh, Rendering.RenderBuffer buffer)
         {
             int size = buffer.Vertices.Count;
 
@@ -61,7 +59,5 @@ namespace Voxelmetric.Code.Builders
             Globals.MemPools.PushVector3Array(normals);
             Globals.MemPools.PushVector4Array(tangents);
         }
-
-        #endregion
     }
 }

@@ -11,8 +11,7 @@ namespace Voxelmetric.Code.Rendering
     public class DrawCallBatcher
     {
         private const string GOPChunk = "Chunk";
-
-        private readonly IMeshBuilder m_meshBuilder;
+        
         private readonly Chunk m_chunk;
 
         private readonly List<RenderBuffer> m_renderBuffers;
@@ -21,9 +20,8 @@ namespace Voxelmetric.Code.Rendering
         
         private bool m_visible;
 
-        public DrawCallBatcher(IMeshBuilder builder, Chunk chunk)
+        public DrawCallBatcher(Chunk chunk)
         {
-            m_meshBuilder = builder;
             m_chunk = chunk;
             
             m_renderBuffers = new List<RenderBuffer>(1)
@@ -135,7 +133,7 @@ namespace Voxelmetric.Code.Rendering
 
                     Mesh mesh = Globals.MemPools.MeshPool.Pop();
                     Assert.IsTrue(mesh.vertices.Length<=0);
-                    m_meshBuilder.BuildMesh(mesh, buffer);
+                    UnityMeshBuilder.BuildMesh(mesh, buffer);
 
                     MeshFilter filter = go.GetComponent<MeshFilter>();
                     filter.sharedMesh = null;

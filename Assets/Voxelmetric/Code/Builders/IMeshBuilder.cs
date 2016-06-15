@@ -1,9 +1,9 @@
-﻿using Voxelmetric.Code.Rendering;
+﻿using Voxelmetric.Code.Core;
 
 namespace Voxelmetric.Code.Builders
 {
     public interface IMeshBuilder
     {
-        void BuildMesh(UnityEngine.Mesh mesh, RenderBuffer buffer);
+        void Build(ChunkBlocks blocks);
     }
 }
