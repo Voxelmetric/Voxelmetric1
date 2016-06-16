@@ -4,6 +4,6 @@ namespace Voxelmetric.Code.Builders
 {
     public interface IMeshBuilder
     {
-        void Build(ChunkBlocks blocks);
+        void Build(Chunk chunk);
     }
 }

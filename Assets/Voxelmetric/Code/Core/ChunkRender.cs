@@ -26,7 +26,7 @@ namespace Voxelmetric.Code.Core
         /// <summary> Updates the chunk based on its contents </summary>
         public void BuildMeshData()
         {
-            Globals.CubeMeshBuilder.Build(chunk.blocks);
+            Globals.CubeMeshBuilder.Build(chunk);
         }
 
         public void BuildMesh()

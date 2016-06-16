@@ -138,6 +138,25 @@ namespace Voxelmetric.Code.Common
             return (value % modulus + modulus) % modulus;
         }
 
+        public static uint Mod3(uint value)
+        {
+            uint a = value&0x33333333; /* even two-bit groups */
+            uint b = value&0xcccccccc; /* odd two-bit groups */
+            uint sum = a+(b>>2); /* sum 0-6 in 8 groups */
+            sum = sum+(sum>>2); /* sum 0-3 in 8 groups */
+            sum = sum&0x33333333; /* clear garbage bits */
+            sum = sum+(sum>>4); /* sum 0-6 in 4 groups */
+            sum = sum+(sum>>2); /* sum 0-3 in 4 groups */
+            sum = sum&0x33333333; /* clear garbage bits */
+            sum = sum+(sum>>8); /* sum 0-6 in 2 groups */
+            sum = sum+(sum>>2); /* sum 0-3 in 2 groups */
+            sum = sum&0x33333333; /* clear garbage bits */
+            sum = sum+(sum>>16); /* sum 0-6 in 1 group */
+            sum = sum+(sum>>2); /* sum 0-3 in 1 group */
+            sum = sum&0x3; /* clear garbage bits */
+            return sum;
+        }
+
         public static float Clamp(this float val, float min, float max)
         {
             if (val < min)

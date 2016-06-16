@@ -8,11 +8,11 @@ namespace Voxelmetric.Code.Builders
 {
     public class GenericMeshBuilder: IMeshBuilder
     {
-        public void Build(ChunkBlocks blocks)
+        public void Build(Chunk chunk)
         {
             for (int i = 0; i < Env.ChunkVolume; i++)
             {
-                Block block = blocks.GetBlock(i);
+                Block block = chunk.blocks.GetBlock(i);
                 if (block.type == BlockProvider.AirType)
                     continue;
 
@@ -20,7 +20,7 @@ namespace Voxelmetric.Code.Builders
                 Helpers.GetChunkIndex3DFrom1D(i, out x, out y, out z);
                 BlockPos localBlockPos = new BlockPos(x, y, z);
 
-                block.BuildBlock(blocks.chunk, localBlockPos, blocks.chunk.pos + localBlockPos);
+                block.BuildBlock(chunk, localBlockPos, chunk.pos + localBlockPos);
             }
         }
     }

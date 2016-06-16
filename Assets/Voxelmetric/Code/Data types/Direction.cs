@@ -32,7 +32,7 @@ namespace Voxelmetric.Code.Data_types
                 case Direction.east:
                     return Direction.west;
                 case Direction.south:
-                    return Direction.down;
+                    return Direction.north;
                 case Direction.west:
                     return Direction.east;
                 case Direction.up:
@@ -49,9 +49,9 @@ namespace Voxelmetric.Code.Data_types
         {
             switch (dir)
             {
-                case Direction.north:
-                case Direction.east:
-                case Direction.up:
+                case Direction.south:
+                case Direction.west:
+                case Direction.down:
                     return false;
             }
 

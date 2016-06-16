@@ -62,7 +62,7 @@ public class Block
 
     public virtual bool CanMergeFaceWith(Block adjacentBlock, Direction dir)
     {
-        return true;
+        return false;
     }
 
     public virtual void BuildFace(Chunk chunk, BlockPos localPos, BlockPos globalPos, Direction dir)

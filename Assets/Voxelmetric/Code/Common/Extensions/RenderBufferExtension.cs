@@ -16,34 +16,26 @@ namespace Voxelmetric.Code.Common.Extensions
             // |\ |
             // | \|
             // 3--2
-
-            target.Triangles.Add(offset - 4); // 0
-            target.Triangles.Add(offset - 3); // 1
-            target.Triangles.Add(offset - 2); // 2
-
-            target.Triangles.Add(offset - 4); // 0
-            target.Triangles.Add(offset - 2); // 2
-            target.Triangles.Add(offset - 1); // 3
             /*if (backFace)
             {
-                target.Triangles.Add(offset + 2);
-                target.Triangles.Add(offset + 0);
-                target.Triangles.Add(offset + 1);
+                target.Triangles.Add(offset - 4); // 2
+                target.Triangles.Add(offset - 2); // 0
+                target.Triangles.Add(offset - 3); // 1
 
-                target.Triangles.Add(offset + 3);
-                target.Triangles.Add(offset + 0);
-                target.Triangles.Add(offset + 2);
+                target.Triangles.Add(offset - 4); // 3
+                target.Triangles.Add(offset - 1); // 0
+                target.Triangles.Add(offset - 2); // 2
             }
-            else
+            else*/
             {
-                target.Triangles.Add(offset + 2);
-                target.Triangles.Add(offset + 1);
-                target.Triangles.Add(offset + 0);
+                target.Triangles.Add(offset - 4); // 2
+                target.Triangles.Add(offset - 3); // 1
+                target.Triangles.Add(offset - 2); // 0
 
-                target.Triangles.Add(offset + 3);
-                target.Triangles.Add(offset + 2);
-                target.Triangles.Add(offset + 0);
-            }*/
+                target.Triangles.Add(offset - 4); // 3
+                target.Triangles.Add(offset - 2); // 2
+                target.Triangles.Add(offset - 1); // 0
+            }
         }
 
         public static void AddIndex(this RenderBuffer target, int offset)
