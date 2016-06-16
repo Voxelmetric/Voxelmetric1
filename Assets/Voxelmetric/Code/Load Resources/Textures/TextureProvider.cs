@@ -13,13 +13,20 @@ namespace Voxelmetric.Code.Load_Resources.Textures
 
         [HideInInspector]
         public Texture2D atlas;
-        
-        public TextureProvider()
+
+        public static TextureProvider Create(WorldConfig config)
+        {
+            TextureProvider provider = new TextureProvider();
+            provider.Init(config);
+            return provider;
+        }
+
+        private TextureProvider()
         {
             textures = new Dictionary<string, TextureCollection>();
         }
 
-        public void Init(WorldConfig config)
+        private void Init(WorldConfig config)
         {
             this.config = config;
             LoadTextureIndex();

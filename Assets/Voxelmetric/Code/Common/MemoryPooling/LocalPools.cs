@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 using Voxelmetric.Code.Common.Memory;
-using Voxelmetric.Code.Data_types;
 using Voxelmetric.Code.Rendering;
 
 namespace Voxelmetric.Code.Common.MemoryPooling
@@ -20,8 +19,8 @@ namespace Voxelmetric.Code.Common.MemoryPooling
         private readonly Dictionary<int, IArrayPool<VertexDataFixed>> m_vertexDataFixedArrayPools =
             new Dictionary<int, IArrayPool<VertexDataFixed>>(128);
 
-        private readonly Dictionary<int, IArrayPool<BlockData>> m_blockDataArrayPools =
-            new Dictionary<int, IArrayPool<BlockData>>(128);
+        private readonly Dictionary<int, IArrayPool<Block>> m_blockArrayPools =
+            new Dictionary<int, IArrayPool<Block>>(128);
 
         private readonly Dictionary<int, IArrayPool<Vector2>> m_vector2ArrayPools =
             new Dictionary<int, IArrayPool<Vector2>>(128);
@@ -44,9 +43,9 @@ namespace Voxelmetric.Code.Common.MemoryPooling
             return PopArray(size, m_vertexDataFixedArrayPools);
         }
 
-        public BlockData[] PopBlockDataArray(int size)
+        public Block[] PopBlockArray(int size)
         {
-            return PopArray(size, m_blockDataArrayPools);
+            return PopArray(size, m_blockArrayPools);
         }
 
         public Vector2[] PopVector2Array(int size)
@@ -74,9 +73,9 @@ namespace Voxelmetric.Code.Common.MemoryPooling
             PushArray(arr, m_vertexDataFixedArrayPools);
         }
 
-        public void PushBlockDataArray(BlockData[] arr)
+        public void PushBlockArray(Block[] arr)
         {
-            PushArray(arr, m_blockDataArrayPools);
+            PushArray(arr, m_blockArrayPools);
         }
 
         public void PushVector2Array(Vector2[] arr)

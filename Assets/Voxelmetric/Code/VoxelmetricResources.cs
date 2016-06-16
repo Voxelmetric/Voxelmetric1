@@ -25,7 +25,7 @@ namespace Voxelmetric.Code
             if (TextureProviders.TryGetValue(world.config.textureFolder, out textureProvider))
                 return textureProvider;
 
-            textureProvider = new TextureProvider();
+            textureProvider = TextureProvider.Create(world.config);
             TextureProviders.Add(world.config.textureFolder, textureProvider);
             return textureProvider;
         }
@@ -42,7 +42,7 @@ namespace Voxelmetric.Code
             if (BlockProviders.TryGetValue(world.config.blockFolder, out blockProvider))
                 return blockProvider;
 
-            blockProvider = new BlockProvider();
+            blockProvider = BlockProvider.Create(world.config.blockFolder, world);
             BlockProviders.Add(world.config.blockFolder, blockProvider);
             return blockProvider;
         }

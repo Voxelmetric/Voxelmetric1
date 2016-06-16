@@ -55,10 +55,7 @@ namespace Voxelmetric.Code.Core
             config = new ConfigLoader<WorldConfig>(new[] { "Worlds" }).GetConfig(worldConfig);
 
             textureProvider = Voxelmetric.resources.GetTextureProvider(this);
-            textureProvider.Init(config);
-
             blockProvider = Voxelmetric.resources.GetBlockProvider(this);
-            blockProvider.Init(config.blockFolder, this);
 
             chunkMaterial.mainTexture = textureProvider.atlas;
         }

@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using Voxelmetric.Code.Core;
 using Voxelmetric.Code.Data_types;
+using Voxelmetric.Code.Load_Resources.Blocks;
 using Voxelmetric.Code.Rendering;
 
 public class ConnectedMeshBlock: CustomMeshBlock
@@ -10,22 +11,23 @@ public class ConnectedMeshBlock: CustomMeshBlock
         get { return (ConnectedMeshBlockConfig)config; }
     }
 
-    public override void OnCreate(Chunk chunk, BlockPos localPos, BlockPos globalPos)
+    public override void OnInit(BlockProvider blockProvider)
     {
         if (connectedMeshConfig.connectsToTypes==null)
         {
             connectedMeshConfig.connectsToTypes = new int[connectedMeshConfig.connectsToNames.Length];
             for (int i = 0; i<connectedMeshConfig.connectsToNames.Length; i++)
             {
-                connectedMeshConfig.connectsToTypes[i] = chunk.world.blockProvider.GetType(connectedMeshConfig.connectsToNames[i]);
+                connectedMeshConfig.connectsToTypes[i] = blockProvider.GetType(connectedMeshConfig.connectsToNames[i]);
             }
         }
     }
 
-    public override void AddBlockData(Chunk chunk, BlockPos localPos, BlockPos globalPos)
+    public override void BuildBlock(Chunk chunk, BlockPos localPos, BlockPos globalPos)
     {
         Rect texture;
         DrawCallBatcher batcher = chunk.render.batcher;
+        WorldBlocks blocks = chunk.world.blocks;
 
         for (int d = 0; d<6; d++)
         {

@@ -7,7 +7,7 @@ public class CustomMeshBlock : Block {
 
     public CustomMeshBlockConfig customMeshConfig { get { return (CustomMeshBlockConfig)config; } }
 
-    public override void AddBlockData(Chunk chunk, BlockPos localPos, BlockPos globalPos)
+    public override void BuildBlock(Chunk chunk, BlockPos localPos, BlockPos globalPos)
     {
         Rect texture;
         if (customMeshConfig.texture != null)

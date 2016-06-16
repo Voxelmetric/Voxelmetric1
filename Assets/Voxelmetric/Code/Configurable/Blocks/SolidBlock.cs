@@ -5,22 +5,29 @@ public class SolidBlock : Block
 {
     public virtual bool solidTowardsSameType { get { return ((SolidBlockConfig)config).solidTowardsSameType; } }
 
-    public override void AddBlockData(Chunk chunk, BlockPos localPos, BlockPos globalPos)
+    public override bool CanMergeFaceWith(Block adjacentBlock, Direction dir)
     {
+        if (!adjacentBlock.IsSolid(DirectionUtils.Opposite(dir)))
+        {
+            if (solid || !solidTowardsSameType || adjacentBlock.type != type)
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    public override void BuildBlock(Chunk chunk, BlockPos localPos, BlockPos globalPos)
+    {
+        WorldBlocks blocks = chunk.world.blocks;
+
         for (int d = 0; d < 6; d++)
         {
             Direction dir = DirectionUtils.Get(d);
             Block adjacentBlock = blocks.GetBlock(globalPos.Add(dir));
-            if (!adjacentBlock.IsSolid(DirectionUtils.Opposite(dir)))
-            {
-                if (solid || !solidTowardsSameType || adjacentBlock.type != type)
-                {
-                    BuildFace(chunk, localPos, globalPos, dir);
-                }
-            }
+            if (CanMergeFaceWith(adjacentBlock, dir))
+                BuildFace(chunk, localPos, globalPos, dir);
         }
     }
-
-    protected virtual void BuildFace(Chunk chunk, BlockPos localPos, BlockPos globalPos, Direction direction) { }
-
 }

@@ -1,5 +1,4 @@
-﻿using Assets.Voxelmetric.Code.Builders;
-using Voxelmetric.Code.Builders;
+﻿using Voxelmetric.Code.Builders;
 using Voxelmetric.Code.Common.MemoryPooling;
 using Voxelmetric.Code.Common.Threading;
 

@@ -18,13 +18,20 @@ namespace Voxelmetric.Code.Load_Resources.Blocks
 
         public Block[] BlockTypes { get { return m_blockTypes;} }
 
-        public BlockProvider()
+        public static BlockProvider Create(string blockFolder, World world)
+        {
+            BlockProvider provider = new BlockProvider();
+            provider.Init(blockFolder, world);
+            return provider;
+        }
+
+        private BlockProvider()
         {
             m_names = new Dictionary<string, ushort>();
             m_configs = new List<BlockConfig>();
         }
 
-        public void Init(string blockFolder, World world)
+        private void Init(string blockFolder, World world)
         {
             // Add the static air block type
             AddBlockType(new BlockConfig
@@ -50,7 +57,6 @@ namespace Voxelmetric.Code.Load_Resources.Blocks
                 Block block = (Block)Activator.CreateInstance(config.blockClass);
                 block.type = (ushort)i;
                 block.config = config;
-                block.blocks = config.world.blocks;
                 m_blockTypes[i] = block;
             }
 
@@ -59,7 +65,7 @@ namespace Voxelmetric.Code.Load_Resources.Blocks
             for (int i = 0; i < m_blockTypes.Length; i++)
             {
                 Block block = m_blockTypes[i];
-                block.OnInit();
+                block.OnInit(this);
             }
         }
 

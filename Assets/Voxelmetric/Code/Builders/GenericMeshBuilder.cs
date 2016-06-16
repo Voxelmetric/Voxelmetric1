@@ -1,11 +1,10 @@
-﻿using Voxelmetric.Code.Builders;
-using Voxelmetric.Code.Common;
+﻿using Voxelmetric.Code.Common;
 using Voxelmetric.Code.Core;
 using Voxelmetric.Code.Data_types;
 using Voxelmetric.Code.Load_Resources.Blocks;
 using Voxelmetric.Code.Utilities;
 
-namespace Assets.Voxelmetric.Code.Builders
+namespace Voxelmetric.Code.Builders
 {
     public class GenericMeshBuilder: IMeshBuilder
     {
@@ -13,15 +12,15 @@ namespace Assets.Voxelmetric.Code.Builders
         {
             for (int i = 0; i < Env.ChunkVolume; i++)
             {
-                int x, y, z;
-                Helpers.GetChunkIndex3DFrom1D(i, out x, out y, out z);
-                BlockPos localBlockPos = new BlockPos(x, y, z);
-
                 Block block = blocks.GetBlock(i);
                 if (block.type == BlockProvider.AirType)
                     continue;
 
-                block.BuildBlock(blocks.chunk, localBlockPos, localBlockPos + blocks.chunk.pos);
+                int x, y, z;
+                Helpers.GetChunkIndex3DFrom1D(i, out x, out y, out z);
+                BlockPos localBlockPos = new BlockPos(x, y, z);
+
+                block.BuildBlock(blocks.chunk, localBlockPos, blocks.chunk.pos + localBlockPos);
             }
         }
     }
