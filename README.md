@@ -1,12 +1,15 @@
-# Voxelmetric/Voxe
+# Voxe(lmetric)
 
 [![Join the chat at https://gitter.im/richardbiely/Voxelmetric](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/richardbiely/Voxelmetric?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+[![Repo Size](https://reposs.herokuapp.com/?path=richardbiely/Voxelmetric)](https://github.com/richardbiely/Voxelmetric)
+[![License](https://img.shields.io/badge/Licence-GNU-blue.svg)](https://github.com/richardbiely/Voxelmetric/blob/alpha_3/licence)
+[![Stories in progress](https://badge.waffle.io/richardbiely/Voxelmetric.png?label=In Progress&title=In Progress)](https://waffle.io/richardbiely/Voxelmetric)
 
-This is a VoxelMetrics's fork that is slowly being merged with https://github.com/richardbiely/Voxe in order to make it more powerful. Once merging of all features is completed, Voxe will be discontinued and all further work will be put into this project. Even though it is a fork, it is an almost complete rewrite of the original Voxelmetric.
+This is a VoxelMetrics's fork that is slowly being merged with Voxe (https://github.com/richardbiely/Voxe) in order to make it more powerful. Once merging of all features is completed, Voxe will be discontinued and all further work will be put into this project. Even though it is a fork, it is an almost complete rewrite of the original Voxelmetric.
 
 I liked how Voxelmetric was not just another voxel generator. It had some very neat features like support for customizable block types, simple client-server networking (very rather basic, though) and pathfinding. On the other hand, it was weak in terms of performance, code design and architecture. This came handy, however, because I had some fresh new ideas I wanted to try. So I tried (and still keep trying) and this is the result :)
 
-Voxelmetric/Voxe is an open source voxel framework for Unity3d. It is meant to be an easy to use, easy to extend solution for voxel games. Voxelmetric/Voxe is currently in alpha so expect breaking changes and incomplete documentation. If anyone wants to help they are more then welcome and should feel free to make a pull request. Also use the issues to highlight bugs and suggest features.
+Voxe(lmetric) is an open source voxel framework for Unity3d. It is meant to be an easy to use, easy to extend solution for voxel games. Voxe(lmetric) is currently in alpha so expect breaking changes and incomplete documentation. If anyone wants to help they are more then welcome and should feel free to make a pull request. Also use the issues to highlight bugs and suggest features.
 
 ## Features
 
