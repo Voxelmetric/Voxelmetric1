@@ -124,7 +124,7 @@ namespace Voxelmetric.Code.Utilities
                         }
 
                         // Show generated chunks
-                        if(chunk.IsGenerated_Internal())
+                        if(chunk.IsGenerated)
                         {
                             Gizmos.color = Color.magenta;
                             Gizmos.DrawWireCube(

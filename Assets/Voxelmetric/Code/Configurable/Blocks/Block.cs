@@ -60,7 +60,7 @@ public class Block
     {
     }
 
-    public virtual bool CanMergeFaceWith(Block adjacentBlock, Direction dir)
+    public virtual bool CanBuildFaceWith(Block adjacentBlock, Direction dir)
     {
         return false;
     }

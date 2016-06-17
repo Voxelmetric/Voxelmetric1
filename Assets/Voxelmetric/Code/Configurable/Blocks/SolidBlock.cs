@@ -5,7 +5,7 @@ public class SolidBlock : Block
 {
     public virtual bool solidTowardsSameType { get { return ((SolidBlockConfig)config).solidTowardsSameType; } }
 
-    public override bool CanMergeFaceWith(Block adjacentBlock, Direction dir)
+    public override bool CanBuildFaceWith(Block adjacentBlock, Direction dir)
     {
         if (!adjacentBlock.IsSolid(DirectionUtils.Opposite(dir)))
         {
@@ -26,7 +26,7 @@ public class SolidBlock : Block
         {
             Direction dir = DirectionUtils.Get(d);
             Block adjacentBlock = blocks.GetBlock(globalPos.Add(dir));
-            if (CanMergeFaceWith(adjacentBlock, dir))
+            if (CanBuildFaceWith(adjacentBlock, dir))
                 BuildFace(chunk, localPos, globalPos, dir);
         }
     }

@@ -30,8 +30,7 @@ namespace Voxelmetric.Code.Core
         public Bounds WorldBounds { get; private set; }
 
         //! Specifies whether there's a task running on this Chunk
-        private bool m_taskRunning;
-        private object m_lock;
+        private volatile bool m_taskRunning;
 
         //! Next state after currently finished state
         private ChunkState m_notifyStates;
@@ -41,6 +40,8 @@ namespace Voxelmetric.Code.Core
         private ChunkState m_refreshStates;
         //! Tasks already executed
         private ChunkState m_completedStates;
+        //! Just like m_completedStates, but it is synchronized on the main thread once a check for m_taskRunning is passed
+        private ChunkState m_completedStatesSafe;
         //! If true, removal of chunk has been requested and no further requests are going to be accepted
         private bool m_removalRequested;
 
@@ -89,8 +90,6 @@ namespace Voxelmetric.Code.Core
             render = new ChunkRender(this);
             blocks = new ChunkBlocks(this);
             logic = new ChunkLogic(this);
-
-            m_lock = new object();
         }
 
         private void Init(World world, BlockPos pos)
@@ -120,6 +119,7 @@ namespace Voxelmetric.Code.Core
             m_pendingStates = m_pendingStates.Reset();
             m_refreshStates = m_refreshStates.Reset();
             m_completedStates = m_completedStates.Reset();
+            m_completedStatesSafe = m_completedStatesSafe.Reset();
             m_removalRequested = false;
 
             m_stateExternal = ChunkStateExternal.None;
@@ -182,20 +182,32 @@ namespace Voxelmetric.Code.Core
 
         public void UpdateChunk()
         {
+            // Do not do any processing as long as there is any task still running
+            // Note that this check is not thread-safe because this value can be changed from a different thread. However,
+            // we do not care. The worst thing that can happen is that we read a value which is one frame old. So be it.
+            // Thanks to being this relaxed approach we do not need any synchronization primitives at all.
+            if (IsExecutingTask)
+                return;
+
+            // Synchronize the value with what we have on a different thread. It would be no big deal not having this at
+            // all. However, it is technically more correct.
+            m_completedStatesSafe = m_completedStates;
+
+            // Once this Chunk is marked as finished we ignore any further requests and won't perform any updates
+            if (IsFinished)
+                return;
+
+            // Process chunk tasks
             ProcessPendingTasks();
-            
-            if (
-                // Do not update our chunk when there is a task executed to avoid data/geometry corruption
-                !IsExecutingTask &&
-                // Do not update our chunk until it has all its data prepared
-                m_completedStates.Check(ChunkState.LoadData)
-                )
+
+            // Do not update our chunk until it has all its data prepared
+            if (m_completedStates.Check(ChunkState.LoadData))
             {
-                //logic.Update();
+                logic.Update();
                 blocks.Update();
             }
 
-            // Build chunk mesh
+            // Build chunk mesh if necessary
             if (m_completedStates.Check(ChunkState.BuildVertices))
             {
                 m_completedStates = m_completedStates.Reset(ChunkState.BuildVertices);
@@ -204,17 +216,6 @@ namespace Voxelmetric.Code.Core
         }
         private void ProcessPendingTasks()
         {
-            lock (m_lock)
-            {
-                // We are not allowed to check anything as long as there is a task still running
-                if (IsExecutingTask_Internal())
-                    return;
-
-                // Once this Chunk is marked as finished we stop caring about everything else
-                if (IsFinished_Internal())
-                    return;
-            }
-
             if (m_stateExternal!=ChunkStateExternal.None)
             {
                 // Notify everyone listening
@@ -276,35 +277,25 @@ namespace Voxelmetric.Code.Core
             OnNotified(this, m_notifyStates);
             m_notifyStates = ChunkState.Idle;
         }
-
-        private bool IsFinished_Internal()
-        {
-            return m_completedStates.Check(ChunkState.Remove);
-        }
-
+        
         public bool IsFinished
         {
-            get { lock (m_lock) return IsFinished_Internal(); }
+            get { return m_completedStatesSafe.Check(ChunkState.Remove); }
         }
 
-        public bool IsGenerated_Internal()
+        public bool IsGenerated
         {
-            return m_completedStates.Check(ChunkState.Generate);
+            get { return m_completedStatesSafe.Check(ChunkState.Generate); }
         }
 
         public bool IsSavePossible
         {
-            get { lock (m_lock) { return !m_removalRequested && m_completedStates.Check(ChunkState.Generate|ChunkState.LoadData); } }
-        }
-        
-        private bool IsExecutingTask_Internal()
-        {
-            return m_taskRunning;
+            get { return !m_removalRequested && m_completedStatesSafe.Check(ChunkState.Generate|ChunkState.LoadData); }
         }
 
         public bool IsExecutingTask
         {
-            get { lock (m_lock) return IsExecutingTask_Internal(); }
+            get { return m_taskRunning; }
         }
 
         public override void OnNotified(IEventSource<ChunkState> source, ChunkState state)
@@ -350,7 +341,7 @@ namespace Voxelmetric.Code.Core
                 Assert.IsTrue(cnt==0);
 
                 // All generic work is done
-                lock (chunk.m_lock)
+                //lock (chunk.m_lock)
                 {
                     OnGenericWorkDone(chunk);
                 }
@@ -431,7 +422,7 @@ namespace Voxelmetric.Code.Core
         {
             chunk.world.terrainGen.GenerateTerrainForChunk(chunk);
 
-            lock (chunk.m_lock)
+            //lock (chunk.m_lock)
             {
                 OnGenerateDataDone(chunk);
             }
@@ -446,7 +437,7 @@ namespace Voxelmetric.Code.Core
 
         public static void OnGenerateDataOverNetworkDone(Chunk chunk)
         {
-            lock (chunk.m_lock)
+            //lock (chunk.m_lock)
             {
                 OnGenerateDataDone(chunk);
                 OnLoadDataDone(chunk);
@@ -503,7 +494,7 @@ namespace Voxelmetric.Code.Core
         {
             Serialization.Serialization.LoadChunk(chunk);
 
-            lock (chunk.m_lock)
+            //lock (chunk.m_lock)
             {
                 OnLoadDataDone(chunk);
             }
@@ -564,7 +555,7 @@ namespace Voxelmetric.Code.Core
         {
             Serialization.Serialization.SaveChunk(chunk);
 
-            lock (chunk.m_lock)
+            //lock (chunk.m_lock)
             {
                 OnSaveDataDone(chunk);
             }
@@ -646,7 +637,7 @@ namespace Voxelmetric.Code.Core
         {
             chunk.render.BuildMeshData();
 
-            lock (chunk.m_lock)
+            //lock (chunk.m_lock)
             {
                 OnGenerateVerticesDone(chunk);
             }
