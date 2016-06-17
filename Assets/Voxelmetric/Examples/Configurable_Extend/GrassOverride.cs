@@ -22,7 +22,7 @@ public class GrassBlock: CubeBlock
     // On random Update spread grass to any nearby dirt blocks on the surface
     public override void RandomUpdate(Chunk chunk, BlockPos localPos, BlockPos globalPos)
     {
-        ChunkBlocks blocks = chunk.blocks;
+        WorldBlocks blocks = chunk.world.blocks;
 
         for (int x = -1; x <= 1; x++)
         {
