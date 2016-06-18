@@ -341,10 +341,7 @@ namespace Voxelmetric.Code.Core
                 Assert.IsTrue(cnt==0);
 
                 // All generic work is done
-                //lock (chunk.m_lock)
-                {
-                    OnGenericWorkDone(chunk);
-                }
+                OnGenericWorkDone(chunk);
             }
         }
 
@@ -422,10 +419,7 @@ namespace Voxelmetric.Code.Core
         {
             chunk.world.terrainGen.GenerateTerrainForChunk(chunk);
 
-            //lock (chunk.m_lock)
-            {
-                OnGenerateDataDone(chunk);
-            }
+            OnGenerateDataDone(chunk);
         }
 
         private static void OnGenerateDataDone(Chunk chunk)
@@ -437,11 +431,8 @@ namespace Voxelmetric.Code.Core
 
         public static void OnGenerateDataOverNetworkDone(Chunk chunk)
         {
-            //lock (chunk.m_lock)
-            {
-                OnGenerateDataDone(chunk);
-                OnLoadDataDone(chunk);
-            }
+            OnGenerateDataDone(chunk);
+            OnLoadDataDone(chunk);
         }
 
         private bool GenerateData()
@@ -494,10 +485,7 @@ namespace Voxelmetric.Code.Core
         {
             Serialization.Serialization.LoadChunk(chunk);
 
-            //lock (chunk.m_lock)
-            {
-                OnLoadDataDone(chunk);
-            }
+            OnLoadDataDone(chunk);
         }
 
         private static void OnLoadDataDone(Chunk chunk)
@@ -555,10 +543,7 @@ namespace Voxelmetric.Code.Core
         {
             Serialization.Serialization.SaveChunk(chunk);
 
-            //lock (chunk.m_lock)
-            {
-                OnSaveDataDone(chunk);
-            }
+            OnSaveDataDone(chunk);
         }
 
         private static void OnSaveDataDone(Chunk chunk)
@@ -637,10 +622,7 @@ namespace Voxelmetric.Code.Core
         {
             chunk.render.BuildMeshData();
 
-            //lock (chunk.m_lock)
-            {
-                OnGenerateVerticesDone(chunk);
-            }
+            OnGenerateVerticesDone(chunk);
         }
 
         private static void OnGenerateVerticesDone(Chunk chunk)

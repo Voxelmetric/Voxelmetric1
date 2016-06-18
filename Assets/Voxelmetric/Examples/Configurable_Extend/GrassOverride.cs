@@ -1,6 +1,7 @@
 ﻿using Voxelmetric.Code.Core;
 using Voxelmetric.Code.Data_types;
 using Voxelmetric.Code.Load_Resources.Blocks;
+using Voxelmetric.Code.Utilities;
 
 // This class inherits from BlockCube so that it renders just like any other
 // cube block but it replaces the RandomUpdate function with its own
@@ -22,24 +23,30 @@ public class GrassBlock: CubeBlock
     // On random Update spread grass to any nearby dirt blocks on the surface
     public override void RandomUpdate(Chunk chunk, BlockPos localPos, BlockPos globalPos)
     {
-        WorldBlocks blocks = chunk.world.blocks;
+        ChunkBlocks blocks = chunk.blocks;
+        WorldBlocks blocksW = chunk.world.blocks;
 
-        for (int x = -1; x <= 1; x++)
+        int minX = localPos.x<=0 ? 0 : 1;
+        int maxX = localPos.x>=Env.ChunkMask ? 0 : 1;
+        int minY = localPos.y<=0 ? 0 : 1;
+        int maxY = localPos.y>=Env.ChunkMask ? 0 : 1;
+        int minZ = localPos.z<=0 ? 0 : 1;
+        int maxZ = localPos.z>=Env.ChunkMask ? 0 : 1;
+
+        for (int x = -minX; x<=maxX; x++)
         {
-            for (int y = -1; y <= 1; y++)
+            for (int y = -minY; y<=maxY; y++)
             {
-                for (int z = -1; z <= 1; z++)
+                for (int z = -minZ; z<=maxZ; z++)
                 {
-                    BlockPos newPos = globalPos.Add(x, y, z);
+                    BlockPos newPos = localPos.Add(x, y, z);
                     if (blocks.Get(newPos).Equals(dirt) &&
-                        blocks.Get(globalPos.Add(x, y+1, z)).Equals(air))
+                        blocksW.Get(globalPos.Add(x, y+1, z)).Equals(air))
                     {
                         blocks.Modify(newPos, grass, true);
                     }
                 }
             }
         }
-
-        chunk.RequestBuildVertices();
     }
 }
