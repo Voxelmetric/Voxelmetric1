@@ -33,11 +33,9 @@ namespace Voxelmetric.Code.Core
         private volatile bool m_taskRunning;
 
         //! Next state after currently finished state
-        private ChunkState m_notifyStates;
-        //! Tasks waiting to be executed
+        private ChunkState m_nextState;
+        //! States waiting to be processed
         private ChunkState m_pendingStates;
-        //! States to be refreshed
-        private ChunkState m_refreshStates;
         //! Tasks already executed
         private ChunkState m_completedStates;
         //! Just like m_completedStates, but it is synchronized on the main thread once a check for m_taskRunning is passed
@@ -115,9 +113,8 @@ namespace Voxelmetric.Code.Core
         {
             SubscribeNeighbors(false);
 
-            m_notifyStates = m_notifyStates.Reset();
+            m_nextState = m_nextState.Reset();
             m_pendingStates = m_pendingStates.Reset();
-            m_refreshStates = m_refreshStates.Reset();
             m_completedStates = m_completedStates.Reset();
             m_completedStatesSafe = m_completedStates;
             m_removalRequested = false;
@@ -144,11 +141,9 @@ namespace Voxelmetric.Code.Core
             StringBuilder sb = new StringBuilder();
             sb.Append(pos);
             sb.Append(", N=");
-            sb.Append(m_notifyStates);
+            sb.Append(m_nextState);
             sb.Append(", P=");
             sb.Append(m_pendingStates);
-            sb.Append(", R=");
-            sb.Append(m_refreshStates);
             sb.Append(", C=");
             sb.Append(m_completedStates);
             sb.Append(", blocks=");
@@ -162,12 +157,12 @@ namespace Voxelmetric.Code.Core
         
         public void RequestBuildVertices()
         {
-            RefreshState(ChunkState.BuildVertices);
+            RequestState(ChunkState.BuildVertices);
         }
 
         public void RequestSaveData()
         {
-            RefreshState(ChunkState.SaveData);
+            RequestState(ChunkState.SaveData);
         }
 
         public void RequestRemoval()
@@ -176,7 +171,7 @@ namespace Voxelmetric.Code.Core
                 return;
             m_removalRequested = true;
 
-            RefreshState(ChunkState.SaveData);
+            RequestState(ChunkState.SaveData);
             OnNotified(this, ChunkState.Remove);
         }
 
@@ -271,11 +266,11 @@ namespace Voxelmetric.Code.Core
 
         private void ProcessNotifyState()
         {
-            if (m_notifyStates==ChunkState.Idle)
+            if (m_nextState==ChunkState.Idle)
                 return;
             
-            OnNotified(this, m_notifyStates);
-            m_notifyStates = ChunkState.Idle;
+            OnNotified(this, m_nextState);
+            m_nextState = ChunkState.Idle;
         }
         
         public bool IsFinished
@@ -304,9 +299,8 @@ namespace Voxelmetric.Code.Core
             m_pendingStates = m_pendingStates.Set(state);
         }
 
-        private void RefreshState(ChunkState state)
+        private void RequestState(ChunkState state)
         {
-            m_refreshStates = m_refreshStates.Set(state);
             m_pendingStates = m_pendingStates.Set(state);
         }
 
@@ -348,7 +342,7 @@ namespace Voxelmetric.Code.Core
         private static void OnGenericWorkDone(Chunk chunk)
         {
             chunk.m_completedStates = chunk.m_completedStates.Set(CurrStateGenericWork);
-            chunk.m_notifyStates = NextStateGenericWork;
+            chunk.m_nextState = NextStateGenericWork;
             chunk.m_taskRunning = false;
         }
 
@@ -358,16 +352,6 @@ namespace Voxelmetric.Code.Core
             Assert.IsTrue(Interlocked.CompareExchange(ref m_genericWorkItemsLeftToProcess, 0, 0)==0);
 
             m_pendingStates = m_pendingStates.Reset(CurrStateGenericWork);
-
-            // Nothing here for us to do if the Chunk was not changed
-            if (m_completedStates.Check(CurrStateGenericWork) && !m_refreshStates.Check(CurrStateGenericWork))
-            {
-                m_genericWorkItemsLeftToProcess = 0;
-                OnGenericWorkDone(this);
-                return false;
-            }
-
-            m_refreshStates = m_refreshStates.Reset(CurrStateGenericWork);
             m_completedStates = m_completedStates.Reset(CurrStateGenericWork);
             m_completedStatesSafe = m_completedStates;
 
@@ -406,7 +390,7 @@ namespace Voxelmetric.Code.Core
         {
             Assert.IsTrue(action!=null);
             m_genericWorkItems.Add(action);
-            RefreshState(ChunkState.GenericWork);
+            RequestState(ChunkState.GenericWork);
         }
 
         #endregion
@@ -426,7 +410,7 @@ namespace Voxelmetric.Code.Core
         private static void OnGenerateDataDone(Chunk chunk)
         {
             chunk.m_completedStates = chunk.m_completedStates.Set(CurrStateGenerateData);
-            chunk.m_notifyStates = NextStateGenerateData;
+            chunk.m_nextState = NextStateGenerateData;
             chunk.m_taskRunning = false;
         }
 
@@ -438,17 +422,8 @@ namespace Voxelmetric.Code.Core
 
         private bool GenerateData()
         {
-            if (m_completedStates.Check(CurrStateGenerateData))
-            {
-                m_pendingStates = m_pendingStates.Reset(CurrStateGenerateData);
-
-                OnGenerateDataDone(this);
-                return false;
-            }
-            
             m_pendingStates = m_pendingStates.Reset(CurrStateGenerateData);
-            m_refreshStates = m_pendingStates.Reset(CurrStateGenerateData);
-            m_completedStates = m_completedStates.Reset(CurrStateGenerateData);
+            m_completedStates = m_completedStates.Reset(CurrStateGenerateData|CurrStateLoadData);
             m_completedStatesSafe = m_completedStates;
 
             m_taskRunning = true;
@@ -493,7 +468,7 @@ namespace Voxelmetric.Code.Core
         private static void OnLoadDataDone(Chunk chunk)
         {
             chunk.m_completedStates = chunk.m_completedStates.Set(CurrStateLoadData);
-            chunk.m_notifyStates = NextStateLoadData;
+            chunk.m_nextState = NextStateLoadData;
             chunk.m_taskRunning = false;
         }
 
@@ -509,16 +484,6 @@ namespace Voxelmetric.Code.Core
                 return true;
 
             m_pendingStates = m_pendingStates.Reset(CurrStateLoadData);
-
-            // Nothing here for us to do if the Chunk was not changed
-            if (m_completedStates.Check(CurrStateLoadData))
-            {
-                m_refreshStates = m_refreshStates.Reset(CurrStateLoadData);
-                OnLoadDataDone(this);
-                return false;
-            }
-
-            m_refreshStates = m_refreshStates.Reset(CurrStateLoadData);
             m_completedStates = m_completedStates.Reset(CurrStateLoadData);
             m_completedStatesSafe = m_completedStates;
 
@@ -563,15 +528,6 @@ namespace Voxelmetric.Code.Core
                 return true;
 
             m_pendingStates = m_pendingStates.Reset(CurrStateSaveData);
-
-            // Nothing here for us to do if the Chunk was not changed since the last serialization
-            if (m_completedStates.Check(CurrStateSaveData) && !m_refreshStates.Check(CurrStateSaveData))
-            {
-                OnSaveDataDone(this);
-                return false;
-            }
-
-            m_refreshStates = m_refreshStates.Reset(CurrStateSaveData);
             m_completedStates = m_completedStates.Reset(CurrStateSaveData);
             m_completedStatesSafe = m_completedStates;
 
@@ -651,15 +607,6 @@ namespace Voxelmetric.Code.Core
                 return true;
 
             m_pendingStates = m_pendingStates.Reset(CurrStateGenerateVertices);
-
-            // Nothing here for us to do if the chunk was not changed since the last time geometry was built
-            if (m_completedStates.Check(CurrStateGenerateVertices) && !m_refreshStates.Check(CurrStateGenerateVertices))
-            {
-                OnGenerateVerticesDone(this);
-                return false;
-            }
-
-            m_refreshStates = m_refreshStates.Reset(CurrStateGenerateVertices);
             m_completedStates = m_completedStates.Reset(CurrStateGenerateVertices);
             m_completedStatesSafe = m_completedStates;
 
@@ -715,8 +662,7 @@ namespace Voxelmetric.Code.Core
 
                 m_pendingStates = m_pendingStates.Reset(CurrStateRemoveChunk);
             }
-
-            m_refreshStates = m_refreshStates.Reset(CurrStateRemoveChunk);
+            
             m_completedStates = m_completedStates.Set(CurrStateRemoveChunk);
             return true;
         }
