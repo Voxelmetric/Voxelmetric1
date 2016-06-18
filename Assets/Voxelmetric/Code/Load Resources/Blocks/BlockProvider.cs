@@ -11,12 +11,11 @@ namespace Voxelmetric.Code.Load_Resources.Blocks
     {
         // Air type block will always be present
         public static readonly ushort AirType = 0;
-
-        private Block[] m_blockTypes;
+        
         private readonly List<BlockConfig> m_configs;
         private readonly Dictionary<string, ushort> m_names;
 
-        public Block[] BlockTypes { get { return m_blockTypes;} }
+        public Block[] BlockTypes { get; private set; }
 
         public static BlockProvider Create(string blockFolder, World world)
         {
@@ -34,22 +33,13 @@ namespace Voxelmetric.Code.Load_Resources.Blocks
         private void Init(string blockFolder, World world)
         {
             // Add the static air block type
-            AddBlockType(new BlockConfig
-            {
-                name = "air",
-                className = "Block",
-                world = world,
-                solid = false,
-                canBeWalkedOn = false,
-                transparent = true,
-                canBeWalkedThrough = true,
-            });
+            AddBlockType(BlockConfig.CreateAirBlockConfig(world));
             
             // Add all the block definitions defined in the config files
             ProcessConfigs(world, blockFolder);
 
             // Build block type lookup table
-            m_blockTypes = new Block[m_configs.Count];
+            BlockTypes = new Block[m_configs.Count];
             for (int i = 0; i< m_configs.Count; i++)
             {
                 BlockConfig config = m_configs[i];
@@ -57,14 +47,14 @@ namespace Voxelmetric.Code.Load_Resources.Blocks
                 Block block = (Block)Activator.CreateInstance(config.blockClass);
                 block.type = (ushort)i;
                 block.config = config;
-                m_blockTypes[i] = block;
+                BlockTypes[i] = block;
             }
 
             // Once all blocks are set up, call OnInit on them. It is necessary to do it in a separate loop
             // in order to ensure there will be no dependency issues.
-            for (int i = 0; i < m_blockTypes.Length; i++)
+            for (int i = 0; i < BlockTypes.Length; i++)
             {
-                Block block = m_blockTypes[i];
+                Block block = BlockTypes[i];
                 block.OnInit(this);
             }
         }

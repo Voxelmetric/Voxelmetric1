@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections;
+using System.Runtime.CompilerServices;
 using Voxelmetric.Code.Core;
 
 /// <summary>
@@ -13,13 +14,15 @@ using Voxelmetric.Code.Core;
 public class BlockConfig
 {
     //! Block type. Set externally by BlockIndex class when config is loaded
-    public int type=-1;
+    public int type = -1;
     public World world;
 
     #region Parameters read from config
 
     //! Unique identifier of block config
-    public string name;
+    public int typeInConfig { get; protected set; }
+    //! Unique identifier of block config
+    public string name { get; protected set; }
 
     private string m_className;
     public string className
@@ -32,15 +35,29 @@ public class BlockConfig
         }
     }
 
-    public Type blockClass;
+    public Type blockClass { get; protected set; }
 
-    public bool solid;
-    public bool transparent;
-    public bool canBeWalkedOn;
-    public bool canBeWalkedThrough;
+    public bool solid { get; protected set; }
+    public bool transparent { get; protected set; }
+    public bool canBeWalkedOn { get; protected set; }
+    public bool canBeWalkedThrough { get; protected set; }
 
     #endregion
-    
+
+    public static BlockConfig CreateAirBlockConfig(World world)
+    {
+        return new BlockConfig
+        {
+            world = world,
+            name = "air",
+            className = "Block",
+            solid = false,
+            canBeWalkedOn = false,
+            transparent = true,
+            canBeWalkedThrough = true,
+        };
+    }
+
     /// <summary>
     /// Assigns the variables in the config from a hashtable. When overriding this
     /// remember to call the base function first.
@@ -52,6 +69,7 @@ public class BlockConfig
         this.world = world;
         
         name = _GetPropertyFromConfig(config, "name", defaultValue: "block");
+        typeInConfig = _GetPropertyFromConfig(config, "type", defaultValue: -1);
         className = _GetPropertyFromConfig(config, "blockClass", defaultValue: "Block");
 
         solid = _GetPropertyFromConfig(config, "solid", defaultValue: true);
