@@ -102,11 +102,6 @@ namespace Voxelmetric.Code.Core.Clipmap
 
         public bool IsInsideBounds(int x, int y, int z)
         {
-            if (x==1 && y==-1 && z==0)
-            {
-                x = 1;
-            }
-
             int xx = x + m_axes[0].Map.Offset;
             int yy = y + m_axes[1].Map.Offset;
             int zz = z + m_axes[2].Map.Offset;

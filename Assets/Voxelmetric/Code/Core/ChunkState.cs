@@ -11,7 +11,8 @@ namespace Voxelmetric.Code.Core
         LoadData = 0x02, //! Chunk loads its data
         GenericWork = 0x04, //! Some generic work
         BuildVertices = 0x08, //! Chunk is building its vertex data
-        SaveData = 0x10, //! Chunk stores its data
-        Remove = 0x20, //! Chunk is waiting for removal
+        BuildVerticesNow = 0x10,
+        SaveData = 0x20, //! Chunk stores its data
+        Remove = 0x40, //! Chunk is waiting for removal
     }
 }

@@ -16,11 +16,6 @@ namespace Voxelmetric.Code.Common.Extensions
 
         public static bool Check(this ChunkState state, ChunkState flag)
         {
-            return (state & flag) == flag;
-        }
-
-        public static bool CheckAny(this ChunkState state, ChunkState flag)
-        {
             return (state & flag) != 0;
         }
 

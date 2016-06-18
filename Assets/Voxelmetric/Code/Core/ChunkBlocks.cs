@@ -15,7 +15,8 @@ namespace Voxelmetric.Code.Core
     {
         public Chunk chunk { get; private set; }
         private readonly BlockData[] blocks = Helpers.CreateArray1D<BlockData>(Env.ChunkVolume);
-        
+        private Block[] m_blockTypes;
+
         //! Queue of setBlock operations to execute
         private readonly List<SetBlockContext> m_setBlockQueue = new List<SetBlockContext>();
 
@@ -44,6 +45,11 @@ namespace Voxelmetric.Code.Core
             this.chunk = chunk;
         }
 
+        public void Init()
+        {
+            m_blockTypes = chunk.world.blockProvider.BlockTypes; 
+        }
+
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
@@ -66,7 +72,7 @@ namespace Voxelmetric.Code.Core
         {
             if (m_setBlockQueue.Count<=0)
                 return;
-
+            
             chunk.RequestBuildVertices();
 
             int rebuildMask = 0;
@@ -90,8 +96,8 @@ namespace Voxelmetric.Code.Core
 
                 BlockData oldBlockData = blocks[context.Index];
 
-                Block oldBlock = chunk.world.blockProvider.BlockTypes[oldBlockData.Type];
-                Block newBlock = chunk.world.blockProvider.BlockTypes[context.Block.Type];
+                Block oldBlock = m_blockTypes[oldBlockData.Type];
+                Block newBlock = m_blockTypes[context.Block.Type];
                 oldBlock.OnDestroy(chunk, pos, globalPos);
                 newBlock.OnCreate(chunk, pos, globalPos);
 
@@ -170,7 +176,7 @@ namespace Voxelmetric.Code.Core
                 {
                     Chunk listener = (Chunk)chunk.Listeners[j];
                     if (listener != null && ((rebuildMask >> j) & 1) != 0)
-                        listener.RequestBuildVertices();
+                        listener.RequestBuildVerticesNow();
                 }
             }
         }
@@ -194,7 +200,7 @@ namespace Voxelmetric.Code.Core
         public Block GetBlock(BlockPos pos)
         {
             int index = Helpers.GetChunkIndex1DFrom3D(pos.x, pos.y, pos.z);
-            return chunk.world.blockProvider.BlockTypes[blocks[index].Type];
+            return m_blockTypes[blocks[index].Type];
         }
 
         /// <summary>
@@ -204,7 +210,7 @@ namespace Voxelmetric.Code.Core
         /// <returns>The block at the position</returns>
         public Block GetBlock(int index)
         {
-            return chunk.world.blockProvider.BlockTypes[blocks[index].Type];
+            return m_blockTypes[blocks[index].Type];
         }
 
         /// <summary>

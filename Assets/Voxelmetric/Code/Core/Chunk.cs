@@ -100,8 +100,10 @@ namespace Voxelmetric.Code.Core
                 new Vector3(pos.x+size/2, pos.y+size/2, pos.z+size/2),
                 new Vector3(size, size, size)
                 );
-
+            
             Reset();
+
+            blocks.Init();
 
             // Subscribe neighbors
             SubscribeNeighbors(true);
@@ -160,6 +162,11 @@ namespace Voxelmetric.Code.Core
             RequestState(ChunkState.BuildVertices);
         }
 
+        public void RequestBuildVerticesNow()
+        {
+            RequestState(ChunkState.BuildVerticesNow);
+        }
+
         public void RequestSaveData()
         {
             RequestState(ChunkState.SaveData);
@@ -200,9 +207,9 @@ namespace Voxelmetric.Code.Core
             }
 
             // Build chunk mesh if necessary
-            if (m_completedStatesSafe.Check(ChunkState.BuildVertices))
+            if (m_completedStatesSafe.Check(CurrStateGenerateVertices))
             {
-                m_completedStates = m_completedStatesSafe = m_completedStates.Reset(ChunkState.BuildVertices);
+                m_completedStates = m_completedStatesSafe = m_completedStates.Reset(CurrStateGenerateVertices);
                 render.BuildMesh();
             }
 
@@ -258,7 +265,7 @@ namespace Voxelmetric.Code.Core
                 if (PossiblyVisible)
                 {
                     ProcessNotifyState();
-                    if (m_pendingStates.Check(ChunkState.BuildVertices) && GenerateVertices())
+                    if (m_pendingStates.Check(CurrStateGenerateVertices) && GenerateVertices())
                         return;
                 }
             }
@@ -576,7 +583,7 @@ namespace Voxelmetric.Code.Core
             }
         }
 
-        private static readonly ChunkState CurrStateGenerateVertices = ChunkState.BuildVertices;
+        private static readonly ChunkState CurrStateGenerateVertices = ChunkState.BuildVertices | ChunkState.BuildVerticesNow;
 
         private static void OnGenerateVerices(Chunk chunk)
         {
@@ -606,11 +613,13 @@ namespace Voxelmetric.Code.Core
             if (!SynchronizeChunk())
                 return true;
 
+            bool priority = m_pendingStates.Check(ChunkState.BuildVerticesNow);
+
             m_pendingStates = m_pendingStates.Reset(CurrStateGenerateVertices);
             m_completedStates = m_completedStates.Reset(CurrStateGenerateVertices);
             m_completedStatesSafe = m_completedStates;
 
-            if (blocks.NonEmptyBlocks > 0)
+            if (blocks.NonEmptyBlocks>0)
             {
                 var workItem = new SGenerateVerticesWorkItem(this);
 
@@ -623,9 +632,10 @@ namespace Voxelmetric.Code.Core
                             SGenerateVerticesWorkItem item = (SGenerateVerticesWorkItem)arg;
                             OnGenerateVerices(item.Chunk);
                         },
-                        workItem)
+                        workItem,
+                        priority ? Time.time : float.MaxValue)
                     );
-                }
+            }
             else
             {
                 OnGenerateVerticesDone(this);

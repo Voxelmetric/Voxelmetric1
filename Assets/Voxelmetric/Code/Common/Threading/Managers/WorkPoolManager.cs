@@ -22,7 +22,14 @@ namespace Voxelmetric.Code.Common.Threading.Managers
                 ThreadPool pool = Globals.WorkPool;
                 
                 // Sort our work items by threadID
-                WorkItems.Sort((x,y)=>x.ThreadID.CompareTo(y.ThreadID));
+                WorkItems.Sort(
+                    (x, y) =>
+                    {
+                        int ret = x.ThreadID.CompareTo(y.ThreadID);
+                        if (ret==0)
+                            ret = x.Time.CompareTo(y.Time);
+                        return ret;
+                    });
 
                 // Commit items to their respective task thread.
                 // Instead of commiting tasks one by one, we take them all and commit
