@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using UnityEngine.Assertions;
 using Voxelmetric.Code.Data_types;
 
 namespace Voxelmetric.Code.Core
@@ -24,7 +25,7 @@ namespace Voxelmetric.Code.Core
         }
         
         /// <summary> Returns the chunk at the given position </summary>
-        /// <param name="pos">Position of the chunk or of a block within the chunk</param>
+        /// <param name="pos">Position of the chunk in the world coordinates</param>
         /// <returns>The chunk that contains the given block position or null if there is none</returns>
         public Chunk Get(BlockPos pos)
         {
@@ -42,31 +43,39 @@ namespace Voxelmetric.Code.Core
             chunks[pos] = chunk;
         }
 
+        /// <summary>Removes a given chunk from the world</summary>
+        /// <param name="chunk">Chunk to be removed from the world
         public void RemoveChunk(Chunk chunk)
         {
+            Assert.IsNotNull(chunk);
+
             Chunk.RemoveChunk(chunk);
             chunks.Remove(chunk.pos);
         }
 
-        /// <summary>Instantiates a chunk at a given possiion</summary>
-        /// <param name="pos">The world position to create this chunk.</param>
-        /// <returns>A new chunk<returns>
-        public Chunk CreateChunk(BlockPos pos)
+        /// <summary>Instantiates a new chunk at a given position. If the chunk already exists, it returns it</summary>
+        /// <param name="pos">Position to create this chunk on in the world coordinates.</param>
+        /// <param name="chunk">Chunk at a given world position</param>
+        /// <returns>True if a new chunk was created. False otherwise</returns>
+        public bool CreateOrGetChunk(BlockPos pos, out Chunk chunk)
         {
             // Let's keep it withing allowed world bounds
             BlockPos chunkPos = pos.ContainingChunkCoordinates();
             if (chunkPos.y>world.config.maxY || chunkPos.y<world.config.minY)
-                return null;
+            {
+                chunk = null;
+                return false;
+            }
 
             // Don't recreate the chunk if it already exists
-            Chunk chunk = Get(chunkPos);
-            if(chunk!=null)
-                return chunk;
-            
+            chunk = Get(chunkPos);
+            if (chunk!=null)
+                return false;
+
             // Create a new chunk
             chunk = Chunk.CreateChunk(world, chunkPos);
             chunks.Add(chunkPos, chunk);
-            return chunk;
+            return true;
         }
         
     }

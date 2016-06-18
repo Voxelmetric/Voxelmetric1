@@ -293,8 +293,8 @@ GameObject:
   - 92: {fileID: 297876184}
   - 124: {fileID: 297876183}
   - 81: {fileID: 297876182}
-  - 114: {fileID: 297876188}
   - 114: {fileID: 297876187}
+  - 114: {fileID: 297876188}
   m_Layer: 0
   m_Name: Main Camera
   m_TagString: MainCamera
@@ -348,7 +348,7 @@ Camera:
   m_CullingMask:
     serializedVersion: 2
     m_Bits: 4294967295
-  m_RenderingPath: 3
+  m_RenderingPath: 1
   m_TargetTexture: {fileID: 0}
   m_TargetDisplay: 0
   m_TargetEye: 3
@@ -393,12 +393,14 @@ MonoBehaviour:
   m_GameObject: {fileID: 297876181}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c8ee79f457d68c64abf6acf09d8cb5c3, type: 3}
+  m_Script: {fileID: 11500000, guid: a83d29136e0eb1545b29179284e99417, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   world: {fileID: 1856110255}
   ChunkLoadRadius: 6
-  DistanceToDeleteChunks: 8
+  ChunkDeleteRadius: 8
+  FollowCamera: 0
+  UseFrustumCulling: 1
   Diag_DrawWorldBounds: 0
   Diag_DrawLoadRange: 0
 --- !u!1 &312836251
@@ -603,7 +605,7 @@ Canvas:
   m_RenderMode: 0
   m_Camera: {fileID: 0}
   m_PlaneDistance: 100
-  m_PixelPerfect: 0
+  m_PixelPerfect: 1
   m_ReceivesEvents: 1
   m_OverrideSorting: 0
   m_OverridePixelPerfect: 0

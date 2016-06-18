@@ -3,7 +3,7 @@ using Voxelmetric.Code.Rendering;
 
 namespace Voxelmetric.Code.Builders
 {
-    public class UnityMeshBuilder
+    public static class UnityMeshBuilder
     {
         /// <summary>
         ///     Copy the data to a Unity mesh

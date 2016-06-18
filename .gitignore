@@ -67,3 +67,4 @@ $RECYCLE.BIN/
 *.lnk
 .settings/settings.json
 *.suo
+*.DotSettings

@@ -20,12 +20,9 @@ namespace Voxelmetric.Code.Core
 
         public BlockProvider blockProvider;
         public TextureProvider textureProvider;
-        public ChunksLoop chunksLoop;
         public TerrainGen terrainGen;
 
         public Material chunkMaterial;
-        
-        public bool UseFrustumCulling;
 
         void Awake()
         {
@@ -41,8 +38,6 @@ namespace Voxelmetric.Code.Core
 
         void Update()
         {
-            if (chunksLoop != null)
-                chunksLoop.Update();
         }
 
         void OnApplicationQuit()
@@ -62,24 +57,15 @@ namespace Voxelmetric.Code.Core
 
         private void StartWorld()
         {
-            if (chunksLoop != null)
-                return;
-
             Configure();
 
             networking.StartConnections(this);
             terrainGen = new TerrainGen(this, config.layerFolder);
-            chunksLoop = new ChunksLoop(this);
         }
 
         private void StopWorld()
         {
-            if (chunksLoop == null)
-                return;
-
-            chunksLoop.Stop();
             networking.EndConnections();
-            chunksLoop = null;
         }
     }
 }

@@ -2397,8 +2397,8 @@ GameObject:
   - 92: {fileID: 1929481916}
   - 124: {fileID: 1929481915}
   - 81: {fileID: 1929481914}
-  - 114: {fileID: 1929481913}
   - 114: {fileID: 1929481912}
+  - 114: {fileID: 1929481913}
   m_Layer: 0
   m_Name: Main Camera
   m_TagString: MainCamera
@@ -2429,12 +2429,14 @@ MonoBehaviour:
   m_GameObject: {fileID: 1929481911}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c8ee79f457d68c64abf6acf09d8cb5c3, type: 3}
+  m_Script: {fileID: 11500000, guid: a83d29136e0eb1545b29179284e99417, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   world: {fileID: 838321170}
   ChunkLoadRadius: 6
   DistanceToDeleteChunks: 8
+  FollowCamera: 0
+  UseFrustumCulling: 1
   Diag_DrawWorldBounds: 0
   Diag_DrawLoadRange: 0
 --- !u!81 &1929481914

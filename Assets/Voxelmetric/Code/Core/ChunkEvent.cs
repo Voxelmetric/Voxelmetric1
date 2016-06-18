@@ -13,7 +13,7 @@ namespace Voxelmetric.Code.Core
         //! List of chunk listeners
         public ChunkEvent[] Listeners { get; private set; }
         //! Number of registered listeners
-        public int ListenerCount { get; private set; }
+        protected int ListenerCount { get; private set; }
 
         //! List of external listeners
         private readonly Dictionary<ChunkStateExternal, List<IEventListener<ChunkStateExternal>>> m_listenersExternal;
