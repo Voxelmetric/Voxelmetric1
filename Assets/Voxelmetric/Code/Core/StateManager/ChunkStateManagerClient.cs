@@ -1,7 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Text;
 using System.Threading;
+using Assets.Voxelmetric.Code.Core.StateManager;
 using UnityEngine.Assertions;
 using Voxelmetric.Code.Common.Events;
 using Voxelmetric.Code.Common.Extensions;
@@ -12,10 +12,14 @@ using Voxelmetric.Code.Utilities;
 
 namespace Voxelmetric.Code.Core.StateManager
 {
-    public class ChunkStateManagerClient : ChunkEvent, IChunkStateManager
+    /// <summary>
+    /// Handles state changes for chunks from a client's perspective.
+    /// This means there chunk geometry rendering and chunk neighbors
+    /// need to be taken into account.
+    /// </summary>
+    /// <param name="pos">Global position of the block data</param>
+    public class ChunkStateManagerClient : ChunkStateManager
     {
-        public Chunk chunk { get; private set; }
-
         //! Says whether or not the chunk is visible
         public bool Visible
         {
@@ -24,63 +28,34 @@ namespace Voxelmetric.Code.Core.StateManager
         }
         //! Says whether or not building of geometry can be triggered
         public bool PossiblyVisible { get; set; }
-
-        //! Specifies whether there's a task running on this Chunk
-        private volatile bool m_taskRunning;
-
-        //! Next state after currently finished state
-        private ChunkState m_nextState;
-        //! States waiting to be processed
-        private ChunkState m_pendingStates;
-        //! Tasks already executed
-        private ChunkState m_completedStates;
-        //! Just like m_completedStates, but it is synchronized on the main thread once a check for m_taskRunning is passed
-        private ChunkState m_completedStatesSafe;
-        //! If true, removal of chunk has been requested and no further requests are going to be accepted
-        private bool m_removalRequested;
-
+        
         //! State to notify external listeners about
         private ChunkStateExternal m_stateExternal;
 
-        //! A list of generic tasks a Chunk has to perform
-        private readonly List<Action> m_genericWorkItems = new List<Action>();
-        //! Number of generic tasks waiting to be finished
-        private int m_genericWorkItemsLeftToProcess;
+        
 
-        public ChunkStateManagerClient(Chunk chunk)
+        public ChunkStateManagerClient(Chunk chunk) : base(chunk)
         {
-            this.chunk = chunk;
         }
 
-        public void Init()
+        public override void Init()
         {
+            base.Init();
+
             // Subscribe neighbors
             SubscribeNeighbors(true);
-            // Request this chunk to be generated
-            OnNotified(this, ChunkState.Generate);
         }
 
-        public void Reset()
+        public override void Reset()
         {
+            base.Reset();
+
             SubscribeNeighbors(false);
 
-            m_nextState = m_nextState.Reset();
-            m_pendingStates = m_pendingStates.Reset();
-            m_completedStates = m_completedStates.Reset();
-            m_completedStatesSafe = m_completedStates;
-            m_removalRequested = false;
-
             m_stateExternal = ChunkStateExternal.None;
-
-            m_genericWorkItems.Clear();
-            m_genericWorkItemsLeftToProcess = 0;
             
-            m_taskRunning = false;
-
             Visible = false;
             PossiblyVisible = false;
-
-            Clear();
         }
 
         public override string ToString()
@@ -94,50 +69,13 @@ namespace Voxelmetric.Code.Core.StateManager
             sb.Append(m_completedStates);
             return sb.ToString();
         }
-        
-        public void RequestState(ChunkState state)
-        {
-            if (state==ChunkState.Remove)
-            {
-                if (m_removalRequested)
-                    return;
-                m_removalRequested = true;
 
-                m_pendingStates = m_pendingStates.Set(ChunkState.SaveData);
-                OnNotified(this, ChunkState.Remove);
-            }
-
-            m_pendingStates = m_pendingStates.Set(state);
-        }
-
-        public bool IsStateCompleted(ChunkState state)
-        {
-            return m_completedStatesSafe.Check(state);
-        }
-
-        public void SetMeshBuilt()
+        public override void SetMeshBuilt()
         {
             m_completedStates = m_completedStatesSafe = m_completedStates.Reset(CurrStateGenerateVertices);
         }
 
-        public bool CanUpdate()
-        {
-            // Do not do any processing as long as there is any task still running
-            // Note that this check is not thread-safe because this value can be changed from a different thread. However,
-            // we do not care. The worst thing that can happen is that we read a value which is one frame old. So be it.
-            // Thanks to being this relaxed approach we do not need any synchronization primitives at all.
-            if (m_taskRunning)
-                return false;
-
-            // Synchronize the value with what we have on a different thread. It would be no big deal not having this at
-            // all. However, it is technically more correct.
-            m_completedStatesSafe = m_completedStates;
-
-            // Once this Chunk is marked as finished we ignore any further requests and won't perform any updates
-            return !m_completedStatesSafe.Check(ChunkState.Remove);
-        }
-
-        public void Update()
+        public override void Update()
         {
             if (m_stateExternal != ChunkStateExternal.None)
             {
@@ -199,11 +137,6 @@ namespace Voxelmetric.Code.Core.StateManager
 
             OnNotified(this, m_nextState);
             m_nextState = ChunkState.Idle;
-        }
-
-        public bool IsSavePossible
-        {
-            get { return !m_removalRequested && m_completedStatesSafe.Check(ChunkState.Generate | ChunkState.LoadData); }
         }
 
         public override void OnNotified(IEventSource<ChunkState> source, ChunkState state)
