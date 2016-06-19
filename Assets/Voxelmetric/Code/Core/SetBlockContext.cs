@@ -50,7 +50,7 @@ namespace Voxelmetric.Code.Core
 
         public bool Equals(SetBlockContext other)
         {
-            return AreEqual(ref this, ref other);
+            return GetHashCode()==other.GetHashCode() && AreEqual(ref this, ref other);
         }
 
         public override int GetHashCode()

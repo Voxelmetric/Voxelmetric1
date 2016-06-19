@@ -24,7 +24,7 @@ namespace Voxelmetric.Code.Core
         private byte[] receiveBuffer;
         private int receiveIndex;
 
-        public readonly List<Vector3Int> modifiedBlocks = new List<Vector3Int>();
+        public readonly List<BlockPos> modifiedBlocks = new List<BlockPos>();
         public bool contentsModified;
 
         private static byte[] emptyBytes;
@@ -106,7 +106,7 @@ namespace Voxelmetric.Code.Core
                 blocks[context.Index] = context.Block;
 
                 if (context.SetBlockModified)
-                    BlockModified(pos, globalPos, context.Block);
+                    BlockModified(new BlockPos(x,y,z), globalPos, context.Block);
                 
                 if (
                     // Only check neighbors if it is still needed
@@ -285,7 +285,7 @@ namespace Voxelmetric.Code.Core
             m_setBlockQueue.Add(new SetBlockContext(index, blockData, setBlockModified));
         }
 
-        public void BlockModified(Vector3Int localPos, Vector3Int globalPos, BlockData blockData)
+        public void BlockModified(BlockPos blockPos, Vector3Int globalPos, BlockData blockData)
         {
             //If this is the server log the changed block so that it can be saved
             if (chunk.world.networking.isServer)
@@ -293,9 +293,9 @@ namespace Voxelmetric.Code.Core
                 if (chunk.world.networking.allowConnections)
                     chunk.world.networking.server.BroadcastChange(globalPos, blockData, -1);
 
-                if (!modifiedBlocks.Contains(localPos))
+                if (!modifiedBlocks.Contains(blockPos))
                 {
-                    modifiedBlocks.Add(localPos);
+                    modifiedBlocks.Add(blockPos);
                     chunk.blocks.contentsModified = true;
                 }
             }
