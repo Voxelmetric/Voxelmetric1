@@ -63,10 +63,14 @@ namespace Voxelmetric.Code.Core.StateManager
                 return;
             }
 
+            // If there is no pending task, there is nothing for us to do
+            ProcessNotifyState();
+            if (m_pendingStates == 0)
+                return;
+
             // Go from the least important bit to most important one. If a given bit it set
             // we execute the task tied with it
             {
-                ProcessNotifyState();
                 if (m_pendingStates.Check(ChunkState.Generate) && GenerateData())
                     return;
 
