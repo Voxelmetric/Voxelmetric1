@@ -3,6 +3,7 @@ using UnityEngine;
 using UnityEngine.Assertions;
 using Voxelmetric.Code.Common.Events;
 using Voxelmetric.Code.Core;
+using Voxelmetric.Code.Core.StateManager;
 
 namespace Voxelmetric.Code.Serialization
 {
@@ -27,7 +28,7 @@ namespace Voxelmetric.Code.Serialization
             for (int i = 0; i<chunksToSave.Count; i++)
             {
                 Chunk chunk = chunksToSave[i];
-                chunk.Subscribe(this, ChunkStateExternal.Saved, true);
+                chunk.stateManager.Subscribe(this, ChunkStateExternal.Saved, true);
             }
         }
 
@@ -45,15 +46,15 @@ namespace Voxelmetric.Code.Serialization
         void IEventListener<ChunkStateExternal>.OnNotified(IEventSource<ChunkStateExternal> source, ChunkStateExternal evt)
         {
             // Unsubscribe from any further events
-            Chunk chunk = (Chunk)source;
-            chunk.Subscribe(this, evt, false);
+            ChunkStateManager stateManager = (ChunkStateManager)source;
+            stateManager.Subscribe(this, evt, false);
 
             Assert.IsTrue(evt==ChunkStateExternal.Saved);
             if (evt==ChunkStateExternal.Saved)
             {
-                if (!chunksToSave.Contains(chunk))
+                if (!chunksToSave.Contains(stateManager.chunk))
                     return;
-                SaveCompleteForChunk(chunk);
+                SaveCompleteForChunk(stateManager.chunk);
             }
         }
     }

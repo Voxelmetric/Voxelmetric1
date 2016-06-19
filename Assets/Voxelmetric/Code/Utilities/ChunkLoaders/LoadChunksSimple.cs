@@ -128,7 +128,7 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
                 chunk.UpdateChunk();
 
                 // Automatically collect chunks which are ready to be removed from the world
-                if (chunk.IsFinished)
+                if (chunk.stateManager.IsFinished)
                 {
                     // Remove the chunk from our provider and unregister it from chunk storage
                     world.chunks.RemoveChunk(chunk);
@@ -152,14 +152,14 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
             int zd = Mathf.Abs((m_viewerPos.z-chunk.pos.z)>>Env.ChunkPower);
             if (xd*xd+zd*zd>=ChunkDeleteRadius*ChunkDeleteRadius)
             {
-                chunk.RequestRemoval();
+                chunk.stateManager.RequestState(ChunkState.Remove);
                 return;
             }
 
             // Update visibility information
             bool isInsideFrustum = IsChunkInViewFrustum(chunk) || m_firstRun;
-            chunk.Visible = isInsideFrustum;
-            chunk.PossiblyVisible = isInsideFrustum;
+            chunk.stateManager.Visible = isInsideFrustum;
+            chunk.stateManager.PossiblyVisible = isInsideFrustum;
         }
 
         private void UpdateRanges()
@@ -235,7 +235,7 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
                         }
 
                         // Show generated chunks
-                        if (chunk.IsGenerated)
+                        if (chunk.stateManager.IsGenerated)
                         {
                             Gizmos.color = Color.magenta;
                             Gizmos.DrawWireCube(

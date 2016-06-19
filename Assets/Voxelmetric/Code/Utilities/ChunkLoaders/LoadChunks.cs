@@ -171,7 +171,7 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
                 chunk.UpdateChunk();
 
                 // Automatically collect chunks which are ready to be removed from the world
-                if (chunk.IsFinished)
+                if (chunk.stateManager.IsFinished)
                 {
                     // Remove the chunk from our provider and unregister it from chunk storage
                     world.chunks.RemoveChunk(chunk);
@@ -210,21 +210,21 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
                 // Chunk is too far away. Remove it
                 if (!m_clipmap.IsInsideBounds(localChunkPos.x, localChunkPos.y, localChunkPos.z))
                 {
-                    chunk.RequestRemoval();
+                    chunk.stateManager.RequestState(ChunkState.Remove);
                 }
                 // Chunk is within visibilty range. Full update with geometry generation is possible
                 else if (item.IsWithinVisibleRange)
                 {
                     //chunk.LOD = item.LOD;
-                    chunk.PossiblyVisible = true;
-                    chunk.Visible = true;
+                    chunk.stateManager.PossiblyVisible = true;
+                    chunk.stateManager.Visible = true;
                 }
                 // Chunk is within cached range. Full update except for geometry generation
                 else // if (item.IsWithinCachedRange)
                 {
                     //chunk.LOD = item.LOD;
-                    chunk.PossiblyVisible = true;
-                    chunk.Visible = false;
+                    chunk.stateManager.PossiblyVisible = true;
+                    chunk.stateManager.Visible = false;
                 }
             }
             else
@@ -232,20 +232,20 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
                 // Chunk is not visible and too far away. Remove it
                 if (!m_clipmap.IsInsideBounds(localChunkPos.x, localChunkPos.y, localChunkPos.z))
                 {
-                    chunk.RequestRemoval();
+                    chunk.stateManager.RequestState(ChunkState.Remove);
                 }
                 // Chunk is not in the view frustum but still within cached range
                 else if (item.IsWithinCachedRange)
                 {
                     //chunk.LOD = item.LOD;
-                    chunk.PossiblyVisible = false;
-                    chunk.Visible = false;
+                    chunk.stateManager.PossiblyVisible = false;
+                    chunk.stateManager.Visible = false;
                 }
                 else
                 // Weird state
                 {
                     Assert.IsFalse(true);
-                    chunk.RequestRemoval();
+                    chunk.stateManager.RequestState(ChunkState.Remove);
                 }
             }
         }
@@ -307,7 +307,7 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
                         }
 
                         // Show generated chunks
-                        if (chunk.IsGenerated)
+                        if (chunk.stateManager.IsGenerated)
                         {
                             Gizmos.color = Color.magenta;
                             Gizmos.DrawWireCube(
