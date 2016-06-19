@@ -633,7 +633,7 @@ namespace Voxelmetric.Code.Core
                             OnGenerateVerices(item.Chunk);
                         },
                         workItem,
-                        priority ? Time.time : float.MaxValue)
+                        priority ? Globals.Watch.ElapsedTicks : long.MaxValue)
                     );
             }
             else

@@ -1,4 +1,5 @@
-﻿using Voxelmetric.Code.Builders;
+﻿using System.Diagnostics;
+using Voxelmetric.Code.Builders;
 using Voxelmetric.Code.Common.MemoryPooling;
 using Voxelmetric.Code.Common.Threading;
 
@@ -47,6 +48,17 @@ namespace Voxelmetric.Code
         {
             if (MemPools == null)
                 MemPools = new GlobalPools();
+        }
+
+        // Global stop watch
+        public static Stopwatch Watch { get; private set; }
+        public static void InitWatch()
+        {
+            if (Watch==null)
+            {
+                Watch = new Stopwatch();
+                Watch.Start();
+            }
         }
     }
 }

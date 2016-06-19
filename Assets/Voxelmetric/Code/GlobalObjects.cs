@@ -10,6 +10,7 @@ namespace Voxelmetric.Code
             Globals.InitWorkPool();
             Globals.InitIOPool();
             Globals.InitMemPools();
+            Globals.InitWatch();
         }
 
         void Update ()

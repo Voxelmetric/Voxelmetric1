@@ -7,9 +7,9 @@ namespace Voxelmetric.Code.Common.Threading
         public readonly int ThreadID;
         public readonly Action<object> Action;
         public readonly object Arg;
-        public readonly float Time;
+        public readonly long Time;
 
-        public ThreadPoolItem(ThreadPool pool, Action<object> action, object arg, float time = float.MaxValue)
+        public ThreadPoolItem(ThreadPool pool, Action<object> action, object arg, long time = long.MaxValue)
         {
             ThreadID = pool.GenerateThreadID();
             Action = action;
@@ -17,7 +17,7 @@ namespace Voxelmetric.Code.Common.Threading
             Time = time;
         }
 
-        public ThreadPoolItem(int threadID, Action<object> action, object arg, float time = float.MaxValue)
+        public ThreadPoolItem(int threadID, Action<object> action, object arg, long time = long.MaxValue)
         {
             ThreadID = threadID;
             Action = action;
