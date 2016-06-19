@@ -4,6 +4,9 @@ using Voxelmetric.Code.Utilities;
 
 public class StructureTree: GeneratedStructure
 {
+    private BlockData leaves;
+    private BlockData log;
+
     public StructureTree()
     {
         negX = 3;
@@ -14,11 +17,14 @@ public class StructureTree: GeneratedStructure
         negY = 0;
     }
 
+    public override void Init(World world)
+    {
+        leaves = new BlockData(world.blockProvider.GetBlock("leaves").type);
+        log = new BlockData(world.blockProvider.GetBlock("log").type);
+    }
+
     public override void Build(World world, Chunk chunk, BlockPos pos, TerrainLayer layer)
     {
-        BlockData leaves = new BlockData(world.blockProvider.GetBlock("leaves").type);
-        BlockData log = new BlockData(world.blockProvider.GetBlock("log").type);
-
         int leavesRange = layer.GetNoise(pos.x, 0, pos.z, 1f, 2, 1) +1;
         for (int x = -leavesRange; x <= leavesRange; x++)
         {

@@ -60,7 +60,7 @@ namespace Voxelmetric.Code.Core
             Configure();
 
             networking.StartConnections(this);
-            terrainGen = new TerrainGen(this, config.layerFolder);
+            terrainGen = TerrainGen.Create(this, config.layerFolder);
         }
 
         private void StopWorld()

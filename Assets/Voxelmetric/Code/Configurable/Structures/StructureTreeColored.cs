@@ -4,7 +4,6 @@ using Voxelmetric.Code.Utilities;
 
 public class StructureTreeColored : GeneratedStructure
 {
-
     public StructureTreeColored()
     {
         negX = 3;

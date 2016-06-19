@@ -22,6 +22,11 @@ public class StructureLayer : TerrainLayer
         structure = (GeneratedStructure)Activator.CreateInstance(structureType);
     }
 
+    public override void Init(LayerConfig config)
+    {
+        structure.Init(world);
+    }
+
     public override void GenerateStructures(Chunk chunk)
     {
         int minX, maxX, minZ, maxZ;
