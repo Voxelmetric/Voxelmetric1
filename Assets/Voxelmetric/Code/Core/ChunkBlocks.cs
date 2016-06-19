@@ -195,6 +195,16 @@ namespace Voxelmetric.Code.Core
         }
 
         /// <summary>
+        /// Returns block data from a position within the chunk
+        /// </summary>
+        /// <param name="index">Index to internal block buffer</param>
+        /// <returns>The block at the position</returns>
+        public BlockData Get(int index)
+        {
+            return blocks[index];
+        }
+
+        /// <summary>
         /// Returns a block from a position within the chunk
         /// </summary>
         /// <param name="pos">A local block position</param>
@@ -230,6 +240,26 @@ namespace Voxelmetric.Code.Core
 
             // Update non-empty block count
             if (blockData.Type==BlockProvider.AirType)
+                --NonEmptyBlocks;
+            else
+                ++NonEmptyBlocks;
+
+            blocks[index] = blockData;
+        }
+
+        /// <summary>
+        /// Sets the block at the given position
+        /// </summary>
+        /// <param name="index">Index to internal block buffer</param>
+        public void Set(int index, BlockData blockData)
+        {
+            // Nothing for us to do if block did not change
+            BlockData oldBlockData = blocks[index];
+            if (oldBlockData.Type == blockData.Type)
+                return;
+
+            // Update non-empty block count
+            if (blockData.Type == BlockProvider.AirType)
                 --NonEmptyBlocks;
             else
                 ++NonEmptyBlocks;
