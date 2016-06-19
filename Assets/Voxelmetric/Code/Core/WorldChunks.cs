@@ -57,7 +57,7 @@ namespace Voxelmetric.Code.Core
         /// <param name="pos">Position to create this chunk on in the world coordinates.</param>
         /// <param name="chunk">Chunk at a given world position</param>
         /// <returns>True if a new chunk was created. False otherwise</returns>
-        public bool CreateOrGetChunk(BlockPos pos, out Chunk chunk)
+        public bool CreateOrGetChunk(BlockPos pos, out Chunk chunk, bool isDedicated)
         {
             // Let's keep it withing allowed world bounds
             BlockPos chunkPos = pos.ContainingChunkCoordinates();
@@ -73,7 +73,7 @@ namespace Voxelmetric.Code.Core
                 return false;
 
             // Create a new chunk
-            chunk = Chunk.CreateChunk(world, chunkPos);
+            chunk = Chunk.CreateChunk(world, chunkPos, isDedicated);
             chunks.Add(chunkPos, chunk);
             return true;
         }

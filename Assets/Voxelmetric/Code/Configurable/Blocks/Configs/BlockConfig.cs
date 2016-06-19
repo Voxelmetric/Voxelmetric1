@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections;
-using System.Runtime.CompilerServices;
 using Voxelmetric.Code.Core;
 
 /// <summary>

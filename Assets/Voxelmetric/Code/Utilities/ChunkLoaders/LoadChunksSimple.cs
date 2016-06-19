@@ -104,7 +104,7 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
                         );
 
                     Chunk chunk;
-                    if (!world.chunks.CreateOrGetChunk(newChunkPos, out chunk))
+                    if (!world.chunks.CreateOrGetChunk(newChunkPos, out chunk, false))
                         continue;
 
                     m_updateRequests.Add(chunk);

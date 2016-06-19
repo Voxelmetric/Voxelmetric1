@@ -306,25 +306,17 @@ namespace Voxelmetric.Code.Core.StateManager
 
             m_taskRunning = true;
 
-            if (chunk.world.networking.isServer)
-            {
-                // Let server generate chunk data
-                WorkPoolManager.Add(
-                    new ThreadPoolItem(
-                        chunk.ThreadID,
-                        arg =>
-                        {
-                            ChunkStateManagerServer stateManager = (ChunkStateManagerServer)arg;
-                            OnGenerateData(stateManager);
-                        },
-                        this)
-                    );
-            }
-            else
-            {
-                // Client only asks for data
-                chunk.world.networking.client.RequestChunk(chunk.pos);
-            }
+            // Let server generate chunk data
+            WorkPoolManager.Add(
+                new ThreadPoolItem(
+                    chunk.ThreadID,
+                    arg =>
+                    {
+                        ChunkStateManagerServer stateManager = (ChunkStateManagerServer)arg;
+                        OnGenerateData(stateManager);
+                    },
+                    this)
+                );
 
             return true;
         }

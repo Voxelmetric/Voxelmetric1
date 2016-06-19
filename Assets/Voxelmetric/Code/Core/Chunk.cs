@@ -1,14 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Threading;
+﻿using System.Text;
 using UnityEngine;
-using UnityEngine.Assertions;
-using Voxelmetric.Code.Common.Events;
-using Voxelmetric.Code.Common.Extensions;
 using Voxelmetric.Code.Common.MemoryPooling;
-using Voxelmetric.Code.Common.Threading;
-using Voxelmetric.Code.Common.Threading.Managers;
 using Voxelmetric.Code.Core.StateManager;
 using Voxelmetric.Code.Data_types;
 using Voxelmetric.Code.Utilities;
@@ -35,10 +27,15 @@ namespace Voxelmetric.Code.Core
         //! need to be release where they were allocated. Thanks to this, associated containers could be made lock-free
         public int ThreadID { get; private set; }
 
-        public static Chunk CreateChunk(World world, BlockPos pos)
+        public static Chunk CreateChunk(World world, BlockPos pos, bool isDedicated)
         {
             Chunk chunk = Globals.MemPools.ChunkPool.Pop();
-            chunk.Init(world, pos);
+
+            if(isDedicated)
+                chunk.Init(world, pos, new ChunkStateManagerServer(chunk));
+            else
+                chunk.Init(world, pos, new ChunkStateManagerClient(chunk));
+
             return chunk;
         }
 
@@ -62,10 +59,11 @@ namespace Voxelmetric.Code.Core
             stateManager = new ChunkStateManagerClient(this);
         }
 
-        private void Init(World world, BlockPos pos)
+        private void Init(World world, BlockPos pos, IChunkStateManager stateManager)
         {
             this.world = world;
             this.pos = pos;
+            this.stateManager = stateManager;
 
             const int size = Env.ChunkSize;
             WorldBounds = new Bounds(

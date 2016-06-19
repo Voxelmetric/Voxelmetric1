@@ -6,13 +6,10 @@ using Voxelmetric.Code.Utilities;
 public class BlockPosTest {
     [Test]
     public void ContainingChunkCoordinatesTest() {
-        AssertContainingChunkCoordinates(new BlockPos(0, 0, 0));
-        AssertContainingChunkCoordinates(new BlockPos(-1, -1, -1));
-        AssertContainingChunkCoordinates(new BlockPos(-15, -11, -4));
-        AssertContainingChunkCoordinates(new BlockPos(-35, -21, -127));
-        AssertContainingChunkCoordinates(new BlockPos(15, 11, 4));
-        AssertContainingChunkCoordinates(new BlockPos(16, 11, 4));
-        AssertContainingChunkCoordinates(new BlockPos(35, 21, 127));
+        for(int x=-Env.ChunkSize; x<=2*Env.ChunkSize; x++)
+            for (int y = -Env.ChunkSize; y <= 2 * Env.ChunkSize; y++)
+                for (int z = -Env.ChunkSize; z <= 2 * Env.ChunkSize; z++)
+                    AssertContainingChunkCoordinates(new BlockPos(x, y, z));
     }
 
     private static void AssertContainingChunkCoordinates(BlockPos pos) {

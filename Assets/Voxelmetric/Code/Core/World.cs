@@ -32,7 +32,6 @@ namespace Voxelmetric.Code.Core
 
         void Start()
         {
-            Profiler.maxNumberOfSamplesPerFrame = Mathf.Max(Profiler.maxNumberOfSamplesPerFrame, 1000000);
             StartWorld();
         }
 
