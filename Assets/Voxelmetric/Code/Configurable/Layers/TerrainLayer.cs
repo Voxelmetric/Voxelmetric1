@@ -57,10 +57,11 @@ public class TerrainLayer : IComparable, IEquatable<TerrainLayer>
 
     public int GetNoise(int x, int y, int z, float scale, int max, float power)
     {
-        float noise = (noiseGen.Generate(x / scale, y / scale, z / scale) + 1f);
-        noise *= (max / 2f);
+        float scaleInv = 1.0f/scale;
+        float noise = (noiseGen.Generate(x*scaleInv, y*scaleInv, z*scaleInv)+1f);
+        noise *= (max>>1);
 
-        if (power!=1)
+        if (Math.Abs(power-1)>float.Epsilon)
             noise = Mathf.Pow(noise, power);
 
         return Mathf.FloorToInt(noise);
