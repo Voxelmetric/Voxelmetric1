@@ -41,6 +41,7 @@ public class TerrainGen
 
         List<LayerConfig> layersConfigs = new List<LayerConfig>(configLoader.AllConfigs());
         List<TerrainLayer> layers = new List<TerrainLayer>(layersConfigs.Count);
+        HashSet<int> indexes = new HashSet<int>();
 
         for (int i = 0; i<layersConfigs.Count;)
         {
@@ -59,8 +60,17 @@ public class TerrainGen
             TerrainLayer layer = (TerrainLayer)Activator.CreateInstance(type);
             layer.BaseSetUp(config, world, this);
 
+            // Do not allow any two layers share the same index
+            if (indexes.Contains(layer.index))
+            {
+                Debug.LogError("Could not create layer " + config.layerType + " : " + config.name + ". Index " + layer.index + " already defined");
+                layersConfigs.RemoveAt(i);
+                continue;
+            }
+
             // Add layer to layers list
             layers.Add(layer);
+            indexes.Add(layer.index);
 
             ++i;
         }
