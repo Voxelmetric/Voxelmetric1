@@ -1,14 +1,16 @@
-﻿using UnityEngine.Assertions;
-
-namespace Voxelmetric.Code.Data_types
+﻿namespace Voxelmetric.Code.Data_types
 {
-    public enum Direction {
-        north,
-        east,
-        south,
-        west,
-        up,
-        down
+    /// <summary>
+    /// Enum helping us to determine a direction
+    /// </summary>
+    public enum Direction
+    {
+        north = 0, // front face
+        south = 1, // back face
+        east = 2,
+        west = 3,
+        up = 4,
+        down = 5
     }
 
     public static class DirectionUtils
@@ -25,37 +27,14 @@ namespace Voxelmetric.Code.Data_types
 
         public static Direction Opposite(Direction dir)
         {
-            switch (dir)
-            {
-                case Direction.north:
-                    return Direction.south;
-                case Direction.east:
-                    return Direction.west;
-                case Direction.south:
-                    return Direction.north;
-                case Direction.west:
-                    return Direction.east;
-                case Direction.up:
-                    return Direction.down;
-                case Direction.down:
-                    return Direction.up;
-                default:
-                    Assert.IsTrue(false);
-                    return Direction.up;
-            }
+            // Toogle the first bit to get to opposite direction
+            return (Direction)(Get(dir) ^ 1);
         }
 
         public static bool Backface(Direction dir)
         {
-            switch (dir)
-            {
-                case Direction.south:
-                case Direction.west:
-                case Direction.down:
-                    return false;
-            }
-
-            return true;
+            // The first bit signalizes backface
+            return (Get(dir) & 1)==1;
         }
-}
+    }
 }
