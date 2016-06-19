@@ -1,5 +1,6 @@
 ﻿using NUnit.Framework;
 using UnityEngine;
+using Voxelmetric.Code.Core;
 using Voxelmetric.Code.Data_types;
 using Voxelmetric.Code.Utilities;
 
@@ -13,7 +14,7 @@ public class BlockPosTest {
     }
 
     private static void AssertContainingChunkCoordinates(Vector3Int pos) {
-        Assert.AreEqual(ExpContainingChunkCoordinates(pos), pos.ContainingChunkCoordinates(), pos.ToString());
+        Assert.AreEqual(ExpContainingChunkCoordinates(pos), Chunk.ContainingCoordinates(pos), pos.ToString());
     }
 
     //returns the position of the chunk containing this block

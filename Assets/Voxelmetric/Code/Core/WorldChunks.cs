@@ -29,7 +29,7 @@ namespace Voxelmetric.Code.Core
         /// <returns>The chunk that contains the given block position or null if there is none</returns>
         public Chunk Get(Vector3Int pos)
         {
-            pos = pos.ContainingChunkCoordinates();
+            pos = Chunk.ContainingCoordinates(pos);
 
             Chunk containerChunk;
             chunks.TryGetValue(pos, out containerChunk);
@@ -39,7 +39,7 @@ namespace Voxelmetric.Code.Core
 
         public void Set(Vector3Int pos, Chunk chunk)
         {
-            pos = pos.ContainingChunkCoordinates();
+            pos = Chunk.ContainingCoordinates(pos);
             chunks[pos] = chunk;
         }
 
@@ -60,7 +60,7 @@ namespace Voxelmetric.Code.Core
         public bool CreateOrGetChunk(Vector3Int pos, out Chunk chunk, bool isDedicated)
         {
             // Let's keep it withing allowed world bounds
-            Vector3Int chunkPos = pos.ContainingChunkCoordinates();
+            Vector3Int chunkPos = Chunk.ContainingCoordinates(pos);
             if (chunkPos.y>world.config.maxY || chunkPos.y<world.config.minY)
             {
                 chunk = null;

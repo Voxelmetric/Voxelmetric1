@@ -39,6 +39,19 @@ namespace Voxelmetric.Code.Core
             return chunk;
         }
 
+        /// <summary>
+        /// Returns the position of the chunk containing this block
+        /// </summary>
+        /// <returns>The position of the chunk containing this block</returns>
+        public static Vector3Int ContainingCoordinates(Vector3Int pos)
+        {
+            const int chunkPower = Env.ChunkPower;
+            return new Vector3Int(
+                (pos.x >> chunkPower) << chunkPower,
+                (pos.y >> chunkPower) << chunkPower,
+                (pos.z >> chunkPower) << chunkPower);
+        }
+
         public static void RemoveChunk(Chunk chunk)
         {
             chunk.Reset();

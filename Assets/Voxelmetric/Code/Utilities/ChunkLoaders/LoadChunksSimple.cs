@@ -187,7 +187,7 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
 
         private void UpdateViewerPosition()
         {
-            Vector3Int pos = ((Vector3Int)transform.position).ContainingChunkCoordinates();
+            Vector3Int pos = Chunk.ContainingCoordinates(transform.position);
 
             // Update the viewer position
             m_viewerPosPrev = m_viewerPos;

@@ -1,4 +1,5 @@
 ﻿using System;
+using Assets.Voxelmetric.Code.Common.Math;
 using UnityEngine;
 using Voxelmetric.Code.Core;
 using Voxelmetric.Code.Data_types;
@@ -41,14 +42,14 @@ public class StructureLayer : TerrainLayer
             for (int z = minZ; z < maxZ; z++)
             {
                 Vector3Int pos = new Vector3Int(x, 0, z);
-                float chanceAtPos = pos.Random(44, true);
+                float chanceAtPos = Randomization.Random(pos.GetHashCode(), 44, true);
 
                 if (chance > chanceAtPos)
                 {
-                    if (pos.Add(1, 0, 0).Random(44, true) > chanceAtPos
-                        && pos.Add(-1, 0, 0).Random(44, true) > chanceAtPos
-                        && pos.Add(0, 0, 1).Random(44, true) > chanceAtPos
-                        && pos.Add(0, 0, -1).Random(44, true) > chanceAtPos)
+                    if (Randomization.Random(pos.Add(1, 0, 0).GetHashCode(),44, true) > chanceAtPos &&
+                        Randomization.Random(pos.Add(-1, 0, 0).GetHashCode(),44, true) > chanceAtPos &&
+                        Randomization.Random(pos.Add(0, 0, 1).GetHashCode(),44, true) > chanceAtPos &&
+                        Randomization.Random(pos.Add(0, 0, -1).GetHashCode(),44, true) > chanceAtPos)
                     {
                         int height = terrainGen.GenerateTerrainForBlockColumn(chunk, x, z, true);
                         structure.Build(world, chunk, new Vector3Int(x, height, z), this);

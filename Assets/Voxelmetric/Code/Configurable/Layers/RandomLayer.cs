@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using Assets.Voxelmetric.Code.Common.Math;
+using UnityEngine;
 using Voxelmetric.Code.Core;
 using Voxelmetric.Code.Data_types;
 using Voxelmetric.Code.Load_Resources;
@@ -24,7 +25,8 @@ public class RandomLayer: TerrainLayer
 
     public override int GenerateLayer(Chunk chunk, int x, int z, int heightSoFar, float strength, bool justGetHeight = false)
     {
-        float posChance = new Vector3Int(x, heightSoFar + 1, z).Random(200);
+        var lpos = new Vector3Int(x, heightSoFar+1, z);
+        float posChance = Randomization.Random(lpos.GetHashCode(), 200);
 
         if (chance > posChance)
         {
@@ -33,9 +35,7 @@ public class RandomLayer: TerrainLayer
 
             return heightSoFar + 1;
         }
-        else
-        {
-            return heightSoFar;
-        }
+
+        return heightSoFar;
     }
 }
