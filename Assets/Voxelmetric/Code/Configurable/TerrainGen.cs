@@ -8,7 +8,6 @@ using Voxelmetric.Code.Utilities;
 public class TerrainGen
 {
     private World world;
-    private List<LayerConfig> m_configs;
 
     public TerrainLayer[] Layers { get; private set; }
     public Noise noise { get; private set; }
@@ -20,12 +19,11 @@ public class TerrainGen
         return provider;
     }
 
-    private TerrainGen()
+    protected TerrainGen()
     {
-        m_configs = new List<LayerConfig>();
     }
 
-    public void Init(World world, string layerFolder)
+    protected void Init(World world, string layerFolder)
     {
         this.world = world;
         noise = new Noise(world.name);

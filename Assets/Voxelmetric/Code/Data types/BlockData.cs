@@ -28,7 +28,9 @@ namespace Voxelmetric.Code.Data_types
         {
             return BitConverter.GetBytes(m_data);
         }
-        
+
+        #region Object comparison
+
         public bool Equals(BlockData other)
         {
             return other.m_data==m_data;
@@ -43,5 +45,17 @@ namespace Voxelmetric.Code.Data_types
         {
             return m_data.GetHashCode();
         }
+
+        public static bool operator==(BlockData data1, BlockData data2)
+        {
+            return data1.m_data==data2.m_data;
+        }
+
+        public static bool operator!=(BlockData data1, BlockData data2)
+        {
+            return data1.m_data != data2.m_data;
+        }
+
+        #endregion
     }
 }

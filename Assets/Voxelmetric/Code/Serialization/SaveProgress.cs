@@ -45,7 +45,7 @@ namespace Voxelmetric.Code.Serialization
         void IEventListener<ChunkStateExternal>.OnNotified(IEventSource<ChunkStateExternal> source, ChunkStateExternal evt)
         {
             // Unsubscribe from any further events
-            Chunk chunk = source as Chunk;
+            Chunk chunk = (Chunk)source;
             chunk.Subscribe(this, evt, false);
 
             Assert.IsTrue(evt==ChunkStateExternal.Saved);
