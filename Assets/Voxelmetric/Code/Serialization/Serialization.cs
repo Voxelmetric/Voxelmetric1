@@ -1,8 +1,5 @@
-﻿using System;
-using System.IO;
-using System.Runtime.Serialization;
-using System.Runtime.Serialization.Formatters.Binary;
-using UnityEngine;
+﻿using System.IO;
+using Voxelmetric.Code.Common.IO;
 using Voxelmetric.Code.Core;
 using Voxelmetric.Code.Data_types;
 using Voxelmetric.Code.Utilities;
@@ -69,17 +66,7 @@ namespace Voxelmetric.Code.Serialization
                 return true;
 
             string saveFile = SaveFileName(save.Chunk);
-            try {
-                IFormatter formatter = new BinaryFormatter();
-                using (FileStream stream = new FileStream(saveFile, FileMode.Create, FileAccess.Write, FileShare.None)) {
-                    AddSerializationSurrogates(formatter);
-                    formatter.Serialize(stream, save);
-                }
-            } catch (Exception ex) {
-                Debug.LogError("Could not save: " + saveFile + "\n" + ex);
-                return false;
-            }
-            return true;
+            return FileHelpers.BinarizeToFile(saveFile, save);
         }
 
         private static Save Read(Chunk chunk)
@@ -88,26 +75,11 @@ namespace Voxelmetric.Code.Serialization
             if (!File.Exists(saveFile))
                 return null;
 
-            Save save;
-            try {
-                IFormatter formatter = new BinaryFormatter(null, new StreamingContext(StreamingContextStates.All, chunk.world));
-                using (FileStream stream = new FileStream(saveFile, FileMode.Open)) {
-                    AddSerializationSurrogates(formatter);
-                    save = (Save)formatter.Deserialize(stream);
-                }
-            } catch (Exception ex) {
-                Debug.LogError("Could not load: " + saveFile + "\n" + ex);
+            Save s = new Save(chunk);
+            if (!FileHelpers.DebinarizeFromFile(saveFile, s))
                 return null;
-            }
-            return save;
-        }
 
-        private static void AddSerializationSurrogates(IFormatter formatter)
-        {
-            SurrogateSelector selector = new SurrogateSelector();
-            selector.AddSurrogate(typeof(Color), new StreamingContext(StreamingContextStates.All),
-                                  new ColorSerializationSurrogate());
-            formatter.SurrogateSelector = selector;
+            return s;
         }
     }
 }

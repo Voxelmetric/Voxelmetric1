@@ -28,6 +28,9 @@ namespace Voxelmetric.Code.Common.MemoryPooling
         private readonly Dictionary<int, IArrayPool<Vector3>> m_vector3ArrayPools =
             new Dictionary<int, IArrayPool<Vector3>>(128);
 
+        private readonly Dictionary<int, IArrayPool<byte>> m_byteArrayPools =
+            new Dictionary<int, IArrayPool<byte>>(128);
+
         public VertexData PopVertexData()
         {
             return m_vertexDataPool.Pop();
@@ -58,6 +61,11 @@ namespace Voxelmetric.Code.Common.MemoryPooling
             return PopArray(size, m_vector3ArrayPools);
         }
 
+        public byte[] PopByteArray(int size)
+        {
+            return PopArray(size, m_byteArrayPools);
+        }
+
         public void PushVertexData(VertexData item)
         {
             m_vertexDataPool.Push(item);
@@ -86,6 +94,11 @@ namespace Voxelmetric.Code.Common.MemoryPooling
         public void PushVector3Array(Vector3[] arr)
         {
             PushArray(arr, m_vector3ArrayPools);
+        }
+
+        public void PushByteArray(byte[] arr)
+        {
+            PushArray(arr, m_byteArrayPools);
         }
     }
 }

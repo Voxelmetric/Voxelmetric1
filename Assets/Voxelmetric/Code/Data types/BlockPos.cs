@@ -4,7 +4,6 @@ using UnityEngine.Assertions;
 
 namespace Voxelmetric.Code.Data_types
 {
-    [Serializable]
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
     public struct BlockPos : IEquatable<BlockPos>
     {

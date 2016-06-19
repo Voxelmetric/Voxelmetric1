@@ -1,25 +1,27 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using System.IO;
+using Voxelmetric.Code.Common.IO;
 using Voxelmetric.Code.Core;
 using Voxelmetric.Code.Data_types;
 
 namespace Voxelmetric.Code.Serialization
 {
-    [Serializable]
-    public class Save
+    public class Save: IBinarizable
     {
-        public BlockPos[] positions = new BlockPos[0];
-        public BlockData[] blocks = new BlockData[0];
-
+        public BlockPos[] positions;
+        public BlockData[] blocks;
         public readonly bool changed = false;
 
-        [NonSerialized()] private Chunk chunk;
+        public Chunk Chunk { get; private set; }
 
-        public Chunk Chunk { get { return chunk; } }
+        public Save(Chunk chunk)
+        {
+            Chunk = chunk;
+        }
 
         public Save(Chunk chunk, Save existing)
         {
-            this.chunk = chunk;
+            Chunk = chunk;
 
             Dictionary<BlockPos, BlockData> blocksDictionary = new Dictionary<BlockPos, BlockData>();
 
@@ -59,6 +61,25 @@ namespace Voxelmetric.Code.Serialization
             {
                 blocksDictionary.Add(positions[i], blocks[i]);
             }
+        }
+
+        public void Binarize(BinaryWriter bw)
+        {
+            var positionsBytes = StructSerialization.SerializeArray<BlockPos>(positions);
+            var blocksBytes = StructSerialization.SerializeArray<BlockData>(blocks);
+
+            bw.Write(positionsBytes.Length);
+            bw.Write(blocksBytes.Length);
+            bw.Write(positionsBytes);
+            bw.Write(blocksBytes);
+        }
+
+        public void Debinarize(BinaryReader br)
+        {
+            var positionsBytes = new byte[br.ReadInt32()];
+            var blockBytes = new byte[br.ReadInt32()];
+            positions = StructSerialization.DeserializeArray<BlockPos>(br.ReadBytes(positionsBytes.Length));
+            blocks = StructSerialization.DeserializeArray<BlockData>(br.ReadBytes(blockBytes.Length));
         }
     }
 }
