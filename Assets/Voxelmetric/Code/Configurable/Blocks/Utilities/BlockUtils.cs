@@ -9,7 +9,78 @@ namespace Voxelmetric.Code.Configurable.Blocks.Utilities
 {
     public static class BlockUtils
     {
+        //Adding a tiny overlap between block meshes may solve floating point imprecision
+        //errors causing pixel size gaps between blocks when looking closely
+        private static readonly float halfBlock = (Env.BlockSize/2)+Env.BlockFacePadding;
+
+        private static readonly Vector3[][] halfBlockOffsets =
+        {
+            new[]
+            {
+                // Direction.forward
+                new Vector3(+halfBlock, -halfBlock, +halfBlock),
+                new Vector3(+halfBlock, +halfBlock, +halfBlock),
+                new Vector3(-halfBlock, +halfBlock, +halfBlock),
+                new Vector3(-halfBlock, -halfBlock, +halfBlock)
+            },
+            new[]
+            {
+                // Direction.backward
+                new Vector3(-halfBlock, -halfBlock, -halfBlock),
+                new Vector3(-halfBlock, +halfBlock, -halfBlock),
+                new Vector3(+halfBlock, +halfBlock, -halfBlock),
+                new Vector3(+halfBlock, -halfBlock, -halfBlock),
+            },
+
+            new[]
+            {
+                // Direction.right
+                new Vector3(+halfBlock, -halfBlock, -halfBlock),
+                new Vector3(+halfBlock, +halfBlock, -halfBlock),
+                new Vector3(+halfBlock, +halfBlock, +halfBlock),
+                new Vector3(+halfBlock, -halfBlock, +halfBlock)
+            },
+            new[]
+            {
+                // Direction.left
+                new Vector3(-halfBlock, -halfBlock, +halfBlock),
+                new Vector3(-halfBlock, +halfBlock, +halfBlock),
+                new Vector3(-halfBlock, +halfBlock, -halfBlock),
+                new Vector3(-halfBlock, -halfBlock, -halfBlock),
+            },
+
+            new[]
+            {
+                // Direction.up
+                new Vector3(-halfBlock, +halfBlock, +halfBlock),
+                new Vector3(+halfBlock, +halfBlock, +halfBlock),
+                new Vector3(+halfBlock, +halfBlock, -halfBlock),
+                new Vector3(-halfBlock, +halfBlock, -halfBlock)
+            },
+            new[]
+            {
+                // Direction.down
+                new Vector3(-halfBlock, -halfBlock, -halfBlock),
+                new Vector3(+halfBlock, -halfBlock, -halfBlock),
+                new Vector3(+halfBlock, -halfBlock, +halfBlock),
+                new Vector3(-halfBlock, -halfBlock, +halfBlock),
+            },
+        };
+
         public static void PrepareColors(Chunk chunk, BlockPos localPos, BlockPos globalPos, VertexData[] vertexData, Direction direction)
+        {
+            bool notOnEdge = (((localPos.x + 1) & Env.ChunkMask) > 1 &&
+                              ((localPos.y + 1) & Env.ChunkMask) > 1 &&
+                              ((localPos.z + 1) & Env.ChunkMask) > 1);
+            if (notOnEdge)
+                // If we now no checks are going to reach outside current chunk boundaries, we can access chunk memory directly
+                PrepareColors_Fast(chunk, ref localPos, vertexData, direction);
+            else
+                // We are on an edge and thus need to access chunk data via world blocks
+                PrepareColors_Slow(chunk, ref globalPos, vertexData, direction);
+        }
+
+        private static void PrepareColors_Slow(Chunk chunk, ref BlockPos globalPos, VertexData[] vertexData, Direction direction)
         {
             bool nSolid = false;
             bool eSolid = false;
@@ -134,7 +205,142 @@ namespace Voxelmetric.Code.Configurable.Blocks.Utilities
 
             if (chunk.world.config.addAOToMesh)
             {
-                SetColorsAO(vertexData, wnSolid, nSolid, neSolid, eSolid, esSolid, sSolid, swSolid, wSolid, chunk.world.config.ambientOcclusionStrength);
+                SetColorsAO(vertexData, wnSolid, nSolid, neSolid, eSolid, esSolid, sSolid, swSolid, wSolid,
+                            chunk.world.config.ambientOcclusionStrength);
+            }
+            else
+            {
+                SetColors(vertexData, 1, 1, 1, 1, 1);
+            }
+        }
+
+        private static void PrepareColors_Fast(Chunk chunk, ref BlockPos localPos, VertexData[] vertexData, Direction direction)
+        {
+            bool nSolid = false;
+            bool eSolid = false;
+            bool sSolid = false;
+            bool wSolid = false;
+
+            bool wnSolid = false;
+            bool neSolid = false;
+            bool esSolid = false;
+            bool swSolid = false;
+
+            //float light = 0;
+
+            ChunkBlocks blocks = chunk.blocks;
+            Block block;
+
+            switch (direction)
+            {
+                case Direction.up:
+                    nSolid = blocks.GetBlock(localPos.Add(0, 1, 1)).IsSolid(Direction.south);
+                    eSolid = blocks.GetBlock(localPos.Add(1, 1, 0)).IsSolid(Direction.west);
+                    sSolid = blocks.GetBlock(localPos.Add(0, 1, -1)).IsSolid(Direction.north);
+                    wSolid = blocks.GetBlock(localPos.Add(-1, 1, 0)).IsSolid(Direction.east);
+
+                    block = blocks.GetBlock(localPos.Add(-1, 1, 1));
+                    wnSolid = block.IsSolid(Direction.east) && block.IsSolid(Direction.south);
+                    block = blocks.GetBlock(localPos.Add(1, 1, 1));
+                    neSolid = block.IsSolid(Direction.south) && block.IsSolid(Direction.west);
+                    block = blocks.GetBlock(localPos.Add(1, 1, -1));
+                    esSolid = block.IsSolid(Direction.west) && block.IsSolid(Direction.north);
+                    block = blocks.GetBlock(localPos.Add(-1, 1, -1));
+                    swSolid = block.IsSolid(Direction.north) && block.IsSolid(Direction.east);
+
+                    //light = BlockDataMap.NonSolid.Light(blocks.GetBlock(localPos.Add(0, 1, 0)))/ 15f;
+                    break;
+                case Direction.down:
+                    nSolid = blocks.GetBlock(localPos.Add(0, -1, -1)).IsSolid(Direction.south);
+                    eSolid = blocks.GetBlock(localPos.Add(1, -1, 0)).IsSolid(Direction.west);
+                    sSolid = blocks.GetBlock(localPos.Add(0, -1, 1)).IsSolid(Direction.north);
+                    wSolid = blocks.GetBlock(localPos.Add(-1, -1, 0)).IsSolid(Direction.east);
+
+                    block = blocks.GetBlock(localPos.Add(-1, -1, -1));
+                    wnSolid = block.IsSolid(Direction.east) && block.IsSolid(Direction.south);
+                    block = blocks.GetBlock(localPos.Add(1, -1, -1));
+                    neSolid = block.IsSolid(Direction.south) && block.IsSolid(Direction.west);
+                    block = blocks.GetBlock(localPos.Add(1, -1, 1));
+                    esSolid = block.IsSolid(Direction.west) && block.IsSolid(Direction.north);
+                    block = blocks.GetBlock(localPos.Add(-1, -1, 1));
+                    swSolid = block.IsSolid(Direction.north) && block.IsSolid(Direction.east);
+
+                    //light = BlockDataMap.NonSolid.Light(blocks.GetBlock(localPos.Add(0, -1, 0))) / 15f;
+                    break;
+                case Direction.north:
+                    nSolid = blocks.GetBlock(localPos.Add(1, 0, 1)).IsSolid(Direction.west);
+                    eSolid = blocks.GetBlock(localPos.Add(0, 1, 1)).IsSolid(Direction.down);
+                    sSolid = blocks.GetBlock(localPos.Add(-1, 0, 1)).IsSolid(Direction.east);
+                    wSolid = blocks.GetBlock(localPos.Add(0, -1, 1)).IsSolid(Direction.up);
+
+                    block = blocks.GetBlock(localPos.Add(-1, 1, 1));
+                    esSolid = block.IsSolid(Direction.east) && block.IsSolid(Direction.south);
+                    block = blocks.GetBlock(localPos.Add(1, 1, 1));
+                    neSolid = block.IsSolid(Direction.south) && block.IsSolid(Direction.west);
+                    block = blocks.GetBlock(localPos.Add(1, -1, 1));
+                    wnSolid = block.IsSolid(Direction.west) && block.IsSolid(Direction.north);
+                    block = blocks.GetBlock(localPos.Add(-1, -1, 1));
+                    swSolid = block.IsSolid(Direction.north) && block.IsSolid(Direction.east);
+
+                    //light = BlockDataMap.NonSolid.Light(blocks.GetBlock(localPos.Add(0, 0, 1))) / 15f;
+                    break;
+                case Direction.east:
+                    nSolid = blocks.GetBlock(localPos.Add(1, 0, -1)).IsSolid(Direction.up);
+                    eSolid = blocks.GetBlock(localPos.Add(1, 1, 0)).IsSolid(Direction.west);
+                    sSolid = blocks.GetBlock(localPos.Add(1, 0, 1)).IsSolid(Direction.down);
+                    wSolid = blocks.GetBlock(localPos.Add(1, -1, 0)).IsSolid(Direction.east);
+
+                    block = blocks.GetBlock(localPos.Add(1, 1, 1));
+                    esSolid = block.IsSolid(Direction.west) && block.IsSolid(Direction.north);
+                    block = blocks.GetBlock(localPos.Add(1, 1, -1));
+                    neSolid = block.IsSolid(Direction.south) && block.IsSolid(Direction.west);
+                    block = blocks.GetBlock(localPos.Add(1, -1, -1));
+                    wnSolid = block.IsSolid(Direction.east) && block.IsSolid(Direction.north);
+                    block = blocks.GetBlock(localPos.Add(1, -1, 1));
+                    swSolid = block.IsSolid(Direction.north) && block.IsSolid(Direction.east);
+
+                    //light = BlockDataMap.NonSolid.Light(blocks.GetBlock(localPos.Add(1, 0, 0))) / 15f;
+                    break;
+                case Direction.south:
+                    nSolid = blocks.GetBlock(localPos.Add(-1, 0, -1)).IsSolid(Direction.down);
+                    eSolid = blocks.GetBlock(localPos.Add(0, 1, -1)).IsSolid(Direction.west);
+                    sSolid = blocks.GetBlock(localPos.Add(1, 0, -1)).IsSolid(Direction.up);
+                    wSolid = blocks.GetBlock(localPos.Add(0, -1, -1)).IsSolid(Direction.south);
+
+                    block = blocks.GetBlock(localPos.Add(1, 1, -1));
+                    esSolid = block.IsSolid(Direction.west) && block.IsSolid(Direction.north);
+                    block = blocks.GetBlock(localPos.Add(-1, 1, -1));
+                    neSolid = block.IsSolid(Direction.south) && block.IsSolid(Direction.west);
+                    block = blocks.GetBlock(localPos.Add(-1, -1, -1));
+                    wnSolid = block.IsSolid(Direction.east) && block.IsSolid(Direction.north);
+                    block = blocks.GetBlock(localPos.Add(1, -1, -1));
+                    swSolid = block.IsSolid(Direction.north) && block.IsSolid(Direction.east);
+
+                    //light = BlockDataMap.NonSolid.Light(blocks.GetBlock(localPos.Add(0, 0, -1))) / 15f;
+                    break;
+                case Direction.west:
+                    nSolid = blocks.GetBlock(localPos.Add(-1, 0, 1)).IsSolid(Direction.up);
+                    eSolid = blocks.GetBlock(localPos.Add(-1, 1, 0)).IsSolid(Direction.west);
+                    sSolid = blocks.GetBlock(localPos.Add(-1, 0, -1)).IsSolid(Direction.down);
+                    wSolid = blocks.GetBlock(localPos.Add(-1, -1, 0)).IsSolid(Direction.east);
+
+                    block = blocks.GetBlock(localPos.Add(-1, 1, -1));
+                    esSolid = block.IsSolid(Direction.west) && block.IsSolid(Direction.north);
+                    block = blocks.GetBlock(localPos.Add(-1, 1, 1));
+                    neSolid = block.IsSolid(Direction.south) && block.IsSolid(Direction.west);
+                    block = blocks.GetBlock(localPos.Add(-1, -1, 1));
+                    wnSolid = block.IsSolid(Direction.east) && block.IsSolid(Direction.north);
+                    block = blocks.GetBlock(localPos.Add(-1, -1, -1));
+                    swSolid = block.IsSolid(Direction.north) && block.IsSolid(Direction.east);
+
+                    //light = BlockDataMap.NonSolid.Light(blocks.GetBlock(localPos.Add(-1, 0, 0))) / 15f;
+                    break;
+            }
+
+            if (chunk.world.config.addAOToMesh)
+            {
+                SetColorsAO(vertexData, wnSolid, nSolid, neSolid, eSolid, esSolid, sSolid, swSolid, wSolid,
+                            chunk.world.config.ambientOcclusionStrength);
             }
             else
             {
@@ -146,9 +352,9 @@ namespace Voxelmetric.Code.Configurable.Blocks.Utilities
         {
             Rect texture = textureCollection.GetTexture(chunk, localPos, globalPos, direction);
 
-            vertexData[0].UV = new Vector2(texture.x + texture.width, texture.y);
-            vertexData[1].UV = new Vector2(texture.x + texture.width, texture.y + texture.height);
-            vertexData[2].UV = new Vector2(texture.x, texture.y + texture.height);
+            vertexData[0].UV = new Vector2(texture.x+texture.width, texture.y);
+            vertexData[1].UV = new Vector2(texture.x+texture.width, texture.y+texture.height);
+            vertexData[2].UV = new Vector2(texture.x, texture.y+texture.height);
             vertexData[3].UV = new Vector2(texture.x, texture.y);
         }
 
@@ -177,65 +383,24 @@ namespace Voxelmetric.Code.Configurable.Blocks.Utilities
                     texture = textureCollections[5].GetTexture(chunk, localPos, globalPos, direction);
                     break;
             }
-            
-            vertexData[0].UV = new Vector2(texture.x + texture.width, texture.y);
-            vertexData[1].UV = new Vector2(texture.x + texture.width, texture.y + texture.height);
-            vertexData[2].UV = new Vector2(texture.x, texture.y + texture.height);
+
+            vertexData[0].UV = new Vector2(texture.x+texture.width, texture.y);
+            vertexData[1].UV = new Vector2(texture.x+texture.width, texture.y+texture.height);
+            vertexData[2].UV = new Vector2(texture.x, texture.y+texture.height);
             vertexData[3].UV = new Vector2(texture.x, texture.y);
         }
 
-        public static void PrepareVertices(Chunk chunk, BlockPos localPos, BlockPos globalPos, VertexData[] vertexData, Direction direction)
+        public static void PrepareVertices(BlockPos localPos, VertexData[] vertexData, Direction direction)
         {
-            //Adding a tiny overlap between block meshes may solve floating point imprecision
-            //errors causing pixel size gaps between blocks when looking closely
-            float halfBlock = (Env.BlockSize / 2) + Env.BlockFacePadding;
-
             //Converting the position to a vector adjusts it based on block size and gives us real world coordinates for x, y and z
             Vector3 vPos = localPos;
             //Vector3 vPos = (pos - chunk.pos);
 
-            switch (direction)
-            {
-                case Direction.up:
-                    vertexData[0].Vertex = new Vector3(vPos.x - halfBlock, vPos.y + halfBlock, vPos.z + halfBlock);
-                    vertexData[1].Vertex = new Vector3(vPos.x + halfBlock, vPos.y + halfBlock, vPos.z + halfBlock);
-                    vertexData[2].Vertex = new Vector3(vPos.x + halfBlock, vPos.y + halfBlock, vPos.z - halfBlock);
-                    vertexData[3].Vertex = new Vector3(vPos.x - halfBlock, vPos.y + halfBlock, vPos.z - halfBlock);
-                    break;
-                case Direction.down:
-                    vertexData[0].Vertex = new Vector3(vPos.x - halfBlock, vPos.y - halfBlock, vPos.z - halfBlock);
-                    vertexData[1].Vertex = new Vector3(vPos.x + halfBlock, vPos.y - halfBlock, vPos.z - halfBlock);
-                    vertexData[2].Vertex = new Vector3(vPos.x + halfBlock, vPos.y - halfBlock, vPos.z + halfBlock);
-                    vertexData[3].Vertex = new Vector3(vPos.x - halfBlock, vPos.y - halfBlock, vPos.z + halfBlock);
-                    break;
-                case Direction.north:
-                    vertexData[0].Vertex = new Vector3(vPos.x + halfBlock, vPos.y - halfBlock, vPos.z + halfBlock);
-                    vertexData[1].Vertex = new Vector3(vPos.x + halfBlock, vPos.y + halfBlock, vPos.z + halfBlock);
-                    vertexData[2].Vertex = new Vector3(vPos.x - halfBlock, vPos.y + halfBlock, vPos.z + halfBlock);
-                    vertexData[3].Vertex = new Vector3(vPos.x - halfBlock, vPos.y - halfBlock, vPos.z + halfBlock);
-                    break;
-                case Direction.east:
-                    vertexData[0].Vertex = new Vector3(vPos.x + halfBlock, vPos.y - halfBlock, vPos.z - halfBlock);
-                    vertexData[1].Vertex = new Vector3(vPos.x + halfBlock, vPos.y + halfBlock, vPos.z - halfBlock);
-                    vertexData[2].Vertex = new Vector3(vPos.x + halfBlock, vPos.y + halfBlock, vPos.z + halfBlock);
-                    vertexData[3].Vertex = new Vector3(vPos.x + halfBlock, vPos.y - halfBlock, vPos.z + halfBlock);
-                    break;
-                case Direction.south:
-                    vertexData[0].Vertex = new Vector3(vPos.x - halfBlock, vPos.y - halfBlock, vPos.z - halfBlock);
-                    vertexData[1].Vertex = new Vector3(vPos.x - halfBlock, vPos.y + halfBlock, vPos.z - halfBlock);
-                    vertexData[2].Vertex = new Vector3(vPos.x + halfBlock, vPos.y + halfBlock, vPos.z - halfBlock);
-                    vertexData[3].Vertex = new Vector3(vPos.x + halfBlock, vPos.y - halfBlock, vPos.z - halfBlock);
-                    break;
-                case Direction.west:
-                    vertexData[0].Vertex = new Vector3(vPos.x - halfBlock, vPos.y - halfBlock, vPos.z + halfBlock);
-                    vertexData[1].Vertex = new Vector3(vPos.x - halfBlock, vPos.y + halfBlock, vPos.z + halfBlock);
-                    vertexData[2].Vertex = new Vector3(vPos.x - halfBlock, vPos.y + halfBlock, vPos.z - halfBlock);
-                    vertexData[3].Vertex = new Vector3(vPos.x - halfBlock, vPos.y - halfBlock, vPos.z - halfBlock);
-                    break;
-                default:
-                    Debug.LogError("Direction not recognized");
-                    break;
-            }
+            int d = DirectionUtils.Get(direction);
+            vertexData[0].Vertex = vPos+halfBlockOffsets[d][0];
+            vertexData[1].Vertex = vPos+halfBlockOffsets[d][1];
+            vertexData[2].Vertex = vPos+halfBlockOffsets[d][2];
+            vertexData[3].Vertex = vPos+halfBlockOffsets[d][3];
         }
 
         private static void SetColorsAO(VertexData[] vertexData, bool wnSolid, bool nSolid, bool neSolid, bool eSolid, bool esSolid, bool sSolid, bool swSolid, bool wSolid, float strength)

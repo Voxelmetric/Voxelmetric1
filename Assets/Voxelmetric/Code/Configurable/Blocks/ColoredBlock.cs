@@ -18,7 +18,7 @@ public class ColoredBlock : SolidBlock {
             for (int i = 0; i < 4; i++)
                 vertexData[i] = chunk.pools.PopVertexData();
 
-            BlockUtils.PrepareVertices(chunk, localPos, globalPos, vertexData, direction);
+            BlockUtils.PrepareVertices(localPos, vertexData, direction);
             BlockUtils.PrepareTexture(chunk, localPos, globalPos, vertexData, direction, texture);
             BlockUtils.SetColors(vertexData, ref color);
             
