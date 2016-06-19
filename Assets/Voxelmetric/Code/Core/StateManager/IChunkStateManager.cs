@@ -1,7 +1,4 @@
-﻿using Voxelmetric.Code.Core;
-using Voxelmetric.Code.Core.StateManager;
-
-namespace Assets.Voxelmetric.Code.Core.StateManager
+﻿namespace Voxelmetric.Code.Core.StateManager
 {
     public interface IChunkStateManager
     {
@@ -14,6 +11,7 @@ namespace Assets.Voxelmetric.Code.Core.StateManager
         void RequestState(ChunkState state);
 
         bool IsStateCompleted(ChunkState state);
+        bool IsSavePossible { get; }
 
         void SetMeshBuilt(); // temporary!
     }

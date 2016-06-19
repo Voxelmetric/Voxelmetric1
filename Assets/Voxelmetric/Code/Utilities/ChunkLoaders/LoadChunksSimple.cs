@@ -3,6 +3,7 @@ using UnityEngine;
 using UnityEngine.Assertions;
 using Voxelmetric.Code.Common.Math;
 using Voxelmetric.Code.Core;
+using Voxelmetric.Code.Core.StateManager;
 using Voxelmetric.Code.Data_types;
 
 namespace Voxelmetric.Code.Utilities.ChunkLoaders
@@ -128,7 +129,8 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
                 chunk.UpdateChunk();
 
                 // Automatically collect chunks which are ready to be removed from the world
-                if (chunk.stateManager.IsFinished)
+                ChunkStateManagerClient stateManager = (ChunkStateManagerClient)chunk.stateManager;
+                if (stateManager.IsStateCompleted(ChunkState.Remove))
                 {
                     // Remove the chunk from our provider and unregister it from chunk storage
                     world.chunks.RemoveChunk(chunk);
@@ -158,8 +160,10 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
 
             // Update visibility information
             bool isInsideFrustum = IsChunkInViewFrustum(chunk) || m_firstRun;
-            chunk.stateManager.Visible = isInsideFrustum;
-            chunk.stateManager.PossiblyVisible = isInsideFrustum;
+
+            ChunkStateManagerClient stateManager = (ChunkStateManagerClient)chunk.stateManager;
+            stateManager.Visible = isInsideFrustum;
+            stateManager.PossiblyVisible = isInsideFrustum;
         }
 
         private void UpdateRanges()
@@ -235,7 +239,8 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
                         }
 
                         // Show generated chunks
-                        if (chunk.stateManager.IsGenerated)
+                        ChunkStateManagerClient stateManager = (ChunkStateManagerClient)chunk.stateManager;
+                        if (stateManager.IsStateCompleted(ChunkState.Generate))
                         {
                             Gizmos.color = Color.magenta;
                             Gizmos.DrawWireCube(

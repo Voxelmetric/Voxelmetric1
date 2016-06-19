@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Text;
 using System.Threading;
-using Assets.Voxelmetric.Code.Core.StateManager;
 using UnityEngine.Assertions;
 using Voxelmetric.Code.Common.Events;
 using Voxelmetric.Code.Common.Extensions;
@@ -13,7 +12,7 @@ using Voxelmetric.Code.Utilities;
 
 namespace Voxelmetric.Code.Core.StateManager
 {
-    public class ChunkStateManager : ChunkEvent, IChunkStateManager
+    public class ChunkStateManagerClient : ChunkEvent, IChunkStateManager
     {
         public Chunk chunk { get; private set; }
 
@@ -48,7 +47,7 @@ namespace Voxelmetric.Code.Core.StateManager
         //! Number of generic tasks waiting to be finished
         private int m_genericWorkItemsLeftToProcess;
 
-        public ChunkStateManager(Chunk chunk)
+        public ChunkStateManagerClient(Chunk chunk)
         {
             this.chunk = chunk;
         }
@@ -127,7 +126,7 @@ namespace Voxelmetric.Code.Core.StateManager
             // Note that this check is not thread-safe because this value can be changed from a different thread. However,
             // we do not care. The worst thing that can happen is that we read a value which is one frame old. So be it.
             // Thanks to being this relaxed approach we do not need any synchronization primitives at all.
-            if (IsExecutingTask)
+            if (m_taskRunning)
                 return false;
 
             // Synchronize the value with what we have on a different thread. It would be no big deal not having this at
@@ -135,10 +134,7 @@ namespace Voxelmetric.Code.Core.StateManager
             m_completedStatesSafe = m_completedStates;
 
             // Once this Chunk is marked as finished we ignore any further requests and won't perform any updates
-            if (IsFinished)
-                return false;
-
-            return true;
+            return !m_completedStatesSafe.Check(ChunkState.Remove);
         }
 
         public void Update()
@@ -205,24 +201,9 @@ namespace Voxelmetric.Code.Core.StateManager
             m_nextState = ChunkState.Idle;
         }
 
-        public bool IsFinished
-        {
-            get { return m_completedStatesSafe.Check(ChunkState.Remove); }
-        }
-
-        public bool IsGenerated
-        {
-            get { return m_completedStatesSafe.Check(ChunkState.Generate); }
-        }
-
         public bool IsSavePossible
         {
             get { return !m_removalRequested && m_completedStatesSafe.Check(ChunkState.Generate | ChunkState.LoadData); }
-        }
-
-        public bool IsExecutingTask
-        {
-            get { return m_taskRunning; }
         }
 
         public override void OnNotified(IEventSource<ChunkState> source, ChunkState state)
@@ -235,10 +216,10 @@ namespace Voxelmetric.Code.Core.StateManager
 
         private struct SGenericWorkItem
         {
-            public readonly ChunkStateManager Chunk;
+            public readonly ChunkStateManagerClient Chunk;
             public readonly Action Action;
 
-            public SGenericWorkItem(ChunkStateManager chunk, Action action)
+            public SGenericWorkItem(ChunkStateManagerClient chunk, Action action)
             {
                 Chunk = chunk;
                 Action = action;
@@ -250,7 +231,7 @@ namespace Voxelmetric.Code.Core.StateManager
 
         private static void OnGenericWork(ref SGenericWorkItem item)
         {
-            ChunkStateManager chunk = item.Chunk;
+            ChunkStateManagerClient chunk = item.Chunk;
 
             // Perform the action
             item.Action();
@@ -266,7 +247,7 @@ namespace Voxelmetric.Code.Core.StateManager
             }
         }
 
-        private static void OnGenericWorkDone(ChunkStateManager chunk)
+        private static void OnGenericWorkDone(ChunkStateManagerClient chunk)
         {
             chunk.m_completedStates = chunk.m_completedStates.Set(CurrStateGenericWork);
             chunk.m_nextState = NextStateGenericWork;
@@ -327,7 +308,7 @@ namespace Voxelmetric.Code.Core.StateManager
         private static readonly ChunkState CurrStateGenerateData = ChunkState.Generate;
         private static readonly ChunkState NextStateGenerateData = ChunkState.LoadData;
 
-        private static void OnGenerateData(ChunkStateManager stateManager)
+        private static void OnGenerateData(ChunkStateManagerClient stateManager)
         {
             Chunk chunk = stateManager.chunk;
             chunk.world.terrainGen.GenerateTerrainForChunk(chunk);
@@ -335,14 +316,14 @@ namespace Voxelmetric.Code.Core.StateManager
             OnGenerateDataDone(stateManager);
         }
 
-        private static void OnGenerateDataDone(ChunkStateManager stateManager)
+        private static void OnGenerateDataDone(ChunkStateManagerClient stateManager)
         {
             stateManager.m_completedStates = stateManager.m_completedStates.Set(CurrStateGenerateData);
             stateManager.m_nextState = NextStateGenerateData;
             stateManager.m_taskRunning = false;
         }
 
-        public static void OnGenerateDataOverNetworkDone(ChunkStateManager stateManager)
+        public static void OnGenerateDataOverNetworkDone(ChunkStateManagerClient stateManager)
         {
             OnGenerateDataDone(stateManager);
             OnLoadDataDone(stateManager);
@@ -364,7 +345,7 @@ namespace Voxelmetric.Code.Core.StateManager
                         chunk.ThreadID,
                         arg =>
                         {
-                            ChunkStateManager stateManager = (ChunkStateManager)arg;
+                            ChunkStateManagerClient stateManager = (ChunkStateManagerClient)arg;
                             OnGenerateData(stateManager);
                         },
                         this)
@@ -386,14 +367,14 @@ namespace Voxelmetric.Code.Core.StateManager
         private static readonly ChunkState CurrStateLoadData = ChunkState.LoadData;
         private static readonly ChunkState NextStateLoadData = ChunkState.BuildVertices;
 
-        private static void OnLoadData(ChunkStateManager stateManager)
+        private static void OnLoadData(ChunkStateManagerClient stateManager)
         {
             Serialization.Serialization.LoadChunk(stateManager.chunk);
 
             OnLoadDataDone(stateManager);
         }
 
-        private static void OnLoadDataDone(ChunkStateManager stateManager)
+        private static void OnLoadDataDone(ChunkStateManagerClient stateManager)
         {
             stateManager.m_completedStates = stateManager.m_completedStates.Set(CurrStateLoadData);
             stateManager.m_nextState = NextStateLoadData;
@@ -420,7 +401,7 @@ namespace Voxelmetric.Code.Core.StateManager
                 new TaskPoolItem(
                     arg =>
                     {
-                        ChunkStateManager stateManager = (ChunkStateManager)arg;
+                        ChunkStateManagerClient stateManager = (ChunkStateManagerClient)arg;
                         OnLoadData(stateManager);
                     },
                     this)
@@ -435,14 +416,14 @@ namespace Voxelmetric.Code.Core.StateManager
 
         private static readonly ChunkState CurrStateSaveData = ChunkState.SaveData;
 
-        private static void OnSaveData(ChunkStateManager stateManager)
+        private static void OnSaveData(ChunkStateManagerClient stateManager)
         {
             Serialization.Serialization.SaveChunk(stateManager.chunk);
 
             OnSaveDataDone(stateManager);
         }
 
-        private static void OnSaveDataDone(ChunkStateManager stateManager)
+        private static void OnSaveDataDone(ChunkStateManagerClient stateManager)
         {
             stateManager.m_stateExternal = ChunkStateExternal.Saved;
             stateManager.m_completedStates = stateManager.m_completedStates.Set(CurrStateSaveData);
@@ -464,7 +445,7 @@ namespace Voxelmetric.Code.Core.StateManager
                 new TaskPoolItem(
                     arg =>
                     {
-                        ChunkStateManager stateManager = (ChunkStateManager)arg;
+                        ChunkStateManagerClient stateManager = (ChunkStateManagerClient)arg;
                         OnSaveData(stateManager);
                     },
                     this)
@@ -484,7 +465,7 @@ namespace Voxelmetric.Code.Core.StateManager
             // All neighbors have to have their data loaded
             foreach (var chunkEvent in Listeners)
             {
-                var stateManager = (ChunkStateManager)chunkEvent;
+                var stateManager = (ChunkStateManagerClient)chunkEvent;
                 if (!stateManager.m_completedStates.Check(ChunkState.LoadData))
                     return false;
             }
@@ -496,9 +477,9 @@ namespace Voxelmetric.Code.Core.StateManager
 
         private struct SGenerateVerticesWorkItem
         {
-            public readonly ChunkStateManager StateManager;
+            public readonly ChunkStateManagerClient StateManager;
 
-            public SGenerateVerticesWorkItem(ChunkStateManager stateManager)
+            public SGenerateVerticesWorkItem(ChunkStateManagerClient stateManager)
             {
                 StateManager = stateManager;
             }
@@ -506,14 +487,14 @@ namespace Voxelmetric.Code.Core.StateManager
 
         private static readonly ChunkState CurrStateGenerateVertices = ChunkState.BuildVertices | ChunkState.BuildVerticesNow;
 
-        private static void OnGenerateVerices(ChunkStateManager stateManager)
+        private static void OnGenerateVerices(ChunkStateManagerClient stateManager)
         {
             stateManager.chunk.render.BuildMeshData();
 
             OnGenerateVerticesDone(stateManager);
         }
 
-        private static void OnGenerateVerticesDone(ChunkStateManager stateManager)
+        private static void OnGenerateVerticesDone(ChunkStateManagerClient stateManager)
         {
             stateManager.m_completedStates = stateManager.m_completedStates.Set(CurrStateGenerateVertices);
             stateManager.m_taskRunning = false;
@@ -616,7 +597,7 @@ namespace Voxelmetric.Code.Core.StateManager
             Chunk neighbor = chunk.world.chunks.Get(neighborPos);
             if (neighbor != null)
             {
-                ChunkStateManager stateManager = neighbor.stateManager;
+                ChunkStateManagerClient stateManager = (ChunkStateManagerClient)neighbor.stateManager;
                 // Subscribe with each other. Passing Idle as event - it is ignored in this case anyway
                 stateManager.Subscribe(this, ChunkState.Idle, subscribe);
                 Subscribe(stateManager, ChunkState.Idle, subscribe);

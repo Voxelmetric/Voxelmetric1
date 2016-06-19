@@ -4,6 +4,7 @@ using UnityEngine.Assertions;
 using Voxelmetric.Code.Common.Math;
 using Voxelmetric.Code.Core;
 using Voxelmetric.Code.Core.Clipmap;
+using Voxelmetric.Code.Core.StateManager;
 using Voxelmetric.Code.Data_types;
 
 namespace Voxelmetric.Code.Utilities.ChunkLoaders
@@ -171,7 +172,8 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
                 chunk.UpdateChunk();
 
                 // Automatically collect chunks which are ready to be removed from the world
-                if (chunk.stateManager.IsFinished)
+                ChunkStateManagerClient stateManager = (ChunkStateManagerClient)chunk.stateManager;
+                if (stateManager.IsStateCompleted(ChunkState.Remove))
                 {
                     // Remove the chunk from our provider and unregister it from chunk storage
                     world.chunks.RemoveChunk(chunk);
@@ -203,28 +205,29 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
                 );
 
             ClipmapItem item = m_clipmap[localChunkPos.x, localChunkPos.y, localChunkPos.z];
-            
+            ChunkStateManagerClient stateManager = (ChunkStateManagerClient)chunk.stateManager;
+
             // Chunk is within view frustum
             if (IsChunkInViewFrustum(chunk) || m_firstRun)
             {
                 // Chunk is too far away. Remove it
                 if (!m_clipmap.IsInsideBounds(localChunkPos.x, localChunkPos.y, localChunkPos.z))
                 {
-                    chunk.stateManager.RequestState(ChunkState.Remove);
+                    stateManager.RequestState(ChunkState.Remove);
                 }
                 // Chunk is within visibilty range. Full update with geometry generation is possible
                 else if (item.IsWithinVisibleRange)
                 {
                     //chunk.LOD = item.LOD;
-                    chunk.stateManager.PossiblyVisible = true;
-                    chunk.stateManager.Visible = true;
+                    stateManager.PossiblyVisible = true;
+                    stateManager.Visible = true;
                 }
                 // Chunk is within cached range. Full update except for geometry generation
                 else // if (item.IsWithinCachedRange)
                 {
                     //chunk.LOD = item.LOD;
-                    chunk.stateManager.PossiblyVisible = true;
-                    chunk.stateManager.Visible = false;
+                    stateManager.PossiblyVisible = true;
+                    stateManager.Visible = false;
                 }
             }
             else
@@ -232,20 +235,20 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
                 // Chunk is not visible and too far away. Remove it
                 if (!m_clipmap.IsInsideBounds(localChunkPos.x, localChunkPos.y, localChunkPos.z))
                 {
-                    chunk.stateManager.RequestState(ChunkState.Remove);
+                    stateManager.RequestState(ChunkState.Remove);
                 }
                 // Chunk is not in the view frustum but still within cached range
                 else if (item.IsWithinCachedRange)
                 {
                     //chunk.LOD = item.LOD;
-                    chunk.stateManager.PossiblyVisible = false;
-                    chunk.stateManager.Visible = false;
+                    stateManager.PossiblyVisible = false;
+                    stateManager.Visible = false;
                 }
                 else
                 // Weird state
                 {
                     Assert.IsFalse(true);
-                    chunk.stateManager.RequestState(ChunkState.Remove);
+                    stateManager.RequestState(ChunkState.Remove);
                 }
             }
         }
@@ -307,7 +310,8 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
                         }
 
                         // Show generated chunks
-                        if (chunk.stateManager.IsGenerated)
+                        ChunkStateManagerClient stateManager = (ChunkStateManagerClient)chunk.stateManager;
+                        if (stateManager.IsStateCompleted(ChunkState.Generate))
                         {
                             Gizmos.color = Color.magenta;
                             Gizmos.DrawWireCube(

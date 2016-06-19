@@ -73,8 +73,9 @@ namespace Voxelmetric.Code.Core
         {
             if (m_setBlockQueue.Count<=0)
                 return;
-            
-            chunk.stateManager.RequestState(ChunkState.BuildVerticesNow);
+
+            ChunkStateManagerClient stateManager = (ChunkStateManagerClient)chunk.stateManager;
+            stateManager.RequestState(ChunkState.BuildVerticesNow);
 
             int rebuildMask = 0;
 
@@ -122,10 +123,10 @@ namespace Voxelmetric.Code.Core
                 int cz = chunk.pos.z;
 
                 // If it is an edge position, notify neighbor as well
-                // Iterate over neighbors and decide which ones should be notified to rebuild
-                for (int i = 0; i < chunk.stateManager.Listeners.Length; i++)
+                // Iterate over neighbors and decide which ones should be notified to rebuild                
+                for (int i = 0; i < stateManager.Listeners.Length; i++)
                 {
-                    ChunkEvent listener = chunk.stateManager.Listeners[i];
+                    ChunkEvent listener = stateManager.Listeners[i];
                     if (listener == null)
                         continue;
 
@@ -133,7 +134,7 @@ namespace Voxelmetric.Code.Core
                     if (rebuildMask==0x3f)
                         break;
 
-                    ChunkStateManager listenerChunk = (ChunkStateManager)listener;
+                    ChunkStateManagerClient listenerChunk = (ChunkStateManagerClient)listener;
 
                     int lx = listenerChunk.chunk.pos.x;
                     int ly = listenerChunk.chunk.pos.y;
@@ -173,9 +174,9 @@ namespace Voxelmetric.Code.Core
             // Notify neighbors that they need to rebuilt their geometry
             if (rebuildMask > 0)
             {
-                for (int j = 0; j < chunk.stateManager.Listeners.Length; j++)
+                for (int j = 0; j < stateManager.Listeners.Length; j++)
                 {
-                    ChunkStateManager listener = (ChunkStateManager)chunk.stateManager.Listeners[j];
+                    ChunkStateManagerClient listener = (ChunkStateManagerClient)stateManager.Listeners[j];
                     if (listener != null && ((rebuildMask >> j) & 1) != 0)
                         listener.RequestState(ChunkState.BuildVerticesNow);
                 }
@@ -322,7 +323,8 @@ namespace Voxelmetric.Code.Core
         {
             GenerateContentsFromBytes();
 
-            ChunkStateManager.OnGenerateDataOverNetworkDone(chunk.stateManager);
+            ChunkStateManagerClient stateManager = (ChunkStateManagerClient)chunk.stateManager;
+            ChunkStateManagerClient.OnGenerateDataOverNetworkDone(stateManager);
 
             receiveBuffer = null;
             receiveIndex = 0;

@@ -26,7 +26,7 @@ namespace Voxelmetric.Code.Core
         public ChunkBlocks blocks { get; private set; }
         public ChunkLogic logic { get; private set; }
         public ChunkRender render { get; private set; }
-        public ChunkStateManager stateManager { get; private set; }
+        public IChunkStateManager stateManager { get; private set; }
 
         //! Bounding box in world coordinates
         public Bounds WorldBounds { get; private set; }
@@ -59,7 +59,7 @@ namespace Voxelmetric.Code.Core
             render = new ChunkRender(this);
             blocks = new ChunkBlocks(this);
             logic = new ChunkLogic(this);
-            stateManager = new ChunkStateManager(this);
+            stateManager = new ChunkStateManagerClient(this);
         }
 
         private void Init(World world, BlockPos pos)
