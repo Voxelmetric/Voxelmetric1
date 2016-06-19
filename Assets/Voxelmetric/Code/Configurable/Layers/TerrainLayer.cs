@@ -79,7 +79,7 @@ public class TerrainLayer : IComparable, IEquatable<TerrainLayer>
 
         while (y < chunk.pos.y + Env.ChunkSize && y < endPlaceHeight)
         {
-            chunk.world.blocks.Set(new BlockPos(x, y, z), new BlockData(blockToPlace.type));
+            chunk.world.blocks.Set(new Vector3Int(x, y, z), new BlockData(blockToPlace.type));
             y++;
         }
     }

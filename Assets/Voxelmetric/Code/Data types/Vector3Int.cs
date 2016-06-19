@@ -5,11 +5,11 @@ using Voxelmetric.Code.Utilities;
 namespace Voxelmetric.Code.Data_types
 {
     [Serializable]
-    public struct BlockPos : IEquatable<BlockPos>
+    public struct Vector3Int : IEquatable<Vector3Int>
     {
         public readonly int x, y, z;
 
-        public BlockPos(int x, int y, int z)
+        public Vector3Int(int x, int y, int z)
         {
             this.x = x;
             this.y = y;
@@ -57,13 +57,13 @@ namespace Voxelmetric.Code.Data_types
 
         public override bool Equals(object obj)
         {
-            if (!(obj is BlockPos))
+            if (!(obj is Vector3Int))
                 return false;
-            BlockPos other = (BlockPos)obj;
+            Vector3Int other = (Vector3Int)obj;
             return Equals(other);
         }
 
-        public bool Equals(BlockPos other)
+        public bool Equals(Vector3Int other)
         {
             if (GetHashCode() != other.GetHashCode())
                 return false;
@@ -80,33 +80,33 @@ namespace Voxelmetric.Code.Data_types
         /// returns the position of the chunk containing this block
         /// </summary>
         /// <returns>the position of the chunk containing this block</returns>
-        public BlockPos ContainingChunkCoordinates()
+        public Vector3Int ContainingChunkCoordinates()
         {
             const int chunkPower = Env.ChunkPower;
-            return new BlockPos(
+            return new Vector3Int(
                 (x >> chunkPower) << chunkPower,
                 (y >> chunkPower) << chunkPower,
                 (z >> chunkPower) << chunkPower);
         }
 
-        public BlockPos Add(int x, int y, int z)
+        public Vector3Int Add(int x, int y, int z)
         {
-            return new BlockPos(this.x + x, this.y + y, this.z + z);
+            return new Vector3Int(this.x + x, this.y + y, this.z + z);
         }
 
-        public BlockPos Add(BlockPos pos)
+        public Vector3Int Add(Vector3Int pos)
         {
-            return new BlockPos(x + pos.x, y + pos.y, z + pos.z);
+            return new Vector3Int(x + pos.x, y + pos.y, z + pos.z);
         }
 
-        public BlockPos Subtract(BlockPos pos)
+        public Vector3Int Subtract(Vector3Int pos)
         {
-            return new BlockPos(x - pos.x, y - pos.y, z - pos.z);
+            return new Vector3Int(x - pos.x, y - pos.y, z - pos.z);
         }
 
-        public BlockPos Negate()
+        public Vector3Int Negate()
         {
-            return new BlockPos(-x, -y, -z);
+            return new Vector3Int(-x, -y, -z);
         }
 
         public byte[] ToBytes()
@@ -121,103 +121,103 @@ namespace Voxelmetric.Code.Data_types
                 BZ[0], BZ[1], BZ[2], BZ[3]};
         }
 
-        public static BlockPos FromBytes(byte[] bytes, int offset)
+        public static Vector3Int FromBytes(byte[] bytes, int offset)
         {
-            return new BlockPos(
+            return new Vector3Int(
                 BitConverter.ToInt32(bytes, offset),
                 BitConverter.ToInt32(bytes, offset + 4),
                 BitConverter.ToInt32(bytes, offset + 8));
         }
 
         //BlockPos and Vector3 can be substituted for one another
-        public static implicit operator BlockPos(Vector3 v)
+        public static implicit operator Vector3Int(Vector3 v)
         {
-            BlockPos blockPos = new BlockPos(
+            Vector3Int vector3Int = new Vector3Int(
                 Mathf.RoundToInt(v.x * Env.BlockSizeInv),
                 Mathf.RoundToInt(v.y * Env.BlockSizeInv),
                 Mathf.RoundToInt(v.z * Env.BlockSizeInv)
                 );
 
-            return blockPos;
+            return vector3Int;
         }
 
-        public static implicit operator Vector3(BlockPos pos)
+        public static implicit operator Vector3(Vector3Int pos)
         {
             return new Vector3(pos.x, pos.y, pos.z) * Env.BlockSize;
         }
 
-        public static implicit operator BlockPos(Direction d)
+        public static implicit operator Vector3Int(Direction d)
         {
             switch (d) {
                 case Direction.up:
-                    return new BlockPos(0, 1, 0);
+                    return new Vector3Int(0, 1, 0);
                 case Direction.down:
-                    return new BlockPos(0, -1, 0);
+                    return new Vector3Int(0, -1, 0);
                 case Direction.north:
-                    return new BlockPos(0, 0, 1);
+                    return new Vector3Int(0, 0, 1);
                 case Direction.east:
-                    return new BlockPos(1, 0, 0);
+                    return new Vector3Int(1, 0, 0);
                 case Direction.south:
-                    return new BlockPos(0, 0, -1);
+                    return new Vector3Int(0, 0, -1);
                 case Direction.west:
-                    return new BlockPos(-1, 0, 0);
+                    return new Vector3Int(-1, 0, 0);
                 default:
-                    return new BlockPos();
+                    return new Vector3Int();
             }
         }
 
         //These operators let you add and subtract BlockPos from each other
         //or check equality with == and !=
-        public static BlockPos operator -(BlockPos pos1, BlockPos pos2)
+        public static Vector3Int operator -(Vector3Int pos1, Vector3Int pos2)
         {
             return pos1.Subtract(pos2);
         }
 
-        public static BlockPos operator -(BlockPos pos) {
+        public static Vector3Int operator -(Vector3Int pos) {
             return pos.Negate();
         }
 
-        public static bool operator >(BlockPos pos1, BlockPos pos2)
+        public static bool operator >(Vector3Int pos1, Vector3Int pos2)
         {
             return (pos1.x > pos2.x || pos1.y > pos2.y || pos1.z > pos2.x);
         }
 
-        public static bool operator <(BlockPos pos1, BlockPos pos2)
+        public static bool operator <(Vector3Int pos1, Vector3Int pos2)
         {
             return (pos1.x < pos2.x || pos1.y < pos2.y || pos1.z < pos2.x);
         }
 
-        public static bool operator >=(BlockPos pos1, BlockPos pos2)
+        public static bool operator >=(Vector3Int pos1, Vector3Int pos2)
         {
             return (pos1.x >= pos2.x || pos1.y >= pos2.y || pos1.z >= pos2.x);
         }
 
-        public static bool operator <=(BlockPos pos1, BlockPos pos2)
+        public static bool operator <=(Vector3Int pos1, Vector3Int pos2)
         {
             return (pos1.x <= pos2.x || pos1.y <= pos2.y || pos1.z <= pos2.x);
         }
 
-        public static BlockPos operator +(BlockPos pos1, BlockPos pos2)
+        public static Vector3Int operator +(Vector3Int pos1, Vector3Int pos2)
         {
             return pos1.Add(pos2);
         }
 
-        public static BlockPos operator *(BlockPos pos, int i)
+        public static Vector3Int operator *(Vector3Int pos, int i)
         {
-            return new BlockPos(pos.x * i, pos.y * i, pos.z * i);
+            return new Vector3Int(pos.x * i, pos.y * i, pos.z * i);
         }
 
-        public static BlockPos operator *(BlockPos pos1, BlockPos pos2)
+        public static Vector3Int operator *(Vector3Int pos1, Vector3Int pos2)
         {
-            return new BlockPos(pos1.x * pos2.x, pos1.y * pos2.y, pos1.z * pos2.z);
+            return new Vector3Int(pos1.x * pos2.x, pos1.y * pos2.y, pos1.z * pos2.z);
         }
 
-        public static bool operator ==(BlockPos pos1, BlockPos pos2)
+        public static bool operator ==(Vector3Int pos1, Vector3Int pos2)
         {
             return pos1.Equals(pos2);
         }
 
-        public static bool operator !=(BlockPos pos1, BlockPos pos2)
+        public static bool operator !=(Vector3Int pos1, Vector3Int pos2)
         {
             return !pos1.Equals(pos2);
         }
@@ -235,10 +235,10 @@ namespace Voxelmetric.Code.Data_types
         //
         // Summary:
         //     Shorthand for writing BlockPos(0, 0, 0).
-        public static readonly BlockPos zero = new BlockPos(0, 0, 0);
+        public static readonly Vector3Int zero = new Vector3Int(0, 0, 0);
         //
         // Summary:
         //     Shorthand for writing BlockPos(1, 1, 1).
-        public static readonly BlockPos one = new BlockPos(1, 1, 1);
+        public static readonly Vector3Int one = new Vector3Int(1, 1, 1);
     }
 }

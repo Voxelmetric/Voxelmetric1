@@ -36,11 +36,11 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
         public bool Diag_DrawWorldBounds;
         public bool Diag_DrawLoadRange;
 
-        private BlockPos[] m_chunkPositions;
+        private Vector3Int[] m_chunkPositions;
         private Plane[] m_cameraPlanes = new Plane[6];
         private Clipmap m_clipmap;
-        private BlockPos m_viewerPos;
-        private BlockPos m_viewerPosPrev;
+        private Vector3Int m_viewerPos;
+        private Vector3Int m_viewerPosPrev;
 
         //! A list of chunks to update
         private readonly List<Chunk> m_updateRequests = new List<Chunk>();
@@ -54,7 +54,7 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
         void Start()
         {
             UpdateViewerPosition();
-            m_viewerPos += BlockPos.one;
+            m_viewerPos += Vector3Int.one;
             // Add some arbirtary value so that m_viewerPosPrev is different from m_viewerPos
         }
 
@@ -90,20 +90,20 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
                 m_clipmap.Init(0, 0);
 
                 m_chunkPositions = ChunkLoadOrder.ChunkPositions(ChunkLoadRadius);
-                m_viewerPos = m_viewerPos + BlockPos.one; // Invalidate prev pos so that updated ranges can take effect right away
+                m_viewerPos = m_viewerPos + Vector3Int.one; // Invalidate prev pos so that updated ranges can take effect right away
             }
         }
 
         private void UpdateViewerPosition()
         {
-            BlockPos pos = ((BlockPos)transform.position).ContainingChunkCoordinates();
+            Vector3Int pos = ((Vector3Int)transform.position).ContainingChunkCoordinates();
             int posX = pos.x>>Env.ChunkPower;
             int posY = pos.y>>Env.ChunkPower;
             int posZ = pos.z>>Env.ChunkPower;
 
             // Update the viewer position
             m_viewerPosPrev = m_viewerPos;
-            m_viewerPos = new BlockPos(posX, FollowCamera ? posY : 0, posZ);
+            m_viewerPos = new Vector3Int(posX, FollowCamera ? posY : 0, posZ);
         }
 
         private void OnPreProcessChunks()
@@ -128,7 +128,7 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
                 return;
 
             // Translate the viewer position to world position
-            BlockPos viewerPosInWP = m_viewerPos*Env.ChunkSize;
+            Vector3Int viewerPosInWP = m_viewerPos*Env.ChunkSize;
 
             int minY = viewerPosInWP.y+world.config.minY;
             int maxY = viewerPosInWP.y+world.config.maxY;
@@ -140,7 +140,7 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
                 for (int y = minY; y<=maxY; y += Env.ChunkSize)
                 {
                     // Translate array postions to world/chunk positions
-                    BlockPos newChunkPos = new BlockPos(
+                    Vector3Int newChunkPos = new Vector3Int(
                         (m_chunkPositions[i].x<<Env.ChunkPower)+viewerPosInWP.x,
                         (m_chunkPositions[i].y<<Env.ChunkPower)+y,
                         (m_chunkPositions[i].z<<Env.ChunkPower)+viewerPosInWP.z
@@ -198,7 +198,7 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
         
         private void OnProcessChunk(Chunk chunk)
         {
-            BlockPos localChunkPos = new BlockPos(
+            Vector3Int localChunkPos = new Vector3Int(
                 chunk.pos.x>>Env.ChunkPower,
                 chunk.pos.y>>Env.ChunkPower,
                 chunk.pos.z>>Env.ChunkPower
@@ -271,11 +271,11 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
 
                     if (Diag_DrawLoadRange)
                     {
-                        BlockPos pos = chunk.pos;
+                        Vector3Int pos = chunk.pos;
 
                         if (chunk.pos.y==0)
                         {
-                            BlockPos localChunkPos = new BlockPos(
+                            Vector3Int localChunkPos = new Vector3Int(
                                 pos.x>>Env.ChunkPower,
                                 pos.y>>Env.ChunkPower,
                                 pos.z>>Env.ChunkPower

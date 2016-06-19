@@ -12,7 +12,7 @@ namespace Voxelmetric.Code.Utilities
         public const float BlockSizeInv = 1f/BlockSize;
         public const int ChunkVolume = ChunkSize*ChunkSize*ChunkSize;
 
-        public static readonly BlockPos ChunkSizePos = BlockPos.one * ChunkSize;
+        public static readonly Vector3Int ChunkSizePos = Vector3Int.one * ChunkSize;
 
         // Padding added to the size of block faces to fix floating point issues 
         // where tiny gaps can appear between block faces

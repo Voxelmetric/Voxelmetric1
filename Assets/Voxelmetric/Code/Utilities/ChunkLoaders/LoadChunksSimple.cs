@@ -38,10 +38,10 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
         private int m_chunkLoadRadiusPrev;
         private int m_chunkDeleteRadiusPrev;
 
-        private BlockPos[] m_chunkPositions;
+        private Vector3Int[] m_chunkPositions;
         private Plane[] m_cameraPlanes = new Plane[6];
-        private BlockPos m_viewerPos;
-        private BlockPos m_viewerPosPrev;
+        private Vector3Int m_viewerPos;
+        private Vector3Int m_viewerPosPrev;
 
         //! A list of chunks to update
         private readonly List<Chunk> m_updateRequests = new List<Chunk>();
@@ -59,7 +59,7 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
 
             UpdateViewerPosition();
             // Add some arbirtary value so that m_viewerPosPrev is different from m_viewerPos
-            m_viewerPos += BlockPos.one;
+            m_viewerPos += Vector3Int.one;
         }
 
         void Update()
@@ -97,7 +97,7 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
                 for (int y = minY; y<=maxY; y += Env.ChunkSize)
                 {
                     // Translate array postions to world/chunk positions
-                    BlockPos newChunkPos = new BlockPos(
+                    Vector3Int newChunkPos = new Vector3Int(
                         (m_chunkPositions[i].x<<Env.ChunkPower)+ m_viewerPos.x,
                         (m_chunkPositions[i].y<<Env.ChunkPower)+y,
                         (m_chunkPositions[i].z<<Env.ChunkPower)+ m_viewerPos.z
@@ -182,16 +182,16 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
             if (isDifference)
                 m_chunkPositions = ChunkLoadOrder.ChunkPositions(ChunkLoadRadius);
             if (isDifference || ChunkDeleteRadius!=m_chunkDeleteRadiusPrev)
-                m_viewerPos = m_viewerPos + BlockPos.one; // Invalidate prev pos so that updated ranges can take effect right away
+                m_viewerPos = m_viewerPos + Vector3Int.one; // Invalidate prev pos so that updated ranges can take effect right away
         }
 
         private void UpdateViewerPosition()
         {
-            BlockPos pos = ((BlockPos)transform.position).ContainingChunkCoordinates();
+            Vector3Int pos = ((Vector3Int)transform.position).ContainingChunkCoordinates();
 
             // Update the viewer position
             m_viewerPosPrev = m_viewerPos;
-            m_viewerPos = new BlockPos(pos.x, FollowCamera ? pos.y : 0, pos.z);
+            m_viewerPos = new Vector3Int(pos.x, FollowCamera ? pos.y : 0, pos.z);
         }
 
         private bool IsChunkInViewFrustum(Chunk chunk)
@@ -218,7 +218,7 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
 
                     if (Diag_DrawLoadRange)
                     {
-                        BlockPos pos = chunk.pos;
+                        Vector3Int pos = chunk.pos;
                         int xd = Mathf.Abs((m_viewerPos.x-pos.x)>>Env.ChunkPower);
                         int zd = Mathf.Abs((m_viewerPos.z-pos.z)>>Env.ChunkPower);
                         if (xd*xd+zd*zd>=ChunkDeleteRadius*ChunkDeleteRadius)

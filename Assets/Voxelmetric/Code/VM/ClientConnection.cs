@@ -76,17 +76,17 @@ namespace Voxelmetric.Code.VM
 
         public void HandleMessage(byte[] receivedData)
         {
-            BlockPos pos;
+            Vector3Int pos;
 
             switch (receivedData[0])
             {
                 case VmNetworking.SendBlockChange:
-                    pos = BlockPos.FromBytes(receivedData, 1);
+                    pos = Vector3Int.FromBytes(receivedData, 1);
                     ushort type = BitConverter.ToUInt16(receivedData, 13);
                     server.ReceiveChange(pos, type, ID);
                     break;
                 case VmNetworking.RequestChunkData:
-                    pos = BlockPos.FromBytes(receivedData, 1);
+                    pos = Vector3Int.FromBytes(receivedData, 1);
 
                     if (debugClientConnection)
                         Debug.Log("ClientConnection.HandleMessage (" + Thread.CurrentThread.ManagedThreadId + "): " + ID

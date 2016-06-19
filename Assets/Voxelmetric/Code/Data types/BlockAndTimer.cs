@@ -2,10 +2,10 @@
 {
     public struct BlockAndTimer
     {
-        public BlockPos pos;
+        public Vector3Int pos;
         public float time;
 
-        public BlockAndTimer(BlockPos pos, float time)
+        public BlockAndTimer(Vector3Int pos, float time)
         {
             this.pos = pos;
             this.time = time;

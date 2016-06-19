@@ -56,7 +56,7 @@ public class Block
     {
     }
 
-    public virtual void BuildBlock(Chunk chunk, BlockPos localpos, BlockPos globalPos)
+    public virtual void BuildBlock(Chunk chunk, Vector3Int localpos, Vector3Int globalPos)
     {
     }
 
@@ -65,27 +65,27 @@ public class Block
         return false;
     }
 
-    public virtual void BuildFace(Chunk chunk, BlockPos localPos, BlockPos globalPos, Direction dir)
+    public virtual void BuildFace(Chunk chunk, Vector3Int localPos, Vector3Int globalPos, Direction dir)
     {
     }
 
-    public virtual void OnCreate(Chunk chunk, BlockPos localPos, BlockPos globalPos)
+    public virtual void OnCreate(Chunk chunk, Vector3Int localPos, Vector3Int globalPos)
     {
     }
 
-    public virtual void OnDestroy(Chunk chunk, BlockPos localPos, BlockPos globalPos)
+    public virtual void OnDestroy(Chunk chunk, Vector3Int localPos, Vector3Int globalPos)
     {
     }
 
-    public virtual void RandomUpdate(Chunk chunk, BlockPos localPos, BlockPos globalPos)
+    public virtual void RandomUpdate(Chunk chunk, Vector3Int localPos, Vector3Int globalPos)
     {
     }
 
-    public virtual void ScheduledUpdate(Chunk chunk, BlockPos localPos, BlockPos globalPos)
+    public virtual void ScheduledUpdate(Chunk chunk, Vector3Int localPos, Vector3Int globalPos)
     {
     }
 
-    public virtual bool RaycastHit(Vector3 pos, Vector3 dir, BlockPos bPos)
+    public virtual bool RaycastHit(Vector3 pos, Vector3 dir, Vector3Int bPos)
     {
         return solid;
     }

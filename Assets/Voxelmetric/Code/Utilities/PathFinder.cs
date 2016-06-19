@@ -10,13 +10,13 @@ namespace Voxelmetric.Code.Utilities
     public class PathFinder {
 
         World world;
-        Dictionary<BlockPos, Heuristics> open = new Dictionary<BlockPos, Heuristics>();
-        Dictionary<BlockPos, Heuristics> closed = new Dictionary<BlockPos, Heuristics>();
+        Dictionary<Vector3Int, Heuristics> open = new Dictionary<Vector3Int, Heuristics>();
+        Dictionary<Vector3Int, Heuristics> closed = new Dictionary<Vector3Int, Heuristics>();
 
-        public List<BlockPos> path = new List<BlockPos>();
+        public List<Vector3Int> path = new List<Vector3Int>();
 
-        BlockPos targetLocation;
-        BlockPos startLocation;
+        Vector3Int targetLocation;
+        Vector3Int startLocation;
 
         int entityHeight;
 
@@ -36,9 +36,9 @@ namespace Voxelmetric.Code.Utilities
             /// Estimated distance to target
             public float h;
 
-            public BlockPos parent;
+            public Vector3Int parent;
 
-            public Heuristics(float g, float h, BlockPos parent)
+            public Heuristics(float g, float h, Vector3Int parent)
             {
                 this.g = g;
                 this.h = h;
@@ -46,7 +46,7 @@ namespace Voxelmetric.Code.Utilities
             }
         };
 
-        public PathFinder(BlockPos start, BlockPos target, World world, float range = 0.5f, int entityHeight=1)
+        public PathFinder(Vector3Int start, Vector3Int target, World world, float range = 0.5f, int entityHeight=1)
         {
             status = Status.working;
             this.range = range;
@@ -78,7 +78,7 @@ namespace Voxelmetric.Code.Utilities
             }
         }
 
-        private void PathComplete(BlockPos lastTile)
+        private void PathComplete(Vector3Int lastTile)
         {
             Heuristics pos;
             closed.TryGetValue(lastTile, out pos);
@@ -96,12 +96,12 @@ namespace Voxelmetric.Code.Utilities
 
         }
 
-        private static BlockPos FailedPos = new BlockPos(0, int.MaxValue, 0);
+        private static Vector3Int FailedPos = new Vector3Int(0, int.MaxValue, 0);
 
         private void ProcessBest()
         {
             float shortestDist = (distanceFromStartToTarget*maxDistToTravelMultiplier) + maxDistToTravelAfterDirect;
-            BlockPos bestPos = FailedPos;
+            Vector3Int bestPos = FailedPos;
 
             foreach (var tile in open)
             {
@@ -130,7 +130,7 @@ namespace Voxelmetric.Code.Utilities
             ProcessTile(bestPos);
         }
 
-        private void ProcessTile(BlockPos pos)
+        private void ProcessTile(Vector3Int pos)
         {
             Heuristics h = new Heuristics();
             bool exists = open.TryGetValue(pos, out h);
@@ -144,19 +144,19 @@ namespace Voxelmetric.Code.Utilities
             CheckAdjacent(pos, h);
         }
 
-        private void CheckAdjacent(BlockPos pos, Heuristics dist)
+        private void CheckAdjacent(Vector3Int pos, Heuristics dist)
         {
-            List<BlockPos> adjacentPositions = new List<BlockPos>();
+            List<Vector3Int> adjacentPositions = new List<Vector3Int>();
             List<float> distanceFromStart= new List<float>();
 
             //Cardinal directions
-            adjacentPositions.Add(new BlockPos(pos.x, pos.y, pos.z + 1));
+            adjacentPositions.Add(new Vector3Int(pos.x, pos.y, pos.z + 1));
             distanceFromStart.Add(dist.g +1);
-            adjacentPositions.Add(new BlockPos(pos.x + 1, pos.y, pos.z));
+            adjacentPositions.Add(new Vector3Int(pos.x + 1, pos.y, pos.z));
             distanceFromStart.Add(dist.g +1);
-            adjacentPositions.Add(new BlockPos(pos.x, pos.y, pos.z - 1));
+            adjacentPositions.Add(new Vector3Int(pos.x, pos.y, pos.z - 1));
             distanceFromStart.Add(dist.g +1);
-            adjacentPositions.Add(new BlockPos(pos.x - 1, pos.y, pos.z));
+            adjacentPositions.Add(new Vector3Int(pos.x - 1, pos.y, pos.z));
             distanceFromStart.Add(dist.g +1);
 
             ////diagonal directions
@@ -170,23 +170,23 @@ namespace Voxelmetric.Code.Utilities
             //distanceFromStart.Add(dist.g +1.414f);
 
             //climb up directions
-            adjacentPositions.Add(new BlockPos(pos.x, pos.y+1, pos.z+1));
+            adjacentPositions.Add(new Vector3Int(pos.x, pos.y+1, pos.z+1));
             distanceFromStart.Add(dist.g + 1.414f);
-            adjacentPositions.Add(new BlockPos(pos.x+1, pos.y+1, pos.z));
+            adjacentPositions.Add(new Vector3Int(pos.x+1, pos.y+1, pos.z));
             distanceFromStart.Add(dist.g + 1.414f);
-            adjacentPositions.Add(new BlockPos(pos.x, pos.y+1, pos.z-1));
+            adjacentPositions.Add(new Vector3Int(pos.x, pos.y+1, pos.z-1));
             distanceFromStart.Add(dist.g + 1.414f);
-            adjacentPositions.Add(new BlockPos(pos.x-1, pos.y+1, pos.z));
+            adjacentPositions.Add(new Vector3Int(pos.x-1, pos.y+1, pos.z));
             distanceFromStart.Add(dist.g + 1.414f);
 
             //climb down directions
-            adjacentPositions.Add(new BlockPos(pos.x, pos.y-1, pos.z+1));
+            adjacentPositions.Add(new Vector3Int(pos.x, pos.y-1, pos.z+1));
             distanceFromStart.Add(dist.g + 1.414f);
-            adjacentPositions.Add(new BlockPos(pos.x+1, pos.y-1, pos.z));
+            adjacentPositions.Add(new Vector3Int(pos.x+1, pos.y-1, pos.z));
             distanceFromStart.Add(dist.g + 1.414f);
-            adjacentPositions.Add(new BlockPos(pos.x, pos.y-1, pos.z-1));
+            adjacentPositions.Add(new Vector3Int(pos.x, pos.y-1, pos.z-1));
             distanceFromStart.Add(dist.g + 1.414f);
-            adjacentPositions.Add(new BlockPos(pos.x-1, pos.y-1, pos.z));
+            adjacentPositions.Add(new Vector3Int(pos.x-1, pos.y-1, pos.z));
             distanceFromStart.Add(dist.g + 1.414f);
 
             for (int i = 0; i<adjacentPositions.Count; i++)
@@ -221,7 +221,7 @@ namespace Voxelmetric.Code.Utilities
 
         }
 
-        public bool IsWalkable(World world, BlockPos pos)
+        public bool IsWalkable(World world, Vector3Int pos)
         {
             Block block = world.blocks.GetBlock(pos);
             if (!block.canBeWalkedOn)
@@ -238,7 +238,7 @@ namespace Voxelmetric.Code.Utilities
 
         }
 
-        public static float Distance(BlockPos a, BlockPos b)
+        public static float Distance(Vector3Int a, Vector3Int b)
         {
             var x = a.x - b.x;
             var y = a.y - b.y;

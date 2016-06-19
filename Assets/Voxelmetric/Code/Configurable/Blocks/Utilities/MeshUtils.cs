@@ -9,7 +9,7 @@ namespace Voxelmetric.Code.Configurable.Blocks.Utilities
 {
     public static class MeshUtils {
 
-        public static void BuildCrossMesh(Chunk chunk, BlockPos localPos, BlockPos globalPos, TextureCollection texture, bool useOffset = true)
+        public static void BuildCrossMesh(Chunk chunk, Vector3Int localPos, Vector3Int globalPos, TextureCollection texture, bool useOffset = true)
         {
             float halfBlock = (Env.BlockSize / 2) + Env.BlockFacePadding;
 

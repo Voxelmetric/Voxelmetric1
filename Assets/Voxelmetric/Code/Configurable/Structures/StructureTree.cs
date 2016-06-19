@@ -23,7 +23,7 @@ public class StructureTree: GeneratedStructure
         log = new BlockData(world.blockProvider.GetBlock("log").type);
     }
 
-    public override void Build(World world, Chunk chunk, BlockPos pos, TerrainLayer layer)
+    public override void Build(World world, Chunk chunk, Vector3Int pos, TerrainLayer layer)
     {
         int leavesRange = layer.GetNoise(pos.x, 0, pos.z, 1f, 2, 1) +1;
         for (int x = -leavesRange; x <= leavesRange; x++)
@@ -32,7 +32,7 @@ public class StructureTree: GeneratedStructure
             {
                 for (int z = -leavesRange; z <= leavesRange; z++)
                 {
-                    if (pos.Add(x, y, z) < chunk.pos + new BlockPos(Env.ChunkSize, Env.ChunkSize, Env.ChunkSize) && pos.Add(x, y, z) >= chunk.pos)
+                    if (pos.Add(x, y, z) < chunk.pos + new Vector3Int(Env.ChunkSize, Env.ChunkSize, Env.ChunkSize) && pos.Add(x, y, z) >= chunk.pos)
                     {
                         world.blocks.Set(pos.Add(x, y, z), leaves);
                     }
@@ -41,7 +41,7 @@ public class StructureTree: GeneratedStructure
         }
         for (int y = 0; y <= 5; y++)
         {
-            if (pos.Add(0, y, 0) < chunk.pos + new BlockPos(Env.ChunkSize, Env.ChunkSize, Env.ChunkSize)
+            if (pos.Add(0, y, 0) < chunk.pos + new Vector3Int(Env.ChunkSize, Env.ChunkSize, Env.ChunkSize)
                 && pos.Add(0, y, 0) >= chunk.pos)
             {
                 world.blocks.Set(pos.Add(0, y, 0), log);

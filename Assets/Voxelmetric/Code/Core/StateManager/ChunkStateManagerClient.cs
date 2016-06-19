@@ -521,16 +521,16 @@ namespace Voxelmetric.Code.Core.StateManager
 
         private void SubscribeNeighbors(bool subscribe)
         {
-            BlockPos pos = chunk.pos;
-            SubscribeTwoNeighbors(new BlockPos(pos.x + Env.ChunkSize, pos.y, pos.z), subscribe);
-            SubscribeTwoNeighbors(new BlockPos(pos.x - Env.ChunkSize, pos.y, pos.z), subscribe);
-            SubscribeTwoNeighbors(new BlockPos(pos.x, pos.y + Env.ChunkSize, pos.z), subscribe);
-            SubscribeTwoNeighbors(new BlockPos(pos.x, pos.y - Env.ChunkSize, pos.z), subscribe);
-            SubscribeTwoNeighbors(new BlockPos(pos.x, pos.y, pos.z + Env.ChunkSize), subscribe);
-            SubscribeTwoNeighbors(new BlockPos(pos.x, pos.y, pos.z - Env.ChunkSize), subscribe);
+            Vector3Int pos = chunk.pos;
+            SubscribeTwoNeighbors(new Vector3Int(pos.x + Env.ChunkSize, pos.y, pos.z), subscribe);
+            SubscribeTwoNeighbors(new Vector3Int(pos.x - Env.ChunkSize, pos.y, pos.z), subscribe);
+            SubscribeTwoNeighbors(new Vector3Int(pos.x, pos.y + Env.ChunkSize, pos.z), subscribe);
+            SubscribeTwoNeighbors(new Vector3Int(pos.x, pos.y - Env.ChunkSize, pos.z), subscribe);
+            SubscribeTwoNeighbors(new Vector3Int(pos.x, pos.y, pos.z + Env.ChunkSize), subscribe);
+            SubscribeTwoNeighbors(new Vector3Int(pos.x, pos.y, pos.z - Env.ChunkSize), subscribe);
         }
 
-        private void SubscribeTwoNeighbors(BlockPos neighborPos, bool subscribe)
+        private void SubscribeTwoNeighbors(Vector3Int neighborPos, bool subscribe)
         {
             Chunk neighbor = chunk.world.chunks.Get(neighborPos);
             if (neighbor != null)

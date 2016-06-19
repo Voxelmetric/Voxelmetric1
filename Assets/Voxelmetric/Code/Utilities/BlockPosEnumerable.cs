@@ -4,21 +4,21 @@ using Voxelmetric.Code.Data_types;
 
 namespace Voxelmetric.Code.Utilities
 {
-    public class BlockPosEnumerable : IEnumerable<BlockPos> {
+    public class BlockPosEnumerable : IEnumerable<Vector3Int> {
 
-        private readonly BlockPos start;
-        private readonly BlockPos end;
-        private readonly BlockPos step;
+        private readonly Vector3Int start;
+        private readonly Vector3Int end;
+        private readonly Vector3Int step;
 
-        public BlockPosEnumerable(BlockPos end, bool includesEnd = false) :
-            this(BlockPos.zero, end, includesEnd) {
+        public BlockPosEnumerable(Vector3Int end, bool includesEnd = false) :
+            this(Vector3Int.zero, end, includesEnd) {
             }
 
-        public BlockPosEnumerable(BlockPos start, BlockPos end, bool includesEnd = false) :
-            this(start, end, BlockPos.one, includesEnd) {
+        public BlockPosEnumerable(Vector3Int start, Vector3Int end, bool includesEnd = false) :
+            this(start, end, Vector3Int.one, includesEnd) {
             }
 
-        public BlockPosEnumerable(BlockPos start, BlockPos end, BlockPos step, bool includesEnd = false) {
+        public BlockPosEnumerable(Vector3Int start, Vector3Int end, Vector3Int step, bool includesEnd = false) {
             this.start = start;
             this.end = end;
             this.step = step;
@@ -26,13 +26,13 @@ namespace Voxelmetric.Code.Utilities
                 this.end += step;
         }
 
-        public IEnumerator<BlockPos> GetEnumerator()
+        public IEnumerator<Vector3Int> GetEnumerator()
         {
             for (int y = start.y; y < end.y; y += step.y) {
                 for (int z = start.z; z < end.z; z += step.z) {
                     for (int x = start.x; x < end.x; x += step.x)
                     {
-                        yield return new BlockPos(x, y, z);
+                        yield return new Vector3Int(x, y, z);
                     }
                 }
             }

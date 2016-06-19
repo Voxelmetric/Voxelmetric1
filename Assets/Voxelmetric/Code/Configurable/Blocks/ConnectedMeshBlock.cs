@@ -23,7 +23,7 @@ public class ConnectedMeshBlock: CustomMeshBlock
         }
     }
 
-    public override void BuildBlock(Chunk chunk, BlockPos localPos, BlockPos globalPos)
+    public override void BuildBlock(Chunk chunk, Vector3Int localPos, Vector3Int globalPos)
     {
         Rect texture;
         DrawCallBatcher batcher = chunk.render.batcher;

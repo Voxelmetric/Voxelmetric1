@@ -18,9 +18,9 @@ namespace Voxelmetric.Code.Builders
 
                 int x, y, z;
                 Helpers.GetChunkIndex3DFrom1D(i, out x, out y, out z);
-                BlockPos localBlockPos = new BlockPos(x, y, z);
+                Vector3Int localVector3Int = new Vector3Int(x, y, z);
 
-                block.BuildBlock(chunk, localBlockPos, chunk.pos + localBlockPos);
+                block.BuildBlock(chunk, localVector3Int, chunk.pos + localVector3Int);
             }
         }
     }

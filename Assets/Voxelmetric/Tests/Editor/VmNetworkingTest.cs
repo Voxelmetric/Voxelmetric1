@@ -17,7 +17,7 @@ public class VmNetworkingTest {
         World world = TestUtils.CreateWorldDefault();
         world.Configure();
 
-        BlockPos chunkPos = new BlockPos(0, 0, 0);
+        Vector3Int chunkPos = new Vector3Int(0, 0, 0);
         Chunk fromChunk = Chunk.CreateChunk(world, chunkPos, true);
         TestUtils.SetChunkBlocksRandom(fromChunk, new System.Random(444));
         
@@ -58,7 +58,7 @@ public class VmNetworkingTest {
     public void TCPTest() {
         bool debug = false;
 
-        var chunkSizePos = BlockPos.one * Env.ChunkSize;
+        var chunkSizePos = Vector3Int.one * Env.ChunkSize;
         BlockPosEnumerable chunkPosns = new BlockPosEnumerable(-chunkSizePos, chunkSizePos, chunkSizePos, true);
 
         VmServer server = null;
@@ -82,7 +82,7 @@ public class VmNetworkingTest {
             Assert.AreEqual(1, server.ClientCount, "Connected client count");
 
             // Setup a chunk with random blocks on the server
-            BlockPos chunkPos = new BlockPos(0, 0, 0);
+            Vector3Int chunkPos = new Vector3Int(0, 0, 0);
             Chunk serverChunk = Chunk.CreateChunk(serverWorld, chunkPos, false);
             var rand = new System.Random(444);
             TestUtils.SetChunkBlocksRandom(serverChunk, rand);

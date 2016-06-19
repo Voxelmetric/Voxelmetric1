@@ -40,7 +40,7 @@ public class StructureLayer : TerrainLayer
         {
             for (int z = minZ; z < maxZ; z++)
             {
-                BlockPos pos = new BlockPos(x, 0, z);
+                Vector3Int pos = new Vector3Int(x, 0, z);
                 float chanceAtPos = pos.Random(44, true);
 
                 if (chance > chanceAtPos)
@@ -51,7 +51,7 @@ public class StructureLayer : TerrainLayer
                         && pos.Add(0, 0, -1).Random(44, true) > chanceAtPos)
                     {
                         int height = terrainGen.GenerateTerrainForBlockColumn(chunk, x, z, true);
-                        structure.Build(world, chunk, new BlockPos(x, height, z), this);
+                        structure.Build(world, chunk, new Vector3Int(x, height, z), this);
                     }
                 }
             }

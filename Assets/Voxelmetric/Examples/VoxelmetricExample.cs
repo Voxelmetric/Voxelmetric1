@@ -18,8 +18,8 @@ namespace Voxelmetric.Examples
         public Text saveProgressText;
         public World world;
 
-        BlockPos pfStart;
-        BlockPos pfStop;
+        Vector3Int pfStart;
+        Vector3Int pfStop;
         public PathFinder pf;
 
         SaveProgress saveProgress;
@@ -62,7 +62,7 @@ namespace Voxelmetric.Examples
 
             VmRaycastHit hit = Code.Voxelmetric.Raycast(new Ray(Camera.main.transform.position, mousePos - Camera.main.transform.position), world, 1000);
 
-            selectedBlockText.text = Code.Voxelmetric.GetBlock(world, hit.blockPos).displayName;
+            selectedBlockText.text = Code.Voxelmetric.GetBlock(world, hit.vector3Int).displayName;
 
             if (Input.GetMouseButtonDown(0) && !eventSystem.IsPointerOverGameObject())
             {
@@ -70,18 +70,18 @@ namespace Voxelmetric.Examples
                 {
                     ushort type = world.blockProvider.GetType(blockToPlace);
                     bool adjacent = type != BlockProvider.AirType;
-                    Code.Voxelmetric.SetBlock(world, adjacent ? hit.adjacentPos : hit.blockPos, new BlockData(type));
+                    Code.Voxelmetric.SetBlock(world, adjacent ? hit.adjacentPos : hit.vector3Int, new BlockData(type));
                 }
             }
 
             if (Input.GetKeyDown(KeyCode.I))
             {
-                pfStart = hit.blockPos;
+                pfStart = hit.vector3Int;
             }
 
             if (Input.GetKeyDown(KeyCode.O))
             {
-                pfStop = hit.blockPos;
+                pfStop = hit.vector3Int;
             }
 
             if (Input.GetKeyDown(KeyCode.P))

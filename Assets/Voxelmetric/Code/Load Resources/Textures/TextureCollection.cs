@@ -38,7 +38,7 @@ namespace Voxelmetric.Code.Load_Resources.Textures
             }
         }
 
-        public Rect GetTexture(Chunk chunk, BlockPos localPos, BlockPos globalPos, Direction direction)
+        public Rect GetTexture(Chunk chunk, Vector3Int localPos, Vector3Int globalPos, Direction direction)
         {
             if (usesConnectedTextures)
             {

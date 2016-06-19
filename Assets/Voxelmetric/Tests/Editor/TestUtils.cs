@@ -75,7 +75,7 @@ public class TestUtils {
         Debug.Log(sb.ToString());
     }
 
-    public static readonly BlockPosEnumerable LocalPosns = new BlockPosEnumerable(BlockPos.one * Env.ChunkSize);
+    public static readonly BlockPosEnumerable LocalPosns = new BlockPosEnumerable(Vector3Int.one * Env.ChunkSize);
 
     public static AutoDictionary<string, int> FindWorldBlockCounts(World world) {
         var worldBlockCounts = new AutoDictionary<string, int>();
@@ -90,7 +90,7 @@ public class TestUtils {
 
     public static AutoDictionary<string, int> FindChunkBlockCounts(Chunk chunk) {
         AutoDictionary<string, int> chunkBlockCounts = new AutoDictionary<string, int>();
-        foreach (BlockPos localPos in LocalPosns) {
+        foreach (Vector3Int localPos in LocalPosns) {
             Block block = chunk.blocks.GetBlock(localPos);
             chunkBlockCounts[block.name]++;
         }
@@ -113,7 +113,7 @@ public class TestUtils {
             rndBlocks[type] = block;
         }
 
-        foreach (BlockPos localPos in LocalPosns)
+        foreach (Vector3Int localPos in LocalPosns)
             chunk.blocks.Set(localPos, new BlockData(rndBlocks[rand.Next(2)].type));
     }
 
@@ -126,12 +126,12 @@ public class TestUtils {
 
         Block block = new Block(type, config);
 
-        foreach (BlockPos localPos in LocalPosns)
+        foreach (Vector3Int localPos in LocalPosns)
             chunk.blocks.Set(localPos, new BlockData(block.type));
     }
 
     public static void AssertEqualContents(Chunk expected, Chunk actual, string message) {
-        foreach (BlockPos localPos in LocalPosns) {
+        foreach (Vector3Int localPos in LocalPosns) {
             Block expBlock = expected.blocks.GetBlock(localPos);
             Block actBlock = actual.blocks.GetBlock(localPos);
             Assert.AreEqual(expBlock.type, actBlock.type, message + " type at " + localPos);

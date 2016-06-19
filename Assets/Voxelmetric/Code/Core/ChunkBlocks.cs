@@ -24,7 +24,7 @@ namespace Voxelmetric.Code.Core
         private byte[] receiveBuffer;
         private int receiveIndex;
 
-        public readonly List<BlockPos> modifiedBlocks = new List<BlockPos>();
+        public readonly List<Vector3Int> modifiedBlocks = new List<Vector3Int>();
         public bool contentsModified;
 
         private static byte[] emptyBytes;
@@ -93,8 +93,8 @@ namespace Voxelmetric.Code.Core
                 int x, y, z;
                 Helpers.GetChunkIndex3DFrom1D(context.Index, out x, out y, out z);
 
-                BlockPos pos = new BlockPos(x, y, z);
-                BlockPos globalPos = pos + chunk.pos;
+                Vector3Int pos = new Vector3Int(x, y, z);
+                Vector3Int globalPos = pos + chunk.pos;
 
                 BlockData oldBlockData = blocks[context.Index];
 
@@ -188,7 +188,7 @@ namespace Voxelmetric.Code.Core
         /// </summary>
         /// <param name="pos">A local block position</param>
         /// <returns>The block at the position</returns>
-        public BlockData Get(BlockPos pos)
+        public BlockData Get(Vector3Int pos)
         {
             int index = Helpers.GetChunkIndex1DFrom3D(pos.x, pos.y, pos.z);
             return blocks[index];
@@ -209,7 +209,7 @@ namespace Voxelmetric.Code.Core
         /// </summary>
         /// <param name="pos">A local block position</param>
         /// <returns>The block at the position</returns>
-        public Block GetBlock(BlockPos pos)
+        public Block GetBlock(Vector3Int pos)
         {
             int index = Helpers.GetChunkIndex1DFrom3D(pos.x, pos.y, pos.z);
             return m_blockTypes[blocks[index].Type];
@@ -229,7 +229,7 @@ namespace Voxelmetric.Code.Core
         /// Sets the block at the given position
         /// </summary>
         /// <param name="pos">A local block position</param>
-        public void Set(BlockPos pos, BlockData blockData)
+        public void Set(Vector3Int pos, BlockData blockData)
         {
             int index = Helpers.GetChunkIndex1DFrom3D(pos.x, pos.y, pos.z);
 
@@ -273,7 +273,7 @@ namespace Voxelmetric.Code.Core
         /// <param name="pos">A local block position</param>
         /// <param name="blockData">BlockData to place at the given location</param>
         /// <param name="setBlockModified">Set to true to mark chunk data as modified</param>
-        public void Modify(BlockPos pos, BlockData blockData, bool setBlockModified)
+        public void Modify(Vector3Int pos, BlockData blockData, bool setBlockModified)
         {
             int index = Helpers.GetChunkIndex1DFrom3D(pos.x, pos.y, pos.z);
 
@@ -285,7 +285,7 @@ namespace Voxelmetric.Code.Core
             m_setBlockQueue.Add(new SetBlockContext(index, blockData, setBlockModified));
         }
 
-        public void BlockModified(BlockPos localPos, BlockPos globalPos, BlockData blockData)
+        public void BlockModified(Vector3Int localPos, Vector3Int globalPos, BlockData blockData)
         {
             //If this is the server log the changed block so that it can be saved
             if (chunk.world.networking.isServer)
@@ -435,7 +435,7 @@ namespace Voxelmetric.Code.Core
                             i += blockData.RestoreBlockData(receiveBuffer, i);
                         }
 
-                        Set(new BlockPos(x, y, z), blockData);
+                        Set(new Vector3Int(x, y, z), blockData);
                         blockCount--;
                     }
                 }

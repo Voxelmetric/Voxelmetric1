@@ -30,13 +30,13 @@ namespace Voxelmetric.Code.Core
             {
                 randomUpdateTime = 0;
 
-                BlockPos randomBlockPos = new BlockPos(
+                Vector3Int randomVector3Int = new Vector3Int(
                     Voxelmetric.resources.random.Next(0, Env.ChunkMask),
                     Voxelmetric.resources.random.Next(0, Env.ChunkMask),
                     Voxelmetric.resources.random.Next(0, Env.ChunkMask)
                     );
 
-                chunk.blocks.GetBlock(randomBlockPos).RandomUpdate(chunk, randomBlockPos, randomBlockPos+chunk.pos);
+                chunk.blocks.GetBlock(randomVector3Int).RandomUpdate(chunk, randomVector3Int, randomVector3Int+chunk.pos);
 
                 // Process Scheduled Updates
                 for (int i = 0; i<scheduledUpdates.Count; i++)
@@ -58,9 +58,9 @@ namespace Voxelmetric.Code.Core
 
         }
 
-        public void AddScheduledUpdate(BlockPos blockPos, float time)
+        public void AddScheduledUpdate(Vector3Int vector3Int, float time)
         {
-            scheduledUpdates.Add(new BlockAndTimer(blockPos, time));
+            scheduledUpdates.Add(new BlockAndTimer(vector3Int, time));
         }
     }
 }

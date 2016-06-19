@@ -17,18 +17,18 @@ namespace Voxelmetric.Code.Core
         /// Gets the chunk and retrives the block data at the given coordinates
         /// </summary>
         /// <param name="pos">Global position of the block data</param>
-        public BlockData Get(BlockPos pos)
+        public BlockData Get(Vector3Int pos)
         {
             Chunk chunk = world.chunks.Get(pos);
             if (chunk != null && pos.y>=world.config.minY)
             {
-                BlockPos blockPos = new BlockPos(
+                Vector3Int vector3Int = new Vector3Int(
                     pos.x & Env.ChunkMask,
                     pos.y & Env.ChunkMask,
                     pos.z & Env.ChunkMask
                     );
 
-                return chunk.blocks.Get(blockPos);
+                return chunk.blocks.Get(vector3Int);
             }
 
             return new BlockData(BlockProvider.AirType);
@@ -38,18 +38,18 @@ namespace Voxelmetric.Code.Core
         /// Gets the chunk and retrives the block at the given coordinates
         /// </summary>
         /// <param name="pos">Global position of the block</param>
-        public Block GetBlock(BlockPos pos)
+        public Block GetBlock(Vector3Int pos)
         {
             Chunk chunk = world.chunks.Get(pos);
             if (chunk != null && pos.y>=world.config.minY)
             {
-                BlockPos blockPos = new BlockPos(
+                Vector3Int vector3Int = new Vector3Int(
                     pos.x & Env.ChunkMask,
                     pos.y & Env.ChunkMask,
                     pos.z & Env.ChunkMask
                     );
 
-                BlockData blockData = chunk.blocks.Get(blockPos);
+                BlockData blockData = chunk.blocks.Get(vector3Int);
                 return world.blockProvider.BlockTypes[blockData.Type];
             }
 
@@ -61,19 +61,19 @@ namespace Voxelmetric.Code.Core
         /// </summary>
         /// <param name="pos">Global position of the block</param>
         /// <param name="blockData">The block be placed</param>
-        public void Set(BlockPos pos, BlockData blockData)
+        public void Set(Vector3Int pos, BlockData blockData)
         {
             Chunk chunk = world.chunks.Get(pos);
             if (chunk==null)
                 return;
 
-            BlockPos blockPos = new BlockPos(
+            Vector3Int vector3Int = new Vector3Int(
                 pos.x & Env.ChunkMask,
                 pos.y & Env.ChunkMask,
                 pos.z & Env.ChunkMask
                 );
 
-            chunk.blocks.Set(blockPos, blockData);
+            chunk.blocks.Set(vector3Int, blockData);
         }
 
         /// <summary>
@@ -83,19 +83,19 @@ namespace Voxelmetric.Code.Core
         /// <param name="pos">Global position of the block</param>
         /// <param name="blockData">The block be placed</param>
         /// <param name="setBlockModified">Set to true to mark chunk data as modified</param>
-        public void Modify(BlockPos pos, BlockData blockData, bool setBlockModified)
+        public void Modify(Vector3Int pos, BlockData blockData, bool setBlockModified)
         {
             Chunk chunk = world.chunks.Get(pos);
             if (chunk==null)
                 return;
 
-            BlockPos blockPos = new BlockPos(
+            Vector3Int vector3Int = new Vector3Int(
                 pos.x & Env.ChunkMask,
                 pos.y & Env.ChunkMask,
                 pos.z & Env.ChunkMask
                 );
 
-            chunk.blocks.Modify(blockPos, blockData, setBlockModified);
+            chunk.blocks.Modify(vector3Int, blockData, setBlockModified);
         }
     }
 }

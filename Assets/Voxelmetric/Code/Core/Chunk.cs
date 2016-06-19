@@ -12,7 +12,7 @@ namespace Voxelmetric.Code.Core
         private static int s_id = 0;
 
         public World world { get; private set; }
-        public BlockPos pos { get; private set; }
+        public Vector3Int pos { get; private set; }
         public LocalPools pools { get; private set; }
 
         public ChunkBlocks blocks { get; private set; }
@@ -27,7 +27,7 @@ namespace Voxelmetric.Code.Core
         //! need to be release where they were allocated. Thanks to this, associated containers could be made lock-free
         public int ThreadID { get; private set; }
 
-        public static Chunk CreateChunk(World world, BlockPos pos, bool isDedicated)
+        public static Chunk CreateChunk(World world, Vector3Int pos, bool isDedicated)
         {
             Chunk chunk = Globals.MemPools.ChunkPool.Pop();
 
@@ -59,7 +59,7 @@ namespace Voxelmetric.Code.Core
             stateManager = new ChunkStateManagerClient(this);
         }
 
-        private void Init(World world, BlockPos pos, IChunkStateManager stateManager)
+        private void Init(World world, Vector3Int pos, IChunkStateManager stateManager)
         {
             this.world = world;
             this.pos = pos;

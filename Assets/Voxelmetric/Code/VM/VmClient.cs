@@ -152,7 +152,7 @@ namespace Voxelmetric.Code.VM
             switch (receivedData[0])
             {
                 case VmNetworking.SendBlockChange:
-                    BlockPos pos = BlockPos.FromBytes(receivedData, 1);
+                    Vector3Int pos = Vector3Int.FromBytes(receivedData, 1);
                     ushort type = BitConverter.ToUInt16(receivedData, 13);
                     ReceiveChange(pos, new BlockData(type));
                     break;
@@ -162,7 +162,7 @@ namespace Voxelmetric.Code.VM
             }
         }
 
-        public void RequestChunk(BlockPos pos)
+        public void RequestChunk(Vector3Int pos)
         {
             if ( debugClient )
                 Debug.Log("VmClient.RequestChunk (" + Thread.CurrentThread.ManagedThreadId + "): " + pos);
@@ -175,7 +175,7 @@ namespace Voxelmetric.Code.VM
 
         private void ReceiveChunk(byte[] data)
         {
-            BlockPos pos = BlockPos.FromBytes(data, 1);
+            Vector3Int pos = Vector3Int.FromBytes(data, 1);
             Chunk chunk = world.chunks.Get(pos);
             // for now just issue an error if it isn't yet loaded
             if (chunk == null)
@@ -187,7 +187,7 @@ namespace Voxelmetric.Code.VM
                 chunk.blocks.ReceiveChunkData(data);
         }
 
-        public void BroadcastChange(BlockPos pos, BlockData blockData)
+        public void BroadcastChange(Vector3Int pos, BlockData blockData)
         {
             byte[] data = new byte[GetExpectedSize(VmNetworking.SendBlockChange)];
 
@@ -198,7 +198,7 @@ namespace Voxelmetric.Code.VM
             Send(data);
         }
 
-        private void ReceiveChange(BlockPos pos, BlockData block)
+        private void ReceiveChange(Vector3Int pos, BlockData block)
         {
             world.blocks.Modify(pos, block, false);
         }

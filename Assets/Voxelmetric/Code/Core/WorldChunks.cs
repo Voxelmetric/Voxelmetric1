@@ -7,14 +7,14 @@ namespace Voxelmetric.Code.Core
     public class WorldChunks
     {
         World world;
-        Dictionary<BlockPos, Chunk> chunks = new Dictionary<BlockPos, Chunk>();
+        Dictionary<Vector3Int, Chunk> chunks = new Dictionary<Vector3Int, Chunk>();
 
         public ICollection<Chunk> chunkCollection
         {
             get { return chunks.Values; }
         }
 
-        public ICollection<BlockPos> posCollection
+        public ICollection<Vector3Int> posCollection
         {
             get { return chunks.Keys; }
         }
@@ -27,7 +27,7 @@ namespace Voxelmetric.Code.Core
         /// <summary> Returns the chunk at the given position </summary>
         /// <param name="pos">Position of the chunk in the world coordinates</param>
         /// <returns>The chunk that contains the given block position or null if there is none</returns>
-        public Chunk Get(BlockPos pos)
+        public Chunk Get(Vector3Int pos)
         {
             pos = pos.ContainingChunkCoordinates();
 
@@ -37,7 +37,7 @@ namespace Voxelmetric.Code.Core
             return containerChunk;
         }
 
-        public void Set(BlockPos pos, Chunk chunk)
+        public void Set(Vector3Int pos, Chunk chunk)
         {
             pos = pos.ContainingChunkCoordinates();
             chunks[pos] = chunk;
@@ -57,10 +57,10 @@ namespace Voxelmetric.Code.Core
         /// <param name="pos">Position to create this chunk on in the world coordinates.</param>
         /// <param name="chunk">Chunk at a given world position</param>
         /// <returns>True if a new chunk was created. False otherwise</returns>
-        public bool CreateOrGetChunk(BlockPos pos, out Chunk chunk, bool isDedicated)
+        public bool CreateOrGetChunk(Vector3Int pos, out Chunk chunk, bool isDedicated)
         {
             // Let's keep it withing allowed world bounds
-            BlockPos chunkPos = pos.ContainingChunkCoordinates();
+            Vector3Int chunkPos = pos.ContainingChunkCoordinates();
             if (chunkPos.y>world.config.maxY || chunkPos.y<world.config.minY)
             {
                 chunk = null;

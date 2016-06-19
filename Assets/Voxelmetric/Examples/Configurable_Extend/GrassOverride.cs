@@ -21,7 +21,7 @@ public class GrassBlock: CubeBlock
     }
 
     // On random Update spread grass to any nearby dirt blocks on the surface
-    public override void RandomUpdate(Chunk chunk, BlockPos localPos, BlockPos globalPos)
+    public override void RandomUpdate(Chunk chunk, Vector3Int localPos, Vector3Int globalPos)
     {
         ChunkBlocks blocks = chunk.blocks;
         WorldBlocks blocksW = chunk.world.blocks;
@@ -39,7 +39,7 @@ public class GrassBlock: CubeBlock
             {
                 for (int z = -minZ; z<=maxZ; z++)
                 {
-                    BlockPos newPos = localPos.Add(x, y, z);
+                    Vector3Int newPos = localPos.Add(x, y, z);
                     if (blocks.Get(newPos).Equals(dirt) &&
                         blocksW.Get(globalPos.Add(x, y+1, z)).Equals(air))
                     {

@@ -21,7 +21,7 @@ namespace Voxelmetric.Code.Serialization
             return saveLocation;
         }
 
-        private static string FileName(BlockPos chunkLocation)
+        private static string FileName(Vector3Int chunkLocation)
         {
             string fileName = chunkLocation.x + "," + chunkLocation.y + "," + chunkLocation.z + ".bin";
             return fileName;

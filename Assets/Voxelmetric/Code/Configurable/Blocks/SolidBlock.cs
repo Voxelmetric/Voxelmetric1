@@ -18,7 +18,7 @@ public class SolidBlock : Block
         return false;
     }
 
-    public override void BuildBlock(Chunk chunk, BlockPos localPos, BlockPos globalPos)
+    public override void BuildBlock(Chunk chunk, Vector3Int localPos, Vector3Int globalPos)
     {
         WorldBlocks blocks = chunk.world.blocks;
 

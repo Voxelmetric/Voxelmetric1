@@ -20,14 +20,14 @@ namespace Voxelmetric.Code.Utilities
             dir = Quaternion.Inverse(world.transform.rotation) * dir;
 
             // BlockPos to check if the block should be returned
-            BlockPos bPos = pos;
+            Vector3Int bPos = pos;
             //Block pos that gets set to one block behind the hit block, useful for placing blocks at the hit location
-            BlockPos adjacentBPos = pos;
+            Vector3Int adjacentBPos = pos;
 
             // Positive copy of the direction
             Vector3 dirP = new Vector3(Math.Abs(dir.x), Math.Abs(dir.y), Math.Abs(dir.z));
             // The sign of the direction
-            BlockPos dirS = new Vector3(dir.x > 0 ? 1 : -1, dir.y > 0 ? 1 : -1, dir.z > 0 ? 1 : -1);
+            Vector3Int dirS = new Vector3(dir.x > 0 ? 1 : -1, dir.y > 0 ? 1 : -1, dir.z > 0 ? 1 : -1);
 
             // Boundary will be set each step as the nearest block boundary to each direction
             Vector3 boundary;
@@ -72,7 +72,7 @@ namespace Voxelmetric.Code.Utilities
                 // Set the block pos but use ResolveBlockPos because one of the components of pos will be exactly on a block boundary
                 // and will need to use the corresponding direction sign to decide which side of the boundary to fall on
                 adjacentBPos = bPos;
-                bPos = new BlockPos(ResolveBlockPos(pos.x, dirS.x), ResolveBlockPos(pos.y, dirS.y), ResolveBlockPos(pos.z, dirS.z));
+                bPos = new Vector3Int(ResolveBlockPos(pos.x, dirS.x), ResolveBlockPos(pos.y, dirS.y), ResolveBlockPos(pos.z, dirS.z));
                 hitBlock = world.blocks.GetBlock(bPos);
 
                 // The while loop then evaluates if hitblock is a viable block to stop on and
@@ -82,7 +82,7 @@ namespace Voxelmetric.Code.Utilities
             return new VmRaycastHit
             {
                 block = hitBlock,
-                blockPos = bPos,
+                vector3Int = bPos,
                 adjacentPos = adjacentBPos,
                 dir = dir,
                 distance = Vector3.Distance(ray.origin, pos),

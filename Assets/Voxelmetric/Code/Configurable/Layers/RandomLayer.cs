@@ -24,7 +24,7 @@ public class RandomLayer: TerrainLayer
 
     public override int GenerateLayer(Chunk chunk, int x, int z, int heightSoFar, float strength, bool justGetHeight = false)
     {
-        float posChance = new BlockPos(x, heightSoFar + 1, z).Random(200);
+        float posChance = new Vector3Int(x, heightSoFar + 1, z).Random(200);
 
         if (chance > posChance)
         {

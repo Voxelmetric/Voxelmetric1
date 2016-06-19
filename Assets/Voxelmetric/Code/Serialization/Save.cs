@@ -8,7 +8,7 @@ namespace Voxelmetric.Code.Serialization
     [Serializable]
     public class Save
     {
-        public BlockPos[] positions = new BlockPos[0];
+        public Vector3Int[] positions = new Vector3Int[0];
         public BlockData[] blocks = new BlockData[0];
 
         public readonly bool changed = false;
@@ -21,7 +21,7 @@ namespace Voxelmetric.Code.Serialization
         {
             this.chunk = chunk;
 
-            Dictionary<BlockPos, BlockData> blocksDictionary = new Dictionary<BlockPos, BlockData>();
+            Dictionary<Vector3Int, BlockData> blocksDictionary = new Dictionary<Vector3Int, BlockData>();
 
             if (existing != null)
             {
@@ -42,7 +42,7 @@ namespace Voxelmetric.Code.Serialization
             }
 
             blocks = new BlockData[blocksDictionary.Keys.Count];
-            positions = new BlockPos[blocksDictionary.Keys.Count];
+            positions = new Vector3Int[blocksDictionary.Keys.Count];
 
             int index = 0;
             foreach (var pair in blocksDictionary)
@@ -53,7 +53,7 @@ namespace Voxelmetric.Code.Serialization
             }
         }
 
-        private void AddBlocks(Dictionary<BlockPos, BlockData> blocksDictionary)
+        private void AddBlocks(Dictionary<Vector3Int, BlockData> blocksDictionary)
         {
             for (int i = 0; i < blocks.Length; i++)
             {

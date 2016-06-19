@@ -14,7 +14,7 @@ public class StructureTreeColored : GeneratedStructure
         negY = 0;
     }
 
-    public override void Build(World world, Chunk chunk, BlockPos pos, TerrainLayer layer)
+    public override void Build(World world, Chunk chunk, Vector3Int pos, TerrainLayer layer)
     {
         int leaves = layer.GetNoise(pos.x, 0, pos.z, 1f, 2, 1) + 1;
 
@@ -24,7 +24,7 @@ public class StructureTreeColored : GeneratedStructure
             {
                 for (int z = -leaves; z <= leaves; z++)
                 {
-                    if (pos.Add(x, y, z) < chunk.pos + new BlockPos(Env.ChunkSize, Env.ChunkSize, Env.ChunkSize)
+                    if (pos.Add(x, y, z) < chunk.pos + new Vector3Int(Env.ChunkSize, Env.ChunkSize, Env.ChunkSize)
                         && pos.Add(x, y, z) >= chunk.pos)
                     {
                         //Block block = BlockColored.SetBlockColor(new Block("coloredblock", world), 57, 100, 49);
@@ -37,7 +37,7 @@ public class StructureTreeColored : GeneratedStructure
         {
             if (y < world.config.maxY)
             {
-                if (pos.Add(0, y, 0) < chunk.pos + new BlockPos(Env.ChunkSize, Env.ChunkSize, Env.ChunkSize)
+                if (pos.Add(0, y, 0) < chunk.pos + new Vector3Int(Env.ChunkSize, Env.ChunkSize, Env.ChunkSize)
                     && pos.Add(0, y, 0) >= chunk.pos)
                 {
                     //Block block = BlockColored.SetBlockColor(new Block("coloredblock", world), 66, 44, 17);

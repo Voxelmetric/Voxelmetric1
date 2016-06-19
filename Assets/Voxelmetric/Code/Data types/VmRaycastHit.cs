@@ -5,8 +5,8 @@ namespace Voxelmetric.Code.Data_types
 {
     public struct VmRaycastHit
     {
-        public BlockPos blockPos;
-        public BlockPos adjacentPos;
+        public Vector3Int vector3Int;
+        public Vector3Int adjacentPos;
         public Vector3 dir;
         public float distance;
         public Block block;

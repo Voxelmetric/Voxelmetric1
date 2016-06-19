@@ -67,7 +67,7 @@ namespace Voxelmetric.Code.Configurable.Blocks.Utilities
             },
         };
 
-        public static void PrepareColors(Chunk chunk, BlockPos localPos, BlockPos globalPos, VertexData[] vertexData, Direction direction)
+        public static void PrepareColors(Chunk chunk, Vector3Int localPos, Vector3Int globalPos, VertexData[] vertexData, Direction direction)
         {
             bool notOnEdge = (((localPos.x + 1) & Env.ChunkMask) > 1 &&
                               ((localPos.y + 1) & Env.ChunkMask) > 1 &&
@@ -80,7 +80,7 @@ namespace Voxelmetric.Code.Configurable.Blocks.Utilities
                 PrepareColors_Slow(chunk, ref globalPos, vertexData, direction);
         }
 
-        private static void PrepareColors_Slow(Chunk chunk, ref BlockPos globalPos, VertexData[] vertexData, Direction direction)
+        private static void PrepareColors_Slow(Chunk chunk, ref Vector3Int globalPos, VertexData[] vertexData, Direction direction)
         {
             bool nSolid = false;
             bool eSolid = false;
@@ -214,7 +214,7 @@ namespace Voxelmetric.Code.Configurable.Blocks.Utilities
             }
         }
 
-        private static void PrepareColors_Fast(Chunk chunk, ref BlockPos localPos, VertexData[] vertexData, Direction direction)
+        private static void PrepareColors_Fast(Chunk chunk, ref Vector3Int localPos, VertexData[] vertexData, Direction direction)
         {
             bool nSolid = false;
             bool eSolid = false;
@@ -348,7 +348,7 @@ namespace Voxelmetric.Code.Configurable.Blocks.Utilities
             }
         }
 
-        public static void PrepareTexture(Chunk chunk, BlockPos localPos, BlockPos globalPos, VertexData[] vertexData, Direction direction, TextureCollection textureCollection)
+        public static void PrepareTexture(Chunk chunk, Vector3Int localPos, Vector3Int globalPos, VertexData[] vertexData, Direction direction, TextureCollection textureCollection)
         {
             Rect texture = textureCollection.GetTexture(chunk, localPos, globalPos, direction);
 
@@ -358,7 +358,7 @@ namespace Voxelmetric.Code.Configurable.Blocks.Utilities
             vertexData[3].UV = new Vector2(texture.x, texture.y);
         }
 
-        public static void PrepareTexture(Chunk chunk, BlockPos localPos, BlockPos globalPos, VertexData[] vertexData, Direction direction, TextureCollection[] textureCollections)
+        public static void PrepareTexture(Chunk chunk, Vector3Int localPos, Vector3Int globalPos, VertexData[] vertexData, Direction direction, TextureCollection[] textureCollections)
         {
             Rect texture = new Rect();
 
@@ -390,7 +390,7 @@ namespace Voxelmetric.Code.Configurable.Blocks.Utilities
             vertexData[3].UV = new Vector2(texture.x, texture.y);
         }
 
-        public static void PrepareVertices(BlockPos localPos, VertexData[] vertexData, Direction direction)
+        public static void PrepareVertices(Vector3Int localPos, VertexData[] vertexData, Direction direction)
         {
             //Converting the position to a vector adjusts it based on block size and gives us real world coordinates for x, y and z
             Vector3 vPos = localPos;

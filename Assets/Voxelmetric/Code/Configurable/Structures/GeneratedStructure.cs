@@ -14,7 +14,7 @@ public class GeneratedStructure {
 
     public virtual void Init(World world) {}
 
-    public virtual void Build(World world, Chunk chunk, BlockPos pos, TerrainLayer layer) { }
+    public virtual void Build(World world, Chunk chunk, Vector3Int pos, TerrainLayer layer) { }
 
     //public bool ChunkContains(BlockPos chunkPos, BlockPos pos)
     //{

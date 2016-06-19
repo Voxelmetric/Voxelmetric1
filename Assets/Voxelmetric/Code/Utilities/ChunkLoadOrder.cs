@@ -7,14 +7,14 @@ namespace Voxelmetric.Code.Utilities
 {
     public static class ChunkLoadOrder
     {
-        public static BlockPos[] ChunkPositions(int chunkLoadRadius)
+        public static Vector3Int[] ChunkPositions(int chunkLoadRadius)
         {
-            var chunkLoads = new List<BlockPos>();
+            var chunkLoads = new List<Vector3Int>();
             for (int x = -chunkLoadRadius; x <= chunkLoadRadius; x++)
             {
                 for (int z = -chunkLoadRadius; z <= chunkLoadRadius; z++)
                 {
-                    chunkLoads.Add(new BlockPos(x, 0, z));
+                    chunkLoads.Add(new Vector3Int(x, 0, z));
                 }
             }
 

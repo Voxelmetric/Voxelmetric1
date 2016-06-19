@@ -120,7 +120,7 @@ namespace Voxelmetric.Code.VM
             }
         }
 
-        public void RequestChunk(BlockPos pos, int id)
+        public void RequestChunk(Vector3Int pos, int id)
         {
             Chunk chunk = null;
             if (world == null)
@@ -153,7 +153,7 @@ namespace Voxelmetric.Code.VM
 
         public const int headerSize = 13, leaderSize = headerSize + 8;
 
-        protected void SendChunk(BlockPos pos, byte[] chunkData, int id)
+        protected void SendChunk(Vector3Int pos, byte[] chunkData, int id)
         {
             int chunkDataIndex = 0;
             while (chunkDataIndex < chunkData.Length)
@@ -183,7 +183,7 @@ namespace Voxelmetric.Code.VM
             }
         }
 
-        public void BroadcastChange(BlockPos pos, BlockData blockData, int excludedUser)
+        public void BroadcastChange(Vector3Int pos, BlockData blockData, int excludedUser)
         {
             lock(clients)
             {
@@ -204,7 +204,7 @@ namespace Voxelmetric.Code.VM
             }
         }
 
-        public void ReceiveChange(BlockPos pos, ushort type, int id)
+        public void ReceiveChange(Vector3Int pos, ushort type, int id)
         {
             BlockData blockData = new BlockData(type);
             world.blocks.Modify(pos, blockData, true);
