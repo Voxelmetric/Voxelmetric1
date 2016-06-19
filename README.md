@@ -11,6 +11,8 @@ I liked how Voxelmetric was not just another voxel generator. It had some very n
 
 Voxe(lmetric) is an open source voxel framework for Unity3d. It is meant to be an easy to use, easy to extend solution for voxel games. Voxe(lmetric) is currently in alpha so expect breaking changes and incomplete documentation. If anyone wants to help they are more then welcome and should feel free to make a pull request. Also use the issues to highlight bugs and suggest features.
 
+![alt tag](https://i.imgsafe.org/6e7f59856b.jpg)
+
 ## Features
 
 ### World management
@@ -27,10 +29,10 @@ Terrain generates around a given object and is removed when you move too far awa
 ### Special features
 
 ##### Threading
-Using a custom threadpool, chunks are generated on multiple threads taking full advantage of you hardware. Voxe uses an event-driven model for chunk generation. Upon creation, each chunk registers to its neighbors and from this moment on everything is automatic. The system is build in a way that no synchronization is necessary.
+Using a custom threadpool, chunks are generated on multiple threads taking full advantage of you hardware. Voxe(lmetric) uses an event-driven model for chunk generation. Upon creation, each chunk registers to its neighbors and from this moment on everything is automatic. The system is build in a way that no synchronization is necessary.
 
 ##### Memory pooling
-Voxe tries to waste as little memory as possible. It sports a memory pool manager that stores and reuses objects as necessary to improve performance.
+Voxe(lmetric) tries to waste as little memory as possible. It sports a memory pool manager that stores and reuses objects as necessary to improve performance.
 
 ##### Ambient Occlusion
 Darkening in the corners between blocks makes the terrain look more realistically lit.
@@ -42,4 +44,4 @@ Define new blocks in the scene with your own textures and even your own 3d mesh 
 3d voxel aligned pathfinding for units makes it possible for AI to move around the terrain.
 
 ## Development
-Voxelmetric is in development and is not yet at a 1.0 release, this means things are liable to change fast without notice or be broken and documentation will struggle to keep up.
+Voxel(metric) is in development and is not yet at a 1.0 release, this means things are liable to change fast without notice or be broken and documentation will struggle to keep up.
