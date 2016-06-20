@@ -65,8 +65,8 @@ namespace Voxelmetric.Code.Serialization
 
         public void Binarize(BinaryWriter bw)
         {
-            var positionsBytes = StructSerialization.SerializeArray<BlockPos>(positions);
-            var blocksBytes = StructSerialization.SerializeArray<BlockData>(blocks);
+            var positionsBytes = StructSerialization.SerializeArray(positions, Chunk.pools.MarshaledPool);
+            var blocksBytes = StructSerialization.SerializeArray(blocks, Chunk.pools.MarshaledPool);
 
             bw.Write(positionsBytes.Length);
             bw.Write(blocksBytes.Length);
@@ -78,8 +78,8 @@ namespace Voxelmetric.Code.Serialization
         {
             var positionsBytes = new byte[br.ReadInt32()];
             var blockBytes = new byte[br.ReadInt32()];
-            positions = StructSerialization.DeserializeArray<BlockPos>(br.ReadBytes(positionsBytes.Length));
-            blocks = StructSerialization.DeserializeArray<BlockData>(br.ReadBytes(blockBytes.Length));
+            positions = StructSerialization.DeserializeArray<BlockPos>(br.ReadBytes(positionsBytes.Length), Chunk.pools.MarshaledPool);
+            blocks = StructSerialization.DeserializeArray<BlockData>(br.ReadBytes(blockBytes.Length), Chunk.pools.MarshaledPool);
         }
     }
 }

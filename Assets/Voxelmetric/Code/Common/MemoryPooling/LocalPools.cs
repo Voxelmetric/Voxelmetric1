@@ -31,6 +31,14 @@ namespace Voxelmetric.Code.Common.MemoryPooling
         private readonly Dictionary<int, IArrayPool<byte>> m_byteArrayPools =
             new Dictionary<int, IArrayPool<byte>>(128);
 
+        private readonly MarshalMemPool m_marshaledPool =
+            new MarshalMemPool(65535); // 65k of memory should be more sufficient for now
+
+        public MarshalMemPool MarshaledPool
+        {
+            get { return m_marshaledPool; }
+        }
+
         public VertexData PopVertexData()
         {
             return m_vertexDataPool.Pop();
