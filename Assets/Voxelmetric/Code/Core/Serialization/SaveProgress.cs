@@ -2,10 +2,9 @@
 using UnityEngine;
 using UnityEngine.Assertions;
 using Voxelmetric.Code.Common.Events;
-using Voxelmetric.Code.Core;
 using Voxelmetric.Code.Core.StateManager;
 
-namespace Voxelmetric.Code.Serialization
+namespace Voxelmetric.Code.Core.Serialization
 {
     public class SaveProgress: IEventListener<ChunkStateExternal>
     {

@@ -1,10 +1,9 @@
 ﻿using System.Collections.Generic;
 using System.IO;
 using Voxelmetric.Code.Common.IO;
-using Voxelmetric.Code.Core;
 using Voxelmetric.Code.Data_types;
 
-namespace Voxelmetric.Code.Serialization
+namespace Voxelmetric.Code.Core.Serialization
 {
     public class Save: IBinarizable
     {
