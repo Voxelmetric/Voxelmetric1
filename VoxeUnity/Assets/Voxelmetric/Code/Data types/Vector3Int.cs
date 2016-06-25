@@ -23,7 +23,7 @@ namespace Voxelmetric.Code.Data_types
             unchecked
             {
                 int hash = 47;
-            
+
                 hash = hash * 227 + x.GetHashCode();
                 hash = hash * 227 + y.GetHashCode();
                 hash = hash * 227 + z.GetHashCode();
@@ -51,7 +51,7 @@ namespace Voxelmetric.Code.Data_types
                 return false;
             return true;
         }
-        
+
         public Vector3Int Add(int x, int y, int z)
         {
             return new Vector3Int(this.x + x, this.y + y, this.z + z);
@@ -142,22 +142,22 @@ namespace Voxelmetric.Code.Data_types
 
         public static bool operator >(Vector3Int pos1, Vector3Int pos2)
         {
-            return (pos1.x > pos2.x || pos1.y > pos2.y || pos1.z > pos2.x);
+            return (pos1.x > pos2.x || pos1.y > pos2.y || pos1.z > pos2.z);
         }
 
         public static bool operator <(Vector3Int pos1, Vector3Int pos2)
         {
-            return (pos1.x < pos2.x || pos1.y < pos2.y || pos1.z < pos2.x);
+            return (pos1.x < pos2.x || pos1.y < pos2.y || pos1.z < pos2.z);
         }
 
         public static bool operator >=(Vector3Int pos1, Vector3Int pos2)
         {
-            return (pos1.x >= pos2.x || pos1.y >= pos2.y || pos1.z >= pos2.x);
+            return (pos1.x >= pos2.x || pos1.y >= pos2.y || pos1.z >= pos2.z);
         }
 
         public static bool operator <=(Vector3Int pos1, Vector3Int pos2)
         {
-            return (pos1.x <= pos2.x || pos1.y <= pos2.y || pos1.z <= pos2.x);
+            return (pos1.x <= pos2.x || pos1.y <= pos2.y || pos1.z <= pos2.z);
         }
 
         public static Vector3Int operator +(Vector3Int pos1, Vector3Int pos2)
@@ -190,7 +190,7 @@ namespace Voxelmetric.Code.Data_types
         public override string ToString()
         {
             return "(" + x + ", " + y + ", " + z + ")";
-        }        
+        }
 
         //
         // Summary:
