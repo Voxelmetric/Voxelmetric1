@@ -16,7 +16,7 @@ namespace Voxelmetric.Code.Common.Extensions
             // |\ |
             // | \|
             // 3--2
-            /*if (backFace)
+            if (backFace)
             {
                 target.Triangles.Add(offset - 4); // 2
                 target.Triangles.Add(offset - 2); // 0
@@ -26,7 +26,7 @@ namespace Voxelmetric.Code.Common.Extensions
                 target.Triangles.Add(offset - 1); // 0
                 target.Triangles.Add(offset - 2); // 2
             }
-            else*/
+            else
             {
                 target.Triangles.Add(offset - 4); // 2
                 target.Triangles.Add(offset - 3); // 1

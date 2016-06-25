@@ -2,6 +2,7 @@
 using System.Text;
 using System.Threading;
 using Assets.Voxelmetric.Code.Core.StateManager;
+using UnityEngine;
 using UnityEngine.Assertions;
 using Voxelmetric.Code.Common.Events;
 using Voxelmetric.Code.Common.Extensions;
@@ -249,7 +250,23 @@ namespace Voxelmetric.Code.Core.StateManager
         private static void OnGenerateData(ChunkStateManagerClient stateManager)
         {
             Chunk chunk = stateManager.chunk;
-            chunk.world.terrainGen.GenerateTerrainForChunk(chunk);
+
+            if (chunk.pos.x==0 && chunk.pos.z==0 && chunk.pos.y==0)
+            {
+                ushort type = chunk.world.blockProvider.GetBlock("stone").type;
+                for(int i=0; i<Env.ChunkVolume;i++)
+                    chunk.blocks.Set(i, new BlockData(type));
+            }
+            else /*if (
+                Mathf.Abs(chunk.pos.x)<=4*Env.ChunkSize &&
+                Mathf.Abs(chunk.pos.y)<=4*Env.ChunkSize &&
+                Mathf.Abs(chunk.pos.z)<=4*Env.ChunkSize)*/
+            {
+                for (int i = 0; i < Env.ChunkVolume; i++)
+                    chunk.blocks.Set(i, new BlockData(0));
+            }/*
+            else
+            chunk.world.terrainGen.GenerateTerrainForChunk(chunk);*/
 
             OnGenerateDataDone(stateManager);
         }

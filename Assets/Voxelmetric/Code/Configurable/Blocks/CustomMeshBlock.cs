@@ -9,14 +9,14 @@ public class CustomMeshBlock : Block {
 
     public override void BuildBlock(Chunk chunk, Vector3Int localPos, Vector3Int globalPos)
     {
-        Rect texture;
+        /*Rect texture;
         if (customMeshConfig.texture != null)
             texture = customMeshConfig.texture.GetTexture(chunk, localPos, globalPos, Direction.down);
         else
             texture = new Rect();
 
         DrawCallBatcher batcher = chunk.render.batcher;
-        batcher.AddMeshData(customMeshConfig.tris, customMeshConfig.verts, texture, localPos);
+        batcher.AddMeshData(customMeshConfig.tris, customMeshConfig.verts, texture, localPos);*/
     }
 
 }

@@ -65,6 +65,11 @@ public class Block
         return false;
     }
 
+	public virtual bool CanMergeFaceWith(Block adjacentBlock, Direction dir)
+    {
+        return false;
+    }
+
     public virtual void BuildFace(Chunk chunk, Vector3Int localPos, Vector3Int globalPos, Direction dir)
     {
     }

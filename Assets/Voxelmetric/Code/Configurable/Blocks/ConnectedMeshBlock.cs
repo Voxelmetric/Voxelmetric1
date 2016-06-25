@@ -25,7 +25,7 @@ public class ConnectedMeshBlock: CustomMeshBlock
 
     public override void BuildBlock(Chunk chunk, Vector3Int localPos, Vector3Int globalPos)
     {
-        Rect texture;
+        /*Rect texture;
         DrawCallBatcher batcher = chunk.render.batcher;
         WorldBlocks blocks = chunk.world.blocks;
 
@@ -56,6 +56,6 @@ public class ConnectedMeshBlock: CustomMeshBlock
         }
 
         texture = customMeshConfig.texture.GetTexture(chunk, localPos, globalPos, Direction.down);
-        batcher.AddMeshData(customMeshConfig.tris, customMeshConfig.verts, texture, localPos);
+        batcher.AddMeshData(customMeshConfig.tris, customMeshConfig.verts, texture, localPos);*/
     }
 }

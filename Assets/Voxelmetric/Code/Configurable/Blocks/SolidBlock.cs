@@ -9,10 +9,8 @@ public class SolidBlock : Block
     {
         if (!adjacentBlock.IsSolid(DirectionUtils.Opposite(dir)))
         {
-            if (solid || !solidTowardsSameType || adjacentBlock.type != type)
-            {
+            if (solid || !solidTowardsSameType || adjacentBlock.type!=type)
                 return true;
-            }
         }
 
         return false;
