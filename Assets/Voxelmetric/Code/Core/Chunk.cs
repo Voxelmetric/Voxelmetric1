@@ -21,13 +21,15 @@ namespace Voxelmetric.Code.Core
         public ColliderGeometryHandler ColliderGeometryHandler { get; private set; }
         public IChunkStateManager stateManager { get; private set; }
 
+        public bool NeedsCollider { get; set; }
+        
         //! Bounding box in world coordinates
         public Bounds WorldBounds { get; private set; }
 
         //! ThreadID associated with this chunk. Used when working with object pools in MT environment. Resources
         //! need to be release where they were allocated. Thanks to this, associated containers could be made lock-free
         public int ThreadID { get; private set; }
-
+        
         public static Chunk CreateChunk(World world, Vector3Int pos, bool isDedicated)
         {
             Chunk chunk = Globals.MemPools.ChunkPool.Pop();
@@ -98,6 +100,8 @@ namespace Voxelmetric.Code.Core
             logic.Reset();
             GeometryHandler.Reset();
             stateManager.Reset();
+
+            NeedsCollider = false;
         }
 
         public override string ToString()
@@ -126,17 +130,40 @@ namespace Voxelmetric.Code.Core
                 logic.Update();
                 blocks.Update();
             }
+            
+            // Process chunk tasks
+            stateManager.Update();
 
-            // Build chunk mesh if necessary
-            if (stateManager.IsStateCompleted(ChunkState.BuildVertices|ChunkState.BuildVerticesNow))
+            if (blocks.contentsModified)
             {
-                stateManager.SetMeshBuilt();
-                GeometryHandler.Commit();
+                // Consume info about this chunk having been modified
+                blocks.contentsModified = false;
+
+                // Request bulding of a new collider only if there was none before
+                if (NeedsCollider && !stateManager.IsStateCompleted(ChunkState.BuildCollider))
+                {
+                    stateManager.RequestState(ChunkState.BuildCollider);
+                    stateManager.SetColliderBuilt();
+                }
+            }
+
+            // Release the collider when no longer needed
+            if (!NeedsCollider)
+                ColliderGeometryHandler.Reset();
+
+            // Build collider if necessary
+            if (NeedsCollider && stateManager.IsStateCompleted(ChunkState.BuildCollider))
+            {
+                stateManager.SetColliderBuilt();
                 ColliderGeometryHandler.Commit();
             }
 
-            // Process chunk tasks
-            stateManager.Update();
+            // Build chunk mesh if necessary
+            if (stateManager.IsStateCompleted(ChunkState.BuildVertices | ChunkState.BuildVerticesNow))
+            {
+                stateManager.SetMeshBuilt();
+                GeometryHandler.Commit();
+            }
         }
     }
 }

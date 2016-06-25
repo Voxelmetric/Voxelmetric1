@@ -293,8 +293,8 @@ GameObject:
   - 92: {fileID: 297876184}
   - 124: {fileID: 297876183}
   - 81: {fileID: 297876182}
-  - 114: {fileID: 297876188}
   - 114: {fileID: 297876187}
+  - 114: {fileID: 297876188}
   m_Layer: 0
   m_Name: Main Camera
   m_TagString: MainCamera
@@ -393,14 +393,14 @@ MonoBehaviour:
   m_GameObject: {fileID: 297876181}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c8ee79f457d68c64abf6acf09d8cb5c3, type: 3}
+  m_Script: {fileID: 11500000, guid: a83d29136e0eb1545b29179284e99417, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   world: {fileID: 1856110255}
   ChunkLoadRadius: 6
   ChunkDeleteRadius: 8
   FollowCamera: 0
-  UseFrustumCulling: 0
+  UseFrustumCulling: 1
   Diag_DrawWorldBounds: 0
   Diag_DrawLoadRange: 0
 --- !u!1 &312836251
@@ -1029,11 +1029,11 @@ Prefab:
       objectReference: {fileID: 0}
     - target: {fileID: 11406898, guid: 28fc5073d6f2b5b42acaec530dd745cd, type: 2}
       propertyPath: ObjectPools.Array.data[0].InitialSize
-      value: 1024
+      value: 256
       objectReference: {fileID: 0}
     - target: {fileID: 11406898, guid: 28fc5073d6f2b5b42acaec530dd745cd, type: 2}
       propertyPath: ObjectPools.Array.data[1].InitialSize
-      value: 1024
+      value: 256
       objectReference: {fileID: 0}
     - target: {fileID: 11406898, guid: 28fc5073d6f2b5b42acaec530dd745cd, type: 2}
       propertyPath: ObjectPools.Array.data[2].Name
@@ -1045,7 +1045,7 @@ Prefab:
       objectReference: {fileID: 100002, guid: cff7141e7c83e7d4a8f9174acaf8663b, type: 3}
     - target: {fileID: 11406898, guid: 28fc5073d6f2b5b42acaec530dd745cd, type: 2}
       propertyPath: ObjectPools.Array.data[2].InitialSize
-      value: 1024
+      value: 256
       objectReference: {fileID: 0}
     - target: {fileID: 11406898, guid: 28fc5073d6f2b5b42acaec530dd745cd, type: 2}
       propertyPath: ObjectPools.Array.data[1].Name

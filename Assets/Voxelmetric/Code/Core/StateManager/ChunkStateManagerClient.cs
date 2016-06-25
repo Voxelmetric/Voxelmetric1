@@ -78,6 +78,11 @@ namespace Voxelmetric.Code.Core.StateManager
             m_completedStates = m_completedStatesSafe = m_completedStates.Reset(CurrStateGenerateVertices);
         }
 
+        public override void SetColliderBuilt()
+        {
+            m_completedStates = m_completedStatesSafe = m_completedStates.Reset(CurrStateGenerateCollider);
+        }
+
         public override void Update()
         {
             if (m_stateExternal != ChunkStateExternal.None)
@@ -128,6 +133,10 @@ namespace Voxelmetric.Code.Core.StateManager
                 if (m_pendingStates.Check(ChunkState.Remove) && RemoveChunk())
                     return;
 
+                ProcessNotifyState();
+                if (m_pendingStates.Check(ChunkState.BuildCollider) && GenerateCollider())
+                    return;
+
                 // In order to save performance, we generate geometry on-demand - when the chunk can be seen
                 if (PossiblyVisible)
                 {
@@ -137,7 +146,7 @@ namespace Voxelmetric.Code.Core.StateManager
                 }
             }
         }
-
+        
         private void ProcessNotifyState()
         {
             if (m_nextState == ChunkState.Idle)
@@ -397,6 +406,70 @@ namespace Voxelmetric.Code.Core.StateManager
 
         #endregion Save chunk data
 
+        #region Generate collider
+
+        private struct SGenerateColliderWorkItem
+        {
+            public readonly ChunkStateManagerClient StateManager;
+
+            public SGenerateColliderWorkItem(ChunkStateManagerClient stateManager)
+            {
+                StateManager = stateManager;
+            }
+        }
+
+        private static readonly ChunkState CurrStateGenerateCollider = ChunkState.BuildCollider;
+
+        private static void OnGenerateCollider(ChunkStateManagerClient stateManager)
+        {
+            stateManager.chunk.ColliderGeometryHandler.Build();
+
+            OnGenerateColliderDone(stateManager);
+        }
+
+        private static void OnGenerateColliderDone(ChunkStateManagerClient stateManager)
+        {
+            stateManager.m_completedStates = stateManager.m_completedStates.Set(CurrStateGenerateCollider);
+            stateManager.m_taskRunning = false;
+        }
+
+        /// <summary>
+        ///     Build this chunk's collision geometry
+        /// </summary>
+        private bool GenerateCollider()
+        {
+            if (!m_completedStates.Check(ChunkState.LoadData))
+                return true;
+            
+            m_pendingStates = m_pendingStates.Reset(CurrStateGenerateCollider);
+            m_completedStates = m_completedStates.Reset(CurrStateGenerateCollider);
+            m_completedStatesSafe = m_completedStates;
+
+            if (chunk.blocks.NonEmptyBlocks > 0)
+            {
+                var workItem = new SGenerateColliderWorkItem(this);
+
+                m_taskRunning = true;
+                WorkPoolManager.Add(
+                    new ThreadPoolItem(
+                        chunk.ThreadID,
+                        arg =>
+                        {
+                            SGenerateColliderWorkItem item = (SGenerateColliderWorkItem)arg;
+                            OnGenerateCollider(item.StateManager);
+                        },
+                        workItem)
+                    );
+
+                return true;
+            }
+
+            OnGenerateColliderDone(this);
+            return false;
+        }
+
+        #endregion Generate vertices
+
         private bool SynchronizeChunk()
         {
             // 6 neighbors are necessary
@@ -412,7 +485,7 @@ namespace Voxelmetric.Code.Core.StateManager
             }
 
             return true;
-        }
+        }        
 
         #region Generate vertices
 
@@ -431,7 +504,6 @@ namespace Voxelmetric.Code.Core.StateManager
         private static void OnGenerateVerices(ChunkStateManagerClient stateManager)
         {
             stateManager.chunk.GeometryHandler.Build();
-            stateManager.chunk.ColliderGeometryHandler.Build();
 
             OnGenerateVerticesDone(stateManager);
         }
@@ -447,10 +519,6 @@ namespace Voxelmetric.Code.Core.StateManager
         /// </summary>
         private bool GenerateVertices()
         {
-            /*Assert.IsTrue(
-            m_completedTasks.Check(ChunkState.LoadData),
-            string.Format("[{0},{1},{2}] - GenerateVertices set sooner than LoadData completed. Pending:{3}, Completed:{4}", Pos.X, Pos.Y, Pos.Z, m_pendingTasks, m_completedTasks)
-            );*/
             if (!m_completedStates.Check(ChunkState.LoadData))
                 return true;
 
@@ -479,13 +547,12 @@ namespace Voxelmetric.Code.Core.StateManager
                         workItem,
                         priority ? Globals.Watch.ElapsedTicks : long.MaxValue)
                     );
-            }
-            else
-            {
-                OnGenerateVerticesDone(this);
+
+                return true;
             }
 
-            return true;
+            OnGenerateVerticesDone(this);
+            return false;
         }
 
         #endregion Generate vertices

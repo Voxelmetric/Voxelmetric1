@@ -13,6 +13,8 @@
         bool IsStateCompleted(ChunkState state);
         bool IsSavePossible { get; }
 
-        void SetMeshBuilt(); // temporary!
+        //! TODO: Get rid of this - bad design. It should stay only temporary
+        void SetMeshBuilt();
+        void SetColliderBuilt();
     }
 }

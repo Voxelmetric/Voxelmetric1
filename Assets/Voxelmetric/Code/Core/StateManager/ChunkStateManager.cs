@@ -107,5 +107,10 @@ namespace Assets.Voxelmetric.Code.Core.StateManager
         {
             throw new System.NotImplementedException();
         }
+
+        public virtual void SetColliderBuilt()
+        {
+            throw new System.NotImplementedException();
+        }
     }
 }

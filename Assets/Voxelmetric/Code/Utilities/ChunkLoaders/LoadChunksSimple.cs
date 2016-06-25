@@ -158,6 +158,12 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
                 return;
             }
 
+            // Dummy collider example - let use collider for 2 closest chunks around viewer
+            bool neededCollider = chunk.NeedsCollider;
+            chunk.NeedsCollider = xd*xd+zd*zd<=1;
+            if(!neededCollider && chunk.NeedsCollider)
+                chunk.stateManager.RequestState(ChunkState.BuildCollider);
+
             // Update visibility information
             bool isInsideFrustum = IsChunkInViewFrustum(chunk) || m_firstRun;
 
