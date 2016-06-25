@@ -1,33 +1,35 @@
 ﻿using UnityEngine;
+using Voxelmetric.Code.Common.MemoryPooling;
 using Voxelmetric.Code.Configurable.Blocks.Utilities;
 using Voxelmetric.Code.Core;
 using Voxelmetric.Code.Data_types;
+using Voxelmetric.Code.Rendering;
 using Voxelmetric.Code.Utilities;
 
-namespace Voxelmetric.Code.Builders
+namespace Voxelmetric.Code.Builders.Collider
 {
     /// <summary>
     /// Generates a typical cubical voxel geometry for a chunk
     /// </summary>
-    public class BoxelMeshBuilder: IMeshBuilder
+    public class CubeMeshColliderBuilder: IMeshBuilder
     {
         public void Build(Chunk chunk)
         {
             WorldBlocks blocks = chunk.world.blocks;
-            Block airBlock = chunk.world.blockProvider.BlockTypes[0];
 
-            int stepSize = 1;
-            int width = Env.ChunkSize;
+            const int stepSize = 1;
+            const int width = Env.ChunkSize;
 
             int[] mins = {0, 0, 0};
             int[] maxes = {Env.ChunkMask, Env.ChunkMask, Env.ChunkMask};
 
             int[] x = {0, 0, 0}; // Relative position of a block
-            int[] q = {0, 0, 0}; // Direction in which we compare neighbors when building mask (q[d] is our current direction)
+            int[] q = {0, 0, 0};
+            // Direction in which we compare neighbors when building mask (q[d] is our current direction)
             int[] du = {0, 0, 0}; // Width in a given dimension (du[u] is our current dimension)
             int[] dv = {0, 0, 0}; // Height in a given dimension (dv[v] is our current dimension)
 
-            Block[] mask = chunk.pools.PopBlockArray(width*width);
+            bool[] mask = chunk.pools.PopBoolArray(width*width);
             Vector3[] vecs = chunk.pools.PopVector3Array(4);
 
             // Iterate over 3 dimensions. Once for front faces, once for back faces
@@ -50,13 +52,14 @@ namespace Voxelmetric.Code.Builders
                 Direction dir = Direction.west;
                 switch (dd)
                 {
+                    // Back faces
                     //case 0: dir = Direction.west; break;
-                    case 3: dir = Direction.east; break;
-
                     case 1: dir = Direction.down; break;
-                    case 4: dir = Direction.up; break;
-
                     case 2: dir = Direction.south; break;
+
+                    // Front faces
+                    case 3: dir = Direction.east; break;
+                    case 4: dir = Direction.up; break;
                     case 5: dir = Direction.north; break;
                 }
                 bool backFace = DirectionUtils.Backface(dir);
@@ -70,36 +73,34 @@ namespace Voxelmetric.Code.Builders
                     for (x[v] = 0; x[v]<mins[v]; x[v]++)
                     {
                         for (x[u] = 0; x[u]<width; x[u]++)
-                            mask[n++] = airBlock;
+                            mask[n++] = false;
                     }
 
                     for (x[v] = mins[v]; x[v]<=maxes[v]; x[v]++)
                     {
                         for (x[u] = 0; x[u]<mins[u]; x[u]++)
-                            mask[n++] = airBlock;
+                            mask[n++] = false;
 
                         for (x[u] = mins[u]; x[u]<=maxes[u]; x[u]++)
                         {
-                            int realX = x[0];
-                            int realY = x[1];
-                            int realZ = x[2];
+                            int realX = chunk.pos.x + x[0];
+                            int realY = chunk.pos.y + x[1];
+                            int realZ = chunk.pos.z + x[2];
 
-                            Block voxelFace0 = blocks.GetBlock(new BlockPos(realX, realY, realZ));
-                            Block voxelFace1 = blocks.GetBlock(new BlockPos(realX+q[0], realY+q[1], realZ+q[2]));
+                            bool voxelFace0 = blocks.GetBlock(new Vector3Int(realX, realY, realZ)).canBeWalkedOn;
+                            bool voxelFace1 = blocks.GetBlock(new Vector3Int(realX+q[0], realY+q[1], realZ+q[2])).canBeWalkedOn;
 
-                            mask[n++] = 
-                                //voxelFace0.CanBuildFaceWith(voxelFace1, dir) ? (backFace ? voxelFace1 : voxelFace0) : airBlock;
-                                voxelFace0.solid && voxelFace1.solid ? airBlock : (backFace ? voxelFace1 : voxelFace0);
+                            mask[n++] = (!voxelFace0 || !voxelFace1) && (backFace ? voxelFace1 : voxelFace0);
                         }
 
                         for (x[u] = maxes[u]+1; x[u]<width; x[u]++)
-                            mask[n++] = airBlock;
+                            mask[n++] = false;
                     }
 
                     for (x[v] = maxes[v]+1; x[v]<width; x[v]++)
                     {
                         for (x[u] = 0; x[u]<width; x[u]++)
-                            mask[n++] = airBlock;
+                            mask[n++] = false;
                     }
 
                     x[d]++;
@@ -112,70 +113,94 @@ namespace Voxelmetric.Code.Builders
                         int i;
                         for (i = 0; i<width;)
                         {
-                            if (mask[n]==airBlock)
+                            if (mask[n]==false)
                             {
                                 i++;
                                 n++;
                                 continue;
                             }
 
-                            // Compute width & height
-                            const int w = 1;
-                            const int h = 1;
+                            bool type = mask[n];
+
+                            // Compute width
+                            int w;
+                            for (w = 1; i + w < width && mask[n + w] == type; w++)
+                            {
+                            }
+
+                            // Compute height
+                            bool done = false;
+                            int k;
+                            int h;
+                            for (h = 1; j + h < width; h++)
+                            {
+                                for (k = 0; k < w; k++)
+                                {
+                                    if (mask[n+k+h*width]==false ||
+                                        mask[n+k+h*width]!=type)
+                                    {
+                                        done = true;
+                                        break;
+                                    }
+                                }
+
+                                if (done)
+                                    break;
+                            }
 
                             // Determine whether we really want to build this face
                             // TODO: Skip bottom faces at the bottom of the world
-                            bool buildFace = true;
+                            const bool buildFace = true;
                             if (buildFace)
                             {
                                 // Prepare face coordinates and dimensions
                                 x[u] = i;
                                 x[v] = j;
-                                
+
                                 du[0] = du[1] = du[2] = 0;
                                 dv[0] = dv[1] = dv[2] = 0;
                                 du[u] = w;
                                 dv[v] = h;
-
-                                // Face vertices
-                                BlockPos v1 = new BlockPos(
-                                    x[0], x[1], x[2]
-                                    );
-                                BlockPos v2 = new BlockPos(
-                                    x[0]+du[0], x[1]+du[1], x[2]+du[2]
-                                    );
-                                BlockPos v3 = new BlockPos(
-                                    x[0]+du[0]+dv[0], x[1]+du[1]+dv[1], x[2]+du[2]+dv[2]
-                                    );
-                                BlockPos v4 = new BlockPos(
-                                    x[0]+dv[0], x[1]+dv[1], x[2]+dv[2]
-                                    );
 
                                 // Face vertices transformed to world coordinates
                                 // 0--1
                                 // |  |
                                 // |  |
                                 // 3--2
-                                vecs[0] = new Vector3(v4.x, v4.y, v4.z);
-                                vecs[1] = new Vector3(v3.x, v3.y, v3.z);
-                                vecs[2] = new Vector3(v2.x, v2.y, v2.z);
-                                vecs[3] = new Vector3(v1.x, v1.y, v1.z);
+                                vecs[0] = new Vector3(x[0]+dv[0], x[1]+dv[1], x[2]+dv[2])-BlockUtils.HalfBlockVector;
+                                vecs[1] = new Vector3(x[0]+du[0]+dv[0], x[1]+du[1]+dv[1], x[2]+du[2]+dv[2])-BlockUtils.HalfBlockVector;
+                                vecs[2] = new Vector3(x[0]+du[0], x[1]+du[1], x[2]+du[2])-BlockUtils.HalfBlockVector;
+                                vecs[3] = new Vector3(x[0], x[1], x[2])-BlockUtils.HalfBlockVector;
 
-                                // Build the face
-                                Block b = mask[n];
-                                BlockPos localPos = new BlockPos(x[0], x[1], x[2]);
-                                BlockPos globalPos = localPos + chunk.pos;
-                                b.BuildFace(chunk, vecs, localPos, globalPos, dir);
+                                {
+                                    LocalPools pool = chunk.pools;
+                                    VertexData[] vertexData = pool.PopVertexDataArray(4);
+                                    VertexDataFixed[] vertexDataFixed = pool.PopVertexDataFixedArray(4);
+                                    {
+                                        for (int ii = 0; ii<4; ii++)
+                                        {
+                                            vertexData[ii] = pool.PopVertexData();
+                                            vertexData[ii].Vertex = vecs[ii];
+                                            vertexDataFixed[ii] = VertexDataUtils.ClassToStruct(vertexData[ii]);
+                                        }
+                                            
+                                        chunk.ColliderGeometryHandler.Batcher.AddFace(vertexDataFixed, backFace);
+
+                                        for (int ii = 0; ii<4; ii++)
+                                            pool.PushVertexData(vertexData[ii]);
+                                    }
+                                    pool.PushVertexDataFixedArray(vertexDataFixed);
+                                    pool.PushVertexDataArray(vertexData);
+                                }
                             }
 
                             // Zero out the mask
                             int l;
                             for (l = 0; l<h; ++l)
                             {
-                                int k;
                                 for (k = 0; k<w; ++k)
                                 {
-                                    mask[n+k+l*width] = airBlock;
+                                    mask[n+k+l*width] = false;
                                 }
                             }
 
@@ -186,7 +211,7 @@ namespace Voxelmetric.Code.Builders
                 }
             }
 
-            chunk.pools.PushBlockArray(mask);
+            chunk.pools.PushBoolArray(mask);
             chunk.pools.PushVector3Array(vecs);
         }
     }

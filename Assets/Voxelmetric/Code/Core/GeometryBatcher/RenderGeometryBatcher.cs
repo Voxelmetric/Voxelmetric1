@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using Assets.Voxelmetric.Code.Core.GeometryBatcher;
 using UnityEngine;
 using UnityEngine.Assertions;
 using Voxelmetric.Code.Builders;
@@ -8,30 +9,30 @@ using Voxelmetric.Code.Core;
 
 namespace Voxelmetric.Code.Rendering
 {
-    public class DrawCallBatcher
+    public class RenderGeometryBatcher: IGeometryBatcher
     {
         private const string GOPChunk = "Chunk";
-        
+
         private readonly Chunk m_chunk;
 
-        private readonly List<RenderBuffer> m_renderBuffers;
-        private readonly List<GameObject> m_drawCalls;
-        private readonly List<Renderer> m_drawCallRenderers;
-        
+        private readonly List<GeometryBuffer> m_buffers;
+        private readonly List<GameObject> m_objects;
+        private readonly List<Renderer> m_renderers;
+
         private bool m_visible;
 
-        public DrawCallBatcher(Chunk chunk)
+        public RenderGeometryBatcher(Chunk chunk)
         {
             m_chunk = chunk;
-            
-            m_renderBuffers = new List<RenderBuffer>(1)
+
+            m_buffers = new List<GeometryBuffer>(1)
             {
                 // Default render buffer
-                new RenderBuffer()
+                new GeometryBuffer()
             };
-            m_drawCalls = new List<GameObject>();
-            m_drawCallRenderers = new List<Renderer>();
-            
+            m_objects = new List<GameObject>();
+            m_renderers = new List<Renderer>();
+
             m_visible = false;
         }
 
@@ -40,8 +41,8 @@ namespace Voxelmetric.Code.Rendering
         /// </summary>
         public void Clear()
         {
-            for (int i = 0; i < m_renderBuffers.Count; i++)
-                m_renderBuffers[i].Clear();
+            for (int i = 0; i<m_buffers.Count; i++)
+                m_buffers[i].Clear();
 
             ReleaseOldData();
 
@@ -50,7 +51,7 @@ namespace Voxelmetric.Code.Rendering
 
         public void AddMeshData(int[] tris, VertexDataFixed[] verts, Rect texture, Vector3 offset)
         {
-            RenderBuffer buffer = m_renderBuffers[m_renderBuffers.Count - 1];
+            GeometryBuffer buffer = m_buffers[m_buffers.Count-1];
 
             int initialVertCount = buffer.Vertices.Count;
 
@@ -59,8 +60,8 @@ namespace Voxelmetric.Code.Rendering
                 // If there are too many vertices we need to create a new separate buffer for them
                 if (buffer.Vertices.Count+1>65000)
                 {
-                    buffer = new RenderBuffer();
-                    m_renderBuffers.Add(buffer);
+                    buffer = new GeometryBuffer();
+                    m_buffers.Add(buffer);
                 }
 
                 VertexDataFixed v = new VertexDataFixed()
@@ -73,31 +74,30 @@ namespace Voxelmetric.Code.Rendering
                         (verts[i].UV.x*texture.width)+texture.x,
                         (verts[i].UV.y*texture.height)+texture.y
                         ),
-                    Vertex = verts[i].Vertex + offset
+                    Vertex = verts[i].Vertex+offset
                 };
                 buffer.AddVertex(ref v);
             }
-            
-            for (int i = 0; i < tris.Length; i++)
-                buffer.AddIndex(tris[i] + initialVertCount);
+
+            for (int i = 0; i<tris.Length; i++)
+                buffer.AddIndex(tris[i]+initialVertCount);
         }
 
         /// <summary>
         ///     Addds one face to our render buffer
         /// </summary>
         /// <param name="vertexData"> An array of 4 vertices forming the face</param>
-        /// <param name="backFace">Order in which vertices are considered to be oriented. If true, this is a backface (counter clockwise)</param>
-        public void AddFace(VertexDataFixed[] vertexData, bool backFace)
+        public void AddFace(VertexDataFixed[] vertexData)
         {
             Assert.IsTrue(vertexData.Length>=4);
 
-            RenderBuffer buffer = m_renderBuffers[m_renderBuffers.Count - 1];
-            
+            GeometryBuffer buffer = m_buffers[m_buffers.Count-1];
+
             // If there are too many vertices we need to create a new separate buffer for them
-            if (buffer.Vertices.Count+4 > 65000)
+            if (buffer.Vertices.Count+4>65000)
             {
-                buffer = new RenderBuffer();
-                m_renderBuffers.Add(buffer);
+                buffer = new GeometryBuffer();
+                m_buffers.Add(buffer);
             }
 
             // Add data to the render buffer            
@@ -105,7 +105,7 @@ namespace Voxelmetric.Code.Rendering
             buffer.AddVertex(ref vertexData[1]);
             buffer.AddVertex(ref vertexData[2]);
             buffer.AddVertex(ref vertexData[3]);
-            buffer.AddIndices(buffer.Vertices.Count, backFace);
+            buffer.AddIndices(buffer.Vertices.Count, false);
         }
 
         /// <summary>
@@ -116,13 +116,13 @@ namespace Voxelmetric.Code.Rendering
             ReleaseOldData();
 
             // No data means there's no mesh to build
-            if (m_renderBuffers[0].IsEmpty())
+            if (m_buffers[0].IsEmpty())
                 return;
 
-            for (int i = 0; i<m_renderBuffers.Count; i++)
+            for (int i = 0; i<m_buffers.Count; i++)
             {
-                RenderBuffer buffer = m_renderBuffers[i];
-                
+                GeometryBuffer buffer = m_buffers[i];
+
                 var go = GameObjectProvider.PopObject(GOPChunk);
                 Assert.IsTrue(go!=null);
                 if (go!=null)
@@ -133,7 +133,7 @@ namespace Voxelmetric.Code.Rendering
 
                     Mesh mesh = Globals.MemPools.MeshPool.Pop();
                     Assert.IsTrue(mesh.vertices.Length<=0);
-                    UnityMeshBuilder.BuildMesh(mesh, buffer);
+                    UnityMeshBuilder.BuildGeometryMesh(mesh, buffer);
 
                     MeshFilter filter = go.GetComponent<MeshFilter>();
                     filter.sharedMesh = null;
@@ -145,37 +145,37 @@ namespace Voxelmetric.Code.Rendering
                     Renderer renderer = go.GetComponent<Renderer>();
                     renderer.material = m_chunk.world.chunkMaterial;
 
-                    m_drawCalls.Add(go);
-                    m_drawCallRenderers.Add(renderer);
+                    m_objects.Add(go);
+                    m_renderers.Add(renderer);
                 }
 
                 buffer.Clear();
             }
         }
 
-        public void SetVisible(bool show)
+        public void Enable(bool show)
         {
-            for (int i = 0; i<m_drawCallRenderers.Count; i++)
+            for (int i = 0; i<m_renderers.Count; i++)
             {
-                Renderer renderer = m_drawCallRenderers[i];
+                Renderer renderer = m_renderers[i];
                 renderer.enabled = show;
             }
-            m_visible = show && m_drawCallRenderers.Count>0;
+            m_visible = show && m_renderers.Count>0;
         }
 
-        public bool IsVisible()
+        public bool IsEnabled()
         {
-            return m_drawCalls.Count>0 && m_visible;
+            return m_objects.Count>0 && m_visible;
         }
 
         private void ReleaseOldData()
         {
-            Assert.IsTrue(m_drawCalls.Count==m_drawCallRenderers.Count);
-            for (int i = 0; i < m_drawCalls.Count; i++)
+            Assert.IsTrue(m_objects.Count==m_renderers.Count);
+            for (int i = 0; i<m_objects.Count; i++)
             {
-                var go = m_drawCalls[i];
+                var go = m_objects[i];
                 // If the component does not exist it means nothing else has been added as well
-                if (go == null)
+                if (go==null)
                     continue;
 
                 MeshFilter filter = go.GetComponent<MeshFilter>();
@@ -189,8 +189,8 @@ namespace Voxelmetric.Code.Rendering
                 GameObjectProvider.PushObject(GOPChunk, go);
             }
 
-            m_drawCalls.Clear();
-            m_drawCallRenderers.Clear();
+            m_objects.Clear();
+            m_renderers.Clear();
         }
     }
 }

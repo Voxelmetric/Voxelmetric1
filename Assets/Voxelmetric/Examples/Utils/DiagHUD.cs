@@ -107,8 +107,8 @@ namespace Assets.Client.Scripts.Misc
             m_text.AppendLine(Globals.MemPools.ToString());
             m_text.AppendLine(GameObjectProvider.Instance.ToString());
 
-            const int width = 350;
-            const int height = 200;
+            const int width = 400;
+            const int height = 210;
             GUI.Box(new Rect(Screen.width-width, Screen.height-height, width, height), "");
             GUI.Label(new Rect(Screen.width-width+10, Screen.height-height+10, width-10, height-10), m_text.ToString());
         }

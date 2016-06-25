@@ -1,7 +1,6 @@
 ﻿using UnityEngine;
 using Voxelmetric.Code.Common.MemoryPooling;
 using Voxelmetric.Code.Rendering;
-using RenderBuffer = Voxelmetric.Code.Rendering.RenderBuffer;
 
 namespace Voxelmetric.Code.Common.Extensions
 {
@@ -10,7 +9,7 @@ namespace Voxelmetric.Code.Common.Extensions
         /// <summary>
         ///     Adds triangle indices for a quad
         /// </summary>
-        public static void AddIndices(this RenderBuffer target, int offset, bool backFace)
+        public static void AddIndices(this GeometryBuffer target, int offset, bool backFace)
         {
             // 0--1
             // |\ |
@@ -38,7 +37,7 @@ namespace Voxelmetric.Code.Common.Extensions
             }
         }
 
-        public static void AddIndex(this RenderBuffer target, int offset)
+        public static void AddIndex(this GeometryBuffer target, int offset)
         {
             target.Triangles.Add(offset);
         }
@@ -46,17 +45,17 @@ namespace Voxelmetric.Code.Common.Extensions
         /// <summary>
         ///     Adds the vertices to the render buffer.
         /// </summary>
-        public static void AddVertices(this RenderBuffer target, VertexDataFixed[] vertices)
+        public static void AddVertices(this GeometryBuffer target, VertexDataFixed[] vertices)
         {
             target.Vertices.AddRange(vertices);
         }
 
-        public static void AddVertex(this RenderBuffer target, ref VertexDataFixed vertex)
+        public static void AddVertex(this GeometryBuffer target, ref VertexDataFixed vertex)
         {
             target.Vertices.Add(vertex);
         }
 
-        public static void GenerateTangents(this RenderBuffer buffer, LocalPools pools)
+        public static void GenerateTangents(this GeometryBuffer buffer, LocalPools pools)
         {
             var vertices = buffer.Vertices;
             var triangles = buffer.Triangles;

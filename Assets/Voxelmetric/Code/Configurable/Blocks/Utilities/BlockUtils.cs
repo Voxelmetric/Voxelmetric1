@@ -11,13 +11,15 @@ namespace Voxelmetric.Code.Configurable.Blocks.Utilities
     {
         //Adding a tiny overlap between block meshes may solve floating point imprecision
         //errors causing pixel size gaps between blocks when looking closely
-        private static readonly float halfBlock = (Env.BlockSize/2)+Env.BlockFacePadding;
+        public static readonly float halfBlock = (Env.BlockSize/2)+Env.BlockFacePadding;
 
-        private static readonly Vector3[][] halfBlockOffsets =
+        public static readonly Vector3 HalfBlockVector = new Vector3(halfBlock, halfBlock, halfBlock);
+
+        public static readonly Vector3[][] HalfBlockOffsets =
         {
             new[]
             {
-                // Direction.forward
+                // Direction.north
                 new Vector3(+halfBlock, -halfBlock, +halfBlock),
                 new Vector3(+halfBlock, +halfBlock, +halfBlock),
                 new Vector3(-halfBlock, +halfBlock, +halfBlock),
@@ -25,7 +27,7 @@ namespace Voxelmetric.Code.Configurable.Blocks.Utilities
             },
             new[]
             {
-                // Direction.backward
+                // Direction.south
                 new Vector3(-halfBlock, -halfBlock, -halfBlock),
                 new Vector3(-halfBlock, +halfBlock, -halfBlock),
                 new Vector3(+halfBlock, +halfBlock, -halfBlock),
@@ -34,7 +36,7 @@ namespace Voxelmetric.Code.Configurable.Blocks.Utilities
 
             new[]
             {
-                // Direction.right
+                // Direction.east
                 new Vector3(+halfBlock, -halfBlock, -halfBlock),
                 new Vector3(+halfBlock, +halfBlock, -halfBlock),
                 new Vector3(+halfBlock, +halfBlock, +halfBlock),
@@ -42,7 +44,7 @@ namespace Voxelmetric.Code.Configurable.Blocks.Utilities
             },
             new[]
             {
-                // Direction.left
+                // Direction.west
                 new Vector3(-halfBlock, -halfBlock, +halfBlock),
                 new Vector3(-halfBlock, +halfBlock, +halfBlock),
                 new Vector3(-halfBlock, +halfBlock, -halfBlock),
@@ -397,12 +399,12 @@ namespace Voxelmetric.Code.Configurable.Blocks.Utilities
             //Vector3 vPos = (pos - chunk.pos);
 
             int d = DirectionUtils.Get(direction);
-            vertexData[0].Vertex = vPos+halfBlockOffsets[d][0];
-            vertexData[1].Vertex = vPos+halfBlockOffsets[d][1];
-            vertexData[2].Vertex = vPos+halfBlockOffsets[d][2];
-            vertexData[3].Vertex = vPos+halfBlockOffsets[d][3];
+            vertexData[0].Vertex = vPos+HalfBlockOffsets[d][0];
+            vertexData[1].Vertex = vPos+HalfBlockOffsets[d][1];
+            vertexData[2].Vertex = vPos+HalfBlockOffsets[d][2];
+            vertexData[3].Vertex = vPos+HalfBlockOffsets[d][3];
         }
-
+        
         private static void SetColorsAO(VertexData[] vertexData, bool wnSolid, bool nSolid, bool neSolid, bool eSolid, bool esSolid, bool sSolid, bool swSolid, bool wSolid, float strength)
         {
             float ne = 1;

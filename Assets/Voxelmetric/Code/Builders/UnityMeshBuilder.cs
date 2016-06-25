@@ -6,9 +6,9 @@ namespace Voxelmetric.Code.Builders
     public static class UnityMeshBuilder
     {
         /// <summary>
-        ///     Copy the data to a Unity mesh
+        ///     Copy render geometry data to a Unity mesh
         /// </summary>
-        public static void BuildMesh(Mesh mesh, Rendering.RenderBuffer buffer)
+        public static void BuildGeometryMesh(Mesh mesh, GeometryBuffer buffer)
         {
             int size = buffer.Vertices.Count;
 
@@ -58,6 +58,39 @@ namespace Voxelmetric.Code.Builders
             Globals.MemPools.PushColor32Array(colors);
             Globals.MemPools.PushVector3Array(normals);
             Globals.MemPools.PushVector4Array(tangents);
+        }
+
+        /// <summary>
+        ///     Copy collider geometry data to a Unity mesh
+        /// </summary>
+        public static void BuildColliderMesh(Mesh mesh, GeometryBuffer buffer)
+        {
+            int size = buffer.Vertices.Count;
+
+            // Avoid allocations by retrieving buffers from the pool
+            Vector3[] vertices = Globals.MemPools.PopVector3Array(size);
+
+            // Fill buffers with data
+            for (int i = 0; i < size; i++)
+            {
+                VertexDataFixed vertexData = buffer.Vertices[i];
+                vertices[i] = vertexData.Vertex;
+            }
+
+            // Due to the way the memory pools work we might have received more
+            // data than necessary. This little overhead is well worth it, though.
+            // Fill unused data with "zeroes"
+            for (int i = size; i < vertices.Length; i++)
+            {
+                vertices[i] = Vector3.zero;
+            }
+
+            // Prepare mesh
+            mesh.vertices = vertices;
+            mesh.SetTriangles(buffer.Triangles, 0);
+
+            // Return memory back to pool
+            Globals.MemPools.PushVector3Array(vertices);
         }
     }
 }

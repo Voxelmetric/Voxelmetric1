@@ -2,7 +2,6 @@
 using System.Text;
 using System.Threading;
 using Assets.Voxelmetric.Code.Core.StateManager;
-using UnityEngine;
 using UnityEngine.Assertions;
 using Voxelmetric.Code.Common.Events;
 using Voxelmetric.Code.Common.Extensions;
@@ -18,14 +17,17 @@ namespace Voxelmetric.Code.Core.StateManager
     /// This means there chunk geometry rendering and chunk neighbors
     /// need to be taken into account.
     /// </summary>
-    /// <param name="pos">Global position of the block data</param>
     public class ChunkStateManagerClient : ChunkStateManager
     {
         //! Says whether or not the chunk is visible
         public bool Visible
         {
-            get { return chunk.render.batcher.IsVisible(); }
-            set { chunk.render.batcher.SetVisible(value); }
+            get { return chunk.GeometryHandler.Batcher.IsEnabled(); }
+            set
+            {
+                chunk.GeometryHandler.Batcher.Enable(value);
+                chunk.ColliderGeometryHandler.Batcher.Enable(value);
+            }
         }
         //! Says whether or not building of geometry can be triggered
         public bool PossiblyVisible { get; set; }
@@ -250,23 +252,7 @@ namespace Voxelmetric.Code.Core.StateManager
         private static void OnGenerateData(ChunkStateManagerClient stateManager)
         {
             Chunk chunk = stateManager.chunk;
-
-            if (chunk.pos.x==0 && chunk.pos.z==0 && chunk.pos.y==0)
-            {
-                ushort type = chunk.world.blockProvider.GetBlock("stone").type;
-                for(int i=0; i<Env.ChunkVolume;i++)
-                    chunk.blocks.Set(i, new BlockData(type));
-            }
-            else /*if (
-                Mathf.Abs(chunk.pos.x)<=4*Env.ChunkSize &&
-                Mathf.Abs(chunk.pos.y)<=4*Env.ChunkSize &&
-                Mathf.Abs(chunk.pos.z)<=4*Env.ChunkSize)*/
-            {
-                for (int i = 0; i < Env.ChunkVolume; i++)
-                    chunk.blocks.Set(i, new BlockData(0));
-            }/*
-            else
-            chunk.world.terrainGen.GenerateTerrainForChunk(chunk);*/
+            chunk.world.terrainGen.GenerateTerrainForChunk(chunk);
 
             OnGenerateDataDone(stateManager);
         }
@@ -444,7 +430,8 @@ namespace Voxelmetric.Code.Core.StateManager
 
         private static void OnGenerateVerices(ChunkStateManagerClient stateManager)
         {
-            stateManager.chunk.render.BuildMeshData();
+            stateManager.chunk.GeometryHandler.Build();
+            stateManager.chunk.ColliderGeometryHandler.Build();
 
             OnGenerateVerticesDone(stateManager);
         }

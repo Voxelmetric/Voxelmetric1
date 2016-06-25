@@ -9,6 +9,6 @@ public class CrossMeshBlock : Block
 
     public override void BuildBlock(Chunk chunk, Vector3Int localPos, Vector3Int globalPos)
     {
-        //MeshUtils.BuildCrossMesh(chunk, localPos, globalPos, texture);
+        MeshUtils.BuildCrossMesh(chunk, localPos, globalPos, texture);
     }
 }

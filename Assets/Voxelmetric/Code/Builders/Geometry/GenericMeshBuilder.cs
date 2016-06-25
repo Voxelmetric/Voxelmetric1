@@ -4,7 +4,7 @@ using Voxelmetric.Code.Data_types;
 using Voxelmetric.Code.Load_Resources.Blocks;
 using Voxelmetric.Code.Utilities;
 
-namespace Voxelmetric.Code.Builders
+namespace Voxelmetric.Code.Builders.Geometry
 {
     public class GenericMeshBuilder: IMeshBuilder
     {

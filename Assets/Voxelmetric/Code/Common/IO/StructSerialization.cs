@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Runtime.InteropServices;
 using Voxelmetric.Code.Common.Memory;
-using Voxelmetric.Code.Common.MemoryPooling;
 
 namespace Voxelmetric.Code.Common.IO
 {

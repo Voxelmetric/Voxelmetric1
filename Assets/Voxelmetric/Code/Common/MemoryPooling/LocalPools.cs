@@ -31,6 +31,9 @@ namespace Voxelmetric.Code.Common.MemoryPooling
         private readonly Dictionary<int, IArrayPool<byte>> m_byteArrayPools =
             new Dictionary<int, IArrayPool<byte>>(128);
 
+        private readonly Dictionary<int, IArrayPool<bool>> m_boolArrayPools =
+            new Dictionary<int, IArrayPool<bool>>(128);
+
         private readonly MarshalMemPool m_marshaledPool =
             new MarshalMemPool(65535); // 65k of memory should be more sufficient for now
 
@@ -74,6 +77,11 @@ namespace Voxelmetric.Code.Common.MemoryPooling
             return PopArray(size, m_byteArrayPools);
         }
 
+        public bool[] PopBoolArray(int size)
+        {
+            return PopArray(size, m_boolArrayPools);
+        }
+
         public void PushVertexData(VertexData item)
         {
             m_vertexDataPool.Push(item);
@@ -107,6 +115,11 @@ namespace Voxelmetric.Code.Common.MemoryPooling
         public void PushByteArray(byte[] arr)
         {
             PushArray(arr, m_byteArrayPools);
+        }
+
+        public void PushBoolArray(bool[] arr)
+        {
+            PushArray(arr, m_boolArrayPools);
         }
     }
 }

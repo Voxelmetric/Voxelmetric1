@@ -86,7 +86,7 @@ namespace Assets.Voxelmetric.Code.Core.StateManager
                     return;
                 m_removalRequested = true;
 
-                m_pendingStates = m_pendingStates.Set(ChunkState.SaveData);
+                OnNotified(this, ChunkState.SaveData);
                 OnNotified(this, ChunkState.Remove);
             }
 

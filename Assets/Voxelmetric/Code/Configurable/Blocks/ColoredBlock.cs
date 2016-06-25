@@ -24,7 +24,7 @@ public class ColoredBlock : SolidBlock {
             
             for (int i = 0; i<4; i++)
                 vertexDataFixed[i]= VertexDataUtils.ClassToStruct(vertexData[i]);
-            chunk.render.batcher.AddFace(vertexDataFixed, DirectionUtils.Backface(direction));
+            chunk.GeometryHandler.Batcher.AddFace(vertexDataFixed);
 
             for (int i = 0; i < 4; i++)
                 chunk.pools.PushVertexData(vertexData[i]);

@@ -17,7 +17,8 @@ namespace Voxelmetric.Code.Core
 
         public ChunkBlocks blocks { get; private set; }
         public ChunkLogic logic { get; private set; }
-        public ChunkRender render { get; private set; }
+        public RenderGeometryHandler GeometryHandler { get; private set; }
+        public ColliderGeometryHandler ColliderGeometryHandler { get; private set; }
         public IChunkStateManager stateManager { get; private set; }
 
         //! Bounding box in world coordinates
@@ -66,7 +67,8 @@ namespace Voxelmetric.Code.Core
             ThreadID = Globals.WorkPool.GetThreadIDFromIndex(s_id++);
             pools = Globals.WorkPool.GetPool(ThreadID);
 
-            render = new ChunkRender(this);
+            GeometryHandler = new RenderGeometryHandler(this);
+            ColliderGeometryHandler = new ColliderGeometryHandler(this);
             blocks = new ChunkBlocks(this);
             logic = new ChunkLogic(this);
             stateManager = new ChunkStateManagerClient(this);
@@ -94,7 +96,7 @@ namespace Voxelmetric.Code.Core
         {
             blocks.Reset();
             logic.Reset();
-            render.Reset();
+            GeometryHandler.Reset();
             stateManager.Reset();
         }
 
@@ -107,7 +109,7 @@ namespace Voxelmetric.Code.Core
             sb.Append(", logic=");
             sb.Append(logic);
             sb.Append(", render=");
-            sb.Append(render);
+            sb.Append(GeometryHandler);
             sb.Append(", ");
             sb.Append(stateManager);
             return sb.ToString();
@@ -129,7 +131,8 @@ namespace Voxelmetric.Code.Core
             if (stateManager.IsStateCompleted(ChunkState.BuildVertices|ChunkState.BuildVerticesNow))
             {
                 stateManager.SetMeshBuilt();
-                render.BuildMesh();
+                GeometryHandler.Commit();
+                ColliderGeometryHandler.Commit();
             }
 
             // Process chunk tasks

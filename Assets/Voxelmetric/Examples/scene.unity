@@ -397,8 +397,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   world: {fileID: 1856110255}
-  ChunkLoadRadius: 4
-  ChunkDeleteRadius: 5
+  ChunkLoadRadius: 6
+  ChunkDeleteRadius: 8
   FollowCamera: 0
   UseFrustumCulling: 0
   Diag_DrawWorldBounds: 0
@@ -967,6 +967,10 @@ Prefab:
   m_Modification:
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 11406898, guid: 28fc5073d6f2b5b42acaec530dd745cd, type: 2}
+      propertyPath: ObjectPools.Array.size
+      value: 3
+      objectReference: {fileID: 0}
     - target: {fileID: 479208, guid: 28fc5073d6f2b5b42acaec530dd745cd, type: 2}
       propertyPath: m_LocalPosition.x
       value: 0
@@ -1031,6 +1035,26 @@ Prefab:
       propertyPath: ObjectPools.Array.data[1].InitialSize
       value: 1024
       objectReference: {fileID: 0}
+    - target: {fileID: 11406898, guid: 28fc5073d6f2b5b42acaec530dd745cd, type: 2}
+      propertyPath: ObjectPools.Array.data[2].Name
+      value: CustomMesh
+      objectReference: {fileID: 0}
+    - target: {fileID: 11406898, guid: 28fc5073d6f2b5b42acaec530dd745cd, type: 2}
+      propertyPath: ObjectPools.Array.data[2].Prefab
+      value: 
+      objectReference: {fileID: 100002, guid: cff7141e7c83e7d4a8f9174acaf8663b, type: 3}
+    - target: {fileID: 11406898, guid: 28fc5073d6f2b5b42acaec530dd745cd, type: 2}
+      propertyPath: ObjectPools.Array.data[2].InitialSize
+      value: 1024
+      objectReference: {fileID: 0}
+    - target: {fileID: 11406898, guid: 28fc5073d6f2b5b42acaec530dd745cd, type: 2}
+      propertyPath: ObjectPools.Array.data[1].Name
+      value: ChunkCollider
+      objectReference: {fileID: 0}
+    - target: {fileID: 11406898, guid: 28fc5073d6f2b5b42acaec530dd745cd, type: 2}
+      propertyPath: ObjectPools.Array.data[1].Prefab
+      value: 
+      objectReference: {fileID: 199192, guid: 6dcd1a91d5174624191754e53d987f23, type: 2}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: 28fc5073d6f2b5b42acaec530dd745cd, type: 2}
   m_IsPrefabParent: 0

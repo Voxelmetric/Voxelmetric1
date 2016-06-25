@@ -5,7 +5,7 @@ namespace Voxelmetric.Code.Rendering
     /// <summary>
     ///     A simple intermediate container for mesh data
     /// </summary>
-    public class RenderBuffer
+    public class GeometryBuffer
     {
         public readonly List<VertexDataFixed> Vertices = new List<VertexDataFixed>();
         public readonly List<int> Triangles = new List<int>();
