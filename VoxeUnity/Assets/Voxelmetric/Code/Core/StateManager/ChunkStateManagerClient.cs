@@ -31,11 +31,11 @@ namespace Voxelmetric.Code.Core.StateManager
         }
         //! Says whether or not building of geometry can be triggered
         public bool PossiblyVisible { get; set; }
-        
+
         //! State to notify external listeners about
         private ChunkStateExternal m_stateExternal;
 
-        
+
 
         public ChunkStateManagerClient(Chunk chunk) : base(chunk)
         {
@@ -56,7 +56,7 @@ namespace Voxelmetric.Code.Core.StateManager
             SubscribeNeighbors(false);
 
             m_stateExternal = ChunkStateExternal.None;
-            
+
             Visible = false;
             PossiblyVisible = false;
         }
@@ -117,7 +117,7 @@ namespace Voxelmetric.Code.Core.StateManager
 
                     ProcessNotifyState();
                 }
-                
+
                 if (m_pendingStates.Check(ChunkState.LoadData) && LoadData())
                     return;
 
@@ -146,7 +146,7 @@ namespace Voxelmetric.Code.Core.StateManager
                 }
             }
         }
-        
+
         private void ProcessNotifyState()
         {
             if (m_nextState == ChunkState.Idle)
@@ -406,6 +406,23 @@ namespace Voxelmetric.Code.Core.StateManager
 
         #endregion Save chunk data
 
+        private bool SynchronizeChunk()
+        {
+            // 6 neighbors are necessary
+            if (ListenerCount != 6)
+                return false;
+
+            // All neighbors have to have their data loaded
+            foreach (var chunkEvent in Listeners)
+            {
+                var stateManager = (ChunkStateManagerClient)chunkEvent;
+                if (!stateManager.m_completedStates.Check(ChunkState.LoadData))
+                    return false;
+            }
+
+            return true;
+        }
+
         #region Generate collider
 
         private struct SGenerateColliderWorkItem
@@ -440,7 +457,10 @@ namespace Voxelmetric.Code.Core.StateManager
         {
             if (!m_completedStates.Check(ChunkState.LoadData))
                 return true;
-            
+
+            if (!SynchronizeChunk())
+                return true;
+
             m_pendingStates = m_pendingStates.Reset(CurrStateGenerateCollider);
             m_completedStates = m_completedStates.Reset(CurrStateGenerateCollider);
             m_completedStatesSafe = m_completedStates;
@@ -469,23 +489,6 @@ namespace Voxelmetric.Code.Core.StateManager
         }
 
         #endregion Generate vertices
-
-        private bool SynchronizeChunk()
-        {
-            // 6 neighbors are necessary
-            if (ListenerCount != 6)
-                return false;
-
-            // All neighbors have to have their data loaded
-            foreach (var chunkEvent in Listeners)
-            {
-                var stateManager = (ChunkStateManagerClient)chunkEvent;
-                if (!stateManager.m_completedStates.Check(ChunkState.LoadData))
-                    return false;
-            }
-
-            return true;
-        }        
 
         #region Generate vertices
 

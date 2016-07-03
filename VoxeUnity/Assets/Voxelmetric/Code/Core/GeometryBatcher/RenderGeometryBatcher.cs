@@ -3,7 +3,6 @@ using Assets.Voxelmetric.Code.Core.GeometryBatcher;
 using UnityEngine;
 using UnityEngine.Assertions;
 using Voxelmetric.Code.Builders;
-using Voxelmetric.Code.Common.Extensions;
 using Voxelmetric.Code.Common.MemoryPooling;
 using Voxelmetric.Code.Core;
 

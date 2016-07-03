@@ -22,14 +22,14 @@ namespace Voxelmetric.Code.Core
         public IChunkStateManager stateManager { get; private set; }
 
         public bool NeedsCollider { get; set; }
-        
+
         //! Bounding box in world coordinates
         public Bounds WorldBounds { get; private set; }
-
+        
         //! ThreadID associated with this chunk. Used when working with object pools in MT environment. Resources
         //! need to be release where they were allocated. Thanks to this, associated containers could be made lock-free
         public int ThreadID { get; private set; }
-        
+
         public static Chunk CreateChunk(World world, Vector3Int pos, bool isDedicated)
         {
             Chunk chunk = Globals.MemPools.ChunkPool.Pop();
@@ -69,11 +69,12 @@ namespace Voxelmetric.Code.Core
             ThreadID = Globals.WorkPool.GetThreadIDFromIndex(s_id++);
             pools = Globals.WorkPool.GetPool(ThreadID);
 
-            GeometryHandler = new RenderGeometryHandler(this);
-            ColliderGeometryHandler = new ColliderGeometryHandler(this);
+            stateManager = new ChunkStateManagerClient(this);
             blocks = new ChunkBlocks(this);
             logic = new ChunkLogic(this);
-            stateManager = new ChunkStateManagerClient(this);
+
+            GeometryHandler = new RenderGeometryHandler(this);
+            ColliderGeometryHandler = new ColliderGeometryHandler(this);
         }
 
         private void Init(World world, Vector3Int pos, IChunkStateManager stateManager)
@@ -87,7 +88,7 @@ namespace Voxelmetric.Code.Core
                 new Vector3(pos.x+size/2, pos.y+size/2, pos.z+size/2),
                 new Vector3(size, size, size)
                 );
-            
+
             Reset();
 
             blocks.Init();
@@ -96,10 +97,12 @@ namespace Voxelmetric.Code.Core
 
         private void Reset()
         {
+            stateManager.Reset();
             blocks.Reset();
             logic.Reset();
+
             GeometryHandler.Reset();
-            stateManager.Reset();
+            ColliderGeometryHandler.Reset();
 
             NeedsCollider = false;
         }
@@ -118,7 +121,7 @@ namespace Voxelmetric.Code.Core
             sb.Append(stateManager);
             return sb.ToString();
         }
-        
+
         public void UpdateChunk()
         {
             if (!stateManager.CanUpdate())
@@ -130,7 +133,7 @@ namespace Voxelmetric.Code.Core
                 logic.Update();
                 blocks.Update();
             }
-            
+
             // Process chunk tasks
             stateManager.Update();
 
