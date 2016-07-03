@@ -1,13 +1,14 @@
 ﻿using System;
 using System.Text;
-using System.Threading;
 using Assets.Voxelmetric.Code.Core.StateManager;
+using UnityEngine;
 using UnityEngine.Assertions;
 using Voxelmetric.Code.Common.Events;
 using Voxelmetric.Code.Common.Extensions;
 using Voxelmetric.Code.Common.Threading;
 using Voxelmetric.Code.Common.Threading.Managers;
 using Voxelmetric.Code.Data_types;
+using Voxelmetric.Code.Load_Resources.Blocks;
 using Voxelmetric.Code.Utilities;
 
 namespace Voxelmetric.Code.Core.StateManager
@@ -22,11 +23,13 @@ namespace Voxelmetric.Code.Core.StateManager
         //! Says whether or not the chunk is visible
         public bool Visible
         {
-            get { return chunk.GeometryHandler.Batcher.IsEnabled(); }
+            get
+            {
+                return chunk.GeometryHandler.Batcher.IsEnabled();
+            }
             set
             {
                 chunk.GeometryHandler.Batcher.Enable(value);
-                chunk.ColliderGeometryHandler.Batcher.Enable(value);
             }
         }
         //! Says whether or not building of geometry can be triggered
@@ -35,7 +38,14 @@ namespace Voxelmetric.Code.Core.StateManager
         //! State to notify external listeners about
         private ChunkStateExternal m_stateExternal;
 
-
+        //! Chunk bounds in terms of geometry
+        private int m_maxRenderX;
+        private int m_minRenderX;
+        private int m_maxRenderY;
+        private int m_minRenderY;
+        private int m_minRenderZ;
+        private int m_maxRenderZ;
+        private int m_lowestEmptyBlock;
 
         public ChunkStateManagerClient(Chunk chunk) : base(chunk)
         {
@@ -59,6 +69,15 @@ namespace Voxelmetric.Code.Core.StateManager
 
             Visible = false;
             PossiblyVisible = false;
+
+            ResetGeometryBounds();
+        }
+
+        private void ResetGeometryBounds()
+        {
+            m_minRenderX = m_minRenderY = m_minRenderZ = Env.ChunkMask;
+            m_maxRenderX = m_maxRenderY = m_maxRenderZ = 0;
+            m_lowestEmptyBlock = Env.ChunkMask;
         }
 
         public override string ToString()
@@ -182,19 +201,8 @@ namespace Voxelmetric.Code.Core.StateManager
         private static void OnGenericWork(ref SGenericWorkItem item)
         {
             ChunkStateManagerClient chunk = item.Chunk;
-
-            // Perform the action
             item.Action();
-
-            int cnt = Interlocked.Decrement(ref chunk.m_genericWorkItemsLeftToProcess);
-            if (cnt <= 0)
-            {
-                // Something is very wrong if we go below zero
-                Assert.IsTrue(cnt == 0);
-
-                // All generic work is done
-                OnGenericWorkDone(chunk);
-            }
+            OnGenericWorkDone(chunk);
         }
 
         private static void OnGenericWorkDone(ChunkStateManagerClient chunk)
@@ -206,40 +214,33 @@ namespace Voxelmetric.Code.Core.StateManager
 
         private bool PerformGenericWork()
         {
-            // When we get here we expect all generic tasks to be processed
-            Assert.IsTrue(Interlocked.CompareExchange(ref m_genericWorkItemsLeftToProcess, 0, 0) == 0);
-
             m_pendingStates = m_pendingStates.Reset(CurrStateGenericWork);
             m_completedStates = m_completedStates.Reset(CurrStateGenericWork);
-            m_completedStatesSafe = m_completedStates;
 
             // If there's nothing to do we can skip this state
             if (m_genericWorkItems.Count <= 0)
             {
-                m_genericWorkItemsLeftToProcess = 0;
                 OnGenericWorkDone(this);
+                m_completedStatesSafe = m_completedStates;
                 return false;
             }
 
+            m_completedStatesSafe = m_completedStates;
+
+            // We have work to do
+            SGenericWorkItem workItem = new SGenericWorkItem(this, m_genericWorkItems.Dequeue());
+
             m_taskRunning = true;
-            m_genericWorkItemsLeftToProcess = m_genericWorkItems.Count;
-
-            for (int i = 0; i < m_genericWorkItems.Count; i++)
-            {
-                SGenericWorkItem workItem = new SGenericWorkItem(this, m_genericWorkItems[i]);
-
-                WorkPoolManager.Add(
-                    new ThreadPoolItem(
-                        chunk.ThreadID,
-                        arg =>
-                        {
-                            SGenericWorkItem item = (SGenericWorkItem)arg;
-                            OnGenericWork(ref item);
-                        },
-                        workItem)
-                    );
-            }
-            m_genericWorkItems.Clear();
+            WorkPoolManager.Add(
+                new ThreadPoolItem(
+                    chunk.ThreadID,
+                    arg =>
+                    {
+                        SGenericWorkItem item = (SGenericWorkItem)arg;
+                        OnGenericWork(ref item);
+                    },
+                    workItem)
+                );
 
             return true;
         }
@@ -247,7 +248,7 @@ namespace Voxelmetric.Code.Core.StateManager
         public void EnqueueGenericTask(Action action)
         {
             Assert.IsTrue(action != null);
-            m_genericWorkItems.Add(action);
+            m_genericWorkItems.Enqueue(action);
             RequestState(ChunkState.GenericWork);
         }
 
@@ -333,12 +334,6 @@ namespace Voxelmetric.Code.Core.StateManager
 
         private bool LoadData()
         {
-            /*Assert.IsTrue(
-                m_completedStates.Check(ChunkState.Generate),
-                string.Format(
-                    "[{0},{1},{2}] - LoadData set sooner than Generate completed. Pending:{3}, Completed:{4}", pos.x,
-                    pos.y, pos.z, m_pendingStates, m_completedStates)
-                );*/
             if (!m_completedStates.Check(ChunkState.Generate))
                 return true;
 
@@ -406,6 +401,57 @@ namespace Voxelmetric.Code.Core.StateManager
 
         #endregion Save chunk data
 
+        private void AdjustMinMaxRenderBounds(int x, int y, int z)
+        {
+            ushort type = chunk.blocks.Get(new Vector3Int(x, y, z)).Type;
+            if (type != BlockProvider.AirType)
+            {
+                if (x < m_minRenderX)
+                    m_minRenderX = x;
+                if (y < m_minRenderY)
+                    m_minRenderY = y;
+                if (z < m_minRenderZ)
+                    m_minRenderZ = z;
+
+                if (x > m_maxRenderX)
+                    m_maxRenderX = x;
+                if (y > m_maxRenderY)
+                    m_maxRenderY = y;
+                if (z > m_maxRenderZ)
+                    m_maxRenderZ = z;
+            }
+            else if (y < m_lowestEmptyBlock)
+                m_lowestEmptyBlock = y;
+        }
+
+        private void CalculateGeometryBounds()
+        {
+            ResetGeometryBounds();
+
+            for (int y = Env.ChunkMask; y >= 0; y--)
+            {
+                for (int z = 0; z <= Env.ChunkMask; z++)
+                {
+                    for (int x = 0; x <= Env.ChunkMask; x++)
+                    {
+                        AdjustMinMaxRenderBounds(x, y, z);
+                    }
+                }
+            }
+
+            // This is an optimization - if this chunk is flat than there's no need to consider it as a whole.
+            // Its' top part is sufficient enough. However, we never want this value be smaller than chunk's
+            // lowest solid part.
+            // E.g. a sphere floating above the group would be considered from its topmost solid block to
+            // the ground without this. With this check, the lowest part above ground will be taken as minimum
+            // render value.
+            m_minRenderY = Mathf.Max(m_lowestEmptyBlock - 1, m_minRenderY);
+            m_minRenderY = Mathf.Max(m_minRenderY, 0);
+
+            // Consume info about block having been modified
+            chunk.blocks.contentsModified = false;
+        }
+
         private bool SynchronizeChunk()
         {
             // 6 neighbors are necessary
@@ -420,6 +466,13 @@ namespace Voxelmetric.Code.Core.StateManager
                     return false;
             }
 
+            // We need to calculate our chunk's bounds if it was invalidated
+            if (chunk.blocks.contentsModified && chunk.blocks.NonEmptyBlocks>0)
+            {
+                EnqueueGenericTask(CalculateGeometryBounds);
+                return false;
+            }
+
             return true;
         }
 
@@ -428,19 +481,31 @@ namespace Voxelmetric.Code.Core.StateManager
         private struct SGenerateColliderWorkItem
         {
             public readonly ChunkStateManagerClient StateManager;
+            public readonly int MinX;
+            public readonly int MaxX;
+            public readonly int MinY;
+            public readonly int MaxY;
+            public readonly int MinZ;
+            public readonly int MaxZ;
 
-            public SGenerateColliderWorkItem(ChunkStateManagerClient stateManager)
+            public SGenerateColliderWorkItem(ChunkStateManagerClient stateManager, int minX, int maxX, int minY, int maxY, int minZ, int maxZ)
             {
                 StateManager = stateManager;
+                MinX = minX;
+                MaxX = maxX;
+                MinY = minY;
+                MaxY = maxY;
+                MinZ = minZ;
+                MaxZ = maxZ;
             }
         }
 
         private static readonly ChunkState CurrStateGenerateCollider = ChunkState.BuildCollider;
 
-        private static void OnGenerateCollider(ChunkStateManagerClient stateManager)
+        private static void OnGenerateCollider(ref SGenerateColliderWorkItem item)
         {
-            stateManager.chunk.ColliderGeometryHandler.Build();
-
+            ChunkStateManagerClient stateManager = item.StateManager;
+            stateManager.chunk.ColliderGeometryHandler.Build(item.MinX, item.MaxX, item.MinY, item.MaxY, item.MinZ, item.MaxZ);
             OnGenerateColliderDone(stateManager);
         }
 
@@ -467,7 +532,12 @@ namespace Voxelmetric.Code.Core.StateManager
 
             if (chunk.blocks.NonEmptyBlocks > 0)
             {
-                var workItem = new SGenerateColliderWorkItem(this);
+                var workItem = new SGenerateColliderWorkItem(
+                    this,
+                    m_minRenderX, m_maxRenderX,
+                    m_minRenderY, m_maxRenderY,
+                    m_minRenderZ, m_maxRenderZ
+                    );
 
                 m_taskRunning = true;
                 WorkPoolManager.Add(
@@ -476,7 +546,7 @@ namespace Voxelmetric.Code.Core.StateManager
                         arg =>
                         {
                             SGenerateColliderWorkItem item = (SGenerateColliderWorkItem)arg;
-                            OnGenerateCollider(item.StateManager);
+                            OnGenerateCollider(ref item);
                         },
                         workItem)
                     );
@@ -495,19 +565,31 @@ namespace Voxelmetric.Code.Core.StateManager
         private struct SGenerateVerticesWorkItem
         {
             public readonly ChunkStateManagerClient StateManager;
+            public readonly int MinX;
+            public readonly int MaxX;
+            public readonly int MinY;
+            public readonly int MaxY;
+            public readonly int MinZ;
+            public readonly int MaxZ;
 
-            public SGenerateVerticesWorkItem(ChunkStateManagerClient stateManager)
+            public SGenerateVerticesWorkItem(ChunkStateManagerClient stateManager, int minX, int maxX, int minY, int maxY, int minZ, int maxZ)
             {
                 StateManager = stateManager;
+                MinX = minX;
+                MaxX = maxX;
+                MinY = minY;
+                MaxY = maxY;
+                MinZ = minZ;
+                MaxZ = maxZ;
             }
         }
 
         private static readonly ChunkState CurrStateGenerateVertices = ChunkState.BuildVertices | ChunkState.BuildVerticesNow;
 
-        private static void OnGenerateVerices(ChunkStateManagerClient stateManager)
+        private static void OnGenerateVerices(ref SGenerateVerticesWorkItem item)
         {
-            stateManager.chunk.GeometryHandler.Build();
-
+            ChunkStateManagerClient stateManager = item.StateManager;
+            stateManager.chunk.GeometryHandler.Build(item.MinX, item.MaxX, item.MinY, item.MaxY, item.MinZ, item.MaxZ);
             OnGenerateVerticesDone(stateManager);
         }
 
@@ -536,7 +618,12 @@ namespace Voxelmetric.Code.Core.StateManager
 
             if (chunk.blocks.NonEmptyBlocks > 0)
             {
-                var workItem = new SGenerateVerticesWorkItem(this);
+                var workItem = new SGenerateVerticesWorkItem(
+                    this,
+                    m_minRenderX, m_maxRenderX,
+                    m_minRenderY, m_maxRenderY,
+                    m_minRenderZ, m_maxRenderZ
+                    );
 
                 m_taskRunning = true;
                 WorkPoolManager.Add(
@@ -545,7 +632,7 @@ namespace Voxelmetric.Code.Core.StateManager
                         arg =>
                         {
                             SGenerateVerticesWorkItem item = (SGenerateVerticesWorkItem)arg;
-                            OnGenerateVerices(item.StateManager);
+                            OnGenerateVerices(ref item);
                         },
                         workItem,
                         priority ? Globals.Watch.ElapsedTicks : long.MaxValue)
@@ -566,22 +653,15 @@ namespace Voxelmetric.Code.Core.StateManager
 
         private bool RemoveChunk()
         {
-            // Wait until all generic tasks are processed
-            if (Interlocked.CompareExchange(ref m_genericWorkItemsLeftToProcess, 0, 0) != 0)
-            {
-                Assert.IsTrue(false);
-                return true;
-            }
-
             // If chunk was generated we need to wait for other states with higher priority to finish first
             if (m_completedStates.Check(ChunkState.Generate))
             {
-                // LoadData need to finish first
-                if (!m_completedStates.Check(ChunkState.LoadData))
-                    return true;
-
-                // Wait for serialization to finish as well
-                if (!m_completedStates.Check(ChunkState.SaveData))
+                if (!m_completedStates.Check(
+                    // Wait until chunk is loaded
+                    ChunkState.LoadData|
+                    // Wait until chunk data is stored
+                    ChunkState.SaveData
+                    ))
                     return true;
 
                 m_pendingStates = m_pendingStates.Reset(CurrStateRemoveChunk);

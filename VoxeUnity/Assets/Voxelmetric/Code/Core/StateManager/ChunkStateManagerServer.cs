@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Text;
-using System.Threading;
 using Assets.Voxelmetric.Code.Core.StateManager;
 using UnityEngine.Assertions;
 using Voxelmetric.Code.Common.Events;
@@ -40,8 +39,12 @@ namespace Voxelmetric.Code.Core.StateManager
             sb.Append(m_completedStates);
             return sb.ToString();
         }
-        
+
         public override void SetMeshBuilt()
+        {
+        }
+
+        public override void SetColliderBuilt()
         {
         }
 
@@ -100,7 +103,7 @@ namespace Voxelmetric.Code.Core.StateManager
             OnNotified(this, m_nextState);
             m_nextState = ChunkState.Idle;
         }
-        
+
         public override void OnNotified(IEventSource<ChunkState> source, ChunkState state)
         {
             // Enqueue the request
@@ -127,19 +130,8 @@ namespace Voxelmetric.Code.Core.StateManager
         private static void OnGenericWork(ref SGenericWorkItem item)
         {
             ChunkStateManagerServer chunk = item.Chunk;
-
-            // Perform the action
             item.Action();
-
-            int cnt = Interlocked.Decrement(ref chunk.m_genericWorkItemsLeftToProcess);
-            if (cnt <= 0)
-            {
-                // Something is very wrong if we go below zero
-                Assert.IsTrue(cnt == 0);
-
-                // All generic work is done
-                OnGenericWorkDone(chunk);
-            }
+            OnGenericWorkDone(chunk);
         }
 
         private static void OnGenericWorkDone(ChunkStateManagerServer chunk)
@@ -151,9 +143,6 @@ namespace Voxelmetric.Code.Core.StateManager
 
         private bool PerformGenericWork()
         {
-            // When we get here we expect all generic tasks to be processed
-            Assert.IsTrue(Interlocked.CompareExchange(ref m_genericWorkItemsLeftToProcess, 0, 0) == 0);
-
             m_pendingStates = m_pendingStates.Reset(CurrStateGenericWork);
             m_completedStates = m_completedStates.Reset(CurrStateGenericWork);
             m_completedStatesSafe = m_completedStates;
@@ -161,30 +150,24 @@ namespace Voxelmetric.Code.Core.StateManager
             // If there's nothing to do we can skip this state
             if (m_genericWorkItems.Count <= 0)
             {
-                m_genericWorkItemsLeftToProcess = 0;
                 OnGenericWorkDone(this);
                 return false;
             }
 
+            // We have work to do
+            SGenericWorkItem workItem = new SGenericWorkItem(this, m_genericWorkItems.Dequeue());
+
             m_taskRunning = true;
-            m_genericWorkItemsLeftToProcess = m_genericWorkItems.Count;
-
-            for (int i = 0; i < m_genericWorkItems.Count; i++)
-            {
-                SGenericWorkItem workItem = new SGenericWorkItem(this, m_genericWorkItems[i]);
-
-                WorkPoolManager.Add(
-                    new ThreadPoolItem(
-                        chunk.ThreadID,
-                        arg =>
-                        {
-                            SGenericWorkItem item = (SGenericWorkItem)arg;
-                            OnGenericWork(ref item);
-                        },
-                        workItem)
-                    );
-            }
-            m_genericWorkItems.Clear();
+            WorkPoolManager.Add(
+                new ThreadPoolItem(
+                    chunk.ThreadID,
+                    arg =>
+                    {
+                        SGenericWorkItem item = (SGenericWorkItem)arg;
+                        OnGenericWork(ref item);
+                    },
+                    workItem)
+                );
 
             return true;
         }
@@ -192,7 +175,7 @@ namespace Voxelmetric.Code.Core.StateManager
         public void EnqueueGenericTask(Action action)
         {
             Assert.IsTrue(action != null);
-            m_genericWorkItems.Add(action);
+            m_genericWorkItems.Enqueue(action);
             RequestState(ChunkState.GenericWork);
         }
 
@@ -349,22 +332,15 @@ namespace Voxelmetric.Code.Core.StateManager
 
         private bool RemoveChunk()
         {
-            // Wait until all generic tasks are processed
-            if (Interlocked.CompareExchange(ref m_genericWorkItemsLeftToProcess, 0, 0) != 0)
-            {
-                Assert.IsTrue(false);
-                return true;
-            }
-
             // If chunk was generated we need to wait for other states with higher priority to finish first
             if (m_completedStates.Check(ChunkState.Generate))
             {
-                // LoadData need to finish first
-                if (!m_completedStates.Check(ChunkState.LoadData))
-                    return true;
-
-                // Wait for serialization to finish as well
-                if (!m_completedStates.Check(ChunkState.SaveData))
+                if (!m_completedStates.Check(
+                    // Wait until chunk is loaded
+                    ChunkState.LoadData |
+                    // Wait until chunk data is stored
+                    ChunkState.SaveData
+                    ))
                     return true;
 
                 m_pendingStates = m_pendingStates.Reset(CurrStateRemoveChunk);
@@ -374,6 +350,6 @@ namespace Voxelmetric.Code.Core.StateManager
             return true;
         }
 
-        #endregion Remove chunk        
+        #endregion Remove chunk
     }
 }

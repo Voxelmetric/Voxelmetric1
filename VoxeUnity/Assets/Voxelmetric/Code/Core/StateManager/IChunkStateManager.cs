@@ -9,6 +9,7 @@
         void Update();
 
         void RequestState(ChunkState state);
+        void ResetRequest(ChunkState state);
 
         bool IsStateCompleted(ChunkState state);
         bool IsSavePossible { get; }

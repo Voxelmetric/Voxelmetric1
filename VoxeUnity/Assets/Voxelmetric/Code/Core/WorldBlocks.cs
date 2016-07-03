@@ -60,7 +60,7 @@ namespace Voxelmetric.Code.Core
         /// Gets the chunk and sets the block data at the given coordinates
         /// </summary>
         /// <param name="pos">Global position of the block</param>
-        /// <param name="blockData">The block be placed</param>
+        /// <param name="blockData">A block to be placed on a given position</param>
         public void Set(Vector3Int pos, BlockData blockData)
         {
             Chunk chunk = world.chunks.Get(pos);

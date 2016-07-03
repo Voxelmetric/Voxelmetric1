@@ -1,4 +1,5 @@
-﻿using Voxelmetric.Code.Rendering;
+﻿using UnityEngineInternal;
+using Voxelmetric.Code.Rendering;
 
 namespace Voxelmetric.Code.Core
 {
@@ -20,9 +21,9 @@ namespace Voxelmetric.Code.Core
         }
 
         /// <summary> Updates the chunk based on its contents </summary>
-        public void Build()
+        public void Build(int minX, int maxX, int minY, int maxY, int minZ, int maxZ)
         {
-            Globals.CubeMeshBuilder.Build(chunk);
+            Globals.CubeMeshBuilder.Build(chunk, minX, maxX, minY, maxY, minZ, maxZ);
         }
 
         public void Commit()

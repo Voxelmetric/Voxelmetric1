@@ -20,9 +20,9 @@ namespace Voxelmetric.Code.Core
         }
 
         /// <summary> Updates the chunk based on its contents </summary>
-        public void Build()
+        public void Build(int minX, int maxX, int minY, int maxY, int minZ, int maxZ)
         {
-            Globals.CubeMeshColliderBuilder.Build(chunk);
+            Globals.CubeMeshColliderBuilder.Build(chunk, minX, maxX, minY, maxY, minZ, maxZ);
         }
 
         public void Commit()

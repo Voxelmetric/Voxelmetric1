@@ -15,17 +15,34 @@ namespace Voxelmetric.Code.Core
         public Vector3Int pos { get; private set; }
         public LocalPools pools { get; private set; }
 
+        public IChunkStateManager stateManager { get; private set; }
         public ChunkBlocks blocks { get; private set; }
         public ChunkLogic logic { get; private set; }
+
         public RenderGeometryHandler GeometryHandler { get; private set; }
         public ColliderGeometryHandler ColliderGeometryHandler { get; private set; }
-        public IChunkStateManager stateManager { get; private set; }
 
-        public bool NeedsCollider { get; set; }
+        private bool m_needsCollider;
+        public bool NeedsCollider
+        {
+            get
+            {
+                return m_needsCollider;
+            }
+            set
+            {
+                bool prevNeedCollider = m_needsCollider;
+                m_needsCollider = value;
+                if (prevNeedCollider!=value && m_needsCollider || blocks.contentsModified)
+                    stateManager.RequestState(ChunkState.BuildCollider);
+                else if(!value)
+                    stateManager.ResetRequest(ChunkState.BuildCollider);
+            }
+        }
 
         //! Bounding box in world coordinates
         public Bounds WorldBounds { get; private set; }
-        
+
         //! ThreadID associated with this chunk. Used when working with object pools in MT environment. Resources
         //! need to be release where they were allocated. Thanks to this, associated containers could be made lock-free
         public int ThreadID { get; private set; }
@@ -34,7 +51,7 @@ namespace Voxelmetric.Code.Core
         {
             Chunk chunk = Globals.MemPools.ChunkPool.Pop();
 
-            if(isDedicated)
+            if (isDedicated)
                 chunk.Init(world, pos, new ChunkStateManagerServer(chunk));
             else
                 chunk.Init(world, pos, new ChunkStateManagerClient(chunk));
@@ -50,9 +67,9 @@ namespace Voxelmetric.Code.Core
         {
             const int chunkPower = Env.ChunkPower;
             return new Vector3Int(
-                (pos.x >> chunkPower) << chunkPower,
-                (pos.y >> chunkPower) << chunkPower,
-                (pos.z >> chunkPower) << chunkPower);
+                (pos.x>>chunkPower)<<chunkPower,
+                (pos.y>>chunkPower)<<chunkPower,
+                (pos.z>>chunkPower)<<chunkPower);
         }
 
         public static void RemoveChunk(Chunk chunk)
@@ -130,39 +147,39 @@ namespace Voxelmetric.Code.Core
             // Do not update our chunk until it has all its data prepared
             if (stateManager.IsStateCompleted(ChunkState.LoadData))
             {
-                logic.Update();
+                //logic.Update();
                 blocks.Update();
             }
 
             // Process chunk tasks
             stateManager.Update();
 
-            if (blocks.contentsModified)
-            {
-                // Consume info about this chunk having been modified
-                blocks.contentsModified = false;
+            HandleCollisionGeometry();
+            HandleRenderGeometry();
+        }
 
-                // Request bulding of a new collider only if there was none before
-                if (NeedsCollider && !stateManager.IsStateCompleted(ChunkState.BuildCollider))
-                {
-                    stateManager.RequestState(ChunkState.BuildCollider);
-                    stateManager.SetColliderBuilt();
-                }
-            }
-
+        private void HandleCollisionGeometry()
+        {
             // Release the collider when no longer needed
             if (!NeedsCollider)
+            {
+                stateManager.SetColliderBuilt();
                 ColliderGeometryHandler.Reset();
+                return;
+            }
 
             // Build collider if necessary
-            if (NeedsCollider && stateManager.IsStateCompleted(ChunkState.BuildCollider))
+            if (stateManager.IsStateCompleted(ChunkState.BuildCollider))
             {
                 stateManager.SetColliderBuilt();
                 ColliderGeometryHandler.Commit();
             }
+        }
 
+        private void HandleRenderGeometry()
+        {
             // Build chunk mesh if necessary
-            if (stateManager.IsStateCompleted(ChunkState.BuildVertices | ChunkState.BuildVerticesNow))
+            if (stateManager.IsStateCompleted(ChunkState.BuildVertices|ChunkState.BuildVerticesNow))
             {
                 stateManager.SetMeshBuilt();
                 GeometryHandler.Commit();

@@ -1,19 +1,19 @@
-﻿using Voxelmetric.Code.Core;
+﻿using UnityEngine;
+using Voxelmetric.Code.Core;
 using Voxelmetric.Code.Data_types;
 using Voxelmetric.Code.Load_Resources.Blocks;
-using Voxelmetric.Code.Utilities;
 
 namespace Voxelmetric.Code.Builders.Geometry
 {
     public class GenericMeshBuilder: IMeshBuilder
     {
-        public void Build(Chunk chunk)
+        public void Build(Chunk chunk, int minX, int maxX, int minY, int maxY, int minZ, int maxZ)
         {
-            for (int y = 0; y<Env.ChunkSize; y++)
+            for (int y = minY; y<=maxY; y++)
             {
-                for (int z = 0; z < Env.ChunkSize; z++)
+                for (int z = minZ; z<=maxZ; z++)
                 {
-                    for (int x = 0; x < Env.ChunkSize; x++)
+                    for (int x = minX; x<=maxX; x++)
                     {
                         Vector3Int localVector3Int = new Vector3Int(x, y, z);
 

@@ -6,7 +6,7 @@ using Voxelmetric.Code.Core.StateManager;
 
 namespace Assets.Voxelmetric.Code.Core.StateManager
 {
-    public class ChunkStateManager: ChunkEvent, IChunkStateManager
+    public abstract class ChunkStateManager: ChunkEvent, IChunkStateManager
     {
         public Chunk chunk { get; private set; }
 
@@ -25,9 +25,7 @@ namespace Assets.Voxelmetric.Code.Core.StateManager
         protected bool m_removalRequested;
 
         //! A list of generic tasks a Chunk has to perform
-        protected readonly List<Action> m_genericWorkItems = new List<Action>();
-        //! Number of generic tasks waiting to be finished
-        protected int m_genericWorkItemsLeftToProcess;
+        protected readonly Queue<Action> m_genericWorkItems = new Queue<Action>();
 
         protected ChunkStateManager(Chunk chunk)
         {
@@ -51,7 +49,6 @@ namespace Assets.Voxelmetric.Code.Core.StateManager
             m_removalRequested = false;
 
             m_genericWorkItems.Clear();
-            m_genericWorkItemsLeftToProcess = 0;
 
             m_taskRunning = false;
         }
@@ -73,10 +70,7 @@ namespace Assets.Voxelmetric.Code.Core.StateManager
             return !m_completedStatesSafe.Check(ChunkState.Remove);
         }
 
-        public virtual void Update()
-        {
-            throw new System.NotImplementedException();
-        }
+        public abstract void Update();
 
         public void RequestState(ChunkState state)
         {
@@ -93,6 +87,11 @@ namespace Assets.Voxelmetric.Code.Core.StateManager
             m_pendingStates = m_pendingStates.Set(state);
         }
 
+        public void ResetRequest(ChunkState state)
+        {
+            m_pendingStates = m_pendingStates.Reset(state);
+        }
+
         public bool IsStateCompleted(ChunkState state)
         {
             return m_completedStatesSafe.Check(state);
@@ -103,14 +102,7 @@ namespace Assets.Voxelmetric.Code.Core.StateManager
             get { return !m_removalRequested && m_completedStatesSafe.Check(ChunkState.Generate | ChunkState.LoadData); }
         }
 
-        public virtual void SetMeshBuilt()
-        {
-            throw new System.NotImplementedException();
-        }
-
-        public virtual void SetColliderBuilt()
-        {
-            throw new System.NotImplementedException();
-        }
+        public abstract void SetMeshBuilt();
+        public abstract void SetColliderBuilt();
     }
 }

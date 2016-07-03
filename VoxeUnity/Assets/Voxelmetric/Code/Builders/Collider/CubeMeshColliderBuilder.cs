@@ -13,15 +13,15 @@ namespace Voxelmetric.Code.Builders.Collider
     /// </summary>
     public class CubeMeshColliderBuilder: IMeshBuilder
     {
-        public void Build(Chunk chunk)
+        public void Build(Chunk chunk, int minX, int maxX, int minY, int maxY, int minZ, int maxZ)
         {
             WorldBlocks blocks = chunk.world.blocks;
 
             const int stepSize = 1;
             const int width = Env.ChunkSize;
 
-            int[] mins = {0, 0, 0};
-            int[] maxes = {Env.ChunkMask, Env.ChunkMask, Env.ChunkMask};
+            int[] mins = {minX, minY, minZ};
+            int[] maxes = {maxX, maxY, maxZ};
 
             int[] x = {0, 0, 0}; // Relative position of a block
             int[] q = {0, 0, 0};
@@ -183,7 +183,7 @@ namespace Voxelmetric.Code.Builders.Collider
                                             vertexData[ii].Vertex = vecs[ii];
                                             vertexDataFixed[ii] = VertexDataUtils.ClassToStruct(vertexData[ii]);
                                         }
-                                            
+
                                         chunk.ColliderGeometryHandler.Batcher.AddFace(vertexDataFixed, backFace);
 
                                         for (int ii = 0; ii<4; ii++)

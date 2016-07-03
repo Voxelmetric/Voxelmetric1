@@ -48,7 +48,7 @@ namespace Voxelmetric.Code.Core
 
         public void Init()
         {
-            m_blockTypes = chunk.world.blockProvider.BlockTypes; 
+            m_blockTypes = chunk.world.blockProvider.BlockTypes;
         }
 
         public override string ToString()
@@ -63,7 +63,7 @@ namespace Voxelmetric.Code.Core
         {
             Array.Clear(blocks, 0, blocks.Length);
 
-            contentsModified = false;
+            contentsModified = true;
             modifiedBlocks.Clear();
 
             NonEmptyBlocks = 0;
@@ -107,7 +107,7 @@ namespace Voxelmetric.Code.Core
 
                 if (context.SetBlockModified)
                     BlockModified(new BlockPos(x,y,z), globalPos, context.Block);
-                
+
                 if (
                     // Only check neighbors if it is still needed
                     rebuildMask == 0x3f ||
@@ -117,13 +117,13 @@ namespace Voxelmetric.Code.Core
                      ((pos.z+1)&Env.ChunkMask)>1)
                     )
                     continue;
-                    
+
                 int cx = chunk.pos.x;
                 int cy = chunk.pos.y;
                 int cz = chunk.pos.z;
 
                 // If it is an edge position, notify neighbor as well
-                // Iterate over neighbors and decide which ones should be notified to rebuild                
+                // Iterate over neighbors and decide which ones should be notified to rebuild
                 for (int i = 0; i < stateManager.Listeners.Length; i++)
                 {
                     ChunkEvent listener = stateManager.Listeners[i];
@@ -177,8 +177,10 @@ namespace Voxelmetric.Code.Core
                 for (int j = 0; j < stateManager.Listeners.Length; j++)
                 {
                     ChunkStateManagerClient listener = (ChunkStateManagerClient)stateManager.Listeners[j];
-                    if (listener != null && ((rebuildMask >> j) & 1) != 0)
+                    if (listener!=null && ((rebuildMask>>j)&1)!=0)
+                    {
                         listener.RequestState(ChunkState.BuildVerticesNow);
+                    }
                 }
             }
         }
@@ -229,6 +231,7 @@ namespace Voxelmetric.Code.Core
         /// Sets the block at the given position
         /// </summary>
         /// <param name="pos">A local block position</param>
+        /// <param name="blockData">A block to be placed on a given position</param>
         public void Set(Vector3Int pos, BlockData blockData)
         {
             int index = Helpers.GetChunkIndex1DFrom3D(pos.x, pos.y, pos.z);
@@ -251,6 +254,7 @@ namespace Voxelmetric.Code.Core
         /// Sets the block at the given position
         /// </summary>
         /// <param name="index">Index to internal block buffer</param>
+        /// <param name="blockData">A block to be placed on a given position</param>
         public void Set(int index, BlockData blockData)
         {
             // Nothing for us to do if block did not change
@@ -294,10 +298,9 @@ namespace Voxelmetric.Code.Core
                     chunk.world.networking.server.BroadcastChange(globalPos, blockData, -1);
 
                 if (!modifiedBlocks.Contains(blockPos))
-                {
                     modifiedBlocks.Add(blockPos);
-                    chunk.blocks.contentsModified = true;
-                }
+
+                chunk.blocks.contentsModified = true;
             }
             else // if this is not the server send the change to the server to sync
             {
@@ -395,7 +398,7 @@ namespace Voxelmetric.Code.Core
                             BlockData bd = new BlockData(blockData.Type);
                             data = bd.ToByteArray();
 
-                            //Add 1 as a short (2 bytes) 
+                            //Add 1 as a short (2 bytes)
                             countIndex = buffer.Count;
                             sameBlockCount = 1;
                             buffer.AddRange(BitConverter.GetBytes(1));
@@ -428,7 +431,7 @@ namespace Voxelmetric.Code.Core
                         {
                             blockCount = BitConverter.ToInt16(receiveBuffer, i);
                             i += 2;
-                            
+
                             ushort type = BitConverter.ToUInt16(receiveBuffer, i);
                             blockData = new BlockData(type);
                             i += 2;

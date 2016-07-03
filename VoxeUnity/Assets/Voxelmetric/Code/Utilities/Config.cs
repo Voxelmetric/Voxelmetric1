@@ -14,7 +14,7 @@ namespace Voxelmetric.Code.Utilities
 
         public static readonly Vector3Int ChunkSizePos = Vector3Int.one * ChunkSize;
 
-        // Padding added to the size of block faces to fix floating point issues 
+        // Padding added to the size of block faces to fix floating point issues
         // where tiny gaps can appear between block faces
         public const float BlockFacePadding = 0.0005f;
     }
