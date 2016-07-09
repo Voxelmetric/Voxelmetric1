@@ -10,7 +10,6 @@ GameObject:
   - 4: {fileID: 412256}
   - 33: {fileID: 3344610}
   - 23: {fileID: 2343156}
-  - 65: {fileID: 6520520}
   m_Layer: 0
   m_Name: Chunk
   m_TagString: Untagged
@@ -64,18 +63,6 @@ MeshFilter:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 150658}
   m_Mesh: {fileID: 0}
---- !u!65 &6520520
-BoxCollider:
-  m_ObjectHideFlags: 1
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 150658}
-  m_Material: {fileID: 0}
-  m_IsTrigger: 0
-  m_Enabled: 0
-  serializedVersion: 2
-  m_Size: {x: 1, y: 1, z: 1}
-  m_Center: {x: 0, y: 0, z: 0}
 --- !u!1001 &100100000
 Prefab:
   m_ObjectHideFlags: 1
