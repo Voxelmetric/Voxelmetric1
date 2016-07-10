@@ -30,11 +30,13 @@ public struct BlockPos
 
     public override bool Equals(object obj)
     {
-        if (GetHashCode() == obj.GetHashCode())
-            return true;
+		if (!(obj is BlockPos))
+			return false;
 
-        return false;
-    }
+		BlockPos pos = (BlockPos)obj;
+
+		return (pos.x == x && pos.y == y && pos.z == z);
+	}
 
     //returns the position of the chunk containing this block
     public BlockPos ContainingChunkCoordinates() {
