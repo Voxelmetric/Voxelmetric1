@@ -99,7 +99,7 @@ namespace Voxelmetric.Code.Rendering
                 m_buffers.Add(buffer);
             }
 
-            // Add data to the render buffer            
+            // Add data to the render buffer
             buffer.AddVertex(ref vertexData[0]);
             buffer.AddVertex(ref vertexData[1]);
             buffer.AddVertex(ref vertexData[2]);

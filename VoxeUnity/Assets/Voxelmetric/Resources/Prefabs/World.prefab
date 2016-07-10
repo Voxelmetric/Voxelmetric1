@@ -13,7 +13,7 @@ GameObject:
   - 114: {fileID: 11406898}
   m_Layer: 0
   m_Name: World
-  m_TagString: Untagged
+  m_TagString: World
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -78,8 +78,6 @@ MonoBehaviour:
     isServer: 1
     allowConnections: 0
   chunkMaterial: {fileID: 2100000, guid: 7fa2460a4614b844c9c80d1c0398b97d, type: 2}
-  useMultiThreading: 0
-  UseFrustumCulling: 1
 --- !u!1001 &100100000
 Prefab:
   m_ObjectHideFlags: 1

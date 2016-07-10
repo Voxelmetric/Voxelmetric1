@@ -1,10 +1,13 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using Assets.Voxelmetric.Code.Core.GeometryBatcher;
 using UnityEngine;
 using UnityEngine.Assertions;
 using Voxelmetric.Code.Builders;
 using Voxelmetric.Code.Common.MemoryPooling;
 using Voxelmetric.Code.Core;
+using Object = UnityEngine.Object;
 
 namespace Voxelmetric.Code.Rendering
 {
@@ -88,12 +91,16 @@ namespace Voxelmetric.Code.Rendering
             {
                 GeometryBuffer buffer = m_buffers[i];
 
-                var go = GameObjectProvider.PopObject(GOPChunk);
-                Assert.IsTrue(go!=null);
-                if (go!=null)
+                // Create a game object for collider. Unfortunatelly, we can't use object pooling
+                // here for otherwise, unity would have to rebake because of change in object position
+                // and that is very time consuming.
+                GameObject prefab = GameObjectProvider.GetPool(GOPChunk).Prefab;
+                GameObject go = Object.Instantiate(prefab);
+                go.transform.parent = GameObjectProvider.Instance.ProviderGameObject.transform;
+
                 {
 #if DEBUG
-                    go.name = m_chunk.pos+"C";
+                    go.name =  m_chunk.pos+"C";
 #endif
 
                     Mesh mesh = Globals.MemPools.MeshPool.Pop();
@@ -147,7 +154,7 @@ namespace Voxelmetric.Code.Rendering
                 collider.sharedMesh = null;
                 collider.sharedMaterial = null;
 
-                GameObjectProvider.PushObject(GOPChunk, go);
+                Object.DestroyImmediate(go);
             }
 
             m_objects.Clear();

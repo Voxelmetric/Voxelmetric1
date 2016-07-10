@@ -5,6 +5,8 @@ TagManager:
   serializedVersion: 2
   tags:
   - Chunk
+  - World
+  - ChunkCollider
   layers:
   - Default
   - TransparentFX

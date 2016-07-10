@@ -14,6 +14,11 @@ namespace Voxelmetric.Code.Common.MemoryPooling
 
         private readonly StringBuilder m_stringBuilder = new StringBuilder();
 
+        public GameObject ProviderGameObject
+        {
+            get { return m_go; }
+        }
+
         // Called after the singleton instance is created
         private void Awake()
         {
@@ -28,7 +33,7 @@ namespace Voxelmetric.Code.Common.MemoryPooling
                     Debug.LogError("No prefab specified in one of the object pool's entries");
                     continue;
                 }
-                
+
                 pool.Init(m_go, pool.Prefab);
             }
         }
@@ -117,7 +122,7 @@ namespace Voxelmetric.Code.Common.MemoryPooling
             public void Push(GameObject go)
             {
                 // Deactive object, reset its' transform and physics data
-                go.SetActive(false);                
+                go.SetActive(false);
 
                 Rigidbody rbody = go.GetComponent<Rigidbody>();
                 if (rbody != null)
@@ -130,7 +135,7 @@ namespace Voxelmetric.Code.Common.MemoryPooling
             public GameObject Pop()
             {
                 GameObject go = Cache.Pop();
-                
+
                 // Reset transform and active it
                 //go.transform.parent = null;
                 Assert.IsTrue(!go.activeSelf, "Popped an active gameObject!");
@@ -138,7 +143,7 @@ namespace Voxelmetric.Code.Common.MemoryPooling
 
                 return go;
             }
-            
+
             public override string ToString()
             {
                 return string.Format("{0}={1}", Name, Cache.Capacity);

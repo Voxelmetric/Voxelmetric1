@@ -1055,6 +1055,10 @@ Prefab:
       propertyPath: ObjectPools.Array.data[1].Prefab
       value: 
       objectReference: {fileID: 199192, guid: 6dcd1a91d5174624191754e53d987f23, type: 2}
+    - target: {fileID: 104736, guid: 28fc5073d6f2b5b42acaec530dd745cd, type: 2}
+      propertyPath: m_TagString
+      value: World
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: 28fc5073d6f2b5b42acaec530dd745cd, type: 2}
   m_IsPrefabParent: 0
