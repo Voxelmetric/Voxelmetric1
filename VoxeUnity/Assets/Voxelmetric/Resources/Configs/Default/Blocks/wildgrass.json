@@ -1,6 +1,8 @@
 {
-  "name": "wildgrass",
-  "blockClass": "CrossMeshBlock",
-  "configClass": "CrossMeshBlockConfig",
-  "texture": "wild_grass"
+    "name": "wildgrass",
+    "blockClass": "CrossMeshBlock",
+    "configClass": "CrossMeshBlockConfig",
+    "texture": "wild_grass",
+    "canBeWalkedOn": false,
+    "canBeWalkedThrough": true
 }
