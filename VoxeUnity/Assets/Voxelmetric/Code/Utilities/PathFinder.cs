@@ -132,7 +132,7 @@ namespace Voxelmetric.Code.Utilities
 
         private void ProcessTile(Vector3Int pos)
         {
-            Heuristics h = new Heuristics();
+            Heuristics h;
             bool exists = open.TryGetValue(pos, out h);
 
             if (!exists)

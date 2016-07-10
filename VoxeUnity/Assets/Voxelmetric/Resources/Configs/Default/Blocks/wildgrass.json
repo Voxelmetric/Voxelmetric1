@@ -4,5 +4,7 @@
     "configClass": "CrossMeshBlockConfig",
     "texture": "wild_grass",
     "canBeWalkedOn": false,
-    "canBeWalkedThrough": true
+    "canBeWalkedThrough": true,
+    "raycastHitOnRemoval": true,
+    "raycastHit": false
 }

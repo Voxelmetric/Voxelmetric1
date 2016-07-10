@@ -60,7 +60,8 @@ namespace Voxelmetric.Examples
 
             var mousePos = Camera.main.ScreenToWorldPoint(new Vector3(Input.mousePosition.x, Input.mousePosition.y, 10));
 
-            VmRaycastHit hit = Code.Voxelmetric.Raycast(new Ray(Camera.main.transform.position, mousePos - Camera.main.transform.position), world, 1000);
+            ushort type = world.blockProvider.GetType(blockToPlace);
+            VmRaycastHit hit = Code.Voxelmetric.Raycast(new Ray(Camera.main.transform.position, mousePos - Camera.main.transform.position), world, 100, type==BlockProvider.AirType);
 
             selectedBlockText.text = Code.Voxelmetric.GetBlock(world, hit.vector3Int).displayName;
 
@@ -68,7 +69,6 @@ namespace Voxelmetric.Examples
             {
                 if (hit.block.type != BlockProvider.AirType)
                 {
-                    ushort type = world.blockProvider.GetType(blockToPlace);
                     bool adjacent = type != BlockProvider.AirType;
                     Code.Voxelmetric.SetBlock(world, adjacent ? hit.adjacentPos : hit.vector3Int, new BlockData(type));
                 }

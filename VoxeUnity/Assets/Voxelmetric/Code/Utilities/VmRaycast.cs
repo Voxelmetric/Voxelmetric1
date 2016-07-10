@@ -7,7 +7,7 @@ namespace Voxelmetric.Code.Utilities
 {
     public static class VmRaycast
     {
-        public static VmRaycastHit Raycast(Ray ray, World world, float range = 10000f)
+        public static VmRaycastHit Raycast(Ray ray, World world, float range, bool removalRequested)
         {
             // Position as we work through the raycast, starts at origin and gets updated as it reaches each block boundary on the route
             Vector3 pos = ray.origin;
@@ -36,7 +36,7 @@ namespace Voxelmetric.Code.Utilities
 
             //The block at bPos
             Block hitBlock = world.blocks.GetBlock(bPos);
-            while (!hitBlock.RaycastHit(pos, dir, bPos) && Vector3.Distance(ray.origin, pos) < range)
+            while (!hitBlock.RaycastHit(pos, dir, bPos, removalRequested) && Vector3.Distance(ray.origin, pos) < range)
             {
                 // Get the nearest upcoming boundary for each direction
                 boundary.x = MakeBoundary(dirS.x, pos.x);
@@ -46,14 +46,14 @@ namespace Voxelmetric.Code.Utilities
                 //Find the distance to each boundary and make the number positive
                 dist = boundary - pos;
                 dist = new Vector3(Math.Abs(dist.x), Math.Abs(dist.y), Math.Abs(dist.z));
-                
+
                 // Divide the distance by the strength of the corresponding direction, the
                 // lowest number will be the boundary we will hit first. This is like distance
                 // over speed = time where dirP is the speed and the it's time to reach the boundary
                 dist.x = dist.x / dirP.x;
                 dist.y = dist.y / dirP.y;
                 dist.z = dist.z / dirP.z;
-                
+
                 // Use the shortest distance as the distance to travel this step times each direction
                 // to give us the position where the ray intersects the closest boundary
                 if (dist.x < dist.y && dist.x < dist.z)

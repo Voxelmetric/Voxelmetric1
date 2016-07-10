@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections;
+using UnityEngine;
 using Voxelmetric.Code.Core;
 
 /// <summary>
@@ -40,6 +41,8 @@ public class BlockConfig
     public bool transparent { get; protected set; }
     public bool canBeWalkedOn { get; protected set; }
     public bool canBeWalkedThrough { get; protected set; }
+    public bool raycastHit { get; protected set; }
+    public bool raycastHitOnRemoval { get; protected set; }
 
     #endregion
 
@@ -66,7 +69,7 @@ public class BlockConfig
     public virtual void SetUp(Hashtable config, World world)
     {
         this.world = world;
-        
+
         name = _GetPropertyFromConfig(config, "name", defaultValue: "block");
         typeInConfig = _GetPropertyFromConfig(config, "type", defaultValue: -1);
         className = _GetPropertyFromConfig(config, "blockClass", defaultValue: "Block");
@@ -75,6 +78,9 @@ public class BlockConfig
         transparent = _GetPropertyFromConfig(config, "transparent", defaultValue: false);
         canBeWalkedOn = _GetPropertyFromConfig(config, "canBeWalkedOn", defaultValue: true);
         canBeWalkedThrough = _GetPropertyFromConfig(config, "canBeWalkedThrough", defaultValue: false);
+
+        raycastHit = _GetPropertyFromConfig(config, "raycastHit", defaultValue: solid);
+        raycastHitOnRemoval = _GetPropertyFromConfig(config, "raycastHitOnRemoval", defaultValue: solid);
     }
 
     public override string ToString()

@@ -51,7 +51,7 @@ public class Block
     {
         return solid;
     }
-    
+
     public virtual void OnInit(BlockProvider blockProvider)
     {
     }
@@ -90,9 +90,9 @@ public class Block
     {
     }
 
-    public virtual bool RaycastHit(Vector3 pos, Vector3 dir, Vector3Int bPos)
+    public virtual bool RaycastHit(Vector3 pos, Vector3 dir, Vector3Int bPos, bool removalRequested)
     {
-        return solid;
+        return removalRequested ? config.raycastHitOnRemoval : config.raycastHit;
     }
 
     public override string ToString()

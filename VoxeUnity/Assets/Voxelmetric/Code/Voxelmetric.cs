@@ -32,7 +32,7 @@ namespace Voxelmetric.Code
         {
             if (world==null)
                 return null;
-            
+
             List<Chunk> chunksToSave = new List<Chunk> ();
 
             foreach (Chunk chunk in world.chunks.chunkCollection)
@@ -49,9 +49,9 @@ namespace Voxelmetric.Code
             return chunksToSave;
         }
 
-        public static VmRaycastHit Raycast(Ray ray, World world, float range = 10000f)
+        public static VmRaycastHit Raycast(Ray ray, World world, float range, bool removalRequested)
         {
-            return VmRaycast.Raycast(ray, world, range);
+            return VmRaycast.Raycast(ray, world, range, removalRequested);
         }
     }
 }
