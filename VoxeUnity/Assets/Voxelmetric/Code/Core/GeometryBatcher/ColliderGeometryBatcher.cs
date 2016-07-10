@@ -35,7 +35,7 @@ namespace Voxelmetric.Code.Rendering
             m_objects = new List<GameObject>();
             m_colliders = new List<Collider>();
 
-            m_visible = false;
+            Clear();
         }
 
         /// <summary>

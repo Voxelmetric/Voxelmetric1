@@ -32,7 +32,7 @@ namespace Voxelmetric.Code.Rendering
             m_objects = new List<GameObject>();
             m_renderers = new List<Renderer>();
 
-            m_visible = false;
+            Clear();
         }
 
         /// <summary>
