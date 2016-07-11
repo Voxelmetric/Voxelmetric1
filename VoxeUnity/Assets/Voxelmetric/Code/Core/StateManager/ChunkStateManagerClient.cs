@@ -449,7 +449,7 @@ namespace Voxelmetric.Code.Core.StateManager
             m_minRenderY = Mathf.Max(m_minRenderY, 0);
 
             // Consume info about block having been modified
-            chunk.blocks.contentsModified = false;
+            chunk.blocks.contentsInvalidated = false;
         }
 
         private bool SynchronizeChunk()
@@ -467,7 +467,7 @@ namespace Voxelmetric.Code.Core.StateManager
             }
 
             // We need to calculate our chunk's bounds if it was invalidated
-            if (chunk.blocks.contentsModified && chunk.blocks.NonEmptyBlocks>0)
+            if (chunk.blocks.contentsInvalidated && chunk.blocks.NonEmptyBlocks>0)
             {
                 EnqueueGenericTask(CalculateGeometryBounds);
                 return false;

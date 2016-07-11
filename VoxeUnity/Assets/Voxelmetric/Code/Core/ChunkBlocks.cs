@@ -25,7 +25,8 @@ namespace Voxelmetric.Code.Core
         private int receiveIndex;
 
         public readonly List<BlockPos> modifiedBlocks = new List<BlockPos>();
-        public bool contentsModified;
+        public bool contentsInvalidated;
+        public bool colliderInvalidated;
 
         private static byte[] emptyBytes;
         public static byte[] EmptyBytes
@@ -54,8 +55,10 @@ namespace Voxelmetric.Code.Core
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("contentsModified=");
-            sb.Append(contentsModified.ToString());
+            sb.Append("contentsInvliadated=");
+            sb.Append(contentsInvalidated.ToString());
+            sb.Append("colliderInvalidated=");
+            sb.Append(contentsInvalidated.ToString());
             return sb.ToString();
         }
 
@@ -63,7 +66,9 @@ namespace Voxelmetric.Code.Core
         {
             Array.Clear(blocks, 0, blocks.Length);
 
-            contentsModified = true;
+            contentsInvalidated = true;
+            colliderInvalidated = true;
+
             modifiedBlocks.Clear();
 
             NonEmptyBlocks = 0;
@@ -106,7 +111,13 @@ namespace Voxelmetric.Code.Core
                 blocks[context.Index] = context.Block;
 
                 if (context.SetBlockModified)
+                {
                     BlockModified(new BlockPos(x,y,z), globalPos, context.Block);
+
+                    chunk.blocks.contentsInvalidated = true;
+                    if (newBlock.canBeWalkedOn != oldBlock.canBeWalkedOn)
+                        chunk.blocks.colliderInvalidated = true;
+                }
 
                 if (
                     // Only check neighbors if it is still needed
@@ -299,8 +310,6 @@ namespace Voxelmetric.Code.Core
 
                 if (!modifiedBlocks.Contains(blockPos))
                     modifiedBlocks.Add(blockPos);
-
-                chunk.blocks.contentsModified = true;
             }
             else // if this is not the server send the change to the server to sync
             {

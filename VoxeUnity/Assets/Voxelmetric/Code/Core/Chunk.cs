@@ -33,9 +33,12 @@ namespace Voxelmetric.Code.Core
             {
                 bool prevNeedCollider = m_needsCollider;
                 m_needsCollider = value;
-                if (prevNeedCollider!=value && m_needsCollider || blocks.contentsModified)
+                if (m_needsCollider && (prevNeedCollider!=m_needsCollider || blocks.colliderInvalidated))
+                {
                     stateManager.RequestState(ChunkState.BuildCollider);
-                else if(!value)
+                    blocks.colliderInvalidated = false;
+                }
+                else if (!value)
                     stateManager.ResetRequest(ChunkState.BuildCollider);
             }
         }
@@ -147,7 +150,7 @@ namespace Voxelmetric.Code.Core
             // Do not update our chunk until it has all its data prepared
             if (stateManager.IsStateCompleted(ChunkState.LoadData))
             {
-                //logic.Update();
+                logic.Update();
                 blocks.Update();
             }
 
