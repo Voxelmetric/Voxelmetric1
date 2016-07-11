@@ -9,7 +9,7 @@ using Voxelmetric.Code.Utilities;
 public class StructureLayer : TerrainLayer
 {
     protected GeneratedStructure structure;
-    float chance;
+    private float chance;
 
     protected override void SetUp(LayerConfig config)
     {
@@ -30,12 +30,10 @@ public class StructureLayer : TerrainLayer
 
     public override void GenerateStructures(Chunk chunk)
     {
-        int minX, maxX, minZ, maxZ;
-
-        minX = chunk.pos.x - structure.negX;
-        maxX = chunk.pos.x + Env.ChunkSize + structure.posX;
-        minZ = chunk.pos.z - structure.negZ;
-        maxZ = chunk.pos.z + Env.ChunkSize + structure.posZ;
+        int minX = chunk.pos.x - structure.negX;
+        int maxX = chunk.pos.x + Env.ChunkSize + structure.posX;
+        int minZ = chunk.pos.z - structure.negZ;
+        int maxZ = chunk.pos.z + Env.ChunkSize + structure.posZ;
 
         for (int x = minX; x < maxX; x++)
         {
