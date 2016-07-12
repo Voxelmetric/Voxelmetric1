@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using Assets.Voxelmetric.Code.Utilities;
 using UnityEngine;
 using UnityEngine.Assertions;
 using Voxelmetric.Code.Common.Math;
@@ -14,7 +15,7 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
     /// This script can be attached to any component. The world will be loaded based on its position
     /// </summary>
     [RequireComponent(typeof (Camera))]
-    public class LoadChunks: MonoBehaviour
+    public class LoadChunks: MonoBehaviour, IChunkLoader
     {
         private const int MinRange = 4;
         private const int MaxRange = 32;
@@ -42,6 +43,8 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
         private Vector3Int m_viewerPos;
         private Vector3Int m_viewerPosPrev;
 
+        private readonly TimeBudgetHandler m_timeBudgetHandler = new TimeBudgetHandler();
+
         //! A list of chunks to update
         private readonly List<Chunk> m_updateRequests = new List<Chunk>();
 
@@ -60,9 +63,11 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
 
         void Update()
         {
-            OnPreProcessChunks();
-            ProcessUpdateRequests();
-            OnPostProcessChunks();
+            m_timeBudgetHandler.Reset();
+
+            PreProcessChunks();
+            ProcessChunks();
+            PostProcessChunks();
         }
 
         // Updates our clipmap region. Has to be set from the outside!
@@ -106,7 +111,7 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
             m_viewerPos = new Vector3Int(posX, FollowCamera ? posY : 0, posZ);
         }
 
-        private void OnPreProcessChunks()
+        public void PreProcessChunks()
         {
             // Recalculate camera frustum planes
             Geometry.CalculateFrustumPlanes(m_camera, ref m_cameraPlanes);
@@ -121,7 +126,7 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
             m_clipmap.SetOffset(m_viewerPos.x, m_viewerPos.y, m_viewerPos.z);
         }
 
-        private void OnPostProcessChunks()
+        public void PostProcessChunks()
         {
             // No update necessary if there was no movement
             if (m_viewerPos==m_viewerPosPrev)
@@ -155,21 +160,34 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
             }
         }
 
-        // The ugliest thing... Until I come with an idea of how to efficiently detect whether a chunk is partialy
-        // inside camera frustum, all chunks are going to be marked as potentially visible on the first run
+        // TODO! The ugliest thing... Until I implement an efficient detect of chunks being at least partialy
+        // inside the camera frustum, all chunks are going to be marked as potentially visible on the first run
         private bool m_firstRun = true;
 
-        private void ProcessUpdateRequests()
+        public void ProcessChunks()
         {
             // Process removal requests
             for (int i = 0; i<m_updateRequests.Count;)
             {
                 Chunk chunk = m_updateRequests[i];
 
-                OnProcessChunk(chunk);
+                ProcessChunk(chunk);
 
-                // Process chunk events
-                chunk.UpdateChunk();
+                // Update the chunk if possible
+                if (chunk.CanUpdate)
+                {
+                    chunk.UpdateState();
+
+                    if (m_timeBudgetHandler.HasTimeBudget)
+                    {
+                        m_timeBudgetHandler.StartMeasurement();
+
+                        bool wasBuilt = chunk.UpdateRenderGeometry();
+                        wasBuilt |= chunk.UpdateCollisionGeometry();
+                        if (wasBuilt)
+                            m_timeBudgetHandler.StopMeasurement();
+                    }
+                }
 
                 // Automatically collect chunks which are ready to be removed from the world
                 ChunkStateManagerClient stateManager = (ChunkStateManagerClient)chunk.stateManager;
@@ -185,7 +203,7 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
 
                 ++i;
             }
-            
+
             if (m_updateRequests.Count > 0)
                 m_firstRun = false;
         }
@@ -195,8 +213,8 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
             // Check if the chunk lies within camera planes
             return !UseFrustumCulling || GeometryUtility.TestPlanesAABB(m_cameraPlanes, chunk.WorldBounds);
         }
-        
-        private void OnProcessChunk(Chunk chunk)
+
+        public void ProcessChunk(Chunk chunk)
         {
             Vector3Int localChunkPos = new Vector3Int(
                 chunk.pos.x>>Env.ChunkPower,

@@ -142,11 +142,13 @@ namespace Voxelmetric.Code.Core
             return sb.ToString();
         }
 
-        public void UpdateChunk()
+        public bool CanUpdate
         {
-            if (!stateManager.CanUpdate())
-                return;
+            get { return stateManager.CanUpdate(); }
+        }
 
+        public void UpdateState()
+        {
             // Do not update our chunk until it has all its data prepared
             if (stateManager.IsStateCompleted(ChunkState.LoadData))
             {
@@ -156,19 +158,16 @@ namespace Voxelmetric.Code.Core
 
             // Process chunk tasks
             stateManager.Update();
-
-            HandleCollisionGeometry();
-            HandleRenderGeometry();
         }
 
-        private void HandleCollisionGeometry()
+        public bool UpdateCollisionGeometry()
         {
             // Release the collider when no longer needed
             if (!NeedsCollider)
             {
                 stateManager.SetColliderBuilt();
                 ColliderGeometryHandler.Reset();
-                return;
+                return false;
             }
 
             // Build collider if necessary
@@ -176,17 +175,23 @@ namespace Voxelmetric.Code.Core
             {
                 stateManager.SetColliderBuilt();
                 ColliderGeometryHandler.Commit();
+                return true;
             }
+
+            return false;
         }
 
-        private void HandleRenderGeometry()
+        public bool UpdateRenderGeometry()
         {
             // Build chunk mesh if necessary
             if (stateManager.IsStateCompleted(ChunkState.BuildVertices|ChunkState.BuildVerticesNow))
             {
                 stateManager.SetMeshBuilt();
                 GeometryHandler.Commit();
+                return true;
             }
+
+            return false;
         }
     }
 }

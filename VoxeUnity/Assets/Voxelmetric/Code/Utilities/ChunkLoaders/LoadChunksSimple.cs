@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using Assets.Voxelmetric.Code.Utilities;
 using UnityEngine;
 using UnityEngine.Assertions;
 using Voxelmetric.Code.Common.Math;
@@ -43,6 +44,8 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
         private Vector3Int m_viewerPos;
         private Vector3Int m_viewerPosPrev;
 
+        private readonly TimeBudgetHandler m_timeBudgetHandler = new TimeBudgetHandler();
+
         //! A list of chunks to update
         private readonly List<Chunk> m_updateRequests = new List<Chunk>();
 
@@ -60,10 +63,14 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
             UpdateViewerPosition();
             // Add some arbirtary value so that m_viewerPosPrev is different from m_viewerPos
             m_viewerPos += Vector3Int.one;
+
+            m_timeBudgetHandler.TimeBudgetMs = 3; // Time allow to be spent for building meshes
         }
 
         void Update()
         {
+            m_timeBudgetHandler.Reset();
+
             PreProcessChunks();
             ProcessChunks();
             PostProcessChunks();
@@ -112,8 +119,8 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
             }
         }
 
-        // The ugliest thing... Until I come with an idea of how to efficiently detect whether a chunk is partialy
-        // inside camera frustum, all chunks are going to be marked as potentially visible on the first run
+        // TODO! The ugliest thing... Until I implement an efficient detect of chunks being at least partialy
+        // inside the camera frustum, all chunks are going to be marked as potentially visible on the first run
         private bool m_firstRun = true;
 
         public void ProcessChunks()
@@ -125,8 +132,21 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
 
                 ProcessChunk(chunk);
 
-                // Process chunk events
-                chunk.UpdateChunk();
+                // Update the chunk if possible
+                if (chunk.CanUpdate)
+                {
+                    chunk.UpdateState();
+
+                    if (m_timeBudgetHandler.HasTimeBudget)
+                    {
+                        m_timeBudgetHandler.StartMeasurement();
+
+                        bool wasBuilt = chunk.UpdateRenderGeometry();
+                        wasBuilt |= chunk.UpdateCollisionGeometry();
+                        if (wasBuilt)
+                            m_timeBudgetHandler.StopMeasurement();
+                    }
+                }
 
                 // Automatically collect chunks which are ready to be removed from the world
                 ChunkStateManagerClient stateManager = (ChunkStateManagerClient)chunk.stateManager;
@@ -143,7 +163,7 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
                 ++i;
             }
 
-            if(m_updateRequests.Count>0)
+            if (m_updateRequests.Count>0)
                 m_firstRun = false;
         }
 
