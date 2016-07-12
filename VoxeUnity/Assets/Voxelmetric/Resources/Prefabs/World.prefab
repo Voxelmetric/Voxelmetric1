@@ -57,10 +57,13 @@ MonoBehaviour:
   ObjectPools:
   - Name: Chunk
     Prefab: {fileID: 150658, guid: f6c03f5bf077f7c45a9b8f4d521fe536, type: 2}
-    InitialSize: 2048
+    InitialSize: 256
+  - Name: ChunkCollider
+    Prefab: {fileID: 199192, guid: 6dcd1a91d5174624191754e53d987f23, type: 2}
+    InitialSize: 256
   - Name: CustomMesh
     Prefab: {fileID: 100002, guid: cff7141e7c83e7d4a8f9174acaf8663b, type: 3}
-    InitialSize: 2048
+    InitialSize: 256
 --- !u!114 &11498696
 MonoBehaviour:
   m_ObjectHideFlags: 1

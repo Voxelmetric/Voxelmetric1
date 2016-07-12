@@ -400,7 +400,7 @@ MonoBehaviour:
   ChunkLoadRadius: 6
   ChunkDeleteRadius: 8
   FollowCamera: 0
-  UseFrustumCulling: 0
+  UseFrustumCulling: 1
   Diag_DrawWorldBounds: 0
   Diag_DrawLoadRange: 0
 --- !u!1 &312836251

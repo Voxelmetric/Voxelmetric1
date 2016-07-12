@@ -50,7 +50,8 @@ public class StructureTree: GeneratedStructure
             }
         }
 
-        for (int y = 0; y <= trunkHeight; y++)
+        blocks.Set(pos, log);
+        for (int y = 1; y <= trunkHeight; y++)
         {
             blocks.Set(pos.Add(0, y, 0), log);
         }
