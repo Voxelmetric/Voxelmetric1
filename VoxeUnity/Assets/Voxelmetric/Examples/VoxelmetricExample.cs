@@ -17,6 +17,7 @@ namespace Voxelmetric.Examples
         public Text selectedBlockText;
         public Text saveProgressText;
         public World world;
+        public Camera cam;
 
         Vector3Int pfStart;
         Vector3Int pfStop;
@@ -32,8 +33,8 @@ namespace Voxelmetric.Examples
 
         void Start()
         {
-            rot.y = 360f - transform.localEulerAngles.x;
-            rot.x = transform.localEulerAngles.y;
+            rot.y = 360f - cam.transform.localEulerAngles.x;
+            rot.x = cam.transform.localEulerAngles.y;
             eventSystem = FindObjectOfType<EventSystem>();
         }
 
@@ -47,21 +48,21 @@ namespace Voxelmetric.Examples
                     rot.y+Input.GetAxis("Mouse Y")*3
                     );
 
-                transform.localRotation = Quaternion.AngleAxis(rot.x, Vector3.up);
-                transform.localRotation *= Quaternion.AngleAxis(rot.y, Vector3.left);
+                cam.transform.localRotation = Quaternion.AngleAxis(rot.x, Vector3.up);
+                cam.transform.localRotation *= Quaternion.AngleAxis(rot.y, Vector3.left);
             }
 
             bool turbo = Input.GetKeyDown(KeyCode.LeftShift) || Input.GetKeyDown(KeyCode.RightShift);
-            transform.position += transform.forward * 40 * (turbo ? 3 : 1) * Input.GetAxis("Vertical") * Time.deltaTime;
-            transform.position += transform.right * 40 * (turbo ? 3 : 1) * Input.GetAxis("Horizontal") * Time.deltaTime;
+            cam.transform.position += cam.transform.forward * 40 * (turbo ? 3 : 1) * Input.GetAxis("Vertical") * Time.deltaTime;
+            cam.transform.position += cam.transform.right * 40 * (turbo ? 3 : 1) * Input.GetAxis("Horizontal") * Time.deltaTime;
 
             //Save
             saveProgressText.text = saveProgress != null ? SaveStatus() : "Save";
 
-            var mousePos = Camera.main.ScreenToWorldPoint(new Vector3(Input.mousePosition.x, Input.mousePosition.y, 10));
+            var mousePos = cam.ScreenToWorldPoint(new Vector3(Input.mousePosition.x, Input.mousePosition.y, 10));
 
             ushort type = world.blockProvider.GetType(blockToPlace);
-            VmRaycastHit hit = Code.Voxelmetric.Raycast(new Ray(Camera.main.transform.position, mousePos - Camera.main.transform.position), world, 100, type==BlockProvider.AirType);
+            VmRaycastHit hit = Code.Voxelmetric.Raycast(new Ray(cam.transform.position, mousePos - cam.transform.position), world, 100, type==BlockProvider.AirType);
 
             selectedBlockText.text = Code.Voxelmetric.GetBlock(world, hit.vector3Int).displayName;
 
