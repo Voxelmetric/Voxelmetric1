@@ -16,42 +16,6 @@ namespace Voxelmetric.Code.Data_types
             this.z = z;
         }
 
-        //Overriding GetHashCode and Equals gives us a faster way to
-        //compare two positions and we have to do that a lot
-        public override int GetHashCode()
-        {
-            unchecked
-            {
-                int hash = 47;
-
-                hash = hash * 227 + x.GetHashCode();
-                hash = hash * 227 + y.GetHashCode();
-                hash = hash * 227 + z.GetHashCode();
-                return hash * 227;
-            }
-        }
-
-        public override bool Equals(object obj)
-        {
-            if (!(obj is Vector3Int))
-                return false;
-            Vector3Int other = (Vector3Int)obj;
-            return Equals(other);
-        }
-
-        public bool Equals(Vector3Int other)
-        {
-            if (GetHashCode() != other.GetHashCode())
-                return false;
-            if (x != other.x)
-                return false;
-            if (y != other.y)
-                return false;
-            if (z != other.z)
-                return false;
-            return true;
-        }
-
         public Vector3Int Add(int x, int y, int z)
         {
             return new Vector3Int(this.x + x, this.y + y, this.z + z);
@@ -175,15 +139,44 @@ namespace Voxelmetric.Code.Data_types
             return new Vector3Int(pos1.x * pos2.x, pos1.y * pos2.y, pos1.z * pos2.z);
         }
 
+        #region Struct comparison
+        
+        public override int GetHashCode()
+        {
+            unchecked
+            {
+                int hash = 47;
+                hash = hash * 227 + x.GetHashCode();
+                hash = hash * 227 + y.GetHashCode();
+                hash = hash * 227 + z.GetHashCode();
+                return hash * 227;
+            }
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (!(obj is Vector3Int))
+                return false;
+            Vector3Int other = (Vector3Int)obj;
+            return Equals(other);
+        }
+
+        public bool Equals(Vector3Int other)
+        {
+            return x==other.x && y==other.y && z==other.z;
+        }
+
         public static bool operator ==(Vector3Int pos1, Vector3Int pos2)
         {
-            return pos1.Equals(pos2);
+            return pos1.x==pos2.x && pos1.y==pos2.y && pos1.z==pos2.z;
         }
 
         public static bool operator !=(Vector3Int pos1, Vector3Int pos2)
         {
-            return !pos1.Equals(pos2);
+            return !(pos1 == pos2);
         }
+
+        #endregion
 
         //You can safely use BlockPos as part of a string like this:
         //"block at " + BlockPos + " is broken."

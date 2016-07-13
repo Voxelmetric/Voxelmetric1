@@ -26,10 +26,8 @@ namespace Voxelmetric.Code.Data_types
             this.z = z;
         }
 
-        #region Comparison
+        #region Struct comparison
 
-        //Overriding GetHashCode and Equals gives us a faster way to
-        //compare two positions and we have to do that a lot
         public override int GetHashCode()
         {
             unchecked
@@ -52,25 +50,17 @@ namespace Voxelmetric.Code.Data_types
 
         public bool Equals(BlockPos other)
         {
-            if (GetHashCode() != other.GetHashCode())
-                return false;
-            if (x != other.x)
-                return false;
-            if (y != other.y)
-                return false;
-            if (z != other.z)
-                return false;
-            return true;
+            return x==other.x && y==other.y && z==other.z;
         }
-        
+
         public static bool operator ==(BlockPos pos1, BlockPos pos2)
         {
-            return pos1.Equals(pos2);
+            return pos1.x==pos2.x && pos1.y==pos2.y && pos1.z==pos2.z;
         }
 
         public static bool operator !=(BlockPos pos1, BlockPos pos2)
         {
-            return !pos1.Equals(pos2);
+            return !(pos1==pos2);
         }
 
         #endregion
@@ -81,23 +71,5 @@ namespace Voxelmetric.Code.Data_types
         {
             return "(" + x + ", " + y + ", " + z + ")";
         }
-
-        #region Byte conversion
-
-        public byte[] ToBytes()
-        {
-            return new[] { x, y, z };
-        }
-
-        public static BlockPos FromBytes(byte[] bytes)
-        {
-            return new BlockPos(
-                (byte)BitConverter.ToChar(bytes, 0),
-                (byte)BitConverter.ToChar(bytes, 1),
-                (byte)BitConverter.ToChar(bytes, 2)
-                );
-        }
-
-        #endregion
     }
 }
