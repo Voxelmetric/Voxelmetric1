@@ -74,14 +74,21 @@ namespace Assets.Voxelmetric.Code.Core.StateManager
 
         public void RequestState(ChunkState state)
         {
-            if (state == ChunkState.Remove)
+            switch (state)
             {
-                if (m_removalRequested)
-                    return;
-                m_removalRequested = true;
+                case ChunkState.BuildCollider:
+                    chunk.blocks.colliderInvalidated = false;
+                break;
+                case ChunkState.Remove:
+                {
+                    if (m_removalRequested)
+                        return;
+                    m_removalRequested = true;
 
-                OnNotified(this, ChunkState.SaveData);
-                OnNotified(this, ChunkState.Remove);
+                    OnNotified(this, ChunkState.SaveData);
+                    OnNotified(this, ChunkState.Remove);
+                }
+                break;
             }
 
             m_pendingStates = m_pendingStates.Set(state);

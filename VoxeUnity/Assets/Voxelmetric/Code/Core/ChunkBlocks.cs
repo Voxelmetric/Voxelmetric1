@@ -24,6 +24,9 @@ namespace Voxelmetric.Code.Core
         private byte[] receiveBuffer;
         private int receiveIndex;
 
+        private long lastUpdateTime;
+        private int rebuildMask;
+
         public readonly List<BlockPos> modifiedBlocks = new List<BlockPos>();
         public bool contentsInvalidated;
         public bool colliderInvalidated;
@@ -66,6 +69,9 @@ namespace Voxelmetric.Code.Core
         {
             Array.Clear(blocks, 0, blocks.Length);
 
+            lastUpdateTime = 0;
+            rebuildMask = -1;
+
             contentsInvalidated = true;
             colliderInvalidated = true;
 
@@ -76,122 +82,139 @@ namespace Voxelmetric.Code.Core
 
         public void Update()
         {
-            if (m_setBlockQueue.Count<=0)
-                return;
-
             ChunkStateManagerClient stateManager = (ChunkStateManagerClient)chunk.stateManager;
-            stateManager.RequestState(ChunkState.BuildVerticesNow);
 
-            int rebuildMask = 0;
-
-            // Modify blocks
-            for (int j = 0; j < m_setBlockQueue.Count; j++)
+            if (m_setBlockQueue.Count>0)
             {
-                SetBlockContext context = m_setBlockQueue[j];
+                if (rebuildMask<0)
+                    rebuildMask = 0;
 
-                // Update non-empty block count
-                if (context.Block.Type == BlockProvider.AirType)
-                    --NonEmptyBlocks;
-                else
-                    ++NonEmptyBlocks;
-
-                int x, y, z;
-                Helpers.GetChunkIndex3DFrom1D(context.Index, out x, out y, out z);
-
-                Vector3Int pos = new Vector3Int(x, y, z);
-                Vector3Int globalPos = pos + chunk.pos;
-
-                BlockData oldBlockData = blocks[context.Index];
-
-                Block oldBlock = m_blockTypes[oldBlockData.Type];
-                Block newBlock = m_blockTypes[context.Block.Type];
-                oldBlock.OnDestroy(chunk, pos, globalPos);
-                newBlock.OnCreate(chunk, pos, globalPos);
-
-                blocks[context.Index] = context.Block;
-
-                if (context.SetBlockModified)
+                // Modify blocks
+                for (int j = 0; j<m_setBlockQueue.Count; j++)
                 {
-                    BlockModified(new BlockPos(x,y,z), globalPos, context.Block);
+                    SetBlockContext context = m_setBlockQueue[j];
 
-                    chunk.blocks.contentsInvalidated = true;
-                    if (newBlock.canBeWalkedOn != oldBlock.canBeWalkedOn)
-                        chunk.blocks.colliderInvalidated = true;
-                }
+                    // Update non-empty block count
+                    if (context.Block.Type==BlockProvider.AirType)
+                        --NonEmptyBlocks;
+                    else
+                        ++NonEmptyBlocks;
 
-                if (
-                    // Only check neighbors if it is still needed
-                    rebuildMask == 0x3f ||
-                    // Only check neighbors when it is a change of a block on a chunk's edge
-                    (((pos.x+1)&Env.ChunkMask)>1 &&
-                     ((pos.y+1)&Env.ChunkMask)>1 &&
-                     ((pos.z+1)&Env.ChunkMask)>1)
-                    )
-                    continue;
+                    int x, y, z;
+                    Helpers.GetChunkIndex3DFrom1D(context.Index, out x, out y, out z);
 
-                int cx = chunk.pos.x;
-                int cy = chunk.pos.y;
-                int cz = chunk.pos.z;
+                    Vector3Int pos = new Vector3Int(x, y, z);
+                    Vector3Int globalPos = pos+chunk.pos;
 
-                // If it is an edge position, notify neighbor as well
-                // Iterate over neighbors and decide which ones should be notified to rebuild
-                for (int i = 0; i < stateManager.Listeners.Length; i++)
-                {
-                    ChunkEvent listener = stateManager.Listeners[i];
-                    if (listener == null)
+                    BlockData oldBlockData = blocks[context.Index];
+
+                    Block oldBlock = m_blockTypes[oldBlockData.Type];
+                    Block newBlock = m_blockTypes[context.Block.Type];
+                    oldBlock.OnDestroy(chunk, pos, globalPos);
+                    newBlock.OnCreate(chunk, pos, globalPos);
+
+                    blocks[context.Index] = context.Block;
+
+                    if (context.SetBlockModified)
+                    {
+                        BlockModified(new BlockPos(x, y, z), globalPos, context.Block);
+
+                        chunk.blocks.contentsInvalidated = true;
+                        if (newBlock.canBeWalkedOn!=oldBlock.canBeWalkedOn)
+                            chunk.blocks.colliderInvalidated = true;
+                    }
+
+                    if (
+                        // Only check neighbors if it is still needed
+                        rebuildMask==0x3f ||
+                        // Only check neighbors when it is a change of a block on a chunk's edge
+                        (((pos.x+1)&Env.ChunkMask)>1 &&
+                         ((pos.y+1)&Env.ChunkMask)>1 &&
+                         ((pos.z+1)&Env.ChunkMask)>1)
+                        )
                         continue;
 
-                    // No further checks needed once we know all neighbors need to be notified
-                    if (rebuildMask==0x3f)
-                        break;
+                    int cx = chunk.pos.x;
+                    int cy = chunk.pos.y;
+                    int cz = chunk.pos.z;
 
-                    ChunkStateManagerClient listenerChunk = (ChunkStateManagerClient)listener;
+                    // If it is an edge position, notify neighbor as well
+                    // Iterate over neighbors and decide which ones should be notified to rebuild
+                    for (int i = 0; i<stateManager.Listeners.Length; i++)
+                    {
+                        ChunkEvent listener = stateManager.Listeners[i];
+                        if (listener==null)
+                            continue;
 
-                    int lx = listenerChunk.chunk.pos.x;
-                    int ly = listenerChunk.chunk.pos.y;
-                    int lz = listenerChunk.chunk.pos.z;
+                        // No further checks needed once we know all neighbors need to be notified
+                        if (rebuildMask==0x3f)
+                            break;
 
-                    if ((ly == cy || lz == cz) &&
-                        (
-                            // Section to the left
-                            ((pos.x == 0) && (lx + Env.ChunkSize == cx)) ||
-                            // Section to the right
-                            ((pos.x == Env.ChunkMask) && (lx - Env.ChunkSize == cx))
-                        ))
-                        rebuildMask = rebuildMask | (1 << i);
+                        ChunkStateManagerClient listenerChunk = (ChunkStateManagerClient)listener;
 
-                    if ((lx == cx || lz == cz) &&
-                        (
-                            // Section to the bottom
-                            ((pos.y == 0) && (ly + Env.ChunkSize == cy)) ||
-                            // Section to the top
-                            ((pos.y == Env.ChunkMask) && (ly - Env.ChunkSize == cy))
-                        ))
-                        rebuildMask = rebuildMask | (1 << i);
+                        int lx = listenerChunk.chunk.pos.x;
+                        int ly = listenerChunk.chunk.pos.y;
+                        int lz = listenerChunk.chunk.pos.z;
 
-                    if ((ly == cy || lx == cx) &&
-                        (
-                            // Section to the back
-                            ((pos.z == 0) && (lz + Env.ChunkSize == cz)) ||
-                            // Section to the front
-                            ((pos.z == Env.ChunkMask) && (lz - Env.ChunkSize == cz))
-                        ))
-                        rebuildMask = rebuildMask | (1 << i);
+                        if ((ly==cy || lz==cz) &&
+                            (
+                                // Section to the left
+                                ((pos.x==0) && (lx+Env.ChunkSize==cx)) ||
+                                // Section to the right
+                                ((pos.x==Env.ChunkMask) && (lx-Env.ChunkSize==cx))
+                            ))
+                            rebuildMask = rebuildMask|(1<<i);
+
+                        if ((lx==cx || lz==cz) &&
+                            (
+                                // Section to the bottom
+                                ((pos.y==0) && (ly+Env.ChunkSize==cy)) ||
+                                // Section to the top
+                                ((pos.y==Env.ChunkMask) && (ly-Env.ChunkSize==cy))
+                            ))
+                            rebuildMask = rebuildMask|(1<<i);
+
+                        if ((ly==cy || lx==cx) &&
+                            (
+                                // Section to the back
+                                ((pos.z==0) && (lz+Env.ChunkSize==cz)) ||
+                                // Section to the front
+                                ((pos.z==Env.ChunkMask) && (lz-Env.ChunkSize==cz))
+                            ))
+                            rebuildMask = rebuildMask|(1<<i);
+                    }
                 }
+
+                m_setBlockQueue.Clear();
             }
 
-            m_setBlockQueue.Clear();
-
-            // Notify neighbors that they need to rebuilt their geometry
-            if (rebuildMask > 0)
+            // Request a geometry update at most 5 times a second
+            long now = Globals.Watch.ElapsedMilliseconds;
+            if (rebuildMask>=0 && now-lastUpdateTime>=200)
             {
-                for (int j = 0; j < stateManager.Listeners.Length; j++)
+                lastUpdateTime = now;
+
+                // Request rebuild on this chunk
+                stateManager.RequestState(ChunkState.BuildVerticesNow);
+                if (chunk.NeedsCollider)
+                    stateManager.RequestState(ChunkState.BuildCollider);
+
+                // Notify neighbors that they need to rebuilt their geometry
+                if (rebuildMask>0)
                 {
-                    ChunkStateManagerClient listener = (ChunkStateManagerClient)stateManager.Listeners[j];
-                    if (listener!=null && ((rebuildMask>>j)&1)!=0)
+                    for (int j = 0; j<stateManager.Listeners.Length; j++)
                     {
-                        listener.RequestState(ChunkState.BuildVerticesNow);
+                        ChunkStateManagerClient listener = (ChunkStateManagerClient)stateManager.Listeners[j];
+                        if (listener!=null && ((rebuildMask>>j)&1)!=0)
+                        {
+                            // Request rebuild on neighbor chunks
+                            listener.RequestState(ChunkState.BuildVerticesNow);
+                            if (listener.chunk.NeedsCollider)
+                                listener.RequestState(ChunkState.BuildCollider);
+                        }
                     }
+
+                    rebuildMask = -1;
                 }
             }
         }

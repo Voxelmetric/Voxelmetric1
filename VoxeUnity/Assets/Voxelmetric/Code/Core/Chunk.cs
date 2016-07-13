@@ -33,11 +33,8 @@ namespace Voxelmetric.Code.Core
             {
                 bool prevNeedCollider = m_needsCollider;
                 m_needsCollider = value;
-                if (m_needsCollider && (prevNeedCollider!=m_needsCollider || blocks.colliderInvalidated))
-                {
+                if (m_needsCollider && !prevNeedCollider)
                     stateManager.RequestState(ChunkState.BuildCollider);
-                    blocks.colliderInvalidated = false;
-                }
                 else if (!value)
                     stateManager.ResetRequest(ChunkState.BuildCollider);
             }
