@@ -5,7 +5,7 @@ using UnityEngine.Assertions;
 namespace Voxelmetric.Code.Data_types
 {
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
-    public struct BlockPos : IEquatable<BlockPos>
+    public struct BlockPos: IEquatable<BlockPos>
     {
         public readonly byte x, y, z;
 
@@ -32,20 +32,18 @@ namespace Voxelmetric.Code.Data_types
         {
             unchecked
             {
-                int hash = 47;
-                hash = hash * 227 + x.GetHashCode();
-                hash = hash * 227 + y.GetHashCode();
-                hash = hash * 227 + z.GetHashCode();
-                return hash * 227;
+                int hashCode = x.GetHashCode();
+                hashCode = (hashCode*397)^y.GetHashCode();
+                hashCode = (hashCode*397)^z.GetHashCode();
+                return hashCode;
             }
         }
 
         public override bool Equals(object obj)
         {
-            if (!(obj is BlockPos))
+            if (ReferenceEquals(null, obj))
                 return false;
-            BlockPos other = (BlockPos)obj;
-            return Equals(other);
+            return obj is BlockPos && Equals((BlockPos)obj);
         }
 
         public bool Equals(BlockPos other)
@@ -53,12 +51,12 @@ namespace Voxelmetric.Code.Data_types
             return x==other.x && y==other.y && z==other.z;
         }
 
-        public static bool operator ==(BlockPos pos1, BlockPos pos2)
+        public static bool operator==(BlockPos pos1, BlockPos pos2)
         {
             return pos1.x==pos2.x && pos1.y==pos2.y && pos1.z==pos2.z;
         }
 
-        public static bool operator !=(BlockPos pos1, BlockPos pos2)
+        public static bool operator!=(BlockPos pos1, BlockPos pos2)
         {
             return !(pos1==pos2);
         }
@@ -69,7 +67,7 @@ namespace Voxelmetric.Code.Data_types
         //"block at " + BlockPos + " is broken."
         public override string ToString()
         {
-            return "(" + x + ", " + y + ", " + z + ")";
+            return "("+x+", "+y+", "+z+")";
         }
     }
 }

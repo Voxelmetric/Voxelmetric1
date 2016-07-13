@@ -442,7 +442,7 @@ namespace Voxelmetric.Code.Core.StateManager
             // This is an optimization - if this chunk is flat than there's no need to consider it as a whole.
             // Its' top part is sufficient enough. However, we never want this value be smaller than chunk's
             // lowest solid part.
-            // E.g. a sphere floating above the group would be considered from its topmost solid block to
+            // E.g. a sphere floating above the ground would be considered from its topmost solid block to
             // the ground without this. With this check, the lowest part above ground will be taken as minimum
             // render value.
             m_minRenderY = Mathf.Max(m_lowestEmptyBlock - 1, m_minRenderY);

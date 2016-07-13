@@ -140,25 +140,23 @@ namespace Voxelmetric.Code.Data_types
         }
 
         #region Struct comparison
-        
+
         public override int GetHashCode()
         {
             unchecked
             {
-                int hash = 47;
-                hash = hash * 227 + x.GetHashCode();
-                hash = hash * 227 + y.GetHashCode();
-                hash = hash * 227 + z.GetHashCode();
-                return hash * 227;
+                int hashCode = x;
+                hashCode = (hashCode*397)^y;
+                hashCode = (hashCode*397)^z;
+                return hashCode;
             }
         }
 
         public override bool Equals(object obj)
         {
-            if (!(obj is Vector3Int))
+            if (ReferenceEquals(null, obj))
                 return false;
-            Vector3Int other = (Vector3Int)obj;
-            return Equals(other);
+            return obj is Vector3Int && Equals((Vector3Int)obj);
         }
 
         public bool Equals(Vector3Int other)

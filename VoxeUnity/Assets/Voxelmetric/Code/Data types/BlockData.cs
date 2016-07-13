@@ -32,12 +32,14 @@ namespace Voxelmetric.Code.Data_types
 
         public bool Equals(BlockData other)
         {
-            return other.m_data==m_data;
+            return m_data==other.m_data;
         }
 
         public override bool Equals(object obj)
         {
-            return obj != null && GetHashCode() == ((BlockData)obj).GetHashCode();
+            if (ReferenceEquals(null, obj))
+                return false;
+            return obj is BlockData && Equals((BlockData)obj);
         }
 
         public override int GetHashCode()
@@ -52,7 +54,7 @@ namespace Voxelmetric.Code.Data_types
 
         public static bool operator!=(BlockData data1, BlockData data2)
         {
-            return data1.m_data != data2.m_data;
+            return data1.m_data!=data2.m_data;
         }
 
         #endregion

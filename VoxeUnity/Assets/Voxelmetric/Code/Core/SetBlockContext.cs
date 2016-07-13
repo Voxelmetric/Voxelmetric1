@@ -3,7 +3,7 @@ using Voxelmetric.Code.Data_types;
 
 namespace Voxelmetric.Code.Core
 {
-    public struct SetBlockContext : IComparable<SetBlockContext>, IEquatable<SetBlockContext>
+    public struct SetBlockContext : IEquatable<SetBlockContext>
     {
         //! Block which is to be worked with
         public readonly BlockData Block;
@@ -19,47 +19,33 @@ namespace Voxelmetric.Code.Core
             SetBlockModified = setBlockModified;
         }
 
-        private static bool AreEqual(ref SetBlockContext a, ref SetBlockContext b)
-        {
-            return a.Index == b.Index && a.Block.Equals(b.Block);
-        }
-
-        public static bool operator ==(SetBlockContext lhs, SetBlockContext rhs)
-        {
-            return AreEqual(ref lhs, ref rhs);
-        }
-
-        public static bool operator !=(SetBlockContext lhs, SetBlockContext rhs)
-        {
-            return !AreEqual(ref lhs, ref rhs);
-        }
-
-        public int CompareTo(SetBlockContext other)
-        {
-            return AreEqual(ref this, ref other) ? 0 : 1;
-        }
-
-        public override bool Equals(object other)
-        {
-            if (!(other is SetBlockContext))
-                return false;
-
-            SetBlockContext vec = (SetBlockContext)other;
-            return AreEqual(ref this, ref vec);
-        }
-
         public bool Equals(SetBlockContext other)
         {
-            return GetHashCode()==other.GetHashCode() && AreEqual(ref this, ref other);
+            return Index==other.Index && Block.Equals(other.Block);
+        }
+
+        public static bool operator ==(SetBlockContext a, SetBlockContext b)
+        {
+            return a.Index==b.Index && a.Block.Equals(b.Block);
+        }
+
+        public static bool operator !=(SetBlockContext a, SetBlockContext b)
+        {
+            return a.Index!=b.Index || a.Block.Equals(b.Block);
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (ReferenceEquals(null, obj))
+                return false;
+            return obj is SetBlockContext && Equals((SetBlockContext)obj);
         }
 
         public override int GetHashCode()
         {
             unchecked
             {
-                int hashCode = Block.GetHashCode();
-                hashCode = (hashCode * 397) ^ Index;
-                return hashCode;
+                return (Block.GetHashCode()*397)^Index;
             }
         }
     }

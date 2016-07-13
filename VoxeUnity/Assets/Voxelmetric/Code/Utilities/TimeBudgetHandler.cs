@@ -1,7 +1,6 @@
 ﻿using UnityEngine;
-using Voxelmetric.Code;
 
-namespace Assets.Voxelmetric.Code.Utilities
+namespace Voxelmetric.Code.Utilities
 {
     public class TimeBudgetHandler
     {
