@@ -40,8 +40,12 @@ namespace Voxelmetric.Code.Rendering
         /// </summary>
         public void Clear()
         {
-            for (int i = 0; i<m_buffers.Count; i++)
-                m_buffers[i].Clear();
+            for (int i = 0; i < m_buffers.Count; i++)
+            {
+                GeometryBuffer buffer = m_buffers[i];
+                if (!buffer.IsEmpty())
+                    m_buffers[i].Clear();
+            }
 
             ReleaseOldData();
 
@@ -188,8 +192,10 @@ namespace Voxelmetric.Code.Rendering
                 GameObjectProvider.PushObject(GOPChunk, go);
             }
 
-            m_objects.Clear();
-            m_renderers.Clear();
+            if (m_objects.Count>0)
+                m_objects.Clear();
+            if (m_renderers.Count>0)
+                m_renderers.Clear();
         }
     }
 }

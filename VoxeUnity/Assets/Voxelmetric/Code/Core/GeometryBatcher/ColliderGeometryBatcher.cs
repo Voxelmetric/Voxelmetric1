@@ -42,7 +42,11 @@ namespace Voxelmetric.Code.Rendering
         public void Clear()
         {
             for (int i = 0; i<m_buffers.Count; i++)
-                m_buffers[i].Clear();
+            {
+                GeometryBuffer buffer = m_buffers[i];
+                if (!buffer.IsEmpty())
+                    m_buffers[i].Clear();
+            }
 
             ReleaseOldData();
 
@@ -155,8 +159,10 @@ namespace Voxelmetric.Code.Rendering
                 Object.DestroyImmediate(go);
             }
 
-            m_objects.Clear();
-            m_colliders.Clear();
+            if(m_objects.Count>0)
+                m_objects.Clear();
+            if(m_colliders.Count>0)
+                m_colliders.Clear();
         }
     }
 }
