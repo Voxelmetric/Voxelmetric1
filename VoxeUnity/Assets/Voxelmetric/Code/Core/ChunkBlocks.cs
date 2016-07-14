@@ -213,9 +213,9 @@ namespace Voxelmetric.Code.Core
                                 listener.RequestState(ChunkState.BuildCollider);
                         }
                     }
-
-                    rebuildMask = -1;
                 }
+
+                rebuildMask = -1;
             }
         }
 
