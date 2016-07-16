@@ -99,6 +99,7 @@ MonoBehaviour:
   ChunkDeleteRadius: 8
   FollowCamera: 0
   UseFrustumCulling: 1
+  FullLoadOnStartUp: 1
   Diag_DrawWorldBounds: 0
   Diag_DrawLoadRange: 0
 --- !u!114 &11465880
@@ -116,6 +117,7 @@ MonoBehaviour:
   selectedBlockText: {fileID: 0}
   saveProgressText: {fileID: 0}
   world: {fileID: 0}
+  cam: {fileID: 0}
 --- !u!114 &11497504
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -132,6 +134,7 @@ MonoBehaviour:
   ChunkDeleteRadius: 8
   FollowCamera: 0
   UseFrustumCulling: 1
+  FullLoadOnStartUp: 1
   Diag_DrawWorldBounds: 0
   Diag_DrawLoadRange: 0
 --- !u!124 &12473024

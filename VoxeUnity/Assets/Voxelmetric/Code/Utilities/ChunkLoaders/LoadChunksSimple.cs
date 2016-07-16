@@ -31,6 +31,8 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
         public bool FollowCamera;
         // Toogles frustum culling
         public bool UseFrustumCulling;
+        // If false, only visible part of map is loaded on startup
+        public bool FullLoadOnStartUp = true;
 
         public bool Diag_DrawWorldBounds;
         public bool Diag_DrawLoadRange;
@@ -118,10 +120,6 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
             }
         }
 
-        // TODO! The ugliest thing... Until I implement an efficient detect of chunks being at least partialy
-        // inside the camera frustum, all chunks are going to be marked as potentially visible on the first run
-        private bool m_firstRun = true;
-
         public void ProcessChunks()
         {
             // Process removal requests
@@ -163,7 +161,7 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
             }
 
             if (m_updateRequests.Count>0)
-                m_firstRun = false;
+                FullLoadOnStartUp = false;
         }
 
         public void ProcessChunk(Chunk chunk)
@@ -181,7 +179,7 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
             chunk.NeedsCollider = xd*xd+zd*zd<=1;
 
             // Update visibility information
-            bool isInsideFrustum = IsChunkInViewFrustum(chunk) || m_firstRun;
+            bool isInsideFrustum = IsChunkInViewFrustum(chunk) || FullLoadOnStartUp;
 
             ChunkStateManagerClient stateManager = (ChunkStateManagerClient)chunk.stateManager;
             stateManager.Visible = isInsideFrustum;
@@ -219,7 +217,7 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
         private bool IsChunkInViewFrustum(Chunk chunk)
         {
             // Check if the chunk lies within camera planes
-            return !UseFrustumCulling || GeometryUtility.TestPlanesAABB(m_cameraPlanes, chunk.WorldBounds);
+            return !UseFrustumCulling || Geometry.TestPlanesAABB(m_cameraPlanes, chunk.WorldBounds);
         }
 
         private void OnDrawGizmosSelected()

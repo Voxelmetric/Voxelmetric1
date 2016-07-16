@@ -105,5 +105,31 @@ namespace Voxelmetric.Code.Common.Math
             inPlane.normal = new Vector3(normal.x * invMagnitude, normal.y * invMagnitude, normal.z * invMagnitude);
             inPlane.distance = distance * invMagnitude;
         }
+
+        /// <summary>
+        ///     Does a conservative check for intersection of a AABB with frustum planes.
+        ///     It is similiar to Unity3D's TestPlanesAABB, however, it accepts partial
+        ///     intersections as well.
+        /// </summary>
+        public static bool TestPlanesAABB(Plane[] planes, Bounds aabb)
+        {
+            float minx, miny, minz;
+
+            for (int i = 0; i < 6; ++i)
+            {
+                // X axis
+                minx = planes[i].normal.x < 0 ? aabb.min.x : aabb.max.x;
+                // Y axis
+                miny = planes[i].normal.y < 0 ? aabb.min.y : aabb.max.y;
+                // Z axis
+                minz = planes[i].normal.z < 0 ? aabb.min.z : aabb.max.z;
+
+                Vector3 vmin = new Vector3(minx, miny, minz);
+                if (Vector3.Dot(vmin, planes[i].normal) + planes[i].distance<0)
+                    return false; // Outside the bounds
+            }
+
+            return true;
+        }
     }
 }
