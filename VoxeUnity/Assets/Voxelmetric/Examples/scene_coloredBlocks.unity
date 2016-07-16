@@ -164,7 +164,7 @@ GameObject:
   - 222: {fileID: 225585893}
   - 114: {fileID: 225585892}
   m_Layer: 5
-  m_Name: Text
+  m_Name: stoneText
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -238,7 +238,7 @@ GameObject:
   - 222: {fileID: 225667567}
   - 114: {fileID: 225667566}
   m_Layer: 5
-  m_Name: Text
+  m_Name: connectedBlockText
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -745,7 +745,7 @@ GameObject:
   - 222: {fileID: 720126635}
   - 114: {fileID: 720126634}
   m_Layer: 5
-  m_Name: Text
+  m_Name: digText
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -950,8 +950,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   blockToPlace: air
-  selectedBlockText: {fileID: 0}
-  saveProgressText: {fileID: 0}
+  selectedBlockText: {fileID: 1062751822}
+  saveProgressText: {fileID: 797217062}
   world: {fileID: 1856110255}
   cam: {fileID: 498862709}
 --- !u!4 &775685701
@@ -981,7 +981,7 @@ GameObject:
   - 222: {fileID: 797217063}
   - 114: {fileID: 797217062}
   m_Layer: 5
-  m_Name: Text
+  m_Name: saveAllText
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1055,7 +1055,7 @@ GameObject:
   - 222: {fileID: 862771946}
   - 114: {fileID: 862771945}
   m_Layer: 5
-  m_Name: Text
+  m_Name: wildGrassText
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1160,7 +1160,7 @@ GameObject:
   - 222: {fileID: 1059324949}
   - 114: {fileID: 1059324948}
   m_Layer: 5
-  m_Name: Text
+  m_Name: importedModelText
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1234,7 +1234,7 @@ GameObject:
   - 222: {fileID: 1062751823}
   - 114: {fileID: 1062751822}
   m_Layer: 5
-  m_Name: Text
+  m_Name: selectedBlockText
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1655,7 +1655,7 @@ GameObject:
   - 222: {fileID: 1216358644}
   - 114: {fileID: 1216358643}
   m_Layer: 5
-  m_Name: Text
+  m_Name: connectedTexturesText
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1729,7 +1729,7 @@ GameObject:
   - 222: {fileID: 1247204519}
   - 114: {fileID: 1247204518}
   m_Layer: 5
-  m_Name: Text
+  m_Name: dirtText
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2456,7 +2456,7 @@ GameObject:
   - 222: {fileID: 1889670989}
   - 114: {fileID: 1889670988}
   m_Layer: 5
-  m_Name: Text
+  m_Name: grassText
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

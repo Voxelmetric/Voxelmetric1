@@ -218,7 +218,7 @@ GameObject:
   - 222: {fileID: 174744772}
   - 114: {fileID: 174744771}
   m_Layer: 5
-  m_Name: Text
+  m_Name: selectedBlockText
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -354,7 +354,7 @@ GameObject:
   - 222: {fileID: 346210630}
   - 114: {fileID: 346210629}
   m_Layer: 5
-  m_Name: Text
+  m_Name: dirtText
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -536,7 +536,7 @@ GameObject:
   - 222: {fileID: 608833866}
   - 114: {fileID: 608833865}
   m_Layer: 5
-  m_Name: Text
+  m_Name: saveAllText
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1595,7 +1595,7 @@ GameObject:
   - 222: {fileID: 1195630381}
   - 114: {fileID: 1195630380}
   m_Layer: 5
-  m_Name: Text
+  m_Name: connectedBlockText
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1791,7 +1791,7 @@ GameObject:
   - 222: {fileID: 1244088003}
   - 114: {fileID: 1244088002}
   m_Layer: 5
-  m_Name: Text
+  m_Name: connectedTexturesText
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2002,7 +2002,7 @@ GameObject:
   - 222: {fileID: 1350949832}
   - 114: {fileID: 1350949831}
   m_Layer: 5
-  m_Name: Text
+  m_Name: wildGrassText
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2145,7 +2145,7 @@ GameObject:
   - 222: {fileID: 1422403591}
   - 114: {fileID: 1422403590}
   m_Layer: 5
-  m_Name: Text
+  m_Name: stoneText
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2294,7 +2294,7 @@ GameObject:
   - 222: {fileID: 1845043974}
   - 114: {fileID: 1845043973}
   m_Layer: 5
-  m_Name: Text
+  m_Name: grassText
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2374,7 +2374,7 @@ GameObject:
   - 222: {fileID: 1938960430}
   - 114: {fileID: 1938960429}
   m_Layer: 5
-  m_Name: Text
+  m_Name: digText
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2675,7 +2675,7 @@ GameObject:
   - 222: {fileID: 2147088977}
   - 114: {fileID: 2147088976}
   m_Layer: 5
-  m_Name: Text
+  m_Name: importedModelText
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
