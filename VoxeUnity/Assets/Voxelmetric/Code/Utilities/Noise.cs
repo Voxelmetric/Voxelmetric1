@@ -50,8 +50,7 @@ namespace Voxelmetric.Code.Utilities
                 int swapIndex = random.Next(i, 256);
                 if (swapIndex != i)
                 {
-                    byte temp = perm[i];
-
+                    int temp = perm[i];
                     perm[i] = perm[swapIndex];
                     perm[swapIndex] = temp;
                 }
@@ -69,7 +68,7 @@ namespace Voxelmetric.Code.Utilities
         /// 1D simplex noise
         /// </summary>
         /// <param name="x"></param>
-        /// <returns></returns>
+        /// <returns>A noise value in the interval [-1,1]</returns>
         public float Generate(float x)
         {
             int i0 = FastFloor(x);
@@ -94,7 +93,7 @@ namespace Voxelmetric.Code.Utilities
         /// </summary>
         /// <param name="x"></param>
         /// <param name="y"></param>
-        /// <returns></returns>
+        /// <returns>A noise value in the interval [-1,1]</returns>
         public float Generate(float x, float y)
         {
             const float F2 = 0.366025403f; // F2 = 0.5*(sqrt(3.0)-1.0)
@@ -167,7 +166,13 @@ namespace Voxelmetric.Code.Utilities
             return 70.0f * (n0 + n1 + n2);
         }
 
-
+        /// <summary>
+        /// 3D simplex noise
+        /// </summary>
+        /// <param name="x"></param>
+        /// <param name="y"></param>
+        /// <param name="z"></param>
+        /// <returns>A noise value in the interval [-1,1]</returns>
         public float Generate(float x, float y, float z)
         {
             // Simple skewing factors for the 3D case
@@ -275,14 +280,14 @@ namespace Voxelmetric.Code.Utilities
             return 32.0f * (n0 + n1 + n2 + n3);
         }
 
-        private static int[][] grad3 =
+        private static float[][] grad3 =
         {
-            new[] {1, 1, 0}, new[] {-1, 1, 0}, new[] {1, -1, 0}, new[] {-1, -1, 0},
-            new[] {1, 0, 1}, new[] {-1, 0, 1}, new[] {1, 0, -1}, new[] {-1, 0, -1},
-            new[] {0, 1, 1}, new[] {0, -1, 1}, new[] {0, 1, -1}, new[] {0, -1, -1}
+            new[] {1f, 1f, 0f}, new[] {-1f, 1f, 0f}, new[] {1f, -1f, 0f}, new[] {-1f, -1f, 0f},
+            new[] {1f, 0f, 1f}, new[] {-1f, 0f, 1f}, new[] {1f, 0f, -1f}, new[] {-1f, 0f, -1f},
+            new[] {0f, 1f, 1f}, new[] {0f, -1f, 1f}, new[] {0f, 1f, -1f}, new[] {0f, -1f, -1f}
         };
 
-        public byte[] perm = new byte[512] {
+        public int[] perm = new int[512] {
               151,160,137,91,90,15,
               131,13,201,95,96,53,194,233,7,225,140,36,103,30,69,142,8,99,37,240,21,10,23,
               190, 6,148,247,120,234,75,0,26,197,62,94,252,219,203,117,35,11,32,57,177,33,
@@ -317,11 +322,11 @@ namespace Voxelmetric.Code.Utilities
             return x>0 ? (int)x : (int)x-1;
         }
 
-        private static float dot(int[] g, float x, float y)
+        private static float dot(float[] g, float x, float y)
         {
             return g[0] * x + g[1] * y;
         }
-        private static float dot(int[] g, float x, float y, float z)
+        private static float dot(float[] g, float x, float y, float z)
         {
             return g[0] * x + g[1] * y + g[2] * z;
         }
