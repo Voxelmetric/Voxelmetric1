@@ -31,7 +31,7 @@ public class RandomLayer: TerrainLayer
         if (chance > posChance)
         {
             if (!justGetHeight)
-                SetBlocksColumn(chunk, x, z, heightSoFar, heightSoFar + 1, blockToPlace);
+                SetBlocks(chunk, x, z, heightSoFar, heightSoFar + 1, blockToPlace);
 
             return heightSoFar + 1;
         }

@@ -99,7 +99,7 @@ public class TerrainLayer : IComparable, IEquatable<TerrainLayer>
     /// <param name="startPlaceHeight">Starting position on y axis in local chunk coordinates</param>
     /// <param name="endPlaceHeight">Ending position on y axis in local chunk coordinates</param>
     /// <param name="blockToPlace">Block type to set</param>
-    protected static void SetBlocksColumn(Chunk chunk, int x, int z, int startPlaceHeight, int endPlaceHeight, Block blockToPlace)
+    protected static void SetBlocks(Chunk chunk, int x, int z, int startPlaceHeight, int endPlaceHeight, Block blockToPlace)
     {
         int yMax = chunk.pos.y+Env.ChunkSize;
         if (startPlaceHeight >= yMax || endPlaceHeight < chunk.pos.y)

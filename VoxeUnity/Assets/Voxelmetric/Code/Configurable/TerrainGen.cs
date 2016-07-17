@@ -7,8 +7,6 @@ using Voxelmetric.Code.Utilities;
 
 public class TerrainGen
 {
-    private World world;
-
     public TerrainLayer[] Layers { get; private set; }
     public Noise noise { get; private set; }
 
@@ -25,7 +23,6 @@ public class TerrainGen
 
     protected void Init(World world, string layerFolder)
     {
-        this.world = world;
         noise = new Noise(world.name);
 
         // Verify all correct layers
@@ -86,7 +83,7 @@ public class TerrainGen
         return layers.ToArray();
     }
 
-    public void GenerateTerrainForChunk(Chunk chunk)
+    public void GenerateTerrain(Chunk chunk)
     {
         for (int x = chunk.pos.x; x < chunk.pos.x + Env.ChunkSize; x++)
         {

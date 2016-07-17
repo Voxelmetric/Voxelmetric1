@@ -16,8 +16,10 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
     [RequireComponent(typeof (Camera))]
     public class LoadChunks: MonoBehaviour, IChunkLoader
     {
-        private const int MinRange = 4;
-        private const int MaxRange = 32;
+        private const int HorizontalMinRange = 4;
+        private const int HorizontalMaxRange = 32;
+        private const int VerticalMinRange = 2;
+        private const int VerticalMaxRange = 32;
 
         // The world we are attached to
         public World world;
@@ -25,9 +27,13 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
         private Camera m_camera;
 
         // Distance in chunks for loading chunks
-        [Range(MinRange, MaxRange-1)] public int ChunkLoadRadius = 6;
+        [Range(HorizontalMinRange, HorizontalMaxRange-1)] public int HorizontalChunkLoadRadius = 6;
         // Distance in chunks for unloading chunks
-        [Range(MinRange+1, MaxRange)] public int ChunkDeleteRadius = 8;
+        [Range(HorizontalMinRange+1, HorizontalMaxRange)] public int HorizontalChunkDeleteRadius = 8;
+        // Distance in chunks for loading chunks
+        [Range(VerticalMinRange, VerticalMaxRange - 1)] public int VerticalChunkLoadRadius = 3;
+        // Distance in chunks for unloading chunks
+        [Range(VerticalMinRange + 1, VerticalMaxRange)] public int VerticalChunkDeleteRadius = 4;
         // Makes the world regenerate around the attached camera. If false, Y sticks at 0.
         public bool FollowCamera;
         // Toogles frustum culling
@@ -37,6 +43,11 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
 
         public bool Diag_DrawWorldBounds;
         public bool Diag_DrawLoadRange;
+
+        private int m_chunkHorizontalLoadRadiusPrev;
+        private int m_chunkHorizontalDeleteRadiusPrev;
+        private int m_chunkVerticalLoadRadiusPrev;
+        private int m_chunkVerticalDeleteRadiusPrev;
 
         private Vector3Int[] m_chunkPositions;
         private Plane[] m_cameraPlanes = new Plane[6];
@@ -57,6 +68,11 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
 
         void Start()
         {
+            m_chunkHorizontalLoadRadiusPrev = HorizontalChunkLoadRadius;
+            m_chunkHorizontalDeleteRadiusPrev = HorizontalChunkDeleteRadius;
+            m_chunkVerticalLoadRadiusPrev = VerticalChunkLoadRadius;
+            m_chunkVerticalDeleteRadiusPrev = VerticalChunkDeleteRadius;
+
             UpdateViewerPosition();
             m_viewerPos += Vector3Int.one;
             // Add some arbirtary value so that m_viewerPosPrev is different from m_viewerPos
@@ -74,28 +90,41 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
         // Updates our clipmap region. Has to be set from the outside!
         private void UpdateRanges()
         {
-            // Make sure ranges are always correct
-            ChunkLoadRadius = Mathf.Max(MinRange, ChunkLoadRadius);
-            ChunkLoadRadius = Mathf.Min(MaxRange - 1, ChunkLoadRadius);
-            if (ChunkDeleteRadius <= ChunkLoadRadius)
-                ChunkDeleteRadius = ChunkDeleteRadius + 1;
-            ChunkDeleteRadius = Mathf.Max(MinRange + 1, ChunkDeleteRadius);
-            ChunkDeleteRadius = Mathf.Min(MaxRange, ChunkDeleteRadius);
+            // Make sure horizontal ranges are always correct
+            HorizontalChunkLoadRadius = Mathf.Max(HorizontalMinRange, HorizontalChunkLoadRadius);
+            HorizontalChunkLoadRadius = Mathf.Min(HorizontalMaxRange-1, HorizontalChunkLoadRadius);
+            if (HorizontalChunkDeleteRadius<=HorizontalChunkLoadRadius)
+                HorizontalChunkDeleteRadius = HorizontalChunkDeleteRadius+1;
+            HorizontalChunkDeleteRadius = Mathf.Max(HorizontalMinRange+1, HorizontalChunkDeleteRadius);
+            HorizontalChunkDeleteRadius = Mathf.Min(HorizontalMaxRange, HorizontalChunkDeleteRadius);
 
-            if ( // Clipmap not initialized yet
-                m_clipmap==null ||
-                // Visibility range changed
-                ChunkLoadRadius!=m_clipmap.VisibleRange || ChunkDeleteRadius!=m_clipmap.CachedRange
-                )
+            // Make sure vertical ranges are always correct
+            VerticalChunkLoadRadius = Mathf.Max(VerticalMinRange, VerticalChunkLoadRadius);
+            VerticalChunkLoadRadius = Mathf.Min(VerticalMaxRange-1, VerticalChunkLoadRadius);
+            if (VerticalChunkDeleteRadius<=VerticalChunkLoadRadius)
+                VerticalChunkDeleteRadius = VerticalChunkDeleteRadius+1;
+            VerticalChunkDeleteRadius = Mathf.Max(VerticalMinRange+1, VerticalChunkDeleteRadius);
+            VerticalChunkDeleteRadius = Mathf.Min(VerticalMaxRange, VerticalChunkDeleteRadius);
+
+            bool isDifferenceXZ = HorizontalChunkLoadRadius!=m_chunkHorizontalLoadRadiusPrev || m_chunkPositions==null;
+            bool isDifferenceY = VerticalChunkLoadRadius!=m_chunkVerticalLoadRadiusPrev;
+            m_chunkHorizontalLoadRadiusPrev = HorizontalChunkLoadRadius;
+            m_chunkVerticalLoadRadiusPrev = VerticalChunkLoadRadius;
+
+            // Rebuild precomputed chunk positions
+            if (isDifferenceXZ)
+                m_chunkPositions = ChunkLoadOrder.ChunkPositions(HorizontalChunkLoadRadius);
+            // Invalidate prev pos so that updated ranges can take effect right away
+            if (isDifferenceXZ || isDifferenceY ||
+                HorizontalChunkDeleteRadius!=m_chunkHorizontalDeleteRadiusPrev ||
+                VerticalChunkDeleteRadius!=m_chunkVerticalDeleteRadiusPrev)
             {
                 m_clipmap = new Clipmap(
-                    world.config.minY/Env.ChunkSize,
-                    world.config.maxY/Env.ChunkSize,
-                    ChunkLoadRadius, ChunkDeleteRadius
+                    VerticalChunkLoadRadius, VerticalChunkDeleteRadius,
+                    HorizontalChunkLoadRadius, HorizontalChunkDeleteRadius
                     );
                 m_clipmap.Init(0, 0);
 
-                m_chunkPositions = ChunkLoadOrder.ChunkPositions(ChunkLoadRadius);
                 m_viewerPos = m_viewerPos + Vector3Int.one; // Invalidate prev pos so that updated ranges can take effect right away
             }
         }
@@ -103,13 +132,16 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
         private void UpdateViewerPosition()
         {
             Vector3Int pos = Chunk.ContainingCoordinates(transform.position);
-            int posX = pos.x>>Env.ChunkPower;
-            int posY = pos.y>>Env.ChunkPower;
-            int posZ = pos.z>>Env.ChunkPower;
 
             // Update the viewer position
             m_viewerPosPrev = m_viewerPos;
-            m_viewerPos = new Vector3Int(posX, FollowCamera ? posY : 0, posZ);
+
+            // Do not let y overflow
+            int y = FollowCamera ? pos.y : 0;
+            y = Mathf.Max(y, world.config.minY);
+            y = Mathf.Min(y, world.config.maxY);
+
+            m_viewerPos = new Vector3Int(pos.x, y, pos.z);
         }
 
         public void PreProcessChunks()

@@ -269,8 +269,10 @@ namespace Voxelmetric.Code.Core
         public void Set(Vector3Int pos, BlockData blockData)
         {
             int index = Helpers.GetChunkIndex1DFrom3D(pos.x, pos.y, pos.z);
+            if(index<0 || index>=Env.ChunkVolume)
+                Debug.LogError("aaa");
 
-            // Nothing for us to do if block did not change
+        // Nothing for us to do if block did not change
             BlockData oldBlockData = blocks[index];
             if (oldBlockData.Type==blockData.Type)
                 return;

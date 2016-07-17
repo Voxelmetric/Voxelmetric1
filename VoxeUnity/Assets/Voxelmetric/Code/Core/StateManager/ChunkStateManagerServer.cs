@@ -189,7 +189,7 @@ namespace Voxelmetric.Code.Core.StateManager
         private static void OnGenerateData(ChunkStateManagerServer stateManager)
         {
             Chunk chunk = stateManager.chunk;
-            chunk.world.terrainGen.GenerateTerrainForChunk(chunk);
+            chunk.world.terrainGen.GenerateTerrain(chunk);
 
             OnGenerateDataDone(stateManager);
         }

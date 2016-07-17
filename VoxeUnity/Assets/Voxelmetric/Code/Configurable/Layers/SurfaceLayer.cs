@@ -27,7 +27,7 @@ public class SurfaceLayer : TerrainLayer
         //If we're not just getting the height apply the changes
         if (!justGetHeight)
         {
-            SetBlocksColumn(chunk, x, z, heightSoFar, heightSoFar + 1, blockToPlace);
+            SetBlocks(chunk, x, z, heightSoFar, heightSoFar + 1, blockToPlace);
         }
 
         return heightSoFar + 1;
