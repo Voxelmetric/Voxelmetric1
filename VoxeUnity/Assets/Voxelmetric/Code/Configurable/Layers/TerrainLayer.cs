@@ -46,13 +46,36 @@ public class TerrainLayer : IComparable, IEquatable<TerrainLayer>
     }
 
     /// <summary>
-    /// Called once for each chunk column. Should generate any
+    /// Called once for each chunk. Should generate any
     /// parts of the structure within the chunk using GeneratedStructure.
     /// </summary>
-    /// <param name="chunkPos">pos of the chunk column</param>
+    /// <param name="chunk">Chunk for which structures are to be generated</param>
     public virtual void GenerateStructures(Chunk chunk)
     {
+    }
 
+    public int GetNoise(int x, float scale, int max, float power)
+    {
+        float scaleInv = 1.0f/scale;
+        float noise = (noiseGen.Generate(x*scaleInv)+1f);
+        noise *= (max>>1);
+
+        if (Math.Abs(power-1)>float.Epsilon)
+            noise = Mathf.Pow(noise, power);
+
+        return Mathf.FloorToInt(noise);
+    }
+
+    public int GetNoise(int x, int y, float scale, int max, float power)
+    {
+        float scaleInv = 1.0f/scale;
+        float noise = (noiseGen.Generate(x*scaleInv, y*scaleInv)+1f);
+        noise *= (max>>1);
+
+        if (Math.Abs(power-1)>float.Epsilon)
+            noise = Mathf.Pow(noise, power);
+
+        return Mathf.FloorToInt(noise);
     }
 
     public int GetNoise(int x, int y, int z, float scale, int max, float power)
@@ -67,20 +90,31 @@ public class TerrainLayer : IComparable, IEquatable<TerrainLayer>
         return Mathf.FloorToInt(noise);
     }
 
-    //Sets a column of chunks starting at startPlaceHeight and ending at endPlaceHeight using localSetBlock for speed
+    /// <summary>
+    /// Fills chunk with layer data starting at startPlaceHeight and ending at endPlaceHeight
+    /// </summary>
+    /// <param name="chunk">Chunk filled with data</param>
+    /// <param name="x">Position on x axis in local chunk coordinates</param>
+    /// <param name="z">Position on z axis in local chunk coordinates</param>
+    /// <param name="startPlaceHeight">Starting position on y axis in local chunk coordinates</param>
+    /// <param name="endPlaceHeight">Ending position on y axis in local chunk coordinates</param>
+    /// <param name="blockToPlace">Block type to set</param>
     protected static void SetBlocksColumn(Chunk chunk, int x, int z, int startPlaceHeight, int endPlaceHeight, Block blockToPlace)
     {
-        if (startPlaceHeight >= chunk.pos.y + Env.ChunkSize || endPlaceHeight < chunk.pos.y)
+        int yMax = chunk.pos.y+Env.ChunkSize;
+        if (startPlaceHeight >= yMax || endPlaceHeight < chunk.pos.y)
             return;
 
+        if (endPlaceHeight < yMax)
+            yMax = endPlaceHeight;
         int y = startPlaceHeight;
         if (startPlaceHeight < chunk.pos.y)
             y = chunk.pos.y;
 
-        while (y < chunk.pos.y + Env.ChunkSize && y < endPlaceHeight)
+        while (y<yMax)
         {
             chunk.blocks.Set(new Vector3Int(x-chunk.pos.x, y-chunk.pos.y, z-chunk.pos.z), new BlockData(blockToPlace.type));
-            y++;
+            ++y;
         }
     }
 

@@ -53,9 +53,7 @@ public class AbsoluteLayer : TerrainLayer
             //Return the height of this layer from minY as this is the new height of the column
             return world.config.minY + heightToAdd;
         }
-        else
-        {
-            return heightSoFar;
-        }
+
+        return heightSoFar;
     }
 }

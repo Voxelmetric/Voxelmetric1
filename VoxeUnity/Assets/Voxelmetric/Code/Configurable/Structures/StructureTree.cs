@@ -1,13 +1,11 @@
-﻿using Assets.Voxelmetric.Code.Common.Math;
-using Voxelmetric.Code.Core;
+﻿using Voxelmetric.Code.Core;
 using Voxelmetric.Code.Data_types;
-using Voxelmetric.Code.Utilities;
 
 public class StructureTree: GeneratedStructure
 {
-    private WorldBlocks blocks;
-    private BlockData leaves;
-    private BlockData log;
+    protected WorldBlocks blocks;
+    protected BlockData leaves;
+    protected BlockData log;
 
     public StructureTree()
     {

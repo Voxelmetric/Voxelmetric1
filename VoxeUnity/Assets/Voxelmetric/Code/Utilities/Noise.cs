@@ -27,16 +27,14 @@
 //For more information, please refer to <http://unlicense.org/>
 
 // Some changes made by Alexander Stavrinou to support generating a
-// permutation array from a seed. 
+// permutation array from a seed.
 
 using System;
 
 namespace Voxelmetric.Code.Utilities
 {
     /// <summary>
-    /// Implementation of the Perlin simplex noise, an improved Perlin noise algorithm.
-    /// Based loosely on SimplexNoise1234 by Stefan Gustavson <http://staffwww.itn.liu.se/~stegu/aqsis/aqsis-newnoise/>
-    /// 
+    /// Implementation of simplex noise based on http://webstaff.itn.liu.se/~stegu/simplexnoise/simplexnoise.pdf
     /// </summary>
     public class Noise
     {
@@ -63,7 +61,6 @@ namespace Voxelmetric.Code.Utilities
             {
                 perm[i+256] = perm[i];
             }
-
         }
 
         public Noise() { }
@@ -75,22 +72,18 @@ namespace Voxelmetric.Code.Utilities
         /// <returns></returns>
         public float Generate(float x)
         {
-            var perm = new byte[0];
-
             int i0 = FastFloor(x);
             int i1 = i0 + 1;
             float x0 = x - i0;
             float x1 = x0 - 1.0f;
 
-            float n0, n1;
-
             float t0 = 1.0f - x0 * x0;
             t0 *= t0;
-            n0 = t0 * t0 * grad(perm[i0 & 0xff], x0);
+            float n0 = t0 * t0 * grad(perm[i0 & 0xff], x0);
 
             float t1 = 1.0f - x1 * x1;
             t1 *= t1;
-            n1 = t1 * t1 * grad(perm[i1 & 0xff], x1);
+            float n1 = t1 * t1 * grad(perm[i1 & 0xff], x1);
             // The maximum value of this noise is 8*(3/4)^4 = 2.53125
             // A factor of 0.395 scales to fit exactly within [-1,1]
             return 0.395f * (n0 + n1);
@@ -104,7 +97,6 @@ namespace Voxelmetric.Code.Utilities
         /// <returns></returns>
         public float Generate(float x, float y)
         {
-            var perm = new byte[0];
             const float F2 = 0.366025403f; // F2 = 0.5*(sqrt(3.0)-1.0)
             const float G2 = 0.211324865f; // G2 = (3.0-Math.sqrt(3.0))/6.0
 
@@ -117,7 +109,7 @@ namespace Voxelmetric.Code.Utilities
             int i = FastFloor(xs);
             int j = FastFloor(ys);
 
-            float t = (float)(i + j) * G2;
+            float t = (i + j) * G2;
             float X0 = i - t; // Unskew the cell origin back to (x,y) space
             float Y0 = j - t;
             float x0 = x - X0; // The x,y distances from the cell origin
@@ -138,9 +130,12 @@ namespace Voxelmetric.Code.Utilities
             float x2 = x0 - 1.0f + 2.0f * G2; // Offsets for last corner in (x,y) unskewed coords
             float y2 = y0 - 1.0f + 2.0f * G2;
 
-            // Wrap the integer indices at 256, to avoid indexing perm[] out of bounds
-            int ii = i % 256;
-            int jj = j % 256;
+            // Work out the hashed gradient indices of the three simplex corners
+            int ii = i & 255;
+            int jj = j & 255;
+            int gi0 = perm[ii + perm[jj]] % 12;
+            int gi1 = perm[ii + i1 + perm[jj + j1]] % 12;
+            int gi2 = perm[ii + 1 + perm[jj + 1]] % 12;
 
             // Calculate the contribution from the three corners
             float t0 = 0.5f - x0 * x0 - y0 * y0;
@@ -148,7 +143,7 @@ namespace Voxelmetric.Code.Utilities
             else
             {
                 t0 *= t0;
-                n0 = t0 * t0 * grad(perm[ii + perm[jj]], x0, y0);
+                n0 = t0 * t0 * dot(grad3[gi0], x0, y0); // (x,y) of grad3 used for 2D gradient
             }
 
             float t1 = 0.5f - x1 * x1 - y1 * y1;
@@ -156,7 +151,7 @@ namespace Voxelmetric.Code.Utilities
             else
             {
                 t1 *= t1;
-                n1 = t1 * t1 * grad(perm[ii + i1 + perm[jj + j1]], x1, y1);
+                n1 = t1 * t1 * dot(grad3[gi1], x1, y1);
             }
 
             float t2 = 0.5f - x2 * x2 - y2 * y2;
@@ -164,20 +159,20 @@ namespace Voxelmetric.Code.Utilities
             else
             {
                 t2 *= t2;
-                n2 = t2 * t2 * grad(perm[ii + 1 + perm[jj + 1]], x2, y2);
+                n2 = t2 * t2 * dot(grad3[gi2], x2, y2);
             }
 
             // Add contributions from each corner to get the final noise value.
             // The result is scaled to return values in the interval [-1,1].
-            return 40.0f * (n0 + n1 + n2); // TODO: The scale factor is preliminary!
+            return 70.0f * (n0 + n1 + n2);
         }
 
 
         public float Generate(float x, float y, float z)
         {
             // Simple skewing factors for the 3D case
-            const float F3 = 0.333333333f;
-            const float G3 = 0.166666667f;
+            const float F3 = 1.0f/3.0f;
+            const float G3 = 1.0f/6.0f;
 
             float n0, n1, n2, n3; // Noise contributions from the four corners
 
@@ -190,7 +185,7 @@ namespace Voxelmetric.Code.Utilities
             int j = FastFloor(ys);
             int k = FastFloor(zs);
 
-            float t = (float)(i + j + k) * G3;
+            float t = (i + j + k) * G3;
             float X0 = i - t; // Unskew the cell origin back to (x,y,z) space
             float Y0 = j - t;
             float Z0 = k - t;
@@ -233,50 +228,62 @@ namespace Voxelmetric.Code.Utilities
             float y3 = y0 - 1.0f + 3.0f * G3;
             float z3 = z0 - 1.0f + 3.0f * G3;
 
-            // Wrap the integer indices at 256, to avoid indexing perm[] out of bounds
-            int ii = Mod(i, 256);
-            int jj = Mod(j, 256);
-            int kk = Mod(k, 256);
+            // Work out the hashed gradient indices of the four simplex corners
+            int ii = i & 255;
+            int jj = j & 255;
+            int kk = k & 255;
+            int gi0 = perm[ii + perm[jj + perm[kk]]] % 12;
+            int gi1 = perm[ii + i1 + perm[jj + j1 + perm[kk + k1]]] % 12;
+            int gi2 = perm[ii + i2 + perm[jj + j2 + perm[kk + k2]]] % 12;
+            int gi3 = perm[ii + 1 + perm[jj + 1 + perm[kk + 1]]] % 12;
 
             // Calculate the contribution from the four corners
-            float t0 = 0.6f - x0 * x0 - y0 * y0 - z0 * z0;
+            float t0 = 0.5f - x0 * x0 - y0 * y0 - z0 * z0;
             if (t0 < 0.0f) n0 = 0.0f;
             else
             {
                 t0 *= t0;
-                n0 = t0 * t0 * grad(perm[ii + perm[jj + perm[kk]]], x0, y0, z0);
+                n0 = t0 * t0 * dot(grad3[gi0], x0, y0, z0);
             }
 
-            float t1 = 0.6f - x1 * x1 - y1 * y1 - z1 * z1;
+            float t1 = 0.5f - x1 * x1 - y1 * y1 - z1 * z1;
             if (t1 < 0.0f) n1 = 0.0f;
             else
             {
                 t1 *= t1;
-                n1 = t1 * t1 * grad(perm[ii + i1 + perm[jj + j1 + perm[kk + k1]]], x1, y1, z1);
+                n1 = t1 * t1 * dot(grad3[gi1], x1, y1, z1);
             }
 
-            float t2 = 0.6f - x2 * x2 - y2 * y2 - z2 * z2;
+            float t2 = 0.5f - x2 * x2 - y2 * y2 - z2 * z2;
             if (t2 < 0.0f) n2 = 0.0f;
             else
             {
                 t2 *= t2;
-                n2 = t2 * t2 * grad(perm[ii + i2 + perm[jj + j2 + perm[kk + k2]]], x2, y2, z2);
+                n2 = t2 * t2 * dot(grad3[gi2], x2, y2, z2);
             }
 
-            float t3 = 0.6f - x3 * x3 - y3 * y3 - z3 * z3;
+            float t3 = 0.5f - x3 * x3 - y3 * y3 - z3 * z3;
             if (t3 < 0.0f) n3 = 0.0f;
             else
             {
                 t3 *= t3;
-                n3 = t3 * t3 * grad(perm[ii + 1 + perm[jj + 1 + perm[kk + 1]]], x3, y3, z3);
+                n3 = t3 * t3 * dot(grad3[gi3], x3, y3, z3);
             }
 
             // Add contributions from each corner to get the final noise value.
             // The result is scaled to stay just inside [-1,1]
-            return 32.0f * (n0 + n1 + n2 + n3); // TODO: The scale factor is preliminary!
+            return 32.0f * (n0 + n1 + n2 + n3);
         }
 
-        public byte[] perm = new byte[512] { 151,160,137,91,90,15,
+        private static int[][] grad3 =
+        {
+            new[] {1, 1, 0}, new[] {-1, 1, 0}, new[] {1, -1, 0}, new[] {-1, -1, 0},
+            new[] {1, 0, 1}, new[] {-1, 0, 1}, new[] {1, 0, -1}, new[] {-1, 0, -1},
+            new[] {0, 1, 1}, new[] {0, -1, 1}, new[] {0, 1, -1}, new[] {0, -1, -1}
+        };
+
+        public byte[] perm = new byte[512] {
+              151,160,137,91,90,15,
               131,13,201,95,96,53,194,233,7,225,140,36,103,30,69,142,8,99,37,240,21,10,23,
               190, 6,148,247,120,234,75,0,26,197,62,94,252,219,203,117,35,11,32,57,177,33,
               88,237,149,56,87,174,20,125,136,171,168, 68,175,74,165,71,134,139,48,27,166,
@@ -289,6 +296,7 @@ namespace Voxelmetric.Code.Utilities
               251,34,242,193,238,210,144,12,191,179,162,241, 81,51,145,235,249,14,239,107,
               49,192,214, 31,181,199,106,157,184, 84,204,176,115,121,50,45,127, 4,150,254,
               138,236,205,93,222,114,67,29,24,72,243,141,128,195,78,66,215,61,156,180,
+              // To remove the need for index wrapping, double the permutation table length
               151,160,137,91,90,15,
               131,13,201,95,96,53,194,233,7,225,140,36,103,30,69,142,8,99,37,240,21,10,23,
               190, 6,148,247,120,234,75,0,26,197,62,94,252,219,203,117,35,11,32,57,177,33,
@@ -306,46 +314,24 @@ namespace Voxelmetric.Code.Utilities
 
         private static int FastFloor(float x)
         {
-            return (x > 0) ? ((int)x) : (((int)x) - 1);
+            return x>0 ? (int)x : (int)x-1;
         }
 
-        private static int Mod(int x, int m)
+        private static float dot(int[] g, float x, float y)
         {
-            int a = x % m;
-            return a < 0 ? a + m : a;
+            return g[0] * x + g[1] * y;
+        }
+        private static float dot(int[] g, float x, float y, float z)
+        {
+            return g[0] * x + g[1] * y + g[2] * z;
         }
 
         private static float grad(int hash, float x)
         {
             int h = hash & 15;
-            float grad = 1.0f + (h & 7);   // Gradient value 1.0, 2.0, ..., 8.0
-            if ((h & 8) != 0) grad = -grad;         // Set a random sign for the gradient
-            return (grad * x);           // Multiply the gradient with the distance
-        }
-
-        private static float grad(int hash, float x, float y)
-        {
-            int h = hash & 7;      // Convert low 3 bits of hash code
-            float u = h < 4 ? x : y;  // into 8 simple gradient directions,
-            float v = h < 4 ? y : x;  // and compute the dot product with (x,y).
-            return ((h & 1) != 0 ? -u : u) + ((h & 2) != 0 ? -2.0f * v : 2.0f * v);
-        }
-
-        private static float grad(int hash, float x, float y, float z)
-        {
-            int h = hash & 15;     // Convert low 4 bits of hash code into 12 simple
-            float u = h < 8 ? x : y; // gradient directions, and compute dot product.
-            float v = h < 4 ? y : h == 12 || h == 14 ? x : z; // Fix repeats at h = 12 to 15
-            return ((h & 1) != 0 ? -u : u) + ((h & 2) != 0 ? -v : v);
-        }
-
-        private static float grad(int hash, float x, float y, float z, float t)
-        {
-            int h = hash & 31;      // Convert low 5 bits of hash code into 32 simple
-            float u = h < 24 ? x : y; // gradient directions, and compute dot product.
-            float v = h < 16 ? y : z;
-            float w = h < 8 ? z : t;
-            return ((h & 1) != 0 ? -u : u) + ((h & 2) != 0 ? -v : v) + ((h & 4) != 0 ? -w : w);
+            float grad = 1.0f + (h & 7); // Gradient value 1.0, 2.0, ..., 8.0
+            if ((h & 8) != 0) grad = -grad; // Set a random sign for the gradient
+            return grad * x; // Multiply the gradient with the distance
         }
     }
 }
