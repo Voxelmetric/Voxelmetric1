@@ -34,7 +34,7 @@ public class TerrainLayer : IComparable, IEquatable<TerrainLayer>
         }
 
         SetUp(config);
-    }    
+    }
 
     protected virtual void SetUp(LayerConfig config) { }
 
@@ -46,7 +46,7 @@ public class TerrainLayer : IComparable, IEquatable<TerrainLayer>
     }
 
     /// <summary>
-    /// Called once for each chunk column. Should generate any 
+    /// Called once for each chunk column. Should generate any
     /// parts of the structure within the chunk using GeneratedStructure.
     /// </summary>
     /// <param name="chunkPos">pos of the chunk column</param>
@@ -79,7 +79,7 @@ public class TerrainLayer : IComparable, IEquatable<TerrainLayer>
 
         while (y < chunk.pos.y + Env.ChunkSize && y < endPlaceHeight)
         {
-            chunk.world.blocks.Set(new Vector3Int(x, y, z), new BlockData(blockToPlace.type));
+            chunk.blocks.Set(new Vector3Int(x-chunk.pos.x, y-chunk.pos.y, z-chunk.pos.z), new BlockData(blockToPlace.type));
             y++;
         }
     }
