@@ -76,9 +76,6 @@ namespace Assets.Voxelmetric.Code.Core.StateManager
         {
             switch (state)
             {
-                case ChunkState.BuildCollider:
-                    chunk.blocks.colliderInvalidated = false;
-                break;
                 case ChunkState.Remove:
                 {
                     if (m_removalRequested)

@@ -24,12 +24,13 @@ namespace Voxelmetric.Code.Core
         private byte[] receiveBuffer;
         private int receiveIndex;
 
-        private long lastUpdateTime;
-        private int rebuildMask;
+        private long lastUpdateTimeGeometry;
+        private long lastUpdateTimeCollider;
+        private int rebuildMaskGeometry;
+        private int rebuildMaskCollider;
 
         public readonly List<BlockPos> modifiedBlocks = new List<BlockPos>();
         public bool contentsInvalidated;
-        public bool colliderInvalidated;
 
         private static byte[] emptyBytes;
         public static byte[] EmptyBytes
@@ -60,8 +61,6 @@ namespace Voxelmetric.Code.Core
             StringBuilder sb = new StringBuilder();
             sb.Append("contentsInvliadated=");
             sb.Append(contentsInvalidated.ToString());
-            sb.Append("colliderInvalidated=");
-            sb.Append(contentsInvalidated.ToString());
             return sb.ToString();
         }
 
@@ -69,11 +68,12 @@ namespace Voxelmetric.Code.Core
         {
             Array.Clear(blocks, 0, blocks.Length);
 
-            lastUpdateTime = 0;
-            rebuildMask = -1;
+            lastUpdateTimeGeometry = 0;
+            lastUpdateTimeCollider = 0;
+            rebuildMaskGeometry = -1;
+            rebuildMaskCollider = -1;
 
             contentsInvalidated = true;
-            colliderInvalidated = true;
 
             modifiedBlocks.Clear();
 
@@ -86,8 +86,10 @@ namespace Voxelmetric.Code.Core
 
             if (m_setBlockQueue.Count>0)
             {
-                if (rebuildMask<0)
-                    rebuildMask = 0;
+                if (rebuildMaskGeometry<0)
+                    rebuildMaskGeometry = 0;
+                if (rebuildMaskCollider<0)
+                    rebuildMaskCollider = 0;
 
                 // Modify blocks
                 for (int j = 0; j<m_setBlockQueue.Count; j++)
@@ -120,13 +122,11 @@ namespace Voxelmetric.Code.Core
                         BlockModified(new BlockPos(x, y, z), globalPos, context.Block);
 
                         chunk.blocks.contentsInvalidated = true;
-                        if (newBlock.canBeWalkedOn!=oldBlock.canBeWalkedOn)
-                            chunk.blocks.colliderInvalidated = true;
                     }
 
                     if (
                         // Only check neighbors if it is still needed
-                        rebuildMask==0x3f ||
+                        rebuildMaskGeometry==0x3f ||
                         // Only check neighbors when it is a change of a block on a chunk's edge
                         (((pos.x+1)&Env.ChunkMask)>1 &&
                          ((pos.y+1)&Env.ChunkMask)>1 &&
@@ -147,7 +147,7 @@ namespace Voxelmetric.Code.Core
                             continue;
 
                         // No further checks needed once we know all neighbors need to be notified
-                        if (rebuildMask==0x3f)
+                        if (rebuildMaskGeometry==0x3f)
                             break;
 
                         ChunkStateManagerClient listenerChunk = (ChunkStateManagerClient)listener;
@@ -163,7 +163,7 @@ namespace Voxelmetric.Code.Core
                                 // Section to the right
                                 ((pos.x==Env.ChunkMask) && (lx-Env.ChunkSize==cx))
                             ))
-                            rebuildMask = rebuildMask|(1<<i);
+                            rebuildMaskGeometry = rebuildMaskGeometry|(1<<i);
 
                         if ((lx==cx || lz==cz) &&
                             (
@@ -172,7 +172,7 @@ namespace Voxelmetric.Code.Core
                                 // Section to the top
                                 ((pos.y==Env.ChunkMask) && (ly-Env.ChunkSize==cy))
                             ))
-                            rebuildMask = rebuildMask|(1<<i);
+                            rebuildMaskGeometry = rebuildMaskGeometry|(1<<i);
 
                         if ((ly==cy || lx==cx) &&
                             (
@@ -181,41 +181,66 @@ namespace Voxelmetric.Code.Core
                                 // Section to the front
                                 ((pos.z==Env.ChunkMask) && (lz-Env.ChunkSize==cz))
                             ))
-                            rebuildMask = rebuildMask|(1<<i);
+                            rebuildMaskGeometry = rebuildMaskGeometry|(1<<i);
                     }
+
+                    rebuildMaskCollider |= rebuildMaskGeometry;
                 }
 
                 m_setBlockQueue.Clear();
             }
 
-            // Request a geometry update at most 5 times a second
             long now = Globals.Watch.ElapsedMilliseconds;
-            if (rebuildMask>=0 && now-lastUpdateTime>=200)
+
+            // Request a geometry update at most 10 times a second
+            if (rebuildMaskGeometry>=0 && now-lastUpdateTimeGeometry>=100)
             {
-                lastUpdateTime = now;
+                lastUpdateTimeGeometry = now;
 
                 // Request rebuild on this chunk
-                stateManager.RequestState(ChunkState.BuildVerticesNow);
-                if (chunk.NeedsCollider)
-                    stateManager.RequestState(ChunkState.BuildCollider);
+                stateManager.RequestState(ChunkState.BuildVerticesNow);;
 
                 // Notify neighbors that they need to rebuilt their geometry
-                if (rebuildMask>0)
+                if (rebuildMaskGeometry>0)
                 {
                     for (int j = 0; j<stateManager.Listeners.Length; j++)
                     {
                         ChunkStateManagerClient listener = (ChunkStateManagerClient)stateManager.Listeners[j];
-                        if (listener!=null && ((rebuildMask>>j)&1)!=0)
+                        if (listener!=null && ((rebuildMaskGeometry>>j)&1)!=0)
                         {
                             // Request rebuild on neighbor chunks
                             listener.RequestState(ChunkState.BuildVerticesNow);
+                        }
+                    }
+                }
+
+                rebuildMaskGeometry = -1;
+            }
+
+            // Request a collider update at most 4 times a second
+            if (chunk.NeedsCollider && rebuildMaskCollider>=0 && now-lastUpdateTimeCollider>=250)
+            {
+                lastUpdateTimeCollider = now;
+
+                // Request rebuild on this chunk
+                stateManager.RequestState(ChunkState.BuildCollider);
+
+                // Notify neighbors that they need to rebuilt their geometry
+                if (rebuildMaskCollider > 0)
+                {
+                    for (int j = 0; j < stateManager.Listeners.Length; j++)
+                    {
+                        ChunkStateManagerClient listener = (ChunkStateManagerClient)stateManager.Listeners[j];
+                        if (listener != null && ((rebuildMaskCollider >> j) & 1) != 0)
+                        {
+                            // Request rebuild on neighbor chunks
                             if (listener.chunk.NeedsCollider)
                                 listener.RequestState(ChunkState.BuildCollider);
                         }
                     }
                 }
 
-                rebuildMask = -1;
+                rebuildMaskCollider = -1;
             }
         }
 
