@@ -100,7 +100,7 @@ public class TerrainGen
 
     public int GenerateTerrainForBlockColumn(Chunk chunk, int x, int z, bool justGetHeight)
     {
-        int height = world.config.minY;
+        int height = 0;
         for (int i = 0; i < Layers.Length; i++)
         {
             TerrainLayer layer = Layers[i];

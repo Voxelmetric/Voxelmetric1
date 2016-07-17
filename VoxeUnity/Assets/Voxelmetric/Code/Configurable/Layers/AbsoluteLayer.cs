@@ -42,16 +42,16 @@ public class AbsoluteLayer : TerrainLayer
 
         //Absolute layers add from the minY and up but if the layer height is
         // lower than the existing terrain there's nothing to add so just return the initial value
-        if (world.config.minY + heightToAdd > heightSoFar)
+        if (heightToAdd > heightSoFar)
         {
             //If we're not just getting the height apply the changes
             if (!justGetHeight)
             {
-                SetBlocksColumn(chunk, x, z, heightSoFar, world.config.minY + heightToAdd, blockToPlace);
+                SetBlocksColumn(chunk, x, z, heightSoFar, heightToAdd, blockToPlace);
             }
 
             //Return the height of this layer from minY as this is the new height of the column
-            return world.config.minY + heightToAdd;
+            return heightToAdd;
         }
 
         return heightSoFar;

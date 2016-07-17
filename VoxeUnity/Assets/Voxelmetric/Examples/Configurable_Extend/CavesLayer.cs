@@ -14,7 +14,7 @@ public class CavesLayer : TerrainLayer
 
     public override int GenerateLayer(Chunk chunk, int x, int z, int heightSoFar, float strength, bool justGetHeight = false)
     {
-        int caveBottom = GetNoise(x, -1000, z, 500, 70, 1) + world.config.minY;
+        int caveBottom = GetNoise(x, -1000, z, 500, 70, 1);
         int caveHeight = GetNoise(x, 1000, z, 50, 30, 1) + caveBottom;
 
         caveHeight -= 20;
