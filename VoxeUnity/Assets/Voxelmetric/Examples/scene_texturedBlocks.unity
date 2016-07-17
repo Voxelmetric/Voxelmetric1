@@ -2275,6 +2275,10 @@ Prefab:
       propertyPath: m_LocalScale.z
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 11422472, guid: 5fb0c4eef722bd7449de294d0744b781, type: 2}
+      propertyPath: UseFrustumCulling
+      value: 1
+      objectReference: {fileID: 0}
     m_RemovedComponents:
     - {fileID: 11465880, guid: 5fb0c4eef722bd7449de294d0744b781, type: 2}
   m_ParentPrefab: {fileID: 100100000, guid: 5fb0c4eef722bd7449de294d0744b781, type: 2}

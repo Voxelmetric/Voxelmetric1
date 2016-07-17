@@ -12,8 +12,8 @@
     "pathToBlockPrefab": "Prefabs/Block",
     "pathToChunkPrefab": "Prefabs/Chunk",
 
-    "maxY": 64,
-    "minY": -64,
+    "maxY": 640,
+    "minY": -640,
 
     "randomUpdateFrequency": 1,
 
