@@ -105,8 +105,13 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
             if (m_viewerPos==m_viewerPosPrev)
                 return;
 
-            int minY = Mathf.Max(m_viewerPos.y - (VerticalChunkLoadRadius<<Env.ChunkPower), world.config.minY);
-            int maxY = Mathf.Min(m_viewerPos.y + (VerticalChunkLoadRadius<<Env.ChunkPower), world.config.maxY);
+            int minY = m_viewerPos.y-(VerticalChunkLoadRadius<<Env.ChunkPower);
+            int maxY = m_viewerPos.y+(VerticalChunkLoadRadius<<Env.ChunkPower);
+            if (world.config.minY!=world.config.maxY)
+            {
+                minY = Mathf.Max(minY, world.config.minY);
+                maxY = Mathf.Min(maxY, world.config.maxY);
+            }
 
             // Cycle through the array of positions
             for (int i = 0; i<m_chunkPositions.Length; i++)
@@ -243,8 +248,11 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
 
             // Do not let y overflow
             int y = FollowCamera ? pos.y : 0;
-            y = Mathf.Max(y, world.config.minY);
-            y = Mathf.Min(y, world.config.maxY);
+            if (world.config.minY!=world.config.maxY)
+            {
+                y = Mathf.Max(y, world.config.minY);
+                y = Mathf.Min(y, world.config.maxY);
+            }
 
             m_viewerPos = new Vector3Int(pos.x, y, pos.z);
         }

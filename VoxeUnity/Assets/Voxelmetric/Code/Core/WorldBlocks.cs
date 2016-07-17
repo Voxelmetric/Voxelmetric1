@@ -20,7 +20,7 @@ namespace Voxelmetric.Code.Core
         public BlockData Get(Vector3Int pos)
         {
             Chunk chunk = world.chunks.Get(pos);
-            if (chunk != null && pos.y>=world.config.minY)
+            if (chunk != null && (pos.y>=world.config.minY || world.config.minY==world.config.maxY))
             {
                 Vector3Int vector3Int = new Vector3Int(
                     pos.x & Env.ChunkMask,
@@ -41,7 +41,7 @@ namespace Voxelmetric.Code.Core
         public Block GetBlock(Vector3Int pos)
         {
             Chunk chunk = world.chunks.Get(pos);
-            if (chunk != null && pos.y>=world.config.minY)
+            if (chunk != null && (pos.y>=world.config.minY || world.config.minY==world.config.maxY))
             {
                 Vector3Int vector3Int = new Vector3Int(
                     pos.x & Env.ChunkMask,

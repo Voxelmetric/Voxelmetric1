@@ -23,7 +23,7 @@ namespace Voxelmetric.Code.Core
         {
             this.world = world;
         }
-        
+
         /// <summary> Returns the chunk at the given position </summary>
         /// <param name="pos">Position of the chunk in the world coordinates</param>
         /// <returns>The chunk that contains the given block position or null if there is none</returns>
@@ -61,7 +61,10 @@ namespace Voxelmetric.Code.Core
         {
             // Let's keep it withing allowed world bounds
             Vector3Int chunkPos = Chunk.ContainingCoordinates(pos);
-            if (chunkPos.y>world.config.maxY || chunkPos.y<world.config.minY)
+            if (
+                (world.config.minY!=world.config.maxY) &&
+                (chunkPos.y>world.config.maxY || chunkPos.y<world.config.minY)
+                )
             {
                 chunk = null;
                 return false;
@@ -77,6 +80,6 @@ namespace Voxelmetric.Code.Core
             chunks.Add(chunkPos, chunk);
             return true;
         }
-        
+
     }
 }

@@ -15,7 +15,6 @@ public class TerrainLayer : IComparable, IEquatable<TerrainLayer>
 
     public string layerName = "";
     public int index { get; private set; }
-    protected int chunksPerColumn { get; private set; }
     public bool isStructure { get; private set; }
 
     public void BaseSetUp(LayerConfig config, World world, TerrainGen terrainGen)
@@ -25,7 +24,6 @@ public class TerrainLayer : IComparable, IEquatable<TerrainLayer>
         isStructure = config.structure != null;
         this.world = world;
         noiseGen = terrainGen.noise;
-        chunksPerColumn = (world.config.maxY - world.config.minY) / Env.ChunkSize;
         index = config.index;
 
         foreach (var key in config.properties.Keys)
