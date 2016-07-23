@@ -1,5 +1,6 @@
 {
     "name": "connectedblock",
+    "type": 8,
     "blockClass": "ConnectedMeshBlock",
     "configClass": "ConnectedMeshBlockConfig",
     "meshFileLocation": "CustomMesh",

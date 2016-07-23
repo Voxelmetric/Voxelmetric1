@@ -1,13 +1,14 @@
 {
-  "name": "stone",
-  "blockClass": "CubeBlock",
-  "configClass": "CubeBlockConfig",
-  "textures": [
-    "stone",
-    "stone",
-    "stone",
-    "stone",
-    "stone",
-    "stone"
-  ],
+    "name": "stone",
+    "type": 2,
+    "blockClass": "CubeBlock",
+    "configClass": "CubeBlockConfig",
+    "textures": [
+        "stone",
+        "stone",
+        "stone",
+        "stone",
+        "stone",
+        "stone"
+    ]
 }

@@ -98,8 +98,8 @@ namespace Voxelmetric.Code.Load_Resources.Textures
                 }
             }
 
-            uPaddingBleed.BleedEdges(atlas, config.textureAtlasPadding, repeatingTextures.ToArray(), repeatingTextures: true);
-            uPaddingBleed.BleedEdges(atlas, config.textureAtlasPadding, nonrepeatingTextures.ToArray(), repeatingTextures: false);
+            uPaddingBleed.BleedEdges(atlas, config.textureAtlasPadding, repeatingTextures.ToArray(), true);
+            uPaddingBleed.BleedEdges(atlas, config.textureAtlasPadding, nonrepeatingTextures.ToArray(), false);
         }
 
         //This function is used if you've made your own texture atlas and the configs just specify where the textures are

@@ -1,6 +1,7 @@
 {
-  "name": "coloredblock",
-  "blockClass": "ColoredBlock",
-  "configClass": "ColoredBlockConfig",
-  "texture": "noise",
+    "name": "coloredblock",
+    "type": 1,
+    "blockClass": "ColoredBlock",
+    "configClass": "ColoredBlockConfig",
+    "texture": "noise"
 }

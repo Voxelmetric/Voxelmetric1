@@ -1,5 +1,6 @@
 {
     "name": "wildgrass",
+    "type": 1,
     "blockClass": "CrossMeshBlock",
     "configClass": "CrossMeshBlockConfig",
     "texture": "wild_grass",

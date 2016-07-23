@@ -16,9 +16,10 @@ public class CustomMeshBlockConfig: BlockConfig
     private int[] m_triangles;
     private VertexDataFixed[] m_vertices;
 
-    public override void SetUp(Hashtable config, World world)
+    public override bool SetUp(Hashtable config, World world)
     {
-        base.SetUp(config, world);
+        if (!base.SetUp(config, world))
+            return false;
 
         solid = _GetPropertyFromConfig(config, "solid", false);
         texture = world.textureProvider.GetTextureCollection(_GetPropertyFromConfig(config, "texture", ""));
@@ -29,6 +30,9 @@ public class CustomMeshBlockConfig: BlockConfig
         meshOffset.z = float.Parse(_GetPropertyFromConfig(config, "meshZOffset", "0"));
 
         SetUpMesh(world.config.meshFolder + "/" + _GetPropertyFromConfig(config, "meshFileLocation", ""), meshOffset, out m_triangles, out m_vertices);
+
+
+        return true;
     }
 
     protected static void SetUpMesh(string meshLocation, Vector3 positionOffset, out int[] trisOut, out VertexDataFixed[] vertsOut)

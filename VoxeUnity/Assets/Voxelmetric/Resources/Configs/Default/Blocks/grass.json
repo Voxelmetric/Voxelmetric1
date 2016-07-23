@@ -1,13 +1,14 @@
 {
-  "name": "grass",
-  "blockClass": "GrassBlock",
-  "configClass": "CubeBlockConfig",
-  "textures": [
-    "grass_top",
-    "dirt",
-    "grass_side",
-    "grass_side",
-    "grass_side",
-    "grass_side"
-  ]
+    "name": "grass",
+    "type": 5,
+    "blockClass": "GrassBlock",
+    "configClass": "CubeBlockConfig",
+    "textures": [
+        "grass_top",
+        "dirt",
+        "grass_side",
+        "grass_side",
+        "grass_side",
+        "grass_side"
+    ]
 }

@@ -1,5 +1,6 @@
 {
     "name": "custommesh",
+    "type": 7,
     "blockClass": "CustomMeshBlock",
     "configClass": "CustomMeshBlockConfig",
     "meshFileLocation": "CustomMesh",

@@ -1,14 +1,15 @@
 {
-  "name": "leaves",
-  "blockClass": "CubeBlock",
-  "configClass": "CubeBlockConfig",
-  "textures": [
-    "leaves",
-    "leaves",
-    "leaves",
-    "leaves",
-    "leaves",
-    "leaves"
-  ],
-  "solid": false,
+    "name": "leaves",
+    "type": 4,
+    "blockClass": "CubeBlock",
+    "configClass": "CubeBlockConfig",
+    "textures": [
+        "leaves",
+        "leaves",
+        "leaves",
+        "leaves",
+        "leaves",
+        "leaves"
+    ],
+    "solid": false
 }

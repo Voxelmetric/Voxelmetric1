@@ -9,11 +9,13 @@ namespace Voxelmetric.Code.Load_Resources.Blocks
 {
     public class BlockProvider
     {
-        // Air type block will always be present
+        //! Air type block will always be present
         public static readonly ushort AirType = 0;
-        
+
         private readonly List<BlockConfig> m_configs;
         private readonly Dictionary<string, ushort> m_names;
+        //! Mapping from typeInConfig to type
+        private readonly Dictionary<ushort, ushort> m_types;
 
         public Block[] BlockTypes { get; private set; }
 
@@ -27,6 +29,7 @@ namespace Voxelmetric.Code.Load_Resources.Blocks
         private BlockProvider()
         {
             m_names = new Dictionary<string, ushort>();
+            m_types = new Dictionary<ushort, ushort>();
             m_configs = new List<BlockConfig>();
         }
 
@@ -34,7 +37,7 @@ namespace Voxelmetric.Code.Load_Resources.Blocks
         {
             // Add the static air block type
             AddBlockType(BlockConfig.CreateAirBlockConfig(world));
-            
+
             // Add all the block definitions defined in the config files
             ProcessConfigs(world, blockFolder);
 
@@ -75,7 +78,8 @@ namespace Voxelmetric.Code.Load_Resources.Blocks
                 }
 
                 BlockConfig config = (BlockConfig)Activator.CreateInstance(configType);
-                config.SetUp(configHash, world);
+                if (!config.SetUp(configHash, world))
+                    continue;
 
                 if (!VerifyBlockConfig(config))
                     continue;
@@ -83,13 +87,20 @@ namespace Voxelmetric.Code.Load_Resources.Blocks
                 AddBlockType(config);
             }
         }
-        
+
         private bool VerifyBlockConfig(BlockConfig config)
         {
             // Unique identifier of block type
             if (m_names.ContainsKey(config.name))
             {
                 Debug.LogErrorFormat("Two blocks with the name {0} are defined", config.name);
+                return false;
+            }
+
+            // Unique identifier of block type
+            if (m_types.ContainsKey(config.typeInConfig))
+            {
+                Debug.LogErrorFormat("Two blocks with type {0} are defined", config.typeInConfig);
                 return false;
             }
 
@@ -117,9 +128,10 @@ namespace Voxelmetric.Code.Load_Resources.Blocks
         /// <returns>The index of the block</returns>
         private void AddBlockType(BlockConfig config)
         {
-            config.type = m_configs.Count;
+            config.type = (ushort)m_configs.Count;
             m_configs.Add(config);
-            m_names.Add(config.name, (ushort)config.type);
+            m_names.Add(config.name, config.type);
+            m_types.Add(config.typeInConfig, config.type);
         }
 
         public ushort GetType(string name)
@@ -129,6 +141,16 @@ namespace Voxelmetric.Code.Load_Resources.Blocks
                 return type;
 
             Debug.LogError("Block not found: " + name);
+            return AirType;
+        }
+
+        public ushort GetTypeFromTypeInConfig(ushort typeInConfig)
+        {
+            ushort type;
+            if (m_types.TryGetValue(typeInConfig, out type))
+                return type;
+
+            Debug.LogError("TypeInConfig not found: " + typeInConfig);
             return AirType;
         }
 

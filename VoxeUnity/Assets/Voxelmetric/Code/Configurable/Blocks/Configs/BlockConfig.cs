@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections;
+using System.Runtime.InteropServices;
 using UnityEngine;
 using Voxelmetric.Code.Core;
 
@@ -14,13 +15,13 @@ using Voxelmetric.Code.Core;
 public class BlockConfig
 {
     //! Block type. Set externally by BlockIndex class when config is loaded
-    public int type = -1;
+    public ushort type = 0;
     public World world;
 
     #region Parameters read from config
 
     //! Unique identifier of block config
-    public int typeInConfig { get; protected set; }
+    public ushort typeInConfig { get; protected set; }
     //! Unique identifier of block config
     public string name { get; protected set; }
 
@@ -52,6 +53,7 @@ public class BlockConfig
         {
             world = world,
             name = "air",
+            typeInConfig = 0,
             className = "Block",
             solid = false,
             canBeWalkedOn = false,
@@ -66,21 +68,42 @@ public class BlockConfig
     /// </summary>
     /// <param name="config">Hashtable of the json config for the block</param>
     /// <param name="world">The world this block type belongs to</param>
-    public virtual void SetUp(Hashtable config, World world)
+    public virtual bool SetUp(Hashtable config, World world)
     {
         this.world = world;
 
-        name = _GetPropertyFromConfig(config, "name", defaultValue: "block");
-        typeInConfig = _GetPropertyFromConfig(config, "type", defaultValue: -1);
-        className = _GetPropertyFromConfig(config, "blockClass", defaultValue: "Block");
+        // Obligatory parameters
+        {
+            string tmpName;
+            if (!_GetPropertyFromConfig(config, "name", out tmpName))
+            {
+                Debug.LogError("Parameter 'name' missing from config");
+                return false;
+            }
+            name = tmpName;
 
-        solid = _GetPropertyFromConfig(config, "solid", defaultValue: true);
-        transparent = _GetPropertyFromConfig(config, "transparent", defaultValue: false);
-        canBeWalkedOn = _GetPropertyFromConfig(config, "canBeWalkedOn", defaultValue: true);
-        canBeWalkedThrough = _GetPropertyFromConfig(config, "canBeWalkedThrough", defaultValue: false);
+            long tmpTypeInConfig;
+            if (!_GetPropertyFromConfig(config, "type", out tmpTypeInConfig))
+            {
+                Debug.LogError("Parameter 'type' missing from config");
+                return false;
+            }
+            typeInConfig = (ushort)tmpTypeInConfig;
+        }
 
-        raycastHit = _GetPropertyFromConfig(config, "raycastHit", defaultValue: solid);
-        raycastHitOnRemoval = _GetPropertyFromConfig(config, "raycastHitOnRemoval", defaultValue: solid);
+
+        // Optional parameters
+        {
+            className = _GetPropertyFromConfig(config, "blockClass", "Block");
+            solid = _GetPropertyFromConfig(config, "solid", true);
+            transparent = _GetPropertyFromConfig(config, "transparent", false);
+            canBeWalkedOn = _GetPropertyFromConfig(config, "canBeWalkedOn", true);
+            canBeWalkedThrough = _GetPropertyFromConfig(config, "canBeWalkedThrough", false);
+            raycastHit = _GetPropertyFromConfig(config, "raycastHit", solid);
+            raycastHitOnRemoval = _GetPropertyFromConfig(config, "raycastHitOnRemoval", solid);
+        }
+
+        return true;
     }
 
     public override string ToString()
@@ -88,7 +111,19 @@ public class BlockConfig
         return name;
     }
 
-    protected static T _GetPropertyFromConfig<T>(Hashtable config, object key, T defaultValue)
+    protected static bool _GetPropertyFromConfig<T>(Hashtable config, string key, out T ret)
+    {
+        if (config.ContainsKey(key))
+        {
+            ret = (T)config[key];
+            return true;
+        }
+
+        ret = default(T);
+        return false;
+    }
+
+    protected static T _GetPropertyFromConfig<T>(Hashtable config, string key, T defaultValue)
     {
         if (config.ContainsKey(key))
             return (T)config[key];

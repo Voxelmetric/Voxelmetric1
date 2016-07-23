@@ -64,8 +64,13 @@ namespace Voxelmetric.Code.Core.Serialization
 
         public void Binarize(BinaryWriter bw)
         {
+            // Convert block types from an internal optimized version into global types
+            ushort[] tmp = new ushort[blocks.Length];
+            for (int i = 0; i < blocks.Length; i++)
+                tmp[i] = Chunk.world.blockProvider.GetConfig(blocks[i].Type).typeInConfig;
+
             var positionsBytes = StructSerialization.SerializeArray(positions, Chunk.pools.MarshaledPool);
-            var blocksBytes = StructSerialization.SerializeArray(blocks, Chunk.pools.MarshaledPool);
+            var blocksBytes = StructSerialization.SerializeArray(tmp, Chunk.pools.MarshaledPool);
 
             bw.Write(positionsBytes.Length);
             bw.Write(blocksBytes.Length);
@@ -78,7 +83,12 @@ namespace Voxelmetric.Code.Core.Serialization
             var positionsBytes = new byte[br.ReadInt32()];
             var blockBytes = new byte[br.ReadInt32()];
             positions = StructSerialization.DeserializeArray<BlockPos>(br.ReadBytes(positionsBytes.Length), Chunk.pools.MarshaledPool);
-            blocks = StructSerialization.DeserializeArray<BlockData>(br.ReadBytes(blockBytes.Length), Chunk.pools.MarshaledPool);
+            var tmp = StructSerialization.DeserializeArray<ushort>(br.ReadBytes(blockBytes.Length), Chunk.pools.MarshaledPool);
+
+            // Convert block types global types into internal optimized version
+            blocks = new BlockData[tmp.Length];
+            for (int i = 0; i < blocks.Length; i++)
+                blocks[i] = new BlockData(Chunk.world.blockProvider.GetTypeFromTypeInConfig(tmp[i]));
         }
     }
 }

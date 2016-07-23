@@ -4,9 +4,13 @@ using Voxelmetric.Code.Core;
 public class SolidBlockConfig : BlockConfig
 {
     public bool solidTowardsSameType;
-    public override void SetUp(Hashtable config, World world)
+    public override bool SetUp(Hashtable config, World world)
     {
-        base.SetUp(config, world);
+        if (!base.SetUp(config, world))
+            return false;
+
         solidTowardsSameType = _GetPropertyFromConfig(config, "solidTowardsSameType", false);
+
+        return true;
     }
 }

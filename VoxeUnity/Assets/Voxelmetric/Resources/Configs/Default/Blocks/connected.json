@@ -1,13 +1,14 @@
 {
-  "name": "connected",
-  "blockClass": "CubeBlock",
-  "configClass": "CubeBlockConfig",
-  "textures": [
-    "connected",
-    "connected",
-    "connected",
-    "connected",
-    "connected",
-    "connected"
-  ],
+    "name": "connected",
+    "type": 9,
+    "blockClass": "CubeBlock",
+    "configClass": "CubeBlockConfig",
+    "textures": [
+        "connected",
+        "connected",
+        "connected",
+        "connected",
+        "connected",
+        "connected"
+    ]
 }

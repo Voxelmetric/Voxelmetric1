@@ -16,9 +16,10 @@ public class ConnectedMeshBlockConfig : CustomMeshBlockConfig
     public string[] connectsToNames;
     public bool connectsToSolid;
 
-    public override void SetUp(Hashtable config, World world)
+    public override bool SetUp(Hashtable config, World world)
     {
-        base.SetUp(config, world);
+        if (!base.SetUp(config, world))
+            return false;
 
         connectsToNames = _GetPropertyFromConfig(config, "connectsToNames", "").Replace(" ", "").Split(',');
         connectsToSolid = _GetPropertyFromConfig(config, "connectsToSolid", true);
@@ -46,5 +47,6 @@ public class ConnectedMeshBlockConfig : CustomMeshBlockConfig
             directionalVerts.Add(direction, newVerts);
         }
 
+        return true;
     }
 }
