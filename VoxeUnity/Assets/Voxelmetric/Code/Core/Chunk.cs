@@ -1,6 +1,7 @@
 ﻿using System.Text;
 using UnityEngine;
 using Voxelmetric.Code.Common.MemoryPooling;
+using Voxelmetric.Code.Core.GeometryHandler;
 using Voxelmetric.Code.Core.StateManager;
 using Voxelmetric.Code.Data_types;
 using Voxelmetric.Code.Utilities;
@@ -19,8 +20,8 @@ namespace Voxelmetric.Code.Core
         public ChunkBlocks blocks { get; private set; }
         public ChunkLogic logic { get; private set; }
 
-        public RenderGeometryHandler GeometryHandler { get; private set; }
-        public ColliderGeometryHandler ColliderGeometryHandler { get; private set; }
+        public ChunkRenderGeometryHandler GeometryHandler { get; private set; }
+        public ChunkColliderGeometryHandler ChunkColliderGeometryHandler { get; private set; }
 
         private bool m_needsCollider;
         public bool NeedsCollider
@@ -90,8 +91,8 @@ namespace Voxelmetric.Code.Core
             blocks = new ChunkBlocks(this);
             logic = new ChunkLogic(this);
 
-            GeometryHandler = new RenderGeometryHandler(this);
-            ColliderGeometryHandler = new ColliderGeometryHandler(this);
+            GeometryHandler = new ChunkRenderGeometryHandler(this);
+            ChunkColliderGeometryHandler = new ChunkColliderGeometryHandler(this);
         }
 
         private void Init(World world, Vector3Int pos, IChunkStateManager stateManager)
@@ -119,7 +120,7 @@ namespace Voxelmetric.Code.Core
             logic.Reset();
 
             GeometryHandler.Reset();
-            ColliderGeometryHandler.Reset();
+            ChunkColliderGeometryHandler.Reset();
 
             NeedsCollider = false;
         }
@@ -163,7 +164,7 @@ namespace Voxelmetric.Code.Core
             if (!NeedsCollider)
             {
                 stateManager.SetColliderBuilt();
-                ColliderGeometryHandler.Reset();
+                ChunkColliderGeometryHandler.Reset();
                 return false;
             }
 
@@ -171,7 +172,7 @@ namespace Voxelmetric.Code.Core
             if (stateManager.IsStateCompleted(ChunkState.BuildCollider))
             {
                 stateManager.SetColliderBuilt();
-                ColliderGeometryHandler.Commit();
+                ChunkColliderGeometryHandler.Commit();
                 return true;
             }
 

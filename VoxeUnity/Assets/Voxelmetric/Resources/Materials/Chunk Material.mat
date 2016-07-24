@@ -104,7 +104,7 @@ Material:
       data:
         first:
           name: _Cutoff
-        second: 0.343
+        second: 0.238
       data:
         first:
           name: _Shininess

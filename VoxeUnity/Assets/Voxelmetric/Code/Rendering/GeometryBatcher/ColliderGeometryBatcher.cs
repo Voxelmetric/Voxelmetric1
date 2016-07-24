@@ -1,19 +1,14 @@
 ﻿using System.Collections.Generic;
-using Assets.Voxelmetric.Code.Core.GeometryBatcher;
 using UnityEngine;
 using UnityEngine.Assertions;
 using Voxelmetric.Code.Builders;
 using Voxelmetric.Code.Common.MemoryPooling;
-using Voxelmetric.Code.Core;
-using Object = UnityEngine.Object;
 
-namespace Voxelmetric.Code.Rendering
+namespace Voxelmetric.Code.Rendering.GeometryBatcher
 {
-    public class ColliderGeometryBatcher: IGeometryBatcher
+    public class ColliderGeometryBatcher: IGeometryBatcher<PhysicMaterial>
     {
         private const string GOPChunk = "ChunkCollider";
-
-        private readonly Chunk m_chunk;
 
         private readonly List<GeometryBuffer> m_buffers;
         private readonly List<GameObject> m_objects;
@@ -21,10 +16,8 @@ namespace Voxelmetric.Code.Rendering
 
         private bool m_visible;
 
-        public ColliderGeometryBatcher(Chunk chunk)
+        public ColliderGeometryBatcher()
         {
-            m_chunk = chunk;
-
             m_buffers = new List<GeometryBuffer>(1)
             {
                 // Default render buffer
@@ -81,7 +74,7 @@ namespace Voxelmetric.Code.Rendering
         /// <summary>
         ///     Finalize the draw calls
         /// </summary>
-        public void Commit()
+        public void Commit(Vector3 position, Quaternion rotation, PhysicMaterial material)
         {
             ReleaseOldData();
 
@@ -101,10 +94,6 @@ namespace Voxelmetric.Code.Rendering
                 go.transform.parent = GameObjectProvider.Instance.ProviderGameObject.transform;
 
                 {
-#if DEBUG
-                    go.name =  m_chunk.pos+"C";
-#endif
-
                     Mesh mesh = Globals.MemPools.MeshPool.Pop();
                     Assert.IsTrue(mesh.vertices.Length<=0);
                     UnityMeshBuilder.BuildColliderMesh(mesh, buffer);
@@ -112,10 +101,9 @@ namespace Voxelmetric.Code.Rendering
                     MeshCollider collider = go.GetComponent<MeshCollider>();
                     collider.sharedMesh = null;
                     collider.sharedMesh = mesh;
-                    collider.transform.position = m_chunk.world.transform.rotation*m_chunk.pos+
-                                                  m_chunk.world.transform.position;
-                    collider.transform.rotation = m_chunk.world.transform.rotation;
-                    collider.sharedMaterial = null; // TODO: Add some material
+                    collider.transform.position = position;
+                    collider.transform.rotation = rotation;
+                    collider.sharedMaterial = material;
 
                     m_objects.Add(go);
                     m_colliders.Add(collider);

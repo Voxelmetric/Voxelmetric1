@@ -505,7 +505,7 @@ namespace Voxelmetric.Code.Core.StateManager
         private static void OnGenerateCollider(ref SGenerateColliderWorkItem item)
         {
             ChunkStateManagerClient stateManager = item.StateManager;
-            stateManager.chunk.ColliderGeometryHandler.Build(item.MinX, item.MaxX, item.MinY, item.MaxY, item.MinZ, item.MaxZ);
+            stateManager.chunk.ChunkColliderGeometryHandler.Build(item.MinX, item.MaxX, item.MinY, item.MaxY, item.MinZ, item.MaxZ);
             OnGenerateColliderDone(stateManager);
         }
 

@@ -915,6 +915,10 @@ Prefab:
       propertyPath: worldName
       value: world_colored
       objectReference: {fileID: 0}
+    - target: {fileID: 11498696, guid: 28fc5073d6f2b5b42acaec530dd745cd, type: 2}
+      propertyPath: renderMaterial
+      value: 
+      objectReference: {fileID: 2100000, guid: 7fa2460a4614b844c9c80d1c0398b97d, type: 2}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: 28fc5073d6f2b5b42acaec530dd745cd, type: 2}
   m_IsPrefabParent: 0

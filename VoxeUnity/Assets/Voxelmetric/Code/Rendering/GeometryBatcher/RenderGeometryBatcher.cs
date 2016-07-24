@@ -1,18 +1,14 @@
 ﻿using System.Collections.Generic;
-using Assets.Voxelmetric.Code.Core.GeometryBatcher;
 using UnityEngine;
 using UnityEngine.Assertions;
 using Voxelmetric.Code.Builders;
 using Voxelmetric.Code.Common.MemoryPooling;
-using Voxelmetric.Code.Core;
 
-namespace Voxelmetric.Code.Rendering
+namespace Voxelmetric.Code.Rendering.GeometryBatcher
 {
-    public class RenderGeometryBatcher: IGeometryBatcher
+    public class RenderGeometryBatcher: IGeometryBatcher<Material>
     {
         private const string GOPChunk = "Chunk";
-
-        private readonly Chunk m_chunk;
 
         private readonly List<GeometryBuffer> m_buffers;
         private readonly List<GameObject> m_objects;
@@ -20,10 +16,8 @@ namespace Voxelmetric.Code.Rendering
 
         private bool m_visible;
 
-        public RenderGeometryBatcher(Chunk chunk)
+        public RenderGeometryBatcher()
         {
-            m_chunk = chunk;
-
             m_buffers = new List<GeometryBuffer>(1)
             {
                 // Default render buffer
@@ -114,7 +108,7 @@ namespace Voxelmetric.Code.Rendering
         /// <summary>
         ///     Finalize the draw calls
         /// </summary>
-        public void Commit()
+        public void Commit(Vector3 position, Quaternion rotation, Material material)
         {
             ReleaseOldData();
 
@@ -130,10 +124,6 @@ namespace Voxelmetric.Code.Rendering
                 Assert.IsTrue(go!=null);
                 if (go!=null)
                 {
-#if DEBUG
-                    go.name = m_chunk.pos.ToString();
-#endif
-
                     Mesh mesh = Globals.MemPools.MeshPool.Pop();
                     Assert.IsTrue(mesh.vertices.Length<=0);
                     UnityMeshBuilder.BuildGeometryMesh(mesh, buffer);
@@ -141,12 +131,11 @@ namespace Voxelmetric.Code.Rendering
                     MeshFilter filter = go.GetComponent<MeshFilter>();
                     filter.sharedMesh = null;
                     filter.sharedMesh = mesh;
-                    filter.transform.position = m_chunk.world.transform.rotation*m_chunk.pos+
-                                                m_chunk.world.transform.position;
-                    filter.transform.rotation = m_chunk.world.transform.rotation;
+                    filter.transform.position = position;
+                    filter.transform.rotation = rotation;
 
                     Renderer renderer = go.GetComponent<Renderer>();
-                    renderer.material = m_chunk.world.chunkMaterial;
+                    renderer.material = material;
 
                     m_objects.Add(go);
                     m_renderers.Add(renderer);

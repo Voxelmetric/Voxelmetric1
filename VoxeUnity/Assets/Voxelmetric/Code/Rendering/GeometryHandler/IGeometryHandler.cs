@@ -1,6 +1,6 @@
-﻿namespace Voxelmetric.Code.Core
+﻿namespace Voxelmetric.Code.Rendering.GeometryHandler
 {
-    public interface IChunkGeometryHandler
+    public interface IGeometryHandler<in T> where T: class
     {
         void Reset();
 

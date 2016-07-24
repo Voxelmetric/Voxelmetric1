@@ -184,7 +184,7 @@ namespace Voxelmetric.Code.Builders.Collider
                                             vertexDataFixed[ii] = VertexDataUtils.ClassToStruct(vertexData[ii]);
                                         }
 
-                                        chunk.ColliderGeometryHandler.Batcher.AddFace(vertexDataFixed, backFace);
+                                        chunk.ChunkColliderGeometryHandler.Batcher.AddFace(vertexDataFixed, backFace);
 
                                         for (int ii = 0; ii<4; ii++)
                                             pool.PushVertexData(vertexData[ii]);

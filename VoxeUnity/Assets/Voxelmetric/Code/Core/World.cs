@@ -22,7 +22,8 @@ namespace Voxelmetric.Code.Core
         public TextureProvider textureProvider;
         public TerrainGen terrainGen;
 
-        public Material chunkMaterial;
+        public Material renderMaterial;
+        public PhysicMaterial physicsMaterial;
 
         void Awake()
         {
@@ -51,7 +52,7 @@ namespace Voxelmetric.Code.Core
             textureProvider = Voxelmetric.resources.GetTextureProvider(this);
             blockProvider = Voxelmetric.resources.GetBlockProvider(this);
 
-            chunkMaterial.mainTexture = textureProvider.atlas;
+            renderMaterial.mainTexture = textureProvider.atlas;
         }
 
         private void StartWorld()
