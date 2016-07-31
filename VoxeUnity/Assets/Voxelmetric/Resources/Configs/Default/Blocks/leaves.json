@@ -11,5 +11,7 @@
         "leaves",
         "leaves"
     ],
-    "solid": false
+    "solid": false,
+    "raycastHitOnRemoval": true,
+    "raycastHit": true
 }
