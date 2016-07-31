@@ -74,7 +74,11 @@ namespace Voxelmetric.Code.Rendering.GeometryBatcher
         /// <summary>
         ///     Finalize the draw calls
         /// </summary>
-        public void Commit(Vector3 position, Quaternion rotation, PhysicMaterial material)
+        public void Commit(Vector3 position, Quaternion rotation, PhysicMaterial material
+#if DEBUG
+            , string debugName = null
+#endif
+            )
         {
             ReleaseOldData();
 
@@ -94,6 +98,15 @@ namespace Voxelmetric.Code.Rendering.GeometryBatcher
                 go.transform.parent = GameObjectProvider.Instance.ProviderGameObject.transform;
 
                 {
+#if DEBUG
+                    if (!string.IsNullOrEmpty(debugName))
+                    {
+                        go.name = debugName;
+                        if (i>0)
+                            go.name = go.name+"_"+i;
+                    }
+#endif
+
                     Mesh mesh = Globals.MemPools.MeshPool.Pop();
                     Assert.IsTrue(mesh.vertices.Length<=0);
                     UnityMeshBuilder.BuildColliderMesh(mesh, buffer);
@@ -137,6 +150,10 @@ namespace Voxelmetric.Code.Rendering.GeometryBatcher
                 // If the component does not exist it means nothing else has been added as well
                 if (go==null)
                     continue;
+
+#if DEBUG
+                go.name = m_prefabName;
+#endif
 
                 MeshCollider collider = go.GetComponent<MeshCollider>();
                 collider.sharedMesh.Clear(false);

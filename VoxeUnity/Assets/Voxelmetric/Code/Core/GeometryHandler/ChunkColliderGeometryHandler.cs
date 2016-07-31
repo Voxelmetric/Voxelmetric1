@@ -21,8 +21,11 @@ namespace Voxelmetric.Code.Core.GeometryHandler
         public override void Commit()
         {
             Batcher.Commit(
-                chunk.world.transform.rotation * chunk.pos + chunk.world.transform.position,
+                chunk.world.transform.rotation*chunk.pos+chunk.world.transform.position,
                 chunk.world.transform.rotation, chunk.world.physicsMaterial
+#if DEBUG
+                , chunk.pos+"C"
+#endif
                 );
         }
     }
