@@ -565,22 +565,10 @@ namespace Voxelmetric.Code.Core.StateManager
         private struct SGenerateVerticesWorkItem
         {
             public readonly ChunkStateManagerClient StateManager;
-            public readonly int MinX;
-            public readonly int MaxX;
-            public readonly int MinY;
-            public readonly int MaxY;
-            public readonly int MinZ;
-            public readonly int MaxZ;
 
-            public SGenerateVerticesWorkItem(ChunkStateManagerClient stateManager, int minX, int maxX, int minY, int maxY, int minZ, int maxZ)
+            public SGenerateVerticesWorkItem(ChunkStateManagerClient stateManager)
             {
                 StateManager = stateManager;
-                MinX = minX;
-                MaxX = maxX;
-                MinY = minY;
-                MaxY = maxY;
-                MinZ = minZ;
-                MaxZ = maxZ;
             }
         }
 
@@ -589,7 +577,7 @@ namespace Voxelmetric.Code.Core.StateManager
         private static void OnGenerateVerices(ref SGenerateVerticesWorkItem item)
         {
             ChunkStateManagerClient stateManager = item.StateManager;
-            stateManager.chunk.GeometryHandler.Build(item.MinX, item.MaxX, item.MinY, item.MaxY, item.MinZ, item.MaxZ);
+            stateManager.chunk.GeometryHandler.Build(0, Env.ChunkMask, 0, Env.ChunkMask, 0, Env.ChunkMask);
             OnGenerateVerticesDone(stateManager);
         }
 
@@ -618,12 +606,7 @@ namespace Voxelmetric.Code.Core.StateManager
 
             if (chunk.blocks.NonEmptyBlocks > 0)
             {
-                var workItem = new SGenerateVerticesWorkItem(
-                    this,
-                    m_minRenderX, m_maxRenderX,
-                    m_minRenderY, m_maxRenderY,
-                    m_minRenderZ, m_maxRenderZ
-                    );
+                var workItem = new SGenerateVerticesWorkItem(this);
 
                 m_taskRunning = true;
                 WorkPoolManager.Add(
