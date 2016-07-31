@@ -7,9 +7,9 @@ namespace Voxelmetric.Code.Rendering.GeometryHandler
     {
         public RenderGeometryBatcher Batcher { get; private set; }
 
-        public ARenderGeometryHandler()
+        public ARenderGeometryHandler(string prefabName)
         {
-            Batcher = new RenderGeometryBatcher();
+            Batcher = new RenderGeometryBatcher(prefabName);
         }
 
         public void Reset()

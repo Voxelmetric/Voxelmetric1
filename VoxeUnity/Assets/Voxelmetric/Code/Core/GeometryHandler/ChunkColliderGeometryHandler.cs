@@ -4,9 +4,10 @@ namespace Voxelmetric.Code.Core.GeometryHandler
 {
     public class ChunkColliderGeometryHandler: AColliderGeometryHandler
     {
+        private const string GOPChunk = "ChunkCollider";
         private readonly Chunk chunk;
 
-        public ChunkColliderGeometryHandler(Chunk chunk)
+        public ChunkColliderGeometryHandler(Chunk chunk): base(GOPChunk)
         {
             this.chunk = chunk;
         }

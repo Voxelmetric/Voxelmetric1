@@ -8,16 +8,16 @@ namespace Voxelmetric.Code.Rendering.GeometryBatcher
 {
     public class ColliderGeometryBatcher: IGeometryBatcher<PhysicMaterial>
     {
-        private const string GOPChunk = "ChunkCollider";
-
+        private readonly string m_prefabName;
         private readonly List<GeometryBuffer> m_buffers;
         private readonly List<GameObject> m_objects;
         private readonly List<Collider> m_colliders;
 
         private bool m_visible;
 
-        public ColliderGeometryBatcher()
+        public ColliderGeometryBatcher(string prefabName)
         {
+            m_prefabName = prefabName;
             m_buffers = new List<GeometryBuffer>(1)
             {
                 // Default render buffer
@@ -89,7 +89,7 @@ namespace Voxelmetric.Code.Rendering.GeometryBatcher
                 // Create a game object for collider. Unfortunatelly, we can't use object pooling
                 // here for otherwise, unity would have to rebake because of change in object position
                 // and that is very time consuming.
-                GameObject prefab = GameObjectProvider.GetPool(GOPChunk).Prefab;
+                GameObject prefab = GameObjectProvider.GetPool(m_prefabName).Prefab;
                 GameObject go = Object.Instantiate(prefab);
                 go.transform.parent = GameObjectProvider.Instance.ProviderGameObject.transform;
 

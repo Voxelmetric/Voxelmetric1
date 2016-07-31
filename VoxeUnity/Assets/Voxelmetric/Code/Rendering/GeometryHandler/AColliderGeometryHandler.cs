@@ -7,9 +7,9 @@ namespace Voxelmetric.Code.Rendering.GeometryHandler
     {
         public ColliderGeometryBatcher Batcher { get; private set; }
 
-        public AColliderGeometryHandler()
+        public AColliderGeometryHandler(string prefabName)
         {
-            Batcher = new ColliderGeometryBatcher();
+            Batcher = new ColliderGeometryBatcher(prefabName);
         }
 
         public void Reset()

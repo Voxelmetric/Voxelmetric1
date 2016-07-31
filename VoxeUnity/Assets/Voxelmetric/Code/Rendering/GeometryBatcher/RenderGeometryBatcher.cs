@@ -8,16 +8,16 @@ namespace Voxelmetric.Code.Rendering.GeometryBatcher
 {
     public class RenderGeometryBatcher: IGeometryBatcher<Material>
     {
-        private const string GOPChunk = "Chunk";
-
+        private readonly string m_prefabName;
         private readonly List<GeometryBuffer> m_buffers;
         private readonly List<GameObject> m_objects;
         private readonly List<Renderer> m_renderers;
 
         private bool m_visible;
 
-        public RenderGeometryBatcher()
+        public RenderGeometryBatcher(string prefabName)
         {
+            m_prefabName = prefabName;
             m_buffers = new List<GeometryBuffer>(1)
             {
                 // Default render buffer
@@ -120,7 +120,7 @@ namespace Voxelmetric.Code.Rendering.GeometryBatcher
             {
                 GeometryBuffer buffer = m_buffers[i];
 
-                var go = GameObjectProvider.PopObject(GOPChunk);
+                var go = GameObjectProvider.PopObject(m_prefabName);
                 Assert.IsTrue(go!=null);
                 if (go!=null)
                 {
@@ -178,7 +178,7 @@ namespace Voxelmetric.Code.Rendering.GeometryBatcher
                 Renderer renderer = go.GetComponent<Renderer>();
                 renderer.materials[0] = null;
 
-                GameObjectProvider.PushObject(GOPChunk, go);
+                GameObjectProvider.PushObject(m_prefabName, go);
             }
 
             if (m_objects.Count>0)

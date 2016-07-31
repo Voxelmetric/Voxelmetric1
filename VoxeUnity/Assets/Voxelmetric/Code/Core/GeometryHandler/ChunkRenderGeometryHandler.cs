@@ -4,9 +4,10 @@ namespace Voxelmetric.Code.Core.GeometryHandler
 {
     public class ChunkRenderGeometryHandler: ARenderGeometryHandler
     {
+        private const string GOPChunk = "Chunk";
         private readonly Chunk chunk;
 
-        public ChunkRenderGeometryHandler(Chunk chunk)
+        public ChunkRenderGeometryHandler(Chunk chunk): base(GOPChunk)
         {
             this.chunk = chunk;
         }
