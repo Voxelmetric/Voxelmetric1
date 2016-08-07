@@ -263,7 +263,7 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
             ChunkStateManagerClient stateManager = (ChunkStateManagerClient)chunk.stateManager;
 
             // Chunk is within view frustum
-            if (IsChunkInViewFrustum(chunk) || FullLoadOnStartUp)
+            if (FullLoadOnStartUp || IsChunkInViewFrustum(chunk))
             {
                 // Chunk is too far away. Remove it
                 if (!m_clipmap.IsInsideBounds(localChunkPos.x, localChunkPos.y, localChunkPos.z))

@@ -199,7 +199,7 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
             chunk.NeedsCollider = xd<=1 && yd<=1 && zd<=1;
 
             // Update visibility information
-            bool isInsideFrustum = IsChunkInViewFrustum(chunk) || FullLoadOnStartUp;
+            bool isInsideFrustum = FullLoadOnStartUp || IsChunkInViewFrustum(chunk);
 
             ChunkStateManagerClient stateManager = (ChunkStateManagerClient)chunk.stateManager;
             stateManager.Visible = isInsideFrustum;
