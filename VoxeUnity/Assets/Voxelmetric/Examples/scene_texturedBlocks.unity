@@ -13,7 +13,7 @@ SceneSettings:
 --- !u!104 &2
 RenderSettings:
   m_ObjectHideFlags: 0
-  serializedVersion: 6
+  serializedVersion: 7
   m_Fog: 0
   m_FogColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
   m_FogMode: 3
@@ -37,12 +37,12 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
+  m_IndirectSpecularColor: {r: 0, g: 0, b: 0, a: 1}
 --- !u!157 &4
 LightmapSettings:
   m_ObjectHideFlags: 0
-  serializedVersion: 6
+  serializedVersion: 7
   m_GIWorkflowMode: 1
-  m_LightmapsMode: 1
   m_GISettings:
     serializedVersion: 2
     m_BounceScale: 1
@@ -53,17 +53,22 @@ LightmapSettings:
     m_EnableBakedLightmaps: 1
     m_EnableRealtimeLightmaps: 0
   m_LightmapEditorSettings:
-    serializedVersion: 3
+    serializedVersion: 4
     m_Resolution: 1
     m_BakeResolution: 50
     m_TextureWidth: 1024
     m_TextureHeight: 1024
+    m_AO: 0
     m_AOMaxDistance: 1
-    m_Padding: 2
     m_CompAOExponent: 0
+    m_CompAOExponentDirect: 0
+    m_Padding: 2
     m_LightmapParameters: {fileID: 0}
+    m_LightmapsBakeMode: 1
     m_TextureCompression: 0
+    m_DirectLightInLightProbes: 1
     m_FinalGather: 0
+    m_FinalGatherFiltering: 1
     m_FinalGatherRayCount: 1024
     m_ReflectionCompression: 2
   m_LightingDataAsset: {fileID: 0}
@@ -304,7 +309,7 @@ Light:
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 312836251}
   m_Enabled: 1
-  serializedVersion: 6
+  serializedVersion: 7
   m_Type: 1
   m_Color: {r: 1, g: 0.9953347, b: 0.8308824, a: 1}
   m_Intensity: 0.85
@@ -314,6 +319,7 @@ Light:
   m_Shadows:
     m_Type: 0
     m_Resolution: -1
+    m_CustomResolution: -1
     m_Strength: 1
     m_Bias: 0.05
     m_NormalBias: 0.4
@@ -326,10 +332,10 @@ Light:
     serializedVersion: 2
     m_Bits: 4294967295
   m_Lightmapping: 1
+  m_AreaSize: {x: 1, y: 1}
   m_BounceIntensity: 1
   m_ShadowRadius: 0
   m_ShadowAngle: 0
-  m_AreaSize: {x: 1, y: 1}
 --- !u!4 &312836253
 Transform:
   m_ObjectHideFlags: 0
@@ -850,10 +856,6 @@ Prefab:
   m_Modification:
     m_TransformParent: {fileID: 775685701}
     m_Modifications:
-    - target: {fileID: 11406898, guid: 28fc5073d6f2b5b42acaec530dd745cd, type: 2}
-      propertyPath: ObjectPools.Array.size
-      value: 3
-      objectReference: {fileID: 0}
     - target: {fileID: 479208, guid: 28fc5073d6f2b5b42acaec530dd745cd, type: 2}
       propertyPath: m_LocalPosition.x
       value: 0
@@ -889,58 +891,6 @@ Prefab:
     - target: {fileID: 104736, guid: 28fc5073d6f2b5b42acaec530dd745cd, type: 2}
       propertyPath: m_Name
       value: Voxelmetric World
-      objectReference: {fileID: 0}
-    - target: {fileID: 11406898, guid: 28fc5073d6f2b5b42acaec530dd745cd, type: 2}
-      propertyPath: ObjectPools.Array.data[0].Name
-      value: Chunk
-      objectReference: {fileID: 0}
-    - target: {fileID: 11498696, guid: 28fc5073d6f2b5b42acaec530dd745cd, type: 2}
-      propertyPath: useMultiThreading
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 11498696, guid: 28fc5073d6f2b5b42acaec530dd745cd, type: 2}
-      propertyPath: chunkMaterial
-      value: 
-      objectReference: {fileID: 2100000, guid: 7fa2460a4614b844c9c80d1c0398b97d, type: 2}
-    - target: {fileID: 0}
-      propertyPath: World
-      value: 
-      objectReference: {fileID: 1856110255}
-    - target: {fileID: 11498696, guid: 28fc5073d6f2b5b42acaec530dd745cd, type: 2}
-      propertyPath: UseFrustumCulling
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 11406898, guid: 28fc5073d6f2b5b42acaec530dd745cd, type: 2}
-      propertyPath: ObjectPools.Array.data[0].InitialSize
-      value: 256
-      objectReference: {fileID: 0}
-    - target: {fileID: 11406898, guid: 28fc5073d6f2b5b42acaec530dd745cd, type: 2}
-      propertyPath: ObjectPools.Array.data[1].InitialSize
-      value: 256
-      objectReference: {fileID: 0}
-    - target: {fileID: 11406898, guid: 28fc5073d6f2b5b42acaec530dd745cd, type: 2}
-      propertyPath: ObjectPools.Array.data[2].Name
-      value: CustomMesh
-      objectReference: {fileID: 0}
-    - target: {fileID: 11406898, guid: 28fc5073d6f2b5b42acaec530dd745cd, type: 2}
-      propertyPath: ObjectPools.Array.data[2].Prefab
-      value: 
-      objectReference: {fileID: 100002, guid: cff7141e7c83e7d4a8f9174acaf8663b, type: 3}
-    - target: {fileID: 11406898, guid: 28fc5073d6f2b5b42acaec530dd745cd, type: 2}
-      propertyPath: ObjectPools.Array.data[2].InitialSize
-      value: 256
-      objectReference: {fileID: 0}
-    - target: {fileID: 11406898, guid: 28fc5073d6f2b5b42acaec530dd745cd, type: 2}
-      propertyPath: ObjectPools.Array.data[1].Name
-      value: ChunkCollider
-      objectReference: {fileID: 0}
-    - target: {fileID: 11406898, guid: 28fc5073d6f2b5b42acaec530dd745cd, type: 2}
-      propertyPath: ObjectPools.Array.data[1].Prefab
-      value: 
-      objectReference: {fileID: 199192, guid: 6dcd1a91d5174624191754e53d987f23, type: 2}
-    - target: {fileID: 104736, guid: 28fc5073d6f2b5b42acaec530dd745cd, type: 2}
-      propertyPath: m_TagString
-      value: World
       objectReference: {fileID: 0}
     - target: {fileID: 11498696, guid: 28fc5073d6f2b5b42acaec530dd745cd, type: 2}
       propertyPath: renderMaterial
@@ -1956,7 +1906,7 @@ Light:
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 1340459963}
   m_Enabled: 1
-  serializedVersion: 6
+  serializedVersion: 7
   m_Type: 1
   m_Color: {r: 1, g: 0.9953347, b: 0.8308824, a: 1}
   m_Intensity: 0.93
@@ -1966,6 +1916,7 @@ Light:
   m_Shadows:
     m_Type: 0
     m_Resolution: -1
+    m_CustomResolution: -1
     m_Strength: 1
     m_Bias: 0.05
     m_NormalBias: 0.4
@@ -1978,10 +1929,10 @@ Light:
     serializedVersion: 2
     m_Bits: 4294967295
   m_Lightmapping: 1
+  m_AreaSize: {x: 1, y: 1}
   m_BounceIntensity: 1
   m_ShadowRadius: 0
   m_ShadowAngle: 0
-  m_AreaSize: {x: 1, y: 1}
 --- !u!4 &1340459965
 Transform:
   m_ObjectHideFlags: 0
@@ -2488,7 +2439,7 @@ Light:
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 1992624480}
   m_Enabled: 1
-  serializedVersion: 6
+  serializedVersion: 7
   m_Type: 1
   m_Color: {r: 1, g: 0.9953347, b: 0.8308824, a: 1}
   m_Intensity: 0.79
@@ -2498,6 +2449,7 @@ Light:
   m_Shadows:
     m_Type: 1
     m_Resolution: -1
+    m_CustomResolution: -1
     m_Strength: 1
     m_Bias: 0.013
     m_NormalBias: 1.454
@@ -2510,10 +2462,10 @@ Light:
     serializedVersion: 2
     m_Bits: 4294967295
   m_Lightmapping: 1
+  m_AreaSize: {x: 1, y: 1}
   m_BounceIntensity: 1
   m_ShadowRadius: 0
   m_ShadowAngle: 0
-  m_AreaSize: {x: 1, y: 1}
 --- !u!4 &1992624482
 Transform:
   m_ObjectHideFlags: 0

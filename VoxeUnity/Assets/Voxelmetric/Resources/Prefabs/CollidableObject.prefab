@@ -10,8 +10,8 @@ GameObject:
   - 4: {fileID: 467484}
   - 64: {fileID: 6454280}
   m_Layer: 0
-  m_Name: ChunkCollider
-  m_TagString: ChunkCollider
+  m_Name: CollidableObject
+  m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 4294967295
