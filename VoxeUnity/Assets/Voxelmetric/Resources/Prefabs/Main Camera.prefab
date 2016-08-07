@@ -95,8 +95,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   world: {fileID: 0}
-  HorizontalChunkLoadRadius: 10
-  HorizontalChunkDeleteRadius: 12
+  HorizontalChunkLoadRadius: 6
+  HorizontalChunkDeleteRadius: 8
   VerticalChunkLoadRadius: 3
   VerticalChunkDeleteRadius: 4
   FollowCamera: 0
@@ -132,8 +132,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   world: {fileID: 0}
-  HorizontalChunkLoadRadius: 10
-  HorizontalChunkDeleteRadius: 12
+  HorizontalChunkLoadRadius: 6
+  HorizontalChunkDeleteRadius: 8
   VerticalChunkLoadRadius: 3
   VerticalChunkDeleteRadius: 4
   FollowCamera: 0
