@@ -167,10 +167,10 @@ namespace Voxelmetric.Code.Builders.Collider
                                 // |  |
                                 // |  |
                                 // 3--2
-                                vecs[0] = new Vector3(x[0]+dv[0], x[1]+dv[1], x[2]+dv[2])-BlockUtils.HalfBlockVector;
-                                vecs[1] = new Vector3(x[0]+du[0]+dv[0], x[1]+du[1]+dv[1], x[2]+du[2]+dv[2])-BlockUtils.HalfBlockVector;
-                                vecs[2] = new Vector3(x[0]+du[0], x[1]+du[1], x[2]+du[2])-BlockUtils.HalfBlockVector;
-                                vecs[3] = new Vector3(x[0], x[1], x[2])-BlockUtils.HalfBlockVector;
+                                vecs[0] = new Vector3(x[0], x[1], x[2])-BlockUtils.HalfBlockVector;
+                                vecs[1] = new Vector3(x[0]+du[0], x[1]+du[1], x[2]+du[2])-BlockUtils.HalfBlockVector;
+                                vecs[2] = new Vector3(x[0]+du[0]+dv[0], x[1]+du[1]+dv[1], x[2]+du[2]+dv[2])-BlockUtils.HalfBlockVector;
+                                vecs[3] = new Vector3(x[0]+dv[0], x[1]+dv[1], x[2]+dv[2])-BlockUtils.HalfBlockVector;
 
                                 {
                                     LocalPools pool = chunk.pools;
