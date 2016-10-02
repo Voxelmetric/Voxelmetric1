@@ -6,7 +6,6 @@ using UnityEngine;
 using Voxelmetric.Code.Common;
 using Voxelmetric.Code.Core.StateManager;
 using Voxelmetric.Code.Data_types;
-using Voxelmetric.Code.Load_Resources.Blocks;
 using Voxelmetric.Code.Utilities;
 using Voxelmetric.Code.VM;
 
@@ -15,7 +14,7 @@ namespace Voxelmetric.Code.Core
     public sealed class ChunkBlocks
     {
         public Chunk chunk { get; private set; }
-        private readonly BlockData[] blocks = Helpers.CreateArray1D<BlockData>(Env.ChunkVolume);
+        private readonly ChunkVolume blocks = new ChunkVolume();
         private Block[] m_blockTypes;
 
         //! Queue of setBlock operations to execute
@@ -44,7 +43,10 @@ namespace Voxelmetric.Code.Core
         }
 
         //! Number of blocks which are not air (non-empty blocks)
-        public int NonEmptyBlocks { get; private set; }
+        public int NonEmptyBlocks
+        {
+            get { return blocks.NonEmptyBlocks; }
+        }
 
         public ChunkBlocks(Chunk chunk)
         {
@@ -66,7 +68,7 @@ namespace Voxelmetric.Code.Core
 
         public void Reset()
         {
-            Array.Clear(blocks, 0, blocks.Length);
+            blocks.Clear();
 
             lastUpdateTimeGeometry = 0;
             lastUpdateTimeCollider = 0;
@@ -76,8 +78,6 @@ namespace Voxelmetric.Code.Core
             contentsInvalidated = true;
 
             modifiedBlocks.Clear();
-
-            NonEmptyBlocks = 0;
         }
 
         public void Update()
@@ -96,26 +96,20 @@ namespace Voxelmetric.Code.Core
                 {
                     SetBlockContext context = m_setBlockQueue[j];
 
-                    // Update non-empty block count
-                    if (context.Block.Type==BlockProvider.AirType)
-                        --NonEmptyBlocks;
-                    else
-                        ++NonEmptyBlocks;
-
                     int x, y, z;
                     Helpers.GetChunkIndex3DFrom1D(context.Index, out x, out y, out z);
 
                     Vector3Int pos = new Vector3Int(x, y, z);
                     Vector3Int globalPos = pos+chunk.pos;
 
-                    BlockData oldBlockData = blocks[context.Index];
+                    BlockData oldBlockData = blocks.Get(context.Index);
 
                     Block oldBlock = m_blockTypes[oldBlockData.Type];
                     Block newBlock = m_blockTypes[context.Block.Type];
                     oldBlock.OnDestroy(chunk, pos, globalPos);
                     newBlock.OnCreate(chunk, pos, globalPos);
 
-                    blocks[context.Index] = context.Block;
+                    blocks.Set(context.Index, context.Block);
 
                     if (context.SetBlockModified)
                     {
@@ -251,8 +245,7 @@ namespace Voxelmetric.Code.Core
         /// <returns>The block at the position</returns>
         public BlockData Get(Vector3Int pos)
         {
-            int index = Helpers.GetChunkIndex1DFrom3D(pos.x, pos.y, pos.z);
-            return blocks[index];
+            return blocks.Get(ref pos);
         }
 
         /// <summary>
@@ -262,7 +255,7 @@ namespace Voxelmetric.Code.Core
         /// <returns>The block at the position</returns>
         public BlockData Get(int index)
         {
-            return blocks[index];
+            return blocks.Get(index);
         }
 
         /// <summary>
@@ -272,8 +265,7 @@ namespace Voxelmetric.Code.Core
         /// <returns>The block at the position</returns>
         public Block GetBlock(Vector3Int pos)
         {
-            int index = Helpers.GetChunkIndex1DFrom3D(pos.x, pos.y, pos.z);
-            return m_blockTypes[blocks[index].Type];
+            return m_blockTypes[blocks.Get(ref pos).Type];
         }
 
         /// <summary>
@@ -283,7 +275,7 @@ namespace Voxelmetric.Code.Core
         /// <returns>The block at the position</returns>
         public Block GetBlock(int index)
         {
-            return m_blockTypes[blocks[index].Type];
+            return m_blockTypes[blocks.Get(index).Type];
         }
 
         /// <summary>
@@ -293,20 +285,7 @@ namespace Voxelmetric.Code.Core
         /// <param name="blockData">A block to be placed on a given position</param>
         public void Set(Vector3Int pos, BlockData blockData)
         {
-            int index = Helpers.GetChunkIndex1DFrom3D(pos.x, pos.y, pos.z);
-
-            // Nothing for us to do if block did not change
-            BlockData oldBlockData = blocks[index];
-            if (oldBlockData.Type==blockData.Type)
-                return;
-
-            // Update non-empty block count
-            if (blockData.Type==BlockProvider.AirType)
-                --NonEmptyBlocks;
-            else
-                ++NonEmptyBlocks;
-
-            blocks[index] = blockData;
+            blocks.Set(ref pos, blockData);
         }
 
         /// <summary>
@@ -316,18 +295,7 @@ namespace Voxelmetric.Code.Core
         /// <param name="blockData">A block to be placed on a given position</param>
         public void Set(int index, BlockData blockData)
         {
-            // Nothing for us to do if block did not change
-            BlockData oldBlockData = blocks[index];
-            if (oldBlockData.Type == blockData.Type)
-                return;
-
-            // Update non-empty block count
-            if (blockData.Type == BlockProvider.AirType)
-                --NonEmptyBlocks;
-            else
-                ++NonEmptyBlocks;
-
-            blocks[index] = blockData;
+            blocks.Set(index, blockData);
         }
 
         /// <summary>
@@ -341,7 +309,7 @@ namespace Voxelmetric.Code.Core
             int index = Helpers.GetChunkIndex1DFrom3D(pos.x, pos.y, pos.z);
 
             // Nothing for us to do if block did not change
-            BlockData oldBlockData = blocks[index];
+            BlockData oldBlockData = blocks.Get(index);
             if (oldBlockData.Type==blockData.Type)
                 return;
 
@@ -440,7 +408,7 @@ namespace Voxelmetric.Code.Core
                     for (int x = 0; x<Env.ChunkSize; x++)
                     {
                         int index = Helpers.GetChunkIndex1DFrom3D(x, y, z);
-                        blockData = blocks[index];
+                        blockData = blocks.Get(index);
 
                         if (blockData.Equals(lastBlockData))
                         {
