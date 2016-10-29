@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Assertions;
+using Voxelmetric.Code.Common;
 using Voxelmetric.Code.Common.Math;
 using Voxelmetric.Code.Core;
 using Voxelmetric.Code.Core.Clipmap;
@@ -191,9 +192,9 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
 
         public void ProcessChunk(Chunk chunk)
         {
-            int xd = Mathf.Abs((m_viewerPos.x - chunk.pos.x) >> Env.ChunkPower);
-            int yd = Mathf.Abs((m_viewerPos.y - chunk.pos.y) >> Env.ChunkPower);
-            int zd = Mathf.Abs((m_viewerPos.z - chunk.pos.z) >> Env.ChunkPower);
+            int xd = Helpers.Abs((m_viewerPos.x - chunk.pos.x) >> Env.ChunkPower);
+            int yd = Helpers.Abs((m_viewerPos.y - chunk.pos.y) >> Env.ChunkPower);
+            int zd = Helpers.Abs((m_viewerPos.z - chunk.pos.z) >> Env.ChunkPower);
 
             int tx = m_clipmap.TransformX(chunk.pos.x >> Env.ChunkPower);
             int ty = m_clipmap.TransformY(chunk.pos.y >> Env.ChunkPower);

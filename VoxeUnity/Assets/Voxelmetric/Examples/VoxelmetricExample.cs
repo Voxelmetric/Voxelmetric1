@@ -27,7 +27,8 @@ namespace Voxelmetric.Examples
 
         private EventSystem eventSystem;
 
-        public void SetType(string newType){
+        public void SetType(string newType)
+        {
             blockToPlace = newType;
         }
 

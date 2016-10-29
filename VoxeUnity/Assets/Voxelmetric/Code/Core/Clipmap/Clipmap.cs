@@ -75,9 +75,9 @@ namespace Voxelmetric.Code.Core.Clipmap
             int zz = tz.Clamp(0, m_axes[2].Map.Length - 1);
 
             // Pick the furthest one
-            int absX = Mathf.Abs(xx);
-            int absY = Mathf.Abs(yy);
-            int absZ = Mathf.Abs(zz);
+            int absX = Helpers.Abs(xx);
+            int absY = Helpers.Abs(yy);
+            int absZ = Helpers.Abs(zz);
 
             if (absX > absZ)
                 return (absX > absY) ? m_axes[0].Map[xx] : m_axes[1].Map[yy];
@@ -166,7 +166,7 @@ namespace Voxelmetric.Code.Core.Clipmap
                     return 0;
 
                 // Pick the greater distance and choose a proper LOD
-                int dist = Mathf.Abs(distance);
+                int dist = Helpers.Abs(distance);
                 lod = (int)(dist / (coefLOD * Env.ChunkPower));
             }
 

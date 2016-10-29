@@ -172,5 +172,10 @@ namespace Voxelmetric.Code.Common
 
 			return val > max ? max : val;
 		}
+
+		public static int Abs(int val)
+		{
+			return (val + (val >> 31)) ^ (val >> 31);
+		}
 	}
 }

@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Assertions;
+using Voxelmetric.Code.Common;
 using Voxelmetric.Code.Common.Math;
 using Voxelmetric.Code.Core;
 using Voxelmetric.Code.Core.StateManager;
@@ -182,9 +183,9 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
 
         public void ProcessChunk(Chunk chunk)
         {
-            int xd = Mathf.Abs((m_viewerPos.x-chunk.pos.x)>>Env.ChunkPower);
-            int yd = Mathf.Abs((m_viewerPos.y-chunk.pos.y)>>Env.ChunkPower);
-            int zd = Mathf.Abs((m_viewerPos.z-chunk.pos.z)>>Env.ChunkPower);
+            int xd = Helpers.Abs((m_viewerPos.x-chunk.pos.x)>>Env.ChunkPower);
+            int yd = Helpers.Abs((m_viewerPos.y-chunk.pos.y)>>Env.ChunkPower);
+            int zd = Helpers.Abs((m_viewerPos.z-chunk.pos.z)>>Env.ChunkPower);
 
             // Remove the chunk if it is too far away
             if (
@@ -283,8 +284,8 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
                     if (Diag_DrawLoadRange)
                     {
                         Vector3Int pos = chunk.pos;
-                        int xd = Mathf.Abs((m_viewerPos.x-pos.x)>>Env.ChunkPower);
-                        int zd = Mathf.Abs((m_viewerPos.z-pos.z)>>Env.ChunkPower);
+                        int xd = Helpers.Abs((m_viewerPos.x-pos.x)>>Env.ChunkPower);
+                        int zd = Helpers.Abs((m_viewerPos.z-pos.z)>>Env.ChunkPower);
                         if (xd*xd+zd*zd>=HorizontalChunkDeleteRadius*HorizontalChunkDeleteRadius)
                         {
                             Gizmos.color = Color.red;

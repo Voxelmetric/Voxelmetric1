@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using Voxelmetric.Code.Common;
 using Voxelmetric.Code.Data_types;
 
 namespace Voxelmetric.Code.Utilities
@@ -23,10 +24,10 @@ namespace Voxelmetric.Code.Utilities
 
             //sort 2d vectors by closeness to center
             return chunkLoads
-                .Where(pos => Mathf.Abs(pos.x) + Mathf.Abs(pos.z) < maxRadius)
-                .OrderBy(pos => Mathf.Abs(pos.x) + Mathf.Abs(pos.z)) //smallest magnitude vectors first
-                .ThenBy(pos => Mathf.Abs(pos.x)) //make sure not to process e.g (-10,0) before (5,5)
-                .ThenBy(pos => Mathf.Abs(pos.z))
+                .Where(pos => Helpers.Abs(pos.x) + Helpers.Abs(pos.z) < maxRadius)
+                .OrderBy(pos => Helpers.Abs(pos.x) + Helpers.Abs(pos.z)) //smallest magnitude vectors first
+                .ThenBy(pos => Helpers.Abs(pos.x)) //make sure not to process e.g (-10,0) before (5,5)
+                .ThenBy(pos => Helpers.Abs(pos.z))
                 .ToArray();
         }
 
