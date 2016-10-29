@@ -3,11 +3,10 @@
 namespace Voxelmetric.Code.Common.Collections
 {
     /// <summary>
-    ///     Represents a circular 2D array
+    ///     Represents a circular 1D array
     /// </summary>
     public sealed class CircularArray1D<T> : IEnumerable
     {
-        // size X and Y of the array
         private readonly T[] m_items;
 
         public CircularArray1D(int width)

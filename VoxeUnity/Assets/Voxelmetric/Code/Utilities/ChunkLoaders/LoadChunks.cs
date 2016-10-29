@@ -74,8 +74,10 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
             m_chunkVerticalDeleteRadiusPrev = VerticalChunkDeleteRadius;
 
             UpdateViewerPosition();
-            m_viewerPos += Vector3Int.one;
             // Add some arbirtary value so that m_viewerPosPrev is different from m_viewerPos
+            m_viewerPos += Vector3Int.one;
+
+            m_timeBudgetHandler.TimeBudgetMs = 3; // Time allow to be spent for building meshes
         }
 
         void Update()
@@ -85,66 +87,6 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
             PreProcessChunks();
             ProcessChunks();
             PostProcessChunks();
-        }
-
-        // Updates our clipmap region. Has to be set from the outside!
-        private void UpdateRanges()
-        {
-            // Make sure horizontal ranges are always correct
-            HorizontalChunkLoadRadius = Mathf.Max(HorizontalMinRange, HorizontalChunkLoadRadius);
-            HorizontalChunkLoadRadius = Mathf.Min(HorizontalMaxRange-1, HorizontalChunkLoadRadius);
-            if (HorizontalChunkDeleteRadius<=HorizontalChunkLoadRadius)
-                HorizontalChunkDeleteRadius = HorizontalChunkDeleteRadius+1;
-            HorizontalChunkDeleteRadius = Mathf.Max(HorizontalMinRange+1, HorizontalChunkDeleteRadius);
-            HorizontalChunkDeleteRadius = Mathf.Min(HorizontalMaxRange, HorizontalChunkDeleteRadius);
-
-            // Make sure vertical ranges are always correct
-            VerticalChunkLoadRadius = Mathf.Max(VerticalMinRange, VerticalChunkLoadRadius);
-            VerticalChunkLoadRadius = Mathf.Min(VerticalMaxRange-1, VerticalChunkLoadRadius);
-            if (VerticalChunkDeleteRadius<=VerticalChunkLoadRadius)
-                VerticalChunkDeleteRadius = VerticalChunkDeleteRadius+1;
-            VerticalChunkDeleteRadius = Mathf.Max(VerticalMinRange+1, VerticalChunkDeleteRadius);
-            VerticalChunkDeleteRadius = Mathf.Min(VerticalMaxRange, VerticalChunkDeleteRadius);
-
-            bool isDifferenceXZ = HorizontalChunkLoadRadius!=m_chunkHorizontalLoadRadiusPrev || m_chunkPositions==null;
-            bool isDifferenceY = VerticalChunkLoadRadius!=m_chunkVerticalLoadRadiusPrev;
-            m_chunkHorizontalLoadRadiusPrev = HorizontalChunkLoadRadius;
-            m_chunkVerticalLoadRadiusPrev = VerticalChunkLoadRadius;
-
-            // Rebuild precomputed chunk positions
-            if (isDifferenceXZ)
-                m_chunkPositions = ChunkLoadOrder.ChunkPositions(HorizontalChunkLoadRadius);
-            // Invalidate prev pos so that updated ranges can take effect right away
-            if (isDifferenceXZ || isDifferenceY ||
-                HorizontalChunkDeleteRadius!=m_chunkHorizontalDeleteRadiusPrev ||
-                VerticalChunkDeleteRadius!=m_chunkVerticalDeleteRadiusPrev)
-            {
-                m_clipmap = new Clipmap(
-                    VerticalChunkLoadRadius, VerticalChunkDeleteRadius,
-                    HorizontalChunkLoadRadius, HorizontalChunkDeleteRadius
-                    );
-                m_clipmap.Init(0, 0);
-
-                m_viewerPos = m_viewerPos + Vector3Int.one; // Invalidate prev pos so that updated ranges can take effect right away
-            }
-        }
-
-        private void UpdateViewerPosition()
-        {
-            Vector3Int pos = Chunk.ContainingCoordinates(transform.position);
-
-            // Update the viewer position
-            m_viewerPosPrev = m_viewerPos;
-
-            // Do not let y overflow
-            int y = FollowCamera ? pos.y : 0;
-            if (world.config.minY!=world.config.maxY)
-            {
-                y = Mathf.Max(y, world.config.minY);
-                y = Mathf.Min(y, world.config.maxY);
-            }
-
-            m_viewerPos = new Vector3Int(pos.x, y, pos.z);
         }
 
         public void PreProcessChunks()
@@ -159,7 +101,11 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
             UpdateViewerPosition();
 
             // Update clipmap offsets based on the viewer position
-            m_clipmap.SetOffset(m_viewerPos.x, m_viewerPos.y, m_viewerPos.z);
+            m_clipmap.SetOffset(
+                m_viewerPos.x >> Env.ChunkPower,
+                m_viewerPos.y >> Env.ChunkPower,
+                m_viewerPos.z >> Env.ChunkPower
+                );
         }
 
         public void PostProcessChunks()
@@ -168,12 +114,9 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
             if (m_viewerPos==m_viewerPosPrev)
                 return;
 
-            // Translate the viewer position to world position
-            Vector3Int viewerPosInWP = m_viewerPos*Env.ChunkSize;
-
-            int minY = viewerPosInWP.y-(VerticalChunkLoadRadius<<Env.ChunkPower);
-            int maxY = viewerPosInWP.y+(VerticalChunkLoadRadius<<Env.ChunkPower);
-            if (world.config.minY != world.config.maxY)
+            int minY = m_viewerPos.y-(VerticalChunkLoadRadius<<Env.ChunkPower);
+            int maxY = m_viewerPos.y+(VerticalChunkLoadRadius<<Env.ChunkPower);
+            if (world.config.minY!=world.config.maxY)
             {
                 minY = Mathf.Max(minY, world.config.minY);
                 maxY = Mathf.Min(maxY, world.config.maxY);
@@ -187,9 +130,9 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
                 {
                     // Translate array postions to world/chunk positions
                     Vector3Int newChunkPos = new Vector3Int(
-                        (m_chunkPositions[i].x<<Env.ChunkPower)+viewerPosInWP.x,
+                        (m_chunkPositions[i].x<<Env.ChunkPower)+m_viewerPos.x,
                         (m_chunkPositions[i].y<<Env.ChunkPower)+y,
-                        (m_chunkPositions[i].z<<Env.ChunkPower)+viewerPosInWP.z
+                        (m_chunkPositions[i].z<<Env.ChunkPower)+m_viewerPos.z
                         );
 
                     Chunk chunk;
@@ -215,6 +158,7 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
                 {
                     chunk.UpdateState();
 
+                    // Build colliders if there is enough time
                     if (m_timeBudgetHandler.HasTimeBudget)
                     {
                         m_timeBudgetHandler.StartMeasurement();
@@ -245,67 +189,133 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
                 FullLoadOnStartUp = false;
         }
 
+        public void ProcessChunk(Chunk chunk)
+        {
+            int xd = Mathf.Abs((m_viewerPos.x - chunk.pos.x) >> Env.ChunkPower);
+            int yd = Mathf.Abs((m_viewerPos.y - chunk.pos.y) >> Env.ChunkPower);
+            int zd = Mathf.Abs((m_viewerPos.z - chunk.pos.z) >> Env.ChunkPower);
+
+            int tx = m_clipmap.TransformX(chunk.pos.x >> Env.ChunkPower);
+            int ty = m_clipmap.TransformY(chunk.pos.y >> Env.ChunkPower);
+            int tz = m_clipmap.TransformZ(chunk.pos.z >> Env.ChunkPower);
+
+            ChunkStateManagerClient stateManager = (ChunkStateManagerClient)chunk.stateManager;
+
+            // Chunk is too far away. Remove it
+            if (!m_clipmap.IsInsideBounds_Transformed(tx, ty, tz))
+            {
+                stateManager.RequestState(ChunkState.Remove);
+            }
+            else
+            {
+                // Dummy collider example - create a collider for chunks directly surrounding the viewer
+                chunk.NeedsCollider = xd <= 1 && yd <= 1 && zd <= 1;
+
+                // Chunk is within view frustum
+                if (FullLoadOnStartUp || IsChunkInViewFrustum(chunk))
+                {
+                    ClipmapItem item = m_clipmap.Get_Transformed(tx, ty, tz);
+
+                    // Chunk is within visibilty range. Full update with geometry generation is possible
+                    if (item.IsWithinVisibleRange)
+                    {
+                        //chunk.LOD = item.LOD;
+                        stateManager.PossiblyVisible = true;
+                        stateManager.Visible = true;
+                    }
+                    // Chunk is within cached range. Full update except for geometry generation
+                    else // if (item.IsWithinCachedRange)
+                    {
+                        //chunk.LOD = item.LOD;
+                        stateManager.PossiblyVisible = true;
+                        stateManager.Visible = false;
+                    }
+                }
+                else
+                {
+                    ClipmapItem item = m_clipmap.Get_Transformed(tx, ty, tz);
+
+                    // Chunk is not in the view frustum but still within cached range
+                    if (item.IsWithinCachedRange)
+                    {
+                        //chunk.LOD = item.LOD;
+                        stateManager.PossiblyVisible = false;
+                        stateManager.Visible = false;
+                    }
+                    else
+                    // Weird state
+                    {
+                        Assert.IsFalse(true);
+                        stateManager.RequestState(ChunkState.Remove);
+                    }
+                }
+            }
+        }
+
+        // Updates our clipmap region. Has to be set from the outside!
+        private void UpdateRanges()
+        {
+            // Make sure horizontal ranges are always correct
+            HorizontalChunkLoadRadius = Mathf.Max(HorizontalMinRange, HorizontalChunkLoadRadius);
+            HorizontalChunkLoadRadius = Mathf.Min(HorizontalMaxRange - 1, HorizontalChunkLoadRadius);
+            if (HorizontalChunkDeleteRadius <= HorizontalChunkLoadRadius)
+                HorizontalChunkDeleteRadius = HorizontalChunkDeleteRadius + 1;
+            HorizontalChunkDeleteRadius = Mathf.Max(HorizontalMinRange + 1, HorizontalChunkDeleteRadius);
+            HorizontalChunkDeleteRadius = Mathf.Min(HorizontalMaxRange, HorizontalChunkDeleteRadius);
+
+            // Make sure vertical ranges are always correct
+            VerticalChunkLoadRadius = Mathf.Max(VerticalMinRange, VerticalChunkLoadRadius);
+            VerticalChunkLoadRadius = Mathf.Min(VerticalMaxRange - 1, VerticalChunkLoadRadius);
+            if (VerticalChunkDeleteRadius <= VerticalChunkLoadRadius)
+                VerticalChunkDeleteRadius = VerticalChunkDeleteRadius + 1;
+            VerticalChunkDeleteRadius = Mathf.Max(VerticalMinRange + 1, VerticalChunkDeleteRadius);
+            VerticalChunkDeleteRadius = Mathf.Min(VerticalMaxRange, VerticalChunkDeleteRadius);
+
+            bool isDifferenceXZ = HorizontalChunkLoadRadius != m_chunkHorizontalLoadRadiusPrev || m_chunkPositions == null;
+            bool isDifferenceY = VerticalChunkLoadRadius != m_chunkVerticalLoadRadiusPrev;
+            m_chunkHorizontalLoadRadiusPrev = HorizontalChunkLoadRadius;
+            m_chunkVerticalLoadRadiusPrev = VerticalChunkLoadRadius;
+
+            // Rebuild precomputed chunk positions
+            if (isDifferenceXZ)
+                m_chunkPositions = ChunkLoadOrder.ChunkPositions(HorizontalChunkLoadRadius);
+            // Invalidate prev pos so that updated ranges can take effect right away
+            if (isDifferenceXZ || isDifferenceY ||
+                HorizontalChunkDeleteRadius != m_chunkHorizontalDeleteRadiusPrev ||
+                VerticalChunkDeleteRadius != m_chunkVerticalDeleteRadiusPrev)
+            {
+                m_clipmap = new Clipmap(
+                    HorizontalChunkLoadRadius, HorizontalChunkDeleteRadius,
+                    VerticalChunkLoadRadius, VerticalChunkDeleteRadius
+                    );
+                m_clipmap.Init(0, 0);
+
+                m_viewerPos = m_viewerPos + Vector3Int.one; // Invalidate prev pos so that updated ranges can take effect right away
+            }
+        }
+
+        private void UpdateViewerPosition()
+        {
+            Vector3Int pos = Chunk.ContainingCoordinates(transform.position);
+
+            // Update the viewer position
+            m_viewerPosPrev = m_viewerPos;
+
+            // Do not let y overflow
+            int y = FollowCamera ? pos.y : 0;
+            if (world.config.minY != world.config.maxY)
+            {
+                y = Mathf.Max(y, world.config.minY);
+                y = Mathf.Min(y, world.config.maxY);
+            }
+
+            m_viewerPos = new Vector3Int(pos.x, y, pos.z);
+        }
+
         private bool IsChunkInViewFrustum(Chunk chunk)
         {
             // Check if the chunk lies within camera planes
             return !UseFrustumCulling || Geometry.TestPlanesAABB(m_cameraPlanes, chunk.WorldBounds);
-        }
-
-        public void ProcessChunk(Chunk chunk)
-        {
-            Vector3Int localChunkPos = new Vector3Int(
-                chunk.pos.x>>Env.ChunkPower,
-                chunk.pos.y>>Env.ChunkPower,
-                chunk.pos.z>>Env.ChunkPower
-                );
-
-            ClipmapItem item = m_clipmap[localChunkPos.x, localChunkPos.y, localChunkPos.z];
-            ChunkStateManagerClient stateManager = (ChunkStateManagerClient)chunk.stateManager;
-
-            // Chunk is within view frustum
-            if (FullLoadOnStartUp || IsChunkInViewFrustum(chunk))
-            {
-                // Chunk is too far away. Remove it
-                if (!m_clipmap.IsInsideBounds(localChunkPos.x, localChunkPos.y, localChunkPos.z))
-                {
-                    stateManager.RequestState(ChunkState.Remove);
-                }
-                // Chunk is within visibilty range. Full update with geometry generation is possible
-                else if (item.IsWithinVisibleRange)
-                {
-                    //chunk.LOD = item.LOD;
-                    stateManager.PossiblyVisible = true;
-                    stateManager.Visible = true;
-                }
-                // Chunk is within cached range. Full update except for geometry generation
-                else // if (item.IsWithinCachedRange)
-                {
-                    //chunk.LOD = item.LOD;
-                    stateManager.PossiblyVisible = true;
-                    stateManager.Visible = false;
-                }
-            }
-            else
-            {
-                // Chunk is not visible and too far away. Remove it
-                if (!m_clipmap.IsInsideBounds(localChunkPos.x, localChunkPos.y, localChunkPos.z))
-                {
-                    stateManager.RequestState(ChunkState.Remove);
-                }
-                // Chunk is not in the view frustum but still within cached range
-                else if (item.IsWithinCachedRange)
-                {
-                    //chunk.LOD = item.LOD;
-                    stateManager.PossiblyVisible = false;
-                    stateManager.Visible = false;
-                }
-                else
-                // Weird state
-                {
-                    Assert.IsFalse(true);
-                    stateManager.RequestState(ChunkState.Remove);
-                }
-            }
         }
 
         private void OnDrawGizmosSelected()
@@ -330,15 +340,11 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
 
                         if (chunk.pos.y==0)
                         {
-                            Vector3Int localChunkPos = new Vector3Int(
-                                pos.x>>Env.ChunkPower,
-                                pos.y>>Env.ChunkPower,
-                                pos.z>>Env.ChunkPower
-                                );
+                            int tx = m_clipmap.TransformX(pos.x >> Env.ChunkPower);
+                            int ty = m_clipmap.TransformY(pos.y >> Env.ChunkPower);
+                            int tz = m_clipmap.TransformZ(pos.z >> Env.ChunkPower);
 
-                            ClipmapItem item = m_clipmap[localChunkPos.x, localChunkPos.y, localChunkPos.z];
-
-                            if (!m_clipmap.IsInsideBounds(localChunkPos.x, localChunkPos.y, localChunkPos.z))
+                            if (!m_clipmap.IsInsideBounds_Transformed(tx,ty,tz))
                             {
                                 Gizmos.color = Color.red;
                                 Gizmos.DrawWireCube(
@@ -346,21 +352,25 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
                                     new Vector3(size-0.05f, 0, size-0.05f)
                                     );
                             }
-                            else if (item.IsWithinVisibleRange)
+                            else
                             {
-                                Gizmos.color = Color.green;
-                                Gizmos.DrawWireCube(
-                                    new Vector3(pos.x+halfSize, 0, pos.z+halfSize),
-                                    new Vector3(size-0.05f, 0, size-0.05f)
-                                    );
-                            }
-                            else // if (item.IsWithinCachedRange)
-                            {
-                                Gizmos.color = Color.yellow;
-                                Gizmos.DrawWireCube(
-                                    new Vector3(pos.x+halfSize, 0, pos.z+halfSize),
-                                    new Vector3(size-0.05f, 0, size-0.05f)
-                                    );
+                                ClipmapItem item = m_clipmap.Get_Transformed(tx,ty,tz);
+                                if (item.IsWithinVisibleRange)
+                                {
+                                    Gizmos.color = Color.green;
+                                    Gizmos.DrawWireCube(
+                                        new Vector3(pos.x+halfSize, 0, pos.z+halfSize),
+                                        new Vector3(size-0.05f, 0, size-0.05f)
+                                        );
+                                }
+                                else // if (item.IsWithinCachedRange)
+                                {
+                                    Gizmos.color = Color.yellow;
+                                    Gizmos.DrawWireCube(
+                                        new Vector3(pos.x+halfSize, 0, pos.z+halfSize),
+                                        new Vector3(size-0.05f, 0, size-0.05f)
+                                        );
+                                }
                             }
                         }
 

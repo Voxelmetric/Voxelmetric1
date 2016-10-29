@@ -121,9 +121,9 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
                 {
                     // Translate array postions to world/chunk positions
                     Vector3Int newChunkPos = new Vector3Int(
-                        (m_chunkPositions[i].x<<Env.ChunkPower)+ m_viewerPos.x,
+                        (m_chunkPositions[i].x<<Env.ChunkPower)+m_viewerPos.x,
                         (m_chunkPositions[i].y<<Env.ChunkPower)+y,
-                        (m_chunkPositions[i].z<<Env.ChunkPower)+ m_viewerPos.z
+                        (m_chunkPositions[i].z<<Env.ChunkPower)+m_viewerPos.z
                         );
 
                     Chunk chunk;
@@ -149,6 +149,7 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
                 {
                     chunk.UpdateState();
 
+                    // Build colliders if there is enough time
                     if (m_timeBudgetHandler.HasTimeBudget)
                     {
                         m_timeBudgetHandler.StartMeasurement();
@@ -195,7 +196,7 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
                 return;
             }
 
-            // Dummy collider example - let use create a collider for chunks directly surrounding the viewer
+            // Dummy collider example - create a collider for chunks directly surrounding the viewer
             chunk.NeedsCollider = xd<=1 && yd<=1 && zd<=1;
 
             // Update visibility information

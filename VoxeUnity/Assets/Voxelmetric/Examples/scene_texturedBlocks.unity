@@ -2241,6 +2241,38 @@ Prefab:
       propertyPath: VerticalChunkDeleteRadius
       value: 4
       objectReference: {fileID: 0}
+    - target: {fileID: 11422472, guid: 5fb0c4eef722bd7449de294d0744b781, type: 2}
+      propertyPath: m_Enabled
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 11497504, guid: 5fb0c4eef722bd7449de294d0744b781, type: 2}
+      propertyPath: m_Enabled
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 11497504, guid: 5fb0c4eef722bd7449de294d0744b781, type: 2}
+      propertyPath: FullLoadOnStartUp
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 11497504, guid: 5fb0c4eef722bd7449de294d0744b781, type: 2}
+      propertyPath: Diag_DrawWorldBounds
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 11497504, guid: 5fb0c4eef722bd7449de294d0744b781, type: 2}
+      propertyPath: Diag_DrawLoadRange
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 11422472, guid: 5fb0c4eef722bd7449de294d0744b781, type: 2}
+      propertyPath: Diag_DrawLoadRange
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 11497504, guid: 5fb0c4eef722bd7449de294d0744b781, type: 2}
+      propertyPath: HorizontalChunkLoadRadius
+      value: 6
+      objectReference: {fileID: 0}
+    - target: {fileID: 11497504, guid: 5fb0c4eef722bd7449de294d0744b781, type: 2}
+      propertyPath: HorizontalChunkDeleteRadius
+      value: 8
+      objectReference: {fileID: 0}
     m_RemovedComponents:
     - {fileID: 11465880, guid: 5fb0c4eef722bd7449de294d0744b781, type: 2}
   m_ParentPrefab: {fileID: 100100000, guid: 5fb0c4eef722bd7449de294d0744b781, type: 2}
