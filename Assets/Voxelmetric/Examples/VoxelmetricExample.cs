@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 public class VoxelmetricExample : MonoBehaviour
@@ -16,8 +17,16 @@ public class VoxelmetricExample : MonoBehaviour
 
     SaveProgress saveProgress;
 
+    private EventSystem eventSystem;
+
     public void SetType(string newType){
         blockToPlace = newType;
+    }
+
+    void Start() {
+        rot.y = 360f - transform.localEulerAngles.x;
+        rot.x = transform.localEulerAngles.y;
+        eventSystem = FindObjectOfType<EventSystem>();
     }
 
     void Update()
@@ -51,12 +60,12 @@ public class VoxelmetricExample : MonoBehaviour
 
         selectedBlockText.text = Voxelmetric.GetBlock(hit.blockPos, world).displayName;
 
-        if (Input.GetMouseButtonDown(0))
+        if (Input.GetMouseButtonDown(0) && !eventSystem.IsPointerOverGameObject())
         {
-            if (hit.block.type != Block.VoidType)
+            if (hit.block.Type != Block.VoidType)
             {
                 bool adjacent = true;
-                if (Block.New(blockToPlace, world).type == Block.AirType)
+                if (Block.New(blockToPlace, world).Type == Block.AirType)
                 {
                     adjacent = false;
                 }
@@ -74,24 +83,25 @@ public class VoxelmetricExample : MonoBehaviour
 
         if (Input.GetKeyDown(KeyCode.I))
         {
-                pfStart = hit.blockPos;
+            pfStart = hit.adjacentPos;
         }
 
         if (Input.GetKeyDown(KeyCode.O))
         {
-            pfStop = hit.blockPos;
+            pfStop = hit.adjacentPos;
         }
 
         if (Input.GetKeyDown(KeyCode.P))
         {
             pf = new PathFinder(pfStart, pfStop, world, 2);
-            Debug.Log(pf.path.Count);
+            pf.FindPath();
+            Debug.Log("Found path of length " + pf.path.Count);
         }
 
         if (pf != null && pf.path.Count != 0)
         {
             for (int i = 0; i < pf.path.Count - 1; i++)
-                Debug.DrawLine(pf.path[i].Add(0, 1, 0), pf.path[i + 1].Add(0, 1, 0));
+                Debug.DrawLine(pf.path[i], pf.path[i + 1]);
         }
 
     }
@@ -99,6 +109,7 @@ public class VoxelmetricExample : MonoBehaviour
     public void SaveAll()
     {
         saveProgress = Voxelmetric.SaveAll(world);
+        StartCoroutine(saveProgress.SaveCoroutine());
     }
 
     public string SaveStatus()

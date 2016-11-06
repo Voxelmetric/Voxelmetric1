@@ -11,11 +11,11 @@ public class BlockPosEnumerable : IEnumerable<BlockPos> {
     private readonly BlockPos step;
     private readonly bool includesEnd;
 
-    public BlockPosEnumerable(BlockPos end, bool includesEnd = false):
+    public BlockPosEnumerable(BlockPos end, bool includesEnd = false) :
             this(BlockPos.zero, end, includesEnd) {
     }
 
-    public BlockPosEnumerable(BlockPos start, BlockPos end, bool includesEnd = false):
+    public BlockPosEnumerable(BlockPos start, BlockPos end, bool includesEnd = false) :
             this(start, end, BlockPos.one, includesEnd) {
     }
 

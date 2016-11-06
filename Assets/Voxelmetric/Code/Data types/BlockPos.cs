@@ -6,6 +6,46 @@ public struct BlockPos : IEquatable<BlockPos>
 {
     public int x, y, z;
 
+    public int this[int index] {
+        get {
+            switch (index) {
+                case 0:
+                    return x;
+                case 1:
+                    return y;
+                case 2:
+                    return z;
+                default:
+                    throw new IndexOutOfRangeException();
+            }
+        }
+        set {
+            switch (index) {
+                case 0:
+                    x = value;
+                    break;
+                case 1:
+                    y = value;
+                    break;
+                case 2:
+                    z = value;
+                    break;
+                default:
+                    throw new IndexOutOfRangeException();
+            }
+        }
+    }
+
+    public int LengthSq {
+        get { return x * x + y * y + z * z; }
+    }
+
+    public float Length { get { return Mathf.Sqrt(LengthSq); } }
+
+    public int LengthL1 {
+        get { return Math.Abs(x) + Math.Abs(y) + Math.Abs(z); }
+    }
+
     public BlockPos(int x, int y, int z)
     {
         this.x = x;
@@ -84,6 +124,20 @@ public struct BlockPos : IEquatable<BlockPos>
             (z >> chunkPower) << chunkPower);
     }
 
+    /// <summary>
+    /// Determines if pos is a neighbor of this BlockPos
+    /// </summary>
+    /// <param name="pos"></param>
+    /// <returns></returns>
+    public bool IsNeighbor(BlockPos pos, bool diagOk = false) {
+        BlockPos d = pos - this;
+        if(diagOk) {
+            float lenSq = d.LengthSq;
+            return lenSq > 0 && lenSq < 3;
+        } else
+            return d.LengthL1 == 1;
+    }
+
     public BlockPos Add(int x, int y, int z)
     {
         return new BlockPos(this.x + x, this.y + y, this.z + z);
@@ -91,17 +145,25 @@ public struct BlockPos : IEquatable<BlockPos>
 
     public BlockPos Add(BlockPos pos)
     {
-        return new BlockPos(this.x + pos.x, this.y + pos.y, this.z + pos.z);
+        return Add(pos.x, pos.y, pos.z);
+    }
+
+    public BlockPos Subtract(int x, int y, int z) {
+        return new BlockPos(this.x - x, this.y - y, this.z - z);
     }
 
     public BlockPos Subtract(BlockPos pos)
     {
-        return new BlockPos(x - pos.x, y - pos.y, z - pos.z);
+        return Subtract(pos.x, pos.y, pos.z);
     }
 
     public BlockPos Negate()
     {
         return new BlockPos(-x, -y, -z);
+    }
+
+    public int Dot(BlockPos pos) {
+        return x*pos.x + y*pos.y + z*pos.z;
     }
 
     public byte[] ToBytes()
@@ -221,7 +283,7 @@ public struct BlockPos : IEquatable<BlockPos>
     //"block at " + BlockPos + " is broken."
     public override string ToString()
     {
-        return "(" + x + ", " + y + ", " + z + ")";
+        return string.Format("({0}, {1}, {2})", x, y, z);
     }
 
     // first 255 prime numbers and 1. Used for randomizing a number in the RandomPercent function.
@@ -230,9 +292,9 @@ public struct BlockPos : IEquatable<BlockPos>
     //
     // Summary:
     //     Shorthand for writing BlockPos(0, 0, 0).
-    public static BlockPos zero = new BlockPos(0, 0, 0);
+    public static readonly BlockPos zero = new BlockPos(0, 0, 0);
     //
     // Summary:
     //     Shorthand for writing BlockPos(1, 1, 1).
-    public static BlockPos one = new BlockPos(1, 1, 1);
+    public static readonly BlockPos one = new BlockPos(1, 1, 1);
 }

@@ -5,7 +5,7 @@ public class ConnectedTextures {
 
     public static bool IsSame(Chunk chunk, BlockPos localPos, int h, int v, Direction forwards, int type)
     {
-        return chunk.blocks.LocalGet(RelativePos(localPos, h, v, forwards)).type == type;
+        return chunk.blocks.LocalGet(RelativePos(localPos, h, v, forwards)).Type == type;
     }
 
     public static BlockPos RelativePos(BlockPos localPos, int h, int v, Direction forwards)

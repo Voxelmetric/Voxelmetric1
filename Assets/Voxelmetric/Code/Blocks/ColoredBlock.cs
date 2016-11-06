@@ -1,12 +1,15 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System;
+using System.Runtime.Serialization;
 
 [Serializable]
 public class ColoredBlock : SolidBlock {
 
-    public Color color;
+    public Color color = Color.grey;
     public TextureCollection texture { get { return ((ColoredBlockConfig)config).texture; } }
+
+    public ColoredBlock() { }
 
     public override void BuildFace(Chunk chunk, BlockPos localPos, BlockPos globalPos, MeshData meshData, Direction direction)
     {
@@ -33,5 +36,10 @@ public class ColoredBlock : SolidBlock {
         {
             return base.displayName + " (" + color + ")";
         }
+    }
+
+    // Constructor only used for deserialization
+    protected ColoredBlock(SerializationInfo info, StreamingContext context):
+        base(info, context) {
     }
 }

@@ -8,6 +8,9 @@ using System.Net.Sockets;
 using System.Text;
 using System.Threading;
 using System.Linq;
+using SendBlockChange = VmNetworking.SendBlockChange;
+using RequestChunkData = VmNetworking.RequestChunkData;
+using TransmitChunkData = VmNetworking.TransmitChunkData;
 
 public class VmServer {
 
@@ -21,6 +24,14 @@ public class VmServer {
     private bool debugServer = false;
 
     public IPAddress ServerIP { get { return serverIP; } }
+
+    public int ClientCount {
+        get {
+            lock (clients) {
+                return clients.Count;
+            }
+        }
+    }
 
     public VmServer(World world)
     {
@@ -81,12 +92,14 @@ public class VmServer {
         }
     }
 
-    internal void Disconnect()
+    public void Disconnect()
     {
         lock(clients) {
             var clientConnections = clients.Values.ToList();
-            foreach (var client in clientConnections)
-                client.Disconnect();
+            foreach (var clientConnection in clientConnections) {
+                if (clientConnection != null)
+                    clientConnection.Disconnect();
+            }
         }
         if (serverSocket != null) {// && serverSocket.Connected) {
             //serverSocket.Shutdown(SocketShutdown.Both);
@@ -113,14 +126,15 @@ public class VmServer {
         } else
             chunk = world.chunks.Get(pos);
         byte[] data;
-        //for now return an empty chunk if it isn't yet loaded
+        // for now return the empty chunk if the request chunk isn't yet loaded
         // Todo: load the chunk then send it to the player
         if (chunk == null) {
             Debug.LogError("VmServer.RequestChunk (" + Thread.CurrentThread.ManagedThreadId + "): "
                 + "Could not find chunk for " + pos);
-            data = ChunkBlocks.EmptyBytes;
-        } else
-            data = chunk.blocks.ToBytes();
+            chunk = world.EmptyChunk;
+            chunk.StartLoading();
+        }
+        data = chunk.blocks.ToBytes();
         if ( debugServer )
             Debug.Log("VmServer.RequestChunk (" + Thread.CurrentThread.ManagedThreadId + "): " + id
                 + " " + pos);
@@ -128,31 +142,49 @@ public class VmServer {
         SendChunk(pos, data, id);
     }
 
-    public const int headerSize = 13, leaderSize = headerSize + 8;
-
     protected void SendChunk(BlockPos pos, byte[] chunkData, int id)
     {
         int chunkDataIndex = 0;
         while (chunkDataIndex < chunkData.Length) {
-            byte[] message = new byte[VmNetworking.bufferLength];
-            message[0] = VmNetworking.transmitChunkData;
-            pos.ToBytes().CopyTo(message, 1);
-            BitConverter.GetBytes(chunkDataIndex).CopyTo(message, headerSize);
-            BitConverter.GetBytes(chunkData.Length).CopyTo(message, headerSize + 4);
+            int remaining = chunkData.Length - chunkDataIndex;
+            int size;
+            if ( TransmitChunkData.UseVariableMessageLength )
+                size = Math.Min(VmNetworking.bufferLength, TransmitChunkData.HeaderSize + remaining);
+            else
+                size = VmNetworking.bufferLength;
+            byte[] message = new byte[size];
+            message[0] = TransmitChunkData.ID;
+            BitConverter.GetBytes(size).CopyTo(message, TransmitChunkData.IdxSize);
+            pos.ToBytes().CopyTo(message, TransmitChunkData.IdxChunkPos);
+            BitConverter.GetBytes(chunkDataIndex).CopyTo(message, TransmitChunkData.IdxDataOffset);
+            BitConverter.GetBytes(chunkData.Length).CopyTo(message, TransmitChunkData.IdxDataLength);
 
             if ( debugServer )
                 Debug.Log("VmServer.SendChunk (" + Thread.CurrentThread.ManagedThreadId + "): " + pos
                     + ", chunkDataIndex=" + chunkDataIndex
                     + ", chunkData.Length=" + chunkData.Length
-                    + ", buffer=" + message.Length);
+                    + ", buffer=" + message.Length
+                    + ", size=" + size);
 
-            for (int i = leaderSize; i < message.Length; i++) {
-                message[i] = chunkData[chunkDataIndex];
+            int idx = TransmitChunkData.IdxData;
+            for (; idx < message.Length; idx++) {
+                message[idx] = chunkData[chunkDataIndex];
                 chunkDataIndex++;
 
                 if (chunkDataIndex >= chunkData.Length) {
                     break;
                 }
+            }
+
+            if (debugServer) {
+                int messageLength = message.Length;
+                if (idx < messageLength)
+                    messageLength = idx + 1;
+                if (size != messageLength) {
+                    Debug.Log("VmServer.SendChunk messageLength =" + messageLength
+                        + ", size=" + size);
+                }
+                //BitConverter.GetBytes(messageLength).CopyTo(message, TransmitChunkData.IdxSize);
             }
 
             SendToClient(message, id);
@@ -166,11 +198,11 @@ public class VmServer {
                 return;
             }
 
-            byte[] data = new byte[15];
+            byte[] data = new byte[SendBlockChange.Size];
 
-            data[0] = VmNetworking.SendBlockChange;
-            pos.ToBytes().CopyTo(data, 1);
-            BitConverter.GetBytes(block.type).CopyTo(data, 13);
+            data[0] = SendBlockChange.ID;
+            pos.ToBytes().CopyTo(data, SendBlockChange.IdxBlockPos);
+            BitConverter.GetBytes(block.Type).CopyTo(data, SendBlockChange.IdxBlockType);
 
             foreach (var client in clients.Values) {
                 if (excludedUser == -1 || client.ID != excludedUser) {
@@ -180,7 +212,7 @@ public class VmServer {
         }
     }
 
-    public void ReceiveChange(BlockPos pos, int type, int id)
+    public void ReceiveChange(BlockPos pos, ushort type, int id)
     {
         Block block = Block.New(type, world);
         world.blocks.Set(pos, block, updateChunk: true, setBlockModified: true);
@@ -228,7 +260,7 @@ internal class ClientConnection : VmSocketState.IMessageHandler {
                 Debug.Log("ClientConnection.OnReceiveFromClient (" + Thread.CurrentThread.ManagedThreadId + "): " + id);
 
             VmSocketState socketState = ar.AsyncState as VmSocketState;
-            socketState.Receive(received, 0);
+            socketState.Receive(received);
             if (socket != null && socket.Connected) {// Should be able to use a mutex but unity doesn't seem to like it
                 socket.BeginReceive(socketState.buffer, 0, VmNetworking.bufferLength, SocketFlags.None, new AsyncCallback(OnReceiveFromClient), socketState);
             }
@@ -239,10 +271,10 @@ internal class ClientConnection : VmSocketState.IMessageHandler {
 
     public int GetExpectedSize(byte type) {
         switch (type) {
-            case VmNetworking.SendBlockChange:
-                return 17;
-            case VmNetworking.RequestChunkData:
-                return 13;
+            case SendBlockChange.ID:
+                return SendBlockChange.Size;
+            case RequestChunkData.ID:
+                return RequestChunkData.Size;
             default:
                 return 0;
         }
@@ -252,13 +284,13 @@ internal class ClientConnection : VmSocketState.IMessageHandler {
         BlockPos pos;
 
         switch (receivedData[0]) {
-            case VmNetworking.SendBlockChange:
-                pos = BlockPos.FromBytes(receivedData, 1);
-                int type = BitConverter.ToUInt16(receivedData, 13);
+            case SendBlockChange.ID:
+                pos = BlockPos.FromBytes(receivedData, SendBlockChange.IdxBlockPos);
+                ushort type = BitConverter.ToUInt16(receivedData, SendBlockChange.IdxBlockType);
                 server.ReceiveChange(pos, type, id);
                 break;
-            case VmNetworking.RequestChunkData:
-                pos = BlockPos.FromBytes(receivedData, 1);
+            case RequestChunkData.ID:
+                pos = BlockPos.FromBytes(receivedData, RequestChunkData.IdxBlockPos);
 
                 if (debugClientConnection)
                     Debug.Log("ClientConnection.HandleMessage (" + Thread.CurrentThread.ManagedThreadId + "): " + id

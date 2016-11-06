@@ -22,10 +22,7 @@ namespace Config
 
     public static class Toggle
     {
-        public static bool UseMultipleWorlds = false;
-        
-        //Multi threading must be disabled on web builds
-        public static bool UseMultiThreadingDefault = true;
+        public static bool UseMultipleWorlds = false;        
     }
 
 }
