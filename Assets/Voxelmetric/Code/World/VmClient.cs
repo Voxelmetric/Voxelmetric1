@@ -4,6 +4,9 @@ using System.Net;
 using System.Net.Sockets;
 using System.Threading;
 using System.Runtime.CompilerServices;
+using SendBlockChange = VmNetworking.SendBlockChange;
+using RequestChunkData = VmNetworking.RequestChunkData;
+using TransmitChunkData = VmNetworking.TransmitChunkData;
 
 public class VmClient : VmSocketState.IMessageHandler
 {
@@ -83,7 +86,7 @@ public class VmClient : VmSocketState.IMessageHandler
                 Debug.Log("VmClient.OnReceiveFromServer (" + Thread.CurrentThread.ManagedThreadId + "): ");
 
             VmSocketState socketState = ar.AsyncState as VmSocketState;
-            socketState.Receive(received, 0);
+            socketState.Receive(received);
             if (clientSocket != null && clientSocket.Connected) { // Should be able to use a mutex but unity doesn't seem to like it
                 clientSocket.BeginReceive(socketState.buffer, 0, VmNetworking.bufferLength, SocketFlags.None, new AsyncCallback(OnReceiveFromServer), socketState);
             }
@@ -125,12 +128,13 @@ public class VmClient : VmSocketState.IMessageHandler
 
     public int GetExpectedSize(byte messageType) {
         switch (messageType) {
-            case VmNetworking.SendBlockChange:
-                return 15;
-            case VmNetworking.transmitChunkData:
-                //TODO TCD So that small chunks don't need 1025 bytes to be sent...
-                //return -VmServer.leaderSize;
-                return VmNetworking.bufferLength;
+            case SendBlockChange.ID:
+                return SendBlockChange.Size;
+            case TransmitChunkData.ID:
+                if (TransmitChunkData.UseVariableMessageLength)
+                    return -TransmitChunkData.IdxSize;
+                else
+                    return VmNetworking.bufferLength;
             default:
                 return 0;
         }
@@ -138,12 +142,12 @@ public class VmClient : VmSocketState.IMessageHandler
 
     public void HandleMessage(byte[] receivedData) {
         switch (receivedData[0]) {
-            case VmNetworking.SendBlockChange:
-                BlockPos pos = BlockPos.FromBytes(receivedData, 1);
-                ushort type = BitConverter.ToUInt16(receivedData, 13);
+            case SendBlockChange.ID:
+                BlockPos pos = BlockPos.FromBytes(receivedData, SendBlockChange.IdxBlockPos);
+                ushort type = BitConverter.ToUInt16(receivedData, SendBlockChange.IdxBlockType);
                 ReceiveChange(pos, Block.New(type, world));
                 break;
-            case VmNetworking.transmitChunkData:
+            case TransmitChunkData.ID:
                 ReceiveChunk(receivedData);
                 break;
         }
@@ -154,15 +158,15 @@ public class VmClient : VmSocketState.IMessageHandler
         if ( debugClient )
             Debug.Log("VmClient.RequestChunk (" + Thread.CurrentThread.ManagedThreadId + "): " + pos);
 
-        byte[] message = new byte[13];
-        message[0] = VmNetworking.RequestChunkData;
-        pos.ToBytes().CopyTo(message, 1);
+        byte[] message = new byte[RequestChunkData.Size];
+        message[0] = RequestChunkData.ID;
+        pos.ToBytes().CopyTo(message, RequestChunkData.IdxBlockPos);
         Send(message);
     }
 
     private void ReceiveChunk(byte[] data)
     {
-        BlockPos pos = BlockPos.FromBytes(data, 1);
+        BlockPos pos = BlockPos.FromBytes(data, TransmitChunkData.IdxChunkPos);
         Chunk chunk = world.chunks.Get(pos);
         // for now just issue an error if it isn't yet loaded
         if (chunk == null) {
@@ -174,11 +178,11 @@ public class VmClient : VmSocketState.IMessageHandler
 
     public void BroadcastChange(BlockPos pos, Block block)
     {
-        byte[] data = new byte[GetExpectedSize(VmNetworking.SendBlockChange)];
+        byte[] data = new byte[SendBlockChange.Size];
 
-        data[0] = VmNetworking.SendBlockChange;
-        pos.ToBytes().CopyTo(data, 1);
-        BitConverter.GetBytes(block.type).CopyTo(data, 13);
+        data[0] = SendBlockChange.ID;
+        pos.ToBytes().CopyTo(data, SendBlockChange.IdxBlockPos);
+        BitConverter.GetBytes(block.Type).CopyTo(data, SendBlockChange.IdxBlockType);
 
         Send(data);
     }

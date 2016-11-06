@@ -11,6 +11,13 @@ using UnityEngine;
 public class VmSocketState {
 
     public interface IMessageHandler {
+        /// <summary>
+        /// Expected size of the message.
+        /// If positive then the message has a fixed size.
+        /// If negative then the negation is the offset of an integer that gives the size of this instance.
+        /// </summary>
+        /// <param name="messageType"></param>
+        /// <returns></returns>
         int GetExpectedSize(byte messageType);
         void HandleMessage(byte[] message);
     }
@@ -24,19 +31,22 @@ public class VmSocketState {
 
     private IMessageHandler messageHandler;
 
+    private bool debug = false;
+
     public VmSocketState(IMessageHandler messageHandler) {
         this.messageHandler = messageHandler;
         ResetMessage();
     }
 
-    public void Receive(int received, int bufferOffset) {
-        if (messageOffset == 0) {
-            expectedSize = messageHandler.GetExpectedSize(buffer[bufferOffset]);
-            if (expectedSize < 0) {
-                expectedSize = -expectedSize;
-                tmpExpectedSize = true;
-            }
-        }
+    public void Receive(int received) {
+        Receive(received, 0);
+    }
+
+    private void Receive(int received, int bufferOffset) {
+        if ( debug ) Debug.Log("VmSocketState.Receive: received=" + received + " at " + bufferOffset);
+
+        if (messageOffset == 0)
+            SetExpectedSize(messageHandler.GetExpectedSize(buffer[bufferOffset]));
 
         int messageEnd = messageOffset + received;
         int messageExtra = 0;
@@ -49,11 +59,18 @@ public class VmSocketState {
         messageOffset += toCopy;
         if (messageOffset == expectedSize) {
             if (tmpExpectedSize) {
-                //TODO So that small chunks don't need 1025 bytes to be sent...
+                int realExpectedSize = BitConverter.ToInt32(message, messageOffset - 4);
+                if (debug) Debug.Log("VmSocketState.Receive: realExpectedSize=" + realExpectedSize);
+                SetExpectedSize(realExpectedSize);
+                int remaining = received - toCopy;
+                if ( remaining >= 0 )
+                    Receive(remaining, bufferOffset + toCopy);
+                return;
+            } else {
+                // Message complete -- dispatch it!
+                messageHandler.HandleMessage(message);
+                ResetMessage(); // get ready for the next message
             }
-            // Message complete -- dispatch it!
-            messageHandler.HandleMessage(message);
-            ResetMessage(); // get ready for the next message
         }
         if (messageExtra > 0) {
             bufferOffset += toCopy;
@@ -61,8 +78,18 @@ public class VmSocketState {
         }
     }
 
+    private void SetExpectedSize(int newExpectedSize) {
+        expectedSize = newExpectedSize;
+        if (expectedSize < 0) {
+            expectedSize = 4 - expectedSize; // To get to the end of the integer with the real size
+            tmpExpectedSize = true;
+        } else {
+            tmpExpectedSize = false;
+        }
+    }
+
     private void ResetMessage() {
         messageOffset = 0;
-        expectedSize = 0;
+        SetExpectedSize(0);
     }
 }

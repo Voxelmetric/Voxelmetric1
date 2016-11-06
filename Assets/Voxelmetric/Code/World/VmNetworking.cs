@@ -15,9 +15,34 @@ public class VmNetworking {
 
     public const int bufferLength = 1024;
 
-    public const byte SendBlockChange = 1;
-    public const byte RequestChunkData = 2;
-    public const byte transmitChunkData = 3;
+    public class SendBlockChange {
+        public const byte ID = 1;
+
+        public const int IdxBlockPos = 1;
+        public const int IdxBlockType = IdxBlockPos + 12;
+
+        public const int Size = IdxBlockType + 2;
+    }
+    public class RequestChunkData {
+        public const byte ID = 2;
+
+        public const int IdxBlockPos = 1;
+
+        public const int Size = IdxBlockPos + 12;
+    }
+    public class TransmitChunkData {
+        public const byte ID = 3;
+
+        public const int IdxSize = 1;
+        public const int IdxChunkPos = IdxSize + 4;
+        public const int IdxDataOffset = IdxChunkPos + 12;
+        public const int IdxDataLength = IdxDataOffset + 4;
+        public const int IdxData = IdxDataLength + 4;
+
+        public const int HeaderSize = IdxData;
+
+        public const bool UseVariableMessageLength = true;
+    }
 
     /// <summary> True if this world is hosted by the player, not someone else </summary>
     public bool isServer = true;

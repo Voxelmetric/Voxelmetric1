@@ -16,7 +16,7 @@ public class ConfigLoader<T>
     {
         foreach (var configFolder in configFolders)
         {
-            var configFiles = UnityEngine.Resources.LoadAll<TextAsset>(configFolder);
+            var configFiles = Resources.LoadAll<TextAsset>(configFolder);
 
             foreach (var configFile in configFiles)
             {
@@ -48,7 +48,7 @@ public class ConfigLoader<T>
 
     public T[] AllConfigs()
     {
-        if (this.configs.Keys.Count == 0)
+        if (configs.Keys.Count == 0)
         {
             LoadConfigs();
         }

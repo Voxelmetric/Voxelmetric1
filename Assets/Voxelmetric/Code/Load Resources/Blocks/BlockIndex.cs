@@ -1,14 +1,23 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using Newtonsoft.Json;
+using System.Text;
 
 public class BlockIndex {
 
-    public Dictionary<int, BlockConfig> configs = new Dictionary<int, BlockConfig>();
-    public Dictionary<string, int> names = new Dictionary<string, int>();
-    int largestIndexSoFar = 0;
+    private Dictionary<int, BlockConfig> configs = new Dictionary<int, BlockConfig>();
+    private Dictionary<string, ushort> names = new Dictionary<string, ushort>();
+    private int largestIndexSoFar = 0;
+
+    public const int VoidType = 0;
+    public const int AirType = 1;
+
+    public ICollection<string> Names { get { return names.Keys; } }
+    public ICollection<ushort> Types { get { return names.Values; } }
+    public ICollection<BlockConfig> Configs { get { return configs.Values; } }
 
     public BlockIndex(string blockFolder, World world){
 
@@ -16,7 +25,7 @@ public class BlockIndex {
         AddBlockType(new BlockConfig()
         {
             name = "void",
-            type = 0,
+            type = VoidType,
             world = world,
             blockClass = typeof(Block),
             solid = true,
@@ -28,7 +37,7 @@ public class BlockIndex {
         // Add the static air block type
         AddBlockType(new BlockConfig() {
             name = "air",
-            type = 1,
+            type = AirType,
             world = world,
             blockClass = typeof(Block),
             solid = false,
@@ -68,8 +77,21 @@ public class BlockIndex {
             Debug.LogError("Two blocks with the name " + config.name + " are defined");
         }
 
-        configs.Add(config.type, config);
-        names.Add(config.name, config.type);
+        if(configs.ContainsKey(config.type)) {
+            var oldConfig = configs[config.type];
+            ushort type;
+            if(names.TryGetValue(config.name, out type)) {
+                if(type == config.type)
+                    Debug.Log("configs already contains " + config.type + ": " + oldConfig + ", and names has the same type of " + config);
+                else
+                    Debug.Log("configs already contains " + config.type + ": " + oldConfig + ", and names has type " + type + " instead of the type of " + config);
+            } else {
+                Debug.Log("configs already contains " + config.type + ": " + oldConfig + ", but names doesn't contain the name of " + config);
+            }
+        } else {
+            configs.Add(config.type, config);
+            names.Add(config.name, (ushort)config.type);
+        }
 
         if (config.type > largestIndexSoFar)
         {
@@ -99,9 +121,9 @@ public class BlockIndex {
         }
     }
 
-    public int GetType(string name)
+    public ushort GetBlockType(string name)
     {
-        int type;
+        ushort type;
         if (names.TryGetValue(name, out type))
         {
             return type;
@@ -109,7 +131,7 @@ public class BlockIndex {
         else
         {
             Debug.LogWarning("Block not found: " + name);
-            return 0;
+            return VoidType;
         }
     }
 
@@ -125,5 +147,16 @@ public class BlockIndex {
             Debug.LogWarning("Config not found: " + index);
             return null;
         }
+    }
+
+    public void DebugLog() {
+        StringBuilder sb = new StringBuilder();
+        foreach (var kvp in names.OrderBy(kvp => kvp.Value)) {
+            sb.Append(kvp.Value);
+            sb.Append(": ");
+            sb.Append(kvp.Key);
+            sb.Append("\n");
+        }
+        Debug.Log("BlockIndex\n" + sb.ToString());
     }
 }

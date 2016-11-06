@@ -17,12 +17,12 @@ public class EmptyChunkBlocks : ChunkBlocks
 
     public override Block Get(BlockPos blockPos)
     {
-        return chunk.world.Air;
+        return chunk.world.Void;
     }
 
     public override Block LocalGet(BlockPos localBlockPos)
     {
-        return chunk.world.Air;
+        return chunk.world.Void;
     }
 
     public override void Set(BlockPos blockPos, Block block, bool updateChunk = true, bool setBlockModified = true)

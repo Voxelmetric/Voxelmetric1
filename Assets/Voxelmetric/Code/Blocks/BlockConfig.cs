@@ -21,6 +21,7 @@ public class BlockConfig
     public bool transparent;
     public bool canBeWalkedOn;
     public bool canBeWalkedThrough;
+    public float movementCost;
 
     /// <summary>
     /// Assigns the variables in the config from a hashtable. When overriding this
@@ -41,18 +42,26 @@ public class BlockConfig
         transparent = _GetPropertyFromConfig(config, "transparent", defaultValue: false);
         canBeWalkedOn = _GetPropertyFromConfig(config, "canBeWalkedOn", defaultValue: true);
         canBeWalkedThrough = _GetPropertyFromConfig(config, "canBeWalkedThrough", defaultValue: false);
+        movementCost = (float)_GetPropertyFromConfig(config, "movementCost", defaultValue: 1.0);
     }
 
     public override string ToString()
     {
-        return name;
+        return string.Format("name({0}), type({1}), class({2}), solid({3}), transparent({4})",
+            name, type, blockClass, solid, transparent);
+            //canBeWalkedOn, canBeWalkedThrough, movementCost
     }
 
     protected static T _GetPropertyFromConfig<T>(Hashtable config, object key, T defaultValue)
     {
         if (config.ContainsKey(key))
         {
-            return (T)config[key];
+            var obj = config[key];
+            if(!(obj is T)) {
+                Debug.Log("obj is wrong type: " + obj.GetType());
+                return defaultValue;
+            }
+            return (T)obj;
         }
         else
         {

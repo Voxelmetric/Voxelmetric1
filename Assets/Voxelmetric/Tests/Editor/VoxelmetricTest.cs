@@ -8,6 +8,7 @@ using System.Net;
 using System;
 using System.Text;
 using Stopwatch = System.Diagnostics.Stopwatch;
+using System.IO;
 
 public class VoxelmetricTest {
 
@@ -45,7 +46,8 @@ public class VoxelmetricTest {
             worlds.Add(serverWorld);
             serverWorld.networking.isServer = true;
             serverWorld.networking.allowConnections = true;
-            serverWorld.useMultiThreading = useMultiThreading;
+            serverWorld.UseMultiThreading = useMultiThreading;
+            serverWorld.UseCoroutines = false;
             serverWorld.StartWorld();
 
             IPAddress serverIP = serverWorld.networking.server.ServerIP;
@@ -56,7 +58,8 @@ public class VoxelmetricTest {
             worlds.Add(clientWorld);
             clientWorld.networking.isServer = false;
             clientWorld.networking.serverIP = serverIP;
-            clientWorld.useMultiThreading = useMultiThreading;
+            clientWorld.UseMultiThreading = useMultiThreading;
+            clientWorld.UseCoroutines = false;
             clientWorld.StartWorld();
 
             // Wait a short while for the client and server to get done initializing
@@ -160,10 +163,10 @@ public class VoxelmetricTest {
                     Assert.IsTrue(clientChunkBlockCounts.TryGetValue(serverPair.Key, out clientCount), msg + " has no corresponfing client count for " + serverPair.Key);
                     Assert.AreEqual(serverPair.Value, clientCount, msg + " count of " + serverPair.Key);
                 }
-                foreach (BlockPos localPos in TestUtils.LocalPosns) {
+                foreach (BlockPos localPos in Chunk.LocalPosns) {
                     Block serverBlock = serverChunk.blocks.LocalGet(localPos);
                     Block clientBlock = clientChunk.blocks.LocalGet(localPos);
-                    Assert.AreEqual(serverBlock.type, clientBlock.type, msg + " block at " + localPos
+                    Assert.AreEqual(serverBlock.Type, clientBlock.Type, msg + " block at " + localPos
                         + " has no matching clientBlock type");
                 }
             }
@@ -201,16 +204,16 @@ public class VoxelmetricTest {
 
     private void TestWorldDefault(bool useMultiThreading) {
         World world = TestUtils.CreateWorldDefault();
-        AssertWorld(world, useMultiThreading, GetExpDefaultBlocks(), "log", "air", "stone");
+        AssertWorld(world, useMultiThreading, GetExpDefaultBlocks());
     }
 
     private void TestWorldColored(bool useMultiThreading) {
         World world = TestUtils.CreateWorldColored();
-        AssertWorld(world, useMultiThreading, GetExpColoredBlocks(), "coloredblock", "air", "coloredblock");
+        AssertWorld(world, useMultiThreading, GetExpColoredBlocks());
     }
 
     private static void AppendBlockPosns(Chunk chunk, string blockName, List<BlockPos> blockPosns) {
-        foreach (BlockPos localPos in TestUtils.LocalPosns) {
+        foreach (BlockPos localPos in Chunk.LocalPosns) {
             Block block = chunk.blocks.LocalGet(localPos);
             if (block.name == blockName) {
                 blockPosns.Add(chunk.pos + localPos);
@@ -218,13 +221,13 @@ public class VoxelmetricTest {
         }
     }
 
-    private static void AssertWorld(World world, bool useMultiThreading,
-            Dictionary<string, int> expBlockCounts,
-            string editName, string airName, string placeName) {
+    public static void AssertWorld(World world, bool useMultiThreading,
+            Dictionary<string, int> expBlockCounts) {
         bool debug = false;
 
         try {
-            world.useMultiThreading = useMultiThreading;
+            world.UseMultiThreading = useMultiThreading;
+            world.UseCoroutines = false;
             world.StartWorld();
 
             // Cause a chunk to load
@@ -233,10 +236,9 @@ public class VoxelmetricTest {
 
             var stageChunks = new TestUtils.AutoDictionary<Stage, List<Chunk>>();
             var blockCounts = new TestUtils.AutoDictionary<string, int>();
-            List<BlockPos> editPosns = new List<BlockPos>();
             if (useMultiThreading) {
                 // Need to just wait for the threads to do their work
-                Thread.Sleep(100); // 100 ms should be plenty of time
+                Thread.Sleep(100); // 100 ms should be plenty of time, but sometimes it isn't!
 
                 // Run for a while to load some chunks
                 //for (int i = 0; i<100; ++i)
@@ -246,14 +248,13 @@ public class VoxelmetricTest {
                 // and one to move into BuildMesh
                 world.chunksLoop.Terrain();
 
-                // TODO TCD test MainThreadLoop earlier and later too
+                // TODO test MainThreadLoop earlier and later too
                 world.chunksLoop.MainThreadLoop(); // Should do nothing when called here
             }
 
             // Check that things have been generated as expected
             foreach (var chunk in world.chunks.chunkCollection) {
                 stageChunks[chunk.stage].Add(chunk);
-                AppendBlockPosns(chunk, editName, editPosns);
                 foreach (var pair in TestUtils.FindChunkBlockCounts(chunk))
                     blockCounts[pair.Key] += pair.Value;
             }
@@ -261,9 +262,15 @@ public class VoxelmetricTest {
             if (!useMultiThreading) {
                 Assert.AreEqual(2, stageChunks.Count, "Terrain stageChunks.Count");
                 Assert.AreEqual(26, stageChunks[Stage.created].Count, "Terrain stageChunks[Stage.created]");
-                Assert.AreEqual(1, stageChunks[Stage.buildMesh].Count, "Terrain stageChunks[Stage.buildMesh]");
-                Chunk buildMeshChunk = stageChunks[Stage.buildMesh].FirstOrDefault();
-                Assert.AreEqual(loadPos.ContainingChunkCoordinates(), buildMeshChunk.pos, "Terrain chunk at loadPos should be at buildMesh");
+                stageChunks.Remove(Stage.created);
+                // Others will be at some later stage, buildMesh, priorityBuildMesh, render or ready
+                var kvp = stageChunks.First();
+                var stageTerrain = kvp.Key;
+                Assert.True(stageTerrain != Stage.created && stageTerrain != Stage.terrain, "Terrain chunk should be at a later stage: " + stageTerrain);
+                var chunksTerrain = kvp.Value;
+                Assert.AreEqual(1, chunksTerrain.Count, "Terrain stageChunks[" + stageTerrain + "]");
+                Chunk chunkTerrain = chunksTerrain.FirstOrDefault();
+                Assert.AreEqual(loadPos.ContainingChunkCoordinates(), chunkTerrain.pos, "Terrain chunk at loadPos should be at " + stageTerrain);
             }
 
             if (debug) TestUtils.DebugBlockCounts(useMultiThreading ? "multithreading" : "single thread", blockCounts);
@@ -271,15 +278,28 @@ public class VoxelmetricTest {
                 Assert.IsTrue(blockCounts[expCount.Key] > expCount.Value, expCount.Key + " total not > " + expCount.Value + " was " + blockCounts[expCount.Key]);
             }
 
+            // Check for modified blocks
+            Assert.AreEqual(0, TestUtils.CountModifiedBlocks(world), "modified blocks");
+
             // Save before anything is changed
             SaveProgress saveProgress = Voxelmetric.SaveAll(world);
             if (useMultiThreading)
                 AssertWaitForSave(saveProgress, new TimeSpan(0, 0, 2)); // 2s should be way long enough
+            else
+                CoroutineUtils.DoCoroutine(saveProgress.SaveCoroutine());
 
-            //TODO Check for dirty chunk (should be 0 here)
             Assert.AreEqual(27, saveProgress.totalChunksToSave);
-            Assert.AreEqual(100, saveProgress.GetProgress());
+            Assert.AreEqual(100, saveProgress.GetProgress(), "save before change progress");
             Assert.AreEqual(0, saveProgress.ErrorChunks.Count());
+
+            // Load
+            // Check for files existing from a previous test run
+            int numFiles = 0;
+            foreach (var chunk in world.chunks.chunkCollection) {
+                if (File.Exists(Serialization.SaveFileName(chunk)))
+                    ++numFiles;
+            }
+            Assert.AreEqual(numFiles, TestUtils.LoadAll(world), "numFiles");
 
             if (useMultiThreading) {
                 // Need to just wait for the threads to do their work
@@ -299,11 +319,26 @@ public class VoxelmetricTest {
                 stageChunks[chunk.stage].Add(chunk);
 
             // Check that meshes got generated
+            if(debug) TestUtils.DebugLog("stageChunks " + (useMultiThreading ? "multithreading" : "single thread"), stageChunks);
             Assert.AreEqual(2, stageChunks.Count, "BuildMesh stageChunks.Count");
             Assert.AreEqual(26, stageChunks[Stage.created].Count, "BuildMesh stageChunks[Stage.created]");
-            Assert.AreEqual(1, stageChunks[Stage.render].Count, "BuildMesh stageChunks[Stage.render]");
-            Chunk renderChunk = stageChunks[Stage.render].FirstOrDefault();
-            Assert.AreEqual(loadPos.ContainingChunkCoordinates(), renderChunk.pos, "BuildMesh chunk at loadPos should be at render");
+            stageChunks.Remove(Stage.created);
+            // Others will be at some later stage, render or ready
+            var kvpStage = stageChunks.First();
+            var stage = kvpStage.Key;
+            Assert.True(stage != Stage.created && stage != Stage.terrain && stage != Stage.buildMesh && stage != Stage.priorityBuildMesh,
+                "BuildMesh chunk should be at a later stage: " + stage);
+            var chunks = kvpStage.Value;
+            Assert.AreEqual(1, chunks.Count, "BuildMesh stageChunks[" + stage + "]");
+            Chunk readyChunk = chunks.FirstOrDefault();
+            Assert.AreEqual(loadPos.ContainingChunkCoordinates(), readyChunk.pos, "BuildMesh chunk at loadPos should be at " + stage);
+
+            // Find some positions to be edited
+            string editName = blockCounts.OrderBy(kvp => kvp.Value).FirstOrDefault().Key;
+            List<BlockPos> editPosns = new List<BlockPos>();
+            foreach (var chunk in world.chunks.chunkCollection) {
+                AppendBlockPosns(chunk, editName, editPosns);
+            }
 
             // Check that editPosns have editName
             foreach (var pos in editPosns) {
@@ -312,25 +347,35 @@ public class VoxelmetricTest {
             }
 
             // Change a block to air
-            Voxelmetric.SetBlock(editPosns[0], Block.New(airName, world), world);
+            Voxelmetric.SetBlock(editPosns[0], Block.New(world.Air.name, world), world);
 
-            // Place a block
-            Voxelmetric.SetBlock(editPosns[1], Block.New(placeName, world), world);
+            // Place blocks of every type but air
+            int idxEdit = 1, numEdits = 1;
+            foreach (var name in world.blockIndex.Names) {
+                ushort type = world.blockIndex.GetBlockType(name);
+                if (type != Block.AirType && type != Block.VoidType) {
+                    Voxelmetric.SetBlock(editPosns[idxEdit], Block.New(name, world), world);
+                    idxEdit++; ++numEdits;
+                }
+            }
+
+            // Check for modified blocks
+            Assert.AreEqual(numEdits, TestUtils.CountModifiedBlocks(world), "modified blocks");
+            int numModChunks = TestUtils.CountModifiedChunks(world);
 
             // Save again
             saveProgress = Voxelmetric.SaveAll(world);
             if (useMultiThreading)
                 AssertWaitForSave(saveProgress, new TimeSpan(0, 0, 2)); // 2s should be way long enough
+            else
+                CoroutineUtils.DoCoroutine(saveProgress.SaveCoroutine());
 
-            //TODO Check for dirty chunk (should be >0 here)
             Assert.AreEqual(27, saveProgress.totalChunksToSave);
-            Assert.AreEqual(100, saveProgress.GetProgress());
+            Assert.AreEqual(100, saveProgress.GetProgress(), "save after change progress");
             Assert.AreEqual(0, saveProgress.ErrorChunks.Count());
 
             // Load
-            // TODO TCD
-
-
+            Assert.AreEqual(numModChunks, TestUtils.LoadAll(world), "numLoaded");
 
             // Check that edits change chunk stages as expected
             stageChunks.Clear();
@@ -339,20 +384,23 @@ public class VoxelmetricTest {
             if (debug) TestUtils.DebugChunks("final chunks", world.chunks.chunkCollection);
             if (useMultiThreading) {
                 Assert.AreEqual(2, stageChunks.Count, "Edit stageChunks.Count");
-                Assert.AreEqual(25, stageChunks[Stage.created].Count, "Edit stageChunks[Stage.created]");
-                Assert.AreEqual(2, stageChunks[Stage.render].Count, "Edit stageChunks[Stage.render]");
+                Assert.AreEqual(25, stageChunks[Stage.created].Count, 2, "Edit stageChunks[Stage.created]");
+                Assert.AreEqual(2, stageChunks[Stage.render].Count, 1, "Edit stageChunks[Stage.render]");
             } else {
                 Assert.AreEqual(3, stageChunks.Count, "Edit stageChunks.Count");
-                Assert.AreEqual(25, stageChunks[Stage.created].Count, "Edit stageChunks[Stage.created]");
-                Assert.AreEqual(1, stageChunks[Stage.priorityBuildMesh].Count, "Edit stageChunks[Stage.priorityBuildMesh]");
-                Assert.AreEqual(1, stageChunks[Stage.render].Count, "Edit stageChunks[Stage.render]");
+                int created = stageChunks[Stage.created].Count,
+                    priority = stageChunks[Stage.priorityBuildMesh].Count,
+                    render = stageChunks[Stage.render].Count,
+                    ready = stageChunks[Stage.ready].Count;
+                Assert.AreEqual(25, created, 2, "Edit stageChunks[Stage.created]");
+                Assert.AreEqual(1, priority, 2, "Edit stageChunks[Stage.priorityBuildMesh]");
+                Assert.AreEqual(1, render, 1, "Edit stageChunks[Stage.render]");
+                Assert.AreEqual(1, ready, 1, "Edit stageChunks[Stage.ready]");
+                Assert.AreEqual(27, created + priority + render + ready, "Edit all chunks");
                 Chunk buildMeshChunk = stageChunks[Stage.priorityBuildMesh].FirstOrDefault();
                 Assert.AreEqual(editPosns[0].ContainingChunkCoordinates(), buildMeshChunk.pos, "Edit chunk at editPosns[0] should be at priorityBuildMesh");
                 Assert.AreEqual(editPosns[1].ContainingChunkCoordinates(), buildMeshChunk.pos, "Edit chunk at editPosns[1] should be at priorityBuildMesh");
             }
-
-            // TODO TCD Generate another mesh
-            //world.chunksLoop.BuildMesh();
         } finally {
             world.StopWorld();
         }

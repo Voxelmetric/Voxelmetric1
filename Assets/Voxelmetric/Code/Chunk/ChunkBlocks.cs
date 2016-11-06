@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System;
 using System.Text;
 using System.Threading;
+using TransmitChunkData = VmNetworking.TransmitChunkData;
 
 public class ChunkBlocks {
 
@@ -11,21 +12,14 @@ public class ChunkBlocks {
 
     protected Block[,,] blocks = new Block[Config.Env.ChunkSize, Config.Env.ChunkSize, Config.Env.ChunkSize];
     public List<BlockPos> modifiedBlocks = new List<BlockPos>();
+
+    private bool debugRecieve = false;
     protected byte[] receiveBuffer;
     protected int receiveIndex;
+
     public bool contentsGenerated;
     public bool generationStarted;
     public bool contentsModified;
-
-    private static byte[] emptyBytes;
-
-    public static byte[] EmptyBytes {
-        get {
-            if (emptyBytes == null)
-                emptyBytes = new byte[16384];
-            return emptyBytes;
-        }
-    }
 
     public ChunkBlocks(Chunk chunk)
     {
@@ -64,7 +58,7 @@ public class ChunkBlocks {
         }
         else
         {
-            return chunk.world.blocks.Get(blockPos);
+            return chunk.world.GetBlock(blockPos);
         }
     }
 
@@ -82,19 +76,21 @@ public class ChunkBlocks {
             (localBlockPos.y < Config.Env.ChunkSize && localBlockPos.y >= 0) &&
             (localBlockPos.z < Config.Env.ChunkSize && localBlockPos.z >= 0))
         {
-            Block block = blocks[localBlockPos.x, localBlockPos.y, localBlockPos.z];
-            if (block == null)
-            {
-                return chunk.world.Air;
-            }
-            else
-            {
-                return block;
-            }
+            return LocalGetL(localBlockPos);
         }
         else
         {
-            return chunk.world.blocks.Get(localBlockPos + chunk.pos);
+            return chunk.world.GetBlock(localBlockPos + chunk.pos);
+        }
+    }
+
+    public Block LocalGetL(BlockPos localBlockPos)
+    {
+        Block block = blocks[localBlockPos.x, localBlockPos.y, localBlockPos.z];
+        if (block == null) {
+            return chunk.world.Air;
+        } else {
+            return block;
         }
     }
 
@@ -112,7 +108,7 @@ public class ChunkBlocks {
         if (InRange(blockPos))
         {
             //Only call create and destroy if this is a different block type, otherwise it's just updating the properties of an existing block
-            if (Get(blockPos).type != block.type)
+            if (Get(blockPos).Type != block.Type)
             {
                 Get(blockPos).OnDestroy(chunk, blockPos, blockPos + chunk.pos);
                 block.OnCreate(chunk, blockPos, blockPos + chunk.pos);
@@ -182,8 +178,6 @@ public class ChunkBlocks {
         }
     }
 
-    private bool debugRecieve = false;
-
     void InitializeChunkDataReceive(int index, int size)
     {
         receiveIndex = index;
@@ -192,8 +186,8 @@ public class ChunkBlocks {
 
     public void ReceiveChunkData(byte[] buffer)
     {
-        int index = BitConverter.ToInt32(buffer, VmServer.headerSize);
-        int size = BitConverter.ToInt32(buffer, VmServer.headerSize + 4);
+        int index = BitConverter.ToInt32(buffer, TransmitChunkData.IdxDataOffset);
+        int size = BitConverter.ToInt32(buffer, TransmitChunkData.IdxDataLength);
         if (debugRecieve)
             Debug.Log("ChunkBlocks.ReceiveChunkData (" + Thread.CurrentThread.ManagedThreadId + "): " + chunk.pos
                 //+ ", buffer=" + buffer.Length
@@ -203,7 +197,7 @@ public class ChunkBlocks {
         {
             InitializeChunkDataReceive(index, size);
         }
-        TranscribeChunkData(buffer, VmServer.leaderSize);
+        TranscribeChunkData(buffer, TransmitChunkData.IdxData);
     }
 
     void TranscribeChunkData(byte[] buffer, int offset)
@@ -232,6 +226,7 @@ public class ChunkBlocks {
         if (debugRecieve)
             Debug.Log("ChunkBlocks.FinishChunkDataReceive (" + Thread.CurrentThread.ManagedThreadId + "): " + chunk.pos
                 + ", contentsGenerated=" + contentsGenerated);
+        chunk.world.FireContentsGenerated(chunk);
     }
 
     public byte[] ToBytes()
@@ -313,4 +308,5 @@ public class ChunkBlocks {
             }
         }
     }
+
 }
