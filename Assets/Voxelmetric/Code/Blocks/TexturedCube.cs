@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System;
+using System.Runtime.Serialization;
 
 [Serializable]
 public class TexturedCube : CubeBlock
@@ -34,4 +35,9 @@ public class TexturedCube : CubeBlock
     //        BlockBuilder.BuildCollider(chunk, localPos, globalPos, meshData, direction);
     //    }
     //}
+
+    // Constructor only used for deserialization
+    protected TexturedCube(SerializationInfo info, StreamingContext context):
+        base(info, context) {
+    }
 }

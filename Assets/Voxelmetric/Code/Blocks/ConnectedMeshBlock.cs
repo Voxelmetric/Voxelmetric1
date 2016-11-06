@@ -2,11 +2,14 @@
 using System.Collections.Generic;
 using Newtonsoft.Json;
 using System;
+using System.Runtime.Serialization;
 
 [Serializable]
 public class ConnectedMeshBlock : CustomMeshBlock
 {
     public ConnectedMeshBlockConfig connectedMeshConfig { get { return (ConnectedMeshBlockConfig)config; } }
+
+    public ConnectedMeshBlock() { }
 
     public override void OnCreate(Chunk chunk, BlockPos localPos, BlockPos globalPos)
     {
@@ -15,7 +18,7 @@ public class ConnectedMeshBlock : CustomMeshBlock
             connectedMeshConfig.connectsToTypes = new int[connectedMeshConfig.connectsToNames.Length];
             for (int i = 0; i < connectedMeshConfig.connectsToNames.Length; i++)
             {
-                connectedMeshConfig.connectsToTypes[i] = chunk.world.blockIndex.names[connectedMeshConfig.connectsToNames[i]];
+                connectedMeshConfig.connectsToTypes[i] = chunk.world.blockIndex.GetBlockType(connectedMeshConfig.connectsToNames[i]);
             }
         }
     }
@@ -40,7 +43,7 @@ public class ConnectedMeshBlock : CustomMeshBlock
             }
             else if (connectedMeshConfig.connectsToTypes.Length != 0)
             {
-                int neighborType = chunk.blocks.LocalGet(localPos.Add(dir)).type;
+                int neighborType = chunk.blocks.LocalGet(localPos.Add(dir)).Type;
                 for (int i = 0; i < connectedMeshConfig.connectsToTypes.Length; i++)
                 {
                     if (neighborType == connectedMeshConfig.connectsToTypes[i])
@@ -59,4 +62,8 @@ public class ConnectedMeshBlock : CustomMeshBlock
         meshData.AddMesh(customMeshConfig.tris, customMeshConfig.verts, customMeshConfig.uvs, texture, localPos);
     }
 
+    // Constructor only used for deserialization
+    protected ConnectedMeshBlock(SerializationInfo info, StreamingContext context):
+        base(info, context) {
+    }
 }

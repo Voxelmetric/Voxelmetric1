@@ -2,32 +2,46 @@
 using System.Threading;
 using System.Collections.Generic;
 
-public class LoadChunks : MonoBehaviour
-{
+public class LoadChunks : MonoBehaviour {
 
     public World world;
-    public bool generateTerrain = true;
 
-    [Range(1, 64)]
-    public int chunkLoadRadius = 8;
-    BlockPos[] chunkPositions;
+    [SerializeField, Range(1, 64)]
+    private int chunkLoadRadius = 8;
+    private BlockPos[] chunkPositions;
 
     //The distance is measured in chunks
-    [Range(1, 64)]
-    public int DistanceToDeleteChunks = (int)(8 * 1.25f);
+    [SerializeField, Range(1, 64)]
+    private int distanceToDeleteChunks = (int)(8 * 1.25f);
     private int distanceToDeleteInUnitsSquared;
 
-    void Start()
-    {
-        chunkPositions = ChunkLoadOrder.ChunkPositions(chunkLoadRadius);
-        distanceToDeleteInUnitsSquared = (int)(DistanceToDeleteChunks * Config.Env.ChunkSize * Config.Env.BlockSize);
-        distanceToDeleteInUnitsSquared *= distanceToDeleteInUnitsSquared;
+    public int ChunkLoadRadius {
+        get { return chunkLoadRadius; }
+        set {
+            bool changed = chunkLoadRadius != value;
+            chunkLoadRadius = value;
+            if ( changed )
+                OnChangedLoadRadius();
+        }
     }
 
-    void Update()
-    {
-        if (world.chunksLoop.ChunksInProgress > 32)
-        {
+    public int DistanceToDeleteChunks {
+        get { return distanceToDeleteChunks; }
+        set {
+            bool changed = distanceToDeleteChunks != value;
+            distanceToDeleteChunks = value;
+            if (changed)
+                OnChangedDeleteDistance();
+        }
+    }
+
+    void Start() {
+        OnChangedLoadRadius();
+        OnChangedDeleteDistance();
+    }
+
+    void Update() {
+        if(world.chunksLoop.ChunksInProgress > 32) {
             return;
         }
 
@@ -35,29 +49,39 @@ public class LoadChunks : MonoBehaviour
         FindChunksAndLoad();
     }
 
-    void DeleteChunks()
-    {
+    // This function is called when the script is loaded or a value is changed in the inspector (Called in the editor only)
+    public void OnValidate() {
+        OnChangedLoadRadius();
+        OnChangedDeleteDistance();
+    }
+
+    private void OnChangedLoadRadius() {
+        chunkPositions = ChunkLoadOrder.ChunkPositions(chunkLoadRadius);
+    }
+
+    private void OnChangedDeleteDistance() {
+        distanceToDeleteInUnitsSquared = (int)((DistanceToDeleteChunks + 1) * Config.Env.ChunkSize * Config.Env.BlockSize);
+        distanceToDeleteInUnitsSquared *= distanceToDeleteInUnitsSquared;
+    }
+
+    private void DeleteChunks() {
         int posX = Mathf.FloorToInt(transform.position.x);
         int posZ = Mathf.FloorToInt(transform.position.z);
 
-        foreach (var pos in world.chunks.posCollection)
-        {
+        foreach(var pos in world.chunks.posCollection) {
             int xd = posX - pos.x;
             int yd = posZ - pos.z;
 
-            if ((xd * xd + yd * yd) > distanceToDeleteInUnitsSquared)
-            {
+            if((xd * xd + yd * yd) > distanceToDeleteInUnitsSquared) {
                 Chunk chunk = world.chunks.Get(pos);
-                    chunk.MarkForDeletion();
+                chunk.MarkForDeletion();
             }
         }
     }
 
-    void FindChunksAndLoad()
-    {
+    private void FindChunksAndLoad() {
         //Cycle through the array of positions
-        for (int i = 0; i < chunkPositions.Length; i++)
-        {
+        for(int i = 0; i < chunkPositions.Length; i++) {
             //Get the position of this gameobject to generate around
             BlockPos playerPos = ((BlockPos)transform.position).ContainingChunkCoordinates();
 
@@ -73,10 +97,10 @@ public class LoadChunks : MonoBehaviour
 
             //If the chunk already exists and it's already
             //rendered or in queue to be rendered continue
-            if (newChunk != null && newChunk.stage != Stage.created)
+            if(newChunk != null && newChunk.stage != Stage.created)
                 continue;
 
-            for (int y = world.config.minY; y <= world.config.maxY; y += Config.Env.ChunkSize)
+            for(int y = world.config.minY; y <= world.config.maxY; y += Config.Env.ChunkSize)
                 world.chunks.New(new BlockPos(newChunkPos.x, y, newChunkPos.z));
 
             return;

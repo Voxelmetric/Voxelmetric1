@@ -1,13 +1,14 @@
 ﻿using System;
 using System.Runtime.InteropServices;
+using System.Runtime.Serialization;
+using System.Text;
 using UnityEngine;
 
 [Serializable]
-public class Block
-{
+public class Block : ISerializable {
     // Static block types: These are always added as 0 and 1 in the block index
-    public static readonly int VoidType = 0;
-    public static readonly int AirType = 1;
+    public static readonly ushort VoidType = 0;
+    public static readonly ushort AirType = 1;
 
     public Block() { }
     public Block(int type)
@@ -15,27 +16,37 @@ public class Block
         this.type = (ushort)type;
     }
 
-    public ushort type;
-    public byte worldIndex;
+    private ushort type;
 
     [NonSerialized()] private BlockConfig cachedConfig;
-    [NonSerialized()] public World world;
+    [NonSerialized()] private World world;
+
+    public ushort Type { get { return type; } }
+    public World World { get { return world; } }
 
     public virtual string       name                { get { return config.name;                     } }
     public virtual string       displayName         { get { return name;                            } }
     public virtual BlockConfig  config              { get {
             if (cachedConfig == null || cachedConfig.type != type)
-                cachedConfig = world.blockIndex.configs[type];
+                cachedConfig = world.blockIndex.GetConfig(type);
             return cachedConfig;
         }
     }
     public virtual bool         solid               { get { return config.solid;                    } }
+    public virtual bool         transparent         { get { return config.transparent;              } }
     public virtual bool         canBeWalkedOn       { get { return config.canBeWalkedOn;            } }
     public virtual bool         canBeWalkedThrough  { get { return config.canBeWalkedThrough;       } }
+    public virtual float        movementCost        { get { return config.movementCost;             } }
+
+    public object Extensions { get; set; }
 
     public virtual bool IsSolid(Direction direction)
     {
         return solid;
+    }
+
+    public virtual bool IsTransparent(Direction direction) {
+        return transparent;
     }
 
     public virtual void BuildBlock(Chunk chunk, BlockPos localPos, BlockPos globalPos, MeshData meshData)
@@ -56,13 +67,12 @@ public class Block
 
     public static Block New(string name, World world)
     {
-        return New(world.blockIndex.GetType(name), world);
+        return New(world.blockIndex.GetBlockType(name), world);
     }
 
-    public static Block New(int type, World world)
-    {
+    public static Block New(ushort type, World world) {
         Block block = (Block)Activator.CreateInstance(world.blockIndex.GetConfig(type).blockClass);
-        block.type = (ushort)type;
+        block.type = type;
         block.world = world;
         return block;
     }
@@ -85,5 +95,15 @@ public class Block
     public byte[] ToByteArray()
     {
         return BitConverter.GetBytes(type);
+    }
+
+    // Constructor only used for deserialization
+    protected Block(SerializationInfo info, StreamingContext context) {
+        type = info.GetUInt16("type");
+        world = context.Context as World;
+    }
+    // Gets information for serialization
+    public virtual void GetObjectData(SerializationInfo info, StreamingContext context) {
+        info.AddValue("type", type);
     }
 }

@@ -9,6 +9,8 @@
 
 public static class DirectionUtils
 {
+    public const int NumDirections = 6;
+
     public static Direction Get(int i)
     {
         switch (i)

@@ -5,6 +5,8 @@ public enum Stage {created, terrain, buildMesh, priorityBuildMesh, render, ready
 
 public class Chunk
 {
+    public static readonly BlockPosEnumerable LocalPosns = new BlockPosEnumerable(Config.Env.ChunkSizePos);
+
     public World world;
     public BlockPos pos;
 
@@ -12,18 +14,13 @@ public class Chunk
     public ChunkLogic  logic;
     public ChunkRender render;
 
-    public Stage _stage;
+    private Stage _stage;
+
     public Stage stage {
-        get
-        {
-            return _stage;
-        }
-        set
-        {
+        get { return _stage; }
+        set {
             if (_stage != value)
-            {
                 world.chunksLoop.ChunkStageChanged(this, oldStage: _stage, newStage: value);
-            }
             _stage = value;
         }
     }
@@ -49,7 +46,7 @@ public class Chunk
         sb.Append(", ");
         sb.Append(pos.ToString());
         sb.Append(", stage=");
-        sb.Append(_stage.ToString());
+        sb.Append(stage.ToString());
         sb.Append(", blocks=");
         sb.Append(blocks.ToString());
         sb.Append(", logic=");

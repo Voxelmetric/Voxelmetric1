@@ -25,13 +25,9 @@ public class WorldBlocks  {
     public Block Get(BlockPos pos)
     {
         Chunk containerChunk = world.chunks.Get(pos);
-
-        if (containerChunk != null && pos.y >= world.config.minY)
-        {
-            return containerChunk.blocks.Get(pos);
-        }
-        else
-        {
+        if (containerChunk != null && pos.y >= world.config.minY) {
+            return containerChunk.blocks.LocalGet(pos - containerChunk.pos);
+        } else {
             return world.Void;
         }
     }

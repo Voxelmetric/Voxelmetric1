@@ -1,8 +1,17 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 
 public class VmRaycast
 {
-    public static VmRaycastHit Raycast(Ray ray, World world, float range = 10000f)
+    public static VmRaycastHit Raycast(Ray ray, World world, float range = 10000f) {
+        return Raycast(ray, world,
+            (pos, dir, hitBlock, bPos) => hitBlock.RaycastHit(pos, dir, bPos),
+            range);
+    }
+
+    public static VmRaycastHit Raycast(Ray ray, World world,
+        Func<Vector3, Vector3, Block, BlockPos, bool> raycastHit,
+        float range = 10000f)
     {
         // Position as we work through the raycast, starts at origin and gets updated as it reaches each block boundary on the route
         Vector3 pos = ray.origin;
@@ -30,9 +39,18 @@ public class VmRaycast
         Vector3 dist;
 
         //The block at bPos
-        Block hitBlock = world.blocks[bPos];
+        Block hitBlock;
+        BlockPos cPos = bPos.ContainingChunkCoordinates();
+        BlockPos lPos = bPos - cPos;
+        Chunk hitChunk = world.chunks.ChunkGet(cPos);
+        if (hitChunk != null && bPos.y >= world.config.minY) {
+            hitBlock = hitChunk.blocks.LocalGetL(lPos);
+        } else {
+            hitBlock = world.Void;
+        }
+
         //Color debugLineColor = Color.magenta; //debug
-        while (!hitBlock.RaycastHit(pos, dir, bPos) && Vector3.Distance(ray.origin, pos) < range)
+        while (!raycastHit(pos, dir, hitBlock, bPos) && Vector3.Distance(ray.origin, pos) < range)
         {
             // Get the nearest upcoming boundary for each direction
             boundary.x = MakeBoundary(dirS.x, pos.x);
@@ -79,7 +97,17 @@ public class VmRaycast
             // and will need to use the corresponding direction sign to decide which side of the boundary to fall on
             adjacentBPos = bPos;
             bPos = new BlockPos(ResolveBlockPos(pos.x, dirS.x), ResolveBlockPos(pos.y, dirS.y), ResolveBlockPos(pos.z, dirS.z));
-            hitBlock = world.blocks[bPos];
+            BlockPos newChunkPos = bPos.ContainingChunkCoordinates();
+            if (newChunkPos != cPos) {
+                cPos = newChunkPos;
+                hitChunk = world.chunks.ChunkGet(cPos);
+            }
+            lPos = bPos - cPos;
+            if (hitChunk != null && bPos.y >= world.config.minY) {
+                hitBlock = hitChunk.blocks.LocalGetL(lPos);
+            } else {
+                hitBlock = world.Void;
+            }
 
             // The while loop then evaluates if hitblock is a viable block to stop on and
             // if not does it all again starting from the new position
