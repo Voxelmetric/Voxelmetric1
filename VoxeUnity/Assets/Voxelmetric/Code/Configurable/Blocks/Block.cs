@@ -37,6 +37,11 @@ public class Block
         get { return config.solid; }
     }
 
+    public virtual bool transparent
+    {
+        get { return config.transparent; }
+    }
+
     public virtual bool canBeWalkedOn
     {
         get { return config.canBeWalkedOn; }
@@ -50,6 +55,11 @@ public class Block
     public virtual bool IsSolid(Direction direction)
     {
         return solid;
+    }
+
+    public virtual bool IsTransparent(Direction direction)
+    {
+        return transparent;
     }
 
     public virtual void OnInit(BlockProvider blockProvider)
