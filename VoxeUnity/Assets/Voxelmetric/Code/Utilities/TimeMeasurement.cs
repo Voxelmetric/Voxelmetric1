@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Globalization;
 using System.Linq;
 using System.Threading;
 using Assets.Voxelmetric.Code.Common.Collections;
@@ -59,16 +58,16 @@ namespace Assets.Voxelmetric.Code.Utilities
                 if (!Stopwatch.IsHighResolution)
                     throw new NotSupportedException("Your hardware doesn't support high resolution counter");
 
-                // Prevent the JIT Compiler from optimizing Fkt calls away
+                // Prevent the JIT compiler from optimizing Fkt calls away
                 long seed = Environment.TickCount;
 
-                // Use the second Core/Processor for the test
+                // Use the second core/processor for the test
                 Process.GetCurrentProcess().ProcessorAffinity = new IntPtr(2);
 
-                // Prevent "Normal" Processes from interrupting Threads
+                // Prevent "Normal" processes from interrupting Threads
                 Process.GetCurrentProcess().PriorityClass = ProcessPriorityClass.High;
 
-                // Prevent "Normal" Threads from interrupting this thread
+                // Prevent "Normal" threads from interrupting this thread
                 Thread.CurrentThread.Priority = ThreadPriority.Highest;
             }
 
