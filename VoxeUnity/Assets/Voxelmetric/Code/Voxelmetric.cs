@@ -10,7 +10,7 @@ namespace Voxelmetric.Code
     public static class Voxelmetric
     {
         //Used as a manager class with references to classes treated like singletons
-        public static VoxelmetricResources resources = new VoxelmetricResources ();
+        public static readonly VoxelmetricResources resources = new VoxelmetricResources ();
 
         public static void SetBlock(World world, Vector3Int pos, BlockData blockData)
         {

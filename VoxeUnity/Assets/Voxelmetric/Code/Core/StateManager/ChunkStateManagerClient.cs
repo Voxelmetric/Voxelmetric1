@@ -3,6 +3,7 @@ using System.Text;
 using Assets.Voxelmetric.Code.Core.StateManager;
 using UnityEngine;
 using UnityEngine.Assertions;
+using Voxelmetric.Code.Common;
 using Voxelmetric.Code.Common.Events;
 using Voxelmetric.Code.Common.Extensions;
 using Voxelmetric.Code.Common.Threading;
@@ -452,7 +453,7 @@ namespace Voxelmetric.Code.Core.StateManager
             chunk.blocks.contentsInvalidated = false;
         }
 
-        private bool SynchronizeChunk()
+        private bool SynchronizeNeighbors()
         {
             // 6 neighbors are necessary
             if (ListenerCount != 6)
@@ -465,6 +466,46 @@ namespace Voxelmetric.Code.Core.StateManager
                 if (!stateManager.m_completedStates.Check(ChunkState.LoadData))
                     return false;
             }
+
+            return true;
+        }
+
+        private void SynchronizeYLayer()
+        {
+            // Search for neighbors we are vertically aligned with
+            foreach (var chunkEvent in Listeners)
+            {
+                var stateManager = (ChunkStateManagerClient)chunkEvent;
+
+                Chunk neighborChunk = stateManager.chunk;
+                if (neighborChunk.pos.x!=chunk.pos.x)
+                    continue;
+
+                // Copy the bottom layers of neighbor chunk to the top layers of ours
+                if (neighborChunk.pos.y>chunk.pos.y)
+                {
+                    int srcIndex = Helpers.GetChunkIndex1DFrom3D(-1, 0, -1);
+                    int dstIndex = Helpers.GetChunkIndex1DFrom3D(-1, Env.ChunkSize, -1);
+                    chunk.blocks.Copy(neighborChunk.blocks, srcIndex, dstIndex, Env.ChunkSizeWithPaddingPow2);
+                }
+                // Copy the top layers of neighbor chunk to the bottom layers of ours
+                else// if (neighborChunk.pos.y < chunk.pos.y)
+                {
+                    int srcIndex = Helpers.GetChunkIndex1DFrom3D(-1, Env.ChunkMask, -1);
+                    int dstIndex = Helpers.GetChunkIndex1DFrom3D(-1, -1, -1);
+                    chunk.blocks.Copy(neighborChunk.blocks, srcIndex, dstIndex, Env.ChunkSizeWithPaddingPow2);
+                }
+            }
+        }
+
+        private bool SynchronizeChunk()
+        {
+            // 6 neighbors are necessary
+            if (!SynchronizeNeighbors())
+                return false;
+
+            // Synchronize edge data of chunks
+            SynchronizeYLayer();
 
             // We need to calculate our chunk's bounds if it was invalidated
             if (chunk.blocks.contentsInvalidated && chunk.blocks.NonEmptyBlocks>0)

@@ -49,7 +49,7 @@ public class StructureLayer : TerrainLayer
                         Randomization.Random(pos.Add(0, 0, 1).GetHashCode(),44, true) > chanceAtPos &&
                         Randomization.Random(pos.Add(0, 0, -1).GetHashCode(),44, true) > chanceAtPos)
                     {
-                        int height = terrainGen.GenerateTerrainForBlockColumn(chunk, x, z, true);
+                        int height = terrainGen.GenerateTerrainForChunk(chunk, x, z, true);
                         structure.Build(world, chunk, new Vector3Int(x, height, z), this);
                     }
                 }

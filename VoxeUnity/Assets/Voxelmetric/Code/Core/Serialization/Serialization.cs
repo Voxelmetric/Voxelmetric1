@@ -58,7 +58,7 @@ namespace Voxelmetric.Code.Core.Serialization
 
             return true;
         }
-        
+
         private static bool Write(Save save)
         {
             if (!save.changed)

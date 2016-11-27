@@ -9,7 +9,7 @@ namespace Voxelmetric.Code.Load_Resources.Textures
 
         public static bool IsSame(Chunk chunk, Vector3Int globalsPos, int h, int v, Direction forwards, int type)
         {
-            return chunk.world.blocks.Get(RelativePos(globalsPos, h, v, forwards)).Type == type;
+            return chunk.blocks.Get(RelativePos(globalsPos, h, v, forwards)).Type == type;
         }
 
         public static Vector3Int RelativePos(Vector3Int pos, int h, int v, Direction forwards)

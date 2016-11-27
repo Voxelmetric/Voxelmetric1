@@ -66,7 +66,7 @@ public class Block
     {
     }
 
-    public virtual void BuildBlock(Chunk chunk, Vector3Int localpos, Vector3Int globalPos)
+    public virtual void BuildBlock(Chunk chunk, Vector3Int localpos)
     {
     }
 
@@ -80,23 +80,23 @@ public class Block
         return false;
     }
 
-    public virtual void BuildFace(Chunk chunk, Vector3Int localPos, Vector3Int globalPos, Direction dir)
+    public virtual void BuildFace(Chunk chunk, Vector3Int localPos, Direction dir)
     {
     }
 
-    public virtual void OnCreate(Chunk chunk, Vector3Int localPos, Vector3Int globalPos)
+    public virtual void OnCreate(Chunk chunk, Vector3Int localPos)
     {
     }
 
-    public virtual void OnDestroy(Chunk chunk, Vector3Int localPos, Vector3Int globalPos)
+    public virtual void OnDestroy(Chunk chunk, Vector3Int localPos)
     {
     }
 
-    public virtual void RandomUpdate(Chunk chunk, Vector3Int localPos, Vector3Int globalPos)
+    public virtual void RandomUpdate(Chunk chunk, Vector3Int localPos)
     {
     }
 
-    public virtual void ScheduledUpdate(Chunk chunk, Vector3Int localPos, Vector3Int globalPos)
+    public virtual void ScheduledUpdate(Chunk chunk, Vector3Int localPos)
     {
     }
 

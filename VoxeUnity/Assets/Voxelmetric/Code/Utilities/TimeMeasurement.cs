@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading;
-using Assets.Voxelmetric.Code.Common.Collections;
 
 namespace Assets.Voxelmetric.Code.Utilities
 {
@@ -19,14 +18,14 @@ namespace Assets.Voxelmetric.Code.Utilities
             return deviations.Where(t => t.Item2 > 0 || Math.Abs(t.Item2) <= meanDeviation).Average(t => t.Item1);
         }
 
-        public static IEnumerable<Tuple<double, double>> Deviations(this ICollection<double> values)
+        public static IEnumerable<Common.Collections.Tuple<double, double>> Deviations(this ICollection<double> values)
         {
             if (values.Count == 0)
                 yield break;
 
             var avg = values.Average();
             foreach (var d in values)
-                yield return Tuple.Create(d, avg - d);
+                yield return Common.Collections.Tuple.Create(d, avg - d);
         }
 
         private interface IStopwatch

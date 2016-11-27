@@ -8,7 +8,7 @@ public class CubeBlock : SolidBlock {
 
     public TextureCollection[] textures { get { return ((CubeBlockConfig)config).textures; } }
 
-    public override void BuildFace(Chunk chunk, Vector3Int localPos, Vector3Int globalPos, Direction direction)
+    public override void BuildFace(Chunk chunk, Vector3Int localPos, Direction direction)
     {
         VertexData[] vertexData = chunk.pools.PopVertexDataArray(4);
         VertexDataFixed[] vertexDataFixed = chunk.pools.PopVertexDataFixedArray(4);
@@ -17,8 +17,8 @@ public class CubeBlock : SolidBlock {
                 vertexData[i] = chunk.pools.PopVertexData();
 
             BlockUtils.PrepareVertices(localPos, vertexData, direction);
-            BlockUtils.PrepareTexture(chunk, localPos, globalPos, vertexData, direction, textures);
-            BlockUtils.PrepareColors(chunk, localPos, globalPos, vertexData, direction);
+            BlockUtils.PrepareTexture(chunk, localPos, vertexData, direction, textures);
+            BlockUtils.PrepareColors(chunk, localPos, vertexData, direction);
 
             for (int i = 0; i < 4; i++)
                 vertexDataFixed[i] = VertexDataUtils.ClassToStruct(vertexData[i]);

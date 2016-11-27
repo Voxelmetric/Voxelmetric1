@@ -92,10 +92,10 @@ public class TerrainLayer : IComparable, IEquatable<TerrainLayer>
     /// Fills chunk with layer data starting at startPlaceHeight and ending at endPlaceHeight
     /// </summary>
     /// <param name="chunk">Chunk filled with data</param>
-    /// <param name="x">Position on x axis in local chunk coordinates</param>
-    /// <param name="z">Position on z axis in local chunk coordinates</param>
-    /// <param name="startPlaceHeight">Starting position on y axis in local chunk coordinates</param>
-    /// <param name="endPlaceHeight">Ending position on y axis in local chunk coordinates</param>
+    /// <param name="x">Position on x axis in world coordinates</param>
+    /// <param name="z">Position on z axis in world coordinates</param>
+    /// <param name="startPlaceHeight">Starting position on y axis in world coordinates</param>
+    /// <param name="endPlaceHeight">Ending position on y axis in world coordinates</param>
     /// <param name="blockToPlace">Block type to set</param>
     protected static void SetBlocks(Chunk chunk, int x, int z, int startPlaceHeight, int endPlaceHeight, Block blockToPlace)
     {

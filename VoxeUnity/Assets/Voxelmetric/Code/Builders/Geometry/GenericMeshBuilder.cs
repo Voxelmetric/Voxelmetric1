@@ -20,7 +20,7 @@ namespace Voxelmetric.Code.Builders.Geometry
                         if (block.type==BlockProvider.AirType)
                             continue;
 
-                        block.BuildBlock(chunk, localVector3Int, chunk.pos+localVector3Int);
+                        block.BuildBlock(chunk, localVector3Int);
                     }
                 }
             }

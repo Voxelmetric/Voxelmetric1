@@ -10,19 +10,28 @@ namespace Voxelmetric.Code.Core
 {
     public sealed class Chunk
     {
+        //! ID used by memory pools to map the chunk to a given thread. Must be accessed from the main thread
         private static int s_id = 0;
 
         public World world { get; private set; }
-        public Vector3Int pos { get; private set; }
-        public LocalPools pools { get; private set; }
-
         public IChunkStateManager stateManager { get; private set; }
         public ChunkBlocks blocks { get; private set; }
         public ChunkLogic logic { get; private set; }
-
         public ChunkRenderGeometryHandler GeometryHandler { get; private set; }
         public ChunkColliderGeometryHandler ChunkColliderGeometryHandler { get; private set; }
+        public LocalPools pools { get; private set; }
 
+        //! Chunk position in world coordinates
+        public Vector3Int pos { get; private set; }
+
+        //! Bounding box in world coordinates
+        public Bounds WorldBounds { get; private set; }
+
+        //! ThreadID associated with this chunk. Used when working with object pools in MT environment. Resources
+        //! need to be release where they were allocated. Thanks to this, associated containers could be made lock-free
+        public int ThreadID { get; private set; }
+
+        //! Says whether the chunk needs its collider rebuilt
         private bool m_needsCollider;
         public bool NeedsCollider
         {
@@ -41,12 +50,6 @@ namespace Voxelmetric.Code.Core
             }
         }
 
-        //! Bounding box in world coordinates
-        public Bounds WorldBounds { get; private set; }
-
-        //! ThreadID associated with this chunk. Used when working with object pools in MT environment. Resources
-        //! need to be release where they were allocated. Thanks to this, associated containers could be made lock-free
-        public int ThreadID { get; private set; }
 
         public static Chunk CreateChunk(World world, Vector3Int pos, bool isDedicated)
         {
@@ -60,13 +63,14 @@ namespace Voxelmetric.Code.Core
             return chunk;
         }
 
+        private static readonly int chunkPower = Env.ChunkPow;
+
         /// <summary>
         /// Returns the position of the chunk containing this block
         /// </summary>
         /// <returns>The position of the chunk containing this block</returns>
         public static Vector3Int ContainingCoordinates(Vector3Int pos)
         {
-            const int chunkPower = Env.ChunkPower;
             return new Vector3Int(
                 (pos.x>>chunkPower)<<chunkPower,
                 (pos.y>>chunkPower)<<chunkPower,
@@ -101,10 +105,9 @@ namespace Voxelmetric.Code.Core
             this.pos = pos;
             this.stateManager = stateManager;
 
-            const int size = Env.ChunkSize;
             WorldBounds = new Bounds(
-                new Vector3(pos.x+size/2, pos.y+size/2, pos.z+size/2),
-                new Vector3(size, size, size)
+                new Vector3(pos.x+ Env.ChunkSize/2, pos.y+ Env.ChunkSize/2, pos.z+ Env.ChunkSize/2),
+                new Vector3(Env.ChunkSize, Env.ChunkSize, Env.ChunkSize)
                 );
 
             Reset();

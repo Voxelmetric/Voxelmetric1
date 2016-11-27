@@ -18,14 +18,14 @@ namespace Voxelmetric.Code.Data_types
             get { return m_data; }
         }
 
-        public int RestoreBlockData(byte[] data, int offset)
+        public static ushort RestoreBlockData(byte[] data, int offset)
         {
-            return 0;
+            return BitConverter.ToUInt16(data, offset);
         }
 
-        public byte[] ToByteArray()
+        public static byte[] ToByteArray(BlockData data)
         {
-            return BitConverter.GetBytes(m_data);
+            return BitConverter.GetBytes(data.m_data);
         }
 
         #region Object comparison

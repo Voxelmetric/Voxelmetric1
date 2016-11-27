@@ -7,8 +7,8 @@ public class CrossMeshBlock : Block
 {
     public TextureCollection texture { get { return ((CrossMeshBlockConfig)config).texture; } }
 
-    public override void BuildBlock(Chunk chunk, Vector3Int localPos, Vector3Int globalPos)
+    public override void BuildBlock(Chunk chunk, Vector3Int localPos)
     {
-        MeshUtils.BuildCrossMesh(chunk, localPos, globalPos, texture);
+        MeshUtils.BuildCrossMesh(chunk, localPos, texture);
     }
 }

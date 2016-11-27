@@ -13,12 +13,12 @@ namespace Voxelmetric.Code.Builders.Collider
     /// </summary>
     public class CubeMeshColliderBuilder: IMeshBuilder
     {
+        private static readonly int stepSize = 1;
+        private static readonly int width = Env.ChunkSize;
+
         public void Build(Chunk chunk, int minX, int maxX, int minY, int maxY, int minZ, int maxZ)
         {
-            WorldBlocks blocks = chunk.world.blocks;
-
-            const int stepSize = 1;
-            const int width = Env.ChunkSize;
+            ChunkBlocks blocks = chunk.blocks;
 
             int[] mins = {minX, minY, minZ};
             int[] maxes = {maxX, maxY, maxZ};
@@ -83,9 +83,9 @@ namespace Voxelmetric.Code.Builders.Collider
 
                         for (x[u] = mins[u]; x[u]<=maxes[u]; x[u]++)
                         {
-                            int realX = chunk.pos.x + x[0];
-                            int realY = chunk.pos.y + x[1];
-                            int realZ = chunk.pos.z + x[2];
+                            int realX = x[0];
+                            int realY = x[1];
+                            int realZ = x[2];
 
                             bool voxelFace0 = blocks.GetBlock(new Vector3Int(realX, realY, realZ)).canBeWalkedOn;
                             bool voxelFace1 = blocks.GetBlock(new Vector3Int(realX+q[0], realY+q[1], realZ+q[2])).canBeWalkedOn;
@@ -120,11 +120,11 @@ namespace Voxelmetric.Code.Builders.Collider
                                 continue;
                             }
 
-                            bool type = mask[n];
+                            bool m = mask[n];
 
                             // Compute width
                             int w;
-                            for (w = 1; i + w < width && mask[n + w] == type; w++)
+                            for (w = 1; i + w < width && mask[n + w] == m; w++)
                             {
                             }
 
@@ -136,8 +136,8 @@ namespace Voxelmetric.Code.Builders.Collider
                             {
                                 for (k = 0; k < w; k++)
                                 {
-                                    if (mask[n+k+h*width]==false ||
-                                        mask[n+k+h*width]!=type)
+                                    int maskIndex = n+k+h*width;
+                                    if (mask[maskIndex] ==false || mask[maskIndex] != m)
                                     {
                                         done = true;
                                         break;

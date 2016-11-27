@@ -103,9 +103,9 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
 
             // Update clipmap offsets based on the viewer position
             m_clipmap.SetOffset(
-                m_viewerPos.x >> Env.ChunkPower,
-                m_viewerPos.y >> Env.ChunkPower,
-                m_viewerPos.z >> Env.ChunkPower
+                m_viewerPos.x >> Env.ChunkPow,
+                m_viewerPos.y >> Env.ChunkPow,
+                m_viewerPos.z >> Env.ChunkPow
                 );
         }
 
@@ -115,8 +115,8 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
             if (m_viewerPos==m_viewerPosPrev)
                 return;
 
-            int minY = m_viewerPos.y-(VerticalChunkLoadRadius<<Env.ChunkPower);
-            int maxY = m_viewerPos.y+(VerticalChunkLoadRadius<<Env.ChunkPower);
+            int minY = m_viewerPos.y-(VerticalChunkLoadRadius<<Env.ChunkPow);
+            int maxY = m_viewerPos.y+(VerticalChunkLoadRadius<<Env.ChunkPow);
             if (world.config.minY!=world.config.maxY)
             {
                 minY = Mathf.Max(minY, world.config.minY);
@@ -131,9 +131,9 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
                 {
                     // Translate array postions to world/chunk positions
                     Vector3Int newChunkPos = new Vector3Int(
-                        (m_chunkPositions[i].x<<Env.ChunkPower)+m_viewerPos.x,
-                        (m_chunkPositions[i].y<<Env.ChunkPower)+y,
-                        (m_chunkPositions[i].z<<Env.ChunkPower)+m_viewerPos.z
+                        (m_chunkPositions[i].x<<Env.ChunkPow)+m_viewerPos.x,
+                        (m_chunkPositions[i].y<<Env.ChunkPow)+y,
+                        (m_chunkPositions[i].z<<Env.ChunkPow)+m_viewerPos.z
                         );
 
                     Chunk chunk;
@@ -192,13 +192,13 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
 
         public void ProcessChunk(Chunk chunk)
         {
-            int xd = Helpers.Abs((m_viewerPos.x - chunk.pos.x) >> Env.ChunkPower);
-            int yd = Helpers.Abs((m_viewerPos.y - chunk.pos.y) >> Env.ChunkPower);
-            int zd = Helpers.Abs((m_viewerPos.z - chunk.pos.z) >> Env.ChunkPower);
+            int xd = Helpers.Abs((m_viewerPos.x - chunk.pos.x) >> Env.ChunkPow);
+            int yd = Helpers.Abs((m_viewerPos.y - chunk.pos.y) >> Env.ChunkPow);
+            int zd = Helpers.Abs((m_viewerPos.z - chunk.pos.z) >> Env.ChunkPow);
 
-            int tx = m_clipmap.TransformX(chunk.pos.x >> Env.ChunkPower);
-            int ty = m_clipmap.TransformY(chunk.pos.y >> Env.ChunkPower);
-            int tz = m_clipmap.TransformZ(chunk.pos.z >> Env.ChunkPower);
+            int tx = m_clipmap.TransformX(chunk.pos.x >> Env.ChunkPow);
+            int ty = m_clipmap.TransformY(chunk.pos.y >> Env.ChunkPow);
+            int tz = m_clipmap.TransformZ(chunk.pos.z >> Env.ChunkPow);
 
             ChunkStateManagerClient stateManager = (ChunkStateManagerClient)chunk.stateManager;
 
@@ -341,9 +341,9 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
 
                         if (chunk.pos.y==0)
                         {
-                            int tx = m_clipmap.TransformX(pos.x >> Env.ChunkPower);
-                            int ty = m_clipmap.TransformY(pos.y >> Env.ChunkPower);
-                            int tz = m_clipmap.TransformZ(pos.z >> Env.ChunkPower);
+                            int tx = m_clipmap.TransformX(pos.x >> Env.ChunkPow);
+                            int ty = m_clipmap.TransformY(pos.y >> Env.ChunkPow);
+                            int tz = m_clipmap.TransformZ(pos.z >> Env.ChunkPow);
 
                             if (!m_clipmap.IsInsideBounds_Transformed(tx,ty,tz))
                             {

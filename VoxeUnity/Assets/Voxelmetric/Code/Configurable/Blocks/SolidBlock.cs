@@ -18,16 +18,16 @@ public class SolidBlock : Block
         return false;
     }
 
-    public override void BuildBlock(Chunk chunk, Vector3Int localPos, Vector3Int globalPos)
+    public override void BuildBlock(Chunk chunk, Vector3Int localPos)
     {
-        WorldBlocks blocks = chunk.world.blocks;
+        ChunkBlocks blocks = chunk.blocks;
 
         for (int d = 0; d < 6; d++)
         {
             Direction dir = DirectionUtils.Get(d);
-            Block adjacentBlock = blocks.GetBlock(globalPos.Add(dir));
+            Block adjacentBlock = blocks.GetBlock(localPos.Add(dir));
             if (CanBuildFaceWith(adjacentBlock, dir))
-                BuildFace(chunk, localPos, globalPos, dir);
+                BuildFace(chunk, localPos, dir);
         }
     }
 }

@@ -43,7 +43,7 @@ namespace Voxelmetric.Code.VM
 
             clientSocket.BeginConnect(serverEndPoint, OnConnect, null);
         }
-    
+
         private void OnConnect(IAsyncResult ar)
         {
             try {
@@ -125,7 +125,7 @@ namespace Voxelmetric.Code.VM
                 if ( debugClient )
                     Debug.Log("VmClient.OnSend (" + Thread.CurrentThread.ManagedThreadId + "): send ended");
             }
-            catch (Exception ex) 
+            catch (Exception ex)
             {
                 Debug.LogError(ex);
                 Disconnect();

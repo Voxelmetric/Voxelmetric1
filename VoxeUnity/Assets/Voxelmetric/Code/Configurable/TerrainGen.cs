@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using Voxelmetric.Code.Core;
+using Voxelmetric.Code.Data_types;
 using Voxelmetric.Code.Load_Resources;
 using Voxelmetric.Code.Utilities;
 
@@ -28,7 +29,7 @@ public class TerrainGen
         // Verify all correct layers
         Layers = ProcessConfigs(world, layerFolder);
 
-        //Sort the layers by index
+        // Sort the layers by index
         Array.Sort(Layers);
     }
 
@@ -85,17 +86,24 @@ public class TerrainGen
 
     public void GenerateTerrain(Chunk chunk)
     {
-        for (int x = chunk.pos.x; x < chunk.pos.x + Env.ChunkSize; x++)
+        for (int z = chunk.pos.z - Env.ChunkPadding; z < chunk.pos.z + Env.ChunkSizePlusPadding; z++)
         {
-            for (int z = chunk.pos.z; z < chunk.pos.z + Env.ChunkSize; z++)
+            for (int x = chunk.pos.x - Env.ChunkPadding; x < chunk.pos.x + Env.ChunkSizePlusPadding; x++)
             {
-                GenerateTerrainForBlockColumn(chunk, x, z, false);
+                GenerateTerrainForChunk(chunk, x, z, false);
             }
         }
         GenerateStructuresForChunk(chunk);
     }
 
-    public int GenerateTerrainForBlockColumn(Chunk chunk, int x, int z, bool justGetHeight)
+    /// <summary>
+    /// Generates terrain for a given chunk
+    /// </summary>
+    /// <param name="chunk">Chunk for which terrain is generated</param>
+    /// <param name="x">Position on the x axis in world coordinates</param>
+    /// <param name="z">Position on the z axis in world coordinates</param>
+    /// <param name="justGetHeight">If true, no height data will be modified while performing the call</param>
+    public int GenerateTerrainForChunk(Chunk chunk, int x, int z, bool justGetHeight)
     {
         int height = 0;
         for (int i = 0; i < Layers.Length; i++)
@@ -113,6 +121,10 @@ public class TerrainGen
         return height;
     }
 
+    /// <summary>
+    /// Generates structures for a given chunk
+    /// </summary>
+    /// <param name="chunk">Chunk for which structures are generated</param>
     public void GenerateStructuresForChunk(Chunk chunk)
     {
         for (int i = 0; i < Layers.Length; i++)

@@ -1,9 +1,17 @@
-﻿using Voxelmetric.Code.Utilities;
+﻿using System.Threading;
+using Voxelmetric.Code.Utilities;
 
 namespace Voxelmetric.Code.Common
 {
 	public static class Helpers
 	{
+	    public static int MainThreadID = Thread.CurrentThread.ManagedThreadId;
+
+	    public static bool IsMainThread
+	    {
+	        get { return Thread.CurrentThread.ManagedThreadId==MainThreadID; }
+	    }
+
 		public static int GetIndex1DFrom2D(int x, int z, int sizeX)
 		{
 			return x + z * sizeX;
@@ -16,8 +24,13 @@ namespace Voxelmetric.Code.Common
 
 		public static int GetChunkIndex1DFrom3D(int x, int y, int z)
 		{
-			return x + (z << Env.ChunkPower) + (y << Env.ChunkPower2);
-		}
+            /*
+			 In the past, indexs were computed using:
+			 x + (z << Env.ChunkPower) + (y << Env.ChunkPower2);
+			 However, since then padding was introduced and real size might no longer be a power of 2
+			*/
+            return x+Env.ChunkPadding + Env.ChunkSizeWithPadding * ((z+Env.ChunkPadding) + (y+Env.ChunkPadding) * Env.ChunkSizeWithPadding);
+        }
 
 		public static void GetIndex2DFrom1D(int index, out int x, out int z, int sizeX)
 		{
@@ -32,14 +45,25 @@ namespace Voxelmetric.Code.Common
 			z = (index / sizeX) % sizeZ;
 		}
 
-		public static void GetChunkIndex3DFrom1D(int index, out int x, out int y, out int z)
-		{
-			x = index & Env.ChunkMask;
-			y = index >> Env.ChunkPower2;
-			z = (index >> Env.ChunkPower) & Env.ChunkMask;
-		}
+	    public static void GetChunkIndex3DFrom1D(int index, out int x, out int y, out int z)
+	    {
+	        /*
+			 In the past, indexs were computed using:
+			 x = index & Env.ChunkMask;
+			 y = index >> Env.ChunkPower2;
+			 z = (index >> Env.ChunkPower) & Env.ChunkMask;
+			 However, since then padding was introduced and real size might no longer be a power of 2
+			*/
+	        x = index % Env.ChunkSizeWithPadding;
+	        y = index / Env.ChunkSizeWithPaddingPow2;
+	        z = (index / Env.ChunkSizeWithPadding) % Env.ChunkSizeWithPadding;
 
-		public static T[] CreateArray1D<T>(int size)
+	        x -= Env.ChunkPadding;
+	        y -= Env.ChunkPadding;
+	        z -= Env.ChunkPadding;
+	    }
+
+	    public static T[] CreateArray1D<T>(int size)
 		{
 			return new T[size];
 		}

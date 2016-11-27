@@ -10,7 +10,7 @@ public class ColoredBlock : SolidBlock {
     public Color color;
     public TextureCollection texture { get { return ((ColoredBlockConfig)config).texture; } }
 
-    public override void BuildFace(Chunk chunk, Vector3Int localPos, Vector3Int globalPos, Direction direction)
+    public override void BuildFace(Chunk chunk, Vector3Int localPos, Direction direction)
     {
         VertexData[] vertexData = chunk.pools.PopVertexDataArray(4);
         VertexDataFixed[] vertexDataFixed = chunk.pools.PopVertexDataFixedArray(4);
@@ -19,7 +19,7 @@ public class ColoredBlock : SolidBlock {
                 vertexData[i] = chunk.pools.PopVertexData();
 
             BlockUtils.PrepareVertices(localPos, vertexData, direction);
-            BlockUtils.PrepareTexture(chunk, localPos, globalPos, vertexData, direction, texture);
+            BlockUtils.PrepareTexture(chunk, localPos, vertexData, direction, texture);
             BlockUtils.SetColors(vertexData, ref color);
             
             for (int i = 0; i<4; i++)

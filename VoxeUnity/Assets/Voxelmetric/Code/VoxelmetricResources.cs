@@ -20,7 +20,7 @@ namespace Voxelmetric.Code
 
         public TextureProvider GetTextureProvider(World world)
         {
-            //Check for the folder in the dictionary and if it doesn't exist create it
+            // Check for the folder in the dictionary and if it doesn't exist create it
             TextureProvider textureProvider;
             if (TextureProviders.TryGetValue(world.config.textureFolder, out textureProvider))
                 return textureProvider;
