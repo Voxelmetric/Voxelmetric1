@@ -86,9 +86,9 @@ public class TerrainGen
 
     public void GenerateTerrain(Chunk chunk)
     {
-        for (int z = chunk.pos.z - Env.ChunkPadding; z < chunk.pos.z + Env.ChunkSizePlusPadding; z++)
+        for (int z = chunk.pos.z; z < chunk.pos.z + Env.ChunkSize; z++)
         {
-            for (int x = chunk.pos.x - Env.ChunkPadding; x < chunk.pos.x + Env.ChunkSizePlusPadding; x++)
+            for (int x = chunk.pos.x; x < chunk.pos.x + Env.ChunkSize; x++)
             {
                 GenerateTerrainForChunk(chunk, x, z, false);
             }

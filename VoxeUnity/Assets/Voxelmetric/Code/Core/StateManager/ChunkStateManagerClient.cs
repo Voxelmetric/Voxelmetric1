@@ -341,7 +341,7 @@ namespace Voxelmetric.Code.Core.StateManager
             m_pendingStates = m_pendingStates.Reset(CurrStateLoadData);
             m_completedStates = m_completedStates.Reset(CurrStateLoadData);
             m_completedStatesSafe = m_completedStates;
-
+            
             m_taskRunning = true;
             IOPoolManager.Add(
                 new TaskPoolItem(
@@ -476,31 +476,93 @@ namespace Voxelmetric.Code.Core.StateManager
             foreach (var chunkEvent in Listeners)
             {
                 var stateManager = (ChunkStateManagerClient)chunkEvent;
-
                 Chunk neighborChunk = stateManager.chunk;
-                if (neighborChunk.pos.x!=chunk.pos.x)
-                    continue;
 
-                // Copy the bottom layers of neighbor chunk to the top layers of ours
-                if (neighborChunk.pos.y>chunk.pos.y)
+                // Sync vertical neighbors
+                if (neighborChunk.pos.x == chunk.pos.x &&
+                    neighborChunk.pos.z == chunk.pos.z)
                 {
-                    int srcIndex = Helpers.GetChunkIndex1DFrom3D(-1, 0, -1);
-                    int dstIndex = Helpers.GetChunkIndex1DFrom3D(-1, Env.ChunkSize, -1);
-                    chunk.blocks.Copy(neighborChunk.blocks, srcIndex, dstIndex, Env.ChunkSizeWithPaddingPow2);
+                    // Copy the bottom layer of a neighbor chunk to the top layer of ours
+                    if (neighborChunk.pos.y > chunk.pos.y)
+                    {
+                        int srcIndex = Helpers.GetChunkIndex1DFrom3D(-1, 0, -1);
+                        int dstIndex = Helpers.GetChunkIndex1DFrom3D(-1, Env.ChunkSize, -1);
+                        chunk.blocks.Copy(neighborChunk.blocks, srcIndex, dstIndex, Env.ChunkSizeWithPaddingPow2);
+                    }
+                    // Copy the top layer of a neighbor chunk to the bottom layer of ours
+                    else// if (neighborChunk.pos.y < chunk.pos.y)
+                    {
+                        int srcIndex = Helpers.GetChunkIndex1DFrom3D(-1, Env.ChunkMask, -1);
+                        int dstIndex = Helpers.GetChunkIndex1DFrom3D(-1, -1, -1);
+                        chunk.blocks.Copy(neighborChunk.blocks, srcIndex, dstIndex, Env.ChunkSizeWithPaddingPow2);
+                    }
                 }
-                // Copy the top layers of neighbor chunk to the bottom layers of ours
-                else// if (neighborChunk.pos.y < chunk.pos.y)
+
+                // Sync front and back neighbors
+                if (neighborChunk.pos.x == chunk.pos.x &&
+                    neighborChunk.pos.y == chunk.pos.y)
                 {
-                    int srcIndex = Helpers.GetChunkIndex1DFrom3D(-1, Env.ChunkMask, -1);
-                    int dstIndex = Helpers.GetChunkIndex1DFrom3D(-1, -1, -1);
-                    chunk.blocks.Copy(neighborChunk.blocks, srcIndex, dstIndex, Env.ChunkSizeWithPaddingPow2);
+                    // Copy the front layer of a neighbor chunk to the back layer of ours
+                    if (neighborChunk.pos.z > chunk.pos.z)
+                    {
+                        for (int y = -1; y < Env.ChunkSizePlusPadding; y++)
+                        {
+                            for (int x = -1; x < Env.ChunkSizePlusPadding; x++)
+                            {
+                                BlockData data = neighborChunk.blocks.Get(new Vector3Int(x,y,0));
+                                chunk.blocks.Set(new Vector3Int(x,y,Env.ChunkSize), data);
+                            }
+                        }
+                    }
+                    // Copy the top back layer of a neighbor chunk to the front layer of ours
+                    else// if (neighborChunk.pos.z < chunk.pos.z)
+                    {
+                        for (int y = -1; y < Env.ChunkSizePlusPadding; y++)
+                        {
+                            for (int x = -1; x < Env.ChunkSizePlusPadding; x++)
+                            {
+                                BlockData data = neighborChunk.blocks.Get(new Vector3Int(x, y, Env.ChunkMask));
+                                chunk.blocks.Set(new Vector3Int(x, y, -1), data);
+                            }
+                        }
+                    }
+                }
+
+                // Sync right and left neighbors
+                if (neighborChunk.pos.y == chunk.pos.y &&
+                    neighborChunk.pos.z == chunk.pos.z)
+                {
+                    // Copy the right layer of a neighbor chunk to the left layer of ours
+                    if (neighborChunk.pos.x > chunk.pos.x)
+                    {
+                        for (int y = -1; y < Env.ChunkSizePlusPadding; y++)
+                        {
+                            for (int z = -1; z < Env.ChunkSizePlusPadding; z++)
+                            {
+                                BlockData data = neighborChunk.blocks.Get(new Vector3Int(0, y, z));
+                                chunk.blocks.Set(new Vector3Int(Env.ChunkSize, y, z), data);
+                            }
+                        }
+                    }
+                    // Copy the left layer of a neighbor chunk to the right layer of ours
+                    else// if (neighborChunk.pos.x < chunk.pos.x)
+                    {
+                        for (int y = -1; y < Env.ChunkSizePlusPadding; y++)
+                        {
+                            for (int z = -1; z < Env.ChunkSizePlusPadding; z++)
+                            {
+                                BlockData data = neighborChunk.blocks.Get(new Vector3Int(Env.ChunkMask, y, z));
+                                chunk.blocks.Set(new Vector3Int(-1, y, z), data);
+                            }
+                        }
+                    }
                 }
             }
         }
 
         private bool SynchronizeChunk()
         {
-            // 6 neighbors are necessary
+            // 6 neighbors are necessary to be loaded
             if (!SynchronizeNeighbors())
                 return false;
 

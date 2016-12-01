@@ -36,8 +36,6 @@ namespace Voxelmetric.Code.Core
 
         public readonly List<BlockPos> modifiedBlocks = new List<BlockPos>();
         public bool contentsInvalidated;
-        public bool topLayerInvalidated;
-        public bool bottomLayerInvalidated;
 
         private static byte[] emptyBytes;
         public static byte[] EmptyBytes
@@ -85,8 +83,6 @@ namespace Voxelmetric.Code.Core
             rebuildMaskCollider = -1;
 
             contentsInvalidated = true;
-            topLayerInvalidated = true;
-            bottomLayerInvalidated = true;
 
             modifiedBlocks.Clear();
         }
