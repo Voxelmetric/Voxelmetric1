@@ -48,6 +48,8 @@ namespace Voxelmetric.Code.Core.StateManager
         private int m_maxRenderZ;
         private int m_lowestEmptyBlock;
 
+        private bool m_syncEdgeBlocks;
+
         public ChunkStateManagerClient(Chunk chunk) : base(chunk)
         {
         }
@@ -72,6 +74,8 @@ namespace Voxelmetric.Code.Core.StateManager
             PossiblyVisible = false;
 
             ResetGeometryBounds();
+
+            m_syncEdgeBlocks = true;
         }
 
         private void ResetGeometryBounds()
@@ -472,6 +476,12 @@ namespace Voxelmetric.Code.Core.StateManager
 
         private void SynchronizeYLayer()
         {
+            // It is only necessary to perform the sychronization once when data is generated.
+            // All subsequend changes of blocks are automatically synchronized inside ChunkBlocks
+            if (!m_syncEdgeBlocks)
+                return;
+            m_syncEdgeBlocks = false;
+
             // Search for neighbors we are vertically aligned with
             foreach (var chunkEvent in Listeners)
             {
