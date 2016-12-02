@@ -66,7 +66,7 @@ public class CustomMeshBlockConfig: BlockConfig
                     Vertex = mesh.vertices[i]+positionOffset,
                     UV = mesh.uv.Length!=0 ? mesh.uv[i] : new Vector2(),
                     //Coloring of blocks is not yet implemented so just pass in full brightness
-                    Color = new Color32(1, 1, 1, 1)
+                    Color = new Color32(255, 255, 255, 255)
                 };
             }
 
