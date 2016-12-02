@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Threading;
+﻿using System.Collections.Generic;
 using UnityEngine.Assertions;
 using Voxelmetric.Code.Common;
 using Voxelmetric.Code.Data_types;

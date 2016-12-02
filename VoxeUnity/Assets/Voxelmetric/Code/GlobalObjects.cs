@@ -11,8 +11,6 @@ namespace Voxelmetric.Code
             Globals.InitIOPool();
             Globals.InitMemPools();
             Globals.InitWatch();
-
-            Profiler.maxNumberOfSamplesPerFrame = Mathf.Max(Profiler.maxNumberOfSamplesPerFrame, 1000000);
         }
 
         void Update ()

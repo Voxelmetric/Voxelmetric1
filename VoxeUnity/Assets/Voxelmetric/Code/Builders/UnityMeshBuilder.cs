@@ -50,7 +50,6 @@ namespace Voxelmetric.Code.Builders
             mesh.tangents = tangents;
             mesh.SetTriangles(buffer.Triangles, 0);
             mesh.RecalculateNormals();
-            mesh.Optimize();
 
             // Return memory back to pool
             Globals.MemPools.PushVector3Array(vertices);
