@@ -30,7 +30,7 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
         // Distance in chunks for loading chunks
         [Range(HorizontalMinRange, HorizontalMaxRange-1)] public int HorizontalChunkLoadRadius = 6;
         // Distance in chunks for unloading chunks
-        [Range(HorizontalMinRange+1, HorizontalMaxRange)] public int HorizontalChunkDeleteRadius = 8;
+        [Range(HorizontalMinRange+1, HorizontalMaxRange)] public int HorizontalChunkDeleteRadius = 7;
         // Distance in chunks for loading chunks
         [Range(VerticalMinRange, VerticalMaxRange - 1)] public int VerticalChunkLoadRadius = 3;
         // Distance in chunks for unloading chunks
