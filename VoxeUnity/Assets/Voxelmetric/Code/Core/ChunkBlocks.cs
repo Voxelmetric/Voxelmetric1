@@ -106,6 +106,9 @@ namespace Voxelmetric.Code.Core
                     int x, y, z;
                     Helpers.GetChunkIndex3DFrom1D(context.Index, out x, out y, out z);
 
+                    if (x<0 || y<0 || z<0 || x>Env.ChunkMask || y>Env.ChunkMask || z>Env.ChunkMask)
+                        continue;
+
                     Vector3Int pos = new Vector3Int(x, y, z);
                     Vector3Int globalPos = pos+chunk.pos;
 
@@ -164,7 +167,7 @@ namespace Voxelmetric.Code.Core
                             if ((pos.x == 0) && (lx + Env.ChunkSize == cx))
                             {
                                 rebuildMaskGeometry = rebuildMaskGeometry | (1 << i);
-                                
+
                                 // Mirror the block to the neighbor edge
                                 int neighborIndex = Helpers.GetChunkIndex1DFrom3D(Env.ChunkSize, y, z);
                                 listenerChunk.blocks.blocks[neighborIndex] = context.Block;

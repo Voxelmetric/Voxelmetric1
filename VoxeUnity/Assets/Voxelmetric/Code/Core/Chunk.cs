@@ -91,7 +91,9 @@ namespace Voxelmetric.Code.Core
 
             stateManager = new ChunkStateManagerClient(this);
             blocks = new ChunkBlocks(this);
-            logic = new ChunkLogic(this);
+
+            if (world.config.randomUpdateFrequency>0.0f)
+                logic = new ChunkLogic(this);
 
             GeometryHandler = new ChunkRenderGeometryHandler(this);
             ChunkColliderGeometryHandler = new ChunkColliderGeometryHandler(this);
@@ -118,7 +120,8 @@ namespace Voxelmetric.Code.Core
         {
             stateManager.Reset();
             blocks.Reset();
-            logic.Reset();
+            if (logic!=null)
+                logic.Reset();
 
             GeometryHandler.Reset();
             ChunkColliderGeometryHandler.Reset();
@@ -132,8 +135,11 @@ namespace Voxelmetric.Code.Core
             sb.Append(pos);
             sb.Append(", blocks=");
             sb.Append(blocks);
-            sb.Append(", logic=");
-            sb.Append(logic);
+            if (logic!=null)
+            {
+                sb.Append(", logic=");
+                sb.Append(logic);
+            }
             sb.Append(", render=");
             sb.Append(GeometryHandler);
             sb.Append(", ");
@@ -151,7 +157,8 @@ namespace Voxelmetric.Code.Core
             // Do not update our chunk until it has all its data prepared
             if (stateManager.IsStateCompleted(ChunkState.LoadData))
             {
-                logic.Update();
+                if (logic!=null)
+                    logic.Update();
                 blocks.Update();
             }
 

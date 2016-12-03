@@ -25,7 +25,7 @@ namespace Voxelmetric.Code.Core
 
         public void Update()
         {
-            randomUpdateTime += Time.fixedDeltaTime;
+            randomUpdateTime += Time.deltaTime;
             if (randomUpdateTime>=chunk.world.config.randomUpdateFrequency)
             {
                 randomUpdateTime = 0;

@@ -70,7 +70,7 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
             // Add some arbirtary value so that m_viewerPosPrev is different from m_viewerPos
             m_viewerPos += Vector3Int.one;
 
-            m_timeBudgetHandler.TimeBudgetMs = 3; // Time allow to be spent for building meshes
+            m_timeBudgetHandler.TimeBudgetMs = 3; // Time in ms allowed to be spent building meshes
         }
 
         void Update()
