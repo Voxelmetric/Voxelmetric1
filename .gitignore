@@ -17,6 +17,7 @@ VoxeUnity/*.userprefs
 VoxeUnity/*.pidb
 VoxeUnity/*.booproj
 .vs/
+.vscode/
 
 #Unity3D Generated File On Crash Reports
 sysinfo.txt

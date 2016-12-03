@@ -18,8 +18,10 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
     {
         private const int HorizontalMinRange = 4;
         private const int HorizontalMaxRange = 32;
+        private const int HorizontalDefRange = 6;
         private const int VerticalMinRange = 2;
         private const int VerticalMaxRange = 32;
+        private const int VerticalDefRange = 3;
 
         // The world we are attached to
         public World world;
@@ -27,13 +29,9 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
         private Camera m_camera;
 
         // Distance in chunks for loading chunks
-        [Range(HorizontalMinRange, HorizontalMaxRange-1)] public int HorizontalChunkLoadRadius = 6;
-        // Distance in chunks for unloading chunks
-        [Range(HorizontalMinRange+1, HorizontalMaxRange)] public int HorizontalChunkDeleteRadius = 7;
+        [Range(HorizontalMinRange, HorizontalMaxRange)] public int HorizontalChunkLoadRadius = HorizontalDefRange;
         // Distance in chunks for loading chunks
-        [Range(VerticalMinRange, VerticalMaxRange - 1)] public int VerticalChunkLoadRadius = 3;
-        // Distance in chunks for unloading chunks
-        [Range(VerticalMinRange + 1, VerticalMaxRange)] public int VerticalChunkDeleteRadius = 4;
+        [Range(VerticalMinRange, VerticalMaxRange)] public int VerticalChunkLoadRadius = VerticalDefRange;
         // Makes the world regenerate around the attached camera. If false, Y sticks at 0.
         public bool FollowCamera;
         // Toogles frustum culling
@@ -45,9 +43,7 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
         public bool Diag_DrawLoadRange;
 
         private int m_chunkHorizontalLoadRadiusPrev;
-        private int m_chunkHorizontalDeleteRadiusPrev;
         private int m_chunkVerticalLoadRadiusPrev;
-        private int m_chunkVerticalDeleteRadiusPrev;
 
         private Vector3Int[] m_chunkPositions;
         private Plane[] m_cameraPlanes = new Plane[6];
@@ -68,9 +64,7 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
         void Start()
         {
             m_chunkHorizontalLoadRadiusPrev = HorizontalChunkLoadRadius;
-            m_chunkHorizontalDeleteRadiusPrev = HorizontalChunkDeleteRadius;
             m_chunkVerticalLoadRadiusPrev = VerticalChunkLoadRadius;
-            m_chunkVerticalDeleteRadiusPrev = VerticalChunkDeleteRadius;
 
             UpdateViewerPosition();
             // Add some arbirtary value so that m_viewerPosPrev is different from m_viewerPos
@@ -189,8 +183,8 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
 
             // Remove the chunk if it is too far away
             if (
-                xd*xd+zd*zd>=HorizontalChunkDeleteRadius*HorizontalChunkDeleteRadius ||
-                yd*yd>=VerticalChunkDeleteRadius*VerticalChunkDeleteRadius
+                xd*xd+zd*zd>HorizontalChunkLoadRadius*HorizontalChunkLoadRadius ||
+                yd*yd>VerticalChunkLoadRadius*VerticalChunkLoadRadius
                 )
             {
                 chunk.stateManager.RequestState(ChunkState.Remove);
@@ -213,18 +207,10 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
             // Make sure horizontal ranges are always correct
             HorizontalChunkLoadRadius = Mathf.Max(HorizontalMinRange, HorizontalChunkLoadRadius);
             HorizontalChunkLoadRadius = Mathf.Min(HorizontalMaxRange-1, HorizontalChunkLoadRadius);
-            if (HorizontalChunkDeleteRadius<=HorizontalChunkLoadRadius)
-                HorizontalChunkDeleteRadius = HorizontalChunkDeleteRadius+1;
-            HorizontalChunkDeleteRadius = Mathf.Max(HorizontalMinRange+1, HorizontalChunkDeleteRadius);
-            HorizontalChunkDeleteRadius = Mathf.Min(HorizontalMaxRange, HorizontalChunkDeleteRadius);
 
             // Make sure vertical ranges are always correct
             VerticalChunkLoadRadius = Mathf.Max(VerticalMinRange, VerticalChunkLoadRadius);
             VerticalChunkLoadRadius = Mathf.Min(VerticalMaxRange-1, VerticalChunkLoadRadius);
-            if (VerticalChunkDeleteRadius<=VerticalChunkLoadRadius)
-                VerticalChunkDeleteRadius = VerticalChunkDeleteRadius+1;
-            VerticalChunkDeleteRadius = Mathf.Max(VerticalMinRange+1, VerticalChunkDeleteRadius);
-            VerticalChunkDeleteRadius = Mathf.Min(VerticalMaxRange, VerticalChunkDeleteRadius);
 
             bool isDifferenceXZ = HorizontalChunkLoadRadius!=m_chunkHorizontalLoadRadiusPrev || m_chunkPositions==null;
             bool isDifferenceY = VerticalChunkLoadRadius!=m_chunkVerticalLoadRadiusPrev;
@@ -236,8 +222,8 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
                 m_chunkPositions = ChunkLoadOrder.ChunkPositions(HorizontalChunkLoadRadius);
             // Invalidate prev pos so that updated ranges can take effect right away
             if (isDifferenceXZ || isDifferenceY ||
-                HorizontalChunkDeleteRadius!=m_chunkHorizontalDeleteRadiusPrev ||
-                VerticalChunkDeleteRadius!=m_chunkVerticalDeleteRadiusPrev)
+                HorizontalChunkLoadRadius != m_chunkHorizontalLoadRadiusPrev ||
+                VerticalChunkLoadRadius != m_chunkVerticalLoadRadiusPrev)
                 m_viewerPos = m_viewerPos+Vector3Int.one;
         }
 
@@ -286,7 +272,7 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
                         Vector3Int pos = chunk.pos;
                         int xd = Helpers.Abs((m_viewerPos.x-pos.x)>>Env.ChunkPow);
                         int zd = Helpers.Abs((m_viewerPos.z-pos.z)>>Env.ChunkPow);
-                        if (xd*xd+zd*zd>=HorizontalChunkDeleteRadius*HorizontalChunkDeleteRadius)
+                        if (xd*xd+zd*zd>HorizontalChunkLoadRadius*HorizontalChunkLoadRadius)
                         {
                             Gizmos.color = Color.red;
                             Gizmos.DrawWireCube(
