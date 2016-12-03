@@ -15,6 +15,7 @@ namespace Assets.Voxelmetric.Examples
             Benchmark_AbsValue();
             Benchmark_3D_to_1D_Index();
             Benchmark_1D_to_3D_Index();
+            Benchmark_Noise();
             Application.Quit();
         }
 
@@ -154,7 +155,7 @@ namespace Assets.Voxelmetric.Examples
                 number[1] = 0;
                 number[2] = 0;
                 number[3] = 0;
-                Clock.BenchmarkTime(() =>
+                t = Clock.BenchmarkTime(() =>
                 {
                     ++number[1];
                     ++number[2];
@@ -179,6 +180,48 @@ namespace Assets.Voxelmetric.Examples
                     );
                 Debug.LogFormat("GetChunkIndex1DFrom3D -> out:{0}, x:{1},y:{2},z:{3}, time:{4}", number[0], number[1], number[2], number[3], t.ToString(CultureInfo.InvariantCulture));
                 writer.WriteLine("GetChunkIndex1DFrom3D -> out:{0}, x:{1},y:{2},z:{3}, time:{4}", number[0], number[1], number[2], number[3], t.ToString(CultureInfo.InvariantCulture));
+            }
+        }
+
+        void Benchmark_Noise()
+        {
+            Noise noise = new Noise("benchmark");
+
+            Debug.Log("Bechmark - 1D, 2D, 3D noise");
+            using (StreamWriter writer = File.CreateText("perf_noise.txt"))
+            {
+                float[] number = { 0, 0, 0, 0 };
+                double t = Clock.BenchmarkTime(() => {
+                            number[1] += 1.0f;
+                            number[0] += noise.Generate(number[1]);
+                        }, 1000000);
+                Debug.LogFormat("noise.Generate 1D -> out:{0}, time:{1}", number[0], t.ToString(CultureInfo.InvariantCulture));
+                writer.WriteLine("noise.Generate 1D -> out:{0}, time:{1}", number[0], t.ToString(CultureInfo.InvariantCulture));
+
+                number[0] = 0;
+                number[1] = 0;
+                number[2] = 0;
+                number[3] = 0;
+                t = Clock.BenchmarkTime(() => {
+                            number[1] += 1.0f;
+                            number[2] += 1.0f;
+                            number[0] += noise.Generate(number[1], number[2]);
+                        }, 1000000);
+                Debug.LogFormat("noise.Generate 2D -> out:{0}, time:{1}", number[0], t.ToString(CultureInfo.InvariantCulture));
+                writer.WriteLine("noise.Generate 2D -> out:{0}, time:{1}", number[0], t.ToString(CultureInfo.InvariantCulture));
+
+                number[0] = 0;
+                number[1] = 0;
+                number[2] = 0;
+                number[3] = 0;
+                t = Clock.BenchmarkTime(() => {
+                            number[1] += 1.0f;
+                            number[2] += 1.0f;
+                            number[3] += 1.0f;
+                            number[0] += noise.Generate(number[1], number[2], number[3]);
+                        }, 1000000);
+                Debug.LogFormat("noise.Generate 3D -> out:{0}, time:{1}", number[0], t.ToString(CultureInfo.InvariantCulture));
+                writer.WriteLine("noise.Generate 3D -> out:{0}, time:{1}", number[0], t.ToString(CultureInfo.InvariantCulture));
             }
         }
     }
