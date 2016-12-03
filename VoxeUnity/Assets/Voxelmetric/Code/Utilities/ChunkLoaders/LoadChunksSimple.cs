@@ -181,10 +181,13 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
             int yd = Helpers.Abs((m_viewerPos.y-chunk.pos.y)>>Env.ChunkPow);
             int zd = Helpers.Abs((m_viewerPos.z-chunk.pos.z)>>Env.ChunkPow);
 
+            int hRadius = HorizontalChunkLoadRadius+1;
+            int vRadius = VerticalChunkLoadRadius+1;
+
             // Remove the chunk if it is too far away
             if (
-                xd*xd+zd*zd>HorizontalChunkLoadRadius*HorizontalChunkLoadRadius ||
-                yd*yd>VerticalChunkLoadRadius*VerticalChunkLoadRadius
+                xd*xd+zd*zd>=hRadius*hRadius ||
+                yd*yd>=vRadius*vRadius
                 )
             {
                 chunk.stateManager.RequestState(ChunkState.Remove);
@@ -272,7 +275,7 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
                         Vector3Int pos = chunk.pos;
                         int xd = Helpers.Abs((m_viewerPos.x-pos.x)>>Env.ChunkPow);
                         int zd = Helpers.Abs((m_viewerPos.z-pos.z)>>Env.ChunkPow);
-                        if (xd*xd+zd*zd>HorizontalChunkLoadRadius*HorizontalChunkLoadRadius)
+                        if (xd*xd+zd*zd>=(HorizontalChunkLoadRadius+1)*(HorizontalChunkLoadRadius+1))
                         {
                             Gizmos.color = Color.red;
                             Gizmos.DrawWireCube(
