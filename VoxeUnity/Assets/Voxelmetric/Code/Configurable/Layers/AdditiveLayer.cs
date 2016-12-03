@@ -47,7 +47,7 @@ public class AdditiveLayer: TerrainLayer
         // Calculate height to add and sum it with the min height (because the height of this
         // layer should fluctuate between minHeight and minHeight+the max noise) and multiply
         // it by strength so that a fraction of the result that gets used can be decided
-        int heightToAdd = GetNoise(x, z, frequency, amplitude, exponent);
+        int heightToAdd = GetNoise(x, 0, z, frequency, amplitude, exponent);
         heightToAdd += minHeight;
         heightToAdd = (int)(heightToAdd * strength);
 
