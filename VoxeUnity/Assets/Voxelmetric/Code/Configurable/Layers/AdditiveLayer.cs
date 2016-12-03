@@ -30,21 +30,28 @@ public class AdditiveLayer: TerrainLayer
         amplitude = maxHeight - minHeight;
     }
 
-    public override int GenerateLayer(Chunk chunk, int x, int z, int heightSoFar, float strength, bool justGetHeight = false)
+    public override int GetHeight(Chunk chunk, int x, int z, int heightSoFar, float strength)
     {
-        // Calculate height to add with the perlin noise using settings from the config
-        // and add to that the min height from the config (because the height of this
-        // layer should fluctuate between that min height and the min height + the max noise
-        // And multiply by strength so that it can decide the fraction of the result that gets used
+        // Calculate height to add and sum it with the min height (because the height of this
+        // layer should fluctuate between minHeight and minHeight+the max noise) and multiply
+        // it by strength so that a fraction of the result that gets used can be decided
         int heightToAdd = GetNoise(x, 0, z, frequency, amplitude, exponent);
         heightToAdd += minHeight;
         heightToAdd = (int)(heightToAdd * strength);
 
-        //If we're not just getting the height apply the changes
-        if (!justGetHeight)
-        {
-            SetBlocks(chunk, x, z, heightSoFar, heightSoFar + heightToAdd, blockToPlace);
-        }
+        return heightSoFar + heightToAdd;
+    }
+
+    public override int GenerateLayer(Chunk chunk, int x, int z, int heightSoFar, float strength)
+    {
+        // Calculate height to add and sum it with the min height (because the height of this
+        // layer should fluctuate between minHeight and minHeight+the max noise) and multiply
+        // it by strength so that a fraction of the result that gets used can be decided
+        int heightToAdd = GetNoise(x, z, frequency, amplitude, exponent);
+        heightToAdd += minHeight;
+        heightToAdd = (int)(heightToAdd * strength);
+
+        SetBlocks(chunk, x, z, heightSoFar, heightSoFar + heightToAdd, blockToPlace);
 
         return heightSoFar + heightToAdd;
     }

@@ -89,20 +89,19 @@ public class TerrainGen
         {
             for (int x = chunk.pos.x; x < chunk.pos.x + Env.ChunkSize; x++)
             {
-                GenerateTerrainForChunk(chunk, x, z, false);
+                GenerateTerrainForChunk(chunk, x, z);
             }
         }
         GenerateStructuresForChunk(chunk);
     }
 
     /// <summary>
-    /// Generates terrain for a given chunk
+    /// Retrieves the terrain height in a given chunk on given coordinates
     /// </summary>
     /// <param name="chunk">Chunk for which terrain is generated</param>
     /// <param name="x">Position on the x axis in world coordinates</param>
     /// <param name="z">Position on the z axis in world coordinates</param>
-    /// <param name="justGetHeight">If true, no height data will be modified while performing the call</param>
-    public int GenerateTerrainForChunk(Chunk chunk, int x, int z, bool justGetHeight)
+    public int GetTerrainHeightForChunk(Chunk chunk, int x, int z)
     {
         int height = 0;
         for (int i = 0; i < Layers.Length; i++)
@@ -115,7 +114,31 @@ public class TerrainGen
             }
 
             if (!layer.isStructure)
-                height = Layers[i].GenerateLayer(chunk, x, z, height, 1, justGetHeight);
+                height = Layers[i].GetHeight(chunk, x, z, height, 1);
+        }
+        return height;
+    }
+
+    /// <summary>
+    /// Generates terrain for a given chunk
+    /// </summary>
+    /// <param name="chunk">Chunk for which terrain is generated</param>
+    /// <param name="x">Position on the x axis in world coordinates</param>
+    /// <param name="z">Position on the z axis in world coordinates</param>
+    public int GenerateTerrainForChunk(Chunk chunk, int x, int z)
+    {
+        int height = 0;
+        for (int i = 0; i < Layers.Length; i++)
+        {
+            TerrainLayer layer = Layers[i];
+            if (layer == null)
+            {
+                Debug.LogError("Layer name '" + layer + "' in layer order didn't match a valid layer");
+                continue;
+            }
+
+            if (!layer.isStructure)
+                height = Layers[i].GenerateLayer(chunk, x, z, height, 1);
         }
         return height;
     }

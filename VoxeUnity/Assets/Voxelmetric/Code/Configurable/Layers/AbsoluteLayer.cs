@@ -30,25 +30,40 @@ public class AbsoluteLayer : TerrainLayer
         amplitude = maxHeight - minHeight;
     }
 
-    public override int GenerateLayer(Chunk chunk, int x, int z, int heightSoFar, float strength, bool justGetHeight = false)
+    public override int GetHeight(Chunk chunk, int x, int z, int heightSoFar, float strength)
     {
-        // Calculate height to add with the perlin noise using settings from the config
-        // and add to that the min height from the config (because the height of this
-        // layer should fluctuate between that min height and the min height + the max noise
-        // And multiply by strength so that it can decide the fraction of the result that gets used
+        // Calculate height to add and sum it with the min height (because the height of this
+        // layer should fluctuate between minHeight and minHeight+the max noise) and multiply
+        // it by strength so that a fraction of the result that gets used can be decided
         int heightToAdd = GetNoise(x, 0, z, frequency, amplitude, exponent);
         heightToAdd += minHeight;
         heightToAdd = (int)(heightToAdd * strength);
 
-        //Absolute layers add from the minY and up but if the layer height is
-        // lower than the existing terrain there's nothing to add so just return the initial value
+        // Absolute layers add from the minY and up but if the layer height is lower than
+        // the existing terrain there's nothing to add so just return the initial value
         if (heightToAdd > heightSoFar)
         {
-            //If we're not just getting the height apply the changes
-            if (!justGetHeight)
-            {
-                SetBlocks(chunk, x, z, heightSoFar, heightToAdd, blockToPlace);
-            }
+            //Return the height of this layer from minY as this is the new height of the column
+            return heightToAdd;
+        }
+
+        return heightSoFar;
+    }
+
+    public override int GenerateLayer(Chunk chunk, int x, int z, int heightSoFar, float strength)
+    {
+        // Calculate height to add and sum it with the min height (because the height of this
+        // layer should fluctuate between minHeight and minHeight+the max noise) and multiply
+        // it by strength so that a fraction of the result that gets used can be decided
+        int heightToAdd = GetNoise(x, z, frequency, amplitude, exponent);
+        heightToAdd += minHeight;
+        heightToAdd = (int)(heightToAdd * strength);
+
+        // Absolute layers add from the minY and up but if the layer height is lower than
+        // the existing terrain there's nothing to add so just return the initial value
+        if (heightToAdd > heightSoFar)
+        {
+            SetBlocks(chunk, x, z, heightSoFar, heightToAdd, blockToPlace);
 
             //Return the height of this layer from minY as this is the new height of the column
             return heightToAdd;

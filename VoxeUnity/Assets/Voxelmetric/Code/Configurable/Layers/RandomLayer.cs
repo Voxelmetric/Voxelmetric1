@@ -23,15 +23,27 @@ public class RandomLayer: TerrainLayer
         chance = float.Parse(properties["chance"]);
     }
 
-    public override int GenerateLayer(Chunk chunk, int x, int z, int heightSoFar, float strength, bool justGetHeight = false)
+    public override int GetHeight(Chunk chunk, int x, int z, int heightSoFar, float strength)
+    {
+        var lpos = new Vector3Int(x, heightSoFar + 1, z);
+        float posChance = Randomization.Random(lpos.GetHashCode(), 200);
+
+        if (chance > posChance)
+        {
+            return heightSoFar + 1;
+        }
+
+        return heightSoFar;
+    }
+
+    public override int GenerateLayer(Chunk chunk, int x, int z, int heightSoFar, float strength)
     {
         var lpos = new Vector3Int(x, heightSoFar+1, z);
         float posChance = Randomization.Random(lpos.GetHashCode(), 200);
 
         if (chance > posChance)
         {
-            if (!justGetHeight)
-                SetBlocks(chunk, x, z, heightSoFar, heightSoFar + 1, blockToPlace);
+            SetBlocks(chunk, x, z, heightSoFar, heightSoFar + 1, blockToPlace);
 
             return heightSoFar + 1;
         }

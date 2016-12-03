@@ -28,6 +28,16 @@ public class StructureLayer : TerrainLayer
         structure.Init(world);
     }
 
+    public override int GetHeight(Chunk chunk, int x, int z, int heightSoFar, float strength)
+    {
+        return heightSoFar;
+    }
+
+    public override int GenerateLayer(Chunk chunk, int x, int z, int heightSoFar, float strength)
+    {
+        return heightSoFar;
+    }
+
     public override void GenerateStructures(Chunk chunk)
     {
         int minX = chunk.pos.x - structure.negX;
@@ -49,7 +59,7 @@ public class StructureLayer : TerrainLayer
                         Randomization.Random(pos.Add(0, 0, 1).GetHashCode(),44, true) > chanceAtPos &&
                         Randomization.Random(pos.Add(0, 0, -1).GetHashCode(),44, true) > chanceAtPos)
                     {
-                        int height = terrainGen.GenerateTerrainForChunk(chunk, x, z, true);
+                        int height = terrainGen.GetTerrainHeightForChunk(chunk, x, z);
                         structure.Build(world, chunk, new Vector3Int(x, height, z), this);
                     }
                 }

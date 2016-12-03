@@ -21,14 +21,14 @@ public class SurfaceLayer : TerrainLayer
         }
     }
 
-    public override int GenerateLayer(Chunk chunk, int x, int z, int heightSoFar, float strength, bool justGetHeight = false)
+    public override int GetHeight(Chunk chunk, int x, int z, int heightSoFar, float strength)
     {
+        return heightSoFar + 1;
+    }
 
-        //If we're not just getting the height apply the changes
-        if (!justGetHeight)
-        {
-            SetBlocks(chunk, x, z, heightSoFar, heightSoFar + 1, blockToPlace);
-        }
+    public override int GenerateLayer(Chunk chunk, int x, int z, int heightSoFar, float strength)
+    {
+        SetBlocks(chunk, x, z, heightSoFar, heightSoFar + 1, blockToPlace);
 
         return heightSoFar + 1;
     }

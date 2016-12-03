@@ -6,7 +6,7 @@ using Voxelmetric.Code.Data_types;
 using Voxelmetric.Code.Load_Resources;
 using Voxelmetric.Code.Utilities;
 
-public class TerrainLayer : IComparable, IEquatable<TerrainLayer>
+public abstract class TerrainLayer : IComparable, IEquatable<TerrainLayer>
 {
     protected World world;
     protected Noise noiseGen;
@@ -38,10 +38,27 @@ public class TerrainLayer : IComparable, IEquatable<TerrainLayer>
 
     public virtual void Init(LayerConfig config) { }
 
-    public virtual int GenerateLayer(Chunk chunk, int x, int z, int heightSoFar, float strength, bool justGetHeight = false)
-    {
-        return heightSoFar;
-    }
+    /// <summary>
+    /// Retrieves the height on given coordinates
+    /// </summary>
+    /// <param name="chunk">Chunk for which we search for height</param>
+    /// <param name="x">Position on the x-axis in world coordinates</param>
+    /// <param name="z">Position on the z-axis in world coordinates</param>
+    /// <param name="heightSoFar">Position on the y-axis in world coordinates</param>
+    /// <param name="strength">How much features are pronounced</param>
+    /// <returns>List of chunks waiting to be saved.</returns>
+    public abstract int GetHeight(Chunk chunk, int x, int z, int heightSoFar, float strength);
+
+    /// <summary>
+    /// Retrieves the height on given coordinates and if possible, updates the block within chunk based on the layer's configuration
+    /// </summary>
+    /// <param name="chunk">Chunk for which we search for height</param>
+    /// <param name="x">Position on the x-axis in world coordinates</param>
+    /// <param name="z">Position on the z-axis in world coordinates</param>
+    /// <param name="heightSoFar">Position on the y-axis in world coordinates</param>
+    /// <param name="strength">How much features are pronounced</param>
+    /// <returns>List of chunks waiting to be saved.</returns>
+    public abstract int GenerateLayer(Chunk chunk, int x, int z, int heightSoFar, float strength);
 
     /// <summary>
     /// Called once for each chunk. Should generate any
