@@ -82,14 +82,14 @@ namespace Voxelmetric.Code.Common.IO
 
             T[] ret = new T[objArrSize];
             IntPtr buffer = pool.Pop(data.Length);
-            
+
             Marshal.Copy(data, 0, buffer, data.Length);
 
             long pBuffer = (long)buffer;
             for (int i = 0; i < objArrSize; i++, pBuffer += objSize)
                 ret[i] = (T)Marshal.PtrToStructure((IntPtr)pBuffer, typeof(T));
 
-            pool.Push(objSize);
+            pool.Push(data.Length);
 
             return ret;
         }
