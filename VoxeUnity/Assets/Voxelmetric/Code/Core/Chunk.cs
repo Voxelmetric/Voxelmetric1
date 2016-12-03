@@ -63,8 +63,6 @@ namespace Voxelmetric.Code.Core
             return chunk;
         }
 
-        private static readonly int chunkPower = Env.ChunkPow;
-
         /// <summary>
         /// Returns the position of the chunk containing this block
         /// </summary>
@@ -72,9 +70,9 @@ namespace Voxelmetric.Code.Core
         public static Vector3Int ContainingCoordinates(Vector3Int pos)
         {
             return new Vector3Int(
-                (pos.x>>chunkPower)<<chunkPower,
-                (pos.y>>chunkPower)<<chunkPower,
-                (pos.z>>chunkPower)<<chunkPower);
+                (pos.x>>Env.ChunkPow)<<Env.ChunkPow,
+                (pos.y>>Env.ChunkPow)<<Env.ChunkPow,
+                (pos.z>>Env.ChunkPow)<<Env.ChunkPow);
         }
 
         public static void RemoveChunk(Chunk chunk)
