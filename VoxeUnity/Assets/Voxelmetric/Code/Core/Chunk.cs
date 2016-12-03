@@ -92,8 +92,6 @@ namespace Voxelmetric.Code.Core
             stateManager = new ChunkStateManagerClient(this);
             blocks = new ChunkBlocks(this);
 
-            if (world.config.randomUpdateFrequency>0.0f)
-                logic = new ChunkLogic(this);
 
             GeometryHandler = new ChunkRenderGeometryHandler(this);
             ChunkColliderGeometryHandler = new ChunkColliderGeometryHandler(this);
@@ -104,6 +102,8 @@ namespace Voxelmetric.Code.Core
             this.world = world;
             this.pos = pos;
             this.stateManager = stateManager;
+
+            logic = world.config.randomUpdateFrequency>0.0f ? new ChunkLogic(this) : null;
 
             WorldBounds = new Bounds(
                 new Vector3(pos.x+ Env.ChunkSize/2, pos.y+ Env.ChunkSize/2, pos.z+ Env.ChunkSize/2),
