@@ -17,6 +17,11 @@ namespace Voxelmetric.Code
             world.blocks.Modify(pos, blockData, true);
         }
 
+        public static void SetBlockRange(World world, Vector3Int posFrom, Vector3Int posTo, BlockData blockData)
+        {
+            world.blocks.ModifyRange(posFrom, posTo, blockData, true);
+        }
+
         public static Block GetBlock(World world, Vector3Int pos)
         {
             Block block = world.blocks.GetBlock(pos);

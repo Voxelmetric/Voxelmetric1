@@ -67,6 +67,7 @@ namespace Voxelmetric.Examples
 
             selectedBlockText.text = Code.Voxelmetric.GetBlock(world, hit.vector3Int).displayName;
 
+            // Clicking voxel blocks
             if (Input.GetMouseButtonDown(0) && !eventSystem.IsPointerOverGameObject())
             {
                 if (hit.block.type != BlockProvider.AirType)
@@ -76,6 +77,7 @@ namespace Voxelmetric.Examples
                 }
             }
 
+            // Pathfinding
             if (Input.GetKeyDown(KeyCode.I))
             {
                 pfStart = hit.vector3Int;
@@ -96,6 +98,12 @@ namespace Voxelmetric.Examples
             {
                 for (int i = 0; i < pf.path.Count - 1; i++)
                     Debug.DrawLine(pf.path[i].Add(0, 1, 0), pf.path[i + 1].Add(0, 1, 0));
+            }
+
+            // Test of ranged block setting
+            if (Input.GetKeyDown(KeyCode.T))
+            {
+                Code.Voxelmetric.SetBlockRange(world, new Vector3Int(-44, -44, -44), new Vector3Int(44, 44, 44), new BlockData(1));
             }
         }
 

@@ -1,10 +1,7 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
-using Voxelmetric.Code.Common.IO;
 using Voxelmetric.Code.Common.Memory;
-using Voxelmetric.Code.Data_types;
 using Voxelmetric.Code.Rendering;
-using Voxelmetric.Code.Utilities;
 
 namespace Voxelmetric.Code.Common.MemoryPooling
 {
