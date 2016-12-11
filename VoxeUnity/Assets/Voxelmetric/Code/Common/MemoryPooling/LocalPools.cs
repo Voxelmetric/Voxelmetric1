@@ -1,7 +1,10 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
+using Voxelmetric.Code.Common.IO;
 using Voxelmetric.Code.Common.Memory;
+using Voxelmetric.Code.Data_types;
 using Voxelmetric.Code.Rendering;
+using Voxelmetric.Code.Utilities;
 
 namespace Voxelmetric.Code.Common.MemoryPooling
 {
@@ -12,7 +15,7 @@ namespace Voxelmetric.Code.Common.MemoryPooling
     {
         private readonly ObjectPool<VertexData> m_vertexDataPool =
             new ObjectPool<VertexData>(ch => new VertexData(), 65535, false);
-        
+
         private readonly Dictionary<int, IArrayPool<VertexData>> m_vertexDataArrayPools =
             new Dictionary<int, IArrayPool<VertexData>>(128);
 
@@ -34,8 +37,7 @@ namespace Voxelmetric.Code.Common.MemoryPooling
         private readonly Dictionary<int, IArrayPool<bool>> m_boolArrayPools =
             new Dictionary<int, IArrayPool<bool>>(128);
 
-        private readonly MarshalMemPool m_marshaledPool =
-            new MarshalMemPool(65535); // 65k of memory should be more sufficient for now
+        private readonly MarshalMemPool m_marshaledPool = new MarshalMemPool(1024*512); // 512 kiB of memory should be more sufficient for now
 
         public MarshalMemPool MarshaledPool
         {
