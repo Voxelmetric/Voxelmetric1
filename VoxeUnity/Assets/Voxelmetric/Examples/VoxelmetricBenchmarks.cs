@@ -273,7 +273,7 @@ namespace Assets.Voxelmetric.Examples
             for (int x = 0; x<ni.noiseGen.Size; x++)
             {
                 float xf = (x<<ni.noiseGen.Step);
-                ni.lookupTable[i++] = noise.Generate(xf, 0f, 0f);
+                ni.lookupTable[i++] = noise.Generate(xf);
             }
 
             return ni;
@@ -290,7 +290,7 @@ namespace Assets.Voxelmetric.Examples
                 for (int x = 0; x<ni.noiseGen.Size; x++)
                 {
                     float xf = (x<<ni.noiseGen.Step);
-                    ni.lookupTable[i++] = noise.Generate(xf, 0f, zf);
+                    ni.lookupTable[i++] = noise.Generate(xf, zf);
                 }
             }
 
@@ -325,9 +325,10 @@ namespace Assets.Voxelmetric.Examples
             Debug.Log("Bechmark - 1D, 2D, 3D noise downsampling");
             using (StreamWriter writer = File.CreateText("perf_noise_downsampling.txt"))
             {
+                for(int i=1; i<=3; i++)
                 {
                     NoiseItem ni = new NoiseItem { noiseGen = new NoiseInterpolator() };
-                    ni.noiseGen.SetInterpBitStep(Env.ChunkSize, 2);
+                    ni.noiseGen.SetInterpBitStep(Env.ChunkSize, i);
                     ni.lookupTable = Helpers.CreateArray1D<float>(ni.noiseGen.Size);
 
                     float[] number = {0};
@@ -340,15 +341,16 @@ namespace Assets.Voxelmetric.Examples
                                     for (int x = 0; x < Env.ChunkSize; x++)
                                         number[0] += ni.noiseGen.Interpolate(x, ni.lookupTable);
                         }, 10);
-                    Debug.LogFormat("noise.Generate 1D -> out:{0}, time:{1}", number[0],
-                                    t.ToString(CultureInfo.InvariantCulture));
-                    writer.WriteLine("noise.Generate 1D -> out:{0}, time:{1}", number[0],
-                                     t.ToString(CultureInfo.InvariantCulture));
+                    Debug.LogFormat("noise.Generate 1D -> out:{0}, time:{1}, downsample factor {2}", number[0],
+                                    t.ToString(CultureInfo.InvariantCulture), i);
+                    writer.WriteLine("noise.Generate 1D -> out:{0}, time:{1}, downsample factor {2}", number[0],
+                                     t.ToString(CultureInfo.InvariantCulture), i);
                 }
 
+                for (int i = 1; i <= 3; i++)
                 {
                     NoiseItem ni = new NoiseItem { noiseGen = new NoiseInterpolator() };
-                    ni.noiseGen.SetInterpBitStep(Env.ChunkSize, 2);
+                    ni.noiseGen.SetInterpBitStep(Env.ChunkSize, i);
                     ni.lookupTable = Helpers.CreateArray1D<float>(ni.noiseGen.Size * ni.noiseGen.Size);
 
                     float[] number = {0};
@@ -361,15 +363,16 @@ namespace Assets.Voxelmetric.Examples
                                     for (int x = 0; x < Env.ChunkSize; x++)
                                         number[0] += ni.noiseGen.Interpolate(x, z, ni.lookupTable);
                         }, 10);
-                    Debug.LogFormat("noise.Generate 2D -> out:{0}, time:{1}", number[0],
-                                    t.ToString(CultureInfo.InvariantCulture));
-                    writer.WriteLine("noise.Generate 2D -> out:{0}, time:{1}", number[0],
-                                     t.ToString(CultureInfo.InvariantCulture));
+                    Debug.LogFormat("noise.Generate 2D -> out:{0}, time:{1}, downsample factor {2}", number[0],
+                                    t.ToString(CultureInfo.InvariantCulture), i);
+                    writer.WriteLine("noise.Generate 2D -> out:{0}, time:{1}, downsample factor {2}", number[0],
+                                     t.ToString(CultureInfo.InvariantCulture), i);
                 }
 
+                for (int i = 1; i <= 3; i++)
                 {
                     NoiseItem ni = new NoiseItem { noiseGen = new NoiseInterpolator() };
-                    ni.noiseGen.SetInterpBitStep(Env.ChunkSize, 2);
+                    ni.noiseGen.SetInterpBitStep(Env.ChunkSize, i);
                     ni.lookupTable = Helpers.CreateArray1D<float>(ni.noiseGen.Size * ni.noiseGen.Size * ni.noiseGen.Size);
 
                     float[] number = {0};
@@ -382,10 +385,10 @@ namespace Assets.Voxelmetric.Examples
                                     for (int x = 0; x<Env.ChunkSize; x++)
                                         number[0] += ni.noiseGen.Interpolate(x, y, z, ni.lookupTable);
                         }, 10);
-                    Debug.LogFormat("noise.Generate 3D -> out:{0}, time:{1}", number[0],
-                                    t.ToString(CultureInfo.InvariantCulture));
-                    writer.WriteLine("noise.Generate 3D -> out:{0}, time:{1}", number[0],
-                                     t.ToString(CultureInfo.InvariantCulture));
+                    Debug.LogFormat("noise.Generate 3D -> out:{0}, time:{1}, downsample factor {2}", number[0],
+                                    t.ToString(CultureInfo.InvariantCulture), i);
+                    writer.WriteLine("noise.Generate 3D -> out:{0}, time:{1}, downsample factor {2}", number[0],
+                                     t.ToString(CultureInfo.InvariantCulture), i);
                 }
             }
         }
