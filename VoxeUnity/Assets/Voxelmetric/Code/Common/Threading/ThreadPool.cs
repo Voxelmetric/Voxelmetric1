@@ -24,8 +24,6 @@ namespace Voxelmetric.Code.Common.Threading
             m_pools = Helpers.CreateArray1D<TaskPool>(threadCnt);
             // NOTE: Normally, I would simply call CreateAndInitArray1D, however, any attempt to allocate memory
             // for TaskPool in this contructor ends up with Unity3D crashing :(
-
-            //Debug.Log("Threadpool created with " + threadCnt + " threads");
         }
 
         public int GenerateThreadID()
@@ -88,8 +86,8 @@ namespace Voxelmetric.Code.Common.Threading
             Assert.IsTrue(threadID>=0 && threadID<m_pools.Length);
             m_pools[threadID].AddItem(action, arg);
         }
-        
-        public int Size
+
+        public int PooledItemCnt
         {
             get
             {
@@ -98,6 +96,11 @@ namespace Voxelmetric.Code.Common.Threading
                     items += m_pools[i].Size;
                 return items;
             }
+        }
+
+        public int Size
+        {
+            get { return m_pools.Length; }
         }
     }
 }

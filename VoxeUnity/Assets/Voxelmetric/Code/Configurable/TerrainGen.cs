@@ -1,13 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
+using Voxelmetric.Code;
 using Voxelmetric.Code.Core;
 using Voxelmetric.Code.Load_Resources;
 using Voxelmetric.Code.Utilities;
+using Voxelmetric.Code.Utilities.Noise;
 
 public class TerrainGen
 {
-    public TerrainLayer[] Layers { get; private set; }
+    public TerrainLayer[] TerrainLayers { get; private set; }
+    public TerrainLayer[] StructureLayers { get; private set; }
     public Noise noise { get; private set; }
 
     public static TerrainGen Create(World world, string layerFolder)
@@ -26,19 +29,22 @@ public class TerrainGen
         noise = new Noise(world.name);
 
         // Verify all correct layers
-        Layers = ProcessConfigs(world, layerFolder);
-
-        // Sort the layers by index
-        Array.Sort(Layers);
+        ProcessConfigs(world, layerFolder);
     }
 
-    private TerrainLayer[] ProcessConfigs(World world, string layerFolder)
+    private void ProcessConfigs(World world, string layerFolder)
     {
         var configLoader = new ConfigLoader<LayerConfig>(new[] { layerFolder });
 
         List<LayerConfig> layersConfigs = new List<LayerConfig>(configLoader.AllConfigs());
-        List<TerrainLayer> layers = new List<TerrainLayer>(layersConfigs.Count);
-        HashSet<int> indexes = new HashSet<int>();
+
+        // Terrain layers
+        List<TerrainLayer> terrainLayers = new List<TerrainLayer>();
+        List<int> terrainLayersIndexes = new List<int>(); // could be implemented as a HashSet, however, it would be insane storing hundreads of layers here
+
+        // Structure layers
+        List<TerrainLayer> structLayers = new List<TerrainLayer>();
+        List<int> structLayersIndexes = new List<int>(); // could be implemented as a HashSet, however, it would be insane storing hundreads of layers here
 
         for (int i = 0; i<layersConfigs.Count;)
         {
@@ -57,65 +63,99 @@ public class TerrainGen
             TerrainLayer layer = (TerrainLayer)Activator.CreateInstance(type);
             layer.BaseSetUp(config, world, this);
 
-            // Do not allow any two layers share the same index
-            if (indexes.Contains(layer.index))
+            if (layer.isStructure)
             {
-                Debug.LogError("Could not create layer " + config.layerType + " : " + config.name + ". Index " + layer.index + " already defined");
-                layersConfigs.RemoveAt(i);
-                continue;
-            }
+                // Do not allow any two layers share the same index
+                if (structLayersIndexes.Contains(layer.index))
+                {
+                    Debug.LogError("Could not create structure layer " + config.layerType + " : " + config.name + ". Index " + layer.index +
+                                   " already defined");
+                    layersConfigs.RemoveAt(i);
+                    continue;
+                }
 
-            // Add layer to layers list
-            layers.Add(layer);
-            indexes.Add(layer.index);
+                // Add layer to layers list
+                structLayers.Add(layer);
+                structLayersIndexes.Add(layer.index);
+            }
+            else
+            {
+                // Do not allow any two layers share the same index
+                if (terrainLayersIndexes.Contains(layer.index))
+                {
+                    Debug.LogError("Could not create terrain layer "+config.layerType+" : "+config.name+". Index "+layer.index+
+                                   " already defined");
+                    layersConfigs.RemoveAt(i);
+                    continue;
+                }
+
+                // Add layer to layers list
+                terrainLayers.Add(layer);
+                terrainLayersIndexes.Add(layer.index);
+            }
 
             ++i;
         }
 
         // Call OnInit for each layer now that they all have been set up. Thanks to this, layers can
         // e.g. address other layers knowing that they will be able to access all data they need.
-        for (int i = 0; i < layersConfigs.Count; i++)
+        int ti = 0, si = 0;
+        for (int i = 0; i<layersConfigs.Count; i++)
         {
             LayerConfig config = layersConfigs[i];
-            layers[i].Init(config);
+            if (LayerConfig.IsStructure(config.structure))
+                structLayers[si++].Init(config);
+            else
+                terrainLayers[ti++].Init(config);
         }
 
-        return layers.ToArray();
+        // Sort the layers by index
+        TerrainLayers = terrainLayers.ToArray();
+        Array.Sort(TerrainLayers);
+        StructureLayers = structLayers.ToArray();
+        Array.Sort(StructureLayers);
+
+        // Register support noise functionality with each workpool thread
+        for (int i = 0; i < Globals.WorkPool.Size; i++)
+        {
+            Globals.WorkPool.GetPool(i).noiseItems = new NoiseItem[layersConfigs.Count];
+            for (int j = 0; j < layersConfigs.Count; j++)
+            {
+                Globals.WorkPool.GetPool(i).noiseItems[j] = new NoiseItem
+                {
+                    noiseGen = new NoiseInterpolator()
+                };
+            }
+        }
     }
 
     public void GenerateTerrain(Chunk chunk)
     {
-        for (int z = chunk.pos.z; z < chunk.pos.z + Env.ChunkSize; z++)
-        {
-            for (int x = chunk.pos.x; x < chunk.pos.x + Env.ChunkSize; x++)
-            {
-                GenerateTerrainForChunk(chunk, x, z);
-            }
-        }
+        // Do some layer preprocessing on a chunk
+        for (int i=0; i<TerrainLayers.Length; i++)
+            TerrainLayers[i].PreProcess(chunk, i);
+
+        // Generate terrain and structures
+        GenerateTerrainForChunk(chunk);
         GenerateStructuresForChunk(chunk);
+
+        // Do some layer postprocessing on a chunk
+        for (int i=0; i<TerrainLayers.Length; i++)
+            TerrainLayers[i].PostProcess(chunk, i);
     }
 
     /// <summary>
     /// Retrieves the terrain height in a given chunk on given coordinates
     /// </summary>
     /// <param name="chunk">Chunk for which terrain is generated</param>
-    /// <param name="x">Position on the x axis in world coordinates</param>
-    /// <param name="z">Position on the z axis in world coordinates</param>
-    public int GetTerrainHeightForChunk(Chunk chunk, int x, int z)
+    /// <param name="x">Position on the x axis in local coordinates</param>
+    /// <param name="z">Position on the z axis in local coordinates</param>
+    public float GetTerrainHeightForChunk(Chunk chunk, int x, int z)
     {
-        int height = 0;
-        for (int i = 0; i < Layers.Length; i++)
-        {
-            TerrainLayer layer = Layers[i];
-            if (layer == null)
-            {
-                Debug.LogError("Layer name '" + layer + "' in layer order didn't match a valid layer");
-                continue;
-            }
+        float height = 0f;
+        for (int i = 0; i < TerrainLayers.Length; i++)
+            height = TerrainLayers[i].GetHeight(chunk, i, x, z, height, 1f);
 
-            if (!layer.isStructure)
-                height = Layers[i].GetHeight(chunk, x, z, height, 1);
-        }
         return height;
     }
 
@@ -123,24 +163,17 @@ public class TerrainGen
     /// Generates terrain for a given chunk
     /// </summary>
     /// <param name="chunk">Chunk for which terrain is generated</param>
-    /// <param name="x">Position on the x axis in world coordinates</param>
-    /// <param name="z">Position on the z axis in world coordinates</param>
-    public int GenerateTerrainForChunk(Chunk chunk, int x, int z)
+    public void GenerateTerrainForChunk(Chunk chunk)
     {
-        int height = 0;
-        for (int i = 0; i < Layers.Length; i++)
+        for (int z = 0; z<Env.ChunkSize; z++)
         {
-            TerrainLayer layer = Layers[i];
-            if (layer == null)
+            for (int x = 0; x<Env.ChunkSize; x++)
             {
-                Debug.LogError("Layer name '" + layer + "' in layer order didn't match a valid layer");
-                continue;
+                float height = 0f;
+                for (int i = 0; i<TerrainLayers.Length; i++)
+                    height = TerrainLayers[i].GenerateLayer(chunk, i, x, z, height, 1f);
             }
-
-            if (!layer.isStructure)
-                height = Layers[i].GenerateLayer(chunk, x, z, height, 1);
         }
-        return height;
     }
 
     /// <summary>
@@ -149,14 +182,8 @@ public class TerrainGen
     /// <param name="chunk">Chunk for which structures are generated</param>
     public void GenerateStructuresForChunk(Chunk chunk)
     {
-        for (int i = 0; i < Layers.Length; i++)
-        {
-            TerrainLayer layer = Layers[i];
-            if (layer == null || !layer.isStructure)
-                continue;
-
-            layer.GenerateStructures(chunk);
-        }
+        for (int i = 0; i < StructureLayers.Length; i++)
+            StructureLayers[i].GenerateStructures(chunk, i);
     }
 
 }

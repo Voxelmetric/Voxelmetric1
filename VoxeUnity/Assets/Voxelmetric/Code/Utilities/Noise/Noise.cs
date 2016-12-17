@@ -30,8 +30,9 @@
 // permutation array from a seed.
 
 using System;
+using Voxelmetric.Code.Common;
 
-namespace Voxelmetric.Code.Utilities
+namespace Voxelmetric.Code.Utilities.Noise
 {
     /// <summary>
     /// Implementation of simplex noise based on http://webstaff.itn.liu.se/~stegu/simplexnoise/simplexnoise.pdf
@@ -40,10 +41,6 @@ namespace Voxelmetric.Code.Utilities
     {
         public Noise(string seed)
         {
-            //Seed Voxelmetric uses the default world
-            if (seed == "Voxelmetric")
-                return;
-
             Random random = new Random(seed.GetHashCode());
             for (int i = 0; i < 256 - 1; i += 1)
             {
@@ -71,7 +68,7 @@ namespace Voxelmetric.Code.Utilities
         /// <returns>A noise value in the interval [-1,1]</returns>
         public float Generate(float x)
         {
-            int i0 = FastFloor(x);
+            int i0 = Helpers.FastFloor(x);
             int i1 = i0 + 1;
             float x0 = x - i0;
             float x1 = x0 - 1.0f;
@@ -105,8 +102,8 @@ namespace Voxelmetric.Code.Utilities
             float s = (x + y) * F2; // Hairy factor for 2D
             float xs = x + s;
             float ys = y + s;
-            int i = FastFloor(xs);
-            int j = FastFloor(ys);
+            int i = Helpers.FastFloor(xs);
+            int j = Helpers.FastFloor(ys);
 
             float t = (i + j) * G2;
             float X0 = i - t; // Unskew the cell origin back to (x,y) space
@@ -186,9 +183,9 @@ namespace Voxelmetric.Code.Utilities
             float xs = x + s;
             float ys = y + s;
             float zs = z + s;
-            int i = FastFloor(xs);
-            int j = FastFloor(ys);
-            int k = FastFloor(zs);
+            int i = Helpers.FastFloor(xs);
+            int j = Helpers.FastFloor(ys);
+            int k = Helpers.FastFloor(zs);
 
             float t = (i + j + k) * G3;
             float X0 = i - t; // Unskew the cell origin back to (x,y,z) space
@@ -280,14 +277,14 @@ namespace Voxelmetric.Code.Utilities
             return 32.0f * (n0 + n1 + n2 + n3);
         }
 
-        private static float[][] grad3 =
+        private static readonly float[][] grad3 =
         {
             new[] {1f, 1f, 0f}, new[] {-1f, 1f, 0f}, new[] {1f, -1f, 0f}, new[] {-1f, -1f, 0f},
             new[] {1f, 0f, 1f}, new[] {-1f, 0f, 1f}, new[] {1f, 0f, -1f}, new[] {-1f, 0f, -1f},
             new[] {0f, 1f, 1f}, new[] {0f, -1f, 1f}, new[] {0f, 1f, -1f}, new[] {0f, -1f, -1f}
         };
 
-        public int[] perm = new int[512] {
+        public readonly int[] perm = new int[512] {
               151,160,137,91,90,15,
               131,13,201,95,96,53,194,233,7,225,140,36,103,30,69,142,8,99,37,240,21,10,23,
               190, 6,148,247,120,234,75,0,26,197,62,94,252,219,203,117,35,11,32,57,177,33,
@@ -317,10 +314,6 @@ namespace Voxelmetric.Code.Utilities
               138,236,205,93,222,114,67,29,24,72,243,141,128,195,78,66,215,61,156,180
             };
 
-        private static int FastFloor(float x)
-        {
-            return x>0 ? (int)x : (int)x-1;
-        }
 
         private static float dot(float[] g, float x, float y)
         {

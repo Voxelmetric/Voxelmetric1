@@ -51,5 +51,10 @@ namespace Voxelmetric.Code.Common.Memory
 
             m_pos -= size;
         }
+
+        public int Left
+        {
+            get { return m_size - (int)(m_pos-m_buffer); }
+        }
     }
 }

@@ -8,7 +8,7 @@ public class SurfaceLayer : TerrainLayer
     // but it's a placeholder so that in the future we can do things like blend surface layers
     // between separate biomes
 
-    Block blockToPlace;
+    private Block blockToPlace;
 
     protected override void SetUp(LayerConfig config)
     {
@@ -21,14 +21,14 @@ public class SurfaceLayer : TerrainLayer
         }
     }
 
-    public override int GetHeight(Chunk chunk, int x, int z, int heightSoFar, float strength)
+    public override float GetHeight(Chunk chunk, int layerIndex, int x, int z, float heightSoFar, float strength)
     {
         return heightSoFar + 1;
     }
 
-    public override int GenerateLayer(Chunk chunk, int x, int z, int heightSoFar, float strength)
+    public override float GenerateLayer(Chunk chunk, int layerIndex, int x, int z, float heightSoFar, float strength)
     {
-        SetBlocks(chunk, x, z, heightSoFar, heightSoFar + 1, blockToPlace);
+        SetBlocks(chunk, x, z, (int)heightSoFar, (int)heightSoFar + 1, blockToPlace);
 
         return heightSoFar + 1;
     }

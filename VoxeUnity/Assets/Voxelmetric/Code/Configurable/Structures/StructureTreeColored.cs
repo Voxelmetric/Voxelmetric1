@@ -14,7 +14,7 @@ public class StructureTreeColored: StructureTree
         log = new BlockData(BlockProvider.AirType);
     }
 
-    public override void Build(World world, Chunk chunk, Vector3Int pos, TerrainLayer layer)
+    public override void Build(World world, Vector3Int pos, TerrainLayer layer)
     {
     }
 }

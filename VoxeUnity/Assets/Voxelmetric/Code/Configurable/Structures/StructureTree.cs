@@ -1,4 +1,5 @@
-﻿using Voxelmetric.Code.Core;
+﻿using Voxelmetric.Code.Common;
+using Voxelmetric.Code.Core;
 using Voxelmetric.Code.Data_types;
 
 public class StructureTree: GeneratedStructure
@@ -24,9 +25,9 @@ public class StructureTree: GeneratedStructure
         log = new BlockData(world.blockProvider.GetBlock("log").type);
     }
 
-    public override void Build(World world, Chunk chunk, Vector3Int pos, TerrainLayer layer)
+    public override void Build(World world, Vector3Int pos, TerrainLayer layer)
     {
-        int noise = layer.GetNoise(pos.x, pos.y, pos.z, 1f, 3, 1);
+        int noise = Helpers.FastFloor(layer.GetNoise(pos.x, pos.y, pos.z, 1f, 3, 1f));
         int leavesRange = noise + 3;
         int leavesRange2 = leavesRange*leavesRange;
         int trunkHeight = posY - noise;
@@ -42,7 +43,7 @@ public class StructureTree: GeneratedStructure
                 {
                     if (x*x*a2inv +z*z*a2inv + y*y*b2inv<=1.0f) // An ellipsoid flattened on the y axis
                     {
-                        blocks.Set(pos.Add(x, y+ trunkHeight, z), leaves);
+                        blocks.Set(pos.Add(x, y+trunkHeight, z), leaves);
                     }
                 }
             }

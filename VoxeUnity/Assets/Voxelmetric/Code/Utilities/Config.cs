@@ -7,6 +7,7 @@ namespace Voxelmetric.Code.Utilities
         public static readonly int ChunkPow = 5;
         public static readonly int ChunkPow2 = 2*ChunkPow;
         public static readonly int ChunkSize = 1 << ChunkPow;
+        public static readonly int ChunkSizeHalf = ChunkSize>>1;
         public static readonly int ChunkSizePow2 = ChunkSize*ChunkSize;
         public static readonly int ChunkSizePow3 = ChunkSize*ChunkSizePow2;
         public static readonly int ChunkMask = ChunkSize-1;

@@ -9,14 +9,14 @@ using Voxelmetric.Code.Utilities;
 
 public class GrassBlock: CubeBlock
 {
-    private BlockData dirt;
     private BlockData air;
+    private BlockData dirt;
     private BlockData grass;
 
     public override void OnInit(BlockProvider blockProvider)
     {
+        air = new BlockData(BlockProvider.AirType);
         dirt = new BlockData(blockProvider.GetBlock("dirt").type);
-        air = new BlockData(blockProvider.GetBlock("air").type);
         grass = new BlockData(blockProvider.GetBlock("grass").type);
     }
 

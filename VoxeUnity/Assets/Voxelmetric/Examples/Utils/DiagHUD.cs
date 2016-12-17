@@ -101,14 +101,16 @@ namespace Assets.Client.Scripts.Misc
                 int chunks = World.chunks.chunkCollection.Count;
                 m_text.AppendFormat("Chunks {0}\n", chunks);
             }
-            m_text.AppendFormat("ThreadPool items {0}\n", Globals.WorkPool.Size);
+            m_text.AppendFormat("ThreadPool items {0}\n", Globals.WorkPool.PooledItemCnt);
             m_text.AppendFormat("TaskPool items {0}\n", Globals.IOPool.Size);
 
             m_text.AppendLine(Globals.MemPools.ToString());
+            for(int i=0; i<Globals.WorkPool.Size; i++)
+                m_text.AppendLine(Globals.WorkPool.GetPool(i).ToString());
             m_text.AppendLine(GameObjectProvider.Instance.ToString());
 
-            const int width = 400;
-            const int height = 210;
+            const int width = 600;
+            const int height = 460;
             GUI.Box(new Rect(Screen.width-width, Screen.height-height, width, height), "");
             GUI.Label(new Rect(Screen.width-width+10, Screen.height-height+10, width-10, height-10), m_text.ToString());
         }

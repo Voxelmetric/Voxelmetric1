@@ -29,9 +29,6 @@ namespace Voxelmetric.Code.Common.MemoryPooling
         private readonly Dictionary<int, IArrayPool<Color32>> m_color32ArrayPools =
             new Dictionary<int, IArrayPool<Color32>>(128);
 
-        private readonly Dictionary<int, IArrayPool<ushort>> m_ushortArrayPools =
-            new Dictionary<int, IArrayPool<ushort>>(128);
-
         public Vector2[] PopVector2Array(int size)
         {
             return PopArray(size, m_vector2ArrayPools);
@@ -52,11 +49,6 @@ namespace Voxelmetric.Code.Common.MemoryPooling
             return PopArray(size, m_color32ArrayPools);
         }
 
-        public ushort[] PopUshortArray(int size)
-        {
-            return PopArray(size, m_ushortArrayPools);
-        }
-
         public void PushVector2Array(Vector2[] arr)
         {
             PushArray(arr, m_vector2ArrayPools);
@@ -75,11 +67,6 @@ namespace Voxelmetric.Code.Common.MemoryPooling
         public void PushColor32Array(Color32[] arr)
         {
             PushArray(arr, m_color32ArrayPools);
-        }
-
-        public void PushUshortArray(ushort[] arr)
-        {
-            PushArray(arr, m_ushortArrayPools);
         }
 
         public override string ToString()

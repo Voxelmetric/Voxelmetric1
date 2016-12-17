@@ -1,13 +1,12 @@
 ﻿using Assets.Voxelmetric.Code.Common.Math;
 using UnityEngine;
 using Voxelmetric.Code.Core;
-using Voxelmetric.Code.Data_types;
 using Voxelmetric.Code.Load_Resources;
 
 public class RandomLayer: TerrainLayer
 {
-    Block blockToPlace;
-    float chance;
+    private Block blockToPlace;
+    private float chance;
 
     protected override void SetUp(LayerConfig config)
     {
@@ -22,10 +21,10 @@ public class RandomLayer: TerrainLayer
 
         chance = float.Parse(properties["chance"]);
     }
-
-    public override int GetHeight(Chunk chunk, int x, int z, int heightSoFar, float strength)
+    
+    public override float GetHeight(Chunk chunk, int layerIndex, int x, int z, float heightSoFar, float strength)
     {
-        var lpos = new Vector3Int(x, heightSoFar + 1, z);
+        var lpos = new Vector3(chunk.pos.x + x, heightSoFar + 1f, chunk.pos.z);
         float posChance = Randomization.Random(lpos.GetHashCode(), 200);
 
         if (chance > posChance)
@@ -36,16 +35,16 @@ public class RandomLayer: TerrainLayer
         return heightSoFar;
     }
 
-    public override int GenerateLayer(Chunk chunk, int x, int z, int heightSoFar, float strength)
+    public override float GenerateLayer(Chunk chunk, int layerIndex, int x, int z, float heightSoFar, float strength)
     {
-        var lpos = new Vector3Int(x, heightSoFar+1, z);
+        var lpos = new Vector3(chunk.pos.x + x, heightSoFar + 1f, chunk.pos.z);
         float posChance = Randomization.Random(lpos.GetHashCode(), 200);
 
         if (chance > posChance)
         {
-            SetBlocks(chunk, x, z, heightSoFar, heightSoFar + 1, blockToPlace);
+            SetBlocks(chunk, x, z, (int)heightSoFar, (int)(heightSoFar+1f), blockToPlace);
 
-            return heightSoFar + 1;
+            return heightSoFar+1;
         }
 
         return heightSoFar;

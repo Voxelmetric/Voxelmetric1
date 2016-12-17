@@ -14,6 +14,11 @@ namespace Voxelmetric.Code.Load_Resources
         public string structure;
         public Hashtable properties;
 
+        public static bool IsStructure(string structure)
+        {
+            return !string.IsNullOrEmpty(structure);
+        }
+
         public override string ToString()
         {
             return name;

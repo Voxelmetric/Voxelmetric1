@@ -101,7 +101,7 @@ namespace Voxelmetric.Code.Common
 			return arr;
 		}
 
-		public static float Interpolate(float x0, float x1, float alpha)
+        public static float Interpolate(float x0, float x1, float alpha)
 		{
 			return x0 + (x1 - x0) * alpha;
 		}

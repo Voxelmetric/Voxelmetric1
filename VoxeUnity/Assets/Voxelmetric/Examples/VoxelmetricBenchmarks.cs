@@ -5,6 +5,7 @@ using Assets.Voxelmetric.Code.Utilities;
 using UnityEngine;
 using Voxelmetric.Code.Common;
 using Voxelmetric.Code.Utilities;
+using Voxelmetric.Code.Utilities.Noise;
 
 namespace Assets.Voxelmetric.Examples
 {

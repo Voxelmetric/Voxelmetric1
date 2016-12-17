@@ -346,7 +346,7 @@ namespace Voxelmetric.Code.Core
         {
             // Nothing for us to do if there was no change
             BlockData oldBlockData = blocks[index];
-            if (oldBlockData.Type == blockData.Type)
+            if (oldBlockData.Type==blockData.Type)
                 return;
 
             // Update non-empty block count if we're inside non-padded area
