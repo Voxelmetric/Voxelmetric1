@@ -2228,7 +2228,7 @@ Prefab:
       objectReference: {fileID: 0}
     - target: {fileID: 11422472, guid: 5fb0c4eef722bd7449de294d0744b781, type: 2}
       propertyPath: HorizontalChunkLoadRadius
-      value: 9
+      value: 6
       objectReference: {fileID: 0}
     - target: {fileID: 11422472, guid: 5fb0c4eef722bd7449de294d0744b781, type: 2}
       propertyPath: HorizontalChunkDeleteRadius
