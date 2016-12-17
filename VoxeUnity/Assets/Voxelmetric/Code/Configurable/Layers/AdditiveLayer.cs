@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using Voxelmetric.Code.Core;
 using Voxelmetric.Code.Load_Resources;
+using Voxelmetric.Code.Utilities;
 using Voxelmetric.Code.Utilities.Noise;
 
 public class AdditiveLayer: TerrainLayer
@@ -34,7 +35,7 @@ public class AdditiveLayer: TerrainLayer
     public override void PreProcess(Chunk chunk, int layerIndex)
     {
         NoiseItem ni = chunk.pools.noiseItems[layerIndex];
-        ni.noiseGen.SetInterpBitStep(2);
+        ni.noiseGen.SetInterpBitStep(Env.ChunkSize, 2);
         ni.lookupTable = chunk.pools.PopFloatArray(ni.noiseGen.Size * ni.noiseGen.Size);
 
         int xOffset = chunk.pos.x;
@@ -59,7 +60,7 @@ public class AdditiveLayer: TerrainLayer
         NoiseItem ni = chunk.pools.noiseItems[layerIndex];
         chunk.pools.PushFloatArray(ni.lookupTable);
     }
-    
+
     public override float GetHeight(Chunk chunk, int layerIndex, int x, int z, float heightSoFar, float strength)
     {
         NoiseItem ni = chunk.pools.noiseItems[layerIndex];
