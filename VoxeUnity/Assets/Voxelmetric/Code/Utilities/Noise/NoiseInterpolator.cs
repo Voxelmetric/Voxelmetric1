@@ -13,9 +13,13 @@ namespace Voxelmetric.Code.Utilities.Noise
         //! Interpolated scale
         protected float m_scale;
 
-        public void SetInterpBitStep(int interpBitStep)
+        /// <summary>
+        /// Initiates NoiseInterpolator
+        /// </summary>
+        /// <param name="downsamplingFactor">Factor says how much is ChunkSize supposed to be downsampled</param>
+        public void SetInterpBitStep(int downsamplingFactor)
         {
-            m_step = interpBitStep;
+            m_step = downsamplingFactor;
             m_size = (Env.ChunkSize>>m_step)+1;
             m_sizePow2 = m_size*m_size;
             m_sizePow3 = m_sizePow2*m_size;
@@ -25,11 +29,16 @@ namespace Voxelmetric.Code.Utilities.Noise
         public int Step { get { return m_step;} }
         public int Size { get { return m_size; } }
 
-
-        public float Interpolate(int localX, int localZ, float[] interpLookup)
+        /// <summary>
+        /// Interpolate chunk coordinates into downsampled coordinates of a lookuptable and returns and interpolated value from it
+        /// </summary>
+        /// <param name="x">Position within chunk on the x axis</param>
+        /// <param name="z">Position within chunk on the z axis</param>
+        /// <param name="lookupTable">Lookup table to be used to interpolate</param>
+        public float Interpolate(int x, int z, float[] lookupTable)
         {
-            float xs = (localX + 0.5f) * m_scale;
-            float zs = (localZ + 0.5f) * m_scale;
+            float xs = (x + 0.5f) * m_scale;
+            float zs = (z + 0.5f) * m_scale;
 
             int x0 = Helpers.FastFloor(xs);
             int z0 = Helpers.FastFloor(zs);
@@ -40,24 +49,24 @@ namespace Voxelmetric.Code.Utilities.Noise
             int lookupIndex = Helpers.GetIndex1DFrom2D(x0, z0, m_size);
             int lookupIndex2 = lookupIndex+m_size; // x0,z0+1
 
-            try
-            {
-                return Helpers.Interpolate(
-                    Helpers.Interpolate(interpLookup[lookupIndex], interpLookup[lookupIndex+1], xs),
-                    Helpers.Interpolate(interpLookup[lookupIndex2], interpLookup[lookupIndex2+1], xs),
-                    zs);
-            }
-            catch
-            {
-                return 0;
-            }
+            return Helpers.Interpolate(
+                Helpers.Interpolate(lookupTable[lookupIndex], lookupTable[lookupIndex+1], xs),
+                Helpers.Interpolate(lookupTable[lookupIndex2], lookupTable[lookupIndex2+1], xs),
+                zs);
         }
 
-        public float Interpolate(int localX, int localY, int localZ, float[] interpLookup)
+        /// <summary>
+        /// Interpolate chunk coordinates into downsampled coordinates of a lookuptable and returns and interpolated value from it
+        /// </summary>
+        /// <param name="x">Position within chunk on the x axis</param>
+        /// <param name="y">Position within chunk on the y axis</param>
+        /// <param name="z">Position within chunk on the z axis</param>
+        /// <param name="lookupTable">Lookup table to be used to interpolate</param>
+        public float Interpolate(int x, int y, int z, float[] lookupTable)
         {
-            float xs = (localX+0.5f)*m_scale;
-            float ys = (localY+0.5f)*m_scale;
-            float zs = (localZ+0.5f)*m_scale;
+            float xs = (x+0.5f)*m_scale;
+            float ys = (y+0.5f)*m_scale;
+            float zs = (z+0.5f)*m_scale;
 
             int x0 = Helpers.FastFloor(xs);
             int y0 = Helpers.FastFloor(ys);
@@ -74,12 +83,12 @@ namespace Voxelmetric.Code.Utilities.Noise
 
             return Helpers.Interpolate(
                 Helpers.Interpolate(
-                    Helpers.Interpolate(interpLookup[lookupIndex], interpLookup[lookupIndex+1], xs),
-                    Helpers.Interpolate(interpLookup[lookupIndexY], interpLookup[lookupIndexY+1], xs),
+                    Helpers.Interpolate(lookupTable[lookupIndex], lookupTable[lookupIndex+1], xs),
+                    Helpers.Interpolate(lookupTable[lookupIndexY], lookupTable[lookupIndexY+1], xs),
                     ys),
                 Helpers.Interpolate(
-                    Helpers.Interpolate(interpLookup[lookupIndexZ], interpLookup[lookupIndexZ+1], xs),
-                    Helpers.Interpolate(interpLookup[lookupIndexYZ], interpLookup[lookupIndexYZ+1], xs),
+                    Helpers.Interpolate(lookupTable[lookupIndexZ], lookupTable[lookupIndexZ+1], xs),
+                    Helpers.Interpolate(lookupTable[lookupIndexYZ], lookupTable[lookupIndexYZ+1], xs),
                     ys),
                 zs);
         }
