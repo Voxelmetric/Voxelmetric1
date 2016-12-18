@@ -7,8 +7,6 @@ using Voxelmetric.Code.Utilities.Noise;
 public class AbsoluteLayer : TerrainLayer
 {
     private Block blockToPlace;
-    private float frequency;
-    private float exponent;
     private int minHeight;
     private int maxHeight;
     private int amplitude;
@@ -24,8 +22,8 @@ public class AbsoluteLayer : TerrainLayer
             ((ColoredBlock)blockToPlace).color = new Color(byte.Parse(colors[0]) / 255f, byte.Parse(colors[1]) / 255f, byte.Parse(colors[2]) / 255f);
         }
 
-        frequency = float.Parse(properties["frequency"]);
-        exponent = float.Parse(properties["exponent"]);
+        noise.Frequency = float.Parse(properties["frequency"]);
+        noise.Gain = float.Parse(properties["exponent"]);
         minHeight = int.Parse(properties["minHeight"]);
         maxHeight = int.Parse(properties["maxHeight"]);
 
@@ -50,7 +48,7 @@ public class AbsoluteLayer : TerrainLayer
             for (int x = 0; x<ni.noiseGen.Size; x++)
             {
                 float xf = (x<<ni.noiseGen.Step)+xOffset;
-                ni.lookupTable[i++] = GetNoise(xf, 0, zf, frequency, amplitude, exponent);
+                ni.lookupTable[i++] = NoiseUtils.GetNoise(noise.Noise, xf, 0, zf, noise.Frequency, amplitude, noise.Gain);
             }
         }
     }

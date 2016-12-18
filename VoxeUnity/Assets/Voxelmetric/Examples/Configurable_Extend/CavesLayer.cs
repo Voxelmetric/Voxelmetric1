@@ -1,6 +1,7 @@
 ﻿using Voxelmetric.Code.Core;
 using Voxelmetric.Code.Load_Resources;
 using Voxelmetric.Code.Load_Resources.Blocks;
+using Voxelmetric.Code.Utilities.Noise;
 
 
 public class CavesLayer : TerrainLayer
@@ -14,8 +15,8 @@ public class CavesLayer : TerrainLayer
 
     public override float GetHeight(Chunk chunk, int layerIndex, int x, int z, float heightSoFar, float strength)
     {
-        float caveBottom = GetNoise(x+chunk.pos.x, -1000.0f, z+chunk.pos.z, 500.0f, 70, 1.0f);
-        float caveHeight = GetNoise(x+chunk.pos.x, 1000.0f, z+chunk.pos.z, 50.0f, 30, 1.0f) + caveBottom;
+        float caveBottom = NoiseUtils.GetNoise(noise.Noise, x+chunk.pos.x, -1000.0f, z+chunk.pos.z, 500.0f, 70, 1.0f);
+        float caveHeight = NoiseUtils.GetNoise(noise.Noise, x + chunk.pos.x, 1000.0f, z+chunk.pos.z, 50.0f, 30, 1.0f) + caveBottom;
 
         caveHeight -= 20f;
 
@@ -32,8 +33,8 @@ public class CavesLayer : TerrainLayer
 
     public override float GenerateLayer(Chunk chunk, int layerIndex, int x, int z, float heightSoFar, float strength)
     {
-        float caveBottom = GetNoise(x+chunk.pos.x, -1000.0f, z+chunk.pos.z, 500.0f, 70, 1.0f);
-        float caveHeight = GetNoise(x+chunk.pos.x, 1000.0f, z+chunk.pos.z, 50.0f, 30, 1.0f) + caveBottom;
+        float caveBottom = NoiseUtils.GetNoise(noise.Noise, x + chunk.pos.x, -1000.0f, z+chunk.pos.z, 500.0f, 70, 1.0f);
+        float caveHeight = NoiseUtils.GetNoise(noise.Noise, x + chunk.pos.x, 1000.0f, z+chunk.pos.z, 50.0f, 30, 1.0f) + caveBottom;
 
         caveHeight -= 20;
 

@@ -1,6 +1,7 @@
 ﻿using Voxelmetric.Code.Common;
 using Voxelmetric.Code.Core;
 using Voxelmetric.Code.Data_types;
+using Voxelmetric.Code.Utilities.Noise;
 
 public class StructureTree: GeneratedStructure
 {
@@ -27,7 +28,7 @@ public class StructureTree: GeneratedStructure
 
     public override void Build(World world, Vector3Int pos, TerrainLayer layer)
     {
-        int noise = Helpers.FastFloor(layer.GetNoise(pos.x, pos.y, pos.z, 1f, 3, 1f));
+        int noise = Helpers.FastFloor(NoiseUtils.GetNoise(layer.Noise.Noise, pos.x, pos.y, pos.z, 1f, 3, 1f));
         int leavesRange = noise + 3;
         int leavesRange2 = leavesRange*leavesRange;
         int trunkHeight = posY - noise;

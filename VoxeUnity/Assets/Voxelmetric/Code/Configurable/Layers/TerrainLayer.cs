@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using UnityEngine;
 using Voxelmetric.Code.Core;
 using Voxelmetric.Code.Data_types;
 using Voxelmetric.Code.Load_Resources;
@@ -10,21 +9,23 @@ using Voxelmetric.Code.Utilities.Noise;
 public abstract class TerrainLayer : IComparable, IEquatable<TerrainLayer>
 {
     protected World world;
-    protected Noise noise;
     protected TerrainGen terrainGen;
     protected Dictionary<string, string> properties = new Dictionary<string, string>();
+    protected NoiseWrapper noise;
 
     public string layerName = "";
     public int index { get; private set; }
     public bool isStructure { get; private set; }
 
+    public NoiseWrapper Noise { get { return noise; } }
+
     public void BaseSetUp(LayerConfig config, World world, TerrainGen terrainGen)
     {
         this.terrainGen = terrainGen;
+        noise = new NoiseWrapper(world.name);
         layerName = config.name;
         isStructure = LayerConfig.IsStructure(config.structure);
         this.world = world;
-        noise = terrainGen.noise;
         index = config.index;
 
         foreach (var key in config.properties.Keys)
@@ -41,7 +42,7 @@ public abstract class TerrainLayer : IComparable, IEquatable<TerrainLayer>
 
     public virtual void PreProcess(Chunk chunk, int layerIndex) { }
     public virtual void PostProcess(Chunk chunk, int layerIndex) { }
-    
+
     /// <summary>
     /// Retrieves the height on given coordinates
     /// </summary>
@@ -74,42 +75,6 @@ public abstract class TerrainLayer : IComparable, IEquatable<TerrainLayer>
     /// <param name="layerIndex">Index of layer generating this structure</param>
     public virtual void GenerateStructures(Chunk chunk, int layerIndex)
     {
-    }
-
-    public float GetNoise(float x, float scale, int max, float power)
-    {
-        float scaleInv = 1.0f/scale;
-        float n = (noise.Generate(x*scaleInv)+1f);
-        n *= (max>>1);
-
-        if (Math.Abs(power-1f)>float.Epsilon)
-            n = Mathf.Pow(n, power);
-
-        return Mathf.FloorToInt(n);
-    }
-
-    public float GetNoise(float x, float y, float scale, int max, float power)
-    {
-        float scaleInv = 1.0f/scale;
-        float n = (noise.Generate(x*scaleInv, y*scaleInv)+1f);
-        n *= (max>>1);
-
-        if (Math.Abs(power-1f)>float.Epsilon)
-            n = Mathf.Pow(n, power);
-
-        return Mathf.FloorToInt(n);
-    }
-
-    public float GetNoise(float x, float y, float z, float scale, int max, float power)
-    {
-        float scaleInv = 1.0f / scale;
-        float n = (noise.Generate(x * scaleInv, y * scaleInv, z * scaleInv) + 1f);
-        n *= (max >> 1);
-
-        if (Math.Abs(power-1f)>float.Epsilon)
-            n = Mathf.Pow(n, power);
-
-        return n;
     }
 
     /// <summary>

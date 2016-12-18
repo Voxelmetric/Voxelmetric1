@@ -11,7 +11,6 @@ public class TerrainGen
 {
     public TerrainLayer[] TerrainLayers { get; private set; }
     public TerrainLayer[] StructureLayers { get; private set; }
-    public Noise noise { get; private set; }
 
     public static TerrainGen Create(World world, string layerFolder)
     {
@@ -26,8 +25,6 @@ public class TerrainGen
 
     protected void Init(World world, string layerFolder)
     {
-        noise = new Noise(world.name);
-
         // Verify all correct layers
         ProcessConfigs(world, layerFolder);
     }
