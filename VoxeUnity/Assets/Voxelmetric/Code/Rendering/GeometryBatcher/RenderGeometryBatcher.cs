@@ -84,7 +84,8 @@ namespace Voxelmetric.Code.Rendering.GeometryBatcher
         ///     Addds one face to our render buffer
         /// </summary>
         /// <param name="vertexData"> An array of 4 vertices forming the face</param>
-        public void AddFace(VertexDataFixed[] vertexData)
+        /// <param name="backFace">If false, vertices are added clock-wise</param>
+        public void AddFace(VertexDataFixed[] vertexData, bool backFace)
         {
             Assert.IsTrue(vertexData.Length>=4);
 
@@ -102,7 +103,7 @@ namespace Voxelmetric.Code.Rendering.GeometryBatcher
             buffer.AddVertex(ref vertexData[1]);
             buffer.AddVertex(ref vertexData[2]);
             buffer.AddVertex(ref vertexData[3]);
-            buffer.AddIndices(buffer.Vertices.Count, false);
+            buffer.AddIndices(buffer.Vertices.Count, backFace);
         }
 
         /// <summary>

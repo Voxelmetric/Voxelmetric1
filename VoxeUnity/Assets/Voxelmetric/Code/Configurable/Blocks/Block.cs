@@ -7,7 +7,7 @@ using Voxelmetric.Code.Load_Resources.Blocks;
 public class Block
 {
     public ushort type;
-    public BlockConfig config;
+    protected BlockConfig config;
 
     public Block()
     {
@@ -15,7 +15,7 @@ public class Block
         config = null;
     }
 
-    public Block(int type, BlockConfig config)
+    public void Init(int type, BlockConfig config)
     {
         Assert.IsTrue(config!=null);
         this.type = (ushort)type;
@@ -52,6 +52,11 @@ public class Block
         get { return config.canBeWalkedThrough; }
     }
 
+    public virtual bool custom
+    {
+        get { return config.custom; }
+    }
+
     public virtual bool IsSolid(Direction direction)
     {
         return solid;
@@ -72,15 +77,15 @@ public class Block
 
     public virtual bool CanBuildFaceWith(Block adjacentBlock, Direction dir)
     {
-        return false;
+        return config.custom; // custom blocks will be considered as able to create face with others by default
     }
 
-	public virtual bool CanMergeFaceWith(Block adjacentBlock, Direction dir)
+    public virtual bool CanMergeFaceWith(Block adjacentBlock, Direction dir)
     {
         return false;
     }
 
-    public virtual void BuildFace(Chunk chunk, Vector3Int localPos, Direction dir)
+    public virtual void BuildFace(Chunk chunk, Vector3Int localPos, Vector3[] vertices, Direction dir)
     {
     }
 

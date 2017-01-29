@@ -15,7 +15,6 @@ public class BlockConfig
 {
     //! Block type. Set externally by BlockIndex class when config is loaded
     public ushort type = 0;
-    public World world;
 
     #region Parameters read from config
 
@@ -44,13 +43,14 @@ public class BlockConfig
     public bool raycastHit { get; protected set; }
     public bool raycastHitOnRemoval { get; protected set; }
 
+    public bool custom { get; protected set; }
+
     #endregion
 
     public static BlockConfig CreateAirBlockConfig(World world)
     {
         return new BlockConfig
         {
-            world = world,
             name = "air",
             typeInConfig = 0,
             className = "Block",
@@ -58,6 +58,7 @@ public class BlockConfig
             canBeWalkedOn = false,
             transparent = true,
             canBeWalkedThrough = true,
+            custom = false,
         };
     }
 
@@ -69,8 +70,6 @@ public class BlockConfig
     /// <param name="world">The world this block type belongs to</param>
     public virtual bool SetUp(Hashtable config, World world)
     {
-        this.world = world;
-
         // Obligatory parameters
         {
             string tmpName;
@@ -100,6 +99,7 @@ public class BlockConfig
             canBeWalkedThrough = _GetPropertyFromConfig(config, "canBeWalkedThrough", false);
             raycastHit = _GetPropertyFromConfig(config, "raycastHit", solid);
             raycastHitOnRemoval = _GetPropertyFromConfig(config, "raycastHitOnRemoval", solid);
+            custom = _GetPropertyFromConfig(config, "custom", false);
         }
 
         return true;

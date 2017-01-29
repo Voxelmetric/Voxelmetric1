@@ -7,8 +7,9 @@ public class SolidBlock : Block
 
     public override bool CanBuildFaceWith(Block adjacentBlock, Direction dir)
     {
-        bool adjSolid = adjacentBlock.IsSolid(DirectionUtils.Opposite(dir));
-        bool adjTransparent = adjacentBlock.IsTransparent(DirectionUtils.Opposite(dir));
+        Direction oppositeDir = DirectionUtils.Opposite(dir);
+        bool adjSolid = adjacentBlock.IsSolid(oppositeDir);
+        bool adjTransparent = adjacentBlock.IsTransparent(oppositeDir);
         if ((!adjSolid || adjTransparent) && (!solid || !transparent || !adjTransparent || !adjSolid))
         {
             if (solid || !solidTowardsSameType || adjacentBlock.type!=type)
@@ -27,7 +28,7 @@ public class SolidBlock : Block
             Direction dir = DirectionUtils.Get(d);
             Block adjacentBlock = blocks.GetBlock(localPos.Add(dir));
             if (CanBuildFaceWith(adjacentBlock, dir))
-                BuildFace(chunk, localPos, dir);
+                BuildFace(chunk, localPos, null, dir);
         }
     }
 }

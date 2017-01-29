@@ -7,5 +7,6 @@
     "canBeWalkedOn": false,
     "canBeWalkedThrough": true,
     "raycastHitOnRemoval": true,
-    "raycastHit": false
+    "raycastHit": false,
+    "custom": true
 }

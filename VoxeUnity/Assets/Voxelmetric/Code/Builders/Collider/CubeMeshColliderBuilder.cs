@@ -62,7 +62,7 @@ namespace Voxelmetric.Code.Builders.Collider
                     case 4: dir = Direction.up; break;
                     case 5: dir = Direction.north; break;
                 }
-                bool backFace = DirectionUtils.Backface(dir);
+                bool backFace = DirectionUtils.IsBackface(dir);
 
                 // Move through the dimension from front to back
                 for (x[d] = mins[d]-1; x[d]<=maxes[d];)

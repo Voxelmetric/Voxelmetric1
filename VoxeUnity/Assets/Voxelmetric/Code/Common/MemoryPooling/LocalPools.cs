@@ -2,7 +2,9 @@
 using System.Text;
 using UnityEngine;
 using Voxelmetric.Code.Common.Memory;
+using Voxelmetric.Code.Configurable.Blocks;
 using Voxelmetric.Code.Rendering;
+using Voxelmetric.Code.Utilities;
 using Voxelmetric.Code.Utilities.Noise;
 
 namespace Voxelmetric.Code.Common.MemoryPooling
@@ -32,7 +34,10 @@ namespace Voxelmetric.Code.Common.MemoryPooling
         private readonly Dictionary<int, IArrayPool<float>> m_floatArrayPools =
             new Dictionary<int, IArrayPool<float>>(128);
 
-        private readonly MarshalMemPool m_marshaledPool = new MarshalMemPool(1024*512); // 512 kiB of memory should be more sufficient for now
+        private readonly Dictionary<int, IArrayPool<BlockFace>> m_blockFaceArrayPools =
+            new Dictionary<int, IArrayPool<BlockFace>>(128);
+
+        private readonly MarshalMemPool m_marshaledPool = new MarshalMemPool(Env.ChunkSizeWithPaddingPow3*8); // Set to a multiple of chunk volume
 
 
         public MarshalMemPool MarshaledPool
@@ -70,6 +75,11 @@ namespace Voxelmetric.Code.Common.MemoryPooling
             return PopArray(size, m_floatArrayPools);
         }
 
+        public BlockFace[] PopBlockFaceArray(int size)
+        {
+            return PopArray(size, m_blockFaceArrayPools);
+        }
+
         public void PushVertexData(VertexData item)
         {
             m_vertexDataPool.Push(item);
@@ -98,6 +108,10 @@ namespace Voxelmetric.Code.Common.MemoryPooling
         public void PushFloatArray(float[] arr)
         {
             PushArray(arr, m_floatArrayPools);
+        }
+        public void PushBlockFaceArray(BlockFace[] arr)
+        {
+            PushArray(arr, m_blockFaceArrayPools);
         }
 
         public override string ToString()

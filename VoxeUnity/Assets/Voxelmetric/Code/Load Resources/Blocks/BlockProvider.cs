@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using Newtonsoft.Json;
 using UnityEngine;
 using Voxelmetric.Code.Core;
+using Voxelmetric.Code.Data_types;
 
 namespace Voxelmetric.Code.Load_Resources.Blocks
 {
@@ -11,6 +12,7 @@ namespace Voxelmetric.Code.Load_Resources.Blocks
     {
         //! Air type block will always be present
         public static readonly ushort AirType = 0;
+        public static readonly BlockData AirBlock = new BlockData(AirType);
 
         private readonly List<BlockConfig> m_configs;
         private readonly Dictionary<string, ushort> m_names;
@@ -48,8 +50,7 @@ namespace Voxelmetric.Code.Load_Resources.Blocks
                 BlockConfig config = m_configs[i];
 
                 Block block = (Block)Activator.CreateInstance(config.blockClass);
-                block.type = (ushort)i;
-                block.config = config;
+                block.Init((ushort)i, config);
                 BlockTypes[i] = block;
             }
 

@@ -7,9 +7,9 @@ namespace Voxelmetric.Code.Load_Resources.Textures
 {
     public static class ConnectedTextures {
 
-        public static bool IsSame(Chunk chunk, Vector3Int globalsPos, int h, int v, Direction dir, int type)
+        public static bool IsSame(Chunk chunk, Vector3Int localPos, int h, int v, Direction dir, int type)
         {
-            return chunk.blocks.Get(RelativePos(globalsPos, h, v, dir)).Type == type;
+            return chunk.blocks.Get(RelativePos(localPos, h, v, dir)).Type == type;
         }
 
         public static Vector3Int RelativePos(Vector3Int pos, int h, int v, Direction dir)
@@ -251,8 +251,8 @@ namespace Voxelmetric.Code.Load_Resources.Textures
         public static List<Color[]> GetTextureQuads(Texture2D texture)
         {
             List<Color[]> textures = new List<Color[]>();
-            int halfWidth = texture.width / 2;
-            int halfHeight = texture.height / 2;
+            int halfWidth = texture.width >> 1;
+            int halfHeight = texture.height >> 1;
 
             textures.Add(texture.GetPixels(0, halfHeight, halfWidth, halfHeight));
             textures.Add(texture.GetPixels(halfWidth, halfHeight, halfWidth, halfHeight));
@@ -265,8 +265,8 @@ namespace Voxelmetric.Code.Load_Resources.Textures
         public static Texture2D TextureFromColorQuads(Color[] wn, Color[] ne, Color[] es, Color[] sw, int width, int height)
         {
             Texture2D texture = new Texture2D(width, height, TextureFormat.ARGB32, false);
-            int halfWidth = texture.width / 2;
-            int halfHeight = texture.height / 2;
+            int halfWidth = texture.width >> 1;
+            int halfHeight = texture.height >> 1;
 
             texture.SetPixels(0, halfHeight, halfWidth, halfHeight, wn);
             texture.SetPixels(halfWidth, halfHeight, halfWidth, halfHeight, ne);

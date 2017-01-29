@@ -25,6 +25,7 @@ public class GrassBlock: CubeBlock
     {
         ChunkBlocks blocks = chunk.blocks;
 
+        // Let's stay inside bounds
         int minX = localPos.x<=0 ? 0 : 1;
         int maxX = localPos.x>=Env.ChunkMask ? 0 : 1;
         int minY = localPos.y<=0 ? 0 : 1;
@@ -42,7 +43,9 @@ public class GrassBlock: CubeBlock
                     if (!blocks.Get(newPos).Equals(dirt))
                         continue;
 
-                    // Let's turn air about dirt into grass
+                    // Turn the air above dirt into grass
+                    //!TODO 1: This does seem to replace the dirt with grass. Fix me
+                    //!TODO 2: Why does this keep going after placing the first block?
                     if (blocks.Get(newPos.Add(0,1,0)).Equals(air))
                         blocks.Modify(newPos, grass, true);
                 }

@@ -19,6 +19,23 @@ namespace Voxelmetric.Code.Configurable.Blocks.Utilities
         {
             new[]
             {
+                // Direction.up
+                new Vector3(-halfBlock, +halfBlock, +halfBlock),
+                new Vector3(+halfBlock, +halfBlock, +halfBlock),
+                new Vector3(+halfBlock, +halfBlock, -halfBlock),
+                new Vector3(-halfBlock, +halfBlock, -halfBlock)
+            },
+            new[]
+            {
+                // Direction.down
+                new Vector3(-halfBlock, -halfBlock, -halfBlock),
+                new Vector3(+halfBlock, -halfBlock, -halfBlock),
+                new Vector3(+halfBlock, -halfBlock, +halfBlock),
+                new Vector3(-halfBlock, -halfBlock, +halfBlock),
+            },
+
+            new[]
+            {
                 // Direction.north
                 new Vector3(+halfBlock, -halfBlock, +halfBlock),
                 new Vector3(+halfBlock, +halfBlock, +halfBlock),
@@ -49,24 +66,7 @@ namespace Voxelmetric.Code.Configurable.Blocks.Utilities
                 new Vector3(-halfBlock, +halfBlock, +halfBlock),
                 new Vector3(-halfBlock, +halfBlock, -halfBlock),
                 new Vector3(-halfBlock, -halfBlock, -halfBlock),
-            },
-
-            new[]
-            {
-                // Direction.up
-                new Vector3(-halfBlock, +halfBlock, +halfBlock),
-                new Vector3(+halfBlock, +halfBlock, +halfBlock),
-                new Vector3(+halfBlock, +halfBlock, -halfBlock),
-                new Vector3(-halfBlock, +halfBlock, -halfBlock)
-            },
-            new[]
-            {
-                // Direction.down
-                new Vector3(-halfBlock, -halfBlock, -halfBlock),
-                new Vector3(+halfBlock, -halfBlock, -halfBlock),
-                new Vector3(+halfBlock, -halfBlock, +halfBlock),
-                new Vector3(-halfBlock, -halfBlock, +halfBlock),
-            },
+            }
         };
 
         public static void PrepareColors(Chunk chunk, Vector3Int localPos, VertexData[] vertexData, Direction direction)
@@ -181,7 +181,7 @@ namespace Voxelmetric.Code.Configurable.Blocks.Utilities
                 }
 
                 SetColorsAO(vertexData, wnSolid, nSolid, neSolid, eSolid, esSolid, sSolid, swSolid, wSolid,
-                            chunk.world.config.ambientOcclusionStrength);
+                            chunk.world.config.ambientOcclusionStrength, direction);
             }
             else
             {
@@ -193,65 +193,41 @@ namespace Voxelmetric.Code.Configurable.Blocks.Utilities
         {
             Rect texture = textureCollection.GetTexture(chunk, localPos, direction);
 
-            vertexData[0].UV = new Vector2(texture.x+texture.width, texture.y);
-            vertexData[1].UV = new Vector2(texture.x+texture.width, texture.y+texture.height);
-            vertexData[2].UV = new Vector2(texture.x, texture.y+texture.height);
-            vertexData[3].UV = new Vector2(texture.x, texture.y);
+            vertexData[3].UV = new Vector2(texture.x+texture.width, texture.y);
+            vertexData[2].UV = new Vector2(texture.x+texture.width, texture.y+texture.height);
+            vertexData[1].UV = new Vector2(texture.x, texture.y+texture.height);
+            vertexData[0].UV = new Vector2(texture.x, texture.y);
         }
 
         public static void PrepareTexture(Chunk chunk, Vector3Int localPos, VertexData[] vertexData, Direction direction, TextureCollection[] textureCollections)
         {
-            Rect texture = new Rect();
+            Rect texture = textureCollections[(int)direction].GetTexture(chunk, localPos, direction);
 
-            switch (direction)
-            {
-                case Direction.up:
-                    texture = textureCollections[0].GetTexture(chunk, localPos, direction);
-                    break;
-                case Direction.down:
-                    texture = textureCollections[1].GetTexture(chunk, localPos, direction);
-                    break;
-                case Direction.north:
-                    texture = textureCollections[2].GetTexture(chunk, localPos, direction);
-                    break;
-                case Direction.east:
-                    texture = textureCollections[3].GetTexture(chunk, localPos, direction);
-                    break;
-                case Direction.south:
-                    texture = textureCollections[4].GetTexture(chunk, localPos, direction);
-                    break;
-                case Direction.west:
-                    texture = textureCollections[5].GetTexture(chunk, localPos, direction);
-                    break;
-            }
-
-            vertexData[0].UV = new Vector2(texture.x+texture.width, texture.y);
-            vertexData[1].UV = new Vector2(texture.x+texture.width, texture.y+texture.height);
-            vertexData[2].UV = new Vector2(texture.x, texture.y+texture.height);
-            vertexData[3].UV = new Vector2(texture.x, texture.y);
+            vertexData[3].UV = new Vector2(texture.x+texture.width, texture.y);
+            vertexData[2].UV = new Vector2(texture.x+texture.width, texture.y+texture.height);
+            vertexData[1].UV = new Vector2(texture.x, texture.y+texture.height);
+            vertexData[0].UV = new Vector2(texture.x, texture.y);
         }
 
         public static void PrepareVertices(Vector3Int localPos, VertexData[] vertexData, Direction direction)
         {
-            //Converting the position to a vector adjusts it based on block size and gives us real world coordinates for x, y and z
             Vector3 vPos = localPos;
-            //Vector3 vPos = (pos - chunk.pos);
-
             int d = DirectionUtils.Get(direction);
+
             vertexData[0].Vertex = vPos+HalfBlockOffsets[d][0];
             vertexData[1].Vertex = vPos+HalfBlockOffsets[d][1];
             vertexData[2].Vertex = vPos+HalfBlockOffsets[d][2];
             vertexData[3].Vertex = vPos+HalfBlockOffsets[d][3];
         }
 
-        private static void SetColorsAO(VertexData[] vertexData, bool wnSolid, bool nSolid, bool neSolid, bool eSolid, bool esSolid, bool sSolid, bool swSolid, bool wSolid, float strength)
+        private static void SetColorsAO(VertexData[] vertexData, bool wnSolid, bool nSolid, bool neSolid, bool eSolid, bool esSolid, bool sSolid, bool swSolid, bool wSolid, float strength, Direction direction)
         {
-            float ne = 1;
-            float es = 1;
-            float sw = 1;
-            float wn = 1;
+            float ne = 1f;
+            float es = 1f;
+            float sw = 1f;
+            float wn = 1f;
 
-            strength /= 2;
+            strength *= 0.5f;
 
             if (nSolid)
             {
@@ -289,20 +265,44 @@ namespace Voxelmetric.Code.Configurable.Blocks.Utilities
             if (esSolid)
                 es -= strength;
 
-            SetColors(vertexData, ne, es, sw, wn, 1);
+            SetColors(vertexData, ne, es, sw, wn, 1, direction);
         }
 
-        public static void SetColors(VertexData[] data, float ne, float es, float sw, float wn, float light)
+        public static void SetColors(VertexData[] data, float ne, float es, float sw, float wn, float light, Direction direction=Direction.up)
         {
             wn = (wn * light);
             ne = (ne * light);
             es = (es * light);
             sw = (sw * light);
 
-            data[0].Color = new Color(wn, wn, wn);
-            data[1].Color = new Color(ne, ne, ne);
-            data[2].Color = new Color(es, es, es);
-            data[3].Color = new Color(sw, sw, sw);
+            switch (direction)
+            {
+                case Direction.down:
+                    data[0].Color = new Color(wn, wn, wn);
+                    data[3].Color = new Color(ne, ne, ne);
+                    data[2].Color = new Color(es, es, es);
+                    data[1].Color = new Color(sw, sw, sw);
+                    break;
+                case Direction.up:
+                    data[1].Color = new Color(wn, wn, wn);
+                    data[2].Color = new Color(ne, ne, ne);
+                    data[3].Color = new Color(es, es, es);
+                    data[0].Color = new Color(sw, sw, sw);
+                    break;
+                case Direction.north:
+                case Direction.east:
+                    data[0].Color = new Color(wn, wn, wn);
+                    data[1].Color = new Color(ne, ne, ne);
+                    data[2].Color = new Color(es, es, es);
+                    data[3].Color = new Color(sw, sw, sw);
+                    break;
+                default: // east, south
+                    data[3].Color = new Color(wn, wn, wn);
+                    data[2].Color = new Color(ne, ne, ne);
+                    data[1].Color = new Color(es, es, es);
+                    data[0].Color = new Color(sw, sw, sw);
+                    break;
+            }
         }
 
         public static void SetColors(VertexData[] data, ref Color color)

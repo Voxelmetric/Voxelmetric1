@@ -7,5 +7,6 @@
     "texture": "pyramid",
     "solid": false,
     "raycastHitOnRemoval": true,
-    "raycastHit": true
+    "raycastHit": true,
+    "custom": true
 }

@@ -59,7 +59,7 @@ namespace Voxelmetric.Code.Configurable.Blocks.Utilities
 
                     for (int i = 0; i < 4; i++)
                         vertexDataFixed[i] = VertexDataUtils.ClassToStruct(vertexData[i]);
-                    chunk.GeometryHandler.Batcher.AddFace(vertexDataFixed);
+                    chunk.GeometryHandler.Batcher.AddFace(vertexDataFixed, false);
 
                     for (int i = 0; i < 4; i++)
                         chunk.pools.PushVertexData(vertexData[i]);
@@ -84,7 +84,7 @@ namespace Voxelmetric.Code.Configurable.Blocks.Utilities
 
                     for (int i = 0; i < 4; i++)
                         vertexDataFixed[i] = VertexDataUtils.ClassToStruct(vertexData[i]);
-                    chunk.GeometryHandler.Batcher.AddFace(vertexDataFixed);
+                    chunk.GeometryHandler.Batcher.AddFace(vertexDataFixed, false);
 
                     for (int i = 0; i < 4; i++)
                         chunk.pools.PushVertexData(vertexData[i]);
@@ -109,7 +109,7 @@ namespace Voxelmetric.Code.Configurable.Blocks.Utilities
 
                     for (int i = 0; i < 4; i++)
                         vertexDataFixed[i] = VertexDataUtils.ClassToStruct(vertexData[i]);
-                    chunk.GeometryHandler.Batcher.AddFace(vertexDataFixed);
+                    chunk.GeometryHandler.Batcher.AddFace(vertexDataFixed, false);
 
                     for (int i = 0; i < 4; i++)
                         chunk.pools.PushVertexData(vertexData[i]);
@@ -134,7 +134,7 @@ namespace Voxelmetric.Code.Configurable.Blocks.Utilities
 
                     for (int i = 0; i < 4; i++)
                         vertexDataFixed[i] = VertexDataUtils.ClassToStruct(vertexData[i]);
-                    chunk.GeometryHandler.Batcher.AddFace(vertexDataFixed);
+                    chunk.GeometryHandler.Batcher.AddFace(vertexDataFixed, false);
 
                     for (int i = 0; i < 4; i++)
                         chunk.pools.PushVertexData(vertexData[i]);

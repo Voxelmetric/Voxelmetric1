@@ -5,12 +5,13 @@
     /// </summary>
     public enum Direction
     {
-        north = 0, // front face
-        south = 1, // back face
-        east = 2,
-        west = 3,
-        up = 4,
-        down = 5
+        up = 0,
+        down = 1,
+        north = 2, // front face
+        south = 3, // back face
+        east = 4,
+        west = 5,
+
     }
 
     public static class DirectionUtils
@@ -27,13 +28,13 @@
 
         public static Direction Opposite(Direction dir)
         {
-            // Toogle the first bit to get to opposite direction
+            // Toogle the first bit to get the opposite direction
             return (Direction)(Get(dir) ^ 1);
         }
 
-        public static bool Backface(Direction dir)
+        public static bool IsBackface(Direction dir)
         {
-            // The first bit signalizes backface
+            // The first bit signalizes a backface
             return (Get(dir) & 1)==1;
         }
     }

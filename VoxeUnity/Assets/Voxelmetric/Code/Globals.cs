@@ -34,7 +34,7 @@ namespace Voxelmetric.Code
         }
 
         // Geometry mesh builder
-        private static readonly IMeshBuilder s_cubeMeshBuilder = new GenericMeshBuilder();
+        private static readonly IMeshBuilder s_cubeMeshBuilder = new CubeMeshBuilder();
         public static IMeshBuilder CubeMeshBuilder
         {
             get

@@ -37,23 +37,23 @@ namespace Voxelmetric.Code.Rendering
             // 3--2
             if (backFace)
             {
-                Triangles.Add(offset - 4); // 2
-                Triangles.Add(offset - 2); // 0
-                Triangles.Add(offset - 3); // 1
-
-                Triangles.Add(offset - 4); // 3
-                Triangles.Add(offset - 1); // 0
+                Triangles.Add(offset - 4); // 0
+                Triangles.Add(offset - 1); // 3
                 Triangles.Add(offset - 2); // 2
+
+                Triangles.Add(offset - 2); // 2
+                Triangles.Add(offset - 3); // 1
+                Triangles.Add(offset - 4); // 0
             }
             else
             {
-                Triangles.Add(offset - 4); // 2
+                Triangles.Add(offset - 4); // 0
                 Triangles.Add(offset - 3); // 1
-                Triangles.Add(offset - 2); // 0
-
-                Triangles.Add(offset - 4); // 3
                 Triangles.Add(offset - 2); // 2
-                Triangles.Add(offset - 1); // 0
+
+                Triangles.Add(offset - 2); // 2
+                Triangles.Add(offset - 1); // 3
+                Triangles.Add(offset - 4); // 0
             }
         }
 
