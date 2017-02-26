@@ -5,7 +5,7 @@ namespace Voxelmetric.Code.Common
 {
 	public static class Helpers
 	{
-	    public static int MainThreadID = Thread.CurrentThread.ManagedThreadId;
+	    public static readonly int MainThreadID = Thread.CurrentThread.ManagedThreadId;
 
 	    public static bool IsMainThread
 	    {
@@ -25,8 +25,8 @@ namespace Voxelmetric.Code.Common
 		public static int GetChunkIndex1DFrom3D(int x, int y, int z)
 		{
             /*
-			 In the past, indexs were computed using:
-			 x + (z << Env.ChunkPower) + (y << Env.ChunkPower2);
+			 In the past, indexes were computed using:
+             x + (z << Env.ChunkPower) + (y << Env.ChunkPower2);
 			 However, since then padding was introduced and real size might no longer be a power of 2
 			*/
             return x+Env.ChunkPadding + Env.ChunkSizeWithPadding * ((z+Env.ChunkPadding) + (y+Env.ChunkPadding) * Env.ChunkSizeWithPadding);
@@ -48,7 +48,7 @@ namespace Voxelmetric.Code.Common
 	    public static void GetChunkIndex3DFrom1D(int index, out int x, out int y, out int z)
 	    {
 	        /*
-			 In the past, indexs were computed using:
+			 In the past, indexes were computed using:
 			 x = index & Env.ChunkMask;
 			 y = index >> Env.ChunkPower2;
 			 z = (index >> Env.ChunkPower) & Env.ChunkMask;

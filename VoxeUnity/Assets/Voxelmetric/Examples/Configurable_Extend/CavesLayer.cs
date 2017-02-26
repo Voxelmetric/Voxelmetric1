@@ -9,7 +9,7 @@ public class CavesLayer : TerrainLayer
     protected override void SetUp(LayerConfig config)
     {
         // Doesn't currently support customization via config but you can add them like this:
-        // frequency = float.Parse(properties["frequency"]);
+        // frequency = 1f/float.Parse(properties["frequency"]); // Frequency in configs is in fast 1/frequency
         // and it will fetch an element in the config's property object called frequency
     }
 

@@ -22,8 +22,12 @@ public class AbsoluteLayer : TerrainLayer
             ((ColoredBlock)blockToPlace).color = new Color(byte.Parse(colors[0]) / 255f, byte.Parse(colors[1]) / 255f, byte.Parse(colors[2]) / 255f);
         }
 
-        noise.Frequency = float.Parse(properties["frequency"]);
+        noise.Frequency = 1f/float.Parse(properties["frequency"]); // Frequency in configs is in fast 1/frequency
         noise.Gain = float.Parse(properties["exponent"]);
+#if UNITY_STANDALONE_WIN && !DISABLE_FASTSIMD
+        noiseSIMD.Frequency = noise.Frequency;
+        noiseSIMD.Gain = noise.Gain;
+#endif
         minHeight = int.Parse(properties["minHeight"]);
         maxHeight = int.Parse(properties["maxHeight"]);
 
@@ -36,6 +40,25 @@ public class AbsoluteLayer : TerrainLayer
         ni.noiseGen.SetInterpBitStep(Env.ChunkSize, 2);
         ni.lookupTable = chunk.pools.PopFloatArray(ni.noiseGen.Size*ni.noiseGen.Size);
 
+#if UNITY_STANDALONE_WIN && !DISABLE_FASTSIMD
+        float[] noiseSet = chunk.pools.PopFloatArray(ni.noiseGen.Size * ni.noiseGen.Size * ni.noiseGen.Size);
+
+        // Generate SIMD noise
+        int offsetShift = Env.ChunkPow - ni.noiseGen.Step;
+        int xStart = (chunk.pos.x >> Env.ChunkPow) << offsetShift;
+        int yStart = (chunk.pos.y >> Env.ChunkPow) << offsetShift;
+        int zStart = (chunk.pos.z >> Env.ChunkPow) << offsetShift;
+        float scaleModifier = 1 << ni.noiseGen.Step;
+        noiseSIMD.Noise.FillNoiseSet(noiseSet, xStart, yStart, zStart, ni.noiseGen.Size, ni.noiseGen.Size, ni.noiseGen.Size, scaleModifier);
+
+        // Generate a lookup table
+        int i = 0;
+        for (int z = 0; z < ni.noiseGen.Size; z++)
+            for (int x = 0; x < ni.noiseGen.Size; x++)
+                ni.lookupTable[i++] = NoiseUtilsSIMD.GetNoise(noiseSet, ni.noiseGen.Size, x, 0, z, amplitude, noise.Gain);
+
+        chunk.pools.PushFloatArray(noiseSet);
+#else
         int xOffset = chunk.pos.x;
         int zOffset = chunk.pos.z;
 
@@ -48,9 +71,10 @@ public class AbsoluteLayer : TerrainLayer
             for (int x = 0; x<ni.noiseGen.Size; x++)
             {
                 float xf = (x<<ni.noiseGen.Step)+xOffset;
-                ni.lookupTable[i++] = NoiseUtils.GetNoise(noise.Noise, xf, 0, zf, noise.Frequency, amplitude, noise.Gain);
+                ni.lookupTable[i++] = NoiseUtils.GetNoise(noise.Noise, xf, 0, zf, 1f, amplitude, noise.Gain);
             }
         }
+#endif
     }
 
     public override void PostProcess(Chunk chunk, int layerIndex)

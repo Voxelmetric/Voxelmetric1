@@ -1,22 +1,22 @@
-﻿namespace Voxelmetric.Code.Utilities.Noise
+﻿#if UNITY_STANDALONE_WIN && !DISABLE_FASTSIMD
+namespace Voxelmetric.Code.Utilities.Noise
 {
-    public class NoiseWrapper
+    public class NoiseWrapperSIMD
     {
-        protected readonly FastNoise noise;
+        protected readonly FastNoiseSIMD noise;
 
-        public FastNoise.NoiseType noiseType = FastNoise.NoiseType.Simplex;
-        public FastNoise.FractalType fractalType = FastNoise.FractalType.FBM;
+        public FastNoiseSIMD.NoiseType noiseType = FastNoiseSIMD.NoiseType.Simplex;
+        public FastNoiseSIMD.FractalType fractalType = FastNoiseSIMD.FractalType.FBM;
 
         public float frequency = 0.01f;
         public int octaves = 3;
         public float lacunarity = 2.0f;
         public float gain = 0.5f;
 
-        public NoiseWrapper(string seed)
+        public NoiseWrapperSIMD(string seed)
         {
-            noise = new FastNoise(seed.GetHashCode());
+            noise = new FastNoiseSIMD(seed.GetHashCode());
             noise.SetNoiseType(noiseType);
-            noise.SetInterp(FastNoise.Interp.Quintic);
             noise.SetFractalType(fractalType);
             noise.SetFrequency(frequency);
             noise.SetFractalOctaves(octaves);
@@ -24,12 +24,12 @@
             noise.SetFractalGain(gain);
         }
 
-        public FastNoise Noise
+        public FastNoiseSIMD Noise
         {
             get { return noise; }
         }
 
-        public FastNoise.NoiseType NoiseType
+        public FastNoiseSIMD.NoiseType NoiseType
         {
             set
             {
@@ -39,7 +39,7 @@
             get { return noiseType; }
         }
 
-        public FastNoise.FractalType FractalType
+        public FastNoiseSIMD.FractalType FractalType
         {
             set
             {
@@ -90,3 +90,5 @@
         }
     }
 }
+
+#endif

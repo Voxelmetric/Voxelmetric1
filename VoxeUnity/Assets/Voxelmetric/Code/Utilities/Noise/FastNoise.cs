@@ -283,8 +283,8 @@ public class FastNoise
 	private static int Hash2D(int seed, int x, int y)
 	{
 		int hash = seed;
-		hash += X_PRIME * x;
-		hash += Y_PRIME * y;
+		hash ^= X_PRIME * x;
+		hash ^= Y_PRIME * y;
 
 		hash = hash * hash * hash * 60493;
 		hash = (hash >> 13) ^ hash;
@@ -298,9 +298,9 @@ public class FastNoise
 	private static int Hash3D(int seed, int x, int y, int z)
 	{
 		int hash = seed;
-		hash += X_PRIME * x;
-		hash += Y_PRIME * y;
-		hash += Z_PRIME * z;
+		hash ^= X_PRIME * x;
+		hash ^= Y_PRIME * y;
+		hash ^= Z_PRIME * z;
 
 		hash = hash * hash * hash * 60493;
 		hash = (hash >> 13) ^ hash;
@@ -314,10 +314,10 @@ public class FastNoise
 	private static int Hash4D(int seed, int x, int y, int z, int w)
 	{
 		int hash = seed;
-		hash += X_PRIME * x;
-		hash += Y_PRIME * y;
-		hash += Z_PRIME * z;
-		hash += W_PRIME * w;
+		hash ^= X_PRIME * x;
+		hash ^= Y_PRIME * y;
+		hash ^= Z_PRIME * z;
+		hash ^= W_PRIME * w;
 
 		hash = hash * hash * hash * 60493;
 		hash = (hash >> 13) ^ hash;
@@ -330,12 +330,11 @@ public class FastNoise
 #endif
 	private static FN_DECIMAL ValCoord2D(int seed, int x, int y)
 	{
-		int n = X_PRIME * x;
-		n += Y_PRIME * y;
-		n += seed;
-		n &= 0x7fffffff;
-		n = (n >> 13) ^ n;
-		return (FN_DECIMAL)9.313225750491593848211501654336e-10 * (((n * (n * n * 60493 + 19990303) + 1376312589) & 0x7fffffff) - (FN_DECIMAL)1073741823.5);
+		int n = seed;
+		n ^= X_PRIME * x;
+		n ^= Y_PRIME * y;
+
+		return (n * n * n * 60493) / (FN_DECIMAL)2147483648.0;
 	}
 
 #if !FN_DISABLE_AGGRESSIVE_INLINING
@@ -343,12 +342,12 @@ public class FastNoise
 #endif
 	private static FN_DECIMAL ValCoord3D(int seed, int x, int y, int z)
 	{
-		int n = X_PRIME * x;
-		n += Y_PRIME * y;
-		n += Z_PRIME * z;
-		n += seed;
-		n = (n >> 13) ^ n;
-		return (FN_DECIMAL)9.313225750491593848211501654336e-10 * (((n * (n * n * 60493 + 19990303) + 1376312589) & 0x7fffffff) - (FN_DECIMAL)1073741823.5);
+		int n = seed;
+		n ^= X_PRIME * x;
+		n ^= Y_PRIME * y;
+		n ^= Z_PRIME * z;
+
+		return (n * n * n * 60493) / (FN_DECIMAL)2147483648.0;
 	}
 
 #if !FN_DISABLE_AGGRESSIVE_INLINING
@@ -356,13 +355,13 @@ public class FastNoise
 #endif
 	private static FN_DECIMAL ValCoord4D(int seed, int x, int y, int z, int w)
 	{
-		int n = X_PRIME * x;
-		n += Y_PRIME * y;
-		n += Z_PRIME * z;
-		n += W_PRIME * w;
-		n += seed;
-		n = (n >> 13) ^ n;
-		return (FN_DECIMAL)9.313225750491593848211501654336e-10 * (((n * (n * n * 60493 + 19990303) + 1376312589) & 0x7fffffff) - (FN_DECIMAL)1073741823.5);
+		int n = seed;
+		n ^= X_PRIME * x;
+		n ^= Y_PRIME * y;
+		n ^= Z_PRIME * z;
+		n ^= W_PRIME * w;
+
+		return (n * n * n * 60493) / (FN_DECIMAL)2147483648.0;
 	}
 
 #if !FN_DISABLE_AGGRESSIVE_INLINING
@@ -371,8 +370,8 @@ public class FastNoise
 	private static FN_DECIMAL GradCoord2D(int seed, int x, int y, FN_DECIMAL xd, FN_DECIMAL yd)
 	{
 		int hash = seed;
-		hash += X_PRIME * x;
-		hash += Y_PRIME * y;
+		hash ^= X_PRIME * x;
+		hash ^= Y_PRIME * y;
 
 		hash = hash * hash * hash * 60493;
 		hash = (hash >> 13) ^ hash;
@@ -389,9 +388,9 @@ public class FastNoise
 	private static FN_DECIMAL GradCoord3D(int seed, int x, int y, int z, FN_DECIMAL xd, FN_DECIMAL yd, FN_DECIMAL zd)
 	{
 		int hash = seed;
-		hash += X_PRIME * x;
-		hash += Y_PRIME * y;
-		hash += Z_PRIME * z;
+		hash ^= X_PRIME * x;
+		hash ^= Y_PRIME * y;
+		hash ^= Z_PRIME * z;
 
 		hash = hash * hash * hash * 60493;
 		hash = (hash >> 13) ^ hash;
@@ -408,10 +407,10 @@ public class FastNoise
 	private static FN_DECIMAL GradCoord4D(int seed, int x, int y, int z, int w, FN_DECIMAL xd, FN_DECIMAL yd, FN_DECIMAL zd, FN_DECIMAL wd)
 	{
 		int hash = seed;
-		hash += X_PRIME * x;
-		hash += Y_PRIME * y;
-		hash += Z_PRIME * z;
-		hash += W_PRIME * w;
+		hash ^= X_PRIME * x;
+		hash ^= Y_PRIME * y;
+		hash ^= Z_PRIME * z;
+		hash ^= W_PRIME * w;
 
 		hash = hash * hash * hash * 60493;
 		hash = (hash >> 13) ^ hash;
@@ -1935,7 +1934,7 @@ public class FastNoise
 
 	public void GradientPerturb(ref FN_DECIMAL x, ref FN_DECIMAL y, ref FN_DECIMAL z)
 	{
-		SingleGradientPerturb(0, m_gradientPerturbAmp, m_frequency, ref x, ref y, ref z);
+		SingleGradientPerturb(m_seed, m_gradientPerturbAmp, m_frequency, ref x, ref y, ref z);
 	}
 
 	public void GradientPerturbFractal(ref FN_DECIMAL x, ref FN_DECIMAL y, ref FN_DECIMAL z)
@@ -2027,7 +2026,7 @@ public class FastNoise
 
 	public void GradientPerturb(ref FN_DECIMAL x, ref FN_DECIMAL y)
 	{
-		SingleGradientPerturb(0, m_gradientPerturbAmp, m_frequency, ref x, ref y);
+		SingleGradientPerturb(m_seed, m_gradientPerturbAmp, m_frequency, ref x, ref y);
 	}
 
 	public void GradientPerturbFractal(ref FN_DECIMAL x, ref FN_DECIMAL y)

@@ -10,23 +10,33 @@ public abstract class TerrainLayer : IComparable, IEquatable<TerrainLayer>
 {
     protected World world;
     protected TerrainGen terrainGen;
-    protected Dictionary<string, string> properties = new Dictionary<string, string>();
+    protected readonly Dictionary<string, string> properties = new Dictionary<string, string>();
     protected NoiseWrapper noise;
+#if UNITY_STANDALONE_WIN && !DISABLE_FASTSIMD
+    protected NoiseWrapperSIMD noiseSIMD;
+#endif
 
     public string layerName = "";
     public int index { get; private set; }
     public bool isStructure { get; private set; }
 
     public NoiseWrapper Noise { get { return noise; } }
+#if UNITY_STANDALONE_WIN && !DISABLE_FASTSIMD
+    public NoiseWrapperSIMD NoiseSIMD { get {return noiseSIMD;} }
+#endif
 
     public void BaseSetUp(LayerConfig config, World world, TerrainGen terrainGen)
     {
         this.terrainGen = terrainGen;
-        noise = new NoiseWrapper(world.name);
         layerName = config.name;
         isStructure = LayerConfig.IsStructure(config.structure);
         this.world = world;
         index = config.index;
+
+        noise = new NoiseWrapper(world.name);
+#if UNITY_STANDALONE_WIN && !DISABLE_FASTSIMD
+        noiseSIMD = new NoiseWrapperSIMD(world.name);
+#endif
 
         foreach (var key in config.properties.Keys)
         {

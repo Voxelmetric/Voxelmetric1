@@ -8,9 +8,9 @@ namespace Voxelmetric.Code.Utilities.Noise
         protected int m_size;
         protected int m_sizePow2;
         protected int m_sizePow2plusSize;
-        //! +1 intepolated into downsampled state
+        //! +1 interpolated into downsampled state
         protected int m_step;
-        //! Interpolated scale
+        //! Interpolation scale
         protected float m_scale;
 
         /// <summary>
