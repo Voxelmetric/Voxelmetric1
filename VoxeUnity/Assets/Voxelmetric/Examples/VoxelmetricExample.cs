@@ -68,7 +68,7 @@ namespace Voxelmetric.Examples
             selectedBlockText.text = Code.Voxelmetric.GetBlock(world, hit.vector3Int).displayName;
 
             // Clicking voxel blocks
-            if (Input.GetMouseButtonDown(0) && !eventSystem.IsPointerOverGameObject())
+            if (Input.GetMouseButtonDown(0) && eventSystem!=null && !eventSystem.IsPointerOverGameObject())
             {
                 if (hit.block.type != BlockProvider.AirType)
                 {
