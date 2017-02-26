@@ -183,7 +183,7 @@ namespace Voxelmetric.Code.Core
                         rebuildMaskGeometry = rebuildMaskGeometry | (1 << i);
 
                         // Mirror the block to the neighbor edge
-                        int neighborIndex = Helpers.GetChunkIndex1DFrom3D(x, Env.ChunkSize, y);
+                        int neighborIndex = Helpers.GetChunkIndex1DFrom3D(x, Env.ChunkSize, z);
                         listenerChunk.blocks.blocks[neighborIndex] = block;
                     }
                     // Section to the top
@@ -192,7 +192,7 @@ namespace Voxelmetric.Code.Core
                         rebuildMaskGeometry = rebuildMaskGeometry | (1 << i);
 
                         // Mirror the block to the neighbor edge
-                        int neighborIndex = Helpers.GetChunkIndex1DFrom3D(x, -1, y);
+                        int neighborIndex = Helpers.GetChunkIndex1DFrom3D(x, -1, z);
                         listenerChunk.blocks.blocks[neighborIndex] = block;
                     }
                 }
