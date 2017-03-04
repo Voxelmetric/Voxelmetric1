@@ -49,10 +49,22 @@ namespace Voxelmetric.Code.Core
             return containerChunk;
         }
 
-        public void Set(Vector3Int pos, Chunk chunk)
+        public bool Set(Vector3Int pos, Chunk chunk)
         {
+            Assert.IsTrue(Helpers.IsMainThread);
             pos = Chunk.ContainingCoordinates(pos);
+
+            // Let's keep it within allowed world bounds
+            if (
+                (world.config.minY != world.config.maxY) &&
+                (pos.y > world.config.maxY || pos.y < world.config.minY)
+                )
+            {
+                return false;
+            }
+
             chunks[pos] = chunk;
+            return true;
         }
 
         /// <summary>Removes a given chunk from the world</summary>
@@ -78,7 +90,7 @@ namespace Voxelmetric.Code.Core
             Assert.IsTrue(Helpers.IsMainThread);
             pos = Chunk.ContainingCoordinates(pos);
 
-            // Let's keep it withing allowed world bounds
+            // Let's keep it within allowed world bounds
             if (
                 (world.config.minY!=world.config.maxY) &&
                 (pos.y>world.config.maxY || pos.y<world.config.minY)

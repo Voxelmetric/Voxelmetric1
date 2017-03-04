@@ -21,17 +21,16 @@ namespace Voxelmetric.Code.Core
         /// <param name="pos">Global position of the block data</param>
         public BlockData Get(Vector3Int pos)
         {
+            // Return air for chunk that do not exist
             Chunk chunk = world.chunks.Get(pos);
-            if (chunk != null && (pos.y>=world.config.minY || world.config.minY==world.config.maxY))
-            {
-                int xx = pos.x&Env.ChunkMask;
-                int yy = pos.y&Env.ChunkMask;
-                int zz = pos.z&Env.ChunkMask;
+            if (chunk==null)
+                return new BlockData(BlockProvider.AirType);
 
-                return chunk.blocks.Get(Helpers.GetChunkIndex1DFrom3D(xx, yy, zz));
-            }
+            int xx = pos.x&Env.ChunkMask;
+            int yy = pos.y&Env.ChunkMask;
+            int zz = pos.z&Env.ChunkMask;
 
-            return new BlockData(BlockProvider.AirType);
+            return chunk.blocks.Get(Helpers.GetChunkIndex1DFrom3D(xx, yy, zz));
         }
 
         /// <summary>
@@ -40,18 +39,17 @@ namespace Voxelmetric.Code.Core
         /// <param name="pos">Global position of the block</param>
         public Block GetBlock(Vector3Int pos)
         {
+            // Return air for chunk that do not exist
             Chunk chunk = world.chunks.Get(pos);
-            if (chunk != null && (pos.y>=world.config.minY || world.config.minY==world.config.maxY))
-            {
-                int xx = pos.x&Env.ChunkMask;
-                int yy = pos.y&Env.ChunkMask;
-                int zz = pos.z&Env.ChunkMask;
+            if (chunk == null)
+                return world.blockProvider.BlockTypes[BlockProvider.AirType];
 
-                BlockData blockData = chunk.blocks.Get(Helpers.GetChunkIndex1DFrom3D(xx, yy, zz));
-                return world.blockProvider.BlockTypes[blockData.Type];
-            }
+            int xx = pos.x&Env.ChunkMask;
+            int yy = pos.y&Env.ChunkMask;
+            int zz = pos.z&Env.ChunkMask;
 
-            return world.blockProvider.BlockTypes[BlockProvider.AirType];
+            BlockData blockData = chunk.blocks.Get(Helpers.GetChunkIndex1DFrom3D(xx, yy, zz));
+            return world.blockProvider.BlockTypes[blockData.Type];
         }
 
         /// <summary>
