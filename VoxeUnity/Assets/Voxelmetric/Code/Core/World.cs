@@ -1,7 +1,9 @@
 ﻿using UnityEngine;
+using Voxelmetric.Code.Data_types;
 using Voxelmetric.Code.Load_Resources;
 using Voxelmetric.Code.Load_Resources.Blocks;
 using Voxelmetric.Code.Load_Resources.Textures;
+using Voxelmetric.Code.Utilities;
 using Voxelmetric.Code.VM;
 
 namespace Voxelmetric.Code.Core
@@ -66,6 +68,22 @@ namespace Voxelmetric.Code.Core
         private void StopWorld()
         {
             networking.EndConnections();
+        }
+
+        public void CapCoordYInsideWorld(ref int minY, ref int maxY)
+        {
+            if (config.minY!=config.maxY)
+            {
+                int offset = Env.ChunkSize; // We always load one more chunk
+                minY = Mathf.Max(minY, config.minY-offset);
+                maxY = Mathf.Min(maxY, config.maxY+offset);
+            }
+        }
+
+        public bool IsCoordInsideWorld(Vector3Int pos)
+        {
+            int offset = Env.ChunkSize; // We always load one more chunk
+            return config.minY==config.maxY || (pos.y>config.minY-offset && pos.y<config.maxY+offset);
         }
     }
 }

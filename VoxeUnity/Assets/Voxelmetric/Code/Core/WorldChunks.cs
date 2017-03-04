@@ -55,13 +55,8 @@ namespace Voxelmetric.Code.Core
             pos = Chunk.ContainingCoordinates(pos);
 
             // Let's keep it within allowed world bounds
-            if (
-                (world.config.minY != world.config.maxY) &&
-                (pos.y > world.config.maxY || pos.y < world.config.minY)
-                )
-            {
+            if (!world.IsCoordInsideWorld(pos))
                 return false;
-            }
 
             chunks[pos] = chunk;
             return true;
@@ -91,10 +86,7 @@ namespace Voxelmetric.Code.Core
             pos = Chunk.ContainingCoordinates(pos);
 
             // Let's keep it within allowed world bounds
-            if (
-                (world.config.minY!=world.config.maxY) &&
-                (pos.y>world.config.maxY || pos.y<world.config.minY)
-                )
+            if (!world.IsCoordInsideWorld(pos))
             {
                 chunk = null;
                 return false;

@@ -99,11 +99,7 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
 
             int minY = m_viewerPos.y-(VerticalChunkLoadRadius<<Env.ChunkPow);
             int maxY = m_viewerPos.y+(VerticalChunkLoadRadius<<Env.ChunkPow);
-            if (world.config.minY!=world.config.maxY)
-            {
-                minY = Mathf.Max(minY, world.config.minY);
-                maxY = Mathf.Min(maxY, world.config.maxY);
-            }
+            world.CapCoordYInsideWorld(ref minY, ref maxY);
 
             // Cycle through the array of positions
             for (int i = 0; i<m_chunkPositions.Length; i++)
@@ -235,11 +231,11 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
             m_viewerPosPrev = m_viewerPos;
 
             // Do not let y overflow
-            int y = FollowCamera ? pos.y : 0;
-            if (world.config.minY!=world.config.maxY)
+            int y = 0;
+            if (FollowCamera)
             {
-                y = Mathf.Max(y, world.config.minY);
-                y = Mathf.Min(y, world.config.maxY);
+                y = pos.y;
+                world.CapCoordYInsideWorld(ref y, ref y);
             }
 
             m_viewerPos = new Vector3Int(pos.x, y, pos.z);
@@ -263,7 +259,8 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
                 {
                     if (Diag_DrawWorldBounds)
                     {
-                        Gizmos.color = Color.blue;
+                        // Make center chunks more apparent by using yellow color
+                        Gizmos.color = chunk.pos.z==0 || chunk.pos.y==0 || chunk.pos.z==0 ? Color.yellow : Color.blue;
                         Gizmos.DrawWireCube(chunk.WorldBounds.center, chunk.WorldBounds.size);
                     }
 
