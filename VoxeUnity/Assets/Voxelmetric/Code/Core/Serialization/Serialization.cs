@@ -53,7 +53,7 @@ namespace Voxelmetric.Code.Core.Serialization
             {
                 ushort type = save.blocks[i].Type;
                 BlockPos pos = save.positions[i];
-                chunk.blocks.Set(new Vector3Int(pos.x,pos.y,pos.z), new BlockData(type));
+                chunk.blocks.SetInner(new Vector3Int(pos.x,pos.y,pos.z), new BlockData(type));
             }
 
             return true;

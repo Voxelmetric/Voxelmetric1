@@ -74,7 +74,7 @@ namespace Voxelmetric.Code.Core
                 pos.z & Env.ChunkMask
                 );
 
-            chunk.blocks.Set(vector3Int, blockData);
+            chunk.blocks.SetInner(vector3Int, blockData);
         }
 
         /// <summary>

@@ -523,20 +523,14 @@ namespace Voxelmetric.Code.Core.StateManager
                             chunk.blocks.SetPadded(new Vector3Int(x, -1, Env.ChunkSize), data);
                         }
 
-                        // Inner area
+                        // Padded area - sides
                         for (int y = 0; y<Env.ChunkSize; y++)
                         {
-                            BlockData data = neighborChunk.blocks.Get(new Vector3Int(-1, y, 0));
-                            chunk.blocks.SetPadded(new Vector3Int(-1, y, Env.ChunkSize), data);
-
-                            for (int x = 0; x<Env.ChunkSize; x++)
+                            for (int x = -1; x<Env.ChunkSizePlusPadding; x++)
                             {
-                                data = neighborChunk.blocks.Get(new Vector3Int(x, y, 0));
-                                chunk.blocks.SetInner(new Vector3Int(x, y, Env.ChunkSize), data);
+                                BlockData data = neighborChunk.blocks.Get(new Vector3Int(x, y, 0));
+                                chunk.blocks.SetPadded(new Vector3Int(x, y, Env.ChunkSize), data);
                             }
-
-                            data = neighborChunk.blocks.Get(new Vector3Int(Env.ChunkSize, y, 0));
-                            chunk.blocks.SetPadded(new Vector3Int(Env.ChunkSize, y, Env.ChunkSize), data);
                         }
 
                         // Padded area - bottom
@@ -556,20 +550,14 @@ namespace Voxelmetric.Code.Core.StateManager
                             chunk.blocks.SetPadded(new Vector3Int(x, -1, -1), data);
                         }
 
-                        // Inner area
+                        // Padded area - sides
                         for (int y = 0; y<Env.ChunkSize; y++)
                         {
-                            BlockData data = neighborChunk.blocks.Get(new Vector3Int(-1, y, Env.ChunkMask));
-                            chunk.blocks.SetPadded(new Vector3Int(-1, y, -1), data);
-
-                            for (int x = 0; x<Env.ChunkSize; x++)
+                            for (int x = -1; x<Env.ChunkSizePlusPadding; x++)
                             {
-                                data = neighborChunk.blocks.Get(new Vector3Int(x, y, Env.ChunkMask));
-                                chunk.blocks.SetInner(new Vector3Int(x, y, -1), data);
+                                BlockData data = neighborChunk.blocks.Get(new Vector3Int(x, y, Env.ChunkMask));
+                                chunk.blocks.SetPadded(new Vector3Int(x, y, -1), data);
                             }
-
-                            data = neighborChunk.blocks.Get(new Vector3Int(Env.ChunkSize, y, Env.ChunkMask));
-                            chunk.blocks.SetPadded(new Vector3Int(Env.ChunkSize, y, -1), data);
                         }
 
                         // Padded area - bottom
@@ -595,20 +583,14 @@ namespace Voxelmetric.Code.Core.StateManager
                             chunk.blocks.SetPadded(new Vector3Int(Env.ChunkSize, -1, z), data);
                         }
 
-                        // Inner area
+                        // Padded area - sides
                         for (int y = 0; y<Env.ChunkSize; y++)
                         {
-                            BlockData data = neighborChunk.blocks.Get(new Vector3Int(0, y, -1));
-                            chunk.blocks.SetPadded(new Vector3Int(Env.ChunkSize, y, -1), data);
-
-                            for (int z = 0; z<Env.ChunkSize; z++)
+                            for (int z = -1; z<Env.ChunkSizePlusPadding; z++)
                             {
-                                data = neighborChunk.blocks.Get(new Vector3Int(0, y, z));
-                                chunk.blocks.SetInner(new Vector3Int(Env.ChunkSize, y, z), data);
+                                BlockData data = neighborChunk.blocks.Get(new Vector3Int(0, y, z));
+                                chunk.blocks.SetPadded(new Vector3Int(Env.ChunkSize, y, z), data);
                             }
-
-                            data = neighborChunk.blocks.Get(new Vector3Int(0, y, Env.ChunkSize));
-                            chunk.blocks.SetPadded(new Vector3Int(Env.ChunkSize, y, Env.ChunkSize), data);
                         }
 
                         // Padded area - bottom
@@ -628,20 +610,14 @@ namespace Voxelmetric.Code.Core.StateManager
                             chunk.blocks.SetPadded(new Vector3Int(-1, -1, z), data);
                         }
 
-                        // Inner area
+                        // Padded area - sides
                         for (int y = 0; y<Env.ChunkSize; y++)
                         {
-                            BlockData data = neighborChunk.blocks.Get(new Vector3Int(Env.ChunkMask, y, -1));
-                            chunk.blocks.SetPadded(new Vector3Int(-1, y, -1), data);
-
-                            for (int z = 0; z<Env.ChunkSize; z++)
+                            for (int z = -1; z<Env.ChunkSizePlusPadding; z++)
                             {
-                                data = neighborChunk.blocks.Get(new Vector3Int(Env.ChunkMask, y, z));
-                                chunk.blocks.SetInner(new Vector3Int(-1, y, z), data);
+                                BlockData data = neighborChunk.blocks.Get(new Vector3Int(Env.ChunkMask, y, z));
+                                chunk.blocks.SetPadded(new Vector3Int(-1, y, z), data);
                             }
-
-                            data = neighborChunk.blocks.Get(new Vector3Int(Env.ChunkMask, y, Env.ChunkSize));
-                            chunk.blocks.SetPadded(new Vector3Int(-1, y, Env.ChunkSize), data);
                         }
 
                         // Padded area - bottom

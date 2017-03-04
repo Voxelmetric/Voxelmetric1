@@ -110,7 +110,7 @@ public abstract class TerrainLayer : IComparable, IEquatable<TerrainLayer>
 
         while (y<yMax)
         {
-            chunk.blocks.Set(new Vector3Int(x, y-chunk.pos.y, z), new BlockData(blockToPlace.type));
+            chunk.blocks.SetInner(new Vector3Int(x, y-chunk.pos.y, z), new BlockData(blockToPlace.type));
             ++y;
         }
     }

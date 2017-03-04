@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using UnityEngine;
 using UnityEngine.Assertions;
 using Voxelmetric.Code.Common;
 using Voxelmetric.Code.Core.StateManager;
@@ -362,7 +363,7 @@ namespace Voxelmetric.Code.Core
 
             blocks[index] = blockData;
         }
-
+        
         private void SetInternalInner(int index, ref Vector3Int pos, BlockData blockData)
         {
             // Nothing for us to do if there was no change
@@ -371,6 +372,11 @@ namespace Voxelmetric.Code.Core
                 return;
 
             // We guarantee we're inside non-padded area
+            /*Assert.IsTrue(
+                pos.x>=0 && pos.x<Env.ChunkSize &&
+                pos.y>=0 && pos.y<Env.ChunkSize &&
+                pos.z>=0 && pos.z<Env.ChunkSize);*/
+                
             if (blockData.Type == BlockProvider.AirType)
                 --NonEmptyBlocks;
             else
@@ -378,9 +384,15 @@ namespace Voxelmetric.Code.Core
 
             blocks[index] = blockData;
         }
-
+        
         private void SetInternalPadded(int index, ref Vector3Int pos, BlockData blockData)
         {
+            // We guarantee we're inside padded area
+            /*Assert.IsFalse(
+                pos.x >= 0 && pos.x < Env.ChunkSize &&
+                pos.y >= 0 && pos.y < Env.ChunkSize &&
+                pos.z >= 0 && pos.z < Env.ChunkSize);*/
+
             blocks[index] = blockData;
         }
 
@@ -396,7 +408,7 @@ namespace Voxelmetric.Code.Core
         }
 
         /// <summary>
-        /// Sets the block at the given position. The position is guaranteed to be inside the standard area
+        /// Sets the block at the given position. The position is guaranteed to be inside chunk's non-padded area
         /// </summary>
         /// <param name="pos">Position in local chunk coordinates</param>
         /// <param name="blockData">A block to be placed on a given position</param>
@@ -407,7 +419,7 @@ namespace Voxelmetric.Code.Core
         }
 
         /// <summary>
-        /// Sets the block at the given position. The position is guaranteed to be in the padded area
+        /// Sets the block at the given position. The position is guaranteed to be inside chunk's padded area
         /// </summary>
         /// <param name="pos">Position in local chunk coordinates</param>
         /// <param name="blockData">A block to be placed on a given position</param>
@@ -433,7 +445,7 @@ namespace Voxelmetric.Code.Core
                     {
                         int index = Helpers.GetChunkIndex1DFrom3D(x, y, z);
                         Vector3Int pos = new Vector3Int(x, y, z);
-                        SetInternal(index, ref pos, blockData);
+                        SetInternalInner(index, ref pos, blockData);
                     }
                 }
             }
@@ -483,7 +495,7 @@ namespace Voxelmetric.Code.Core
                 // Performing following checks would be super performance unfriendly. Modified blocks
                 // is now used during serialization of chunks anyway and uses a map there to filter out
                 // duplicates taking O(n logn) instead of O(n) here.
-                // TODO: Remove this altogether because this whole modified blocks only unnecessary
+                // TODO: Remove this altogether because this whole modifiedBlocks only unnecessarily
                 // increases memory requirements. Rather then doing this, a proper compression should
                 // be implemented
                 //if (!modifiedBlocks.Contains(blockPos))
