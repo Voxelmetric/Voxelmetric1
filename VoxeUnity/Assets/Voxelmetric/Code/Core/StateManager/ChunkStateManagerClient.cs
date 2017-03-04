@@ -629,12 +629,12 @@ namespace Voxelmetric.Code.Core.StateManager
                         }
 
                         // Inner area
-                        for (int y = 0; y<Env.ChunkSizePlusPadding; y++)
+                        for (int y = 0; y<Env.ChunkSize; y++)
                         {
                             BlockData data = neighborChunk.blocks.Get(new Vector3Int(Env.ChunkMask, y, -1));
                             chunk.blocks.SetPadded(new Vector3Int(-1, y, -1), data);
 
-                            for (int z = 0; z<Env.ChunkSizePlusPadding; z++)
+                            for (int z = 0; z<Env.ChunkSize; z++)
                             {
                                 data = neighborChunk.blocks.Get(new Vector3Int(Env.ChunkMask, y, z));
                                 chunk.blocks.SetInner(new Vector3Int(-1, y, z), data);
