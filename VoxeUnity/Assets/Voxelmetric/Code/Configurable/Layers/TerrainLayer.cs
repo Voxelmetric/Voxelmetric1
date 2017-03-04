@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Voxelmetric.Code.Common;
 using Voxelmetric.Code.Core;
 using Voxelmetric.Code.Data_types;
 using Voxelmetric.Code.Load_Resources;
@@ -110,7 +111,7 @@ public abstract class TerrainLayer : IComparable, IEquatable<TerrainLayer>
 
         while (y<yMax)
         {
-            chunk.blocks.SetInner(new Vector3Int(x, y-chunk.pos.y, z), new BlockData(blockToPlace.type));
+            chunk.blocks.SetInner(Helpers.GetChunkIndex1DFrom3D(x, y-chunk.pos.y, z), new BlockData(blockToPlace.type));
             ++y;
         }
     }

@@ -1,4 +1,5 @@
 ﻿using System;
+using Voxelmetric.Code.Common;
 using Voxelmetric.Code.Data_types;
 using Voxelmetric.Code.Load_Resources.Blocks;
 using Voxelmetric.Code.Utilities;
@@ -23,13 +24,11 @@ namespace Voxelmetric.Code.Core
             Chunk chunk = world.chunks.Get(pos);
             if (chunk != null && (pos.y>=world.config.minY || world.config.minY==world.config.maxY))
             {
-                Vector3Int vector3Int = new Vector3Int(
-                    pos.x & Env.ChunkMask,
-                    pos.y & Env.ChunkMask,
-                    pos.z & Env.ChunkMask
-                    );
+                int xx = pos.x&Env.ChunkMask;
+                int yy = pos.y&Env.ChunkMask;
+                int zz = pos.z&Env.ChunkMask;
 
-                return chunk.blocks.Get(vector3Int);
+                return chunk.blocks.Get(Helpers.GetChunkIndex1DFrom3D(xx, yy, zz));
             }
 
             return new BlockData(BlockProvider.AirType);
@@ -44,13 +43,11 @@ namespace Voxelmetric.Code.Core
             Chunk chunk = world.chunks.Get(pos);
             if (chunk != null && (pos.y>=world.config.minY || world.config.minY==world.config.maxY))
             {
-                Vector3Int vector3Int = new Vector3Int(
-                    pos.x & Env.ChunkMask,
-                    pos.y & Env.ChunkMask,
-                    pos.z & Env.ChunkMask
-                    );
+                int xx = pos.x&Env.ChunkMask;
+                int yy = pos.y&Env.ChunkMask;
+                int zz = pos.z&Env.ChunkMask;
 
-                BlockData blockData = chunk.blocks.Get(vector3Int);
+                BlockData blockData = chunk.blocks.Get(Helpers.GetChunkIndex1DFrom3D(xx, yy, zz));
                 return world.blockProvider.BlockTypes[blockData.Type];
             }
 
@@ -68,13 +65,11 @@ namespace Voxelmetric.Code.Core
             if (chunk==null)
                 return;
 
-            Vector3Int vector3Int = new Vector3Int(
-                pos.x & Env.ChunkMask,
-                pos.y & Env.ChunkMask,
-                pos.z & Env.ChunkMask
-                );
+            int xx = pos.x&Env.ChunkMask;
+            int yy = pos.y&Env.ChunkMask;
+            int zz = pos.z&Env.ChunkMask;
 
-            chunk.blocks.SetInner(vector3Int, blockData);
+            chunk.blocks.SetInner(Helpers.GetChunkIndex1DFrom3D(xx, yy, zz), blockData);
         }
 
         /// <summary>

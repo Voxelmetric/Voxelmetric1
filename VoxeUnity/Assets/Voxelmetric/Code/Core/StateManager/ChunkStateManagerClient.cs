@@ -408,7 +408,7 @@ namespace Voxelmetric.Code.Core.StateManager
 
         private void AdjustMinMaxRenderBounds(int x, int y, int z)
         {
-            ushort type = chunk.blocks.Get(new Vector3Int(x, y, z)).Type;
+            ushort type = chunk.blocks.Get(Helpers.GetChunkIndex1DFrom3D(x, y, z)).Type;
             if (type != BlockProvider.AirType)
             {
                 if (x < m_minRenderX)
@@ -513,8 +513,8 @@ namespace Voxelmetric.Code.Core.StateManager
                         // Padded area - top
                         for (int x = -1; x<Env.ChunkSizePlusPadding; x++)
                         {
-                            BlockData data = neighborChunk.blocks.Get(new Vector3Int(x, -1, 0));
-                            chunk.blocks.SetPadded(new Vector3Int(x, -1, Env.ChunkSize), data);
+                            BlockData data = neighborChunk.blocks.Get(Helpers.GetChunkIndex1DFrom3D(x, -1, 0));
+                            chunk.blocks.SetPadded(Helpers.GetChunkIndex1DFrom3D(x, -1, Env.ChunkSize), data);
                         }
 
                         // Padded area - sides
@@ -522,16 +522,16 @@ namespace Voxelmetric.Code.Core.StateManager
                         {
                             for (int x = -1; x<Env.ChunkSizePlusPadding; x++)
                             {
-                                BlockData data = neighborChunk.blocks.Get(new Vector3Int(x, y, 0));
-                                chunk.blocks.SetPadded(new Vector3Int(x, y, Env.ChunkSize), data);
+                                BlockData data = neighborChunk.blocks.Get(Helpers.GetChunkIndex1DFrom3D(x, y, 0));
+                                chunk.blocks.SetPadded(Helpers.GetChunkIndex1DFrom3D(x, y, Env.ChunkSize), data);
                             }
                         }
 
                         // Padded area - bottom
                         for (int x = -1; x < Env.ChunkSizePlusPadding; x++)
                         {
-                            BlockData data = neighborChunk.blocks.Get(new Vector3Int(x, Env.ChunkSize, 0));
-                            chunk.blocks.SetPadded(new Vector3Int(x, Env.ChunkSize, Env.ChunkSize), data);
+                            BlockData data = neighborChunk.blocks.Get(Helpers.GetChunkIndex1DFrom3D(x, Env.ChunkSize, 0));
+                            chunk.blocks.SetPadded(Helpers.GetChunkIndex1DFrom3D(x, Env.ChunkSize, Env.ChunkSize), data);
                         }
                     }
                     // Copy the top back layer of a neighbor chunk to the front layer of ours
@@ -540,8 +540,8 @@ namespace Voxelmetric.Code.Core.StateManager
                         // Padded area - top
                         for (int x = -1; x < Env.ChunkSizePlusPadding; x++)
                         {
-                            BlockData data = neighborChunk.blocks.Get(new Vector3Int(x, -1, Env.ChunkMask));
-                            chunk.blocks.SetPadded(new Vector3Int(x, -1, -1), data);
+                            BlockData data = neighborChunk.blocks.Get(Helpers.GetChunkIndex1DFrom3D(x, -1, Env.ChunkMask));
+                            chunk.blocks.SetPadded(Helpers.GetChunkIndex1DFrom3D(x, -1, -1), data);
                         }
 
                         // Padded area - sides
@@ -549,16 +549,16 @@ namespace Voxelmetric.Code.Core.StateManager
                         {
                             for (int x = -1; x<Env.ChunkSizePlusPadding; x++)
                             {
-                                BlockData data = neighborChunk.blocks.Get(new Vector3Int(x, y, Env.ChunkMask));
-                                chunk.blocks.SetPadded(new Vector3Int(x, y, -1), data);
+                                BlockData data = neighborChunk.blocks.Get(Helpers.GetChunkIndex1DFrom3D(x, y, Env.ChunkMask));
+                                chunk.blocks.SetPadded(Helpers.GetChunkIndex1DFrom3D(x, y, -1), data);
                             }
                         }
 
                         // Padded area - bottom
                         for (int x = -1; x < Env.ChunkSizePlusPadding; x++)
                         {
-                            BlockData data = neighborChunk.blocks.Get(new Vector3Int(x, Env.ChunkSize, Env.ChunkMask));
-                            chunk.blocks.SetPadded(new Vector3Int(x, Env.ChunkSize, -1), data);
+                            BlockData data = neighborChunk.blocks.Get(Helpers.GetChunkIndex1DFrom3D(x, Env.ChunkSize, Env.ChunkMask));
+                            chunk.blocks.SetPadded(Helpers.GetChunkIndex1DFrom3D(x, Env.ChunkSize, -1), data);
                         }
                     }
                 }
@@ -573,8 +573,8 @@ namespace Voxelmetric.Code.Core.StateManager
                         // Padded area - top
                         for (int z = -1; z<Env.ChunkSizePlusPadding; z++)
                         {
-                            BlockData data = neighborChunk.blocks.Get(new Vector3Int(0, -1, z));
-                            chunk.blocks.SetPadded(new Vector3Int(Env.ChunkSize, -1, z), data);
+                            BlockData data = neighborChunk.blocks.Get(Helpers.GetChunkIndex1DFrom3D(0, -1, z));
+                            chunk.blocks.SetPadded(Helpers.GetChunkIndex1DFrom3D(Env.ChunkSize, -1, z), data);
                         }
 
                         // Padded area - sides
@@ -582,16 +582,16 @@ namespace Voxelmetric.Code.Core.StateManager
                         {
                             for (int z = -1; z<Env.ChunkSizePlusPadding; z++)
                             {
-                                BlockData data = neighborChunk.blocks.Get(new Vector3Int(0, y, z));
-                                chunk.blocks.SetPadded(new Vector3Int(Env.ChunkSize, y, z), data);
+                                BlockData data = neighborChunk.blocks.Get(Helpers.GetChunkIndex1DFrom3D(0, y, z));
+                                chunk.blocks.SetPadded(Helpers.GetChunkIndex1DFrom3D(Env.ChunkSize, y, z), data);
                             }
                         }
 
                         // Padded area - bottom
                         for (int z = -1; z < Env.ChunkSizePlusPadding; z++)
                         {
-                            BlockData data = neighborChunk.blocks.Get(new Vector3Int(0, Env.ChunkSize, z));
-                            chunk.blocks.SetPadded(new Vector3Int(Env.ChunkSize, Env.ChunkSize, z), data);
+                            BlockData data = neighborChunk.blocks.Get(Helpers.GetChunkIndex1DFrom3D(0, Env.ChunkSize, z));
+                            chunk.blocks.SetPadded(Helpers.GetChunkIndex1DFrom3D(Env.ChunkSize, Env.ChunkSize, z), data);
                         }
                     }
                     // Copy the left layer of a neighbor chunk to the right layer of ours
@@ -600,8 +600,8 @@ namespace Voxelmetric.Code.Core.StateManager
                         // Padded area - top
                         for (int z = -1; z<Env.ChunkSizePlusPadding; z++)
                         {
-                            BlockData data = neighborChunk.blocks.Get(new Vector3Int(Env.ChunkMask, -1, z));
-                            chunk.blocks.SetPadded(new Vector3Int(-1, -1, z), data);
+                            BlockData data = neighborChunk.blocks.Get(Helpers.GetChunkIndex1DFrom3D(Env.ChunkMask, -1, z));
+                            chunk.blocks.SetPadded(Helpers.GetChunkIndex1DFrom3D(-1, -1, z), data);
                         }
 
                         // Padded area - sides
@@ -609,16 +609,16 @@ namespace Voxelmetric.Code.Core.StateManager
                         {
                             for (int z = -1; z<Env.ChunkSizePlusPadding; z++)
                             {
-                                BlockData data = neighborChunk.blocks.Get(new Vector3Int(Env.ChunkMask, y, z));
-                                chunk.blocks.SetPadded(new Vector3Int(-1, y, z), data);
+                                BlockData data = neighborChunk.blocks.Get(Helpers.GetChunkIndex1DFrom3D(Env.ChunkMask, y, z));
+                                chunk.blocks.SetPadded(Helpers.GetChunkIndex1DFrom3D(-1, y, z), data);
                             }
                         }
 
                         // Padded area - bottom
                         for (int z = -1; z < Env.ChunkSizePlusPadding; z++)
                         {
-                            BlockData data = neighborChunk.blocks.Get(new Vector3Int(Env.ChunkMask, Env.ChunkSize, z));
-                            chunk.blocks.SetPadded(new Vector3Int(-1, Env.ChunkSize, z), data);
+                            BlockData data = neighborChunk.blocks.Get(Helpers.GetChunkIndex1DFrom3D(Env.ChunkMask, Env.ChunkSize, z));
+                            chunk.blocks.SetPadded(Helpers.GetChunkIndex1DFrom3D(-1, Env.ChunkSize, z), data);
                         }
                     }
                 }

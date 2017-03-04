@@ -343,6 +343,26 @@ namespace Voxelmetric.Code.Core
         }
 
         /// <summary>
+        /// Returns block data from a position within the chunk
+        /// </summary>
+        /// <param name="index">Index in local chunk data</param>
+        /// <returns>The block at the position</returns>
+        public BlockData Get(int index)
+        {
+            return blocks[index];
+        }
+
+        /// <summary>
+        /// Returns a block from a position within the chunk
+        /// </summary>
+        /// <param name="index">Index in local chunk data</param>
+        /// <returns>The block at the position</returns>
+        public Block GetBlock(int index)
+        {
+            return m_blockTypes[blocks[index].Type];
+        }
+
+        /// <summary>
         /// Sets the block at the given position. The position is guaranteed to be inside chunk's non-padded area
         /// </summary>
         /// <param name="index">Index in local chunk data</param>
@@ -363,36 +383,12 @@ namespace Voxelmetric.Code.Core
         }
 
         /// <summary>
-        /// Sets the block at the given position. The position is guaranteed to be inside chunk's non-padded area
-        /// </summary>
-        /// <param name="pos">Position in local chunk coordinates</param>
-        /// <param name="blockData">A block to be placed on a given position</param>
-        public void SetInner(Vector3Int pos, BlockData blockData)
-        {
-            int index = Helpers.GetChunkIndex1DFrom3D(pos.x, pos.y, pos.z);
-
-            // Nothing for us to do if there was no change
-            BlockData oldBlockData = blocks[index];
-            if (oldBlockData.Type == blockData.Type)
-                return;
-
-            if (blockData.Type == BlockProvider.AirType)
-                --NonEmptyBlocks;
-            else
-                ++NonEmptyBlocks;
-
-            blocks[index] = blockData;
-        }
-
-        /// <summary>
         /// Sets the block at the given position. The position is guaranteed to be inside chunk's padded area
         /// </summary>
-        /// <param name="pos">Position in local chunk coordinates</param>
+        /// <param name="index">Index in local chunk data</param>
         /// <param name="blockData">A block to be placed on a given position</param>
-        public void SetPadded(Vector3Int pos, BlockData blockData)
+        public void SetPadded(int index, BlockData blockData)
         {
-            int index = Helpers.GetChunkIndex1DFrom3D(pos.x, pos.y, pos.z);
-
             blocks[index] = blockData;
         }
 
@@ -410,7 +406,7 @@ namespace Voxelmetric.Code.Core
                 {
                     for (int x = posFrom.x; x<=posTo.x; x++)
                     {
-                        SetInner(new Vector3Int(x, y, z), blockData);
+                        SetInner(Helpers.GetChunkIndex1DFrom3D(x, y, z), blockData);
                     }
                 }
             }

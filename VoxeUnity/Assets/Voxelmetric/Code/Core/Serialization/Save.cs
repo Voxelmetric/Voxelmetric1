@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.IO;
+using Voxelmetric.Code.Common;
 using Voxelmetric.Code.Common.IO;
 using Voxelmetric.Code.Data_types;
 
@@ -38,7 +39,7 @@ namespace Voxelmetric.Code.Core.Serialization
                 //remove any existing blocks in the dictionary as they're
                 //from the existing save and are overwritten
                 blocksDictionary.Remove(pos);
-                blocksDictionary.Add(pos, chunk.blocks.Get(new Vector3Int(pos.x,pos.y,pos.z)));
+                blocksDictionary.Add(pos, chunk.blocks.Get(Helpers.GetChunkIndex1DFrom3D(pos.x,pos.y,pos.z)));
                 changed = true;
             }
 

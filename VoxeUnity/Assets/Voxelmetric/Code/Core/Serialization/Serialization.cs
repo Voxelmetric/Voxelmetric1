@@ -1,4 +1,5 @@
 ﻿using System.IO;
+using Voxelmetric.Code.Common;
 using Voxelmetric.Code.Common.IO;
 using Voxelmetric.Code.Data_types;
 using Voxelmetric.Code.Utilities;
@@ -53,7 +54,7 @@ namespace Voxelmetric.Code.Core.Serialization
             {
                 ushort type = save.blocks[i].Type;
                 BlockPos pos = save.positions[i];
-                chunk.blocks.SetInner(new Vector3Int(pos.x,pos.y,pos.z), new BlockData(type));
+                chunk.blocks.SetInner(Helpers.GetChunkIndex1DFrom3D(pos.x, pos.y, pos.z), new BlockData(type));
             }
 
             return true;
