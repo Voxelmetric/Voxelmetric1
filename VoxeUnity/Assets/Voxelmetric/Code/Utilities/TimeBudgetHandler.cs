@@ -4,16 +4,18 @@ namespace Voxelmetric.Code.Utilities
 {
     public class TimeBudgetHandler
     {
+        //! Time in ms allowed to be spent working on something
         public long TimeBudgetMs { get; set; }
 
         public bool HasTimeBudget { get; private set; }
 
         private long m_startTime;
         private long m_totalTime;
-
-        public TimeBudgetHandler()
+        
+        public TimeBudgetHandler(long budget=0)
         {
             Reset();
+            TimeBudgetMs = budget;
         }
 
         public void Reset()

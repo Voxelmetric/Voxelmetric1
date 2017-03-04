@@ -474,14 +474,8 @@ namespace Voxelmetric.Code.Core.StateManager
             return true;
         }
 
-        private void SynchronizeEdges()
+        private void OnSynchronizeEdges()
         {
-            // It is only necessary to perform the sychronization once when data is generated.
-            // All subsequend changes of blocks are automatically synchronized inside ChunkBlocks
-            if (!m_syncEdgeBlocks)
-                return;
-            m_syncEdgeBlocks = false;
-
             // Search for neighbors we are vertically aligned with
             for (int i = 0; i<Listeners.Length; i++)
             {
@@ -631,6 +625,26 @@ namespace Voxelmetric.Code.Core.StateManager
             }
         }
 
+
+        private bool SynchronizeEdges()
+        {
+            // It is only necessary to perform the sychronization once when data is generated.
+            // All subsequend changes of blocks are automatically synchronized inside ChunkBlocks
+            if (!m_syncEdgeBlocks)
+                return true;
+
+            // Sync edges if there's enough time
+            if (!Globals.EdgeSyncBudget.HasTimeBudget)
+                return false;
+
+            m_syncEdgeBlocks = false;
+
+            Globals.EdgeSyncBudget.StartMeasurement();
+            OnSynchronizeEdges();
+            Globals.EdgeSyncBudget.StopMeasurement();
+            return true;
+        }
+
         private bool SynchronizeChunk()
         {
             // 6 neighbors are necessary to be loaded
@@ -638,7 +652,8 @@ namespace Voxelmetric.Code.Core.StateManager
                 return false;
 
             // Synchronize edge data of chunks
-            SynchronizeEdges();
+            if (!SynchronizeEdges())
+                return false;
 
             // We need to calculate our chunk's bounds if it was invalidated
             if (chunk.blocks.contentsInvalidated && chunk.blocks.NonEmptyBlocks>0)

@@ -4,6 +4,7 @@ using Voxelmetric.Code.Builders.Collider;
 using Voxelmetric.Code.Builders.Geometry;
 using Voxelmetric.Code.Common.MemoryPooling;
 using Voxelmetric.Code.Common.Threading;
+using Voxelmetric.Code.Utilities;
 
 namespace Voxelmetric.Code
 {
@@ -70,6 +71,23 @@ namespace Voxelmetric.Code
             {
                 Watch = new Stopwatch();
                 Watch.Start();
+            }
+        }
+
+        // Global time budget handlers
+        private static readonly TimeBudgetHandler s_geometryBudget = new TimeBudgetHandler(4); // 4 ms a frame for geometry generation
+        public static TimeBudgetHandler GeometryBudget {
+            get
+            {
+                return s_geometryBudget;
+            }
+        }
+
+        private static readonly TimeBudgetHandler s_edgeSyncBudget = new TimeBudgetHandler(10); // 10 ms a frame for edge synchronization
+        public static TimeBudgetHandler EdgeSyncBudget {
+            get
+            {
+                return s_edgeSyncBudget;
             }
         }
     }

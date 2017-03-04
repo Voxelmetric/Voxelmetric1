@@ -51,9 +51,7 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
         private Clipmap m_clipmap;
         private Vector3Int m_viewerPos;
         private Vector3Int m_viewerPosPrev;
-
-        private readonly TimeBudgetHandler m_timeBudgetHandler = new TimeBudgetHandler();
-
+        
         //! A list of chunks to update
         private readonly List<Chunk> m_updateRequests = new List<Chunk>();
 
@@ -71,13 +69,12 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
             UpdateViewerPosition();
             // Add some arbirtary value so that m_viewerPosPrev is different from m_viewerPos
             m_viewerPos += Vector3Int.one;
-
-            m_timeBudgetHandler.TimeBudgetMs = 3; // Time in ms allowed to be spent building meshes
         }
 
         void Update()
         {
-            m_timeBudgetHandler.Reset();
+            Globals.GeometryBudget.Reset();
+            Globals.EdgeSyncBudget.Reset();
 
             PreProcessChunks();
             ProcessChunks();
@@ -154,14 +151,14 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
                     chunk.UpdateState();
 
                     // Build colliders if there is enough time
-                    if (m_timeBudgetHandler.HasTimeBudget)
+                    if (Globals.GeometryBudget.HasTimeBudget)
                     {
-                        m_timeBudgetHandler.StartMeasurement();
+                        Globals.GeometryBudget.StartMeasurement();
 
                         bool wasBuilt = chunk.UpdateRenderGeometry();
                         wasBuilt |= chunk.UpdateCollisionGeometry();
                         if (wasBuilt)
-                            m_timeBudgetHandler.StopMeasurement();
+                            Globals.GeometryBudget.StopMeasurement();
                     }
                 }
 
