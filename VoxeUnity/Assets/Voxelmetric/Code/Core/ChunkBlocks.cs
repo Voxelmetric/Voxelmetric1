@@ -363,6 +363,27 @@ namespace Voxelmetric.Code.Core
             blocks[index] = blockData;
         }
 
+        private void SetInternalInner(int index, ref Vector3Int pos, BlockData blockData)
+        {
+            // Nothing for us to do if there was no change
+            BlockData oldBlockData = blocks[index];
+            if (oldBlockData.Type == blockData.Type)
+                return;
+
+            // We guarantee we're inside non-padded area
+            if (blockData.Type == BlockProvider.AirType)
+                --NonEmptyBlocks;
+            else
+                ++NonEmptyBlocks;
+
+            blocks[index] = blockData;
+        }
+
+        private void SetInternalPadded(int index, ref Vector3Int pos, BlockData blockData)
+        {
+            blocks[index] = blockData;
+        }
+
         /// <summary>
         /// Sets the block at the given position
         /// </summary>
@@ -372,6 +393,28 @@ namespace Voxelmetric.Code.Core
         {
             int index = Helpers.GetChunkIndex1DFrom3D(pos.x, pos.y, pos.z);
             SetInternal(index, ref pos, blockData);
+        }
+
+        /// <summary>
+        /// Sets the block at the given position. The position is guaranteed to be inside the standard area
+        /// </summary>
+        /// <param name="pos">Position in local chunk coordinates</param>
+        /// <param name="blockData">A block to be placed on a given position</param>
+        public void SetInner(Vector3Int pos, BlockData blockData)
+        {
+            int index = Helpers.GetChunkIndex1DFrom3D(pos.x, pos.y, pos.z);
+            SetInternalInner(index, ref pos, blockData);
+        }
+
+        /// <summary>
+        /// Sets the block at the given position. The position is guaranteed to be in the padded area
+        /// </summary>
+        /// <param name="pos">Position in local chunk coordinates</param>
+        /// <param name="blockData">A block to be placed on a given position</param>
+        public void SetPadded(Vector3Int pos, BlockData blockData)
+        {
+            int index = Helpers.GetChunkIndex1DFrom3D(pos.x, pos.y, pos.z);
+            SetInternalPadded(index, ref pos, blockData);
         }
 
         /// <summary>

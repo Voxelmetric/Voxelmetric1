@@ -516,25 +516,67 @@ namespace Voxelmetric.Code.Core.StateManager
                     // Copy the front layer of a neighbor chunk to the back layer of ours
                     if (neighborChunk.pos.z>chunk.pos.z)
                     {
-                        for (int y = -1; y<Env.ChunkSizePlusPadding; y++)
+                        // Padded area - top
+                        for (int x = -1; x<Env.ChunkSizePlusPadding; x++)
                         {
-                            for (int x = -1; x<Env.ChunkSizePlusPadding; x++)
+                            BlockData data = neighborChunk.blocks.Get(new Vector3Int(x, -1, 0));
+                            chunk.blocks.SetPadded(new Vector3Int(x, -1, Env.ChunkSize), data);
+                        }
+
+                        // Inner area
+                        for (int y = 0; y<Env.ChunkSize; y++)
+                        {
+                            BlockData data = neighborChunk.blocks.Get(new Vector3Int(-1, y, 0));
+                            chunk.blocks.SetPadded(new Vector3Int(-1, y, Env.ChunkSize), data);
+
+                            for (int x = 0; x<Env.ChunkSize; x++)
                             {
-                                BlockData data = neighborChunk.blocks.Get(new Vector3Int(x, y, 0));
-                                chunk.blocks.Set(new Vector3Int(x, y, Env.ChunkSize), data);
+                                data = neighborChunk.blocks.Get(new Vector3Int(x, y, 0));
+                                chunk.blocks.SetInner(new Vector3Int(x, y, Env.ChunkSize), data);
                             }
+
+                            data = neighborChunk.blocks.Get(new Vector3Int(Env.ChunkSize, y, 0));
+                            chunk.blocks.SetPadded(new Vector3Int(Env.ChunkSize, y, Env.ChunkSize), data);
+                        }
+
+                        // Padded area - bottom
+                        for (int x = -1; x < Env.ChunkSizePlusPadding; x++)
+                        {
+                            BlockData data = neighborChunk.blocks.Get(new Vector3Int(x, Env.ChunkSize, 0));
+                            chunk.blocks.SetPadded(new Vector3Int(x, Env.ChunkSize, Env.ChunkSize), data);
                         }
                     }
                     // Copy the top back layer of a neighbor chunk to the front layer of ours
                     else // if (neighborChunk.pos.z < chunk.pos.z)
                     {
-                        for (int y = -1; y<Env.ChunkSizePlusPadding; y++)
+                        // Padded area - top
+                        for (int x = -1; x < Env.ChunkSizePlusPadding; x++)
                         {
-                            for (int x = -1; x<Env.ChunkSizePlusPadding; x++)
+                            BlockData data = neighborChunk.blocks.Get(new Vector3Int(x, -1, Env.ChunkMask));
+                            chunk.blocks.SetPadded(new Vector3Int(x, -1, -1), data);
+                        }
+
+                        // Inner area
+                        for (int y = 0; y<Env.ChunkSize; y++)
+                        {
+                            BlockData data = neighborChunk.blocks.Get(new Vector3Int(-1, y, Env.ChunkMask));
+                            chunk.blocks.SetPadded(new Vector3Int(-1, y, -1), data);
+
+                            for (int x = 0; x<Env.ChunkSize; x++)
                             {
-                                BlockData data = neighborChunk.blocks.Get(new Vector3Int(x, y, Env.ChunkMask));
-                                chunk.blocks.Set(new Vector3Int(x, y, -1), data);
+                                data = neighborChunk.blocks.Get(new Vector3Int(x, y, Env.ChunkMask));
+                                chunk.blocks.SetInner(new Vector3Int(x, y, -1), data);
                             }
+
+                            data = neighborChunk.blocks.Get(new Vector3Int(Env.ChunkSize, y, Env.ChunkMask));
+                            chunk.blocks.SetPadded(new Vector3Int(Env.ChunkSize, y, -1), data);
+                        }
+
+                        // Padded area - bottom
+                        for (int x = -1; x < Env.ChunkSizePlusPadding; x++)
+                        {
+                            BlockData data = neighborChunk.blocks.Get(new Vector3Int(x, Env.ChunkSize, Env.ChunkMask));
+                            chunk.blocks.SetPadded(new Vector3Int(x, Env.ChunkSize, -1), data);
                         }
                     }
                 }
@@ -546,25 +588,67 @@ namespace Voxelmetric.Code.Core.StateManager
                     // Copy the right layer of a neighbor chunk to the left layer of ours
                     if (neighborChunk.pos.x>chunk.pos.x)
                     {
-                        for (int y = -1; y<Env.ChunkSizePlusPadding; y++)
+                        // Padded area - top
+                        for (int z = -1; z<Env.ChunkSizePlusPadding; z++)
                         {
-                            for (int z = -1; z<Env.ChunkSizePlusPadding; z++)
+                            BlockData data = neighborChunk.blocks.Get(new Vector3Int(0, -1, z));
+                            chunk.blocks.SetPadded(new Vector3Int(Env.ChunkSize, -1, z), data);
+                        }
+
+                        // Inner area
+                        for (int y = 0; y<Env.ChunkSize; y++)
+                        {
+                            BlockData data = neighborChunk.blocks.Get(new Vector3Int(0, y, -1));
+                            chunk.blocks.SetPadded(new Vector3Int(Env.ChunkSize, y, -1), data);
+
+                            for (int z = 0; z<Env.ChunkSize; z++)
                             {
-                                BlockData data = neighborChunk.blocks.Get(new Vector3Int(0, y, z));
-                                chunk.blocks.Set(new Vector3Int(Env.ChunkSize, y, z), data);
+                                data = neighborChunk.blocks.Get(new Vector3Int(0, y, z));
+                                chunk.blocks.SetInner(new Vector3Int(Env.ChunkSize, y, z), data);
                             }
+
+                            data = neighborChunk.blocks.Get(new Vector3Int(0, y, Env.ChunkSize));
+                            chunk.blocks.SetPadded(new Vector3Int(Env.ChunkSize, y, Env.ChunkSize), data);
+                        }
+
+                        // Padded area - bottom
+                        for (int z = -1; z < Env.ChunkSizePlusPadding; z++)
+                        {
+                            BlockData data = neighborChunk.blocks.Get(new Vector3Int(0, Env.ChunkSize, z));
+                            chunk.blocks.SetPadded(new Vector3Int(Env.ChunkSize, Env.ChunkSize, z), data);
                         }
                     }
                     // Copy the left layer of a neighbor chunk to the right layer of ours
                     else // if (neighborChunk.pos.x < chunk.pos.x)
                     {
-                        for (int y = -1; y<Env.ChunkSizePlusPadding; y++)
+                        // Padded area - top
+                        for (int z = -1; z<Env.ChunkSizePlusPadding; z++)
                         {
-                            for (int z = -1; z<Env.ChunkSizePlusPadding; z++)
+                            BlockData data = neighborChunk.blocks.Get(new Vector3Int(Env.ChunkMask, -1, z));
+                            chunk.blocks.SetPadded(new Vector3Int(-1, -1, z), data);
+                        }
+
+                        // Inner area
+                        for (int y = 0; y<Env.ChunkSizePlusPadding; y++)
+                        {
+                            BlockData data = neighborChunk.blocks.Get(new Vector3Int(Env.ChunkMask, y, -1));
+                            chunk.blocks.SetPadded(new Vector3Int(-1, y, -1), data);
+
+                            for (int z = 0; z<Env.ChunkSizePlusPadding; z++)
                             {
-                                BlockData data = neighborChunk.blocks.Get(new Vector3Int(Env.ChunkMask, y, z));
-                                chunk.blocks.Set(new Vector3Int(-1, y, z), data);
+                                data = neighborChunk.blocks.Get(new Vector3Int(Env.ChunkMask, y, z));
+                                chunk.blocks.SetInner(new Vector3Int(-1, y, z), data);
                             }
+
+                            data = neighborChunk.blocks.Get(new Vector3Int(Env.ChunkMask, y, Env.ChunkSize));
+                            chunk.blocks.SetPadded(new Vector3Int(-1, y, Env.ChunkSize), data);
+                        }
+
+                        // Padded area - bottom
+                        for (int z = -1; z < Env.ChunkSizePlusPadding; z++)
+                        {
+                            BlockData data = neighborChunk.blocks.Get(new Vector3Int(Env.ChunkMask, Env.ChunkSize, z));
+                            chunk.blocks.SetPadded(new Vector3Int(-1, Env.ChunkSize, z), data);
                         }
                     }
                 }
