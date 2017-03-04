@@ -151,8 +151,7 @@ namespace Voxelmetric.Code.Builders.Geometry
                                     {
                                         customBlockMaskInitialized = true;
 
-                                        //Array.Clear(customBlockMask, 0, Env.ChunkSizePow3); // TODO: Why does Array.Clear not work here???
-                                        for (int iter = 0; iter < Env.ChunkSizeWithPaddingPow3; iter++) customBlockMask[iter] = false;
+                                        Array.Clear(customBlockMask, 0, Env.ChunkSizeWithPaddingPow3);
                                     }
 
                                     // Custom blocks are treated differently. They are build whole at once instead of
