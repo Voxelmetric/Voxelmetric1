@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using UnityEngine;
 using UnityEngine.Assertions;
 using Voxelmetric.Code.Common;
 using Voxelmetric.Code.Core.StateManager;
@@ -110,7 +109,7 @@ namespace Voxelmetric.Code.Core
             oldBlock.OnDestroy(chunk, pos);
             newBlock.OnCreate(chunk, pos);
 
-            SetInternal(index, ref pos, block);
+            SetInner(index, block);
 
             if (setBlockModified)
             {
@@ -343,68 +342,24 @@ namespace Voxelmetric.Code.Core
             return m_blockTypes[blocks[index].Type];
         }
 
-        private void SetInternal(int index, ref Vector3Int pos, BlockData blockData)
+        /// <summary>
+        /// Sets the block at the given position. The position is guaranteed to be inside chunk's non-padded area
+        /// </summary>
+        /// <param name="index">Index in local chunk data</param>
+        /// <param name="blockData">A block to be placed on a given position</param>
+        public void SetInner(int index, BlockData blockData)
         {
             // Nothing for us to do if there was no change
             BlockData oldBlockData = blocks[index];
             if (oldBlockData.Type==blockData.Type)
                 return;
 
-            // Update non-empty block count if we're inside non-padded area
-            if (pos.x>=0 && pos.x<Env.ChunkSize &&
-                pos.y>=0 && pos.y<Env.ChunkSize &&
-                pos.z>=0 && pos.z<Env.ChunkSize)
-            {
-                if (blockData.Type==BlockProvider.AirType)
-                    --NonEmptyBlocks;
-                else
-                    ++NonEmptyBlocks;
-            }
-
-            blocks[index] = blockData;
-        }
-        
-        private void SetInternalInner(int index, ref Vector3Int pos, BlockData blockData)
-        {
-            // Nothing for us to do if there was no change
-            BlockData oldBlockData = blocks[index];
-            if (oldBlockData.Type == blockData.Type)
-                return;
-
-            // We guarantee we're inside non-padded area
-            /*Assert.IsTrue(
-                pos.x>=0 && pos.x<Env.ChunkSize &&
-                pos.y>=0 && pos.y<Env.ChunkSize &&
-                pos.z>=0 && pos.z<Env.ChunkSize);*/
-                
-            if (blockData.Type == BlockProvider.AirType)
+            if (blockData.Type==BlockProvider.AirType)
                 --NonEmptyBlocks;
             else
                 ++NonEmptyBlocks;
 
             blocks[index] = blockData;
-        }
-        
-        private void SetInternalPadded(int index, ref Vector3Int pos, BlockData blockData)
-        {
-            // We guarantee we're inside padded area
-            /*Assert.IsFalse(
-                pos.x >= 0 && pos.x < Env.ChunkSize &&
-                pos.y >= 0 && pos.y < Env.ChunkSize &&
-                pos.z >= 0 && pos.z < Env.ChunkSize);*/
-
-            blocks[index] = blockData;
-        }
-
-        /// <summary>
-        /// Sets the block at the given position
-        /// </summary>
-        /// <param name="pos">Position in local chunk coordinates</param>
-        /// <param name="blockData">A block to be placed on a given position</param>
-        public void Set(Vector3Int pos, BlockData blockData)
-        {
-            int index = Helpers.GetChunkIndex1DFrom3D(pos.x, pos.y, pos.z);
-            SetInternal(index, ref pos, blockData);
         }
 
         /// <summary>
@@ -415,7 +370,18 @@ namespace Voxelmetric.Code.Core
         public void SetInner(Vector3Int pos, BlockData blockData)
         {
             int index = Helpers.GetChunkIndex1DFrom3D(pos.x, pos.y, pos.z);
-            SetInternalInner(index, ref pos, blockData);
+
+            // Nothing for us to do if there was no change
+            BlockData oldBlockData = blocks[index];
+            if (oldBlockData.Type == blockData.Type)
+                return;
+
+            if (blockData.Type == BlockProvider.AirType)
+                --NonEmptyBlocks;
+            else
+                ++NonEmptyBlocks;
+
+            blocks[index] = blockData;
         }
 
         /// <summary>
@@ -426,7 +392,8 @@ namespace Voxelmetric.Code.Core
         public void SetPadded(Vector3Int pos, BlockData blockData)
         {
             int index = Helpers.GetChunkIndex1DFrom3D(pos.x, pos.y, pos.z);
-            SetInternalPadded(index, ref pos, blockData);
+
+            blocks[index] = blockData;
         }
 
         /// <summary>
@@ -443,9 +410,7 @@ namespace Voxelmetric.Code.Core
                 {
                     for (int x = posFrom.x; x<=posTo.x; x++)
                     {
-                        int index = Helpers.GetChunkIndex1DFrom3D(x, y, z);
-                        Vector3Int pos = new Vector3Int(x, y, z);
-                        SetInternalInner(index, ref pos, blockData);
+                        SetInner(new Vector3Int(x, y, z), blockData);
                     }
                 }
             }
