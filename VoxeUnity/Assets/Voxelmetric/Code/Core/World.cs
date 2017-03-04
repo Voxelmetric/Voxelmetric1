@@ -50,11 +50,30 @@ namespace Voxelmetric.Code.Core
         public void Configure()
         {
             config = new ConfigLoader<WorldConfig>(new[] { "Worlds" }).GetConfig(worldConfig);
+            VerifyConfig();
 
             textureProvider = Voxelmetric.resources.GetTextureProvider(this);
             blockProvider = Voxelmetric.resources.GetBlockProvider(this);
 
             renderMaterial.mainTexture = textureProvider.atlas;
+        }
+
+        private void VerifyConfig()
+        {
+            // minY can't be greater then maxY
+            if (config.minY>config.maxY)
+            {
+                int tmp = config.minY;
+                config.maxY = config.minY;
+                config.minY = tmp;
+            }
+
+            if (config.minY!=config.maxY)
+            {
+                // Make them both at least Env.ChunkSize big so we can generate at least some data
+                config.minY = Mathf.Min(config.minY, -Env.ChunkSize);
+                config.maxY = Mathf.Max(config.maxY, Env.ChunkSize);
+            }
         }
 
         private void StartWorld()
@@ -83,7 +102,7 @@ namespace Voxelmetric.Code.Core
         public bool IsCoordInsideWorld(Vector3Int pos)
         {
             int offset = Env.ChunkSize; // We always load one more chunk
-            return config.minY==config.maxY || (pos.y>config.minY-offset && pos.y<config.maxY+offset);
+            return config.minY==config.maxY || (pos.y>=config.minY-offset && pos.y<=config.maxY+offset);
         }
     }
 }
