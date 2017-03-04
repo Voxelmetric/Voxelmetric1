@@ -10,7 +10,9 @@ namespace Voxelmetric.Code.Load_Resources
         public string layerFolder;
         public string blockFolder;
         public string meshFolder;
+
         public bool useCollisionMesh;
+        public bool renderBottomWorldFaces;
 
         public int maxY;
         public int minY;
@@ -28,8 +30,7 @@ namespace Voxelmetric.Code.Load_Resources
         public Type chunkBlocksHandler;
         public Type chunkRenerer;
         public Type chunkLogic;
-
-
+        
         // These variables relate to how the textures are loaded and how the atlas is created.
         // There is an issue in that texture indexes are created with these variables but if
         // you create a new world using the same texture folder the new world will use the existing

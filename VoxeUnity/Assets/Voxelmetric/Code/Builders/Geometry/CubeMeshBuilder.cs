@@ -16,7 +16,10 @@ namespace Voxelmetric.Code.Builders.Geometry
 
         public void Build(Chunk chunk, int minX, int maxX, int minY, int maxY, int minZ, int maxZ)
         {
+            World world = chunk.world;
             ChunkBlocks blocks = chunk.blocks;
+
+            bool renderingRestricted = world.IsWorldCoordsRestricted() && !world.config.renderBottomWorldFaces && chunk.pos.y==chunk.world.config.minY;
 
             int[] mins = {minX, minY, minZ};
             int[] maxes = {maxX, maxY, maxZ};
@@ -62,6 +65,9 @@ namespace Voxelmetric.Code.Builders.Geometry
                             dir = backFace ? Direction.south : Direction.north;
                             break;
                     }
+
+                    // Do not create faces facing downwards for blocks at the bottom of the world
+                    bool ignoreBottomFace = renderingRestricted && d==1 && backFace;
 
                     // Move through the dimension from front to back
                     for (x[d] = mins[d]-1; x[d]<=maxes[d];)
@@ -163,6 +169,10 @@ namespace Voxelmetric.Code.Builders.Geometry
                                         customBlockMask[index] = true;
                                         m.block.BuildBlock(chunk, m.pos);
                                     }
+                                }
+                                else if (ignoreBottomFace && x[1]==0)
+                                {
+                                    // Skip bottom faces at the bottom of the world
                                 }
                                 else
                                 {

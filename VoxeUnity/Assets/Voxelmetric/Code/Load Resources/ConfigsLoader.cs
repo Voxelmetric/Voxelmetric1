@@ -6,17 +6,17 @@ namespace Voxelmetric.Code.Load_Resources
 {
     public class ConfigLoader<T>
     {
-        Dictionary<string, T> configs = new Dictionary<string, T>();
-        string[] configFolders;
+        private readonly Dictionary<string, T> configs = new Dictionary<string, T>();
+        private readonly string[] configFolders;
 
         public ConfigLoader(string[] folders)
         {
             configFolders = folders;
         }
 
-        void LoadConfigs()
+        private void LoadConfigs()
         {
-            foreach (var configFolder in configFolders)
+            foreach (string configFolder in configFolders)
             {
                 var configFiles = Resources.LoadAll<TextAsset>(configFolder);
                 foreach (var configFile in configFiles)

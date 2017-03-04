@@ -70,9 +70,9 @@ namespace Voxelmetric.Code.Core
 
             if (config.minY!=config.maxY)
             {
-                // Make them both at least Env.ChunkSize big so we can generate at least some data
-                config.minY = Mathf.Min(config.minY, -Env.ChunkSize);
-                config.maxY = Mathf.Max(config.maxY, Env.ChunkSize);
+                // Make sure there is at least one chunk worth of space in the world on the Y axis
+                if (config.maxY-config.minY<Env.ChunkSize)
+                    config.maxY = config.minY + Env.ChunkSize;
             }
         }
 
@@ -87,6 +87,11 @@ namespace Voxelmetric.Code.Core
         private void StopWorld()
         {
             networking.EndConnections();
+        }
+
+        public bool IsWorldCoordsRestricted()
+        {
+            return config.minY!=config.maxY;
         }
 
         public void CapCoordYInsideWorld(ref int minY, ref int maxY)
