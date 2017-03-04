@@ -17,7 +17,7 @@ namespace Voxelmetric.Code.Common.Threading.Managers
                 return;
 
             // Commit all the work we have
-            if (Utilities.Core.UseMultiThreading)
+            if (Utilities.Core.UseThreadPool)
             {
                 ThreadPool pool = Globals.WorkPool;
                 

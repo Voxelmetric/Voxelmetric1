@@ -14,7 +14,7 @@ namespace Voxelmetric.Code.Common.Threading.Managers
         public static void Commit()
         {
             // Commit all the work we have
-            if (Utilities.Core.UseMultiThreading)
+            if (Utilities.Core.UseThreadedIO)
             {
                 TaskPool pool = Globals.IOPool;
                 
