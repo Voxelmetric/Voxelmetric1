@@ -305,6 +305,9 @@ namespace Voxelmetric.Code.Core.StateManager
             m_completedStates = m_completedStates.Reset(CurrStateLoadData | ChunkState.CalculateBounds);
             m_completedStatesSafe = m_completedStates;
 
+            // Consume info about invalidated chunk. Chunk bounds will be read from file
+            chunk.blocks.contentsInvalidated = false;
+
             m_taskRunning = true;
             IOPoolManager.Add(
                 new TaskPoolItem<ChunkStateManagerClient>(
