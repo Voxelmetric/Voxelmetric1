@@ -24,10 +24,7 @@ namespace Assets.Voxelmetric.Code.Core.StateManager
         protected ChunkState m_completedStatesSafe;
         //! If true, removal of chunk has been requested and no further requests are going to be accepted
         protected bool m_removalRequested;
-
-        //! A list of generic tasks a Chunk has to perform
-        protected readonly Queue<ITaskPoolItem> m_genericWorkItems = new Queue<ITaskPoolItem>(2);
-
+        
         protected ChunkStateManager(Chunk chunk)
         {
             this.chunk = chunk;
@@ -48,8 +45,6 @@ namespace Assets.Voxelmetric.Code.Core.StateManager
             m_completedStates = m_completedStates.Reset();
             m_completedStatesSafe = m_completedStates;
             m_removalRequested = false;
-
-            m_genericWorkItems.Clear();
 
             m_taskRunning = false;
         }
@@ -102,6 +97,7 @@ namespace Assets.Voxelmetric.Code.Core.StateManager
             return m_completedStatesSafe.Check(state);
         }
         
+
         public bool IsSavePossible
         {
             get { return !m_removalRequested && m_completedStatesSafe.Check(ChunkState.Generate | ChunkState.LoadData); }

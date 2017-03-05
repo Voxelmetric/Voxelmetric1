@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Text;
 using Assets.Voxelmetric.Code.Core.StateManager;
-using UnityEngine.Assertions;
 using Voxelmetric.Code.Common.Events;
 using Voxelmetric.Code.Common.Extensions;
 using Voxelmetric.Code.Common.Threading;
@@ -17,15 +16,12 @@ namespace Voxelmetric.Code.Core.StateManager
         //! State to notify external listeners about
         private ChunkStateExternal m_stateExternal;
         
-        private readonly Action<SGenericWorkItem> actionOnGenericWork;
-        private readonly Action<ChunkStateManagerServer> actionOnGenerateData;
+        private static readonly Action<ChunkStateManagerServer> actionOnGenerateData = OnGenerateData;
         private static readonly Action<ChunkStateManagerServer> actionOnLoadData = OnLoadData;
         private static readonly Action<ChunkStateManagerServer> actionOnSaveData = OnSaveData;
 
         public ChunkStateManagerServer(Chunk chunk): base(chunk)
         {
-            actionOnGenericWork = arg => { OnGenericWork(ref arg); };
-            actionOnGenerateData = OnGenerateData;
         }
 
         public override void Reset()
@@ -87,11 +83,7 @@ namespace Voxelmetric.Code.Core.StateManager
                 ProcessNotifyState();
                 if (m_pendingStates.Check(ChunkState.LoadData) && LoadData())
                     return;
-
-                ProcessNotifyState();
-                if (m_pendingStates.Check(ChunkState.GenericWork) && PerformGenericWork())
-                    return;
-
+                
                 ProcessNotifyState();
                 if (m_pendingStates.Check(ChunkState.SaveData) && SaveData())
                     return;
@@ -116,73 +108,7 @@ namespace Voxelmetric.Code.Core.StateManager
             // Enqueue the request
             m_pendingStates = m_pendingStates.Set(state);
         }
-
-        #region Generic work
-
-        private struct SGenericWorkItem
-        {
-            public readonly ChunkStateManagerServer Chunk;
-            public readonly ITaskPoolItem Action;
-
-            public SGenericWorkItem(ChunkStateManagerServer chunk, ITaskPoolItem action)
-            {
-                Chunk = chunk;
-                Action = action;
-            }
-        }
-
-        private static readonly ChunkState CurrStateGenericWork = ChunkState.GenericWork;
-        private static readonly ChunkState NextStateGenericWork = ChunkState.Idle;
-
-        private static void OnGenericWork(ref SGenericWorkItem item)
-        {
-            item.Action.Run();
-            OnGenericWorkDone(item.Chunk);
-        }
-
-        private static void OnGenericWorkDone(ChunkStateManagerServer chunk)
-        {
-            chunk.m_completedStates = chunk.m_completedStates.Set(CurrStateGenericWork);
-            chunk.m_nextState = NextStateGenericWork;
-            chunk.m_taskRunning = false;
-        }
-
-        private bool PerformGenericWork()
-        {
-            m_pendingStates = m_pendingStates.Reset(CurrStateGenericWork);
-            m_completedStates = m_completedStates.Reset(CurrStateGenericWork);
-            m_completedStatesSafe = m_completedStates;
-
-            // If there's nothing to do we can skip this state
-            if (m_genericWorkItems.Count <= 0)
-            {
-                OnGenericWorkDone(this);
-                return false;
-            }
-
-            // We have work to do
-            SGenericWorkItem workItem = new SGenericWorkItem(this, m_genericWorkItems.Dequeue());
-
-            m_taskRunning = true;
-            WorkPoolManager.Add(
-                new ThreadPoolItem<SGenericWorkItem>(
-                    chunk.ThreadID,
-                    actionOnGenericWork,
-                    workItem)
-                );
-
-            return true;
-        }
-
-        private void EnqueueGenericTask(Action<ChunkStateManagerServer> action)
-        {
-            Assert.IsTrue(action != null);
-            m_genericWorkItems.Enqueue(new TaskPoolItem<ChunkStateManagerServer>(action, this));
-            RequestState(ChunkState.GenericWork);
-        }
-
-        #endregion
-
+        
         #region Generate Chunk data
 
         private static readonly ChunkState CurrStateGenerateData = ChunkState.Generate;
