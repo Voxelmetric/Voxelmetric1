@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using Voxelmetric.Code.Common.Extensions;
+using Voxelmetric.Code.Common.Threading;
 using Voxelmetric.Code.Core;
 using Voxelmetric.Code.Core.StateManager;
 
@@ -25,7 +26,7 @@ namespace Assets.Voxelmetric.Code.Core.StateManager
         protected bool m_removalRequested;
 
         //! A list of generic tasks a Chunk has to perform
-        protected readonly Queue<Action> m_genericWorkItems = new Queue<Action>(2048);
+        protected readonly Queue<ITaskPoolItem> m_genericWorkItems = new Queue<ITaskPoolItem>(2);
 
         protected ChunkStateManager(Chunk chunk)
         {
@@ -100,7 +101,7 @@ namespace Assets.Voxelmetric.Code.Core.StateManager
         {
             return m_completedStatesSafe.Check(state);
         }
-
+        
         public bool IsSavePossible
         {
             get { return !m_removalRequested && m_completedStatesSafe.Check(ChunkState.Generate | ChunkState.LoadData); }

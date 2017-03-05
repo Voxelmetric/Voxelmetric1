@@ -59,7 +59,7 @@ namespace Voxelmetric.Code.Utilities
             open.Add(startLocation, new Heuristics(0, distanceFromStartToTarget, startLocation));
 
             WorkPoolManager.Add(
-                new AThreadPoolItem<PathFinder>(
+                new ThreadPoolItem<PathFinder>(
                     Globals.WorkPool,
                     arg =>
                     {

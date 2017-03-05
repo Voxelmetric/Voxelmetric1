@@ -16,9 +16,16 @@ namespace Voxelmetric.Code.Core.StateManager
     {
         //! State to notify external listeners about
         private ChunkStateExternal m_stateExternal;
+        
+        private readonly Action<SGenericWorkItem> actionOnGenericWork;
+        private readonly Action<ChunkStateManagerServer> actionOnGenerateData;
+        private static readonly Action<ChunkStateManagerServer> actionOnLoadData = OnLoadData;
+        private static readonly Action<ChunkStateManagerServer> actionOnSaveData = OnSaveData;
 
         public ChunkStateManagerServer(Chunk chunk): base(chunk)
         {
+            actionOnGenericWork = arg => { OnGenericWork(ref arg); };
+            actionOnGenerateData = OnGenerateData;
         }
 
         public override void Reset()
@@ -115,9 +122,9 @@ namespace Voxelmetric.Code.Core.StateManager
         private struct SGenericWorkItem
         {
             public readonly ChunkStateManagerServer Chunk;
-            public readonly Action Action;
+            public readonly ITaskPoolItem Action;
 
-            public SGenericWorkItem(ChunkStateManagerServer chunk, Action action)
+            public SGenericWorkItem(ChunkStateManagerServer chunk, ITaskPoolItem action)
             {
                 Chunk = chunk;
                 Action = action;
@@ -129,9 +136,8 @@ namespace Voxelmetric.Code.Core.StateManager
 
         private static void OnGenericWork(ref SGenericWorkItem item)
         {
-            ChunkStateManagerServer chunk = item.Chunk;
-            item.Action();
-            OnGenericWorkDone(chunk);
+            item.Action.Run();
+            OnGenericWorkDone(item.Chunk);
         }
 
         private static void OnGenericWorkDone(ChunkStateManagerServer chunk)
@@ -159,22 +165,19 @@ namespace Voxelmetric.Code.Core.StateManager
 
             m_taskRunning = true;
             WorkPoolManager.Add(
-                new AThreadPoolItem<SGenericWorkItem>(
+                new ThreadPoolItem<SGenericWorkItem>(
                     chunk.ThreadID,
-                    arg =>
-                    {
-                        OnGenericWork(ref arg);
-                    },
+                    actionOnGenericWork,
                     workItem)
                 );
 
             return true;
         }
 
-        public void EnqueueGenericTask(Action action)
+        private void EnqueueGenericTask(Action<ChunkStateManagerServer> action)
         {
             Assert.IsTrue(action != null);
-            m_genericWorkItems.Enqueue(action);
+            m_genericWorkItems.Enqueue(new TaskPoolItem<ChunkStateManagerServer>(action, this));
             RequestState(ChunkState.GenericWork);
         }
 
@@ -216,9 +219,9 @@ namespace Voxelmetric.Code.Core.StateManager
 
             // Let server generate chunk data
             WorkPoolManager.Add(
-                new AThreadPoolItem<ChunkStateManagerServer>(
+                new ThreadPoolItem<ChunkStateManagerServer>(
                     chunk.ThreadID,
-                    OnGenerateData,
+                    actionOnGenerateData,
                     this)
                 );
 
@@ -264,7 +267,7 @@ namespace Voxelmetric.Code.Core.StateManager
             m_taskRunning = true;
             IOPoolManager.Add(
                 new TaskPoolItem<ChunkStateManagerServer>(
-                    OnLoadData,
+                    actionOnLoadData,
                     this)
                 );
 
@@ -304,7 +307,7 @@ namespace Voxelmetric.Code.Core.StateManager
             m_taskRunning = true;
             IOPoolManager.Add(
                 new TaskPoolItem<ChunkStateManagerServer>(
-                    OnSaveData,
+                    actionOnSaveData,
                     this)
                 );
 

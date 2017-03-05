@@ -7,7 +7,7 @@ namespace Voxelmetric.Code.Common.Threading
         void Run();
     }
 
-    public class TaskPoolItem<T>: ITaskPoolItem
+    public struct TaskPoolItem<T>: ITaskPoolItem
     {
         public readonly Action<T> Action;
         public readonly T Arg;
