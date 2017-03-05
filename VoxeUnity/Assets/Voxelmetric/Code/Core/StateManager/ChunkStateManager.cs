@@ -25,7 +25,7 @@ namespace Assets.Voxelmetric.Code.Core.StateManager
         protected bool m_removalRequested;
 
         //! A list of generic tasks a Chunk has to perform
-        protected readonly Queue<Action> m_genericWorkItems = new Queue<Action>(1);
+        protected readonly Queue<Action> m_genericWorkItems = new Queue<Action>(2048);
 
         protected ChunkStateManager(Chunk chunk)
         {

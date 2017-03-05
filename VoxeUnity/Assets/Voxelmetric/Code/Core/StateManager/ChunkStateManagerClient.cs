@@ -3,6 +3,7 @@ using System.Text;
 using Assets.Voxelmetric.Code.Core.StateManager;
 using UnityEngine;
 using UnityEngine.Assertions;
+using UnityEngine.Profiling;
 using Voxelmetric.Code.Common;
 using Voxelmetric.Code.Common.Events;
 using Voxelmetric.Code.Common.Extensions;
@@ -237,12 +238,11 @@ namespace Voxelmetric.Code.Core.StateManager
 
             m_taskRunning = true;
             WorkPoolManager.Add(
-                new ThreadPoolItem(
+                new AThreadPoolItem<SGenericWorkItem>(
                     chunk.ThreadID,
                     arg =>
                     {
-                        SGenericWorkItem item = (SGenericWorkItem)arg;
-                        OnGenericWork(ref item);
+                        OnGenericWork(ref arg);
                     },
                     workItem)
                 );
@@ -297,13 +297,9 @@ namespace Voxelmetric.Code.Core.StateManager
             {
                 // Let server generate chunk data
                 WorkPoolManager.Add(
-                    new ThreadPoolItem(
+                    new AThreadPoolItem<ChunkStateManagerClient>(
                         chunk.ThreadID,
-                        arg =>
-                        {
-                            ChunkStateManagerClient stateManager = (ChunkStateManagerClient)arg;
-                            OnGenerateData(stateManager);
-                        },
+                        OnGenerateData,
                         this)
                     );
             }
@@ -348,12 +344,8 @@ namespace Voxelmetric.Code.Core.StateManager
 
             m_taskRunning = true;
             IOPoolManager.Add(
-                new TaskPoolItem(
-                    arg =>
-                    {
-                        ChunkStateManagerClient stateManager = (ChunkStateManagerClient)arg;
-                        OnLoadData(stateManager);
-                    },
+                new TaskPoolItem<ChunkStateManagerClient>(
+                    OnLoadData,
                     this)
                 );
 
@@ -392,12 +384,8 @@ namespace Voxelmetric.Code.Core.StateManager
 
             m_taskRunning = true;
             IOPoolManager.Add(
-                new TaskPoolItem(
-                    arg =>
-                    {
-                        ChunkStateManagerClient stateManager = (ChunkStateManagerClient)arg;
-                        OnSaveData(stateManager);
-                    },
+                new TaskPoolItem<ChunkStateManagerClient>(
+                    OnSaveData,
                     this)
                 );
 
@@ -464,9 +452,9 @@ namespace Voxelmetric.Code.Core.StateManager
                 return false;
 
             // All neighbors have to have their data loaded
-            foreach (var chunkEvent in Listeners)
+            for (int i = 0; i<Listeners.Length; i++)
             {
-                var stateManager = (ChunkStateManagerClient)chunkEvent;
+                var stateManager = (ChunkStateManagerClient)Listeners[i];
                 if (!stateManager.m_completedStates.Check(ChunkState.LoadData))
                     return false;
             }
@@ -654,11 +642,13 @@ namespace Voxelmetric.Code.Core.StateManager
             // Synchronize edge data of chunks
             if (!SynchronizeEdges())
                 return false;
-
+            
             // We need to calculate our chunk's bounds if it was invalidated
             if (chunk.blocks.contentsInvalidated && chunk.blocks.NonEmptyBlocks>0)
             {
+                Profiler.BeginSample("sChunk");
                 EnqueueGenericTask(CalculateGeometryBounds);
+                Profiler.EndSample();
                 return false;
             }
 
@@ -730,12 +720,11 @@ namespace Voxelmetric.Code.Core.StateManager
 
                 m_taskRunning = true;
                 WorkPoolManager.Add(
-                    new ThreadPoolItem(
+                    new AThreadPoolItem<SGenerateColliderWorkItem>(
                         chunk.ThreadID,
                         arg =>
                         {
-                            SGenerateColliderWorkItem item = (SGenerateColliderWorkItem)arg;
-                            OnGenerateCollider(ref item);
+                            OnGenerateCollider(ref arg);
                         },
                         workItem)
                     );
@@ -799,12 +788,11 @@ namespace Voxelmetric.Code.Core.StateManager
 
                 m_taskRunning = true;
                 WorkPoolManager.Add(
-                    new ThreadPoolItem(
+                    new AThreadPoolItem<SGenerateVerticesWorkItem>(
                         chunk.ThreadID,
                         arg =>
                         {
-                            SGenerateVerticesWorkItem item = (SGenerateVerticesWorkItem)arg;
-                            OnGenerateVerices(ref item);
+                            OnGenerateVerices(ref arg);
                         },
                         workItem,
                         priority ? Globals.Watch.ElapsedTicks : long.MaxValue)

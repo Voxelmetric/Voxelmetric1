@@ -159,12 +159,11 @@ namespace Voxelmetric.Code.Core.StateManager
 
             m_taskRunning = true;
             WorkPoolManager.Add(
-                new ThreadPoolItem(
+                new AThreadPoolItem<SGenericWorkItem>(
                     chunk.ThreadID,
                     arg =>
                     {
-                        SGenericWorkItem item = (SGenericWorkItem)arg;
-                        OnGenericWork(ref item);
+                        OnGenericWork(ref arg);
                     },
                     workItem)
                 );
@@ -217,13 +216,9 @@ namespace Voxelmetric.Code.Core.StateManager
 
             // Let server generate chunk data
             WorkPoolManager.Add(
-                new ThreadPoolItem(
+                new AThreadPoolItem<ChunkStateManagerServer>(
                     chunk.ThreadID,
-                    arg =>
-                    {
-                        ChunkStateManagerServer stateManager = (ChunkStateManagerServer)arg;
-                        OnGenerateData(stateManager);
-                    },
+                    OnGenerateData,
                     this)
                 );
 
@@ -268,12 +263,8 @@ namespace Voxelmetric.Code.Core.StateManager
 
             m_taskRunning = true;
             IOPoolManager.Add(
-                new TaskPoolItem(
-                    arg =>
-                    {
-                        ChunkStateManagerServer stateManager = (ChunkStateManagerServer)arg;
-                        OnLoadData(stateManager);
-                    },
+                new TaskPoolItem<ChunkStateManagerServer>(
+                    OnLoadData,
                     this)
                 );
 
@@ -312,12 +303,8 @@ namespace Voxelmetric.Code.Core.StateManager
 
             m_taskRunning = true;
             IOPoolManager.Add(
-                new TaskPoolItem(
-                    arg =>
-                    {
-                        ChunkStateManagerServer stateManager = (ChunkStateManagerServer)arg;
-                        OnSaveData(stateManager);
-                    },
+                new TaskPoolItem<ChunkStateManagerServer>(
+                    OnSaveData,
                     this)
                 );
 

@@ -4,9 +4,9 @@ namespace Voxelmetric.Code.Common.Threading.Managers
 {
     public static class IOPoolManager
     {
-        private static readonly List<TaskPoolItem> WorkItems = new List<TaskPoolItem>();
+        private static readonly List<ITaskPoolItem> WorkItems = new List<ITaskPoolItem>(512);
 
-        public static void Add(TaskPoolItem action)
+        public static void Add(ITaskPoolItem action)
         {
             WorkItems.Add(action);
         }
@@ -20,16 +20,14 @@ namespace Voxelmetric.Code.Common.Threading.Managers
                 
                 for (int i = 0; i<WorkItems.Count; i++)
                 {
-                    var item = WorkItems[i];
-                    pool.AddItem(item.Action, item.Arg);
+                    pool.AddItem(WorkItems[i]);
                 }
             }
             else
             {
                 for (int i = 0; i<WorkItems.Count; i++)
                 {
-                    var item = WorkItems[i];
-                    item.Action(item.Arg);
+                    WorkItems[i].Run();
                 }
             }
 

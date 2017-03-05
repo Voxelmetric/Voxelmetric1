@@ -112,13 +112,14 @@ public class TerrainGen
         StructureLayers = structLayers.ToArray();
         Array.Sort(StructureLayers);
 
-        // Register support noise functionality with each workpool thread
+        // Register support for noise functionality with each workpool thread
         for (int i = 0; i < Globals.WorkPool.Size; i++)
         {
-            Globals.WorkPool.GetPool(i).noiseItems = new NoiseItem[layersConfigs.Count];
+            var pool = Globals.WorkPool.GetPool(i);
+            pool.noiseItems = new NoiseItem[layersConfigs.Count];
             for (int j = 0; j < layersConfigs.Count; j++)
             {
-                Globals.WorkPool.GetPool(i).noiseItems[j] = new NoiseItem
+                pool.noiseItems[j] = new NoiseItem
                 {
                     noiseGen = new NoiseInterpolator()
                 };

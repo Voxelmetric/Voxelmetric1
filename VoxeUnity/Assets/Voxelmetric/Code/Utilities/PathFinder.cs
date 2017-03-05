@@ -59,12 +59,11 @@ namespace Voxelmetric.Code.Utilities
             open.Add(startLocation, new Heuristics(0, distanceFromStartToTarget, startLocation));
 
             WorkPoolManager.Add(
-                new ThreadPoolItem(
+                new AThreadPoolItem<PathFinder>(
                     Globals.WorkPool,
                     arg =>
                     {
-                        PathFinder pf = arg as PathFinder;
-                        pf.ComputePath();
+                        arg.ComputePath();
                     },
                     this
                 ));

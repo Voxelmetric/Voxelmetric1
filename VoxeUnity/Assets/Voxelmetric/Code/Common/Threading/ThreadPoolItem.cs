@@ -2,27 +2,49 @@
 
 namespace Voxelmetric.Code.Common.Threading
 {
-    public struct ThreadPoolItem
+    public abstract class AThreadPoolItem: ITaskPoolItem
     {
         public readonly int ThreadID;
-        public readonly Action<object> Action;
-        public readonly object Arg;
         public readonly long Time;
 
-        public ThreadPoolItem(ThreadPool pool, Action<object> action, object arg, long time = long.MaxValue)
+        protected AThreadPoolItem(ThreadPool pool, long time)
         {
             ThreadID = pool.GenerateThreadID();
-            Action = action;
-            Arg = arg;
             Time = time;
         }
 
-        public ThreadPoolItem(int threadID, Action<object> action, object arg, long time = long.MaxValue)
+        protected AThreadPoolItem(int threadID, long time)
         {
             ThreadID = threadID;
+            Time = time;
+        }
+
+        public abstract void Run();
+    }
+
+    public class AThreadPoolItem<T>: AThreadPoolItem
+    {
+        public readonly Action<T> Action;
+        public readonly T Arg;
+        
+
+        public AThreadPoolItem(ThreadPool pool, Action<T> action, T arg, long time = long.MaxValue) :
+            base(pool, time)
+        {
             Action = action;
             Arg = arg;
-            Time = time;
+        }
+
+        public AThreadPoolItem(int threadID, Action<T> action, T arg, long time = long.MaxValue) :
+            base(threadID, time)
+        {
+            Action = action;
+            Arg = arg;
+        }
+
+        public override void Run()
+        {
+            Action(Arg);
         }
     }
 }

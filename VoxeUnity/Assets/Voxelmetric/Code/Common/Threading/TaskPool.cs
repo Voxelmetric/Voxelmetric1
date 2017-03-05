@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading;
+using JetBrains.Annotations;
 using UnityEngine;
 using Voxelmetric.Code.Common.MemoryPooling;
 
@@ -11,7 +12,7 @@ namespace Voxelmetric.Code.Common.Threading
         //! Each thread contains an object pool
         public LocalPools Pools { get; private set; }
 
-        private List<TaskPoolItem> m_items; // list of tasks
+        private List<ITaskPoolItem> m_items; // list of tasks
         private readonly object m_lock = new object();
 
         private readonly AutoResetEvent m_event; // event for notifing worker thread about work
@@ -23,7 +24,7 @@ namespace Voxelmetric.Code.Common.Threading
         {
             Pools = new LocalPools();
 
-            m_items = new List<TaskPoolItem>();
+            m_items = new List<ITaskPoolItem>();
             m_event = new AutoResetEvent(false);
             m_thread = new Thread(ThreadFunc)
             {
@@ -70,7 +71,21 @@ namespace Voxelmetric.Code.Common.Threading
             get { return m_items.Count; }
         }
 
-        public void AddItem(Action<object> action)
+        public void AddItem(ITaskPoolItem item)
+        {
+            // Do not add new action in we re stopped or action is invalid
+            if (item == null || m_stop)
+                return;
+
+            // Add task to task list and notify the worker thread
+            lock (m_lock)
+            {
+                m_items.Add(item);
+            }
+            m_event.Set();
+        }
+
+        public void AddItem<T>(Action<T> action) where T: class
         {
             // Do not add new action in we re stopped or action is invalid
             if (action == null || m_stop)
@@ -79,12 +94,12 @@ namespace Voxelmetric.Code.Common.Threading
             // Add task to task list and notify the worker thread
             lock (m_lock)
             {
-                m_items.Add(new TaskPoolItem(action, null));
+                m_items.Add(new TaskPoolItem<T>(action, null));
             }
             m_event.Set();
         }
 
-        public void AddItem(Action<object> action, object arg)
+        public void AddItem<T>(Action<T> action, T arg)
         {
             // Do not add new action in we re stopped or action is invalid
             if (action == null || m_stop)
@@ -93,29 +108,26 @@ namespace Voxelmetric.Code.Common.Threading
             // Add task to task list and notify the worker thread
             lock (m_lock)
             {
-                m_items.Add(new TaskPoolItem(action, arg));
+                m_items.Add(new TaskPoolItem<T>(action, arg));
             }
             m_event.Set();
         }
 
-        public void AddItemUnsafe(Action<object> action)
+        public void AddItemUnsafe([NotNull] ITaskPoolItem item)
         {
-            // Do not add new action in we re stopped or action is invalid
-            if (action == null || m_stop)
-                return;
-
-            // Add task to task list and notify the worker thread
-            m_items.Add(new TaskPoolItem(action, null));
+            m_items.Add(item);
         }
 
-        public void AddItemUnsafe(Action<object> action, object arg)
+        public void AddItemUnsafe<T>([NotNull] Action<T> action) where T : class
         {
-            // Do not add new action in we re stopped or action is invalid
-            if (action == null || m_stop)
-                return;
+            // Add task to task list
+            m_items.Add(new TaskPoolItem<T>(action, null));
+        }
 
-            // Add task to task list and notify the worker thread
-            m_items.Add(new TaskPoolItem(action, arg));
+        public void AddItemUnsafe<T>([NotNull] Action<T> action, T arg)
+        {
+            // Add task to task list
+            m_items.Add(new TaskPoolItem<T>(action, arg));
         }
 
         public void Lock()
@@ -131,7 +143,7 @@ namespace Voxelmetric.Code.Common.Threading
 
         private void ThreadFunc()
         {
-            var actions = new List<TaskPoolItem>();
+            var actions = new List<ITaskPoolItem>();
 
             while (!m_stop)
             {
@@ -149,13 +161,13 @@ namespace Voxelmetric.Code.Common.Threading
                 {
                     // Execute the action
                     // Note, it's up to action to provide exception handling
-                    TaskPoolItem poolItem = actions[i];
+                    ITaskPoolItem poolItem = actions[i];
 
 #if DEBUG
                     try
                     {
 #endif
-                        poolItem.Action(poolItem.Arg);
+                        poolItem.Run();
 #if DEBUG
                     }
                     catch (Exception ex)

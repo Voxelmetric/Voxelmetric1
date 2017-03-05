@@ -61,26 +61,32 @@ namespace Voxelmetric.Code.Common.Threading
             }
         }
 
-        public void AddItem(Action<object> action)
+        public void AddItem(ITaskPoolItem item)
+        {
+            int threadID = GenerateThreadID();
+            m_pools[threadID].AddItem(item);
+        }
+
+        public void AddItem<T>(Action<T> action) where T: class
         {
             int threadID = GenerateThreadID();
             m_pools[threadID].AddItem(action);
         }
 
-        public void AddItem(int threadID, Action<object> action)
+        public void AddItem<T>(int threadID, Action<T> action) where T : class
         {
             // Assume a proper index is passed as an arugment
             Assert.IsTrue(threadID>=0 && threadID<m_pools.Length);
             m_pools[threadID].AddItem(action);
         }
 
-        public void AddItem(Action<object> action, object arg)
+        public void AddItem<T>(Action<T> action, T arg)
         {
             int threadID = GenerateThreadID();
             m_pools[threadID].AddItem(action, arg);
         }
 
-        public void AddItem(int threadID, Action<object> action, object arg)
+        public void AddItem<T>(int threadID, Action<T> action, T arg)
         {
             // Assume a proper index is passed as an arugment
             Assert.IsTrue(threadID>=0 && threadID<m_pools.Length);

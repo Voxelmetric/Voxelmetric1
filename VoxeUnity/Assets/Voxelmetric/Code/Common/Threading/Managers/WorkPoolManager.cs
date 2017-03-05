@@ -4,9 +4,9 @@ namespace Voxelmetric.Code.Common.Threading.Managers
 {
     public static class WorkPoolManager
     {
-        private static readonly List<ThreadPoolItem> WorkItems = new List<ThreadPoolItem>();
+        private static readonly List<AThreadPoolItem> WorkItems = new List<AThreadPoolItem>(2048);
 
-        public static void Add(ThreadPoolItem action)
+        public static void Add(AThreadPoolItem action)
         {
             WorkItems.Add(action);
         }
@@ -38,8 +38,8 @@ namespace Voxelmetric.Code.Common.Threading.Managers
                 int from = 0, to = 0;
                 for (int i = 0; i<WorkItems.Count-1; i++)
                 {
-                    ThreadPoolItem curr = WorkItems[i];
-                    ThreadPoolItem next = WorkItems[i+1];
+                    AThreadPoolItem curr = WorkItems[i];
+                    AThreadPoolItem next = WorkItems[i+1];
                     if (curr.ThreadID==next.ThreadID)
                     {
                         to = i+1;
@@ -50,8 +50,7 @@ namespace Voxelmetric.Code.Common.Threading.Managers
                     tp.Lock();
                     for (int j = from; j<=to; j++)
                     {
-                        ThreadPoolItem item = WorkItems[j];
-                        tp.AddItemUnsafe(item.Action, item.Arg);
+                        tp.AddItemUnsafe(WorkItems[j]);
                     }
                     tp.Unlock();
 
@@ -63,8 +62,7 @@ namespace Voxelmetric.Code.Common.Threading.Managers
                 tp.Lock();
                 for (int j = from; j<=to; j++)
                 {
-                    ThreadPoolItem item = WorkItems[j];
-                    tp.AddItemUnsafe(item.Action, item.Arg);
+                    tp.AddItemUnsafe(WorkItems[j]);
                 }
                 tp.Unlock();
             }
@@ -72,8 +70,7 @@ namespace Voxelmetric.Code.Common.Threading.Managers
             {
                 for (int i = 0; i<WorkItems.Count; i++)
                 {
-                    var item = WorkItems[i];
-                    item.Action(item.Arg);
+                    WorkItems[i].Run();
                 }
             }
             
