@@ -11,13 +11,14 @@ namespace Voxelmetric.Code.Builders
         public static void BuildGeometryMesh(Mesh mesh, GeometryBuffer buffer)
         {
             int size = buffer.Vertices.Count;
+            var pools = Globals.MemPools;
 
             // Avoid allocations by retrieving buffers from the pool
-            Vector3[] vertices = Globals.MemPools.PopVector3Array(size);
-            Vector2[] uvs = Globals.MemPools.PopVector2Array(size);
-            Color32[] colors = Globals.MemPools.PopColor32Array(size);
-            Vector3[] normals = Globals.MemPools.PopVector3Array(size);
-            Vector4[] tangents = Globals.MemPools.PopVector4Array(size);
+            Vector3[] vertices = pools.Vector3ArrayPool.Pop(size);
+            Vector2[] uvs = pools.Vector2ArrayPool.Pop(size);
+            Color32[] colors = pools.Color32ArrayPool.Pop(size);
+            Vector3[] normals = pools.Vector3ArrayPool.Pop(size);
+            Vector4[] tangents = pools.Vector4ArrayPool.Pop(size);
 
             // Fill buffers with data
             for (int i = 0; i<size; i++)
@@ -52,11 +53,11 @@ namespace Voxelmetric.Code.Builders
             mesh.RecalculateNormals();
 
             // Return memory back to pool
-            Globals.MemPools.PushVector3Array(vertices);
-            Globals.MemPools.PushVector2Array(uvs);
-            Globals.MemPools.PushColor32Array(colors);
-            Globals.MemPools.PushVector3Array(normals);
-            Globals.MemPools.PushVector4Array(tangents);
+            pools.Vector3ArrayPool.Push(vertices);
+            pools.Vector2ArrayPool.Push(uvs);
+            pools.Color32ArrayPool.Push(colors);
+            pools.Vector3ArrayPool.Push(normals);
+            pools.Vector4ArrayPool.Push(tangents);
         }
 
         /// <summary>
@@ -65,9 +66,10 @@ namespace Voxelmetric.Code.Builders
         public static void BuildColliderMesh(Mesh mesh, GeometryBuffer buffer)
         {
             int size = buffer.Vertices.Count;
+            var pool = Globals.MemPools.Vector3ArrayPool;
 
             // Avoid allocations by retrieving buffers from the pool
-            Vector3[] vertices = Globals.MemPools.PopVector3Array(size);
+            Vector3[] vertices = pool.Pop(size);
 
             // Fill buffers with data
             for (int i = 0; i < size; i++)
@@ -89,7 +91,7 @@ namespace Voxelmetric.Code.Builders
             mesh.SetTriangles(buffer.Triangles, 0);
 
             // Return memory back to pool
-            Globals.MemPools.PushVector3Array(vertices);
+            pool.Push(vertices);
         }
     }
 }

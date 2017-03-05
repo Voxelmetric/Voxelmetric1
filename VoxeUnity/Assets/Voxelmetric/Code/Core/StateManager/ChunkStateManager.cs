@@ -1,8 +1,7 @@
 ﻿using Voxelmetric.Code.Common.Extensions;
-using Voxelmetric.Code.Core;
-using Voxelmetric.Code.Core.StateManager;
+using Voxelmetric.Code.Common.Threading;
 
-namespace Assets.Voxelmetric.Code.Core.StateManager
+namespace Voxelmetric.Code.Core.StateManager
 {
     public abstract class ChunkStateManager: ChunkEvent, IChunkStateManager
     {
@@ -19,9 +18,10 @@ namespace Assets.Voxelmetric.Code.Core.StateManager
         protected ChunkState m_completedStates;
         //! Just like m_completedStates, but it is synchronized on the main thread once a check for m_taskRunning is passed
         protected ChunkState m_completedStatesSafe;
+        
         //! If true, removal of chunk has been requested and no further requests are going to be accepted
         protected bool m_removalRequested;
-        
+
         protected ChunkStateManager(Chunk chunk)
         {
             this.chunk = chunk;

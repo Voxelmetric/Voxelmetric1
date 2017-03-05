@@ -29,10 +29,10 @@ namespace Voxelmetric.Code.Builders.Geometry
             int[] du = {0, 0, 0}; // Width in a given dimension (du[u] is our current dimension)
             int[] dv = {0, 0, 0}; // Height in a given dimension (dv[v] is our current dimension)
 
-            BlockFace[] mask = chunk.pools.PopBlockFaceArray(width * width);
-            bool[] customBlockMask = chunk.pools.PopBoolArray(Env.ChunkSizeWithPaddingPow3);
+            BlockFace[] mask = chunk.pools.BlockFaceArrayPool.Pop(width * width);
+            bool[] customBlockMask = chunk.pools.BoolArrayPool.Pop(Env.ChunkSizeWithPaddingPow3);
             bool customBlockMaskInitialized = false;
-            Vector3[] vecs = chunk.pools.PopVector3Array(4);
+            Vector3[] vecs = chunk.pools.Vector3ArrayPool.Pop(4);
 
             for (bool backFace = false, b = true; b!=backFace; backFace = true, b = !b)
             {
@@ -228,9 +228,9 @@ namespace Voxelmetric.Code.Builders.Geometry
                 }
             }
 
-            chunk.pools.PushBlockFaceArray(mask);
-            chunk.pools.PushBoolArray(customBlockMask);
-            chunk.pools.PushVector3Array(vecs);
+            chunk.pools.BlockFaceArrayPool.Push(mask);
+            chunk.pools.BoolArrayPool.Push(customBlockMask);
+            chunk.pools.Vector3ArrayPool.Push(vecs);
         }
     }
 }

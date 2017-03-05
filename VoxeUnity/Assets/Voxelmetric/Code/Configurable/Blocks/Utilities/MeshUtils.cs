@@ -44,11 +44,11 @@ namespace Voxelmetric.Code.Configurable.Blocks.Utilities
             vPos += new Vector3(offsetX, 0, offsetZ);
 
             {
-                VertexData[] vertexData = chunk.pools.PopVertexDataArray(4);
-                VertexDataFixed[] vertexDataFixed = chunk.pools.PopVertexDataFixedArray(4);
+                VertexData[] vertexData = chunk.pools.VertexDataArrayPool.Pop(4);
+                VertexDataFixed[] vertexDataFixed = chunk.pools.VertexDataFixedArrayPool.Pop(4);
                 {
                     for (int i = 0; i<4; i++)
-                        vertexData[i] = chunk.pools.PopVertexData();
+                        vertexData[i] = chunk.pools.VertexDataPool.Pop();
 
                     vertexData[0].Vertex = new Vector3(vPos.x-halfBlock, vPos.y-halfBlock, vPos.z+halfBlock);
                     vertexData[1].Vertex = new Vector3(vPos.x-halfBlock, vPos.y-halfBlock+blockHeight, vPos.z+halfBlock);
@@ -62,18 +62,18 @@ namespace Voxelmetric.Code.Configurable.Blocks.Utilities
                     chunk.GeometryHandler.Batcher.AddFace(vertexDataFixed, false);
 
                     for (int i = 0; i < 4; i++)
-                        chunk.pools.PushVertexData(vertexData[i]);
+                        chunk.pools.VertexDataPool.Push(vertexData[i]);
                 }
-                chunk.pools.PushVertexDataFixedArray(vertexDataFixed);
-                chunk.pools.PushVertexDataArray(vertexData);
+                chunk.pools.VertexDataFixedArrayPool.Push(vertexDataFixed);
+                chunk.pools.VertexDataArrayPool.Push(vertexData);
             }
 
             {
-                VertexData[] vertexData = chunk.pools.PopVertexDataArray(4);
-                VertexDataFixed[] vertexDataFixed = chunk.pools.PopVertexDataFixedArray(4);
+                VertexData[] vertexData = chunk.pools.VertexDataArrayPool.Pop(4);
+                VertexDataFixed[] vertexDataFixed = chunk.pools.VertexDataFixedArrayPool.Pop(4);
                 {
                     for (int i = 0; i<4; i++)
-                        vertexData[i] = chunk.pools.PopVertexData();
+                        vertexData[i] = chunk.pools.VertexDataPool.Pop();
 
                     vertexData[0].Vertex = new Vector3(vPos.x+halfBlock, vPos.y-halfBlock, vPos.z-halfBlock);
                     vertexData[1].Vertex = new Vector3(vPos.x+halfBlock, vPos.y-halfBlock+blockHeight, vPos.z-halfBlock);
@@ -87,18 +87,18 @@ namespace Voxelmetric.Code.Configurable.Blocks.Utilities
                     chunk.GeometryHandler.Batcher.AddFace(vertexDataFixed, false);
 
                     for (int i = 0; i < 4; i++)
-                        chunk.pools.PushVertexData(vertexData[i]);
+                        chunk.pools.VertexDataPool.Push(vertexData[i]);
                 }
-                chunk.pools.PushVertexDataFixedArray(vertexDataFixed);
-                chunk.pools.PushVertexDataArray(vertexData);
+                chunk.pools.VertexDataFixedArrayPool.Push(vertexDataFixed);
+                chunk.pools.VertexDataArrayPool.Push(vertexData);
             }
 
             {
-                VertexData[] vertexData = chunk.pools.PopVertexDataArray(4);
-                VertexDataFixed[] vertexDataFixed = chunk.pools.PopVertexDataFixedArray(4);
+                VertexData[] vertexData = chunk.pools.VertexDataArrayPool.Pop(4);
+                VertexDataFixed[] vertexDataFixed = chunk.pools.VertexDataFixedArrayPool.Pop(4);
                 {
                     for (int i = 0; i<4; i++)
-                        vertexData[i] = chunk.pools.PopVertexData();
+                        vertexData[i] = chunk.pools.VertexDataPool.Pop();
 
                     vertexData[0].Vertex = new Vector3(vPos.x+halfBlock, vPos.y-halfBlock, vPos.z+halfBlock);
                     vertexData[1].Vertex = new Vector3(vPos.x+halfBlock, vPos.y-halfBlock+blockHeight, vPos.z+halfBlock);
@@ -112,18 +112,18 @@ namespace Voxelmetric.Code.Configurable.Blocks.Utilities
                     chunk.GeometryHandler.Batcher.AddFace(vertexDataFixed, false);
 
                     for (int i = 0; i < 4; i++)
-                        chunk.pools.PushVertexData(vertexData[i]);
+                        chunk.pools.VertexDataPool.Push(vertexData[i]);
                 }
-                chunk.pools.PushVertexDataFixedArray(vertexDataFixed);
-                chunk.pools.PushVertexDataArray(vertexData);
+                chunk.pools.VertexDataFixedArrayPool.Push(vertexDataFixed);
+                chunk.pools.VertexDataArrayPool.Push(vertexData);
             }
 
             {
-                VertexData[] vertexData = chunk.pools.PopVertexDataArray(4);
-                VertexDataFixed[] vertexDataFixed = chunk.pools.PopVertexDataFixedArray(4);
+                VertexData[] vertexData = chunk.pools.VertexDataArrayPool.Pop(4);
+                VertexDataFixed[] vertexDataFixed = chunk.pools.VertexDataFixedArrayPool.Pop(4);
                 {
                     for (int i = 0; i<4; i++)
-                        vertexData[i] = chunk.pools.PopVertexData();
+                        vertexData[i] = chunk.pools.VertexDataPool.Pop();
 
                     vertexData[0].Vertex = new Vector3(vPos.x-halfBlock, vPos.y-halfBlock, vPos.z-halfBlock);
                     vertexData[1].Vertex = new Vector3(vPos.x-halfBlock, vPos.y-halfBlock+blockHeight, vPos.z-halfBlock);
@@ -137,10 +137,10 @@ namespace Voxelmetric.Code.Configurable.Blocks.Utilities
                     chunk.GeometryHandler.Batcher.AddFace(vertexDataFixed, false);
 
                     for (int i = 0; i < 4; i++)
-                        chunk.pools.PushVertexData(vertexData[i]);
+                        chunk.pools.VertexDataPool.Push(vertexData[i]);
                 }
-                chunk.pools.PushVertexDataFixedArray(vertexDataFixed);
-                chunk.pools.PushVertexDataArray(vertexData);
+                chunk.pools.VertexDataFixedArrayPool.Push(vertexDataFixed);
+                chunk.pools.VertexDataArrayPool.Push(vertexData);
             }
         }
     }

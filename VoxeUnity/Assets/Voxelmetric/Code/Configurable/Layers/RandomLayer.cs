@@ -1,5 +1,5 @@
-﻿using Assets.Voxelmetric.Code.Common.Math;
-using UnityEngine;
+﻿using UnityEngine;
+using Voxelmetric.Code.Common.Math;
 using Voxelmetric.Code.Core;
 using Voxelmetric.Code.Load_Resources;
 

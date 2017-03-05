@@ -1,5 +1,4 @@
 ﻿using System.Text;
-using Assets.Voxelmetric.Code.Core;
 using UnityEngine;
 using Voxelmetric.Code.Common;
 using Voxelmetric.Code.Common.MemoryPooling;
@@ -59,12 +58,7 @@ namespace Voxelmetric.Code.Core
         public static Chunk CreateChunk(World world, Vector3Int pos, bool isDedicated)
         {
             Chunk chunk = Globals.MemPools.ChunkPool.Pop();
-
-            if (isDedicated)
-                chunk.Init(world, pos, new ChunkStateManagerServer(chunk));
-            else
-                chunk.Init(world, pos, new ChunkStateManagerClient(chunk));
-
+            chunk.Init(world, pos);
             return chunk;
         }
 
@@ -102,12 +96,12 @@ namespace Voxelmetric.Code.Core
             ChunkColliderGeometryHandler = new ChunkColliderGeometryHandler(this);
         }
 
-        private void Init(World world, Vector3Int pos, IChunkStateManager stateManager)
+        private void Init(World world, Vector3Int pos)
         {
             this.world = world;
             this.pos = pos;
-            this.stateManager = stateManager;
 
+            stateManager = new ChunkStateManagerClient(this);
             logic = world.config.randomUpdateFrequency>0.0f ? new ChunkLogic(this) : null;
 
             WorldBounds = new Bounds(

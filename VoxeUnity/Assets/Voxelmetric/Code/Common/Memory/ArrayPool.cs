@@ -49,5 +49,10 @@ namespace Voxelmetric.Code.Common.Memory
 
             m_arrays.Push(item);
         }
+
+        public override string ToString()
+        {
+            return m_arrays.Count.ToString();
+        }
     }
 }

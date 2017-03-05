@@ -1,7 +1,7 @@
 ﻿using System;
-using Assets.Voxelmetric.Code.Common.Math;
 using UnityEngine;
 using Voxelmetric.Code.Common;
+using Voxelmetric.Code.Common.Math;
 using Voxelmetric.Code.Core;
 using Voxelmetric.Code.Data_types;
 using Voxelmetric.Code.Load_Resources;

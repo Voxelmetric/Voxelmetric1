@@ -1,4 +1,4 @@
-﻿namespace Assets.Voxelmetric.Code.Common.Collections
+﻿namespace Voxelmetric.Code.Common.Collections
 {
     // ----------------------------------------------------------------------------
     // Tuple structs for use in .NET Not-Quite-3.5 (e.g. Unity3D).

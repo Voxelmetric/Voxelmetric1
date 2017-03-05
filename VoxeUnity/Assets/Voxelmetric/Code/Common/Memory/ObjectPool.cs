@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Text;
 
 namespace Voxelmetric.Code.Common.Memory
 {
@@ -138,6 +139,15 @@ namespace Voxelmetric.Code.Common.Memory
 
             // Remove all unused items
             m_objects.RemoveRange(m_objectIndex, m_objects.Count-m_objectIndex);
+        }
+
+        public override string ToString()
+        {
+            StringBuilder sb = new StringBuilder();
+            sb.Append(m_objectIndex);
+            sb.Append("/");
+            sb.Append(Capacity);
+            return sb.ToString();
         }
     }
 }

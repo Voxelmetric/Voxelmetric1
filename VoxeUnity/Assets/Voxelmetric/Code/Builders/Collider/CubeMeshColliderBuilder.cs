@@ -20,6 +20,7 @@ namespace Voxelmetric.Code.Builders.Collider
         {
             World world = chunk.world;
             ChunkBlocks blocks = chunk.blocks;
+            var pools = chunk.pools;
 
             bool colliderRestricted = world.IsWorldCoordsRestricted() && chunk.pos.y==chunk.world.config.minY;
 
@@ -32,8 +33,8 @@ namespace Voxelmetric.Code.Builders.Collider
             int[] du = {0, 0, 0}; // Width in a given dimension (du[u] is our current dimension)
             int[] dv = {0, 0, 0}; // Height in a given dimension (dv[v] is our current dimension)
 
-            bool[] mask = chunk.pools.PopBoolArray(width*width);
-            Vector3[] vecs = chunk.pools.PopVector3Array(4);
+            bool[] mask = pools.BoolArrayPool.Pop(width*width);
+            Vector3[] vecs = pools.Vector3ArrayPool.Pop(4);
 
             for (bool backFace = false, b = true; b!=backFace; backFace = true, b = !b)
             {
@@ -182,12 +183,12 @@ namespace Voxelmetric.Code.Builders.Collider
 
                                     {
                                         LocalPools pool = chunk.pools;
-                                        VertexData[] vertexData = pool.PopVertexDataArray(4);
-                                        VertexDataFixed[] vertexDataFixed = pool.PopVertexDataFixedArray(4);
+                                        VertexData[] vertexData = pool.VertexDataArrayPool.Pop(4);
+                                        VertexDataFixed[] vertexDataFixed = pool.VertexDataFixedArrayPool.Pop(4);
                                         {
                                             for (int ii = 0; ii<4; ii++)
                                             {
-                                                vertexData[ii] = pool.PopVertexData();
+                                                vertexData[ii] = pool.VertexDataPool.Pop();
                                                 vertexData[ii].Vertex = vecs[ii];
                                                 vertexDataFixed[ii] = VertexDataUtils.ClassToStruct(vertexData[ii]);
                                             }
@@ -195,10 +196,10 @@ namespace Voxelmetric.Code.Builders.Collider
                                             chunk.ChunkColliderGeometryHandler.Batcher.AddFace(vertexDataFixed, backFace);
 
                                             for (int ii = 0; ii<4; ii++)
-                                                pool.PushVertexData(vertexData[ii]);
+                                                pool.VertexDataPool.Push(vertexData[ii]);
                                         }
-                                        pool.PushVertexDataFixedArray(vertexDataFixed);
-                                        pool.PushVertexDataArray(vertexData);
+                                        pool.VertexDataFixedArrayPool.Push(vertexDataFixed);
+                                        pool.VertexDataArrayPool.Push(vertexData);
                                     }
                                 }
 
@@ -220,8 +221,8 @@ namespace Voxelmetric.Code.Builders.Collider
                 }
             }
 
-            chunk.pools.PushBoolArray(mask);
-            chunk.pools.PushVector3Array(vecs);
+            chunk.pools.BoolArrayPool.Push(mask);
+            chunk.pools.Vector3ArrayPool.Push(vecs);
         }
     }
 }

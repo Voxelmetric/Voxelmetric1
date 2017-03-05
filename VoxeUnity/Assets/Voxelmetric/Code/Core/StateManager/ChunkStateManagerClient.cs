@@ -1,15 +1,12 @@
 ﻿using System;
+using System.Runtime.CompilerServices;
 using System.Text;
-using Assets.Voxelmetric.Code.Core;
-using Assets.Voxelmetric.Code.Core.StateManager;
-using UnityEngine;
 using Voxelmetric.Code.Common;
 using Voxelmetric.Code.Common.Events;
 using Voxelmetric.Code.Common.Extensions;
 using Voxelmetric.Code.Common.Threading;
 using Voxelmetric.Code.Common.Threading.Managers;
 using Voxelmetric.Code.Data_types;
-using Voxelmetric.Code.Load_Resources.Blocks;
 using Voxelmetric.Code.Utilities;
 
 namespace Voxelmetric.Code.Core.StateManager
@@ -43,10 +40,14 @@ namespace Voxelmetric.Code.Core.StateManager
         
         private static readonly Action<ChunkStateManagerClient> actionOnGenerateData = OnGenerateData;
         private static readonly Action<ChunkStateManagerClient> actionOnCalculateGeometryBounds = OnCalculateGeometryBounds;
-        private static readonly Action<SGenerateVerticesWorkItem> actionOnGenerateVertices = arg => { OnGenerateVertices(ref arg); };
+        private static readonly Action<ChunkStateManagerClient> actionOnGenerateVertices = OnGenerateVertices;
         private static readonly Action<SGenerateColliderWorkItem> actionOnGenerateCollider = arg => { OnGenerateCollider(ref arg); };
         private static readonly Action<ChunkStateManagerClient> actionOnLoadData = OnLoadData;
         private static readonly Action<ChunkStateManagerClient> actionOnSaveData = OnSaveData;
+
+        //! Flags telling us whether pool items should be returned back to the pool
+        protected ChunkPoolItemState m_poolState;
+        protected ITaskPoolItem m_threadPoolItem;
 
         public ChunkStateManagerClient(Chunk chunk) : base(chunk)
         {
@@ -72,6 +73,9 @@ namespace Voxelmetric.Code.Core.StateManager
             PossiblyVisible = false;
 
             m_syncEdgeBlocks = true;
+
+            m_poolState = m_poolState.Reset();
+            m_threadPoolItem = null;
         }
 
         public override string ToString()
@@ -96,8 +100,29 @@ namespace Voxelmetric.Code.Core.StateManager
             m_completedStates = m_completedStatesSafe = m_completedStates.Reset(CurrStateGenerateCollider);
         }
 
+        private void ReturnPoolItems()
+        {
+            var pools = Globals.MemPools;
+
+            // Global.MemPools is not thread safe and were returning values to it from a different thread.
+            // Therefore, each client remembers which pool it used and once the task is finished it returns
+            // it back to the pool as soon as possible from the main thread
+
+            if (m_poolState.Check(ChunkPoolItemState.GenerateColliderThreadPI))
+                pools.GenerateColliderThreadPI.Push(m_threadPoolItem as ThreadPoolItem<SGenerateColliderWorkItem>);
+            else if (m_poolState.Check(ChunkPoolItemState.ThreadPI))
+                pools.SMThreadPI.Push(m_threadPoolItem as ThreadPoolItem<ChunkStateManagerClient>);
+            else if (m_poolState.Check(ChunkPoolItemState.GenerateColliderThreadPI))
+                pools.SMTaskPI.Push(m_threadPoolItem as TaskPoolItem<ChunkStateManagerClient>);
+
+            m_poolState = m_poolState.Reset();
+        }
+
         public override void Update()
         {
+            // Return processed work items back to the pool
+            ReturnPoolItems();
+
             if (m_stateExternal != ChunkStateExternal.None)
             {
                 // Notify everyone listening
@@ -309,11 +334,11 @@ namespace Voxelmetric.Code.Core.StateManager
             chunk.blocks.contentsInvalidated = false;
 
             m_taskRunning = true;
-            IOPoolManager.Add(
-                new TaskPoolItem<ChunkStateManagerClient>(
-                    actionOnLoadData,
-                    this)
-                );
+
+            var task = Globals.MemPools.SMTaskPI.Pop();
+            m_threadPoolItem = task;
+            task.Set(actionOnLoadData, this);
+            IOPoolManager.Add(m_threadPoolItem);
 
             return true;
         }
@@ -349,11 +374,11 @@ namespace Voxelmetric.Code.Core.StateManager
             m_completedStatesSafe = m_completedStates;
 
             m_taskRunning = true;
-            IOPoolManager.Add(
-                new TaskPoolItem<ChunkStateManagerClient>(
-                    actionOnSaveData,
-                    this)
-                );
+
+            var task = Globals.MemPools.SMTaskPI.Pop();
+            m_threadPoolItem = task;
+            task.Set(actionOnSaveData, this);
+            IOPoolManager.Add(task);
 
             return true;
         }
@@ -569,27 +594,7 @@ namespace Voxelmetric.Code.Core.StateManager
 
         #region Generate collider
 
-        private struct SGenerateColliderWorkItem
-        {
-            public readonly ChunkStateManagerClient StateManager;
-            public readonly int MinX;
-            public readonly int MaxX;
-            public readonly int MinY;
-            public readonly int MaxY;
-            public readonly int MinZ;
-            public readonly int MaxZ;
-
-            public SGenerateColliderWorkItem(ChunkStateManagerClient stateManager, int minX, int maxX, int minY, int maxY, int minZ, int maxZ)
-            {
-                StateManager = stateManager;
-                MinX = minX;
-                MaxX = maxX;
-                MinY = minY;
-                MaxY = maxY;
-                MinZ = minZ;
-                MaxZ = maxZ;
-            }
-        }
+        
 
         private static readonly ChunkState CurrStateGenerateCollider = ChunkState.BuildCollider;
 
@@ -623,20 +628,21 @@ namespace Voxelmetric.Code.Core.StateManager
 
             if (chunk.blocks.NonEmptyBlocks > 0)
             {
-                var workItem = new SGenerateColliderWorkItem(
-                    this,
-                    chunk.m_bounds.minX, chunk.m_bounds.maxX,
-                    chunk.m_bounds.minY, chunk.m_bounds.maxY,
-                    chunk.m_bounds.minZ, chunk.m_bounds.maxZ
-                    );
-
                 m_taskRunning = true;
-                WorkPoolManager.Add(
-                    new ThreadPoolItem<SGenerateColliderWorkItem>(
-                        chunk.ThreadID,
-                        actionOnGenerateCollider,
-                        workItem)
+
+                var task = Globals.MemPools.GenerateColliderThreadPI.Pop();
+                m_threadPoolItem = task;
+                task.Set(
+                    chunk.ThreadID,
+                    actionOnGenerateCollider,
+                    new SGenerateColliderWorkItem(
+                        this,
+                        chunk.m_bounds.minX, chunk.m_bounds.maxX,
+                        chunk.m_bounds.minY, chunk.m_bounds.maxY,
+                        chunk.m_bounds.minZ, chunk.m_bounds.maxZ
+                        )
                     );
+                WorkPoolManager.Add(task);
 
                 return true;
             }
@@ -648,24 +654,13 @@ namespace Voxelmetric.Code.Core.StateManager
         #endregion Generate vertices
 
         #region Generate vertices
-
-        private struct SGenerateVerticesWorkItem
-        {
-            public readonly ChunkStateManagerClient StateManager;
-
-            public SGenerateVerticesWorkItem(ChunkStateManagerClient stateManager)
-            {
-                StateManager = stateManager;
-            }
-        }
-
+        
         private static readonly ChunkState CurrStateGenerateVertices = ChunkState.BuildVertices | ChunkState.BuildVerticesNow;
 
-        private static void OnGenerateVertices(ref SGenerateVerticesWorkItem item)
+        private static void OnGenerateVertices(ChunkStateManagerClient client)
         {
-            ChunkStateManagerClient stateManager = item.StateManager;
-            stateManager.chunk.GeometryHandler.Build(0, Env.ChunkMask, 0, Env.ChunkMask, 0, Env.ChunkMask);
-            OnGenerateVerticesDone(stateManager);
+            client.chunk.GeometryHandler.Build(0, Env.ChunkMask, 0, Env.ChunkMask, 0, Env.ChunkMask);
+            OnGenerateVerticesDone(client);
         }
 
         private static void OnGenerateVerticesDone(ChunkStateManagerClient stateManager)
@@ -693,16 +688,17 @@ namespace Voxelmetric.Code.Core.StateManager
 
             if (chunk.blocks.NonEmptyBlocks > 0)
             {
-                var workItem = new SGenerateVerticesWorkItem(this);
-
                 m_taskRunning = true;
-                WorkPoolManager.Add(
-                    new ThreadPoolItem<SGenerateVerticesWorkItem>(
-                        chunk.ThreadID,
-                        actionOnGenerateVertices,
-                        workItem,
-                        priority ? Globals.Watch.ElapsedTicks : long.MaxValue)
+
+                var task = Globals.MemPools.SMThreadPI.Pop();
+                m_threadPoolItem = task;
+                task.Set(
+                    chunk.ThreadID,
+                    actionOnGenerateVertices,
+                    this,
+                    priority ? Globals.Watch.ElapsedTicks : long.MaxValue
                     );
+                WorkPoolManager.Add(task);
 
                 return true;
             }

@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Reflection.Emit;
 using System.Runtime.InteropServices;
+using System.Text;
 using UnityEngine.Assertions;
 
 namespace Voxelmetric.Code.Common.Memory
@@ -47,6 +49,11 @@ namespace Voxelmetric.Code.Common.Memory
         public int Left
         {
             get { return m_size - (int)(m_pos-m_buffer); }
+        }
+
+        public override string ToString()
+        {
+            return string.Format("{0}/{1}", (int)(m_pos-m_buffer), m_size);
         }
     }
 }

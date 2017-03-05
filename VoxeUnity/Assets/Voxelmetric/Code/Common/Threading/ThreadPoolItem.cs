@@ -8,45 +8,54 @@ namespace Voxelmetric.Code.Common.Threading
         long Time { get; }
     }
 
-    public struct ThreadPoolItem<T>: AThreadPoolItem
+    public class ThreadPoolItem<T>: AThreadPoolItem
     {
-        private readonly ITaskPoolItem m_item;
+        private Action<T> Action;
+        private T Arg;
 
         public int ThreadID { get; private set; }
 
         public long Time { get; private set; }
 
-        public ThreadPoolItem(ThreadPool pool, ITaskPoolItem item, long time = long.MaxValue): this()
+        public ThreadPoolItem()
         {
-            m_item = item;
+        }
+
+        public ThreadPoolItem(ThreadPool pool, Action<T> action, T arg, long time = long.MaxValue)
+        {
+            Action = action;
+            Arg = arg;
             ThreadID = pool.GenerateThreadID();
             Time = time;
         }
 
-        public ThreadPoolItem(int threadID, ITaskPoolItem item, long time = long.MaxValue): this()
+        public ThreadPoolItem(int threadID, Action<T> action, T arg, long time = long.MaxValue)
         {
-            m_item = item;
+            Action = action;
+            Arg = arg;
             ThreadID = threadID;
             Time = time;
         }
 
-        public ThreadPoolItem(ThreadPool pool, Action<T> action, T arg, long time = long.MaxValue): this()
+        public void Set(ThreadPool pool, Action<T> action, T arg, long time = long.MaxValue)
         {
-            m_item = new TaskPoolItem<T>(action, arg);
+            Action = action;
+            Arg = arg;
             ThreadID = pool.GenerateThreadID();
             Time = time;
         }
 
-        public ThreadPoolItem(int threadID, Action<T> action, T arg, long time = long.MaxValue): this()
+        public void Set(int threadID, Action<T> action, T arg, long time = long.MaxValue)
         {
-            m_item = new TaskPoolItem<T>(action, arg);
+            Action = action;
+            Arg = arg;
             ThreadID = threadID;
             Time = time;
         }
 
         public void Run()
         {
-            m_item.Run();
+            Action(Arg);
         }
     }
 }

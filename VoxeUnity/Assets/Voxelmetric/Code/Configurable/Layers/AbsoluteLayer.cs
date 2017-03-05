@@ -38,10 +38,10 @@ public class AbsoluteLayer : TerrainLayer
     {
         NoiseItem ni = chunk.pools.noiseItems[layerIndex];
         ni.noiseGen.SetInterpBitStep(Env.ChunkSize, 2);
-        ni.lookupTable = chunk.pools.PopFloatArray(ni.noiseGen.Size*ni.noiseGen.Size);
+        ni.lookupTable = chunk.pools.FloatArrayPool.Pop(ni.noiseGen.Size*ni.noiseGen.Size);
 
 #if UNITY_STANDALONE_WIN && !DISABLE_FASTSIMD
-        float[] noiseSet = chunk.pools.PopFloatArray(ni.noiseGen.Size * ni.noiseGen.Size * ni.noiseGen.Size);
+        float[] noiseSet = chunk.pools.FloatArray(ni.noiseGen.Size * ni.noiseGen.Size * ni.noiseGen.Size);
 
         // Generate SIMD noise
         int offsetShift = Env.ChunkPow - ni.noiseGen.Step;
@@ -57,7 +57,7 @@ public class AbsoluteLayer : TerrainLayer
             for (int x = 0; x < ni.noiseGen.Size; x++)
                 ni.lookupTable[i++] = NoiseUtilsSIMD.GetNoise(noiseSet, ni.noiseGen.Size, x, 0, z, amplitude, noise.Gain);
 
-        chunk.pools.PushFloatArray(noiseSet);
+        chunk.pools.FloatArray(noiseSet);
 #else
         int xOffset = chunk.pos.x;
         int zOffset = chunk.pos.z;
@@ -80,7 +80,7 @@ public class AbsoluteLayer : TerrainLayer
     public override void PostProcess(Chunk chunk, int layerIndex)
     {
         NoiseItem ni = chunk.pools.noiseItems[layerIndex];
-        chunk.pools.PushFloatArray(ni.lookupTable);
+        chunk.pools.FloatArrayPool.Push(ni.lookupTable);
     }
 
     public override float GetHeight(Chunk chunk, int layerIndex, int x, int z, float heightSoFar, float strength)

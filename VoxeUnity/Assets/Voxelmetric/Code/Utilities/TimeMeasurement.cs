@@ -4,7 +4,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 
-namespace Assets.Voxelmetric.Code.Utilities
+namespace Voxelmetric.Code.Utilities
 {
     public static class Clock
     {

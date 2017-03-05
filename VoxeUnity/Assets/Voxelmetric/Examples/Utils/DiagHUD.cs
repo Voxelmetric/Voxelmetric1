@@ -2,12 +2,12 @@
 using System.Collections;
 using System.Text;
 using UnityEngine;
-using Assets.Engine.Scripts.Common.Extensions;
 using Voxelmetric.Code;
+using Voxelmetric.Code.Common.Extensions;
 using Voxelmetric.Code.Common.MemoryPooling;
 using Voxelmetric.Code.Core;
 
-namespace Assets.Client.Scripts.Misc
+namespace Client.Scripts.Misc
 {
     [ExecuteInEditMode]
     public class DiagHUD : MonoBehaviour
@@ -109,8 +109,8 @@ namespace Assets.Client.Scripts.Misc
                 m_text.AppendLine(Globals.WorkPool.GetPool(i).ToString());
             m_text.AppendLine(GameObjectProvider.Instance.ToString());
 
-            const int width = 600;
-            const int height = 460;
+            const int width = 1280;
+            const int height = 640;
             GUI.Box(new Rect(Screen.width-width, Screen.height-height, width, height), "");
             GUI.Label(new Rect(Screen.width-width+10, Screen.height-height+10, width-10, height-10), m_text.ToString());
         }

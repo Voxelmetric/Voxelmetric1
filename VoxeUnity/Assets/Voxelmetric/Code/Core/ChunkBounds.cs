@@ -1,6 +1,6 @@
 ﻿using Voxelmetric.Code.Utilities;
 
-namespace Assets.Voxelmetric.Code.Core
+namespace Voxelmetric.Code.Core
 {
     public class ChunkBounds
     {

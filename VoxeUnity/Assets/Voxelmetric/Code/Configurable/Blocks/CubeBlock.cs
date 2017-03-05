@@ -17,20 +17,20 @@ public class CubeBlock: SolidBlock
     {
         bool backface = DirectionUtils.IsBackface(direction);
 
-        VertexData[] vertexData = chunk.pools.PopVertexDataArray(4);
-        VertexDataFixed[] vertexDataFixed = chunk.pools.PopVertexDataFixedArray(4);
+        VertexData[] vertexData = chunk.pools.VertexDataArrayPool.Pop(4);
+        VertexDataFixed[] vertexDataFixed = chunk.pools.VertexDataFixedArrayPool.Pop(4);
         {
             if (vertices==null)
             {
                 for (int i = 0; i<4; i++)
-                    vertexData[i] = chunk.pools.PopVertexData();
+                    vertexData[i] = chunk.pools.VertexDataPool.Pop();
                 BlockUtils.PrepareVertices(localPos, vertexData, direction);
             }
             else
             {
                 for (int i = 0; i<4; i++)
                 {
-                    vertexData[i] = chunk.pools.PopVertexData();
+                    vertexData[i] = chunk.pools.VertexDataPool.Pop();
                     vertexData[i].Vertex = vertices[i];
                 }
             }
@@ -43,9 +43,9 @@ public class CubeBlock: SolidBlock
             chunk.GeometryHandler.Batcher.AddFace(vertexDataFixed, backface);
 
             for (int i = 0; i < 4; i++)
-                chunk.pools.PushVertexData(vertexData[i]);
+                chunk.pools.VertexDataPool.Push(vertexData[i]);
         }
-        chunk.pools.PushVertexDataFixedArray(vertexDataFixed);
-        chunk.pools.PushVertexDataArray(vertexData);
+        chunk.pools.VertexDataFixedArrayPool.Push(vertexDataFixed);
+        chunk.pools.VertexDataArrayPool.Push(vertexData);
     }
 }

@@ -1,4 +1,4 @@
-﻿namespace Assets.Engine.Scripts.Common.Extensions
+﻿namespace Voxelmetric.Code.Common.Extensions
 {
     public static class NumberExtensions
     {
