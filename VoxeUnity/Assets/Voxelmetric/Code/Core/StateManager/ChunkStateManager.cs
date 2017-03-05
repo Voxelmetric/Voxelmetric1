@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using Voxelmetric.Code.Common.Extensions;
-using Voxelmetric.Code.Common.Threading;
+﻿using Voxelmetric.Code.Common.Extensions;
 using Voxelmetric.Code.Core;
 using Voxelmetric.Code.Core.StateManager;
 

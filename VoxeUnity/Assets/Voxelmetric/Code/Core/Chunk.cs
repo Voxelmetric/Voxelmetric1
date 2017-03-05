@@ -1,9 +1,12 @@
 ﻿using System.Text;
+using Assets.Voxelmetric.Code.Core;
 using UnityEngine;
+using Voxelmetric.Code.Common;
 using Voxelmetric.Code.Common.MemoryPooling;
 using Voxelmetric.Code.Core.GeometryHandler;
 using Voxelmetric.Code.Core.StateManager;
 using Voxelmetric.Code.Data_types;
+using Voxelmetric.Code.Load_Resources.Blocks;
 using Voxelmetric.Code.Utilities;
 
 namespace Voxelmetric.Code.Core
@@ -26,6 +29,8 @@ namespace Voxelmetric.Code.Core
 
         //! Bounding box in world coordinates
         public Bounds WorldBounds { get; private set; }
+        //! Chunk bounds in terms of local geometry
+        public readonly ChunkBounds m_bounds = new ChunkBounds();
 
         //! ThreadID associated with this chunk. Used when working with object pools in MT environment. Resources
         //! need to be release where they were allocated. Thanks to this, associated containers could be made lock-free
@@ -127,6 +132,7 @@ namespace Voxelmetric.Code.Core
             ChunkColliderGeometryHandler.Reset();
 
             NeedsCollider = false;
+            m_bounds.Reset();
         }
 
         public override string ToString()
@@ -198,6 +204,57 @@ namespace Voxelmetric.Code.Core
             }
 
             return false;
+        }
+
+        private void AdjustMinMaxRenderBounds(int x, int y, int z)
+        {
+            ushort type = blocks.Get(Helpers.GetChunkIndex1DFrom3D(x, y, z)).Type;
+            if (type != BlockProvider.AirType)
+            {
+                if (x < m_bounds.minX)
+                    m_bounds.minX = x;
+                if (y < m_bounds.minY)
+                    m_bounds.minY = y;
+                if (z < m_bounds.minZ)
+                    m_bounds.minZ = z;
+
+                if (x > m_bounds.maxX)
+                    m_bounds.maxX = x;
+                if (y > m_bounds.maxY)
+                    m_bounds.maxY = y;
+                if (z > m_bounds.maxZ)
+                    m_bounds.maxZ = z;
+            }
+            else if (y < m_bounds.lowestEmptyBlock)
+                m_bounds.lowestEmptyBlock = y;
+        }
+
+        public void CalculateGeometryBounds()
+        {
+            m_bounds.Reset();
+
+            for (int y = Env.ChunkMask; y >= 0; y--)
+            {
+                for (int z = 0; z <= Env.ChunkMask; z++)
+                {
+                    for (int x = 0; x <= Env.ChunkMask; x++)
+                    {
+                        AdjustMinMaxRenderBounds(x, y, z);
+                    }
+                }
+            }
+
+            // This is an optimization - if this chunk is flat than there's no need to consider it as a whole.
+            // Its' top part is sufficient enough. However, we never want this value be smaller than chunk's
+            // lowest solid part.
+            // E.g. a sphere floating above the ground would be considered from its topmost solid block to
+            // the ground without this. With this check, the lowest part above ground will be taken as minimum
+            // render value.
+            m_bounds.minY = Mathf.Max(m_bounds.lowestEmptyBlock - 1, m_bounds.minY);
+            m_bounds.minY = Mathf.Max(m_bounds.minY, 0);
+
+            // Consume info about block having been modified
+            blocks.contentsInvalidated = false;
         }
     }
 }

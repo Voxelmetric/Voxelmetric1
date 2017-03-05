@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.IO;
+using Assets.Voxelmetric.Code.Core;
 using Voxelmetric.Code.Common;
 using Voxelmetric.Code.Common.IO;
 using Voxelmetric.Code.Data_types;
@@ -8,6 +9,8 @@ namespace Voxelmetric.Code.Core.Serialization
 {
     public class Save: IBinarizable
     {
+        public static readonly short SaveVersion = 1;
+
         public BlockPos[] positions;
         public BlockData[] blocks;
         public readonly bool changed = false;
@@ -63,7 +66,7 @@ namespace Voxelmetric.Code.Core.Serialization
             }
         }
 
-        public void Binarize(BinaryWriter bw)
+        public bool Binarize(BinaryWriter bw)
         {
             // Convert block types from an internal optimized version into global types
             ushort[] tmp = new ushort[blocks.Length];
@@ -72,15 +75,40 @@ namespace Voxelmetric.Code.Core.Serialization
 
             var positionsBytes = StructSerialization.SerializeArray(positions, Chunk.pools.MarshaledPool);
             var blocksBytes = StructSerialization.SerializeArray(tmp, Chunk.pools.MarshaledPool);
+            
+            bw.Write(SaveVersion);
+
+            ChunkBounds bounds = Chunk.m_bounds;
+            bw.Write(bounds.minX);
+            bw.Write(bounds.minY);
+            bw.Write(bounds.minZ);
+            bw.Write(bounds.maxX);
+            bw.Write(bounds.maxY);
+            bw.Write(bounds.maxZ);
+            bw.Write(bounds.lowestEmptyBlock);
 
             bw.Write(positionsBytes.Length);
             bw.Write(blocksBytes.Length);
             bw.Write(positionsBytes);
             bw.Write(blocksBytes);
+
+            return true;
         }
 
-        public void Debinarize(BinaryReader br)
+        public bool Debinarize(BinaryReader br)
         {
+            // Read the version number
+            int version = br.ReadInt16(); // not used for anything at the moment
+
+            ChunkBounds bounds = Chunk.m_bounds;
+            bounds.minX = br.ReadInt32();
+            bounds.minY = br.ReadInt32();
+            bounds.minZ = br.ReadInt32();
+            bounds.maxX = br.ReadInt32();
+            bounds.maxY = br.ReadInt32();
+            bounds.maxZ = br.ReadInt32();
+            bounds.lowestEmptyBlock = br.ReadInt32();
+
             var positionsBytes = new byte[br.ReadInt32()];
             var blockBytes = new byte[br.ReadInt32()];
             positions = StructSerialization.DeserializeArray<BlockPos>(br.ReadBytes(positionsBytes.Length), Chunk.pools.MarshaledPool);
@@ -90,6 +118,8 @@ namespace Voxelmetric.Code.Core.Serialization
             blocks = new BlockData[tmp.Length];
             for (int i = 0; i < blocks.Length; i++)
                 blocks[i] = new BlockData(Chunk.world.blockProvider.GetTypeFromTypeInConfig(tmp[i]));
+
+            return true;
         }
     }
 }

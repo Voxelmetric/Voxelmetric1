@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Text;
+using Assets.Voxelmetric.Code.Core;
 using Assets.Voxelmetric.Code.Core.StateManager;
 using UnityEngine;
 using Voxelmetric.Code.Common;
@@ -37,16 +38,7 @@ namespace Voxelmetric.Code.Core.StateManager
 
         //! State to notify external listeners about
         private ChunkStateExternal m_stateExternal;
-
-        //! Chunk bounds in terms of geometry
-        private int m_maxRenderX;
-        private int m_minRenderX;
-        private int m_maxRenderY;
-        private int m_minRenderY;
-        private int m_minRenderZ;
-        private int m_maxRenderZ;
-        private int m_lowestEmptyBlock;
-
+        
         private bool m_syncEdgeBlocks;
         
         private static readonly Action<ChunkStateManagerClient> actionOnGenerateData = OnGenerateData;
@@ -79,16 +71,7 @@ namespace Voxelmetric.Code.Core.StateManager
             Visible = false;
             PossiblyVisible = false;
 
-            ResetGeometryBounds();
-
             m_syncEdgeBlocks = true;
-        }
-
-        private void ResetGeometryBounds()
-        {
-            m_minRenderX = m_minRenderY = m_minRenderZ = Env.ChunkMask;
-            m_maxRenderX = m_maxRenderY = m_maxRenderZ = 0;
-            m_lowestEmptyBlock = Env.ChunkMask;
         }
 
         public override string ToString()
@@ -193,72 +176,21 @@ namespace Voxelmetric.Code.Core.StateManager
         }
 
         #region Calculate bounds
-
-        private void AdjustMinMaxRenderBounds(int x, int y, int z)
-        {
-            ushort type = chunk.blocks.Get(Helpers.GetChunkIndex1DFrom3D(x, y, z)).Type;
-            if (type != BlockProvider.AirType)
-            {
-                if (x < m_minRenderX)
-                    m_minRenderX = x;
-                if (y < m_minRenderY)
-                    m_minRenderY = y;
-                if (z < m_minRenderZ)
-                    m_minRenderZ = z;
-
-                if (x > m_maxRenderX)
-                    m_maxRenderX = x;
-                if (y > m_maxRenderY)
-                    m_maxRenderY = y;
-                if (z > m_maxRenderZ)
-                    m_maxRenderZ = z;
-            }
-            else if (y < m_lowestEmptyBlock)
-                m_lowestEmptyBlock = y;
-        }
-
-        private static void CalculateGeometryBounds(ChunkStateManagerClient client)
-        {
-            client.ResetGeometryBounds();
-
-            for (int y = Env.ChunkMask; y >= 0; y--)
-            {
-                for (int z = 0; z <= Env.ChunkMask; z++)
-                {
-                    for (int x = 0; x <= Env.ChunkMask; x++)
-                    {
-                        client.AdjustMinMaxRenderBounds(x, y, z);
-                    }
-                }
-            }
-
-            // This is an optimization - if this chunk is flat than there's no need to consider it as a whole.
-            // Its' top part is sufficient enough. However, we never want this value be smaller than chunk's
-            // lowest solid part.
-            // E.g. a sphere floating above the ground would be considered from its topmost solid block to
-            // the ground without this. With this check, the lowest part above ground will be taken as minimum
-            // render value.
-            client.m_minRenderY = Mathf.Max(client.m_lowestEmptyBlock - 1, client.m_minRenderY);
-            client.m_minRenderY = Mathf.Max(client.m_minRenderY, 0);
-
-            // Consume info about block having been modified
-            client.chunk.blocks.contentsInvalidated = false;
-        }
-
+        
         private static readonly ChunkState CurrStateCalculateBounds = ChunkState.CalculateBounds;
         private static readonly ChunkState NextStateCalculateBounds = ChunkState.Idle;
 
-        private static void OnCalculateGeometryBounds(ChunkStateManagerClient chunk)
+        private static void OnCalculateGeometryBounds(ChunkStateManagerClient client)
         {
-            CalculateGeometryBounds(chunk);
-            OnCalculateGeometryBoundsDone(chunk);
+            client.chunk.CalculateGeometryBounds();
+            OnCalculateGeometryBoundsDone(client);
         }
 
-        private static void OnCalculateGeometryBoundsDone(ChunkStateManagerClient chunk)
+        private static void OnCalculateGeometryBoundsDone(ChunkStateManagerClient client)
         {
-            chunk.m_completedStates = chunk.m_completedStates.Set(CurrStateCalculateBounds);
-            chunk.m_nextState = NextStateCalculateBounds;
-            chunk.m_taskRunning = false;
+            client.m_completedStates = client.m_completedStates.Set(CurrStateCalculateBounds);
+            client.m_nextState = NextStateCalculateBounds;
+            client.m_taskRunning = false;
         }
 
         private bool CalculateBounds()
@@ -354,13 +286,12 @@ namespace Voxelmetric.Code.Core.StateManager
         private static void OnLoadData(ChunkStateManagerClient stateManager)
         {
             Serialization.Serialization.LoadChunk(stateManager.chunk);
-
             OnLoadDataDone(stateManager);
         }
 
         private static void OnLoadDataDone(ChunkStateManagerClient stateManager)
         {
-            stateManager.m_completedStates = stateManager.m_completedStates.Set(CurrStateLoadData);
+            stateManager.m_completedStates = stateManager.m_completedStates.Set(CurrStateLoadData | ChunkState.CalculateBounds);
             stateManager.m_nextState = NextStateLoadData;
             stateManager.m_taskRunning = false;
         }
@@ -370,8 +301,8 @@ namespace Voxelmetric.Code.Core.StateManager
             if (!m_completedStates.Check(ChunkState.Generate))
                 return true;
 
-            m_pendingStates = m_pendingStates.Reset(CurrStateLoadData);
-            m_completedStates = m_completedStates.Reset(CurrStateLoadData);
+            m_pendingStates = m_pendingStates.Reset(CurrStateLoadData | ChunkState.CalculateBounds);
+            m_completedStates = m_completedStates.Reset(CurrStateLoadData | ChunkState.CalculateBounds);
             m_completedStatesSafe = m_completedStates;
 
             m_taskRunning = true;
@@ -691,9 +622,9 @@ namespace Voxelmetric.Code.Core.StateManager
             {
                 var workItem = new SGenerateColliderWorkItem(
                     this,
-                    m_minRenderX, m_maxRenderX,
-                    m_minRenderY, m_maxRenderY,
-                    m_minRenderZ, m_maxRenderZ
+                    chunk.m_bounds.minX, chunk.m_bounds.maxX,
+                    chunk.m_bounds.minY, chunk.m_bounds.maxY,
+                    chunk.m_bounds.minZ, chunk.m_bounds.maxZ
                     );
 
                 m_taskRunning = true;

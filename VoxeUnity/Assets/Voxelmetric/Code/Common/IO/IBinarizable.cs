@@ -4,7 +4,7 @@ namespace Voxelmetric.Code.Common.IO
 {
     public interface IBinarizable
     {
-        void Binarize(BinaryWriter bw);
-        void Debinarize(BinaryReader br);
+        bool Binarize(BinaryWriter bw);
+        bool Debinarize(BinaryReader br);
     }
 }
