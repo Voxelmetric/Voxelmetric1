@@ -83,7 +83,7 @@ namespace Voxelmetric.Code
             }
         }
 
-        private static readonly TimeBudgetHandler s_edgeSyncBudget = new TimeBudgetHandler(10); // 10 ms a frame for edge synchronization
+        private static readonly TimeBudgetHandler s_edgeSyncBudget = new TimeBudgetHandler(4); // 4 ms a frame for edge synchronization
         public static TimeBudgetHandler EdgeSyncBudget {
             get
             {
