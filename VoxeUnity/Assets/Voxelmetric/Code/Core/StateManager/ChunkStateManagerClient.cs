@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Runtime.CompilerServices;
 using System.Text;
 using Voxelmetric.Code.Common;
 using Voxelmetric.Code.Common.Events;
@@ -279,18 +278,16 @@ namespace Voxelmetric.Code.Core.StateManager
             m_pendingStates = m_pendingStates.Reset(CurrStateGenerateData);
             m_completedStates = m_completedStates.Reset(CurrStateGenerateData | CurrStateLoadData);
             m_completedStatesSafe = m_completedStates;
-
-            m_taskRunning = true;
-
+            
             if (chunk.world.networking.isServer)
             {
+                m_taskRunning = true;
+
                 // Let server generate chunk data
-                WorkPoolManager.Add(
-                    new ThreadPoolItem<ChunkStateManagerClient>(
-                        chunk.ThreadID,
-                        actionOnGenerateData,
-                        this)
-                    );
+                var task = Globals.MemPools.SMThreadPI.Pop();
+                m_threadPoolItem = task;
+                task.Set(chunk.ThreadID, actionOnGenerateData, this);
+                WorkPoolManager.Add(task);
             }
             else
             {

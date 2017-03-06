@@ -1,5 +1,4 @@
 ﻿using Voxelmetric.Code.Common.Extensions;
-using Voxelmetric.Code.Common.Threading;
 
 namespace Voxelmetric.Code.Core.StateManager
 {
