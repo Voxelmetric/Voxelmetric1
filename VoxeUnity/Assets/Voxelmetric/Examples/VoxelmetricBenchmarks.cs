@@ -12,12 +12,42 @@ namespace Voxelmetric.Examples
     {
         void Awake()
         {
+            Benchmark_Modulus3();
             Benchmark_AbsValue();
             Benchmark_3D_to_1D_Index();
             Benchmark_1D_to_3D_Index();
             Benchmark_Noise();
             Benchmark_Noise_Dowsampling();
             Application.Quit();
+        }
+
+        void Benchmark_Modulus3()
+        {
+            Debug.Log("Bechmark - mod3");
+            using (StreamWriter writer = File.CreateText("perf_mod3.txt"))
+            {
+                uint[] number = { 0 };
+                double t = Clock.BenchmarkTime(
+                    () =>
+                    {
+                        ++number[0];
+                        number[0] = number[0] % 3;
+                    }, 1000000
+                    );
+                Debug.LogFormat("Mod3 -> out:{0}, time:{1}", number[0], t.ToString(CultureInfo.InvariantCulture));
+                writer.WriteLine("Mod3 -> out:{0}, time:{1}", number[0], t.ToString(CultureInfo.InvariantCulture));
+                
+                number[0] = 0;
+                t = Clock.BenchmarkTime(
+                    () =>
+                    {
+                        ++number[0];
+                        number[0] = Helpers.Mod3(number[0]);
+                    }, 1000000
+                    );
+                Debug.LogFormat("Mod3 mersenne -> out:{0}, time:{1}", number[0], t.ToString(CultureInfo.InvariantCulture));
+                writer.WriteLine("Mod3 mersenne -> out:{0}, time:{1}", number[0], t.ToString(CultureInfo.InvariantCulture));
+            }
         }
 
         void Benchmark_AbsValue()

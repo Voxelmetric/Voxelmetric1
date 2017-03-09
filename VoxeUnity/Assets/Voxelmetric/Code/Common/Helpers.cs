@@ -161,27 +161,21 @@ namespace Voxelmetric.Code.Common
 		{
 			return (value % modulus + modulus) % modulus;
 		}
+        
+        public static uint Mod3(uint value)
+        {
+            value = (value >> 16) + (value & 0xFFFF); // sum base 2**16 digits value <= 0x1FFFE
+            value = (value >> 8) + (value & 0xFF); // sum base 2**8 digits value <= 0x2FD
+            value = (value >> 4) + (value & 0xF); // sum base 2**4 digits value <= 0x3C; worst case 0x3B
+            value = (value >> 2) + (value & 0x3); // sum base 2**2 digits value <= 0x1D; worst case 0x1B
+            value = (value >> 2) + (value & 0x3); // sum base 2**2 digits value <= 0x9; worst case 0x7
+            // Following line can be omitted at the cost of slightly more performance but less precision (would go down from 4 to 1 billion)
+            value = (value >> 2) + (value & 0x3); // sum base 2**2 digits value <= 0x4
+            if (value > 2) value = value - 3;
+            return value;
+        }
 
-		public static uint Mod3(uint value)
-		{
-			uint a = value&0x33333333; /* even two-bit groups */
-			uint b = value&0xcccccccc; /* odd two-bit groups */
-			uint sum = a+(b>>2); /* sum 0-6 in 8 groups */
-			sum = sum+(sum>>2); /* sum 0-3 in 8 groups */
-			sum = sum&0x33333333; /* clear garbage bits */
-			sum = sum+(sum>>4); /* sum 0-6 in 4 groups */
-			sum = sum+(sum>>2); /* sum 0-3 in 4 groups */
-			sum = sum&0x33333333; /* clear garbage bits */
-			sum = sum+(sum>>8); /* sum 0-6 in 2 groups */
-			sum = sum+(sum>>2); /* sum 0-3 in 2 groups */
-			sum = sum&0x33333333; /* clear garbage bits */
-			sum = sum+(sum>>16); /* sum 0-6 in 1 group */
-			sum = sum+(sum>>2); /* sum 0-3 in 1 group */
-			sum = sum&0x3; /* clear garbage bits */
-			return sum;
-		}
-
-		public static int Clamp(this int val, int min, int max)
+        public static int Clamp(this int val, int min, int max)
 		{
 			if (val < min)
 				return min;

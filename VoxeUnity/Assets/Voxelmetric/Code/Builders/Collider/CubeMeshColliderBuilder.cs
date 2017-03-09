@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using Voxelmetric.Code.Common;
 using Voxelmetric.Code.Common.MemoryPooling;
 using Voxelmetric.Code.Configurable.Blocks.Utilities;
 using Voxelmetric.Code.Core;
@@ -39,10 +40,12 @@ namespace Voxelmetric.Code.Builders.Collider
             for (bool backFace = false, b = true; b!=backFace; backFace = true, b = !b)
             {
                 // Iterate over 3 dimensions. Once for front faces, once for back faces
-                for (int d = 0; d<3; d++)
+                for (uint d = 0; d<3; d++)
                 {
-                    int u = (d+1)%3;
-                    int v = (d+2)%3;
+                    uint u = d + 1;
+                    if (u > 2) u = u - 3; // u = (d+1)%3; <-- we know the range is within 1..3 so we can improvize
+                    uint v = d + 2;
+                    if (v > 2) v = v - 3; // v = (d+2)%3; <-- we know the range is within 2..4 so we can improvize
 
                     x[0] = 0;
                     x[1] = 0;
