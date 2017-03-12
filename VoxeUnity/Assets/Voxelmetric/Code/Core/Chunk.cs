@@ -27,7 +27,7 @@ namespace Voxelmetric.Code.Core
         public Vector3Int pos { get; private set; }
 
         //! Bounding box in world coordinates
-        public Bounds WorldBounds { get; private set; }
+        public AABB WorldBounds { get; private set; }
         //! Chunk bounds in terms of local geometry
         public readonly ChunkBounds m_bounds = new ChunkBounds();
 
@@ -104,9 +104,9 @@ namespace Voxelmetric.Code.Core
             stateManager = new ChunkStateManagerClient(this);
             logic = world.config.randomUpdateFrequency>0.0f ? new ChunkLogic(this) : null;
 
-            WorldBounds = new Bounds(
-                new Vector3(pos.x+(Env.ChunkSize>>1), pos.y+(Env.ChunkSize>>1), pos.z+(Env.ChunkSize>>1)),
-                new Vector3(Env.ChunkSize, Env.ChunkSize, Env.ChunkSize)
+            WorldBounds = new AABB(
+                pos.x, pos.y, pos.z,
+                pos.x+Env.ChunkSize, pos.x+Env.ChunkSize, pos.x+Env.ChunkSize
                 );
 
             Reset();

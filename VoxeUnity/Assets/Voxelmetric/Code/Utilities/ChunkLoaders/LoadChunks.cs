@@ -472,8 +472,14 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
                     if (Diag_DrawWorldBounds)
                     {
                         // Make center chunks more apparent by using yellow color
-                        Gizmos.color = chunk.pos.z == 0 || chunk.pos.y == 0 || chunk.pos.z == 0 ? Color.yellow : Color.blue;
-                        Gizmos.DrawWireCube(chunk.WorldBounds.center, chunk.WorldBounds.size);
+                        Gizmos.color = chunk.pos.z==0 || chunk.pos.y==0 || chunk.pos.z==0 ? Color.yellow : Color.blue;
+                        Vector3 chunkCenter = new Vector3(
+                            chunk.pos.x+(Env.ChunkSize>>1),
+                            chunk.pos.y+(Env.ChunkSize>>1),
+                            chunk.pos.z+(Env.ChunkSize>>1)
+                            );
+                        Vector3 chunkSize = new Vector3(Env.ChunkSize, Env.ChunkSize, Env.ChunkSize);
+                        Gizmos.DrawWireCube(chunkCenter, chunkSize);
                     }
 
                     if (Diag_DrawLoadRange)

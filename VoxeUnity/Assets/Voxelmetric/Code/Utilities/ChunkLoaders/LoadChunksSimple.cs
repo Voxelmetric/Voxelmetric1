@@ -146,10 +146,7 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
             int rx = rangeX<<Env.ChunkPow;
             int ry = rangeY<<Env.ChunkPow;
             int rz = rangeZ<<Env.ChunkPow;
-            Bounds bounds2 = new Bounds(
-                new Vector3((wx+rx)>>1, (wy+ry)>>1, (wz+rz)>>1),
-                new Vector3(rx, ry, rz)
-                );
+            AABB bounds2 = new AABB(wx, wy, wz, wx+rx, wy+ry, wz+rz);
 
             // Check whether the bouding box lies inside the camera's frustum
             int inside = Geometry.TestPlanesAABB2(m_cameraPlanes, bounds2);
@@ -461,7 +458,13 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
                     {
                         // Make center chunks more apparent by using yellow color
                         Gizmos.color = chunk.pos.z==0 || chunk.pos.y==0 || chunk.pos.z==0 ? Color.yellow : Color.blue;
-                        Gizmos.DrawWireCube(chunk.WorldBounds.center, chunk.WorldBounds.size);
+                        Vector3 chunkCenter = new Vector3(
+                            chunk.pos.x+(Env.ChunkSize>>1),
+                            chunk.pos.y+(Env.ChunkSize>>1),
+                            chunk.pos.z+(Env.ChunkSize>>1)
+                            );
+                        Vector3 chunkSize = new Vector3(Env.ChunkSize, Env.ChunkSize, Env.ChunkSize);
+                        Gizmos.DrawWireCube(chunkCenter, chunkSize);
                     }
 
                     if (Diag_DrawLoadRange)
