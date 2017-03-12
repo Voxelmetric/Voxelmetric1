@@ -77,8 +77,8 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
             Globals.EdgeSyncBudget.Reset();
 
             PreProcessChunks();
-            ProcessChunks();
             PostProcessChunks();
+            ProcessChunks();
         }
 
         public void PreProcessChunks()
@@ -133,7 +133,7 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
                 bool isVisible = Geometry.TestPlanesAABB(m_cameraPlanes, chunk.WorldBounds);
 
                 stateManager.Visible = isVisible && item.IsInVisibleRange;
-                stateManager.PossiblyVisible = isVisible;
+                stateManager.PossiblyVisible = isVisible || FullLoadOnStartUp;
 
                 return;
             }
@@ -182,7 +182,7 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
                                 continue;
 
                             // Update visibility information
-                            stateManager.PossiblyVisible = false;
+                            stateManager.PossiblyVisible = FullLoadOnStartUp;
                             stateManager.Visible = false;
                         }
                     }
@@ -358,8 +358,7 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
                 ++i;
             }
 
-            if (m_updateRequests.Count > 0)
-                FullLoadOnStartUp = false;
+            FullLoadOnStartUp = false;
         }
 
         public void ProcessChunk(Chunk chunk)
