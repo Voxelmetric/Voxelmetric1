@@ -103,15 +103,14 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
         private void UpdateVisibility(int x, int y, int z, int rangeX, int rangeY, int rangeZ)
         {
             bool isLast = rangeX==1 && rangeY==1 && rangeZ==1;
-            int wx, wy, wz;
+
+            int wx = m_viewerPos.x+(x<<Env.ChunkPow);
+            int wy = m_viewerPos.y+(y<<Env.ChunkPow);
+            int wz = m_viewerPos.z+(z<<Env.ChunkPow);
 
             // Stop if there is no further subdivision possible
             if (isLast)
             {
-                wx = m_viewerPos.x+(x<<Env.ChunkPow);
-                wy = m_viewerPos.y+(y<<Env.ChunkPow);
-                wz = m_viewerPos.z+(z<<Env.ChunkPow);
-
                 // Update chunk's visibility information
                 Vector3Int chunkPos = new Vector3Int(wx, wy, wz);
                 Chunk chunk = world.chunks.Get(chunkPos);
@@ -138,18 +137,11 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
                 return;
             }
 
-            wx = m_viewerPos.x+(x<<Env.ChunkPow);
-            wy = m_viewerPos.y+(y<<Env.ChunkPow);
-            wz = m_viewerPos.z+(z<<Env.ChunkPow);
-
             // Calculate the bounding box
             int rx = rangeX<<Env.ChunkPow;
             int ry = rangeY<<Env.ChunkPow;
             int rz = rangeZ<<Env.ChunkPow;
-            Bounds bounds2 = new Bounds(
-                new Vector3((wx+rx)>>1, (wy+ry)>>1, (wz+rz)>>1),
-                new Vector3(rx, ry, rz)
-                );
+            AABB bounds2 = new AABB(wx, wy, wz, wx + rx, wy + ry, wz + rz);
 
             // Check whether the bouding box lies inside the camera's frustum
             int inside = Geometry.TestPlanesAABB2(m_cameraPlanes, bounds2);

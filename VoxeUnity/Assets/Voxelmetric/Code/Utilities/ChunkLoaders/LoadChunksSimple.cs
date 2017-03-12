@@ -94,15 +94,14 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
         private void UpdateVisibility(int x, int y, int z, int rangeX, int rangeY, int rangeZ)
         {
             bool isLast = rangeX==1 && rangeY==1 && rangeZ==1;
-            int wx, wy, wz;
+
+            int wx = m_viewerPos.x+(x<<Env.ChunkPow);
+            int wy = m_viewerPos.y+(y<<Env.ChunkPow);
+            int wz = m_viewerPos.z+(z<<Env.ChunkPow);
 
             // Stop if there is no further subdivision possible
             if (isLast)
             {
-                wx = m_viewerPos.x+(x<<Env.ChunkPow);
-                wy = m_viewerPos.y+(y<<Env.ChunkPow);
-                wz = m_viewerPos.z+(z<<Env.ChunkPow);
-
                 // Update chunk's visibility information
                 Vector3Int chunkPos = new Vector3Int(wx, wy, wz);
                 Chunk chunk = world.chunks.Get(chunkPos);
@@ -122,10 +121,7 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
 
                 // Skip chunks which are too far away
                 if (xDist>hRadius*hRadius || yDist>vRadius*vRadius)
-                {
-                    stateManager.RequestState(ChunkState.Remove);
                     return;
-                }
 
                 // Update visibility information
                 bool isVisible = Geometry.TestPlanesAABB(m_cameraPlanes, chunk.WorldBounds);
@@ -137,10 +133,6 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
 
                 return;
             }
-
-            wx = m_viewerPos.x+(x<<Env.ChunkPow);
-            wy = m_viewerPos.y+(y<<Env.ChunkPow);
-            wz = m_viewerPos.z+(z<<Env.ChunkPow);
 
             // Calculate the bounding box
             int rx = rangeX<<Env.ChunkPow;
