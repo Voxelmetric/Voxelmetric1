@@ -102,10 +102,9 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
             world.CapCoordYInsideWorld(ref minY, ref maxY);
 
             // Cycle through the array of positions
-            for (int i = 0; i<m_chunkPositions.Length; i++)
+            for (int y = maxY; y > minY; y -= Env.ChunkSize)
             {
-                // Create and register chunks
-                for (int y = minY; y<=maxY; y += Env.ChunkSize)
+                for (int i = 0; i < m_chunkPositions.Length; i++)
                 {
                     // Translate array postions to world/chunk positions
                     Vector3Int newChunkPos = new Vector3Int(
