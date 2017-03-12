@@ -99,6 +99,182 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
                 m_viewerPos.z >> Env.ChunkPow
                 );
         }
+        
+        private void UpdateVisibility(int x, int y, int z, int rangeX, int rangeY, int rangeZ)
+        {
+            bool isLast = rangeX==1 && rangeY==1 && rangeZ==1;
+            int wx, wy, wz;
+
+            // Stop if there is no further subdivision possible
+            if (isLast)
+            {
+                wx = m_viewerPos.x+(x<<Env.ChunkPow);
+                wy = m_viewerPos.y+(y<<Env.ChunkPow);
+                wz = m_viewerPos.z+(z<<Env.ChunkPow);
+
+                // Update chunk's visibility information
+                Vector3Int chunkPos = new Vector3Int(wx, wy, wz);
+                Chunk chunk = world.chunks.Get(chunkPos);
+                if (chunk==null)
+                    return;
+
+                ChunkStateManagerClient stateManager = chunk.stateManager;
+
+                int tx = m_clipmap.TransformX(x);
+                int ty = m_clipmap.TransformY(y);
+                int tz = m_clipmap.TransformZ(z);
+
+                // Skip chunks which are too far away
+                if (!m_clipmap.IsInsideBounds_Transformed(tx, ty, tz))
+                    return;
+
+                // Update visibility information
+                ClipmapItem item = m_clipmap.Get_Transformed(tx, ty, tz);
+                bool isVisible = Geometry.TestPlanesAABB(m_cameraPlanes, chunk.WorldBounds);
+
+                stateManager.Visible = isVisible && item.IsInVisibleRange;
+                stateManager.PossiblyVisible = isVisible;
+
+                return;
+            }
+
+            wx = m_viewerPos.x+(x<<Env.ChunkPow);
+            wy = m_viewerPos.y+(y<<Env.ChunkPow);
+            wz = m_viewerPos.z+(z<<Env.ChunkPow);
+
+            // Calculate the bounding box
+            int rx = rangeX<<Env.ChunkPow;
+            int ry = rangeY<<Env.ChunkPow;
+            int rz = rangeZ<<Env.ChunkPow;
+            Bounds bounds2 = new Bounds(
+                new Vector3((wx+rx)>>1, (wy+ry)>>1, (wz+rz)>>1),
+                new Vector3(rx, ry, rz)
+                );
+
+            // Check whether the bouding box lies inside the camera's frustum
+            int inside = Geometry.TestPlanesAABB2(m_cameraPlanes, bounds2);
+
+            #region Full invisibility            
+
+            if (inside==0)
+            {
+                // Full invisibility. All chunks in this area need to be made invisible
+                for (int cy = wy; cy<wy+ry; cy += Env.ChunkSize)
+                {
+                    for (int cz = wz; cz<wz+rz; cz += Env.ChunkSize)
+                    {
+                        for (int cx = wx; cx<wx+rx; cx += Env.ChunkSize)
+                        {
+                            // Update chunk's visibility information
+                            Vector3Int chunkPos = new Vector3Int(cx, cy, cz);
+                            Chunk chunk = world.chunks.Get(chunkPos);
+                            if (chunk==null)
+                                continue;
+
+                            ChunkStateManagerClient stateManager = chunk.stateManager;
+
+                            int tx = m_clipmap.TransformX(x);
+                            int ty = m_clipmap.TransformY(y);
+                            int tz = m_clipmap.TransformZ(z);
+
+                            // Skip chunks which are too far away
+                            if (!m_clipmap.IsInsideBounds_Transformed(tx, ty, tz))
+                                continue;
+
+                            // Update visibility information
+                            stateManager.PossiblyVisible = false;
+                            stateManager.Visible = false;
+                        }
+                    }
+                }
+
+                return;
+            }
+
+            #endregion
+
+            #region Full visibility            
+
+            if (inside==6)
+            {
+                // Full visibility. All chunks in this area need to be made visible
+                for (int cy = wy; cy<wy+ry; cy += Env.ChunkSize)
+                {
+                    for (int cz = wz; cz<wz+rz; cz += Env.ChunkSize)
+                    {
+                        for (int cx = wx; cx<wx+rx; cx += Env.ChunkSize)
+                        {
+                            // Update chunk's visibility information
+                            Vector3Int chunkPos = new Vector3Int(cx, cy, cz);
+                            Chunk chunk = world.chunks.Get(chunkPos);
+                            if (chunk==null)
+                                continue;
+
+                            ChunkStateManagerClient stateManager = chunk.stateManager;
+
+                            int tx = m_clipmap.TransformX(x);
+                            int ty = m_clipmap.TransformY(y);
+                            int tz = m_clipmap.TransformZ(z);
+
+                            // Skip chunks which are too far away
+                            if (!m_clipmap.IsInsideBounds_Transformed(tx, ty, tz))
+                                continue;
+
+                            // Update visibility information
+                            ClipmapItem item = m_clipmap.Get_Transformed(tx, ty, tz);
+
+                            stateManager.Visible = item.IsInVisibleRange;
+                            stateManager.PossiblyVisible = true;
+                        }
+                    }
+                }
+
+                return;
+            }
+
+            #endregion
+
+            #region Partial visibility
+
+            int offX = rangeX>>1;
+            int offY = rangeY>>1;
+            int offZ = rangeZ>>1;
+            rangeX = (rangeX+1)>>1; // ceil the number
+            rangeY = (rangeY+1)>>1; // ceil the number
+            rangeZ = (rangeZ+1)>>1; // ceil the number
+
+            // Subdivide if possible
+            // TODO: Avoid the recursion
+            if (offX  !=0 && offY  !=0 && offZ  !=0) UpdateVisibility(x     , y     , z     , offX  , offY  , offZ);
+            if (rangeX!=0 && offY  !=0 && offZ  !=0) UpdateVisibility(x+offX, y     , z     , rangeX, offY  , offZ);
+            if (offX  !=0 && offY  !=0 && rangeZ!=0) UpdateVisibility(x     , y     , z+offZ, offX  , offY  , rangeZ);
+            if (rangeX!=0 && offY  !=0 && rangeZ!=0) UpdateVisibility(x+offX, y     , z+offZ, rangeX, offY  , rangeZ);
+            if (offX  !=0 && rangeY!=0 && offZ  !=0) UpdateVisibility(x     , y+offY, z     , offX  , rangeY, offZ);
+            if (rangeX!=0 && rangeY!=0 && offZ  !=0) UpdateVisibility(x+offX, y+offY, z     , rangeX, rangeY, offZ);
+            if (offX  !=0 && rangeY!=0 && rangeZ!=0) UpdateVisibility(x     , y+offY, z+offZ, offX  , rangeY, rangeZ);
+            if (rangeX!=0 && rangeY!=0 && rangeZ!=0) UpdateVisibility(x+offX, y+offY, z+offZ, rangeX, rangeY, rangeZ);
+
+            #endregion
+        }
+
+        private void HandleVisibility()
+        {
+            if (!UseFrustumCulling)
+                return;
+
+            int minY = m_viewerPos.y - (VerticalChunkLoadRadius << Env.ChunkPow);
+            int maxY = m_viewerPos.y + (VerticalChunkLoadRadius << Env.ChunkPow);
+            world.CapCoordYInsideWorld(ref minY, ref maxY);
+
+            minY >>= Env.ChunkPow;
+            maxY >>= Env.ChunkPow;
+
+            // TODO: Merge this with clipmap
+            UpdateVisibility(
+                -HorizontalChunkLoadRadius, minY, -HorizontalChunkLoadRadius,
+                (HorizontalChunkLoadRadius << 1) + 1, maxY - minY + 1, (HorizontalChunkLoadRadius << 1) + 1
+                );
+        }
 
         public void PostProcessChunks()
         {
@@ -121,7 +297,8 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
                         (m_chunkPositions[i].y<<Env.ChunkPow)+y,
                         (m_chunkPositions[i].z<<Env.ChunkPow)+m_viewerPos.z
                         );
-
+                        
+                    // Create and register chunks
                     Chunk chunk;
                     if (!world.chunks.CreateOrGetChunk(newChunkPos, out chunk, false))
                         continue;
@@ -140,6 +317,8 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
 
         public void ProcessChunks()
         {
+            HandleVisibility();
+
             // Process removal requests
             for (int i = 0; i<m_updateRequests.Count;)
             {
@@ -185,15 +364,11 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
 
         public void ProcessChunk(Chunk chunk)
         {
-            int xd = Helpers.Abs((m_viewerPos.x - chunk.pos.x) >> Env.ChunkPow);
-            int yd = Helpers.Abs((m_viewerPos.y - chunk.pos.y) >> Env.ChunkPow);
-            int zd = Helpers.Abs((m_viewerPos.z - chunk.pos.z) >> Env.ChunkPow);
+            ChunkStateManagerClient stateManager = chunk.stateManager;
 
             int tx = m_clipmap.TransformX(chunk.pos.x >> Env.ChunkPow);
             int ty = m_clipmap.TransformY(chunk.pos.y >> Env.ChunkPow);
             int tz = m_clipmap.TransformZ(chunk.pos.z >> Env.ChunkPow);
-
-            ChunkStateManagerClient stateManager = chunk.stateManager;
 
             // Chunk is too far away. Remove it
             if (!m_clipmap.IsInsideBounds_Transformed(tx, ty, tz))
@@ -203,29 +378,12 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
             else
             {
                 // Dummy collider example - create a collider for chunks directly surrounding the viewer
+                int xd = Helpers.Abs((m_viewerPos.x - chunk.pos.x) >> Env.ChunkPow);
+                int yd = Helpers.Abs((m_viewerPos.y - chunk.pos.y) >> Env.ChunkPow);
+                int zd = Helpers.Abs((m_viewerPos.z - chunk.pos.z) >> Env.ChunkPow);
                 chunk.NeedsCollider = xd <= 1 && yd <= 1 && zd <= 1;
 
-                // Chunk is within view frustum
-                if (UseFrustumCulling)
-                {
-                    ClipmapItem item = m_clipmap.Get_Transformed(tx, ty, tz);
-
-                    // Chunk is in visibilty range. Full update with geometry generation is possible
-                    if (item.IsInVisibleRange)
-                    {
-                        //chunk.LOD = item.LOD;
-                        stateManager.PossiblyVisible = true;
-                        stateManager.Visible = IsChunkInViewFrustum(chunk);
-                    }
-                    // Chunk is cached range. Full update except for geometry generation
-                    else
-                    {
-                        //chunk.LOD = item.LOD;
-                        stateManager.PossiblyVisible = true;
-                        stateManager.Visible = false;
-                    }
-                }
-                else
+                if (!UseFrustumCulling)
                 {
                     ClipmapItem item = m_clipmap.Get_Transformed(tx, ty, tz);
 
@@ -298,13 +456,7 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
 
             m_viewerPos = new Vector3Int(pos.x, y, pos.z);
         }
-
-        private bool IsChunkInViewFrustum(Chunk chunk)
-        {
-            // Check if the chunk lies within camera planes
-            return Geometry.TestPlanesAABB(m_cameraPlanes, chunk.WorldBounds);
-        }
-
+        
         private void OnDrawGizmosSelected()
         {
             if (!enabled)

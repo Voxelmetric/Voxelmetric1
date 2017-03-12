@@ -105,7 +105,7 @@ namespace Voxelmetric.Code.Core
             logic = world.config.randomUpdateFrequency>0.0f ? new ChunkLogic(this) : null;
 
             WorldBounds = new Bounds(
-                new Vector3(pos.x+ Env.ChunkSize/2, pos.y+ Env.ChunkSize/2, pos.z+ Env.ChunkSize/2),
+                new Vector3(pos.x+(Env.ChunkSize>>1), pos.y+(Env.ChunkSize>>1), pos.z+(Env.ChunkSize>>1)),
                 new Vector3(Env.ChunkSize, Env.ChunkSize, Env.ChunkSize)
                 );
 
@@ -133,8 +133,6 @@ namespace Voxelmetric.Code.Core
         {
             StringBuilder sb = new StringBuilder();
             sb.Append(pos);
-            sb.Append(", blocks=");
-            sb.Append(blocks);
             if (logic!=null)
             {
                 sb.Append(", logic=");

@@ -77,10 +77,25 @@ namespace Voxelmetric.Code.Core.Clipmap
             int absY = Helpers.Abs(yy);
             int absZ = Helpers.Abs(zz);
 
-            if (absX > absZ)
+            /*if (absX > absZ)
                 return (absX > absY) ? m_axes[0].Map[xx] : m_axes[1].Map[yy];
 
-            return absZ > absY ? m_axes[2].Map[zz] : m_axes[1].Map[yy];
+            return absZ > absY ? m_axes[2].Map[zz] : m_axes[1].Map[yy];*/
+            int index = 0;
+            int value = xx;
+
+            if (absY>absX && absY>absZ)
+            {
+                index = 1;
+                value = yy;
+            }
+            else if (absZ>absX && absZ>absY)
+            {
+                index = 2;
+                value = zz;
+            }
+
+            return m_axes[index].Map[value];
         }
 
         private void InitAxis(int axis, int forceLOD, float coefLOD)

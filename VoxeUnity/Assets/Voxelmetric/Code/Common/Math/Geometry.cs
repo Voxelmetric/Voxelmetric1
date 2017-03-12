@@ -113,23 +113,48 @@ namespace Voxelmetric.Code.Common.Math
         /// </summary>
         public static bool TestPlanesAABB(Plane[] planes, Bounds aabb)
         {
-            float minx, miny, minz;
-
-            for (int i = 0; i < 6; ++i)
+            for (int i = 0; i<6; ++i)
             {
-                // X axis
-                minx = planes[i].normal.x < 0 ? aabb.min.x : aabb.max.x;
-                // Y axis
-                miny = planes[i].normal.y < 0 ? aabb.min.y : aabb.max.y;
-                // Z axis
-                minz = planes[i].normal.z < 0 ? aabb.min.z : aabb.max.z;
-
-                Vector3 vmin = new Vector3(minx, miny, minz);
-                if (Vector3.Dot(vmin, planes[i].normal) + planes[i].distance<0)
+                Vector3 vPositive = new Vector3(
+                    planes[i].normal.x>0 ? aabb.max.x : aabb.min.x,
+                    planes[i].normal.y>0 ? aabb.max.y : aabb.min.y,
+                    planes[i].normal.z>0 ? aabb.max.z : aabb.min.z
+                    );
+                if (Vector3.Dot(vPositive, planes[i].normal)+planes[i].distance<0)
                     return false; // Outside the bounds
             }
 
             return true;
+        }
+
+        /// <summary>
+        ///     Does a check for intersection of a AABB with frustum planes. It returns
+        ///     the number of intersecting planes. 0 means there is no intersection,
+        ///     6 stands for aabb fully contained, anything else is a partial intersection
+        /// </summary>
+        public static int TestPlanesAABB2(Plane[] planes, Bounds aabb)
+        {
+            int inside = 6;
+            for (int i = 0; i<6; ++i)
+            {
+                Vector3 vPositive = new Vector3(
+                    planes[i].normal.x>0 ? aabb.max.x : aabb.min.x,
+                    planes[i].normal.y>0 ? aabb.max.y : aabb.min.y,
+                    planes[i].normal.z>0 ? aabb.max.z : aabb.min.z
+                    );
+                if (Vector3.Dot(vPositive, planes[i].normal)+planes[i].distance<0)
+                    return 0; // Outside the bounds
+
+                Vector3 vNegative = new Vector3(
+                    planes[i].normal.x<0 ? aabb.max.x : aabb.min.x,
+                    planes[i].normal.y<0 ? aabb.max.y : aabb.min.y,
+                    planes[i].normal.z<0 ? aabb.max.z : aabb.min.z
+                    );
+                if (Vector3.Dot(vNegative, planes[i].normal)+planes[i].distance<0)
+                    inside = 3; // Partial intersection
+            }
+
+            return inside; // AABB fully contained
         }
     }
 }

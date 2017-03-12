@@ -11,20 +11,19 @@ namespace Voxelmetric.Examples
 {
     public class VoxelmetricExample : MonoBehaviour
     {
-        Vector2 rot;
+        public World world;
+        public Camera cam;
+        private Vector2 rot;
 
         public string blockToPlace = "air";
         public Text selectedBlockText;
         public Text saveProgressText;
-        public World world;
-        public Camera cam;
 
-        Vector3Int pfStart;
-        Vector3Int pfStop;
+        private Vector3Int pfStart;
+        private Vector3Int pfStop;
         public PathFinder pf;
 
-        SaveProgress saveProgress;
-
+        private SaveProgress saveProgress;
         private EventSystem eventSystem;
 
         public void SetType(string newType)
@@ -41,7 +40,7 @@ namespace Voxelmetric.Examples
 
         void Update()
         {
-            //Movement
+            // Roatation
             if (Input.GetMouseButton(1))
             {
                 rot = new Vector2(
@@ -53,57 +52,68 @@ namespace Voxelmetric.Examples
                 cam.transform.localRotation *= Quaternion.AngleAxis(rot.y, Vector3.left);
             }
 
+            // Movement
             bool turbo = Input.GetKeyDown(KeyCode.LeftShift) || Input.GetKeyDown(KeyCode.RightShift);
-            cam.transform.position += cam.transform.forward * 40 * (turbo ? 3 : 1) * Input.GetAxis("Vertical") * Time.deltaTime;
-            cam.transform.position += cam.transform.right * 40 * (turbo ? 3 : 1) * Input.GetAxis("Horizontal") * Time.deltaTime;
+            cam.transform.position += cam.transform.forward*40*(turbo ? 3 : 1)*Input.GetAxis("Vertical")*Time.deltaTime;
+            cam.transform.position += cam.transform.right*40*(turbo ? 3 : 1)*Input.GetAxis("Horizontal")*Time.deltaTime;
 
-            //Save
-            saveProgressText.text = saveProgress != null ? SaveStatus() : "Save";
-
+            // Screenspace mouse cursor coordinates
             var mousePos = cam.ScreenToWorldPoint(new Vector3(Input.mousePosition.x, Input.mousePosition.y, 10));
 
-            ushort type = world.blockProvider.GetType(blockToPlace);
-            VmRaycastHit hit = Code.Voxelmetric.Raycast(new Ray(cam.transform.position, mousePos - cam.transform.position), world, 100, type==BlockProvider.AirType);
-
-            selectedBlockText.text = Code.Voxelmetric.GetBlock(world, hit.vector3Int).displayName;
-
-            // Clicking voxel blocks
-            if (Input.GetMouseButtonDown(0) && eventSystem!=null && !eventSystem.IsPointerOverGameObject())
+            if (world!=null)
             {
-                if (hit.block.type != BlockProvider.AirType)
+                ushort type = world.blockProvider.GetType(blockToPlace);
+                VmRaycastHit hit = Code.Voxelmetric.Raycast(
+                    new Ray(cam.transform.position, mousePos-cam.transform.position),
+                    world, 100, type==BlockProvider.AirType
+                    );
+
+                // Display the type of the selected block
+                if (selectedBlockText!=null)
+                    selectedBlockText.text = Code.Voxelmetric.GetBlock(world, hit.vector3Int).displayName;
+
+                // Save current world status
+                if (saveProgressText != null)
+                    saveProgressText.text = saveProgress != null ? SaveStatus() : "Save";
+
+                // Clicking voxel blocks
+                if (Input.GetMouseButtonDown(0) && eventSystem!=null && !eventSystem.IsPointerOverGameObject())
                 {
-                    bool adjacent = type != BlockProvider.AirType;
-                    Code.Voxelmetric.SetBlock(world, adjacent ? hit.adjacentPos : hit.vector3Int, new BlockData(type));
+                    if (hit.block.type!=BlockProvider.AirType)
+                    {
+                        bool adjacent = type!=BlockProvider.AirType;
+                        Code.Voxelmetric.SetBlock(world, adjacent ? hit.adjacentPos : hit.vector3Int, new BlockData(type));
+                    }
                 }
-            }
 
-            // Pathfinding
-            if (Input.GetKeyDown(KeyCode.I))
-            {
-                pfStart = hit.vector3Int;
-            }
+                // Pathfinding
+                if (Input.GetKeyDown(KeyCode.I))
+                {
+                    pfStart = hit.vector3Int;
+                }
 
-            if (Input.GetKeyDown(KeyCode.O))
-            {
-                pfStop = hit.vector3Int;
-            }
+                if (Input.GetKeyDown(KeyCode.O))
+                {
+                    pfStop = hit.vector3Int;
+                }
 
-            if (Input.GetKeyDown(KeyCode.P))
-            {
-                pf = new PathFinder(pfStart, pfStop, world, 2);
-                Debug.Log(pf.path.Count);
-            }
+                if (Input.GetKeyDown(KeyCode.P))
+                {
+                    pf = new PathFinder(pfStart, pfStop, world, 2);
+                    Debug.Log(pf.path.Count);
+                }
 
-            if (pf != null && pf.path.Count != 0)
-            {
-                for (int i = 0; i < pf.path.Count - 1; i++)
-                    Debug.DrawLine(pf.path[i].Add(0, 1, 0), pf.path[i + 1].Add(0, 1, 0));
-            }
+                if (pf!=null && pf.path.Count!=0)
+                {
+                    for (int i = 0; i<pf.path.Count-1; i++)
+                        Debug.DrawLine(pf.path[i].Add(0, 1, 0), pf.path[i+1].Add(0, 1, 0));
+                }
 
-            // Test of ranged block setting
-            if (Input.GetKeyDown(KeyCode.T))
-            {
-                Code.Voxelmetric.SetBlockRange(world, new Vector3Int(-44, -44, -44), new Vector3Int(44, 44, 44), new BlockData(1));
+                // Test of ranged block setting
+                if (Input.GetKeyDown(KeyCode.T))
+                {
+                    Code.Voxelmetric.SetBlockRange(world, new Vector3Int(-44, -44, -44), new Vector3Int(44, 44, 44), new BlockData(1));
+                }
             }
         }
 

@@ -26,6 +26,5 @@ namespace Voxelmetric.Code.Utilities
                 .ThenBy(pos => Helpers.Abs(pos.z))
                 .ToArray();
         }
-
     }
 }

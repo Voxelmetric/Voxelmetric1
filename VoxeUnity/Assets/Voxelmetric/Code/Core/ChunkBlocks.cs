@@ -59,14 +59,6 @@ namespace Voxelmetric.Code.Core
             m_blockTypes = chunk.world.blockProvider.BlockTypes;
         }
 
-        public override string ToString()
-        {
-            StringBuilder sb = new StringBuilder();
-            sb.Append("contentsInvliadated=");
-            sb.Append(contentsInvalidated.ToString());
-            return sb.ToString();
-        }
-
         public void Copy(ChunkBlocks src, int srcIndex, int dstIndex, int length)
         {
             Array.Copy(src.blocks, srcIndex, blocks, dstIndex, length);
