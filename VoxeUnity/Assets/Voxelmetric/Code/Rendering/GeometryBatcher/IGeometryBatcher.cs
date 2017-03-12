@@ -10,7 +10,7 @@ namespace Voxelmetric.Code.Rendering.GeometryBatcher
             , string debugName = null
 #endif
             );
-        void Enable(bool enable);
-        bool IsEnabled();
+
+        bool Enabled { get; set; }
     }
 }

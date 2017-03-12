@@ -89,14 +89,12 @@ namespace Voxelmetric.Code.Core.Clipmap
             for (int distance = axisInfo.RangeMin; distance<=axisInfo.RangeMax; distance++)
             {
                 int lod = DetermineLOD(distance, forceLOD, coefLOD);
-                bool isInVisibilityRange = IsWithinVisibilityRange(axisInfo, distance);
-                bool isInCacheRange = IsWithinCachedRange(axisInfo, distance);
+                bool isInVisibilityRange = IsInVisibilityRange(axisInfo, distance);
 
                 axisInfo.Map[distance+CachedRange] = new ClipmapItem
                 {
                     LOD = lod,
-                    IsWithinVisibleRange = isInVisibilityRange,
-                    IsWithinCachedRange = isInCacheRange
+                    IsInVisibleRange = isInVisibilityRange
                 };
             }
         }
@@ -177,16 +175,11 @@ namespace Voxelmetric.Code.Core.Clipmap
             return lod;
         }
 
-        private bool IsWithinVisibilityRange(AxisInfo axis, int distance)
+        private bool IsInVisibilityRange(AxisInfo axis, int distance)
         {
             int rangeMin = axis.RangeMin+m_diffCachedVisibleRange;
             int rangeMax = axis.RangeMax-m_diffCachedVisibleRange;
             return distance>=rangeMin && distance<=rangeMax;
-        }
-
-        private static bool IsWithinCachedRange(AxisInfo axis, int distance)
-        {
-            return distance>=axis.RangeMin && distance<=axis.RangeMax;
         }
 
         private class AxisInfo

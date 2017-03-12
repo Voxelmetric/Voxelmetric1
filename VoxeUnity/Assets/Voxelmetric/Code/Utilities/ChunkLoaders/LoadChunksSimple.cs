@@ -118,6 +118,13 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
                     if (!world.chunks.CreateOrGetChunk(newChunkPos, out chunk, false))
                         continue;
 
+                    if (FullLoadOnStartUp)
+                    {
+                        ChunkStateManagerClient stateManager = chunk.stateManager;
+                        stateManager.PossiblyVisible = true;
+                        stateManager.Visible = false;
+                    }
+
                     m_updateRequests.Add(chunk);
                 }
             }
@@ -150,7 +157,7 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
                 }
 
                 // Automatically collect chunks which are ready to be removed from the world
-                ChunkStateManagerClient stateManager = (ChunkStateManagerClient)chunk.stateManager;
+                ChunkStateManagerClient stateManager = chunk.stateManager;
                 if (stateManager.IsStateCompleted(ChunkState.Remove))
                 {
                     // Remove the chunk from our provider and unregister it from chunk storage
@@ -176,11 +183,13 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
 
             int hRadius = HorizontalChunkLoadRadius+1;
             int vRadius = VerticalChunkLoadRadius+1;
+            int xDist = xd*xd+zd*zd;
+            int yDist = yd*yd;
 
             // Remove the chunk if it is too far away
             if (
-                xd*xd+zd*zd>=hRadius*hRadius ||
-                yd*yd>=vRadius*vRadius
+                xDist>hRadius*hRadius ||
+                yDist>vRadius*vRadius
                 )
             {
                 chunk.stateManager.RequestState(ChunkState.Remove);
@@ -191,11 +200,18 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
             chunk.NeedsCollider = xd<=1 && yd<=1 && zd<=1;
 
             // Update visibility information
-            bool isInsideFrustum = FullLoadOnStartUp || IsChunkInViewFrustum(chunk);
-
-            ChunkStateManagerClient stateManager = (ChunkStateManagerClient)chunk.stateManager;
-            stateManager.Visible = isInsideFrustum;
-            stateManager.PossiblyVisible = isInsideFrustum;
+            ChunkStateManagerClient stateManager = chunk.stateManager;
+            if (xDist<=HorizontalChunkLoadRadius*HorizontalChunkLoadRadius &&
+                yDist<=VerticalChunkLoadRadius*VerticalChunkLoadRadius)
+            {
+                stateManager.Visible = IsChunkInViewFrustum(chunk);
+            }
+            else
+            {
+                stateManager.Visible = false;
+            }
+            
+            stateManager.PossiblyVisible = true;
         }
 
         private void UpdateRanges()
@@ -215,7 +231,7 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
 
             // Rebuild precomputed chunk positions
             if (isDifferenceXZ)
-                m_chunkPositions = ChunkLoadOrder.ChunkPositions(HorizontalChunkLoadRadius);
+                m_chunkPositions = ChunkLoadOrder.ChunkPositions(HorizontalChunkLoadRadius+1);
             // Invalidate prev pos so that updated ranges can take effect right away
             if (isDifferenceXZ || isDifferenceY ||
                 HorizontalChunkLoadRadius != m_chunkHorizontalLoadRadiusPrev ||
@@ -249,6 +265,9 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
 
         private void OnDrawGizmosSelected()
         {
+            if (!enabled)
+                return;
+
             int size = Mathf.FloorToInt(Env.ChunkSize*Env.BlockSize);
             int halfSize = size>>1;
             int smallSize = size>>4;
@@ -269,25 +288,34 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
                         Vector3Int pos = chunk.pos;
                         int xd = Helpers.Abs((m_viewerPos.x-pos.x)>>Env.ChunkPow);
                         int zd = Helpers.Abs((m_viewerPos.z-pos.z)>>Env.ChunkPow);
-                        if (xd*xd+zd*zd>=(HorizontalChunkLoadRadius+1)*(HorizontalChunkLoadRadius+1))
-                        {
-                            Gizmos.color = Color.red;
-                            Gizmos.DrawWireCube(
-                                new Vector3(chunk.pos.x+halfSize, 0, chunk.pos.z+halfSize),
-                                new Vector3(size-0.05f, 0, size-0.05f)
-                                );
-                        }
-                        else
+                        int dist = xd*xd+zd*zd;
+                        if (dist<=HorizontalChunkLoadRadius*HorizontalChunkLoadRadius)
                         {
                             Gizmos.color = Color.green;
                             Gizmos.DrawWireCube(
                                 new Vector3(chunk.pos.x+halfSize, 0, chunk.pos.z+halfSize),
-                                new Vector3(size-0.05f, 0, size-0.05f)
+                                new Vector3(size-1f, 0, size-1f)
+                                );
+                        }
+                        else if (dist<=(HorizontalChunkLoadRadius+1)*(HorizontalChunkLoadRadius+1))
+                        {
+                            Gizmos.color = Color.grey;
+                            Gizmos.DrawWireCube(
+                                new Vector3(chunk.pos.x+halfSize, 0, chunk.pos.z+halfSize),
+                                new Vector3(size-1f, 0, size-1f)
+                                );
+                        }
+                        else
+                        {
+                            Gizmos.color = Color.red;
+                            Gizmos.DrawWireCube(
+                                new Vector3(chunk.pos.x+halfSize, 0, chunk.pos.z+halfSize),
+                                new Vector3(size-1f, 0, size-1f)
                                 );
                         }
 
                         // Show generated chunks
-                        ChunkStateManagerClient stateManager = (ChunkStateManagerClient)chunk.stateManager;
+                        ChunkStateManagerClient stateManager = chunk.stateManager;
                         if (stateManager.IsStateCompleted(ChunkState.Generate))
                         {
                             Gizmos.color = Color.magenta;

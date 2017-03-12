@@ -13,7 +13,24 @@ namespace Voxelmetric.Code.Rendering.GeometryBatcher
         private readonly List<GameObject> m_objects;
         private readonly List<Collider> m_colliders;
 
-        private bool m_visible;
+        private bool m_enabled;
+
+        public bool Enabled
+        {
+            set
+            {
+                for (int i = 0; i < m_colliders.Count; i++)
+                {
+                    Collider collider = m_colliders[i];
+                    collider.enabled = value;
+                }
+                m_enabled = value && m_colliders.Count > 0;
+            }
+            get
+            {
+                return m_enabled;
+            }
+        }
 
         public ColliderGeometryBatcher(string prefabName)
         {
@@ -43,7 +60,7 @@ namespace Voxelmetric.Code.Rendering.GeometryBatcher
 
             ReleaseOldData();
 
-            m_visible = false;
+            m_enabled = false;
         }
 
         /// <summary>
@@ -125,22 +142,7 @@ namespace Voxelmetric.Code.Rendering.GeometryBatcher
                 buffer.Clear();
             }
         }
-
-        public void Enable(bool show)
-        {
-            for (int i = 0; i<m_colliders.Count; i++)
-            {
-                Collider collider = m_colliders[i];
-                collider.enabled = show;
-            }
-            m_visible = show && m_colliders.Count>0;
-        }
-
-        public bool IsEnabled()
-        {
-            return m_objects.Count>0 && m_visible;
-        }
-
+        
         private void ReleaseOldData()
         {
             Assert.IsTrue(m_objects.Count==m_colliders.Count);

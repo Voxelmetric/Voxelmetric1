@@ -22,11 +22,11 @@ namespace Voxelmetric.Code.Core.StateManager
         {
             get
             {
-                return chunk.GeometryHandler.Batcher.IsEnabled();
+                return chunk.GeometryHandler.Batcher.Enabled;
             }
             set
             {
-                chunk.GeometryHandler.Batcher.Enable(value);
+                chunk.GeometryHandler.Batcher.Enabled = value;
             }
         }
         //! Says whether or not building of geometry can be triggered
@@ -175,7 +175,7 @@ namespace Voxelmetric.Code.Core.StateManager
                     return;
 
                 // In order to save performance, we generate geometry on-demand - when the chunk can be seen
-                if (PossiblyVisible)
+                if (Visible)
                 {
                     ProcessNotifyState();
                     if (m_pendingStates.Check(CurrStateGenerateVertices) && GenerateVertices())

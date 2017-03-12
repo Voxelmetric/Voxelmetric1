@@ -16,7 +16,7 @@ namespace Voxelmetric.Code.Core
         private static int s_id = 0;
 
         public World world { get; private set; }
-        public IChunkStateManager stateManager { get; private set; }
+        public ChunkStateManagerClient stateManager { get; private set; }
         public ChunkBlocks blocks { get; private set; }
         public ChunkLogic logic { get; private set; }
         public ChunkRenderGeometryHandler GeometryHandler { get; private set; }

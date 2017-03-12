@@ -127,6 +127,13 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
                     if (!world.chunks.CreateOrGetChunk(newChunkPos, out chunk, false))
                         continue;
 
+                    if (FullLoadOnStartUp)
+                    {
+                        ChunkStateManagerClient stateManager = chunk.stateManager;
+                        stateManager.PossiblyVisible = true;
+                        stateManager.Visible = false;
+                    }
+
                     m_updateRequests.Add(chunk);
                 }
             }
@@ -159,7 +166,7 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
                 }
 
                 // Automatically collect chunks which are ready to be removed from the world
-                ChunkStateManagerClient stateManager = (ChunkStateManagerClient)chunk.stateManager;
+                ChunkStateManagerClient stateManager = chunk.stateManager;
                 if (stateManager.IsStateCompleted(ChunkState.Remove))
                 {
                     // Remove the chunk from our provider and unregister it from chunk storage
@@ -187,7 +194,7 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
             int ty = m_clipmap.TransformY(chunk.pos.y >> Env.ChunkPow);
             int tz = m_clipmap.TransformZ(chunk.pos.z >> Env.ChunkPow);
 
-            ChunkStateManagerClient stateManager = (ChunkStateManagerClient)chunk.stateManager;
+            ChunkStateManagerClient stateManager = chunk.stateManager;
 
             // Chunk is too far away. Remove it
             if (!m_clipmap.IsInsideBounds_Transformed(tx, ty, tz))
@@ -200,19 +207,19 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
                 chunk.NeedsCollider = xd <= 1 && yd <= 1 && zd <= 1;
 
                 // Chunk is within view frustum
-                if (FullLoadOnStartUp || IsChunkInViewFrustum(chunk))
+                if (UseFrustumCulling)
                 {
                     ClipmapItem item = m_clipmap.Get_Transformed(tx, ty, tz);
 
-                    // Chunk is within visibilty range. Full update with geometry generation is possible
-                    if (item.IsWithinVisibleRange)
+                    // Chunk is in visibilty range. Full update with geometry generation is possible
+                    if (item.IsInVisibleRange)
                     {
                         //chunk.LOD = item.LOD;
                         stateManager.PossiblyVisible = true;
-                        stateManager.Visible = true;
+                        stateManager.Visible = IsChunkInViewFrustum(chunk);
                     }
-                    // Chunk is within cached range. Full update except for geometry generation
-                    else // if (item.IsWithinCachedRange)
+                    // Chunk is cached range. Full update except for geometry generation
+                    else
                     {
                         //chunk.LOD = item.LOD;
                         stateManager.PossiblyVisible = true;
@@ -223,18 +230,19 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
                 {
                     ClipmapItem item = m_clipmap.Get_Transformed(tx, ty, tz);
 
-                    // Chunk is not in the view frustum but still within cached range
-                    if (item.IsWithinCachedRange)
+                    // Chunk is in visibilty range. Full update with geometry generation is possible
+                    if (item.IsInVisibleRange)
                     {
                         //chunk.LOD = item.LOD;
-                        stateManager.PossiblyVisible = false;
-                        stateManager.Visible = false;
+                        stateManager.PossiblyVisible = true;
+                        stateManager.Visible = true;
                     }
+                    // Chunk is in cached range. Full update except for geometry generation
                     else
-                    // Weird state
                     {
-                        Assert.IsFalse(true);
-                        stateManager.RequestState(ChunkState.Remove);
+                        //chunk.LOD = item.LOD;
+                        stateManager.PossiblyVisible = true;
+                        stateManager.Visible = false;
                     }
                 }
             }
@@ -258,7 +266,7 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
 
             // Rebuild precomputed chunk positions
             if (isDifferenceXZ)
-                m_chunkPositions = ChunkLoadOrder.ChunkPositions(HorizontalChunkLoadRadius);
+                m_chunkPositions = ChunkLoadOrder.ChunkPositions(HorizontalChunkLoadRadius+1);
             // Invalidate prev pos so that updated ranges can take effect right away
             if (isDifferenceXZ || isDifferenceY ||
                 HorizontalChunkLoadRadius != m_chunkHorizontalLoadRadiusPrev ||
@@ -295,11 +303,14 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
         private bool IsChunkInViewFrustum(Chunk chunk)
         {
             // Check if the chunk lies within camera planes
-            return !UseFrustumCulling || Geometry.TestPlanesAABB(m_cameraPlanes, chunk.WorldBounds);
+            return Geometry.TestPlanesAABB(m_cameraPlanes, chunk.WorldBounds);
         }
 
         private void OnDrawGizmosSelected()
         {
+            if (!enabled)
+                return;
+
             int size = Mathf.FloorToInt(Env.ChunkSize*Env.BlockSize);
             int halfSize = size>>1;
             int smallSize = size>>4;
@@ -330,33 +341,33 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
                                 Gizmos.color = Color.red;
                                 Gizmos.DrawWireCube(
                                     new Vector3(pos.x+halfSize, 0, pos.z+halfSize),
-                                    new Vector3(size-0.05f, 0, size-0.05f)
+                                    new Vector3(size-1f, 0, size-1f)
                                     );
                             }
                             else
                             {
                                 ClipmapItem item = m_clipmap.Get_Transformed(tx,ty,tz);
-                                if (item.IsWithinVisibleRange)
+                                if (item.IsInVisibleRange)
                                 {
                                     Gizmos.color = Color.green;
                                     Gizmos.DrawWireCube(
                                         new Vector3(pos.x+halfSize, 0, pos.z+halfSize),
-                                        new Vector3(size-0.05f, 0, size-0.05f)
+                                        new Vector3(size-1f, 0, size-1f)
                                         );
                                 }
-                                else // if (item.IsWithinCachedRange)
+                                else
                                 {
-                                    Gizmos.color = Color.yellow;
+                                    Gizmos.color = Color.grey;
                                     Gizmos.DrawWireCube(
                                         new Vector3(pos.x+halfSize, 0, pos.z+halfSize),
-                                        new Vector3(size-0.05f, 0, size-0.05f)
+                                        new Vector3(size-1f, 0, size-1f)
                                         );
                                 }
                             }
                         }
 
                         // Show generated chunks
-                        ChunkStateManagerClient stateManager = (ChunkStateManagerClient)chunk.stateManager;
+                        ChunkStateManagerClient stateManager = chunk.stateManager;
                         if (stateManager.IsStateCompleted(ChunkState.Generate))
                         {
                             Gizmos.color = Color.magenta;

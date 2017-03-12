@@ -13,7 +13,23 @@ namespace Voxelmetric.Code.Rendering.GeometryBatcher
         private readonly List<GameObject> m_objects;
         private readonly List<Renderer> m_renderers;
 
-        private bool m_visible;
+        private bool m_enabled;
+        public bool Enabled
+        {
+            set
+            {
+                for (int i = 0; i < m_renderers.Count; i++)
+                {
+                    Renderer renderer = m_renderers[i];
+                    renderer.enabled = value;
+                }
+                m_enabled = value;
+            }
+            get
+            {
+                return m_enabled;
+            }
+        }
 
         public RenderGeometryBatcher(string prefabName)
         {
@@ -43,7 +59,7 @@ namespace Voxelmetric.Code.Rendering.GeometryBatcher
 
             ReleaseOldData();
 
-            m_visible = false;
+            m_enabled = false;
         }
 
         public void AddMeshData(int[] tris, VertexDataFixed[] verts, Rect texture, Vector3 offset)
@@ -157,21 +173,6 @@ namespace Voxelmetric.Code.Rendering.GeometryBatcher
 
                 buffer.Clear();
             }
-        }
-
-        public void Enable(bool show)
-        {
-            for (int i = 0; i<m_renderers.Count; i++)
-            {
-                Renderer renderer = m_renderers[i];
-                renderer.enabled = show;
-            }
-            m_visible = show && m_renderers.Count>0;
-        }
-
-        public bool IsEnabled()
-        {
-            return m_objects.Count>0 && m_visible;
         }
 
         private void ReleaseOldData()
