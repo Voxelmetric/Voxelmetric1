@@ -166,15 +166,7 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
                                 continue;
 
                             ChunkStateManagerClient stateManager = chunk.stateManager;
-
-                            int tx = m_clipmap.TransformX(x);
-                            int ty = m_clipmap.TransformY(y);
-                            int tz = m_clipmap.TransformZ(z);
-
-                            // Skip chunks which are too far away
-                            if (!m_clipmap.IsInsideBounds_Transformed(tx, ty, tz))
-                                continue;
-
+                            
                             // Update visibility information
                             stateManager.PossiblyVisible = FullLoadOnStartUp;
                             stateManager.Visible = false;
@@ -209,10 +201,6 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
                             int tx = m_clipmap.TransformX(x);
                             int ty = m_clipmap.TransformY(y);
                             int tz = m_clipmap.TransformZ(z);
-
-                            // Skip chunks which are too far away
-                            if (!m_clipmap.IsInsideBounds_Transformed(tx, ty, tz))
-                                continue;
 
                             // Update visibility information
                             ClipmapItem item = m_clipmap.Get_Transformed(tx, ty, tz);
@@ -276,6 +264,7 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
             maxY >>= Env.ChunkPow;
 
             // TODO: Merge this with clipmap
+            // Let's update chunk visibility info. Operate in chunk load radius so we know we're never outside cached range
             UpdateVisibility(
                 -HorizontalChunkLoadRadius, minY, -HorizontalChunkLoadRadius,
                 (HorizontalChunkLoadRadius << 1) + 1, maxY - minY + 1, (HorizontalChunkLoadRadius << 1) + 1

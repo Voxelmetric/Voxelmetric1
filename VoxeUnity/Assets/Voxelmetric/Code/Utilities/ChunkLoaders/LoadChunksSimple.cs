@@ -90,14 +90,11 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
             // Update viewer position
             UpdateViewerPosition();
         }
-
-        private bool aaaa = true;
-
+        
         private void UpdateVisibility(int x, int y, int z, int rangeX, int rangeY, int rangeZ)
         {
             if (rangeX==0 || rangeY==0 || rangeZ==0)
                 return;
-            //if(aaaa) Debug.LogFormat("{0},{1},{2} - {3},{4},{5}", x,y,z, rangeX,rangeY,rangeZ);
 
             bool isLast = rangeX==1 && rangeY==1 && rangeZ==1;
 
@@ -123,16 +120,10 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
                 int xd = (m_viewerPos.x-chunk.pos.x)>>Env.ChunkPow;
                 int yd = (m_viewerPos.y-chunk.pos.y)>>Env.ChunkPow;
                 int zd = (m_viewerPos.z-chunk.pos.z)>>Env.ChunkPow;
-
-                int hRadius = HorizontalChunkLoadRadius+1;
-                int vRadius = VerticalChunkLoadRadius+1;
+                
                 int xDist = xd*xd+zd*zd;
                 int yDist = yd*yd;
-
-                // Skip chunks which are too far away
-                if (xDist>hRadius*hRadius || yDist>vRadius*vRadius)
-                    return;
-
+                
                 // Update visibility information
                 bool isVisible = Geometry.TestPlanesAABB(m_cameraPlanes, chunk.WorldBounds);
 
@@ -166,20 +157,7 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
                                 continue;
 
                             ChunkStateManagerClient stateManager = chunk.stateManager;
-
-                            int xd = (m_viewerPos.x-chunk.pos.x)>>Env.ChunkPow;
-                            int yd = (m_viewerPos.y-chunk.pos.y)>>Env.ChunkPow;
-                            int zd = (m_viewerPos.z-chunk.pos.z)>>Env.ChunkPow;
-
-                            int hRadius = HorizontalChunkLoadRadius+1;
-                            int vRadius = VerticalChunkLoadRadius+1;
-                            int xDist = xd*xd+zd*zd;
-                            int yDist = yd*yd;
-
-                            // Skip chunks which are too far away
-                            if (xDist>hRadius*hRadius || yDist>vRadius*vRadius)
-                                continue;
-
+                            
                             // Update visibility information
                             stateManager.PossiblyVisible = FullLoadOnStartUp;
                             stateManager.Visible = false;
@@ -214,15 +192,9 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
                             int xd = (m_viewerPos.x-chunk.pos.x)>>Env.ChunkPow;
                             int yd = (m_viewerPos.y-chunk.pos.y)>>Env.ChunkPow;
                             int zd = (m_viewerPos.z-chunk.pos.z)>>Env.ChunkPow;
-
-                            int hRadius = HorizontalChunkLoadRadius+1;
-                            int vRadius = VerticalChunkLoadRadius+1;
+                            
                             int xDist = xd*xd+zd*zd;
                             int yDist = yd*yd;
-
-                            // Skip chunks which are too far away
-                            if (xDist>hRadius*hRadius || yDist>vRadius*vRadius)
-                                continue;
 
                             // Update visibility information
                             stateManager.Visible = xDist<=HorizontalChunkLoadRadius*HorizontalChunkLoadRadius &&
@@ -285,11 +257,11 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
             maxY >>= Env.ChunkPow;
 
             // TODO: Merge this with clipmap
+            // Let's update chunk visibility info. Operate in chunk load radius so we know we're never outside cached range
             UpdateVisibility(
                 (m_viewerPos.x>>Env.ChunkPow)-HorizontalChunkLoadRadius, minY, (m_viewerPos.z>>Env.ChunkPow)-HorizontalChunkLoadRadius,
                 (HorizontalChunkLoadRadius<<1)+1, maxY-minY+1, (HorizontalChunkLoadRadius<<1)+1
                 );
-            aaaa = false;
         }
 
         public void PostProcessChunks()
