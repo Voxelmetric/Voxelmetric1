@@ -1,13 +1,12 @@
-﻿using UnityEngine;
-using Voxelmetric.Code.Rendering.GeometryBatcher;
+﻿using Voxelmetric.Code.Rendering.GeometryBatcher;
 
 namespace Voxelmetric.Code.Rendering.GeometryHandler
 {
-    public abstract class AColliderGeometryHandler: IGeometryHandler<PhysicMaterial>
+    public abstract class AColliderGeometryHandler: IGeometryHandler
     {
         public ColliderGeometryBatcher Batcher { get; private set; }
 
-        public AColliderGeometryHandler(string prefabName)
+        protected AColliderGeometryHandler(string prefabName)
         {
             Batcher = new ColliderGeometryBatcher(prefabName);
         }

@@ -266,7 +266,7 @@ namespace Voxelmetric.Code.Core
                 lastUpdateTimeGeometry = now;
 
                 // Request rebuild on this chunk
-                stateManager.RequestState(ChunkState.BuildVerticesNow);;
+                stateManager.RequestState(ChunkState.BuildVerticesNow);
 
                 // Notify neighbors that they need to rebuilt their geometry
                 if (rebuildMaskGeometry>0)
