@@ -1,6 +1,6 @@
 ﻿namespace Voxelmetric.Code.Rendering.GeometryHandler
 {
-    public interface IGeometryHandler<in T> where T: class
+    public interface IGeometryHandler
     {
         void Reset();
 

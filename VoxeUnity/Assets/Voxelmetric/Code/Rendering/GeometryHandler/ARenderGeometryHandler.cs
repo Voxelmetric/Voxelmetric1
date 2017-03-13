@@ -1,13 +1,12 @@
-﻿using UnityEngine;
-using Voxelmetric.Code.Rendering.GeometryBatcher;
+﻿using Voxelmetric.Code.Rendering.GeometryBatcher;
 
 namespace Voxelmetric.Code.Rendering.GeometryHandler
 {
-    public abstract class ARenderGeometryHandler: IGeometryHandler<Material>
+    public abstract class ARenderGeometryHandler: IGeometryHandler
     {
         public RenderGeometryBatcher Batcher { get; private set; }
 
-        public ARenderGeometryHandler(string prefabName)
+        protected ARenderGeometryHandler(string prefabName)
         {
             Batcher = new RenderGeometryBatcher(prefabName);
         }
