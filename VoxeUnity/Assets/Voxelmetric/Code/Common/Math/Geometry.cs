@@ -116,12 +116,13 @@ namespace Voxelmetric.Code.Common.Math
         {
             for (int i = 0; i<6; ++i)
             {
+                Plane p = planes[i];
                 Vector3 vPositive = new Vector3(
-                    planes[i].normal.x>0 ? aabb.max.x : aabb.min.x,
-                    planes[i].normal.y>0 ? aabb.max.y : aabb.min.y,
-                    planes[i].normal.z>0 ? aabb.max.z : aabb.min.z
+                    p.normal.x>0 ? aabb.max.x : aabb.min.x,
+                    p.normal.y>0 ? aabb.max.y : aabb.min.y,
+                    p.normal.z>0 ? aabb.max.z : aabb.min.z
                     );
-                if (Vector3.Dot(vPositive, planes[i].normal)+planes[i].distance<0)
+                if (Vector3.Dot(vPositive, p.normal)+p.distance<0)
                     return false; // Outside the bounds
             }
 
@@ -137,12 +138,13 @@ namespace Voxelmetric.Code.Common.Math
         {
             for (int i = 0; i<6; ++i)
             {
+                Plane p = planes[i];
                 Vector3 vPositive = new Vector3(
-                    planes[i].normal.x>0 ? aabb.maxX : aabb.minX,
-                    planes[i].normal.y>0 ? aabb.maxY : aabb.minY,
-                    planes[i].normal.z>0 ? aabb.maxZ : aabb.minZ
+                    p.normal.x>0 ? aabb.maxX : aabb.minX,
+                    p.normal.y>0 ? aabb.maxY : aabb.minY,
+                    p.normal.z>0 ? aabb.maxZ : aabb.minZ
                     );
-                if (Vector3.Dot(vPositive, planes[i].normal)+planes[i].distance<0)
+                if (Vector3.Dot(vPositive, p.normal)+p.distance<0)
                     return false; // Outside the bounds
             }
 
@@ -159,20 +161,25 @@ namespace Voxelmetric.Code.Common.Math
             int inside = 6;
             for (int i = 0; i<6; ++i)
             {
+                Plane p = planes[i];
+                bool condX = p.normal.x > 0;
+                bool condY = p.normal.y > 0;
+                bool condZ = p.normal.z > 0;
+
                 Vector3 vPositive = new Vector3(
-                    planes[i].normal.x>0 ? aabb.max.x : aabb.min.x,
-                    planes[i].normal.y>0 ? aabb.max.y : aabb.min.y,
-                    planes[i].normal.z>0 ? aabb.max.z : aabb.min.z
+                    condX ? aabb.max.x : aabb.min.x,
+                    condY ? aabb.max.y : aabb.min.y,
+                    condZ ? aabb.max.z : aabb.min.z
                     );
-                if (Vector3.Dot(vPositive, planes[i].normal)+planes[i].distance<0)
+                if (Vector3.Dot(vPositive, p.normal)+p.distance<0)
                     return 0; // Outside the bounds
 
                 Vector3 vNegative = new Vector3(
-                    planes[i].normal.x<0 ? aabb.max.x : aabb.min.x,
-                    planes[i].normal.y<0 ? aabb.max.y : aabb.min.y,
-                    planes[i].normal.z<0 ? aabb.max.z : aabb.min.z
+                    condX ? aabb.min.x : aabb.max.x,
+                    condY ? aabb.min.y : aabb.max.y,
+                    condZ ? aabb.min.z : aabb.max.z
                     );
-                if (Vector3.Dot(vNegative, planes[i].normal)+planes[i].distance<0)
+                if (Vector3.Dot(vNegative, p.normal)+p.distance<0)
                     inside = 3; // Partial intersection
             }
 
@@ -189,20 +196,25 @@ namespace Voxelmetric.Code.Common.Math
             int inside = 6;
             for (int i = 0; i<6; ++i)
             {
+                Plane p = planes[i];
+                bool condX = p.normal.x>0;
+                bool condY = p.normal.y>0;
+                bool condZ = p.normal.z>0;
+
                 Vector3 vPositive = new Vector3(
-                    planes[i].normal.x>0 ? aabb.maxX : aabb.minX,
-                    planes[i].normal.y>0 ? aabb.maxY : aabb.minY,
-                    planes[i].normal.z>0 ? aabb.maxZ : aabb.minZ
+                    condX ? aabb.maxX : aabb.minX,
+                    condY ? aabb.maxY : aabb.minY,
+                    condZ ? aabb.maxZ : aabb.minZ
                     );
-                if (Vector3.Dot(vPositive, planes[i].normal)+planes[i].distance<0)
+                if (Vector3.Dot(vPositive, p.normal)+p.distance<0)
                     return 0; // Outside the bounds
 
                 Vector3 vNegative = new Vector3(
-                    planes[i].normal.x<0 ? aabb.maxX : aabb.minX,
-                    planes[i].normal.y<0 ? aabb.maxY : aabb.minY,
-                    planes[i].normal.z<0 ? aabb.maxZ : aabb.minZ
+                    condX ? aabb.minX : aabb.maxX,
+                    condY ? aabb.minY : aabb.maxY,
+                    condZ ? aabb.minZ : aabb.maxZ
                     );
-                if (Vector3.Dot(vNegative, planes[i].normal)+planes[i].distance<0)
+                if (Vector3.Dot(vNegative, p.normal)+p.distance<0)
                     inside = 3; // Partial intersection
             }
 

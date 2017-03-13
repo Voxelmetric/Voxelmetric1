@@ -90,14 +90,20 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
             // Update viewer position
             UpdateViewerPosition();
         }
-        
+
+        private bool aaaa = true;
+
         private void UpdateVisibility(int x, int y, int z, int rangeX, int rangeY, int rangeZ)
         {
+            if (rangeX==0 || rangeY==0 || rangeZ==0)
+                return;
+            //if(aaaa) Debug.LogFormat("{0},{1},{2} - {3},{4},{5}", x,y,z, rangeX,rangeY,rangeZ);
+
             bool isLast = rangeX==1 && rangeY==1 && rangeZ==1;
 
-            int wx = m_viewerPos.x+(x<<Env.ChunkPow);
-            int wy = m_viewerPos.y+(y<<Env.ChunkPow);
-            int wz = m_viewerPos.z+(z<<Env.ChunkPow);
+            int wx = x<<Env.ChunkPow;
+            int wy = y<<Env.ChunkPow;
+            int wz = z<<Env.ChunkPow;
 
             int rx = rangeX<<Env.ChunkPow;
             int ry = rangeY<<Env.ChunkPow;
@@ -137,7 +143,7 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
 
                 return;
             }
-
+            
             // Check whether the bouding box lies inside the camera's frustum
             AABB bounds2 = new AABB(wx, wy, wz, wx+rx, wy+ry, wz+rz);
             int inside = Geometry.TestPlanesAABB2(m_cameraPlanes, bounds2);
@@ -230,9 +236,9 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
             }
 
             #endregion
-
+            
             #region Partial visibility
-
+            
             int offX = rangeX;
             if (rangeX>1)
             {
@@ -280,9 +286,10 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
 
             // TODO: Merge this with clipmap
             UpdateVisibility(
-                -HorizontalChunkLoadRadius, minY, -HorizontalChunkLoadRadius,
-                (HorizontalChunkLoadRadius << 1) + 1, maxY - minY + 1, (HorizontalChunkLoadRadius << 1) + 1
+                (m_viewerPos.x>>Env.ChunkPow)-HorizontalChunkLoadRadius, minY, (m_viewerPos.z>>Env.ChunkPow)-HorizontalChunkLoadRadius,
+                (HorizontalChunkLoadRadius<<1)+1, maxY-minY+1, (HorizontalChunkLoadRadius<<1)+1
                 );
+            aaaa = false;
         }
 
         public void PostProcessChunks()

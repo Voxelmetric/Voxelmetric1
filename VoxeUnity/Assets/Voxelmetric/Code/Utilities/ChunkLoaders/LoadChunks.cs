@@ -102,7 +102,10 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
         
         private void UpdateVisibility(int x, int y, int z, int rangeX, int rangeY, int rangeZ)
         {
-            bool isLast = rangeX==1 || rangeY==1 || rangeZ==1;
+            if (rangeX == 0 || rangeY == 0 || rangeZ == 0)
+                return;
+
+            bool isLast = rangeX==1 && rangeY==1 && rangeZ==1;
 
             int wx = m_viewerPos.x+(x<<Env.ChunkPow);
             int wy = m_viewerPos.y+(y<<Env.ChunkPow);

@@ -1933,7 +1933,7 @@ Prefab:
       objectReference: {fileID: 1856110255}
     - target: {fileID: 11497504, guid: 5fb0c4eef722bd7449de294d0744b781, type: 2}
       propertyPath: UseFrustumCulling
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 422196, guid: 5fb0c4eef722bd7449de294d0744b781, type: 2}
       propertyPath: m_LocalScale.z
@@ -1953,7 +1953,7 @@ Prefab:
       objectReference: {fileID: 0}
     - target: {fileID: 11422472, guid: 5fb0c4eef722bd7449de294d0744b781, type: 2}
       propertyPath: UseFrustumCulling
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 11497504, guid: 5fb0c4eef722bd7449de294d0744b781, type: 2}
       propertyPath: FullLoadOnStartUp

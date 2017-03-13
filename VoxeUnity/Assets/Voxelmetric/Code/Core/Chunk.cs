@@ -106,7 +106,7 @@ namespace Voxelmetric.Code.Core
 
             WorldBounds = new AABB(
                 pos.x, pos.y, pos.z,
-                pos.x+Env.ChunkSize, pos.x+Env.ChunkSize, pos.x+Env.ChunkSize
+                pos.x+Env.ChunkSize, pos.y+Env.ChunkSize, pos.z+Env.ChunkSize
                 );
 
             Reset();
