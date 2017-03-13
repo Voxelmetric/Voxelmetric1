@@ -1,6 +1,8 @@
 ﻿using System.Collections.Generic;
+using System.Threading;
 using UnityEngine;
 using UnityEngine.Assertions;
+using UnityEngine.Profiling;
 using Voxelmetric.Code.Common;
 using Voxelmetric.Code.Common.Math;
 using Voxelmetric.Code.Core;
@@ -249,6 +251,8 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
             if (!UseFrustumCulling)
                 return;
 
+            Profiler.BeginSample("HandleVisibility");
+            //Thread.Sleep(10);
             int minY = m_viewerPos.y - (VerticalChunkLoadRadius << Env.ChunkPow);
             int maxY = m_viewerPos.y + (VerticalChunkLoadRadius << Env.ChunkPow);
             world.CapCoordYInsideWorld(ref minY, ref maxY);
@@ -262,6 +266,8 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
                 (m_viewerPos.x>>Env.ChunkPow)-HorizontalChunkLoadRadius, minY, (m_viewerPos.z>>Env.ChunkPow)-HorizontalChunkLoadRadius,
                 (HorizontalChunkLoadRadius<<1)+1, maxY-minY+1, (HorizontalChunkLoadRadius<<1)+1
                 );
+
+            Profiler.EndSample();
         }
 
         public void PostProcessChunks()
