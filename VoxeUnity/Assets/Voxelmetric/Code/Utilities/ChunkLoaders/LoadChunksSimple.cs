@@ -99,6 +99,10 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
             int wy = m_viewerPos.y+(y<<Env.ChunkPow);
             int wz = m_viewerPos.z+(z<<Env.ChunkPow);
 
+            int rx = rangeX<<Env.ChunkPow;
+            int ry = rangeY<<Env.ChunkPow;
+            int rz = rangeZ<<Env.ChunkPow;
+
             // Stop if there is no further subdivision possible
             if (isLast)
             {
@@ -127,20 +131,15 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
                 bool isVisible = Geometry.TestPlanesAABB(m_cameraPlanes, chunk.WorldBounds);
 
                 stateManager.Visible = isVisible &&
-                    xDist <=HorizontalChunkLoadRadius*HorizontalChunkLoadRadius &&
-                    yDist<=VerticalChunkLoadRadius*VerticalChunkLoadRadius;
+                                        xDist<=HorizontalChunkLoadRadius*HorizontalChunkLoadRadius &&
+                                        yDist<=VerticalChunkLoadRadius*VerticalChunkLoadRadius;
                 stateManager.PossiblyVisible = isVisible || FullLoadOnStartUp;
 
                 return;
             }
 
-            // Calculate the bounding box
-            int rx = rangeX<<Env.ChunkPow;
-            int ry = rangeY<<Env.ChunkPow;
-            int rz = rangeZ<<Env.ChunkPow;
-            AABB bounds2 = new AABB(wx, wy, wz, wx+rx, wy+ry, wz+rz);
-
             // Check whether the bouding box lies inside the camera's frustum
+            AABB bounds2 = new AABB(wx, wy, wz, wx+rx, wy+ry, wz+rz);
             int inside = Geometry.TestPlanesAABB2(m_cameraPlanes, bounds2);
 
             #region Full invisibility            
@@ -234,23 +233,35 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
 
             #region Partial visibility
 
-            int offX = rangeX>>1;
-            int offY = rangeY>>1;
-            int offZ = rangeZ>>1;
-            rangeX = (rangeX+1)>>1; // ceil the number
-            rangeY = (rangeY+1)>>1; // ceil the number
-            rangeZ = (rangeZ+1)>>1; // ceil the number
+            int offX = rangeX;
+            if (rangeX>1)
+            {
+                offX = rangeX>>1;
+                rangeX = (rangeX+1)>>1; // ceil the number
+            }
+            int offY = rangeY;
+            if (rangeY>1)
+            {
+                offY = rangeY>>1;
+                rangeY = (rangeY+1)>>1; // ceil the number
+            }
+            int offZ = rangeZ;
+            if (rangeZ>1)
+            {
+                offZ = rangeZ>>1;
+                rangeZ = (rangeZ+1)>>1; // ceil the number
+            }
 
             // Subdivide if possible
             // TODO: Avoid the recursion
-            if (offX  !=0 && offY  !=0 && offZ  !=0) UpdateVisibility(x     , y     , z     , offX  , offY  , offZ);
-            if (rangeX!=0 && offY  !=0 && offZ  !=0) UpdateVisibility(x+offX, y     , z     , rangeX, offY  , offZ);
-            if (offX  !=0 && offY  !=0 && rangeZ!=0) UpdateVisibility(x     , y     , z+offZ, offX  , offY  , rangeZ);
-            if (rangeX!=0 && offY  !=0 && rangeZ!=0) UpdateVisibility(x+offX, y     , z+offZ, rangeX, offY  , rangeZ);
-            if (offX  !=0 && rangeY!=0 && offZ  !=0) UpdateVisibility(x     , y+offY, z     , offX  , rangeY, offZ);
-            if (rangeX!=0 && rangeY!=0 && offZ  !=0) UpdateVisibility(x+offX, y+offY, z     , rangeX, rangeY, offZ);
-            if (offX  !=0 && rangeY!=0 && rangeZ!=0) UpdateVisibility(x     , y+offY, z+offZ, offX  , rangeY, rangeZ);
-            if (rangeX!=0 && rangeY!=0 && rangeZ!=0) UpdateVisibility(x+offX, y+offY, z+offZ, rangeX, rangeY, rangeZ);
+            UpdateVisibility(x     , y     , z     , offX  , offY  , offZ);
+            UpdateVisibility(x+offX, y     , z     , rangeX, offY  , offZ);
+            UpdateVisibility(x     , y     , z+offZ, offX  , offY  , rangeZ);
+            UpdateVisibility(x+offX, y     , z+offZ, rangeX, offY  , rangeZ);
+            UpdateVisibility(x     , y+offY, z     , offX  , rangeY, offZ);
+            UpdateVisibility(x+offX, y+offY, z     , rangeX, rangeY, offZ);
+            UpdateVisibility(x     , y+offY, z+offZ, offX  , rangeY, rangeZ);
+            UpdateVisibility(x+offX, y+offY, z+offZ, rangeX, rangeY, rangeZ);
 
             #endregion
         }
