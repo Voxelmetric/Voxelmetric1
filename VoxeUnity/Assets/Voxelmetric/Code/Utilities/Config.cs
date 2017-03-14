@@ -32,7 +32,7 @@ namespace Voxelmetric.Code.Utilities
 
     public static class Core
     {
-        public const bool UseThreadPool = false;
+        public const bool UseThreadPool = true;
         public const bool UseThreadedIO = true;
     }
 
