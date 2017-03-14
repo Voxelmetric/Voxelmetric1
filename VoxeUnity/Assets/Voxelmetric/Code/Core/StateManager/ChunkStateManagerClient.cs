@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Text;
+using UnityEngine.Assertions;
 using Voxelmetric.Code.Common;
 using Voxelmetric.Code.Common.Events;
 using Voxelmetric.Code.Common.Extensions;
@@ -115,6 +116,7 @@ namespace Voxelmetric.Code.Core.StateManager
                 pools.SMTaskPI.Push(m_threadPoolItem as TaskPoolItem<ChunkStateManagerClient>);
 
             m_poolState = m_poolState.Reset();
+            m_threadPoolItem = null;
         }
 
         public override void Update()
@@ -241,7 +243,7 @@ namespace Voxelmetric.Code.Core.StateManager
             }
 
             // Consume info about block having been modified
-            chunk.blocks.contentsInvalidated = false;
+            chunk.blocks.recalculateBounds = false;
             OnCalculateGeometryBoundsDone(this);
             return false;
         }
@@ -329,9 +331,6 @@ namespace Voxelmetric.Code.Core.StateManager
             m_pendingStates = m_pendingStates.Reset(CurrStateLoadData | ChunkState.CalculateBounds);
             m_completedStates = m_completedStates.Reset(CurrStateLoadData | ChunkState.CalculateBounds);
             m_completedStatesSafe = m_completedStates;
-
-            // Consume info about invalidated chunk. Chunk bounds will be read from file
-            chunk.blocks.contentsInvalidated = false;
             
             var task = Globals.MemPools.SMTaskPI.Pop();
             m_poolState = m_poolState.Set(ChunkPoolItemState.TaskPI);
@@ -375,7 +374,7 @@ namespace Voxelmetric.Code.Core.StateManager
             m_completedStatesSafe = m_completedStates;
             
             var task = Globals.MemPools.SMTaskPI.Pop();
-            m_poolState = m_poolState.Set(ChunkPoolItemState.ThreadPI);
+            m_poolState = m_poolState.Set(ChunkPoolItemState.TaskPI);
             m_threadPoolItem = task;
             task.Set(actionOnSaveData, this);
 
@@ -585,7 +584,7 @@ namespace Voxelmetric.Code.Core.StateManager
                 return false;
             
             // We need to calculate our chunk's bounds if it was invalidated
-            if (chunk.blocks.contentsInvalidated && chunk.blocks.NonEmptyBlocks>0)
+            if (chunk.blocks.recalculateBounds && chunk.blocks.NonEmptyBlocks>0)
             {
                 RequestState(ChunkState.CalculateBounds);
                 return false;

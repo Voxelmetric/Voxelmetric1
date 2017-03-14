@@ -118,6 +118,8 @@ namespace Voxelmetric.Code.Core.Serialization
             for (int i = 0; i < blocks.Length; i++)
                 blocks[i] = new BlockData(Chunk.world.blockProvider.GetTypeFromTypeInConfig(tmp[i]));
 
+            // Consume info about invalidated chunk
+            Chunk.blocks.recalculateBounds = false;
             return true;
         }
     }

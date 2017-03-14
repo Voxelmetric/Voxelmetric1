@@ -25,13 +25,13 @@ namespace Voxelmetric.Code.Common.MemoryPooling
          * on a separate thread.
          */
         public readonly ObjectPool<TaskPoolItem<ChunkStateManagerClient>> SMTaskPI =
-            new ObjectPool<TaskPoolItem<ChunkStateManagerClient>>(m => new TaskPoolItem<ChunkStateManagerClient>(), 512, false);
+            new ObjectPool<TaskPoolItem<ChunkStateManagerClient>>(m => new TaskPoolItem<ChunkStateManagerClient>(), 2048, false);
         
         public readonly ObjectPool<ThreadPoolItem<ChunkStateManagerClient>> SMThreadPI =
-            new ObjectPool<ThreadPoolItem<ChunkStateManagerClient>>(m => new ThreadPoolItem<ChunkStateManagerClient>(), 512, false);
+            new ObjectPool<ThreadPoolItem<ChunkStateManagerClient>>(m => new ThreadPoolItem<ChunkStateManagerClient>(), 2048, false);
         
         public readonly ObjectPool<ThreadPoolItem<SGenerateColliderWorkItem>> GenerateColliderThreadPI =
-            new ObjectPool<ThreadPoolItem<SGenerateColliderWorkItem>>(m => new ThreadPoolItem<SGenerateColliderWorkItem>(), 512, false);
+            new ObjectPool<ThreadPoolItem<SGenerateColliderWorkItem>>(m => new ThreadPoolItem<SGenerateColliderWorkItem>(), 2048, false);
 
         #endregion
 

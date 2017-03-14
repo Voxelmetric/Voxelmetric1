@@ -27,7 +27,7 @@ namespace Voxelmetric.Code.Core.Serialization
             for (int i = 0; i<chunksToSave.Count; i++)
             {
                 Chunk chunk = chunksToSave[i];
-                ChunkStateManagerClient stateManager = (ChunkStateManagerClient)chunk.stateManager;
+                ChunkStateManagerClient stateManager = chunk.stateManager;
                 stateManager.Subscribe(this, ChunkStateExternal.Saved, true);
             }
         }

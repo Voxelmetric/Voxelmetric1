@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
 using UnityEngine.Assertions;
 using Voxelmetric.Code.Common;
 using Voxelmetric.Code.Core.StateManager;
@@ -36,7 +35,7 @@ namespace Voxelmetric.Code.Core
         private int rebuildMaskCollider;
 
         public readonly List<BlockPos> modifiedBlocks = new List<BlockPos>();
-        public bool contentsInvalidated;
+        public bool recalculateBounds;
 
         private static byte[] emptyBytes;
         public static byte[] EmptyBytes
@@ -75,9 +74,16 @@ namespace Voxelmetric.Code.Core
             rebuildMaskGeometry = -1;
             rebuildMaskCollider = -1;
 
-            contentsInvalidated = true;
+            recalculateBounds = true;
 
             modifiedBlocks.Clear();
+        }
+
+        public void RequestCollider()
+        {
+            // Request collider update if there is no request yet
+            if (rebuildMaskCollider<0)
+                rebuildMaskCollider = 0;
         }
 
         private void ProcessSetBlockQueue(BlockData block, int index, bool setBlockModified)
@@ -107,7 +113,7 @@ namespace Voxelmetric.Code.Core
             {
                 BlockModified(new BlockPos(x, y, z), globalPos, block);
 
-                chunk.blocks.contentsInvalidated = true;
+                chunk.blocks.recalculateBounds = true;
             }
 
             if (
@@ -124,7 +130,7 @@ namespace Voxelmetric.Code.Core
             int cy = chunk.pos.y;
             int cz = chunk.pos.z;
 
-            ChunkStateManagerClient stateManager = (ChunkStateManagerClient)chunk.stateManager;
+            ChunkStateManagerClient stateManager = chunk.stateManager;
 
             // If it is an edge position, notify neighbor as well
             // Iterate over neighbors and decide which ones should be notified to rebuild
@@ -215,7 +221,7 @@ namespace Voxelmetric.Code.Core
 
         public void Update()
         {
-            ChunkStateManagerClient stateManager = (ChunkStateManagerClient)chunk.stateManager;
+            ChunkStateManagerClient stateManager = chunk.stateManager;
 
             if (m_setBlockQueue.Count>0)
             {
@@ -497,7 +503,7 @@ namespace Voxelmetric.Code.Core
             if(!InitFromBytes())
                 Reset();
 
-            ChunkStateManagerClient stateManager = (ChunkStateManagerClient)chunk.stateManager;
+            ChunkStateManagerClient stateManager = chunk.stateManager;
             ChunkStateManagerClient.OnGenerateDataOverNetworkDone(stateManager);
 
             receiveBuffer = null;

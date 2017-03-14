@@ -48,9 +48,7 @@ namespace Voxelmetric.Code.Core
                 bool prevNeedCollider = m_needsCollider;
                 m_needsCollider = value;
                 if (m_needsCollider && !prevNeedCollider)
-                    stateManager.RequestState(ChunkState.BuildCollider);
-                else if (!value)
-                    stateManager.ResetRequest(ChunkState.BuildCollider);
+                    blocks.RequestCollider();
             }
         }
 
@@ -125,7 +123,7 @@ namespace Voxelmetric.Code.Core
             GeometryHandler.Reset();
             ChunkColliderGeometryHandler.Reset();
 
-            NeedsCollider = false;
+            m_needsCollider = false;
             m_bounds.Reset();
         }
 
@@ -246,7 +244,7 @@ namespace Voxelmetric.Code.Core
             m_bounds.minY = Mathf.Max(m_bounds.minY, 0);
 
             // Consume info about block having been modified
-            blocks.contentsInvalidated = false;
+            blocks.recalculateBounds = false;
         }
     }
 }

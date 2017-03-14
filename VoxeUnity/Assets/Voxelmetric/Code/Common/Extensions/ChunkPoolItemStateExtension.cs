@@ -23,5 +23,10 @@ namespace Voxelmetric.Code.Common.Extensions
         {
             return ChunkPoolItemState.None;
         }
+
+        public static bool CheckAny(this ChunkPoolItemState state)
+        {
+            return state!=ChunkPoolItemState.None;
+        }
     }
 }
