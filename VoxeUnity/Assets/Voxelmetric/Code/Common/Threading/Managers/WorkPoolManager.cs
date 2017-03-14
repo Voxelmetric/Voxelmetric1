@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using Voxelmetric.Code.Utilities;
 
 namespace Voxelmetric.Code.Common.Threading.Managers
 {
@@ -20,7 +21,7 @@ namespace Voxelmetric.Code.Common.Threading.Managers
             if (Utilities.Core.UseThreadPool)
             {
                 ThreadPool pool = Globals.WorkPool;
-                
+
                 // Sort our work items by threadID
                 WorkItems.Sort(
                     (x, y) =>
@@ -57,7 +58,7 @@ namespace Voxelmetric.Code.Common.Threading.Managers
                     from = i+1;
                     to = from;
                 }
-                    
+
                 tp = pool.GetTaskPool(WorkItems[from].ThreadID);
                 tp.Lock();
                 for (int j = from; j<=to; j++)
@@ -65,17 +66,30 @@ namespace Voxelmetric.Code.Common.Threading.Managers
                     tp.AddItemUnsafe(WorkItems[j]);
                 }
                 tp.Unlock();
+
+                // Remove processed work items
+                WorkItems.Clear();
             }
             else
             {
-                for (int i = 0; i<WorkItems.Count; i++)
+                using (TimeBudgetHandler budget = new TimeBudgetHandler(10))
                 {
-                    WorkItems[i].Run();
+                    int i;
+                    for (i = 0; i<WorkItems.Count; i++)
+                    {
+                        budget.StartMeasurement();
+                        WorkItems[i].Run();
+                        budget.StopMeasurement();
+
+                        // If the tasks take too much time to finish, spread them out over multiple
+                        // frames to avoid performance spikes
+                        if (!budget.HasTimeBudget)
+                            break;
+                    }
+
+                    WorkItems.RemoveRange(0, i+1);
                 }
             }
-            
-            // Remove processed work items
-            WorkItems.Clear();
         }
     }  
 }

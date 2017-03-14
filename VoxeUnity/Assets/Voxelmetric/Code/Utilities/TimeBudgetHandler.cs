@@ -1,8 +1,9 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 
 namespace Voxelmetric.Code.Utilities
 {
-    public class TimeBudgetHandler
+    public class TimeBudgetHandler: IDisposable
     {
         //! Time in ms allowed to be spent working on something
         public long TimeBudgetMs { get; set; }
@@ -37,6 +38,10 @@ namespace Voxelmetric.Code.Utilities
 
             m_totalTime += (stopTime-m_startTime);
             HasTimeBudget = m_totalTime<TimeBudgetMs;
+        }
+
+        public void Dispose()
+        {
         }
     }
 }
