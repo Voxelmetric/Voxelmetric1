@@ -1,5 +1,6 @@
 ﻿using System.Text;
 using UnityEngine;
+using UnityEngine.Profiling;
 using Voxelmetric.Code.Common;
 using Voxelmetric.Code.Common.MemoryPooling;
 using Voxelmetric.Code.Core.GeometryHandler;
@@ -164,11 +165,15 @@ namespace Voxelmetric.Code.Core
 
         public bool UpdateCollisionGeometry()
         {
+            Profiler.BeginSample("UpdateCollisionGeometry");
+
             // Release the collider when no longer needed
             if (!NeedsCollider)
             {
                 stateManager.SetColliderBuilt();
                 ChunkColliderGeometryHandler.Reset();
+
+                Profiler.EndSample();
                 return false;
             }
 
@@ -177,22 +182,30 @@ namespace Voxelmetric.Code.Core
             {
                 stateManager.SetColliderBuilt();
                 ChunkColliderGeometryHandler.Commit();
+
+                Profiler.EndSample();
                 return true;
             }
 
+            Profiler.EndSample();
             return false;
         }
 
         public bool UpdateRenderGeometry()
         {
+            Profiler.BeginSample("UpdateRenderGeometry");
+
             // Build chunk mesh if necessary
             if (stateManager.IsStateCompleted(ChunkState.BuildVertices|ChunkState.BuildVerticesNow))
             {
                 stateManager.SetMeshBuilt();
                 GeometryHandler.Commit();
+
+                Profiler.EndSample();
                 return true;
             }
 
+            Profiler.EndSample();
             return false;
         }
 

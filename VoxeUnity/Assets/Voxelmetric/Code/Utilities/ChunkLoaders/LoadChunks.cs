@@ -84,6 +84,8 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
 
         public void PreProcessChunks()
         {
+            Profiler.BeginSample("PreProcessChunks");
+
             // Recalculate camera frustum planes
             Geometry.CalculateFrustumPlanes(m_camera, ref m_cameraPlanes);
 
@@ -99,6 +101,9 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
                 m_viewerPos.y >> Env.ChunkPow,
                 m_viewerPos.z >> Env.ChunkPow
                 );
+
+
+            Profiler.EndSample();
         }
         
         private void UpdateVisibility(int x, int y, int z, int rangeX, int rangeY, int rangeZ)
@@ -282,6 +287,8 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
             if (m_viewerPos==m_viewerPosPrev)
                 return;
 
+            Profiler.BeginSample("PostProcessChunks");
+
             int minY = m_viewerPos.y-(VerticalChunkLoadRadius<<Env.ChunkPow);
             int maxY = m_viewerPos.y+(VerticalChunkLoadRadius<<Env.ChunkPow);
             world.CapCoordYInsideWorld(ref minY, ref maxY);
@@ -313,10 +320,14 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
                     m_updateRequests.Add(chunk);
                 }
             }
+
+            Profiler.EndSample();
         }
 
         public void ProcessChunks()
         {
+            Profiler.BeginSample("ProcessChunks");
+
             HandleVisibility();
 
             // Process removal requests
@@ -359,10 +370,14 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
             }
 
             FullLoadOnStartUp = false;
+
+            Profiler.EndSample();
         }
 
         public void ProcessChunk(Chunk chunk)
         {
+            Profiler.BeginSample("ProcessChunk");
+
             ChunkStateManagerClient stateManager = chunk.stateManager;
 
             int tx = m_clipmap.TransformX(chunk.pos.x >> Env.ChunkPow);
