@@ -125,9 +125,7 @@ namespace Voxelmetric.Code.Core.Serialization
                 ushort type = provider.GetTypeFromTypeInConfig(tmp[i].Type);
                 blocks[i] = new BlockData(type, tmp[i].Solid, tmp[i].Transparent, tmp[i].Rotation);
             }
-
-            // Consume info about invalidated chunk
-            Chunk.blocks.recalculateBounds = false;
+            
             return true;
         }
     }

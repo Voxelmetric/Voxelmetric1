@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Text;
-using UnityEngine.Assertions;
 using Voxelmetric.Code.Common;
 using Voxelmetric.Code.Common.Events;
 using Voxelmetric.Code.Common.Extensions;
@@ -273,7 +272,7 @@ namespace Voxelmetric.Code.Core.StateManager
         public static void OnGenerateDataOverNetworkDone(ChunkStateManagerClient stateManager)
         {
             OnGenerateDataDone(stateManager);
-            OnLoadDataDone(stateManager);
+            OnLoadDataDone(stateManager, false); //TODO: change to true once the network layers is implemented properly
         }
 
         private bool GenerateData()
@@ -312,14 +311,28 @@ namespace Voxelmetric.Code.Core.StateManager
 
         private static void OnLoadData(ChunkStateManagerClient stateManager)
         {
-            Serialization.Serialization.LoadChunk(stateManager.chunk);
-            OnLoadDataDone(stateManager);
+            bool success = Serialization.Serialization.LoadChunk(stateManager.chunk);
+            OnLoadDataDone(stateManager, success);
         }
 
-        private static void OnLoadDataDone(ChunkStateManagerClient stateManager)
+        private static void OnLoadDataDone(ChunkStateManagerClient stateManager, bool success)
         {
-            stateManager.m_completedStates = stateManager.m_completedStates.Set(CurrStateLoadData | ChunkState.CalculateBounds);
-            stateManager.m_nextState = NextStateLoadData;
+            // Consume info about invalidated chunk
+            stateManager.chunk.blocks.recalculateBounds = false;
+
+            stateManager.m_completedStates = stateManager.m_completedStates.Set(CurrStateLoadData);
+            if (success)
+            {
+                stateManager.m_completedStates = stateManager.m_completedStates.Set(ChunkState.CalculateBounds);
+                stateManager.m_nextState = NextStateLoadData;
+            }
+            else if (stateManager.chunk.blocks.NonEmptyBlocks > 0)
+            {
+                // There was an issue with loading the file. Recalculation of bounds will be necessary
+                stateManager.m_nextState = ChunkState.CalculateBounds;
+                stateManager.RequestState(NextStateLoadData);
+            }
+            
             stateManager.m_taskRunning = false;
         }
 
