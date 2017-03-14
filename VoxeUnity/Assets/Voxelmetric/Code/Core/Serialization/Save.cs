@@ -38,8 +38,7 @@ namespace Voxelmetric.Code.Core.Serialization
             for (int i = 0; i<chunk.blocks.modifiedBlocks.Count; i++)
             {
                 var pos = chunk.blocks.modifiedBlocks[i];
-                //remove any existing blocks in the dictionary as they're
-                //from the existing save and are overwritten
+                // Remove any existing blocks in the dictionary. They come from the existing save and are overwritten
                 blocksDictionary.Remove(pos);
                 blocksDictionary.Add(pos, chunk.blocks.Get(Helpers.GetChunkIndex1DFrom3D(pos.x,pos.y,pos.z)));
                 changed = true;
@@ -67,10 +66,14 @@ namespace Voxelmetric.Code.Core.Serialization
 
         public bool Binarize(BinaryWriter bw)
         {
+            BlockData[] tmp = new BlockData[blocks.Length];
+
             // Convert block types from an internal optimized version into global types
-            ushort[] tmp = new ushort[blocks.Length];
-            for (int i = 0; i < blocks.Length; i++)
-                tmp[i] = Chunk.world.blockProvider.GetConfig(blocks[i].Type).typeInConfig;
+            for (int i = 0; i<blocks.Length; i++)
+            {
+                ushort typeInConfig = Chunk.world.blockProvider.GetConfig(blocks[i].Type).typeInConfig;
+                tmp[i] = new BlockData(typeInConfig, tmp[i].Solid, tmp[i].Transparent, tmp[i].Rotation);
+            }
 
             var positionsBytes = StructSerialization.SerializeArray(positions, Chunk.pools.MarshaledPool);
             var blocksBytes = StructSerialization.SerializeArray(tmp, Chunk.pools.MarshaledPool);
@@ -111,12 +114,17 @@ namespace Voxelmetric.Code.Core.Serialization
             var positionsBytes = new byte[br.ReadInt32()];
             var blockBytes = new byte[br.ReadInt32()];
             positions = StructSerialization.DeserializeArray<BlockPos>(br.ReadBytes(positionsBytes.Length), Chunk.pools.MarshaledPool);
-            var tmp = StructSerialization.DeserializeArray<ushort>(br.ReadBytes(blockBytes.Length), Chunk.pools.MarshaledPool);
+            var tmp = StructSerialization.DeserializeArray<BlockData>(br.ReadBytes(blockBytes.Length), Chunk.pools.MarshaledPool);
+
+            var provider = Chunk.world.blockProvider;
 
             // Convert block types global types into internal optimized version
             blocks = new BlockData[tmp.Length];
-            for (int i = 0; i < blocks.Length; i++)
-                blocks[i] = new BlockData(Chunk.world.blockProvider.GetTypeFromTypeInConfig(tmp[i]));
+            for (int i = 0; i<blocks.Length; i++)
+            {
+                ushort type = provider.GetTypeFromTypeInConfig(tmp[i].Type);
+                blocks[i] = new BlockData(type, tmp[i].Solid, tmp[i].Transparent, tmp[i].Rotation);
+            }
 
             // Consume info about invalidated chunk
             Chunk.blocks.recalculateBounds = false;

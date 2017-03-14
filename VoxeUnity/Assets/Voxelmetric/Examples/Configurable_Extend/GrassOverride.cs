@@ -15,9 +15,11 @@ public class GrassBlock: CubeBlock
 
     public override void OnInit(BlockProvider blockProvider)
     {
-        air = new BlockData(BlockProvider.AirType);
-        dirt = new BlockData(blockProvider.GetBlock("dirt").type);
-        grass = new BlockData(blockProvider.GetBlock("grass").type);
+        air = BlockProvider.AirBlock;
+        Block blk = blockProvider.GetBlock("dirt");
+        dirt = new BlockData(blk.type, blk.solid, blk.transparent);
+        blk = blockProvider.GetBlock("grass");
+        grass = new BlockData(blk.type, blk.solid, blk.transparent);
     }
 
     // On random Update spread grass to any nearby dirt blocks on the surface

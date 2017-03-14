@@ -62,10 +62,10 @@ namespace Voxelmetric.Examples
 
             if (world!=null)
             {
-                ushort type = world.blockProvider.GetType(blockToPlace);
+                Block block = world.blockProvider.GetBlock(blockToPlace);
                 VmRaycastHit hit = Code.Voxelmetric.Raycast(
                     new Ray(cam.transform.position, mousePos-cam.transform.position),
-                    world, 100, type==BlockProvider.AirType
+                    world, 100, block.type==BlockProvider.AirType
                     );
 
                 // Display the type of the selected block
@@ -81,8 +81,8 @@ namespace Voxelmetric.Examples
                 {
                     if (hit.block.type!=BlockProvider.AirType)
                     {
-                        bool adjacent = type!=BlockProvider.AirType;
-                        Code.Voxelmetric.SetBlock(world, adjacent ? hit.adjacentPos : hit.vector3Int, new BlockData(type));
+                        bool adjacent = block.type!=BlockProvider.AirType;
+                        Code.Voxelmetric.SetBlock(world, adjacent ? hit.adjacentPos : hit.vector3Int, new BlockData(block.type, block.solid, block.transparent));
                     }
                 }
 
@@ -112,7 +112,7 @@ namespace Voxelmetric.Examples
                 // Test of ranged block setting
                 if (Input.GetKeyDown(KeyCode.T))
                 {
-                    Code.Voxelmetric.SetBlockRange(world, new Vector3Int(-44, -44, -44), new Vector3Int(44, 44, 44), new BlockData(1));
+                    Code.Voxelmetric.SetBlockRange(world, new Vector3Int(-44, -44, -44), new Vector3Int(44, 44, 44), BlockProvider.AirBlock);
                 }
             }
         }

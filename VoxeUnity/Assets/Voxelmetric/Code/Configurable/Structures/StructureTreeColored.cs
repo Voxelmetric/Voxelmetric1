@@ -8,10 +8,10 @@ public class StructureTreeColored: StructureTree
     {
         //Block block = BlockColored.SetBlockColor(new Block("coloredblock", world), 57, 100, 49);
         //world.SetBlock(pos.Add(x, y, z), block, updateChunk: false, setBlockModified: false);
-        leaves = new BlockData(BlockProvider.AirType);
+        leaves = BlockProvider.AirBlock;
         //Block block = BlockColored.SetBlockColor(new Block("coloredblock", world), 66, 44, 17);
         //world.SetBlock(pos.Add(0, y, 0), block, updateChunk: false, setBlockModified: false);
-        log = new BlockData(BlockProvider.AirType);
+        log = BlockProvider.AirBlock;
     }
 
     public override void Build(World world, Vector3Int pos, TerrainLayer layer)

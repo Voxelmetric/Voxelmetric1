@@ -111,7 +111,7 @@ public abstract class TerrainLayer : IComparable, IEquatable<TerrainLayer>
 
         while (y<yMax)
         {
-            chunk.blocks.SetInner(Helpers.GetChunkIndex1DFrom3D(x, y-chunk.pos.y, z), new BlockData(blockToPlace.type));
+            chunk.blocks.SetInner(Helpers.GetChunkIndex1DFrom3D(x, y-chunk.pos.y, z), new BlockData(blockToPlace.type, blockToPlace.solid, blockToPlace.transparent));
             ++y;
         }
     }

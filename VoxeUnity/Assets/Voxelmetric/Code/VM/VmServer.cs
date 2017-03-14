@@ -194,7 +194,7 @@ namespace Voxelmetric.Code.VM
 
                 data[0] = VmNetworking.SendBlockChange;
                 pos.ToBytes().CopyTo(data, 1);
-                BitConverter.GetBytes(blockData.Type).CopyTo(data, 13);
+                BlockData.ToByteArray(blockData).CopyTo(data, 13);
 
                 foreach (var client in clients.Values)
                 {
@@ -204,9 +204,9 @@ namespace Voxelmetric.Code.VM
             }
         }
 
-        public void ReceiveChange(Vector3Int pos, ushort type, int id)
+        public void ReceiveChange(Vector3Int pos, ushort data, int id)
         {
-            BlockData blockData = new BlockData(type);
+            BlockData blockData = new BlockData(data);
             world.blocks.Modify(pos, blockData, true);
             BroadcastChange(pos, blockData, id);
         }

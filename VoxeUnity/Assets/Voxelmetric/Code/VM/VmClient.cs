@@ -153,8 +153,8 @@ namespace Voxelmetric.Code.VM
             {
                 case VmNetworking.SendBlockChange:
                     Vector3Int pos = Vector3Int.FromBytes(receivedData, 1);
-                    ushort type = BitConverter.ToUInt16(receivedData, 13);
-                    ReceiveChange(pos, new BlockData(type));
+                    ushort data = BitConverter.ToUInt16(receivedData, 13);
+                    ReceiveChange(pos, new BlockData(data));
                     break;
                 case VmNetworking.transmitChunkData:
                     ReceiveChunk(receivedData);
@@ -193,7 +193,7 @@ namespace Voxelmetric.Code.VM
 
             data[0] = VmNetworking.SendBlockChange; // 1 B
             pos.ToBytes().CopyTo(data, 1); // 3*4B = 12 B
-            BitConverter.GetBytes(blockData.Type).CopyTo(data, 13); // 2 B
+            BlockData.ToByteArray(blockData).CopyTo(data, 13); // 2 B
 
             Send(data);
         }

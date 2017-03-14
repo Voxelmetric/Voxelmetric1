@@ -523,8 +523,7 @@ namespace Voxelmetric.Code.Core
 
                 for (int index = 1; index < Env.ChunkSizeWithPaddingPow3; index++)
                 {
-                    BlockData blockData = blocks[index];
-                    if (blockData.Equals(lastBlockData))
+                    if (blocks[index].Equals(lastBlockData))
                     {
                         // If this is the same as the last block added increase the count
                         ++sameBlockCount;
@@ -535,7 +534,7 @@ namespace Voxelmetric.Code.Core
                         buffer.AddRange(BlockData.ToByteArray(lastBlockData));
 
                         sameBlockCount = 1;
-                        lastBlockData = blockData;
+                        lastBlockData = blocks[index];
                     }
                 }
 

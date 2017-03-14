@@ -82,8 +82,8 @@ namespace Voxelmetric.Code.VM
             {
                 case VmNetworking.SendBlockChange:
                     pos = Vector3Int.FromBytes(receivedData, 1);
-                    ushort type = BitConverter.ToUInt16(receivedData, 13);
-                    server.ReceiveChange(pos, type, ID);
+                    ushort data = BlockData.RestoreBlockData(receivedData, 13);
+                    server.ReceiveChange(pos, data, ID);
                     break;
                 case VmNetworking.RequestChunkData:
                     pos = Vector3Int.FromBytes(receivedData, 1);

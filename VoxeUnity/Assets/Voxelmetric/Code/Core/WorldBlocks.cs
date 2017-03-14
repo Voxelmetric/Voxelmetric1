@@ -24,7 +24,7 @@ namespace Voxelmetric.Code.Core
             // Return air for chunk that do not exist
             Chunk chunk = world.chunks.Get(pos);
             if (chunk==null)
-                return new BlockData(BlockProvider.AirType);
+                return BlockProvider.AirBlock;
 
             int xx = pos.x&Env.ChunkMask;
             int yy = pos.y&Env.ChunkMask;

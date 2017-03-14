@@ -22,8 +22,10 @@ public class StructureTree: GeneratedStructure
     public override void Init(World world)
     {
         blocks = world.blocks;
-        leaves = new BlockData(world.blockProvider.GetBlock("leaves").type);
-        log = new BlockData(world.blockProvider.GetBlock("log").type);
+        Block blk = world.blockProvider.GetBlock("leaves");
+        leaves = new BlockData(blk.type, blk.solid, blk.transparent);
+        blk = world.blockProvider.GetBlock("log");
+        log = new BlockData(blk.type, blk.solid, blk.transparent);
     }
 
     public override void Build(World world, Vector3Int pos, TerrainLayer layer)

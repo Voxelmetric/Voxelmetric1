@@ -52,9 +52,8 @@ namespace Voxelmetric.Code.Core.Serialization
             // as not to trigger a new save on unload unless new blocks are added.
             for (int i = 0; i<save.blocks.Length; i++)
             {
-                ushort type = save.blocks[i].Type;
                 BlockPos pos = save.positions[i];
-                chunk.blocks.SetInner(Helpers.GetChunkIndex1DFrom3D(pos.x, pos.y, pos.z), new BlockData(type));
+                chunk.blocks.SetInner(Helpers.GetChunkIndex1DFrom3D(pos.x, pos.y, pos.z), save.blocks[i]);
             }
 
             return true;
