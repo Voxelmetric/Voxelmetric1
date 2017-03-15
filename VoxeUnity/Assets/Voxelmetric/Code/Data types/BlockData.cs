@@ -8,9 +8,8 @@ namespace Voxelmetric.Code.Data_types
     {
         /* Bits
          * 15 - solid
-         * 14 - transparent
-         * 13, 12, 11 - rotation
-         * 10 - 0 - block type
+         * 14, 13, 12 - rotation
+         * 11 - 0 - block type
         */
         private readonly ushort m_data;
 
@@ -19,14 +18,12 @@ namespace Voxelmetric.Code.Data_types
             m_data = data;
         }
 
-        public BlockData(ushort type, bool solid, bool transparent, Direction dir = Direction.up)
+        public BlockData(ushort type, bool solid, Direction dir = Direction.up)
         {
-            m_data = (ushort)(type&0x3FF);
-            m_data |= (ushort)((ushort)dir<<11);
+            m_data = (ushort)(type&0xFFF);
+            m_data |= (ushort)((ushort)dir<<12);
             if (solid)
                 m_data |= 0x8000;
-            if (transparent)
-                m_data |= 0x4000;
         }
 
         /// <summary>
@@ -38,20 +35,12 @@ namespace Voxelmetric.Code.Data_types
         }
 
         /// <summary>
-        /// Fast lookup of whether the block is transparent without having to take a look into block arrays
-        /// </summary>
-        public bool Transparent
-        {
-            get { return (1&(m_data>>14))!=0; }
-        }
-
-        /// <summary>
         /// Information about the direction the block faces
         /// TODO: Just a placeholder
         /// </summary>
         public Direction Rotation
         {
-            get { return (Direction)((m_data>>11)&8); }
+            get { return (Direction)((m_data>>12)&8); }
         }
 
         /// <summary>
@@ -59,7 +48,7 @@ namespace Voxelmetric.Code.Data_types
         /// </summary>
         public ushort Type
         {
-            get { return (ushort)(m_data&0x3FF); }
+            get { return (ushort)(m_data&0xFFF); }
         }
 
         public static ushort RestoreBlockData(byte[] data, int offset)

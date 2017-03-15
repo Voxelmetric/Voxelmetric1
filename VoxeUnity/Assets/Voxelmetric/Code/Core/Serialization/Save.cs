@@ -72,7 +72,7 @@ namespace Voxelmetric.Code.Core.Serialization
             for (int i = 0; i<blocks.Length; i++)
             {
                 ushort typeInConfig = Chunk.world.blockProvider.GetConfig(blocks[i].Type).typeInConfig;
-                tmp[i] = new BlockData(typeInConfig, tmp[i].Solid, tmp[i].Transparent, tmp[i].Rotation);
+                tmp[i] = new BlockData(typeInConfig, tmp[i].Solid, tmp[i].Rotation);
             }
 
             var positionsBytes = StructSerialization.SerializeArray(positions, Chunk.pools.MarshaledPool);
@@ -123,7 +123,7 @@ namespace Voxelmetric.Code.Core.Serialization
             for (int i = 0; i<blocks.Length; i++)
             {
                 ushort type = provider.GetTypeFromTypeInConfig(tmp[i].Type);
-                blocks[i] = new BlockData(type, tmp[i].Solid, tmp[i].Transparent, tmp[i].Rotation);
+                blocks[i] = new BlockData(type, tmp[i].Solid, tmp[i].Rotation);
             }
             
             return true;

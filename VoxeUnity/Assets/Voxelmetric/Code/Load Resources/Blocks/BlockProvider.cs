@@ -12,7 +12,7 @@ namespace Voxelmetric.Code.Load_Resources.Blocks
     {
         //! Air type block will always be present
         public static readonly ushort AirType = 0;
-        public static readonly BlockData AirBlock = new BlockData(AirType, false, true);
+        public static readonly BlockData AirBlock = new BlockData(AirType, false);
 
         private readonly List<BlockConfig> m_configs;
         private readonly Dictionary<string, ushort> m_names;

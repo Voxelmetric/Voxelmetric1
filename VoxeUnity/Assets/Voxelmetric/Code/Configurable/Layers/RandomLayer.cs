@@ -13,7 +13,7 @@ public class RandomLayer: TerrainLayer
     {
         // Config files for random layers MUST define these properties
         Block block = world.blockProvider.GetBlock(properties["blockName"]);
-        blockToPlace = new BlockData(block.type, block.Solid, block.Transparent);
+        blockToPlace = new BlockData(block.type, block.Solid);
 
         if (properties.ContainsKey("blockColors"))
         {

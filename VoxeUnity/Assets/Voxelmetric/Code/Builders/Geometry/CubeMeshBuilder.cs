@@ -101,7 +101,7 @@ namespace Voxelmetric.Code.Builders.Geometry
                                 Block voxelFace1 = blocks.GetBlock(pos1);
 
                                 mask[n++] = backFace
-                                                ? (voxelFace1.CanBuildFaceWith(voxelFace0, dir)
+                                                ? (voxelFace1.CanBuildFaceWith(voxelFace0)
                                                        ? new BlockFace
                                                        {
                                                            block = voxelFace1,
@@ -109,7 +109,7 @@ namespace Voxelmetric.Code.Builders.Geometry
                                                            side = dir
                                                        }
                                                        : new BlockFace())
-                                                : (voxelFace0.CanBuildFaceWith(voxelFace1, dir)
+                                                : (voxelFace0.CanBuildFaceWith(voxelFace1)
                                                        ? new BlockFace
                                                        {
                                                            block = voxelFace0,

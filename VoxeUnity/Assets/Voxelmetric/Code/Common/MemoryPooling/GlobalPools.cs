@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Text;
+﻿using System.Text;
 using UnityEngine;
 using Voxelmetric.Code.Common.Memory;
 using Voxelmetric.Code.Common.Threading;

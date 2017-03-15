@@ -82,7 +82,7 @@ namespace Voxelmetric.Examples
                     if (hit.block.type!=BlockProvider.AirType)
                     {
                         bool adjacent = block.type!=BlockProvider.AirType;
-                        Code.Voxelmetric.SetBlock(world, adjacent ? hit.adjacentPos : hit.vector3Int, new BlockData(block.type, block.Solid, block.Transparent));
+                        Code.Voxelmetric.SetBlock(world, adjacent ? hit.adjacentPos : hit.vector3Int, new BlockData(block.type, block.Solid));
                     }
                 }
 

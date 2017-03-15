@@ -3,19 +3,12 @@ using Voxelmetric.Code.Data_types;
 
 public class SolidBlock : Block
 {
-    public virtual bool solidTowardsSameType { get { return ((SolidBlockConfig)config).solidTowardsSameType; } }
-
-    public override bool CanBuildFaceWith(Block adjacentBlock, Direction dir)
+    public override bool CanBuildFaceWith(Block adjacentBlock)
     {
-        bool adjSolid = adjacentBlock.Solid;
-        bool adjTransparent = adjacentBlock.Transparent;
-        if ((!adjSolid || adjTransparent) && (!Solid || !Transparent || !adjTransparent || !adjSolid))
-        {
-            if (Solid || !solidTowardsSameType || adjacentBlock.type!=type)
-                return true;
-        }
+        if (adjacentBlock.Solid)
+            return !Solid;
 
-        return false;
+        return Solid || adjacentBlock.type!=type;
     }
 
     public override void BuildBlock(Chunk chunk, Vector3Int localPos)
@@ -26,7 +19,7 @@ public class SolidBlock : Block
         {
             Direction dir = DirectionUtils.Get(d);
             Block adjacentBlock = blocks.GetBlock(localPos.Add(dir));
-            if (CanBuildFaceWith(adjacentBlock, dir))
+            if (CanBuildFaceWith(adjacentBlock))
                 BuildFace(chunk, localPos, null, dir);
         }
     }

@@ -36,12 +36,7 @@ public class Block
     {
         get { return config.solid; }
     }
-
-    public bool Transparent
-    {
-        get { return config.transparent; }
-    }
-
+    
     public bool CanBeWalkedOn
     {
         get { return config.canBeWalkedOn; }
@@ -66,12 +61,12 @@ public class Block
     {
     }
 
-    public virtual bool CanBuildFaceWith(Block adjacentBlock, Direction dir)
+    public virtual bool CanBuildFaceWith(Block adjacentBlock)
     {
         return config.custom; // custom blocks will be considered as able to create face with others by default
     }
 
-    public virtual bool CanMergeFaceWith(Block adjacentBlock, Direction dir)
+    public virtual bool CanMergeFaceWith(Block adjacentBlock)
     {
         return false;
     }
