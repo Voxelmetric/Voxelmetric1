@@ -1,22 +1,24 @@
 ﻿using UnityEngine;
 using Voxelmetric.Code.Common.Math;
 using Voxelmetric.Code.Core;
+using Voxelmetric.Code.Data_types;
 using Voxelmetric.Code.Load_Resources;
 
 public class RandomLayer: TerrainLayer
 {
-    private Block blockToPlace;
+    private BlockData blockToPlace;
     private float chance;
 
     protected override void SetUp(LayerConfig config)
     {
         // Config files for random layers MUST define these properties
-        blockToPlace = world.blockProvider.GetBlock(properties["blockName"]);
+        Block block = world.blockProvider.GetBlock(properties["blockName"]);
+        blockToPlace = new BlockData(block.type, block.Solid, block.Transparent);
 
         if (properties.ContainsKey("blockColors"))
         {
             string[] colors = properties["blockColors"].Split(',');
-            ((ColoredBlock)blockToPlace).color = new Color(byte.Parse(colors[0]) / 255f, byte.Parse(colors[1]) / 255f, byte.Parse(colors[2]) / 255f);
+            ((ColoredBlock)block).color = new Color(byte.Parse(colors[0]) / 255f, byte.Parse(colors[1]) / 255f, byte.Parse(colors[2]) / 255f);
         }
 
         chance = float.Parse(properties["chance"]);

@@ -42,7 +42,7 @@ public class CavesLayer : TerrainLayer
         {
             caveBottom -= caveHeight / 2f;
             float caveTop = caveHeight / 2f;
-            SetBlocks(chunk, x, z, (int)caveBottom, (int)caveTop, chunk.world.blockProvider.BlockTypes[BlockProvider.AirType]);
+            SetBlocks(chunk, x, z, (int)caveBottom, (int)caveTop, BlockProvider.AirBlock);
 
             if (caveTop > heightSoFar && caveBottom < heightSoFar)
                 return caveBottom;

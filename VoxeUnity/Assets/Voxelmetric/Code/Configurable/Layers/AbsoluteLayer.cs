@@ -1,12 +1,13 @@
 ﻿using UnityEngine;
 using Voxelmetric.Code.Core;
+using Voxelmetric.Code.Data_types;
 using Voxelmetric.Code.Load_Resources;
 using Voxelmetric.Code.Utilities;
 using Voxelmetric.Code.Utilities.Noise;
 
 public class AbsoluteLayer : TerrainLayer
 {
-    private Block blockToPlace;
+    private BlockData blockToPlace;
     private int minHeight;
     private int maxHeight;
     private int amplitude;
@@ -14,12 +15,13 @@ public class AbsoluteLayer : TerrainLayer
     protected override void SetUp(LayerConfig config)
     {
         // Config files for absolute layers MUST define these properties
-        blockToPlace = world.blockProvider.GetBlock(properties["blockName"]);
+        Block block = world.blockProvider.GetBlock(properties["blockName"]);
+        blockToPlace = new BlockData(block.type, block.Solid, block.Transparent);
 
         if (properties.ContainsKey("blockColors"))
         {
             string[] colors = properties["blockColors"].Split(',');
-            ((ColoredBlock)blockToPlace).color = new Color(byte.Parse(colors[0]) / 255f, byte.Parse(colors[1]) / 255f, byte.Parse(colors[2]) / 255f);
+            ((ColoredBlock)block).color = new Color(byte.Parse(colors[0]) / 255f, byte.Parse(colors[1]) / 255f, byte.Parse(colors[2]) / 255f);
         }
 
         noise.Frequency = 1f/float.Parse(properties["frequency"]); // Frequency in configs is in fast 1/frequency

@@ -7,12 +7,11 @@ public class SolidBlock : Block
 
     public override bool CanBuildFaceWith(Block adjacentBlock, Direction dir)
     {
-        Direction oppositeDir = DirectionUtils.Opposite(dir);
-        bool adjSolid = adjacentBlock.IsSolid(oppositeDir);
-        bool adjTransparent = adjacentBlock.IsTransparent(oppositeDir);
-        if ((!adjSolid || adjTransparent) && (!solid || !transparent || !adjTransparent || !adjSolid))
+        bool adjSolid = adjacentBlock.Solid;
+        bool adjTransparent = adjacentBlock.Transparent;
+        if ((!adjSolid || adjTransparent) && (!Solid || !Transparent || !adjTransparent || !adjSolid))
         {
-            if (solid || !solidTowardsSameType || adjacentBlock.type!=type)
+            if (Solid || !solidTowardsSameType || adjacentBlock.type!=type)
                 return true;
         }
 

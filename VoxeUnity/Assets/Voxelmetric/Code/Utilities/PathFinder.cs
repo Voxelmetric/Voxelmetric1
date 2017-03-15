@@ -223,13 +223,13 @@ namespace Voxelmetric.Code.Utilities
         public bool IsWalkable(World world, Vector3Int pos)
         {
             Block block = world.blocks.GetBlock(pos);
-            if (!block.canBeWalkedOn)
+            if (!block.CanBeWalkedOn)
                 return false;
 
             for (int y = 1; y < entityHeight + 1; y++)
             {
                 block = world.blocks.GetBlock(pos.Add(0, y, 0));
-                if (!block.canBeWalkedThrough)
+                if (!block.CanBeWalkedThrough)
                     return false;
             }
 

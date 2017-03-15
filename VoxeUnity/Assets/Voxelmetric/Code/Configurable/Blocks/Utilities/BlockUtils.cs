@@ -84,99 +84,74 @@ namespace Voxelmetric.Code.Configurable.Blocks.Utilities
                 bool swSolid = false;
 
                 ChunkBlocks blocks = chunk.blocks;
-                Block block;
 
                 switch (direction)
                 {
                     case Direction.up:
-                        nSolid = blocks.GetBlock(localPos.Add(0, 1, 1)).IsSolid(Direction.south);
-                        eSolid = blocks.GetBlock(localPos.Add(1, 1, 0)).IsSolid(Direction.west);
-                        sSolid = blocks.GetBlock(localPos.Add(0, 1, -1)).IsSolid(Direction.north);
-                        wSolid = blocks.GetBlock(localPos.Add(-1, 1, 0)).IsSolid(Direction.east);
-
-                        block = blocks.GetBlock(localPos.Add(-1, 1, 1));
-                        wnSolid = block.IsSolid(Direction.east) && block.IsSolid(Direction.south);
-                        block = blocks.GetBlock(localPos.Add(1, 1, 1));
-                        neSolid = block.IsSolid(Direction.south) && block.IsSolid(Direction.west);
-                        block = blocks.GetBlock(localPos.Add(1, 1, -1));
-                        esSolid = block.IsSolid(Direction.west) && block.IsSolid(Direction.north);
-                        block = blocks.GetBlock(localPos.Add(-1, 1, -1));
-                        swSolid = block.IsSolid(Direction.north) && block.IsSolid(Direction.east);
+                        nSolid = blocks.Get(localPos.Add(0, 1, 1)).Solid;
+                        eSolid = blocks.Get(localPos.Add(1, 1, 0)).Solid;
+                        sSolid = blocks.Get(localPos.Add(0, 1, -1)).Solid;
+                        wSolid = blocks.Get(localPos.Add(-1, 1, 0)).Solid;
+                        
+                        wnSolid = blocks.Get(localPos.Add(-1, 1, 1)).Solid;
+                        neSolid = blocks.Get(localPos.Add(1, 1, 1)).Solid;
+                        esSolid = blocks.Get(localPos.Add(1, 1, -1)).Solid;
+                        swSolid = blocks.Get(localPos.Add(-1, 1, -1)).Solid;
                         break;
                     case Direction.down:
-                        nSolid = blocks.GetBlock(localPos.Add(0, -1, -1)).IsSolid(Direction.south);
-                        eSolid = blocks.GetBlock(localPos.Add(1, -1, 0)).IsSolid(Direction.west);
-                        sSolid = blocks.GetBlock(localPos.Add(0, -1, 1)).IsSolid(Direction.north);
-                        wSolid = blocks.GetBlock(localPos.Add(-1, -1, 0)).IsSolid(Direction.east);
+                        nSolid = blocks.Get(localPos.Add(0, -1, -1)).Solid;
+                        eSolid = blocks.Get(localPos.Add(1, -1, 0)).Solid;
+                        sSolid = blocks.Get(localPos.Add(0, -1, 1)).Solid;
+                        wSolid = blocks.Get(localPos.Add(-1, -1, 0)).Solid;
 
-                        block = blocks.GetBlock(localPos.Add(-1, -1, -1));
-                        wnSolid = block.IsSolid(Direction.east) && block.IsSolid(Direction.south);
-                        block = blocks.GetBlock(localPos.Add(1, -1, -1));
-                        neSolid = block.IsSolid(Direction.south) && block.IsSolid(Direction.west);
-                        block = blocks.GetBlock(localPos.Add(1, -1, 1));
-                        esSolid = block.IsSolid(Direction.west) && block.IsSolid(Direction.north);
-                        block = blocks.GetBlock(localPos.Add(-1, -1, 1));
-                        swSolid = block.IsSolid(Direction.north) && block.IsSolid(Direction.east);
+                        wnSolid = blocks.Get(localPos.Add(-1, -1, -1)).Solid;
+                        neSolid = blocks.Get(localPos.Add(1, -1, -1)).Solid;
+                        esSolid = blocks.Get(localPos.Add(1, -1, 1)).Solid;
+                        swSolid = blocks.Get(localPos.Add(-1, -1, 1)).Solid;
                         break;
                     case Direction.north:
-                        nSolid = blocks.GetBlock(localPos.Add(1, 0, 1)).IsSolid(Direction.west);
-                        eSolid = blocks.GetBlock(localPos.Add(0, 1, 1)).IsSolid(Direction.down);
-                        sSolid = blocks.GetBlock(localPos.Add(-1, 0, 1)).IsSolid(Direction.east);
-                        wSolid = blocks.GetBlock(localPos.Add(0, -1, 1)).IsSolid(Direction.up);
+                        nSolid = blocks.Get(localPos.Add(1, 0, 1)).Solid;
+                        eSolid = blocks.Get(localPos.Add(0, 1, 1)).Solid;
+                        sSolid = blocks.Get(localPos.Add(-1, 0, 1)).Solid;
+                        wSolid = blocks.Get(localPos.Add(0, -1, 1)).Solid;
 
-                        block = blocks.GetBlock(localPos.Add(-1, 1, 1));
-                        esSolid = block.IsSolid(Direction.east) && block.IsSolid(Direction.south);
-                        block = blocks.GetBlock(localPos.Add(1, 1, 1));
-                        neSolid = block.IsSolid(Direction.south) && block.IsSolid(Direction.west);
-                        block = blocks.GetBlock(localPos.Add(1, -1, 1));
-                        wnSolid = block.IsSolid(Direction.west) && block.IsSolid(Direction.north);
-                        block = blocks.GetBlock(localPos.Add(-1, -1, 1));
-                        swSolid = block.IsSolid(Direction.north) && block.IsSolid(Direction.east);
+                        esSolid = blocks.Get(localPos.Add(-1, 1, 1)).Solid;
+                        neSolid = blocks.Get(localPos.Add(1, 1, 1)).Solid;
+                        wnSolid = blocks.Get(localPos.Add(1, -1, 1)).Solid;
+                        swSolid = blocks.Get(localPos.Add(-1, -1, 1)).Solid;
                         break;
                     case Direction.east:
-                        nSolid = blocks.GetBlock(localPos.Add(1, 0, -1)).IsSolid(Direction.up);
-                        eSolid = blocks.GetBlock(localPos.Add(1, 1, 0)).IsSolid(Direction.west);
-                        sSolid = blocks.GetBlock(localPos.Add(1, 0, 1)).IsSolid(Direction.down);
-                        wSolid = blocks.GetBlock(localPos.Add(1, -1, 0)).IsSolid(Direction.east);
+                        nSolid = blocks.Get(localPos.Add(1, 0, -1)).Solid;
+                        eSolid = blocks.Get(localPos.Add(1, 1, 0)).Solid;
+                        sSolid = blocks.Get(localPos.Add(1, 0, 1)).Solid;
+                        wSolid = blocks.Get(localPos.Add(1, -1, 0)).Solid;
 
-                        block = blocks.GetBlock(localPos.Add(1, 1, 1));
-                        esSolid = block.IsSolid(Direction.west) && block.IsSolid(Direction.north);
-                        block = blocks.GetBlock(localPos.Add(1, 1, -1));
-                        neSolid = block.IsSolid(Direction.south) && block.IsSolid(Direction.west);
-                        block = blocks.GetBlock(localPos.Add(1, -1, -1));
-                        wnSolid = block.IsSolid(Direction.east) && block.IsSolid(Direction.north);
-                        block = blocks.GetBlock(localPos.Add(1, -1, 1));
-                        swSolid = block.IsSolid(Direction.north) && block.IsSolid(Direction.east);
+                        esSolid = blocks.Get(localPos.Add(1, 1, 1)).Solid;
+                        neSolid = blocks.Get(localPos.Add(1, 1, -1)).Solid;
+                        wnSolid = blocks.Get(localPos.Add(1, -1, -1)).Solid;
+                        swSolid = blocks.Get(localPos.Add(1, -1, 1)).Solid;
                         break;
                     case Direction.south:
-                        nSolid = blocks.GetBlock(localPos.Add(-1, 0, -1)).IsSolid(Direction.down);
-                        eSolid = blocks.GetBlock(localPos.Add(0, 1, -1)).IsSolid(Direction.west);
-                        sSolid = blocks.GetBlock(localPos.Add(1, 0, -1)).IsSolid(Direction.up);
-                        wSolid = blocks.GetBlock(localPos.Add(0, -1, -1)).IsSolid(Direction.south);
+                        nSolid = blocks.Get(localPos.Add(-1, 0, -1)).Solid;
+                        eSolid = blocks.Get(localPos.Add(0, 1, -1)).Solid;
+                        sSolid = blocks.Get(localPos.Add(1, 0, -1)).Solid;
+                        wSolid = blocks.Get(localPos.Add(0, -1, -1)).Solid;
 
-                        block = blocks.GetBlock(localPos.Add(1, 1, -1));
-                        esSolid = block.IsSolid(Direction.west) && block.IsSolid(Direction.north);
-                        block = blocks.GetBlock(localPos.Add(-1, 1, -1));
-                        neSolid = block.IsSolid(Direction.south) && block.IsSolid(Direction.west);
-                        block = blocks.GetBlock(localPos.Add(-1, -1, -1));
-                        wnSolid = block.IsSolid(Direction.east) && block.IsSolid(Direction.north);
-                        block = blocks.GetBlock(localPos.Add(1, -1, -1));
-                        swSolid = block.IsSolid(Direction.north) && block.IsSolid(Direction.east);
+                        esSolid = blocks.Get(localPos.Add(1, 1, -1)).Solid;
+                        neSolid = blocks.Get(localPos.Add(-1, 1, -1)).Solid;
+                        wnSolid = blocks.Get(localPos.Add(-1, -1, -1)).Solid;
+                        swSolid = blocks.Get(localPos.Add(1, -1, -1)).Solid;
                         break;
                     case Direction.west:
-                        nSolid = blocks.GetBlock(localPos.Add(-1, 0, 1)).IsSolid(Direction.up);
-                        eSolid = blocks.GetBlock(localPos.Add(-1, 1, 0)).IsSolid(Direction.west);
-                        sSolid = blocks.GetBlock(localPos.Add(-1, 0, -1)).IsSolid(Direction.down);
-                        wSolid = blocks.GetBlock(localPos.Add(-1, -1, 0)).IsSolid(Direction.east);
+                        nSolid = blocks.Get(localPos.Add(-1, 0, 1)).Solid;
+                        eSolid = blocks.Get(localPos.Add(-1, 1, 0)).Solid;
+                        sSolid = blocks.Get(localPos.Add(-1, 0, -1)).Solid;
+                        wSolid = blocks.Get(localPos.Add(-1, -1, 0)).Solid;
 
-                        block = blocks.GetBlock(localPos.Add(-1, 1, -1));
-                        esSolid = block.IsSolid(Direction.west) && block.IsSolid(Direction.north);
-                        block = blocks.GetBlock(localPos.Add(-1, 1, 1));
-                        neSolid = block.IsSolid(Direction.south) && block.IsSolid(Direction.west);
-                        block = blocks.GetBlock(localPos.Add(-1, -1, 1));
-                        wnSolid = block.IsSolid(Direction.east) && block.IsSolid(Direction.north);
-                        block = blocks.GetBlock(localPos.Add(-1, -1, -1));
-                        swSolid = block.IsSolid(Direction.north) && block.IsSolid(Direction.east);
+                        esSolid = blocks.Get(localPos.Add(-1, 1, -1)).Solid;
+                        neSolid = blocks.Get(localPos.Add(-1, 1, 1)).Solid;
+                        wnSolid = blocks.Get(localPos.Add(-1, -1, 1)).Solid;
+                        swSolid = blocks.Get(localPos.Add(-1, -1, -1)).Solid;
                         break;
                 }
 

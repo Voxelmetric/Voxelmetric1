@@ -96,8 +96,8 @@ public abstract class TerrainLayer : IComparable, IEquatable<TerrainLayer>
     /// <param name="z">Position on z axis in local coordinates</param>
     /// <param name="startPlaceHeight">Starting position on y axis in world coordinates</param>
     /// <param name="endPlaceHeight">Ending position on y axis in world coordinates</param>
-    /// <param name="blockToPlace">Block type to set</param>
-    protected static void SetBlocks(Chunk chunk, int x, int z, int startPlaceHeight, int endPlaceHeight, Block blockToPlace)
+    /// <param name="blockData">Block data to set</param>
+    protected static void SetBlocks(Chunk chunk, int x, int z, int startPlaceHeight, int endPlaceHeight, BlockData blockData)
     {
         int yMax = chunk.pos.y+Env.ChunkSize;
         if (startPlaceHeight >= yMax || endPlaceHeight < chunk.pos.y)
@@ -111,7 +111,7 @@ public abstract class TerrainLayer : IComparable, IEquatable<TerrainLayer>
 
         while (y<yMax)
         {
-            chunk.blocks.SetInner(Helpers.GetChunkIndex1DFrom3D(x, y-chunk.pos.y, z), new BlockData(blockToPlace.type, blockToPlace.solid, blockToPlace.transparent));
+            chunk.blocks.SetInner(Helpers.GetChunkIndex1DFrom3D(x, y-chunk.pos.y, z), blockData);
             ++y;
         }
     }

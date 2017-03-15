@@ -31,7 +31,6 @@ namespace Voxelmetric.Code.Data_types
 
         /// <summary>
         /// Fast lookup of whether the block is solid without having to take a look into block arrays
-        /// TODO: Just a placeholder
         /// </summary>
         public bool Solid
         {
@@ -40,7 +39,6 @@ namespace Voxelmetric.Code.Data_types
 
         /// <summary>
         /// Fast lookup of whether the block is transparent without having to take a look into block arrays
-        /// TODO: Just a placeholder
         /// </summary>
         public bool Transparent
         {

@@ -22,50 +22,41 @@ public class Block
         this.config = config;
     }
 
-    public virtual string name
+    public string Name
     {
         get { return config.name; }
     }
 
-    public virtual string displayName
+    public virtual string DisplayName
     {
-        get { return name; }
+        get { return Name; }
     }
 
-    public virtual bool solid
+    public bool Solid
     {
         get { return config.solid; }
     }
 
-    public virtual bool transparent
+    public bool Transparent
     {
         get { return config.transparent; }
     }
 
-    public virtual bool canBeWalkedOn
+    public bool CanBeWalkedOn
     {
         get { return config.canBeWalkedOn; }
     }
 
-    public virtual bool canBeWalkedThrough
+    public bool CanBeWalkedThrough
     {
         get { return config.canBeWalkedThrough; }
     }
 
-    public virtual bool custom
+    public bool Custom
     {
         get { return config.custom; }
     }
-
-    public virtual bool IsSolid(Direction direction)
-    {
-        return solid;
-    }
-
-    public virtual bool IsTransparent(Direction direction)
-    {
-        return transparent;
-    }
+    
 
     public virtual void OnInit(BlockProvider blockProvider)
     {
@@ -112,6 +103,6 @@ public class Block
 
     public override string ToString()
     {
-        return name;
+        return Name;
     }
 }

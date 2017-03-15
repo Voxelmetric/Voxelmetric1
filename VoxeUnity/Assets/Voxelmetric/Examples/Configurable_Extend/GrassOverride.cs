@@ -17,9 +17,9 @@ public class GrassBlock: CubeBlock
     {
         air = BlockProvider.AirBlock;
         Block blk = blockProvider.GetBlock("dirt");
-        dirt = new BlockData(blk.type, blk.solid, blk.transparent);
+        dirt = new BlockData(blk.type, blk.Solid, blk.Transparent);
         blk = blockProvider.GetBlock("grass");
-        grass = new BlockData(blk.type, blk.solid, blk.transparent);
+        grass = new BlockData(blk.type, blk.Solid, blk.Transparent);
     }
 
     // On random Update spread grass to any nearby dirt blocks on the surface

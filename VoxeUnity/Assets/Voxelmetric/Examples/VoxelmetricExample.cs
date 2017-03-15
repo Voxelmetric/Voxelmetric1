@@ -70,7 +70,7 @@ namespace Voxelmetric.Examples
 
                 // Display the type of the selected block
                 if (selectedBlockText!=null)
-                    selectedBlockText.text = Code.Voxelmetric.GetBlock(world, hit.vector3Int).displayName;
+                    selectedBlockText.text = Code.Voxelmetric.GetBlock(world, hit.vector3Int).DisplayName;
 
                 // Save current world status
                 if (saveProgressText != null)
@@ -82,7 +82,7 @@ namespace Voxelmetric.Examples
                     if (hit.block.type!=BlockProvider.AirType)
                     {
                         bool adjacent = block.type!=BlockProvider.AirType;
-                        Code.Voxelmetric.SetBlock(world, adjacent ? hit.adjacentPos : hit.vector3Int, new BlockData(block.type, block.solid, block.transparent));
+                        Code.Voxelmetric.SetBlock(world, adjacent ? hit.adjacentPos : hit.vector3Int, new BlockData(block.type, block.Solid, block.Transparent));
                     }
                 }
 

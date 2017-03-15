@@ -46,11 +46,11 @@ public class ColoredBlock : SolidBlock {
         chunk.pools.VertexDataArrayPool.Push(vertexData);
     }
 
-    public override string displayName
+    public override string DisplayName
     {
         get
         {
-            return base.displayName + " (" + color + ")";
+            return base.DisplayName + " (" + color + ")";
         }
     }
 }

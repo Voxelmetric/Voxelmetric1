@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using Voxelmetric.Code.Core;
+using Voxelmetric.Code.Data_types;
 using Voxelmetric.Code.Load_Resources;
 
 public class SurfaceLayer : TerrainLayer
@@ -8,16 +9,17 @@ public class SurfaceLayer : TerrainLayer
     // but it's a placeholder so that in the future we can do things like blend surface layers
     // between separate biomes
 
-    private Block blockToPlace;
+    private BlockData blockToPlace;
 
     protected override void SetUp(LayerConfig config)
     {
-        blockToPlace = world.blockProvider.GetBlock(properties["blockName"]);
+        Block block = world.blockProvider.GetBlock(properties["blockName"]);
+        blockToPlace = new BlockData(block.type, block.Solid, block.Transparent);
 
         if (properties.ContainsKey("blockColors"))
         {
             string[] colors = properties["blockColors"].Split(',');
-            ((ColoredBlock)blockToPlace).color = new Color(byte.Parse(colors[0]) / 255f, byte.Parse(colors[1]) / 255f, byte.Parse(colors[2]) / 255f);
+            ((ColoredBlock)block).color = new Color(byte.Parse(colors[0]) / 255f, byte.Parse(colors[1]) / 255f, byte.Parse(colors[2]) / 255f);
         }
     }
 

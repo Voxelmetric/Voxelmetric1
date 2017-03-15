@@ -152,7 +152,7 @@ namespace Voxelmetric.Code.Builders.Geometry
                                 int h = 1;
 
                                 BlockFace m = mask[n];
-                                if (m.block.custom)
+                                if (m.block.Custom)
                                 {
                                     // Only clear the mask when necessary
                                     if (!customBlockMaskInitialized)

@@ -32,7 +32,7 @@ public class ConnectedMeshBlock: CustomMeshBlock
         RenderGeometryBatcher batcher = chunk.GeometryHandler.Batcher;
         ChunkBlocks blocks = chunk.blocks;
 
-        if (connectedMeshConfig.connectsToSolid && blocks.GetBlock(localPos + dir).solid)
+        if (connectedMeshConfig.connectsToSolid && blocks.Get(localPos + dir).Solid)
         {
             texture = connectedMeshConfig.texture.GetTexture(chunk, localPos, dir);
             batcher.AddMeshData(connectedMeshConfig.directionalTris[dir], connectedMeshConfig.directionalVerts[dir], texture, localPos);

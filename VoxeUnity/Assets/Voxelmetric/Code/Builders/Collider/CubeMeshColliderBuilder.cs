@@ -97,9 +97,9 @@ namespace Voxelmetric.Code.Builders.Collider
                                 int realY = x[1];
                                 int realZ = x[2];
 
-                                bool voxelFace0 = blocks.GetBlock(new Vector3Int(realX, realY, realZ)).canBeWalkedOn;
+                                bool voxelFace0 = blocks.GetBlock(new Vector3Int(realX, realY, realZ)).CanBeWalkedOn;
                                 bool voxelFace1 =
-                                    blocks.GetBlock(new Vector3Int(realX+q[0], realY+q[1], realZ+q[2])).canBeWalkedOn;
+                                    blocks.GetBlock(new Vector3Int(realX+q[0], realY+q[1], realZ+q[2])).CanBeWalkedOn;
 
                                 mask[n++] = (!voxelFace0 || !voxelFace1) && (backFace ? voxelFace1 : voxelFace0);
                             }
