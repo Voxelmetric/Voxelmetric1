@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using JetBrains.Annotations;
+using UnityEngine;
 using UnityEngine.Assertions;
 using Voxelmetric.Code.Core;
 using Voxelmetric.Code.Data_types;
@@ -6,8 +7,14 @@ using Voxelmetric.Code.Load_Resources.Blocks;
 
 public class Block
 {
-    public ushort type;
     protected BlockConfig config;
+
+    public ushort type;
+    public string Name;
+    public bool Solid;
+    public bool CanBeWalkedOn;
+    public bool CanBeWalkedThrough;
+    public bool Custom;
 
     public Block()
     {
@@ -15,43 +22,23 @@ public class Block
         config = null;
     }
 
-    public void Init(int type, BlockConfig config)
+    public void Init(ushort type, BlockConfig config)
     {
         Assert.IsTrue(config!=null);
-        this.type = (ushort)type;
+        this.type = type;
         this.config = config;
-    }
 
-    public string Name
-    {
-        get { return config.name; }
+        Name = config.name;
+        Solid = config.solid;
+        CanBeWalkedOn = config.canBeWalkedOn;
+        CanBeWalkedThrough = config.canBeWalkedThrough;
+        Custom = config.custom;
     }
-
+    
     public virtual string DisplayName
     {
         get { return Name; }
     }
-
-    public bool Solid
-    {
-        get { return config.solid; }
-    }
-    
-    public bool CanBeWalkedOn
-    {
-        get { return config.canBeWalkedOn; }
-    }
-
-    public bool CanBeWalkedThrough
-    {
-        get { return config.canBeWalkedThrough; }
-    }
-
-    public bool Custom
-    {
-        get { return config.custom; }
-    }
-    
 
     public virtual void OnInit(BlockProvider blockProvider)
     {

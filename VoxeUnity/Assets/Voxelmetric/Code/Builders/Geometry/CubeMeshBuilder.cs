@@ -94,18 +94,18 @@ namespace Voxelmetric.Code.Builders.Geometry
                                 int realY = x[1];
                                 int realZ = x[2];
 
-                                Vector3Int pos0 = new Vector3Int(realX, realY, realZ);
-                                Vector3Int pos1 = new Vector3Int(realX+q[0], realY+q[1], realZ+q[2]);
+                                int index0 = Helpers.GetChunkIndex1DFrom3D(realX, realY, realZ);
+                                int index1 = Helpers.GetChunkIndex1DFrom3D(realX+q[0], realY+q[1], realZ+q[2]);
 
-                                Block voxelFace0 = blocks.GetBlock(pos0);
-                                Block voxelFace1 = blocks.GetBlock(pos1);
+                                Block voxelFace0 = blocks.GetBlock(index0);
+                                Block voxelFace1 = blocks.GetBlock(index1);
 
                                 mask[n++] = backFace
                                                 ? (voxelFace1.CanBuildFaceWith(voxelFace0)
                                                        ? new BlockFace
                                                        {
                                                            block = voxelFace1,
-                                                           pos = pos1,
+                                                           pos = new Vector3Int(realX+q[0], realY+q[1], realZ+q[2]),
                                                            side = dir
                                                        }
                                                        : new BlockFace())
@@ -113,7 +113,7 @@ namespace Voxelmetric.Code.Builders.Geometry
                                                        ? new BlockFace
                                                        {
                                                            block = voxelFace0,
-                                                           pos = pos0,
+                                                           pos = new Vector3Int(realX, realY, realZ),
                                                            side = dir
                                                        }
                                                        : new BlockFace());
@@ -139,7 +139,7 @@ namespace Voxelmetric.Code.Builders.Geometry
                             int i;
                             for (i = 0; i<width;)
                             {
-                                if (!mask[n].IsSet)
+                                if (mask[n].block==null)
                                 {
                                     i++;
                                     n++;

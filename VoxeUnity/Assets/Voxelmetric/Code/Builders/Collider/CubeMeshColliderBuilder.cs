@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using Voxelmetric.Code.Common;
 using Voxelmetric.Code.Common.MemoryPooling;
 using Voxelmetric.Code.Configurable.Blocks.Utilities;
 using Voxelmetric.Code.Core;
@@ -96,8 +97,10 @@ namespace Voxelmetric.Code.Builders.Collider
                                 int realY = x[1];
                                 int realZ = x[2];
 
-                                bool voxelFace0 = blocks.GetBlock(new Vector3Int(realX, realY, realZ)).CanBeWalkedOn;
-                                bool voxelFace1 = blocks.GetBlock(new Vector3Int(realX+q[0], realY+q[1], realZ+q[2])).CanBeWalkedOn;
+                                int index0 = Helpers.GetChunkIndex1DFrom3D(realX, realY, realZ);
+                                bool voxelFace0 = blocks.GetBlock(index0).CanBeWalkedOn;
+                                int index1 = Helpers.GetChunkIndex1DFrom3D(realX+q[0], realY+q[1], realZ+q[2]);
+                                bool voxelFace1 = blocks.GetBlock(index1).CanBeWalkedOn;
 
                                 mask[n++] = (!voxelFace0 || !voxelFace1) && (backFace ? voxelFace1 : voxelFace0);
                             }

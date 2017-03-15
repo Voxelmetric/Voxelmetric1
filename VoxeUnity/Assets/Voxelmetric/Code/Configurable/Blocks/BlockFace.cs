@@ -7,10 +7,5 @@ namespace Voxelmetric.Code.Configurable.Blocks
         public Block block;
         public Vector3Int pos;
         public Direction side;
-
-        public bool IsSet
-        {
-            get { return block != null; }
-        }
     }
 }
