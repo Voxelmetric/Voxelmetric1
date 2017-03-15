@@ -369,10 +369,11 @@ namespace Voxelmetric.Code.Core
         {
             // Nothing for us to do if there was no change
             BlockData oldBlockData = blocks[index];
-            if (oldBlockData.Type==blockData.Type)
+            ushort type = blockData.Type;
+            if (oldBlockData.Type==type)
                 return;
 
-            if (blockData.Type==BlockProvider.AirType)
+            if (type==BlockProvider.AirType)
                 --NonEmptyBlocks;
             else
                 ++NonEmptyBlocks;

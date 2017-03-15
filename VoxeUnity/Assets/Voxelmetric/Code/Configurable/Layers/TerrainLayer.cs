@@ -99,19 +99,22 @@ public abstract class TerrainLayer : IComparable, IEquatable<TerrainLayer>
     /// <param name="blockData">Block data to set</param>
     protected static void SetBlocks(Chunk chunk, int x, int z, int startPlaceHeight, int endPlaceHeight, BlockData blockData)
     {
-        int yMax = chunk.pos.y+Env.ChunkSize;
-        if (startPlaceHeight >= yMax || endPlaceHeight < chunk.pos.y)
-            return;
+        int chunkY = chunk.pos.y;
 
+        int yMax = chunkY + Env.ChunkSize;
+        if (startPlaceHeight >= yMax || endPlaceHeight < chunkY)
+            return;
+        
         if (endPlaceHeight < yMax)
             yMax = endPlaceHeight;
         int y = startPlaceHeight;
-        if (startPlaceHeight < chunk.pos.y)
-            y = chunk.pos.y;
-
+        if (startPlaceHeight < chunkY)
+            y = chunkY;
+        
+        ChunkBlocks blocks = chunk.blocks;
         while (y<yMax)
         {
-            chunk.blocks.SetInner(Helpers.GetChunkIndex1DFrom3D(x, y-chunk.pos.y, z), blockData);
+            blocks.SetInner(Helpers.GetChunkIndex1DFrom3D(x, y-chunkY, z), blockData);
             ++y;
         }
     }
