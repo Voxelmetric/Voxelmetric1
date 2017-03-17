@@ -318,7 +318,8 @@ namespace Voxelmetric.Code.Core.StateManager
         private static void OnLoadDataDone(ChunkStateManagerClient stateManager, bool success)
         {
             // Consume info about invalidated chunk
-            stateManager.chunk.blocks.recalculateBounds = false;
+            Chunk chunk = stateManager.chunk;
+            chunk.blocks.recalculateBounds = false;
 
             stateManager.m_completedStates = stateManager.m_completedStates.Set(CurrStateLoadData);
             if (success)
@@ -326,7 +327,7 @@ namespace Voxelmetric.Code.Core.StateManager
                 stateManager.m_completedStates = stateManager.m_completedStates.Set(ChunkState.CalculateBounds);
                 stateManager.m_nextState = NextStateLoadData;
             }
-            else if (stateManager.chunk.blocks.NonEmptyBlocks > 0)
+            else if (chunk.blocks.NonEmptyBlocks > 0)
             {
                 // There was an issue with loading the file. Recalculation of bounds will be necessary
                 stateManager.m_nextState = ChunkState.CalculateBounds;
@@ -344,16 +345,22 @@ namespace Voxelmetric.Code.Core.StateManager
             m_pendingStates = m_pendingStates.Reset(CurrStateLoadData | ChunkState.CalculateBounds);
             m_completedStates = m_completedStates.Reset(CurrStateLoadData | ChunkState.CalculateBounds);
             m_completedStatesSafe = m_completedStates;
-            
-            var task = Globals.MemPools.SMTaskPI.Pop();
-            m_poolState = m_poolState.Set(ChunkPoolItemState.TaskPI);
-            m_threadPoolItem = task;
-            task.Set(actionOnLoadData, this);
 
-            m_taskRunning = true;
-            IOPoolManager.Add(m_threadPoolItem);
+            if (Utilities.Core.UseSerialization)
+            {
+                var task = Globals.MemPools.SMTaskPI.Pop();
+                m_poolState = m_poolState.Set(ChunkPoolItemState.TaskPI);
+                m_threadPoolItem = task;
+                task.Set(actionOnLoadData, this);
 
-            return true;
+                m_taskRunning = true;
+                IOPoolManager.Add(m_threadPoolItem);
+
+                return true;
+            }
+
+            OnLoadDataDone(this, false);
+            return false;
         }
 
         #endregion Load chunk data
@@ -371,7 +378,8 @@ namespace Voxelmetric.Code.Core.StateManager
 
         private static void OnSaveDataDone(ChunkStateManagerClient stateManager)
         {
-            stateManager.m_stateExternal = ChunkStateExternal.Saved;
+            if (Utilities.Core.UseSerialization)
+                stateManager.m_stateExternal = ChunkStateExternal.Saved;
             stateManager.m_completedStates = stateManager.m_completedStates.Set(CurrStateSaveData);
             stateManager.m_taskRunning = false;
         }
@@ -385,16 +393,22 @@ namespace Voxelmetric.Code.Core.StateManager
             m_pendingStates = m_pendingStates.Reset(CurrStateSaveData);
             m_completedStates = m_completedStates.Reset(CurrStateSaveData);
             m_completedStatesSafe = m_completedStates;
-            
-            var task = Globals.MemPools.SMTaskPI.Pop();
-            m_poolState = m_poolState.Set(ChunkPoolItemState.TaskPI);
-            m_threadPoolItem = task;
-            task.Set(actionOnSaveData, this);
 
-            m_taskRunning = true;
-            IOPoolManager.Add(task);
+            if (Utilities.Core.UseSerialization)
+            {
+                var task = Globals.MemPools.SMTaskPI.Pop();
+                m_poolState = m_poolState.Set(ChunkPoolItemState.TaskPI);
+                m_threadPoolItem = task;
+                task.Set(actionOnSaveData, this);
 
-            return true;
+                m_taskRunning = true;
+                IOPoolManager.Add(task);
+
+                return true;
+            }
+
+            OnSaveDataDone(this);
+            return false;
         }
 
         #endregion Save chunk data

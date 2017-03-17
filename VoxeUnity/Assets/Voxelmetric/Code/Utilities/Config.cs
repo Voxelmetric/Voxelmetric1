@@ -11,8 +11,7 @@ namespace Voxelmetric.Code.Utilities
         public const int ChunkSizePow2 = ChunkSize*ChunkSize;
         public const int ChunkSizePow3 = ChunkSize*ChunkSizePow2;
         public const int ChunkMask = ChunkSize-1;
-
-
+        
         //! Internal chunk size including room for edge fields as well so that we do not have to check whether we are within chunk bounds.
         //! This means we will ultimately consume a bit more memory in exchange for more performance
         public const int ChunkPadding = 1;
@@ -34,6 +33,7 @@ namespace Voxelmetric.Code.Utilities
     {
         public const bool UseThreadPool = true;
         public const bool UseThreadedIO = true;
+        public const bool UseSerialization = true;
     }
 
     public static class Directories
