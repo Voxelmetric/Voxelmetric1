@@ -2,6 +2,7 @@
 using UnityEngine;
 using Voxelmetric.Code.Common.Memory;
 using Voxelmetric.Code.Configurable.Blocks;
+using Voxelmetric.Code.Data_types;
 using Voxelmetric.Code.Rendering;
 using Voxelmetric.Code.Utilities;
 using Voxelmetric.Code.Utilities.Noise;
@@ -14,7 +15,7 @@ namespace Voxelmetric.Code.Common.MemoryPooling
     public class LocalPools
     {
         public NoiseItem[] noiseItems;
-
+        
         public readonly ObjectPool<VertexData> VertexDataPool =
             new ObjectPool<VertexData>(ch => new VertexData(), 65535, false);
 
@@ -29,6 +30,9 @@ namespace Voxelmetric.Code.Common.MemoryPooling
 
         public readonly ArrayPoolCollection<bool> BoolArrayPool =
             new ArrayPoolCollection<bool>(128);
+
+        public readonly ArrayPoolCollection<byte> ByteArrayPool =
+            new ArrayPoolCollection<byte>(128);
 
         public readonly ArrayPoolCollection<float> FloatArrayPool =
             new ArrayPoolCollection<float>(128);

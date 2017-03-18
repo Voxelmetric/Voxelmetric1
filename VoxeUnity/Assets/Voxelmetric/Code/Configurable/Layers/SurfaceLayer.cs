@@ -14,7 +14,7 @@ public class SurfaceLayer : TerrainLayer
     protected override void SetUp(LayerConfig config)
     {
         Block block = world.blockProvider.GetBlock(properties["blockName"]);
-        blockToPlace = new BlockData(block.type, block.Solid);
+        blockToPlace = new BlockData(block.Type, block.Solid);
 
         if (properties.ContainsKey("blockColors"))
         {

@@ -71,6 +71,25 @@ namespace Voxelmetric.Code.Core
         }
 
         /// <summary>
+        /// Sets the block data at given world coordinates. It does not perform any logic. It simply sets to block
+        /// Use this function only for generating your terrain and structures
+        /// </summary>
+        /// <param name="pos">Global position of the block</param>
+        /// <param name="blockData">A block to be placed on a given position</param>
+        public void SetRaw(Vector3Int pos, BlockData blockData)
+        {
+            Chunk chunk = world.chunks.Get(pos);
+            if (chunk == null)
+                return;
+
+            int xx = pos.x & Env.ChunkMask;
+            int yy = pos.y & Env.ChunkMask;
+            int zz = pos.z & Env.ChunkMask;
+
+            chunk.blocks.SetRaw(Helpers.GetChunkIndex1DFrom3D(xx, yy, zz), blockData);
+        }
+
+        /// <summary>
         /// Sets blocks to a given value in a given range
         /// </summary>
         /// <param name="posFrom">Starting position in local chunk coordinates</param>

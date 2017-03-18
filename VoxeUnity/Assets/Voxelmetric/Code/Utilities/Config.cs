@@ -33,7 +33,14 @@ namespace Voxelmetric.Code.Utilities
     {
         public const bool UseThreadPool = true;
         public const bool UseThreadedIO = true;
+
+        //! If true, chunk serialization is enabled
         public const bool UseSerialization = true;
+        //! If true, only difference form default-generated data will be stored
+        //! If there is no change no serialization is performned unless UseDifferentialSerialization_ForceSaveHeaders is enabled
+        public const bool UseDifferentialSerialization = true;
+        //! If true, even if there is not difference in data, basic info about chunk structure will be stored
+        public const bool UseDifferentialSerialization_ForceSaveHeaders = false;
     }
 
     public static class Directories

@@ -7,7 +7,7 @@ namespace Voxelmetric.Code.Common.IO
     public static class StructSerialization
     {
         // A helpers class to help us get rid of the Marshal.SizeOf call which can be rather slow
-        internal static class TSSize<T> where T: struct
+        public static class TSSize<T> where T: struct
         {
             public static int ValueSize { get; private set; }
 
@@ -18,7 +18,7 @@ namespace Voxelmetric.Code.Common.IO
         }
 
         // Convert a struct to byte array
-        public static byte[] Serialize<T>(ref T data, MarshalMemPool pool) where T : struct
+        public static byte[] Serialize<T>(MarshalMemPool pool, ref T data) where T : struct
         {
             int objSize = TSSize<T>.ValueSize;
             byte[] ret = new byte[objSize];
@@ -34,7 +34,7 @@ namespace Voxelmetric.Code.Common.IO
         }
 
         // Convert a struct array to byte array
-        public static byte[] SerializeArray<T>(T[] data, MarshalMemPool pool) where T : struct
+        public static byte[] SerializeArray<T>(MarshalMemPool pool, T[] data) where T : struct
         {
             int objSize = TSSize<T>.ValueSize;
             int objArrSize = objSize * data.Length;
@@ -55,7 +55,7 @@ namespace Voxelmetric.Code.Common.IO
         }
 
         // Convert a byte array to a struct
-        public static T Deserialize<T>(byte[] data, MarshalMemPool pool) where T : struct
+        public static T Deserialize<T>(MarshalMemPool pool, byte[] data) where T : struct
         {
             //if(Marshal.SizeOf(typeof (T))<data.Length)
             //    throw new VoxeException("Input data too small");
@@ -72,24 +72,25 @@ namespace Voxelmetric.Code.Common.IO
         }
 
         // Convert a byte array to a struct array
-        public static T[] DeserializeArray<T>(byte[] data, MarshalMemPool pool) where T : struct
+        public static T[] DeserializeArray<T>(MarshalMemPool pool, byte[] data, int length=-1) where T : struct
         {
             //if (Marshal.SizeOf(typeof(T)) < data.Length)
             //    throw new VoxeException("Input data too small");
 
             int objSize = TSSize<T>.ValueSize;
-            int objArrSize = data.Length / objSize;
+            int len = (length<=0) ? data.Length : length;
+            int objArrSize = len/objSize;
 
             T[] ret = new T[objArrSize];
-            IntPtr buffer = pool.Pop(data.Length);
+            IntPtr buffer = pool.Pop(len);
 
-            Marshal.Copy(data, 0, buffer, data.Length);
+            Marshal.Copy(data, 0, buffer, len);
 
             long pBuffer = (long)buffer;
             for (int i = 0; i < objArrSize; i++, pBuffer += objSize)
                 ret[i] = (T)Marshal.PtrToStructure((IntPtr)pBuffer, typeof(T));
 
-            pool.Push(data.Length);
+            pool.Push(len);
 
             return ret;
         }

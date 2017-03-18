@@ -8,7 +8,7 @@ public class ConnectedMeshBlock: CustomMeshBlock
 {
     public ConnectedMeshBlockConfig connectedMeshConfig
     {
-        get { return (ConnectedMeshBlockConfig)config; }
+        get { return (ConnectedMeshBlockConfig)Config; }
     }
 
     public override void OnInit(BlockProvider blockProvider)

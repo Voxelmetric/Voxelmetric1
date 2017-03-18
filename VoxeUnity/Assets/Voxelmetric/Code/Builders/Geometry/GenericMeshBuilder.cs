@@ -17,7 +17,7 @@ namespace Voxelmetric.Code.Builders.Geometry
                         Vector3Int localVector3Int = new Vector3Int(x, y, z);
 
                         Block block = chunk.blocks.GetBlock(localVector3Int);
-                        if (block.type==BlockProvider.AirType)
+                        if (block.Type==BlockProvider.AirType)
                             continue;
 
                         block.BuildBlock(chunk, localVector3Int);

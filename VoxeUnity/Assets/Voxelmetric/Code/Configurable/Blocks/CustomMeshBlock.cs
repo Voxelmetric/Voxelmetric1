@@ -5,7 +5,7 @@ using Voxelmetric.Code.Rendering.GeometryBatcher;
 
 public class CustomMeshBlock : Block {
 
-    public CustomMeshBlockConfig customMeshConfig { get { return (CustomMeshBlockConfig)config; } }
+    public CustomMeshBlockConfig customMeshConfig { get { return (CustomMeshBlockConfig)Config; } }
 
     public override void BuildBlock(Chunk chunk, Vector3Int localPos)
     {

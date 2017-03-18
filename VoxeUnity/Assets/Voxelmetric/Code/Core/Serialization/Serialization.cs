@@ -1,5 +1,4 @@
 ﻿using System.IO;
-using Voxelmetric.Code.Common;
 using Voxelmetric.Code.Common.IO;
 using Voxelmetric.Code.Data_types;
 using Voxelmetric.Code.Utilities;
@@ -31,54 +30,16 @@ namespace Voxelmetric.Code.Core.Serialization
             return saveFile;
         }
 
-        public static bool SaveChunk(Chunk chunk)
+        public static bool Write(Save save)
         {
-            // Check for existing file.
-            Save existing = Read(chunk);
-            // Merge existing with present information
-            Save save = new Save(chunk, existing);
-            // Write
-            return Write(save);
+            string path = SaveFileName(save.Chunk);
+            return save.IsBinarizeNecessary() && FileHelpers.BinarizeToFile(path, save);
         }
 
-        public static bool LoadChunk(Chunk chunk)
+        public static bool Read(Save save)
         {
-            // Read file
-            Save save = Read(chunk);
-            if (save == null)
-                return false;
-
-            // Once the blocks in the save are added they're marked as unmodified so
-            // as not to trigger a new save on unload unless new blocks are added.
-            for (int i = 0; i<save.blocks.Length; i++)
-            {
-                BlockPos pos = save.positions[i];
-                chunk.blocks.SetInner(Helpers.GetChunkIndex1DFrom3D(pos.x, pos.y, pos.z), save.blocks[i]);
-            }
-
-            return true;
-        }
-
-        private static bool Write(Save save)
-        {
-            if (!save.changed)
-                return true;
-
-            string saveFile = SaveFileName(save.Chunk);
-            return FileHelpers.BinarizeToFile(saveFile, save);
-        }
-
-        private static Save Read(Chunk chunk)
-        {
-            string saveFile = SaveFileName(chunk);
-            if (!File.Exists(saveFile))
-                return null;
-
-            Save s = new Save(chunk);
-            if (!FileHelpers.DebinarizeFromFile(saveFile, s))
-                return null;
-
-            return s;
+            string path = SaveFileName(save.Chunk);
+            return FileHelpers.DebinarizeFromFile(path, save);
         }
     }
 }

@@ -78,9 +78,8 @@ namespace Voxelmetric.Code.Core
         /// <summary>Instantiates a new chunk at a given position. If the chunk already exists, it returns it</summary>
         /// <param name="pos">Position to create this chunk on in the world coordinates.</param>
         /// <param name="chunk">Chunk at a given world position</param>
-        /// <param name="isDedicated"></param>
         /// <returns>True if a new chunk was created. False otherwise</returns>
-        public bool CreateOrGetChunk(Vector3Int pos, out Chunk chunk, bool isDedicated)
+        public bool CreateOrGetChunk(Vector3Int pos, out Chunk chunk)
         {
             Assert.IsTrue(Helpers.IsMainThread);
             pos = Chunk.ContainingCoordinates(pos);
@@ -107,7 +106,7 @@ namespace Voxelmetric.Code.Core
                 return false;
 
             // Create a new chunk
-            chunk = Chunk.CreateChunk(world, pos, isDedicated);
+            chunk = Chunk.CreateChunk(world, pos);
             chunks.Add(pos, chunk);
             return true;
         }

@@ -133,6 +133,7 @@ namespace Voxelmetric.Code.Core
             m_listenersExternal.TryGetValue(evt, out evtListeners);
 
             // Add/remove listener if possible
+            Assert.IsTrue(evtListeners!=null);
             bool listenerRegistered = evtListeners.Contains(listener);
             if (register && !listenerRegistered)
             {
@@ -155,6 +156,7 @@ namespace Voxelmetric.Code.Core
             m_listenersExternal.TryGetValue(evt, out evtListeners);
 
             // Nofity each listener
+            Assert.IsTrue(evtListeners!=null);
             for (int i = 0; i < evtListeners.Count; i++)
             {
                 IEventListener<ChunkStateExternal> listener = evtListeners[i];
@@ -169,6 +171,7 @@ namespace Voxelmetric.Code.Core
             m_listenersExternal.TryGetValue(evt, out evtListeners);
 
             // Notify our listener
+            Assert.IsTrue(evtListeners!=null);
             for (int i = 0; i < evtListeners.Count; i++)
             {
                 IEventListener<ChunkStateExternal> l = evtListeners[i];

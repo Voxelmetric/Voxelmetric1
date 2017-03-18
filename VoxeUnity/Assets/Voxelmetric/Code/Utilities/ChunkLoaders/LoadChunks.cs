@@ -307,7 +307,7 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
                         
                     // Create and register chunks
                     Chunk chunk;
-                    if (!world.chunks.CreateOrGetChunk(newChunkPos, out chunk, false))
+                    if (!world.chunks.CreateOrGetChunk(newChunkPos, out chunk))
                         continue;
 
                     if (FullLoadOnStartUp)

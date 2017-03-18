@@ -23,9 +23,9 @@ public class StructureTree: GeneratedStructure
     {
         blocks = world.blocks;
         Block blk = world.blockProvider.GetBlock("leaves");
-        leaves = new BlockData(blk.type, blk.Solid);
+        leaves = new BlockData(blk.Type, blk.Solid);
         blk = world.blockProvider.GetBlock("log");
-        log = new BlockData(blk.type, blk.Solid);
+        log = new BlockData(blk.Type, blk.Solid);
     }
 
     public override void Build(World world, Vector3Int pos, TerrainLayer layer)
@@ -46,16 +46,16 @@ public class StructureTree: GeneratedStructure
                 {
                     if (x*x*a2inv +z*z*a2inv + y*y*b2inv<=1.0f) // An ellipsoid flattened on the y axis
                     {
-                        blocks.Set(pos.Add(x, y+trunkHeight, z), leaves);
+                        blocks.SetRaw(pos.Add(x, y+trunkHeight, z), leaves);
                     }
                 }
             }
         }
 
-        blocks.Set(pos, log);
+        blocks.SetRaw(pos, log);
         for (int y = 1; y <= trunkHeight; y++)
         {
-            blocks.Set(pos.Add(0, y, 0), log);
+            blocks.SetRaw(pos.Add(0, y, 0), log);
         }
     }
 }

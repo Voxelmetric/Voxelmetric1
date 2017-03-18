@@ -65,7 +65,7 @@ namespace Voxelmetric.Examples
                 Block block = world.blockProvider.GetBlock(blockToPlace);
                 VmRaycastHit hit = Code.Voxelmetric.Raycast(
                     new Ray(cam.transform.position, mousePos-cam.transform.position),
-                    world, 100, block.type==BlockProvider.AirType
+                    world, 100, block.Type==BlockProvider.AirType
                     );
 
                 // Display the type of the selected block
@@ -79,10 +79,10 @@ namespace Voxelmetric.Examples
                 // Clicking voxel blocks
                 if (Input.GetMouseButtonDown(0) && eventSystem!=null && !eventSystem.IsPointerOverGameObject())
                 {
-                    if (hit.block.type!=BlockProvider.AirType)
+                    if (hit.block.Type!=BlockProvider.AirType)
                     {
-                        bool adjacent = block.type!=BlockProvider.AirType;
-                        Code.Voxelmetric.SetBlock(world, adjacent ? hit.adjacentPos : hit.vector3Int, new BlockData(block.type, block.Solid));
+                        bool adjacent = block.Type!=BlockProvider.AirType;
+                        Code.Voxelmetric.SetBlock(world, adjacent ? hit.adjacentPos : hit.vector3Int, new BlockData(block.Type, block.Solid));
                     }
                 }
 

@@ -21,7 +21,7 @@ namespace Voxelmetric.Code.Core
 
 
         //! Number of blocks which are not air (non-empty blocks)
-        public int NonEmptyBlocks = 0;
+        public int NonEmptyBlocks;
 
         //! Queue of setBlock operations to execute
         private readonly List<SetBlockContext> m_setBlockQueue = new List<SetBlockContext>();
@@ -62,10 +62,10 @@ namespace Voxelmetric.Code.Core
         {
             Array.Copy(src.blocks, srcIndex, blocks, dstIndex, length);
         }
-
+        
         public void Reset()
         {
-            NonEmptyBlocks = 0;
+            NonEmptyBlocks = -1;
             // Reset internal parts of the chunk buffer. Edges not touched
             Array.Clear(blocks, 0, Env.ChunkSizeWithPaddingPow3);
 
@@ -84,6 +84,26 @@ namespace Voxelmetric.Code.Core
             // Request collider update if there is no request yet
             if (rebuildMaskCollider<0)
                 rebuildMaskCollider = 0;
+        }
+
+        public void CalculateEmptyBlocks()
+        {
+            if (NonEmptyBlocks>=0)
+                return;
+            NonEmptyBlocks = 0;
+
+            for (int y = 0; y<Env.ChunkSize; y++)
+            {
+                for (int z = 0; z<Env.ChunkSize; z++)
+                {
+                    for (int x = 0; x<Env.ChunkSize; x++)
+                    {
+                        int index = Helpers.GetChunkIndex1DFrom3D(x, y, z);
+                        if (blocks[index].Type!=BlockProvider.AirType)
+                            ++NonEmptyBlocks;
+                    }
+                }
+            }
         }
 
         private void ProcessSetBlockQueue(BlockData block, int index, bool setBlockModified)
@@ -382,11 +402,12 @@ namespace Voxelmetric.Code.Core
         }
 
         /// <summary>
-        /// Sets the block at the given position. The position is guaranteed to be inside chunk's padded area
+        /// Sets the block at the given position. It does not perform any logic. It simply sets to block
+        /// Use this function only for generating your terrain and structures
         /// </summary>
         /// <param name="index">Index in local chunk data</param>
         /// <param name="blockData">A block to be placed on a given position</param>
-        public void SetPadded(int index, BlockData blockData)
+        public void SetRaw(int index, BlockData blockData)
         {
             blocks[index] = blockData;
         }
@@ -452,14 +473,11 @@ namespace Voxelmetric.Code.Core
                 if (chunk.world.networking.allowConnections)
                     chunk.world.networking.server.BroadcastChange(globalPos, blockData, -1);
 
-                // Performing following checks would be super performance unfriendly. Modified blocks
-                // is now used during serialization of chunks anyway and uses a map there to filter out
-                // duplicates taking O(n logn) instead of O(n) here.
-                // TODO: Remove this altogether because this whole modifiedBlocks only unnecessarily
-                // increases memory requirements. Rather then doing this, a proper compression should
-                // be implemented
-                //if (!modifiedBlocks.Contains(blockPos))
+                if (Utilities.Core.UseSerialization && Utilities.Core.UseDifferentialSerialization)
+                {
+                    // TODO: Memory unfriendly. Rethink the strategy
                     modifiedBlocks.Add(blockPos);
+                }
             }
             else // if this is not the server send the change to the server to sync
             {

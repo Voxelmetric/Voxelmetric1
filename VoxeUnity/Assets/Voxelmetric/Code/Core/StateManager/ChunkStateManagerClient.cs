@@ -35,8 +35,10 @@ namespace Voxelmetric.Code.Core.StateManager
         //! State to notify external listeners about
         private ChunkStateExternal m_stateExternal;
         
+        //! If true, edges are to be synchronized with neighbor chunks
         private bool m_syncEdgeBlocks;
-        
+
+        //! Static shared pointers to callbacks
         private static readonly Action<ChunkStateManagerClient> actionOnGenerateData = OnGenerateData;
         private static readonly Action<ChunkStateManagerClient> actionOnCalculateGeometryBounds = OnCalculateGeometryBounds;
         private static readonly Action<ChunkStateManagerClient> actionOnGenerateVertices = OnGenerateVertices;
@@ -45,9 +47,9 @@ namespace Voxelmetric.Code.Core.StateManager
         private static readonly Action<ChunkStateManagerClient> actionOnSaveData = OnSaveData;
 
         //! Flags telling us whether pool items should be returned back to the pool
-        protected ChunkPoolItemState m_poolState;
-        protected ITaskPoolItem m_threadPoolItem;
-
+        private ChunkPoolItemState m_poolState;
+        private ITaskPoolItem m_threadPoolItem;
+        
         public ChunkStateManagerClient(Chunk chunk) : base(chunk)
         {
         }
@@ -131,9 +133,9 @@ namespace Voxelmetric.Code.Core.StateManager
                 m_stateExternal = ChunkStateExternal.None;
             }
 
-            // If removal was requested before we got to generating the chunk at all we can safely mark
+            // If removal was requested before we got to loading the chunk at all we can safely mark
             // it as removed right away
-            if (m_removalRequested && !m_completedStates.Check(ChunkState.Generate))
+            if (m_removalRequested && !m_completedStates.Check(ChunkState.LoadData))
             {
                 m_completedStates = m_completedStates.Set(ChunkState.Remove);
                 return;
@@ -150,13 +152,13 @@ namespace Voxelmetric.Code.Core.StateManager
                 // In order to save performance, we generate chunk data on-demand - when the chunk can be seen
                 if (PossiblyVisible)
                 {
-                    if (m_pendingStates.Check(ChunkState.Generate) && GenerateData())
+                    if (m_pendingStates.Check(ChunkState.LoadData) && LoadData())
                         return;
 
                     ProcessNotifyState();
                 }
-
-                if (m_pendingStates.Check(ChunkState.LoadData) && LoadData())
+                
+                if (m_pendingStates.Check(ChunkState.Generate) && GenerateData())
                     return;
 
                 ProcessNotifyState();
@@ -220,7 +222,7 @@ namespace Voxelmetric.Code.Core.StateManager
 
         private bool CalculateBounds()
         {
-            if (!m_completedStates.Check(ChunkState.LoadData))
+            if (!m_completedStates.Check(ChunkState.Generate))
                 return true;
 
             m_pendingStates = m_pendingStates.Reset(CurrStateCalculateBounds);
@@ -252,12 +254,19 @@ namespace Voxelmetric.Code.Core.StateManager
         #region Generate Chunk data
 
         private static readonly ChunkState CurrStateGenerateData = ChunkState.Generate;
-        private static readonly ChunkState NextStateGenerateData = ChunkState.LoadData;
+        private static readonly ChunkState NextStateGenerateData = ChunkState.BuildVertices;
 
         private static void OnGenerateData(ChunkStateManagerClient stateManager)
         {
             Chunk chunk = stateManager.chunk;
             chunk.world.terrainGen.GenerateTerrain(chunk);
+
+            // Commit serialization changes if any
+            if (Utilities.Core.UseSerialization)
+                stateManager.m_save.CommitChanges();
+
+            // Calculate the amount of non-empty blocks
+            chunk.blocks.CalculateEmptyBlocks();
 
             OnGenerateDataDone(stateManager);
         }
@@ -277,27 +286,21 @@ namespace Voxelmetric.Code.Core.StateManager
 
         private bool GenerateData()
         {
+            if (!m_completedStates.Check(ChunkState.LoadData))
+                return true;
+
             m_pendingStates = m_pendingStates.Reset(CurrStateGenerateData);
-            m_completedStates = m_completedStates.Reset(CurrStateGenerateData | CurrStateLoadData);
+            m_completedStates = m_completedStates.Reset(CurrStateGenerateData);
             m_completedStatesSafe = m_completedStates;
             
-            if (chunk.world.networking.isServer)
-            {
-                // Let server generate chunk data
-                var task = Globals.MemPools.SMThreadPI.Pop();
-                m_poolState = m_poolState.Set(ChunkPoolItemState.ThreadPI);
-                m_threadPoolItem = task;
+            var task = Globals.MemPools.SMThreadPI.Pop();
+            m_poolState = m_poolState.Set(ChunkPoolItemState.ThreadPI);
+            m_threadPoolItem = task;
                 
-                task.Set(chunk.ThreadID, actionOnGenerateData, this);
+            task.Set(chunk.ThreadID, actionOnGenerateData, this);
 
-                m_taskRunning = true;
-                WorkPoolManager.Add(task);
-            }
-            else
-            {
-                // Client only asks for data
-                chunk.world.networking.client.RequestChunk(chunk.pos);
-            }
+            m_taskRunning = true;
+            WorkPoolManager.Add(task);
 
             return true;
         }
@@ -307,11 +310,11 @@ namespace Voxelmetric.Code.Core.StateManager
         #region Load chunk data
 
         private static readonly ChunkState CurrStateLoadData = ChunkState.LoadData;
-        private static readonly ChunkState NextStateLoadData = ChunkState.BuildVertices;
+        private static readonly ChunkState NextStateLoadData = ChunkState.Generate;
 
         private static void OnLoadData(ChunkStateManagerClient stateManager)
         {
-            bool success = Serialization.Serialization.LoadChunk(stateManager.chunk);
+            bool success = Serialization.Serialization.Read(stateManager.m_save);
             OnLoadDataDone(stateManager, success);
         }
 
@@ -319,19 +322,26 @@ namespace Voxelmetric.Code.Core.StateManager
         {
             // Consume info about invalidated chunk
             Chunk chunk = stateManager.chunk;
-            chunk.blocks.recalculateBounds = false;
-
             stateManager.m_completedStates = stateManager.m_completedStates.Set(CurrStateLoadData);
+            
             if (success)
             {
-                stateManager.m_completedStates = stateManager.m_completedStates.Set(ChunkState.CalculateBounds);
-                stateManager.m_nextState = NextStateLoadData;
+                chunk.blocks.recalculateBounds = false;
+
+                if (stateManager.m_save.IsDifferential)
+                {
+                    stateManager.m_completedStates = stateManager.m_completedStates.Set(ChunkState.CalculateBounds);
+                    stateManager.m_nextState = NextStateLoadData;
+                }
+                else
+                {
+                    stateManager.m_completedStates = stateManager.m_completedStates.Set(ChunkState.CalculateBounds | ChunkState.Generate);
+                    stateManager.m_nextState = ChunkState.BuildVertices;
+                }
             }
-            else if (chunk.blocks.NonEmptyBlocks > 0)
+            else
             {
-                // There was an issue with loading the file. Recalculation of bounds will be necessary
-                stateManager.m_nextState = ChunkState.CalculateBounds;
-                stateManager.RequestState(NextStateLoadData);
+                stateManager.m_nextState = NextStateLoadData;
             }
             
             stateManager.m_taskRunning = false;
@@ -339,11 +349,8 @@ namespace Voxelmetric.Code.Core.StateManager
 
         private bool LoadData()
         {
-            if (!m_completedStates.Check(ChunkState.Generate))
-                return true;
-
-            m_pendingStates = m_pendingStates.Reset(CurrStateLoadData | ChunkState.CalculateBounds);
-            m_completedStates = m_completedStates.Reset(CurrStateLoadData | ChunkState.CalculateBounds);
+            m_pendingStates = m_pendingStates.Reset(CurrStateLoadData);
+            m_completedStates = m_completedStates.Reset(CurrStateLoadData);
             m_completedStatesSafe = m_completedStates;
 
             if (Utilities.Core.UseSerialization)
@@ -371,23 +378,30 @@ namespace Voxelmetric.Code.Core.StateManager
 
         private static void OnSaveData(ChunkStateManagerClient stateManager)
         {
-            Serialization.Serialization.SaveChunk(stateManager.chunk);
-
-            OnSaveDataDone(stateManager);
+            bool success = Serialization.Serialization.Write(stateManager.m_save);
+            OnSaveDataDone(stateManager, success);
         }
 
-        private static void OnSaveDataDone(ChunkStateManagerClient stateManager)
+        private static void OnSaveDataDone(ChunkStateManagerClient stateManager, bool success)
         {
             if (Utilities.Core.UseSerialization)
-                stateManager.m_stateExternal = ChunkStateExternal.Saved;
+            {
+                if(success)
+                    // Notify listeners in case of success
+                    stateManager.m_stateExternal = ChunkStateExternal.Saved;
+                else
+                    // Free temporary memory in case of failure
+                    stateManager.m_save.MaskAsProcessed();
+            }
+
             stateManager.m_completedStates = stateManager.m_completedStates.Set(CurrStateSaveData);
             stateManager.m_taskRunning = false;
         }
 
         private bool SaveData()
         {
-            // We need to wait until chunk is generated and data finalized
-            if (!m_completedStates.Check(ChunkState.Generate) || !m_completedStates.Check(ChunkState.LoadData))
+            // We need to wait until chunk is generated
+            if (!m_completedStates.Check(ChunkState.Generate))
                 return true;
 
             m_pendingStates = m_pendingStates.Reset(CurrStateSaveData);
@@ -396,6 +410,8 @@ namespace Voxelmetric.Code.Core.StateManager
 
             if (Utilities.Core.UseSerialization)
             {
+                m_save.ConsumeChanges();
+
                 var task = Globals.MemPools.SMTaskPI.Pop();
                 m_poolState = m_poolState.Set(ChunkPoolItemState.TaskPI);
                 m_threadPoolItem = task;
@@ -407,7 +423,7 @@ namespace Voxelmetric.Code.Core.StateManager
                 return true;
             }
 
-            OnSaveDataDone(this);
+            OnSaveDataDone(this, false);
             return false;
         }
 
@@ -419,11 +435,11 @@ namespace Voxelmetric.Code.Core.StateManager
             if (ListenerCount != 6)
                 return false;
 
-            // All neighbors have to have their data loaded
+            // All neighbors have to have their data generated
             for (int i = 0; i<Listeners.Length; i++)
             {
                 var stateManager = (ChunkStateManagerClient)Listeners[i];
-                if (!stateManager.m_completedStates.Check(ChunkState.LoadData))
+                if (!stateManager.m_completedStates.Check(ChunkState.Generate))
                     return false;
             }
 
@@ -470,7 +486,7 @@ namespace Voxelmetric.Code.Core.StateManager
                         for (int x = -1; x<Env.ChunkSizePlusPadding; x++)
                         {
                             BlockData data = neighborChunk.blocks.Get(Helpers.GetChunkIndex1DFrom3D(x, -1, 0));
-                            chunk.blocks.SetPadded(Helpers.GetChunkIndex1DFrom3D(x, -1, Env.ChunkSize), data);
+                            chunk.blocks.SetRaw(Helpers.GetChunkIndex1DFrom3D(x, -1, Env.ChunkSize), data);
                         }
 
                         // Padded area - sides
@@ -479,7 +495,7 @@ namespace Voxelmetric.Code.Core.StateManager
                             for (int x = -1; x<Env.ChunkSizePlusPadding; x++)
                             {
                                 BlockData data = neighborChunk.blocks.Get(Helpers.GetChunkIndex1DFrom3D(x, y, 0));
-                                chunk.blocks.SetPadded(Helpers.GetChunkIndex1DFrom3D(x, y, Env.ChunkSize), data);
+                                chunk.blocks.SetRaw(Helpers.GetChunkIndex1DFrom3D(x, y, Env.ChunkSize), data);
                             }
                         }
 
@@ -487,7 +503,7 @@ namespace Voxelmetric.Code.Core.StateManager
                         for (int x = -1; x < Env.ChunkSizePlusPadding; x++)
                         {
                             BlockData data = neighborChunk.blocks.Get(Helpers.GetChunkIndex1DFrom3D(x, Env.ChunkSize, 0));
-                            chunk.blocks.SetPadded(Helpers.GetChunkIndex1DFrom3D(x, Env.ChunkSize, Env.ChunkSize), data);
+                            chunk.blocks.SetRaw(Helpers.GetChunkIndex1DFrom3D(x, Env.ChunkSize, Env.ChunkSize), data);
                         }
                     }
                     // Copy the top back layer of a neighbor chunk to the front layer of ours
@@ -497,7 +513,7 @@ namespace Voxelmetric.Code.Core.StateManager
                         for (int x = -1; x < Env.ChunkSizePlusPadding; x++)
                         {
                             BlockData data = neighborChunk.blocks.Get(Helpers.GetChunkIndex1DFrom3D(x, -1, Env.ChunkMask));
-                            chunk.blocks.SetPadded(Helpers.GetChunkIndex1DFrom3D(x, -1, -1), data);
+                            chunk.blocks.SetRaw(Helpers.GetChunkIndex1DFrom3D(x, -1, -1), data);
                         }
 
                         // Padded area - sides
@@ -506,7 +522,7 @@ namespace Voxelmetric.Code.Core.StateManager
                             for (int x = -1; x<Env.ChunkSizePlusPadding; x++)
                             {
                                 BlockData data = neighborChunk.blocks.Get(Helpers.GetChunkIndex1DFrom3D(x, y, Env.ChunkMask));
-                                chunk.blocks.SetPadded(Helpers.GetChunkIndex1DFrom3D(x, y, -1), data);
+                                chunk.blocks.SetRaw(Helpers.GetChunkIndex1DFrom3D(x, y, -1), data);
                             }
                         }
 
@@ -514,7 +530,7 @@ namespace Voxelmetric.Code.Core.StateManager
                         for (int x = -1; x < Env.ChunkSizePlusPadding; x++)
                         {
                             BlockData data = neighborChunk.blocks.Get(Helpers.GetChunkIndex1DFrom3D(x, Env.ChunkSize, Env.ChunkMask));
-                            chunk.blocks.SetPadded(Helpers.GetChunkIndex1DFrom3D(x, Env.ChunkSize, -1), data);
+                            chunk.blocks.SetRaw(Helpers.GetChunkIndex1DFrom3D(x, Env.ChunkSize, -1), data);
                         }
                     }
                 }
@@ -530,7 +546,7 @@ namespace Voxelmetric.Code.Core.StateManager
                         for (int z = -1; z<Env.ChunkSizePlusPadding; z++)
                         {
                             BlockData data = neighborChunk.blocks.Get(Helpers.GetChunkIndex1DFrom3D(0, -1, z));
-                            chunk.blocks.SetPadded(Helpers.GetChunkIndex1DFrom3D(Env.ChunkSize, -1, z), data);
+                            chunk.blocks.SetRaw(Helpers.GetChunkIndex1DFrom3D(Env.ChunkSize, -1, z), data);
                         }
 
                         // Padded area - sides
@@ -539,7 +555,7 @@ namespace Voxelmetric.Code.Core.StateManager
                             for (int z = -1; z<Env.ChunkSizePlusPadding; z++)
                             {
                                 BlockData data = neighborChunk.blocks.Get(Helpers.GetChunkIndex1DFrom3D(0, y, z));
-                                chunk.blocks.SetPadded(Helpers.GetChunkIndex1DFrom3D(Env.ChunkSize, y, z), data);
+                                chunk.blocks.SetRaw(Helpers.GetChunkIndex1DFrom3D(Env.ChunkSize, y, z), data);
                             }
                         }
 
@@ -547,7 +563,7 @@ namespace Voxelmetric.Code.Core.StateManager
                         for (int z = -1; z < Env.ChunkSizePlusPadding; z++)
                         {
                             BlockData data = neighborChunk.blocks.Get(Helpers.GetChunkIndex1DFrom3D(0, Env.ChunkSize, z));
-                            chunk.blocks.SetPadded(Helpers.GetChunkIndex1DFrom3D(Env.ChunkSize, Env.ChunkSize, z), data);
+                            chunk.blocks.SetRaw(Helpers.GetChunkIndex1DFrom3D(Env.ChunkSize, Env.ChunkSize, z), data);
                         }
                     }
                     // Copy the left layer of a neighbor chunk to the right layer of ours
@@ -557,7 +573,7 @@ namespace Voxelmetric.Code.Core.StateManager
                         for (int z = -1; z<Env.ChunkSizePlusPadding; z++)
                         {
                             BlockData data = neighborChunk.blocks.Get(Helpers.GetChunkIndex1DFrom3D(Env.ChunkMask, -1, z));
-                            chunk.blocks.SetPadded(Helpers.GetChunkIndex1DFrom3D(-1, -1, z), data);
+                            chunk.blocks.SetRaw(Helpers.GetChunkIndex1DFrom3D(-1, -1, z), data);
                         }
 
                         // Padded area - sides
@@ -566,7 +582,7 @@ namespace Voxelmetric.Code.Core.StateManager
                             for (int z = -1; z<Env.ChunkSizePlusPadding; z++)
                             {
                                 BlockData data = neighborChunk.blocks.Get(Helpers.GetChunkIndex1DFrom3D(Env.ChunkMask, y, z));
-                                chunk.blocks.SetPadded(Helpers.GetChunkIndex1DFrom3D(-1, y, z), data);
+                                chunk.blocks.SetRaw(Helpers.GetChunkIndex1DFrom3D(-1, y, z), data);
                             }
                         }
 
@@ -574,7 +590,7 @@ namespace Voxelmetric.Code.Core.StateManager
                         for (int z = -1; z < Env.ChunkSizePlusPadding; z++)
                         {
                             BlockData data = neighborChunk.blocks.Get(Helpers.GetChunkIndex1DFrom3D(Env.ChunkMask, Env.ChunkSize, z));
-                            chunk.blocks.SetPadded(Helpers.GetChunkIndex1DFrom3D(-1, Env.ChunkSize, z), data);
+                            chunk.blocks.SetRaw(Helpers.GetChunkIndex1DFrom3D(-1, Env.ChunkSize, z), data);
                         }
                     }
                 }
@@ -642,7 +658,7 @@ namespace Voxelmetric.Code.Core.StateManager
         /// </summary>
         private bool GenerateCollider()
         {
-            if (!m_completedStates.Check(ChunkState.LoadData))
+            if (!m_completedStates.Check(ChunkState.Generate))
                 return true;
 
             if (!SynchronizeChunk())
@@ -702,7 +718,7 @@ namespace Voxelmetric.Code.Core.StateManager
         /// </summary>
         private bool GenerateVertices()
         {
-            if (!m_completedStates.Check(ChunkState.LoadData))
+            if (!m_completedStates.Check(ChunkState.Generate))
                 return true;
 
             if (!SynchronizeChunk())
@@ -745,12 +761,12 @@ namespace Voxelmetric.Code.Core.StateManager
 
         private bool RemoveChunk()
         {
-            // If chunk was generated we need to wait for other states with higher priority to finish first
-            if (m_completedStates.Check(ChunkState.Generate))
+            // If chunk was loaded we need to wait for other states with higher priority to finish first
+            if (m_completedStates.Check(ChunkState.LoadData))
             {
                 if (!m_completedStates.Check(
-                    // Wait until chunk is loaded
-                    ChunkState.LoadData|
+                    // Wait until chunk is generated
+                    ChunkState.Generate|
                     // Wait until chunk data is stored
                     ChunkState.SaveData
                     ))

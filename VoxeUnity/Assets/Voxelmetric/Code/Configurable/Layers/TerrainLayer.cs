@@ -114,7 +114,7 @@ public abstract class TerrainLayer : IComparable, IEquatable<TerrainLayer>
         ChunkBlocks blocks = chunk.blocks;
         while (y<yMax)
         {
-            blocks.SetInner(Helpers.GetChunkIndex1DFrom3D(x, y-chunkY, z), blockData);
+            blocks.SetRaw(Helpers.GetChunkIndex1DFrom3D(x, y-chunkY, z), blockData);
             ++y;
         }
     }

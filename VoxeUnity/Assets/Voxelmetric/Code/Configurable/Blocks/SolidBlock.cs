@@ -8,7 +8,7 @@ public class SolidBlock : Block
         if (adjacentBlock.Solid)
             return !Solid;
 
-        return Solid || adjacentBlock.type!=type;
+        return Solid || adjacentBlock.Type!=Type;
     }
 
     public override void BuildBlock(Chunk chunk, Vector3Int localPos)

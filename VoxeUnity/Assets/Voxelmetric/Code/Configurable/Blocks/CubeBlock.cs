@@ -10,7 +10,7 @@ public class CubeBlock: SolidBlock
 
     public TextureCollection[] textures
     {
-        get { return ((CubeBlockConfig)config).textures; }
+        get { return ((CubeBlockConfig)Config).textures; }
     }
 
     public override void BuildFace(Chunk chunk, Vector3Int localPos, Vector3[] vertices, Direction direction)

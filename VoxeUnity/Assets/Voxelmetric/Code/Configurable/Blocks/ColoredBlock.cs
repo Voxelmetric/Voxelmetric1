@@ -8,7 +8,7 @@ using Voxelmetric.Code.Rendering;
 public class ColoredBlock : SolidBlock {
 
     public Color color;
-    public TextureCollection texture { get { return ((ColoredBlockConfig)config).texture; } }
+    public TextureCollection texture { get { return ((ColoredBlockConfig)Config).texture; } }
 
     public override void BuildFace(Chunk chunk, Vector3Int localPos, Vector3[] vertices, Direction direction)
     {

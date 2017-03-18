@@ -7,9 +7,9 @@ using Voxelmetric.Code.Load_Resources.Blocks;
 
 public class Block
 {
-    protected BlockConfig config;
+    protected BlockConfig Config;
 
-    public ushort type;
+    public ushort Type;
     public string Name;
     public bool Solid;
     public bool CanBeWalkedOn;
@@ -18,15 +18,14 @@ public class Block
 
     public Block()
     {
-        type = 0;
-        config = null;
+        Type = 0;
+        Config = null;
     }
 
-    public void Init(ushort type, BlockConfig config)
+    public void Init(ushort type, [NotNull] BlockConfig config)
     {
-        Assert.IsTrue(config!=null);
-        this.type = type;
-        this.config = config;
+        Type = type;
+        Config = config;
 
         Name = config.name;
         Solid = config.solid;
@@ -50,7 +49,7 @@ public class Block
 
     public virtual bool CanBuildFaceWith(Block adjacentBlock)
     {
-        return config.custom; // custom blocks will be considered as able to create face with others by default
+        return Config.custom; // custom blocks will be considered as able to create face with others by default
     }
 
     public virtual bool CanMergeFaceWith(Block adjacentBlock)
@@ -80,7 +79,7 @@ public class Block
 
     public virtual bool RaycastHit(Vector3 pos, Vector3 dir, Vector3Int bPos, bool removalRequested)
     {
-        return removalRequested ? config.raycastHitOnRemoval : config.raycastHit;
+        return removalRequested ? Config.raycastHitOnRemoval : Config.raycastHit;
     }
 
     public override string ToString()

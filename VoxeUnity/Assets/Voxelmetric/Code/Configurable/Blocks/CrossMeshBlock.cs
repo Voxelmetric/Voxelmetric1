@@ -5,7 +5,7 @@ using Voxelmetric.Code.Load_Resources.Textures;
 
 public class CrossMeshBlock : Block
 {
-    public TextureCollection texture { get { return ((CrossMeshBlockConfig)config).texture; } }
+    public TextureCollection texture { get { return ((CrossMeshBlockConfig)Config).texture; } }
     
     public override void BuildBlock(Chunk chunk, Vector3Int localPos)
     {

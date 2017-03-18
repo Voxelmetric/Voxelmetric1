@@ -1,14 +1,17 @@
 ﻿using Voxelmetric.Code.Common.Extensions;
+using Voxelmetric.Code.Core.Serialization;
 
 namespace Voxelmetric.Code.Core.StateManager
 {
-    public abstract class ChunkStateManager: ChunkEvent, IChunkStateManager
+    public abstract class ChunkStateManager: ChunkEvent
     {
         public Chunk chunk { get; private set; }
+        
+        //! Save handler for chunk
+        protected readonly Save m_save;
 
         //! Specifies whether there's a task running on this Chunk
         protected volatile bool m_taskRunning;
-
         //! Next state after currently finished state
         protected ChunkState m_nextState;
         //! States waiting to be processed
@@ -24,12 +27,14 @@ namespace Voxelmetric.Code.Core.StateManager
         protected ChunkStateManager(Chunk chunk)
         {
             this.chunk = chunk;
+            if(Utilities.Core.UseSerialization)
+                m_save = new Save(chunk);
         }
 
         public virtual void Init()
         {
             // Request this chunk to be generated
-            OnNotified(this, ChunkState.Generate);
+            OnNotified(this, ChunkState.LoadData);
         }
 
         public virtual void Reset()
@@ -43,6 +48,9 @@ namespace Voxelmetric.Code.Core.StateManager
             m_removalRequested = false;
 
             m_taskRunning = false;
+
+            if (m_save!=null)
+                m_save.Reset();
         }
 
         public bool CanUpdate()
@@ -73,7 +81,7 @@ namespace Voxelmetric.Code.Core.StateManager
                     if (m_removalRequested)
                         return;
                     m_removalRequested = true;
-
+                    
                     OnNotified(this, ChunkState.SaveData);
                     OnNotified(this, ChunkState.Remove);
                 }
@@ -96,7 +104,7 @@ namespace Voxelmetric.Code.Core.StateManager
 
         public bool IsSavePossible
         {
-            get { return !m_removalRequested && m_completedStatesSafe.Check(ChunkState.Generate | ChunkState.LoadData); }
+            get { return m_save!=null && !m_removalRequested && m_completedStatesSafe.Check(ChunkState.Generate | ChunkState.LoadData); }
         }
 
         public abstract void SetMeshBuilt();

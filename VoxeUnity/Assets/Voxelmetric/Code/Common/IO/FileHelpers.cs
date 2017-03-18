@@ -118,6 +118,9 @@ namespace Voxelmetric.Code.Common.IO
 
         public static bool DebinarizeFromFile(string targetFilePath, IBinarizable stream)
         {
+            if (!File.Exists(targetFilePath))
+                return false;
+
             FileStream fs = null;
             try
             {

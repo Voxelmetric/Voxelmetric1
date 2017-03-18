@@ -298,7 +298,7 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
                         );
 
                     Chunk chunk;
-                    if (!world.chunks.CreateOrGetChunk(newChunkPos, out chunk, false))
+                    if (!world.chunks.CreateOrGetChunk(newChunkPos, out chunk))
                         continue;
 
                     if (FullLoadOnStartUp)
@@ -332,17 +332,8 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
                 if (chunk.CanUpdate)
                 {
                     chunk.UpdateState();
-
-                    // Build colliders if there is enough time
-                    if (Globals.GeometryBudget.HasTimeBudget)
-                    {
-                        Globals.GeometryBudget.StartMeasurement();
-
-                        bool wasBuilt = chunk.UpdateRenderGeometry();
-                        wasBuilt |= chunk.UpdateCollisionGeometry();
-                        if (wasBuilt)
-                            Globals.GeometryBudget.StopMeasurement();
-                    }
+                    chunk.UpdateRenderGeometry();
+                    chunk.UpdateCollisionGeometry();
                 }
 
                 // Automatically collect chunks which are ready to be removed from the world

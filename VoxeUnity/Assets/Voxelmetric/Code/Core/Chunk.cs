@@ -54,7 +54,7 @@ namespace Voxelmetric.Code.Core
         }
 
 
-        public static Chunk CreateChunk(World world, Vector3Int pos, bool isDedicated)
+        public static Chunk CreateChunk(World world, Vector3Int pos)
         {
             Chunk chunk = Globals.MemPools.ChunkPool.Pop();
             chunk.Init(world, pos);
@@ -152,7 +152,7 @@ namespace Voxelmetric.Code.Core
         public void UpdateState()
         {
             // Do not update our chunk until it has all its data prepared
-            if (stateManager.IsStateCompleted(ChunkState.LoadData))
+            if (stateManager.IsStateCompleted(ChunkState.Generate))
             {
                 if (logic!=null)
                     logic.Update();
@@ -165,47 +165,55 @@ namespace Voxelmetric.Code.Core
 
         public bool UpdateCollisionGeometry()
         {
-            Profiler.BeginSample("UpdateCollisionGeometry");
-
             // Release the collider when no longer needed
             if (!NeedsCollider)
             {
                 stateManager.SetColliderBuilt();
                 ChunkColliderGeometryHandler.Reset();
-
-                Profiler.EndSample();
                 return false;
             }
 
+            // Build collision geometry only if there is enough time
+            if (!Globals.GeometryBudget.HasTimeBudget)
+                return false;
+            
             // Build collider if necessary
             if (stateManager.IsStateCompleted(ChunkState.BuildCollider))
             {
+                Profiler.BeginSample("UpdateCollisionGeometry");
+                Globals.GeometryBudget.StartMeasurement();
+
                 stateManager.SetColliderBuilt();
                 ChunkColliderGeometryHandler.Commit();
 
+                Globals.GeometryBudget.StopMeasurement();
                 Profiler.EndSample();
                 return true;
             }
-
-            Profiler.EndSample();
+            
             return false;
         }
 
         public bool UpdateRenderGeometry()
         {
-            Profiler.BeginSample("UpdateRenderGeometry");
-
+            // Build render geometry only if there is enough time
+            if (!Globals.GeometryBudget.HasTimeBudget)
+                return false;
+            
             // Build chunk mesh if necessary
             if (stateManager.IsStateCompleted(ChunkState.BuildVertices|ChunkState.BuildVerticesNow))
             {
+                Profiler.BeginSample("UpdateRenderGeometry");
+                Globals.GeometryBudget.StartMeasurement();
+
                 stateManager.SetMeshBuilt();
                 GeometryHandler.Commit();
 
+                Globals.GeometryBudget.StopMeasurement();
                 Profiler.EndSample();
                 return true;
             }
-
-            Profiler.EndSample();
+            
             return false;
         }
 
