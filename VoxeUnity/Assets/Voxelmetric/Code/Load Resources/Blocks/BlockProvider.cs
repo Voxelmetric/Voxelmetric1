@@ -14,7 +14,10 @@ namespace Voxelmetric.Code.Load_Resources.Blocks
         public static readonly ushort AirType = 0;
         public static readonly BlockData AirBlock = new BlockData(AirType, false);
 
-        private readonly List<BlockConfig> m_configs;
+        //! An array of loaded block configs
+        private BlockConfig[] m_configs;
+
+        //! Mapping from config's name to type
         private readonly Dictionary<string, ushort> m_names;
         //! Mapping from typeInConfig to type
         private readonly Dictionary<ushort, ushort> m_types;
@@ -32,20 +35,16 @@ namespace Voxelmetric.Code.Load_Resources.Blocks
         {
             m_names = new Dictionary<string, ushort>();
             m_types = new Dictionary<ushort, ushort>();
-            m_configs = new List<BlockConfig>();
         }
 
         private void Init(string blockFolder, World world)
         {
-            // Add the static air block type
-            AddBlockType(BlockConfig.CreateAirBlockConfig(world));
-
             // Add all the block definitions defined in the config files
             ProcessConfigs(world, blockFolder);
-
+            
             // Build block type lookup table
-            BlockTypes = new Block[m_configs.Count];
-            for (int i = 0; i< m_configs.Count; i++)
+            BlockTypes = new Block[m_configs.Length];
+            for (int i = 0; i< m_configs.Length; i++)
             {
                 BlockConfig config = m_configs[i];
 
@@ -67,6 +66,12 @@ namespace Voxelmetric.Code.Load_Resources.Blocks
         private void ProcessConfigs(World world, string blockFolder)
         {
             var configFiles = Resources.LoadAll<TextAsset>(blockFolder);
+            List<BlockConfig> configs = new List<BlockConfig>(configFiles.Length);
+
+            // Add the static air block type
+            AddBlockType(configs, BlockConfig.CreateAirBlockConfig(world));
+            
+            // Add block types from config
             foreach (var configFile in configFiles)
             {
                 Hashtable configHash = JsonConvert.DeserializeObject<Hashtable>(configFile.text);
@@ -85,8 +90,10 @@ namespace Voxelmetric.Code.Load_Resources.Blocks
                 if (!VerifyBlockConfig(config))
                     continue;
 
-                AddBlockType(config);
+                AddBlockType(configs, config);
             }
+
+            m_configs = configs.ToArray();
         }
 
         private bool VerifyBlockConfig(BlockConfig config)
@@ -127,10 +134,10 @@ namespace Voxelmetric.Code.Load_Resources.Blocks
         /// </summary>
         /// <param name="config">The controller object for this block</param>
         /// <returns>The index of the block</returns>
-        private void AddBlockType(BlockConfig config)
+        private void AddBlockType(List<BlockConfig> configs, BlockConfig config)
         {
-            config.type = (ushort)m_configs.Count;
-            m_configs.Add(config);
+            config.type = (ushort)configs.Count;
+            configs.Add(config);
             m_names.Add(config.name, config.type);
             m_types.Add(config.typeInConfig, config.type);
         }
@@ -167,7 +174,7 @@ namespace Voxelmetric.Code.Load_Resources.Blocks
 
         public BlockConfig GetConfig(ushort type)
         {
-            if (type<m_configs.Count)
+            if (type<m_configs.Length)
                 return m_configs[type];
 
             Debug.LogError("Config not found: "+type);
