@@ -6,7 +6,7 @@ namespace Voxelmetric.Code.Common.Threading.Managers
     public static class IOPoolManager
     {
         private static readonly List<ITaskPoolItem> WorkItems = new List<ITaskPoolItem>(2048);
-        private static readonly TimeBudgetHandler TimeBudget = Utilities.Core.UseThreadedIO ? new TimeBudgetHandler(10) : null;
+        private static readonly TimeBudgetHandler TimeBudget = Utilities.Core.UseThreadedIO ? null : new TimeBudgetHandler(10);
 
         public static void Add(ITaskPoolItem action)
         {
