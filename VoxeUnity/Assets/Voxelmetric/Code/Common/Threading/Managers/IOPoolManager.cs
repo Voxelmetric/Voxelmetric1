@@ -6,6 +6,7 @@ namespace Voxelmetric.Code.Common.Threading.Managers
     public static class IOPoolManager
     {
         private static readonly List<ITaskPoolItem> WorkItems = new List<ITaskPoolItem>(2048);
+        private static readonly TimeBudgetHandler TimeBudget = Utilities.Core.UseThreadedIO ? new TimeBudgetHandler(10) : null;
 
         public static void Add(ITaskPoolItem action)
         {
@@ -14,6 +15,9 @@ namespace Voxelmetric.Code.Common.Threading.Managers
 
         public static void Commit()
         {
+            if (WorkItems.Count <= 0)
+                return;
+
             // Commit all the work we have
             if (Utilities.Core.UseThreadedIO)
             {
@@ -23,30 +27,27 @@ namespace Voxelmetric.Code.Common.Threading.Managers
                 {
                     pool.AddItem(WorkItems[i]);
                 }
-
-                // Remove processed work items
-                WorkItems.Clear();
             }
             else
             {
-                using (TimeBudgetHandler budget = new TimeBudgetHandler(10))
+                for (int i = 0; i<WorkItems.Count; i++)
                 {
-                    int i;
-                    for (i = 0; i<WorkItems.Count; i++)
+                    TimeBudget.StartMeasurement();
+                    WorkItems[i].Run();
+                    TimeBudget.StopMeasurement();
+
+                    // If the tasks take too much time to finish, spread them out over multiple
+                    // frames to avoid performance spikes
+                    if (!TimeBudget.HasTimeBudget)
                     {
-                        budget.StartMeasurement();
-                        WorkItems[i].Run();
-                        budget.StopMeasurement();
-
-                        // If the tasks take too much time to finish, spread them out over multiple
-                        // frames to avoid performance spikes
-                        if (!budget.HasTimeBudget)
-                            break;
+                        WorkItems.RemoveRange(0, i+1);
+                        return;
                     }
-
-                    WorkItems.RemoveRange(0, i+1);
                 }
             }
+
+            // Remove processed work items
+            WorkItems.Clear();
         }
     }
 }
