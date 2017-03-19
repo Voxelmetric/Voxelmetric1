@@ -98,9 +98,14 @@ namespace Voxelmetric.Code.Core.Serialization
             // Chunk data
             if (Utilities.Core.UseDifferentialSerialization)
             {
-                bw.Write(m_blocks.Length);
-                bw.Write(positionsBytes, 0, posLenBytes);
-                bw.Write(blocksBytes, 0, blkLenBytes);
+                if(m_blocks==null)
+                    bw.Write(0);
+                else
+                {
+                    bw.Write(m_blocks.Length);
+                    bw.Write(positionsBytes, 0, posLenBytes);
+                    bw.Write(blocksBytes, 0, blkLenBytes);
+                }
             }
             else
             {
