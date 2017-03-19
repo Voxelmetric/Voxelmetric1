@@ -2,7 +2,6 @@
 using System.IO;
 using Voxelmetric.Code.Common;
 using Voxelmetric.Code.Common.IO;
-using Voxelmetric.Code.Common.Memory;
 using Voxelmetric.Code.Common.MemoryPooling;
 using Voxelmetric.Code.Data_types;
 using Voxelmetric.Code.Utilities;
@@ -179,7 +178,7 @@ namespace Voxelmetric.Code.Core.Serialization
 
                     // Write compressed data to file
                     bw.Write(compressedLength);
-                    bw.Write(bytesCompressed);
+                    bw.Write(bytesCompressed, 0, compressedLength);
                 }
                 // Return temporary buffer back to pool
                 pools.ByteArrayPool.Push(bytesCompressed);
