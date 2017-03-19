@@ -1,6 +1,5 @@
 ﻿using JetBrains.Annotations;
 using UnityEngine;
-using UnityEngine.Assertions;
 using Voxelmetric.Code.Core;
 using Voxelmetric.Code.Data_types;
 using Voxelmetric.Code.Load_Resources.Blocks;

@@ -20,7 +20,7 @@ namespace Voxelmetric.Code.Load_Resources.Blocks
         //! Mapping from config's name to type
         private readonly Dictionary<string, ushort> m_names;
         //! Mapping from typeInConfig to type
-        private readonly Dictionary<ushort, ushort> m_types;
+        private ushort[] m_types;
 
         public Block[] BlockTypes { get; private set; }
 
@@ -34,7 +34,6 @@ namespace Voxelmetric.Code.Load_Resources.Blocks
         private BlockProvider()
         {
             m_names = new Dictionary<string, ushort>();
-            m_types = new Dictionary<ushort, ushort>();
         }
 
         private void Init(string blockFolder, World world)
@@ -67,9 +66,10 @@ namespace Voxelmetric.Code.Load_Resources.Blocks
         {
             var configFiles = Resources.LoadAll<TextAsset>(blockFolder);
             List<BlockConfig> configs = new List<BlockConfig>(configFiles.Length);
+            Dictionary<ushort, ushort> types = new Dictionary<ushort, ushort>();
 
-            // Add the static air block type
-            AddBlockType(configs, BlockConfig.CreateAirBlockConfig(world));
+                // Add the static air block type
+            AddBlockType(configs, types, BlockConfig.CreateAirBlockConfig(world));
             
             // Add block types from config
             foreach (var configFile in configFiles)
@@ -87,16 +87,31 @@ namespace Voxelmetric.Code.Load_Resources.Blocks
                 if (!config.SetUp(configHash, world))
                     continue;
 
-                if (!VerifyBlockConfig(config))
+                if (!VerifyBlockConfig(types, config))
                     continue;
 
-                AddBlockType(configs, config);
+                AddBlockType(configs, types, config);
             }
 
             m_configs = configs.ToArray();
+
+            // Now iterate over conigs and find the one with the highest TypeInConfig
+            ushort maxTypeInConfig = AirType;
+            for (int i = 0; i<m_configs.Length; i++)
+            {
+                if (m_configs[i].typeInConfig>maxTypeInConfig)
+                    maxTypeInConfig = m_configs[i].typeInConfig;
+            }
+
+            // Allocate maxTypeInConfigs big array now and map config types to runtime types
+            m_types = new ushort[maxTypeInConfig+1];
+            for (ushort i = 0; i < m_configs.Length; i++)
+            {
+                m_types[m_configs[i].typeInConfig] = i;
+            }
         }
 
-        private bool VerifyBlockConfig(BlockConfig config)
+        private bool VerifyBlockConfig(Dictionary<ushort, ushort> types, BlockConfig config)
         {
             // Unique identifier of block type
             if (m_names.ContainsKey(config.name))
@@ -106,7 +121,7 @@ namespace Voxelmetric.Code.Load_Resources.Blocks
             }
 
             // Unique identifier of block type
-            if (m_types.ContainsKey(config.typeInConfig))
+            if (types.ContainsKey(config.typeInConfig))
             {
                 Debug.LogErrorFormat("Two blocks with type {0} are defined", config.typeInConfig);
                 return false;
@@ -132,14 +147,15 @@ namespace Voxelmetric.Code.Load_Resources.Blocks
         /// <summary>
         /// Adds a block type to the index and adds it's name to a dictionary for quick lookup
         /// </summary>
+        /// <param name="configs">A list of configs</param>
         /// <param name="config">The controller object for this block</param>
         /// <returns>The index of the block</returns>
-        private void AddBlockType(List<BlockConfig> configs, BlockConfig config)
+        private void AddBlockType(List<BlockConfig> configs, Dictionary<ushort, ushort> types, BlockConfig config)
         {
             config.type = (ushort)configs.Count;
             configs.Add(config);
             m_names.Add(config.name, config.type);
-            m_types.Add(config.typeInConfig, config.type);
+            types.Add(config.typeInConfig, config.type);
         }
 
         public ushort GetType(string name)
@@ -154,9 +170,8 @@ namespace Voxelmetric.Code.Load_Resources.Blocks
 
         public ushort GetTypeFromTypeInConfig(ushort typeInConfig)
         {
-            ushort type;
-            if (m_types.TryGetValue(typeInConfig, out type))
-                return type;
+            if (typeInConfig<m_types.Length)
+                return m_types[typeInConfig];
 
             Debug.LogError("TypeInConfig not found: " + typeInConfig);
             return AirType;
