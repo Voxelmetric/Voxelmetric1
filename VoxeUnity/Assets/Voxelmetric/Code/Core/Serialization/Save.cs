@@ -92,7 +92,9 @@ namespace Voxelmetric.Code.Core.Serialization
                     var provider = Chunk.world.blockProvider;
 
                     // Pop large enough buffers from the pool
-                    int requestedByteSize = Env.ChunkSizePow3 * StructSerialization.TSSize<BlockData>.ValueSize;
+                    int blockPosSize = StructSerialization.TSSize<BlockPos>.ValueSize;
+                    int blockDataSize = StructSerialization.TSSize<BlockData>.ValueSize;
+                    int requestedByteSize = Env.ChunkSizePow3*blockDataSize;
                     byte[] blocksBytes = pools.ByteArrayPool.Pop(requestedByteSize);
                     byte[] positionsBytes = pools.ByteArrayPool.Pop(requestedByteSize);
                     {
@@ -101,9 +103,7 @@ namespace Voxelmetric.Code.Core.Serialization
                             // Pack positions to a byte array
                             fixed (byte* pDst = positionsBytes)
                             {
-                                for (int i = 0, j = 0;
-                                     i<m_blocks.Length;
-                                     i++, j += StructSerialization.TSSize<BlockPos>.ValueSize)
+                                for (int i = 0, j = 0; i<m_blocks.Length; i++, j += blockPosSize)
                                 {
                                     *(BlockPos*)&pDst[j] = m_positions[i];
                                 }
@@ -112,9 +112,7 @@ namespace Voxelmetric.Code.Core.Serialization
                             fixed (BlockData* pBD = m_blocks)
                             fixed (byte* pDst = blocksBytes)
                             {
-                                for (int i = 0, j = 0;
-                                     i<m_blocks.Length;
-                                     i++, j += StructSerialization.TSSize<BlockData>.ValueSize)
+                                for (int i = 0, j = 0; i<m_blocks.Length; i++, j += blockDataSize)
                                 {
                                     BlockData* bd = &pBD[i];
                                     // Convert block types from internal optimized version into global types
@@ -126,8 +124,8 @@ namespace Voxelmetric.Code.Core.Serialization
                         }
 
                         bw.Write(m_blocks.Length);
-                        bw.Write(positionsBytes, 0, m_blocks.Length*StructSerialization.TSSize<BlockPos>.ValueSize);
-                        bw.Write(blocksBytes, 0, m_blocks.Length*StructSerialization.TSSize<BlockData>.ValueSize);
+                        bw.Write(positionsBytes, 0, m_blocks.Length* blockPosSize);
+                        bw.Write(blocksBytes, 0, m_blocks.Length* blockDataSize);
                     }
                     // Return temporary buffers back to pool
                     pools.ByteArrayPool.Push(positionsBytes);
@@ -143,9 +141,10 @@ namespace Voxelmetric.Code.Core.Serialization
             {
                 LocalPools pools = Chunk.pools;
                 var provider = Chunk.world.blockProvider;
-                
+
                 // Pop large enough buffers from the pool
-                int requestedByteSize = Env.ChunkSizePow3*StructSerialization.TSSize<BlockData>.ValueSize;
+                int blockDataSize = StructSerialization.TSSize<BlockData>.ValueSize;
+                int requestedByteSize = Env.ChunkSizePow3*blockDataSize;
                 byte[] blocksBytes = pools.ByteArrayPool.Pop(requestedByteSize);
                 byte[] bytesCompressed = pools.ByteArrayPool.Pop(requestedByteSize);
                 {
@@ -155,7 +154,7 @@ namespace Voxelmetric.Code.Core.Serialization
                     {
                         for (int z = 0; z<Env.ChunkSize; z++)
                         {
-                            for (int x = 0; x<Env.ChunkSize; x++, i+= StructSerialization.TSSize<BlockData>.ValueSize)
+                            for (int x = 0; x<Env.ChunkSize; x++, i+= blockDataSize)
                             {
                                 int index = Helpers.GetChunkIndex1DFrom3D(x, y, z);
 
@@ -219,13 +218,15 @@ namespace Voxelmetric.Code.Core.Serialization
                     var provider = Chunk.world.blockProvider;
 
                     // Pop large enough buffers from the pool
-                    int requestedByteSize = Env.ChunkSizePow3*StructSerialization.TSSize<BlockData>.ValueSize;
+                    int blockPosSize = StructSerialization.TSSize<BlockPos>.ValueSize;
+                    int blockDataSize = StructSerialization.TSSize<BlockData>.ValueSize;
+                    int requestedByteSize = Env.ChunkSizePow3*blockDataSize;
                     byte[] blocksBytes = pools.ByteArrayPool.Pop(requestedByteSize);
                     byte[] positionsBytes = pools.ByteArrayPool.Pop(requestedByteSize);
                     {
                         int lenBlocks = br.ReadInt32();
-                        int posLenBytes = lenBlocks*StructSerialization.TSSize<BlockPos>.ValueSize;
-                        int blkLenBytes = lenBlocks*StructSerialization.TSSize<BlockData>.ValueSize;
+                        int posLenBytes = lenBlocks*blockPosSize;
+                        int blkLenBytes = lenBlocks*blockDataSize;
 
                         if (br.Read(positionsBytes, 0, posLenBytes)!=posLenBytes)
                         {
@@ -250,9 +251,7 @@ namespace Voxelmetric.Code.Core.Serialization
                             // Extract positions
                             fixed (byte* pSrc = positionsBytes)
                             {
-                                for (i = 0, j = 0;
-                                     i<posLenBytes;
-                                     i += StructSerialization.TSSize<BlockPos>.ValueSize, j++)
+                                for (i = 0, j = 0; i<posLenBytes; i += blockPosSize, j++)
                                 {
                                     m_positions[j] = *(BlockPos*)&pSrc[i];
                                 }
@@ -260,9 +259,7 @@ namespace Voxelmetric.Code.Core.Serialization
                             // Extract block data
                             fixed (byte* pSrc = blocksBytes)
                             {
-                                for (i = 0, j = 0;
-                                     i<blkLenBytes;
-                                     i += StructSerialization.TSSize<BlockData>.ValueSize, j++)
+                                for (i = 0, j = 0; i<blkLenBytes; i += blockDataSize, j++)
                                 {
                                     BlockData* bd = (BlockData*)&pSrc[i];
                                     // Convert global block types into internal optimized version
@@ -283,9 +280,13 @@ namespace Voxelmetric.Code.Core.Serialization
                     if (Utilities.Core.UseDifferentialSerialization)
                         m_hadDifferentialChange = true;
 
+
+                    int blockDataSize = StructSerialization.TSSize<BlockData>.ValueSize;
+                    int requestedByteSize = Env.ChunkSizePow3*blockDataSize;
+
                     // Retrieve a long enough buffer from the pool
-                    var bytesCompressed = Chunk.pools.ByteArrayPool.Pop(Env.ChunkSizePow3*2);
-                    var bytes = Chunk.pools.ByteArrayPool.Pop(Env.ChunkSizePow3*2);
+                    var bytesCompressed = Chunk.pools.ByteArrayPool.Pop(requestedByteSize);
+                    var bytes = Chunk.pools.ByteArrayPool.Pop(requestedByteSize);
 
                     // Read raw data
                     int compressedLength = br.ReadInt32();
@@ -299,7 +300,7 @@ namespace Voxelmetric.Code.Core.Serialization
 
                     // Decompress data
                     int decompressedLength = CLZF2.lzf_decompress(bytesCompressed, compressedLength, ref bytes);
-                    if (decompressedLength!=Env.ChunkSizePow3*StructSerialization.TSSize<BlockData>.ValueSize)
+                    if (decompressedLength!=Env.ChunkSizePow3*blockDataSize)
                     {
                         // Size of decompressed chunk can't be different then ChunkSizePow3
                         success = false;
@@ -318,9 +319,7 @@ namespace Voxelmetric.Code.Core.Serialization
                             {
                                 for (int z = 0; z<Env.ChunkSize; z++)
                                 {
-                                    for (int x = 0;
-                                            x<Env.ChunkSize;
-                                            x++, i += StructSerialization.TSSize<BlockData>.ValueSize)
+                                    for (int x = 0; x<Env.ChunkSize; x++, i += blockDataSize)
                                     {
                                         int index = Helpers.GetChunkIndex1DFrom3D(x, y, z);
                                         BlockData* bd = (BlockData*)&pSrc[i];
