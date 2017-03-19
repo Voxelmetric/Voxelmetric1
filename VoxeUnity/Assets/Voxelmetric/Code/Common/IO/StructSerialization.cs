@@ -17,78 +17,112 @@ namespace Voxelmetric.Code.Common.IO
             }
         }
 
-        // Convert a struct to byte array
-        public static byte[] Serialize<T>(MarshalMemPool pool, ref T data) where T : struct
+        // Converts a struct to a byte array
+        public static byte[] Serialize<T>(MarshalMemPool pool, ref T src) where T: struct
         {
             int objSize = TSSize<T>.ValueSize;
-            byte[] ret = new byte[objSize];
+            byte[] dst = new byte[objSize];
 
             IntPtr buffer = pool.Pop(objSize);
-
-            Marshal.StructureToPtr(data, buffer, true);
-            Marshal.Copy(buffer, ret, 0, objSize);
-
+            {
+                Marshal.StructureToPtr(src, buffer, true);
+                Marshal.Copy(buffer, dst, 0, objSize);
+            }
             pool.Push(objSize);
 
-            return ret;
+            return dst;
         }
 
-        // Convert a struct array to byte array
-        public static byte[] SerializeArray<T>(MarshalMemPool pool, T[] data) where T : struct
+        // Converts a struct to a byte array
+        public static void Serialize<T>(MarshalMemPool pool, ref T src, ref byte[] dst) where T: struct
         {
             int objSize = TSSize<T>.ValueSize;
-            int objArrSize = objSize * data.Length;
 
-            byte[] ret = new byte[objArrSize];
-            IntPtr buffer = pool.Pop(objArrSize);
-
-            long pBuffer = (long)buffer;
-            for (int i = 0; i < data.Length; i++, pBuffer+=objSize)
+            IntPtr buffer = pool.Pop(objSize);
             {
-                Marshal.StructureToPtr(data[i], (IntPtr)pBuffer, true);// should be false in case struct uses pointers
-                Marshal.Copy((IntPtr)pBuffer, ret, i*objSize, objSize);
+                Marshal.StructureToPtr(src, buffer, true);
+                Marshal.Copy(buffer, dst, 0, objSize);
             }
-
-            pool.Push(objArrSize);
-
-            return ret;
+            pool.Push(objSize);
         }
 
-        // Convert a byte array to a struct
-        public static T Deserialize<T>(MarshalMemPool pool, byte[] data) where T : struct
+        // Converts an array of structs to a byte array
+        public static byte[] SerializeArray<T>(MarshalMemPool pool, T[] src, int items = -1) where T: struct
+        {
+            int itemsToConvert = (items<0) ? src.Length : items;
+            int objSize = TSSize<T>.ValueSize;
+            int objArrSize = objSize*itemsToConvert;
+
+            byte[] dst = new byte[objArrSize];
+
+            IntPtr pBuffer = pool.Pop(objArrSize);
+            {
+                long pDst = (long)pBuffer;
+                for (int i = 0; i<itemsToConvert; i++, pDst += objSize)
+                {
+                    Marshal.StructureToPtr(src[i], (IntPtr)pDst, true);
+                    Marshal.Copy((IntPtr)pDst, dst, i*objSize, objSize);
+                }
+            }
+
+            return dst;
+        }
+
+        // Converts an array of structs to a byte array
+        public static void SerializeArray<T>(MarshalMemPool pool, T[] src, ref byte[] dst, int items = -1)
+            where T: struct
+        {
+            int itemsToConvert = (items<0) ? src.Length : items;
+            int objSize = TSSize<T>.ValueSize;
+            int objArrSize = objSize*itemsToConvert;
+
+            IntPtr pBuffer = pool.Pop(objArrSize);
+            {
+                long pDst = (long)pBuffer;
+                for (int i = 0; i<itemsToConvert; i++, pDst += objSize)
+                {
+                    Marshal.StructureToPtr(src[i], (IntPtr)pDst, true);
+                    Marshal.Copy((IntPtr)pDst, dst, i*objSize, objSize);
+                }
+            }
+            pool.Push(objArrSize);
+        }
+
+        // Converts a byte array to a struct
+        public static T Deserialize<T>(MarshalMemPool pool, byte[] src) where T: struct
         {
             //if(Marshal.SizeOf(typeof (T))<data.Length)
             //    throw new VoxeException("Input data too small");
 
-            int objSize = data.Length;
+            int objSize = src.Length;
             IntPtr buffer = pool.Pop(objSize);
 
-            Marshal.Copy(data, 0, buffer, objSize);
-            T ret = (T)Marshal.PtrToStructure(buffer, typeof(T));
+            Marshal.Copy(src, 0, buffer, objSize);
+            T ret = (T)Marshal.PtrToStructure(buffer, typeof (T));
 
             pool.Push(objSize);
 
             return ret;
         }
 
-        // Convert a byte array to a struct array
-        public static T[] DeserializeArray<T>(MarshalMemPool pool, byte[] data, int length=-1) where T : struct
+        // Convert a byte array to an array of structs
+        public static T[] DeserializeArray<T>(MarshalMemPool pool, byte[] src, int length = -1) where T: struct
         {
             //if (Marshal.SizeOf(typeof(T)) < data.Length)
             //    throw new VoxeException("Input data too small");
 
             int objSize = TSSize<T>.ValueSize;
-            int len = (length<=0) ? data.Length : length;
+            int len = (length<=0) ? src.Length : length;
             int objArrSize = len/objSize;
 
             T[] ret = new T[objArrSize];
             IntPtr buffer = pool.Pop(len);
 
-            Marshal.Copy(data, 0, buffer, len);
+            Marshal.Copy(src, 0, buffer, len);
 
             long pBuffer = (long)buffer;
-            for (int i = 0; i < objArrSize; i++, pBuffer += objSize)
-                ret[i] = (T)Marshal.PtrToStructure((IntPtr)pBuffer, typeof(T));
+            for (int i = 0; i<objArrSize; i++, pBuffer += objSize)
+                ret[i] = (T)Marshal.PtrToStructure((IntPtr)pBuffer, typeof (T));
 
             pool.Push(len);
 

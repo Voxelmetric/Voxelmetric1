@@ -39,7 +39,7 @@ namespace Voxelmetric.Code.Utilities
         //! If true, only difference form default-generated data will be stored
         //! If there is no change no serialization is performned unless UseDifferentialSerialization_ForceSaveHeaders is enabled
         public const bool UseDifferentialSerialization = true;
-        //! If true, even if there is not difference in data, basic info about chunk structure will be stored
+        //! If true, even if there is no difference in data, at least basic info about chunk structure is stored
         public const bool UseDifferentialSerialization_ForceSaveHeaders = false;
     }
 

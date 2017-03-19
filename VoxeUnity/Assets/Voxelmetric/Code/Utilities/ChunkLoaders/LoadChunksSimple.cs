@@ -17,7 +17,7 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
     [RequireComponent(typeof (Camera))]
     public class LoadChunksSimple: MonoBehaviour, IChunkLoader
     {
-        private const int HorizontalMinRange = 4;
+        private const int HorizontalMinRange = 2;
         private const int HorizontalMaxRange = 32;
         private const int HorizontalDefRange = 6;
         private const int VerticalMinRange = 2;
