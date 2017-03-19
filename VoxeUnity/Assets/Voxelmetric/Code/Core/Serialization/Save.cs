@@ -43,16 +43,19 @@ namespace Voxelmetric.Code.Core.Serialization
             m_hadDifferentialChange = false;
             MarkAsProcessed();
             
+            // Reset temporary buffers
             posLenBytes = 0;
             positionsBytes = null;
             blkLenBytes = 0;
             blocksBytes = null;
+
+            // Release the memory allocated by temporary buffers
+            m_positions = null;
+            m_blocks = null;
         }
 
         public void MarkAsProcessed()
         {
-            IsDifferential = false;
-
             // Release the memory allocated by temporary buffers
             m_positions = null;
             m_blocks = null;
@@ -157,9 +160,7 @@ namespace Voxelmetric.Code.Core.Serialization
 
                     if (lenBlocks > 0)
                     {
-                        blocksBytes = new byte[posLenBytes];
-                        positionsBytes = new byte[blkLenBytes];
-
+                        positionsBytes = new byte[posLenBytes];
                         if (br.Read(positionsBytes, 0, posLenBytes)!=posLenBytes)
                         {
                             // Length must match
@@ -167,6 +168,7 @@ namespace Voxelmetric.Code.Core.Serialization
                             break;
                         }
 
+                        blocksBytes = new byte[blkLenBytes];
                         if (br.Read(blocksBytes, 0, blkLenBytes)!=blkLenBytes)
                         {
                             // Length must match
@@ -456,10 +458,13 @@ namespace Voxelmetric.Code.Core.Serialization
                 return;
 
             // Rewrite generated blocks with differential positions
-            for (int i = 0; i < m_blocks.Length; i++)
+            if (m_blocks!=null)
             {
-                BlockPos pos = m_positions[i];
-                Chunk.blocks.SetRaw(Helpers.GetChunkIndex1DFrom3D(pos.x, pos.y, pos.z), m_blocks[i]);
+                for (int i = 0; i<m_blocks.Length; i++)
+                {
+                    BlockPos pos = m_positions[i];
+                    Chunk.blocks.SetRaw(Helpers.GetChunkIndex1DFrom3D(pos.x, pos.y, pos.z), m_blocks[i]);
+                }
             }
 
             MarkAsProcessed();
