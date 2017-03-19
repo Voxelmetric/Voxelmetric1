@@ -211,66 +211,82 @@ namespace Voxelmetric.Code.Core.Serialization
             bounds.lowestEmptyBlock = br.ReadByte();
             Chunk.blocks.NonEmptyBlocks = br.ReadInt32();
 
-            if (IsDifferential)
+            while (true)
             {
-                LocalPools pools = Chunk.pools;
-                var provider = Chunk.world.blockProvider;
-
-                // Pop large enough buffers from the pool
-                int requestedByteSize = Env.ChunkSizePow3 * StructSerialization.TSSize<BlockData>.ValueSize;
-                byte[] blocksBytes = pools.ByteArrayPool.Pop(requestedByteSize);
-                byte[] positionsBytes = pools.ByteArrayPool.Pop(requestedByteSize);
+                if (IsDifferential)
                 {
-                    int lenBlocks = br.ReadInt32();
-                    int posLenBytes = lenBlocks*StructSerialization.TSSize<BlockPos>.ValueSize;
-                    int blkLenBytes = lenBlocks*StructSerialization.TSSize<BlockData>.ValueSize;
-                    br.Read(positionsBytes, 0, posLenBytes);
-                    br.Read(blocksBytes, 0, blkLenBytes);
+                    LocalPools pools = Chunk.pools;
+                    var provider = Chunk.world.blockProvider;
 
-                    m_positions = new BlockPos[lenBlocks];
-                    m_blocks = new BlockData[lenBlocks];
-
-                    int i, j;
-                    unsafe
+                    // Pop large enough buffers from the pool
+                    int requestedByteSize = Env.ChunkSizePow3*StructSerialization.TSSize<BlockData>.ValueSize;
+                    byte[] blocksBytes = pools.ByteArrayPool.Pop(requestedByteSize);
+                    byte[] positionsBytes = pools.ByteArrayPool.Pop(requestedByteSize);
                     {
-                        // Extract positions
-                        fixed (byte* pSrc = positionsBytes)
-                        {
-                            for (i = 0, j = 0; i < posLenBytes; i += StructSerialization.TSSize<BlockPos>.ValueSize, j++)
-                            {
-                                m_positions[j] = *(BlockPos*)&pSrc[i];
-                            }
-                        }
-                        // Extract block data
-                        fixed (byte* pSrc = blocksBytes)
-                        {
-                            for (i = 0, j = 0; i < blkLenBytes; i += StructSerialization.TSSize<BlockData>.ValueSize, j++)
-                            {
-                                BlockData *bd = (BlockData*)&pSrc[i];
-                                // Convert global block types into internal optimized version
-                                ushort type = provider.GetTypeFromTypeInConfig(bd->Type);
+                        int lenBlocks = br.ReadInt32();
+                        int posLenBytes = lenBlocks*StructSerialization.TSSize<BlockPos>.ValueSize;
+                        int blkLenBytes = lenBlocks*StructSerialization.TSSize<BlockData>.ValueSize;
 
-                                m_blocks[j] = new BlockData(type, bd->Solid, bd->Rotation);
+                        if (br.Read(positionsBytes, 0, posLenBytes)!=posLenBytes)
+                        {
+                            // Length must match
+                            success = false;
+                            break;
+                        }
+
+                        if (br.Read(blocksBytes, 0, blkLenBytes)!=blkLenBytes)
+                        {
+                            // Length must match
+                            success = false;
+                            break;
+                        }
+
+                        m_positions = new BlockPos[lenBlocks];
+                        m_blocks = new BlockData[lenBlocks];
+
+                        int i, j;
+                        unsafe
+                        {
+                            // Extract positions
+                            fixed (byte* pSrc = positionsBytes)
+                            {
+                                for (i = 0, j = 0;
+                                     i<posLenBytes;
+                                     i += StructSerialization.TSSize<BlockPos>.ValueSize, j++)
+                                {
+                                    m_positions[j] = *(BlockPos*)&pSrc[i];
+                                }
+                            }
+                            // Extract block data
+                            fixed (byte* pSrc = blocksBytes)
+                            {
+                                for (i = 0, j = 0;
+                                     i<blkLenBytes;
+                                     i += StructSerialization.TSSize<BlockData>.ValueSize, j++)
+                                {
+                                    BlockData* bd = (BlockData*)&pSrc[i];
+                                    // Convert global block types into internal optimized version
+                                    ushort type = provider.GetTypeFromTypeInConfig(bd->Type);
+
+                                    m_blocks[j] = new BlockData(type, bd->Solid, bd->Rotation);
+                                }
                             }
                         }
                     }
+                    // Return temporary buffers back to pool
+                    pools.ByteArrayPool.Push(positionsBytes);
+                    pools.ByteArrayPool.Push(blocksBytes);
                 }
-                // Return temporary buffers back to pool
-                pools.ByteArrayPool.Push(positionsBytes);
-                pools.ByteArrayPool.Push(blocksBytes);
-            }
-            else
-            {
-                // If somebody switched from full to differential serialization, make it so that the next time the chunk is serialized it's saved as diff
-                if (Utilities.Core.UseDifferentialSerialization)
-                    m_hadDifferentialChange = true;
-
-                // Retrieve a long enough buffer from the pool
-                var bytesCompressed = Chunk.pools.ByteArrayPool.Pop(Env.ChunkSizePow3 * 2);
-                var bytes = Chunk.pools.ByteArrayPool.Pop(Env.ChunkSizePow3 * 2);
-
-                while (true)
+                else
                 {
+                    // If somebody switched from full to differential serialization, make it so that the next time the chunk is serialized it's saved as diff
+                    if (Utilities.Core.UseDifferentialSerialization)
+                        m_hadDifferentialChange = true;
+
+                    // Retrieve a long enough buffer from the pool
+                    var bytesCompressed = Chunk.pools.ByteArrayPool.Pop(Env.ChunkSizePow3*2);
+                    var bytes = Chunk.pools.ByteArrayPool.Pop(Env.ChunkSizePow3*2);
+
                     // Read raw data
                     int compressedLength = br.ReadInt32();
                     int readLength = br.Read(bytesCompressed, 0, compressedLength);
@@ -280,7 +296,7 @@ namespace Voxelmetric.Code.Core.Serialization
                         success = false;
                         break;
                     }
-                    
+
                     // Decompress data
                     int decompressedLength = CLZF2.lzf_decompress(bytesCompressed, compressedLength, ref bytes);
                     if (decompressedLength!=Env.ChunkSizePow3*StructSerialization.TSSize<BlockData>.ValueSize)
@@ -289,11 +305,11 @@ namespace Voxelmetric.Code.Core.Serialization
                         success = false;
                         break;
                     }
-                    
+
                     // Fill chunk with decompressed data
                     ChunkBlocks blocks = Chunk.blocks;
                     var provider = Chunk.world.blockProvider;
-                    int i=0;
+                    int i = 0;
                     unsafe
                     {
                         fixed (byte* pSrc = bytes)
@@ -302,7 +318,9 @@ namespace Voxelmetric.Code.Core.Serialization
                             {
                                 for (int z = 0; z<Env.ChunkSize; z++)
                                 {
-                                    for (int x = 0; x<Env.ChunkSize; x++, i += StructSerialization.TSSize<BlockData>.ValueSize)
+                                    for (int x = 0;
+                                            x<Env.ChunkSize;
+                                            x++, i += StructSerialization.TSSize<BlockData>.ValueSize)
                                     {
                                         int index = Helpers.GetChunkIndex1DFrom3D(x, y, z);
                                         BlockData* bd = (BlockData*)&pSrc[i];
@@ -317,12 +335,19 @@ namespace Voxelmetric.Code.Core.Serialization
                         }
                     }
 
-                    break;
+                    // Return temporary buffer back to pool
+                    Chunk.pools.ByteArrayPool.Push(bytes);
+                    Chunk.pools.ByteArrayPool.Push(bytesCompressed);
                 }
 
-                // Return temporary buffer back to pool
-                Chunk.pools.ByteArrayPool.Push(bytes);
-                Chunk.pools.ByteArrayPool.Push(bytesCompressed);
+                break;
+            }
+
+            if (!success)
+            {
+                // Revert any changes we performed on our chunk
+                bounds.Reset();
+                Chunk.blocks.NonEmptyBlocks = -1;
             }
 
             return success;
