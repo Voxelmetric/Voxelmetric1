@@ -41,8 +41,8 @@ namespace Voxelmetric.Code.Core.StateManager
         //! Static shared pointers to callbacks
         private static readonly Action<ChunkStateManagerClient> actionOnGenerateData = OnGenerateData;
         private static readonly Action<ChunkStateManagerClient> actionOnCalculateGeometryBounds = OnCalculateGeometryBounds;
-        private static readonly Action<ChunkStateManagerClient> actionOnGenerateVertices = OnGenerateVertices;
-        private static readonly Action<SGenerateColliderWorkItem> actionOnGenerateCollider = arg => { OnGenerateCollider(ref arg); };
+        private static readonly Action<ChunkStateManagerClient> actionOnBuildVertices = OnBuildVertices;
+        private static readonly Action<SBuildColliderWorkItem> actionOnBuildCollider = arg => { OnBuildCollider(ref arg); };
         private static readonly Action<ChunkStateManagerClient> actionOnLoadData = OnLoadData;
         private static readonly Action<ChunkStateManagerClient> actionOnSaveData = OnSaveData;
 
@@ -93,12 +93,12 @@ namespace Voxelmetric.Code.Core.StateManager
 
         public override void SetMeshBuilt()
         {
-            m_completedStates = m_completedStatesSafe = m_completedStates.Reset(CurrStateGenerateVertices);
+            m_completedStates = m_completedStatesSafe = m_completedStates.Reset(CurrStateBuildVertices);
         }
 
         public override void SetColliderBuilt()
         {
-            m_completedStates = m_completedStatesSafe = m_completedStates.Reset(CurrStateGenerateCollider);
+            m_completedStates = m_completedStatesSafe = m_completedStates.Reset(CurrStateBuildCollider);
         }
 
         private void ReturnPoolItems()
@@ -109,8 +109,8 @@ namespace Voxelmetric.Code.Core.StateManager
             // Therefore, each client remembers which pool it used and once the task is finished it returns
             // it back to the pool as soon as possible from the main thread
 
-            if (m_poolState.Check(ChunkPoolItemState.GenerateColliderThreadPI))
-                pools.GenerateColliderThreadPI.Push(m_threadPoolItem as ThreadPoolItem<SGenerateColliderWorkItem>);
+            if (m_poolState.Check(ChunkPoolItemState.BuildColliderThreadPI))
+                pools.BuildColliderThreadPI.Push(m_threadPoolItem as ThreadPoolItem<SBuildColliderWorkItem>);
             else if (m_poolState.Check(ChunkPoolItemState.ThreadPI))
                 pools.SMThreadPI.Push(m_threadPoolItem as ThreadPoolItem<ChunkStateManagerClient>);
             else if (m_poolState.Check(ChunkPoolItemState.TaskPI))
@@ -174,14 +174,14 @@ namespace Voxelmetric.Code.Core.StateManager
                     return;
 
                 ProcessNotifyState();
-                if (m_pendingStates.Check(ChunkState.BuildCollider) && GenerateCollider())
+                if (m_pendingStates.Check(ChunkState.BuildCollider) && BuildCollider())
                     return;
 
                 // In order to save performance, we generate geometry on-demand - when the chunk can be seen
                 if (Visible)
                 {
                     ProcessNotifyState();
-                    if (m_pendingStates.Check(CurrStateGenerateVertices) && GenerateVertices())
+                    if (m_pendingStates.Check(CurrStateBuildVertices) && BuildVertices())
                         return;
                 }
             }
@@ -636,27 +636,27 @@ namespace Voxelmetric.Code.Core.StateManager
             return true;
         }
 
-        #region Generate collider
+        #region Build collider geometry
 
-        private static readonly ChunkState CurrStateGenerateCollider = ChunkState.BuildCollider;
+        private static readonly ChunkState CurrStateBuildCollider = ChunkState.BuildCollider;
 
-        private static void OnGenerateCollider(ref SGenerateColliderWorkItem item)
+        private static void OnBuildCollider(ref SBuildColliderWorkItem item)
         {
             ChunkStateManagerClient stateManager = item.StateManager;
             stateManager.chunk.ChunkColliderGeometryHandler.Build(item.MinX, item.MaxX, item.MinY, item.MaxY, item.MinZ, item.MaxZ);
-            OnGenerateColliderDone(stateManager);
+            OnBuildColliderDone(stateManager);
         }
 
-        private static void OnGenerateColliderDone(ChunkStateManagerClient stateManager)
+        private static void OnBuildColliderDone(ChunkStateManagerClient stateManager)
         {
-            stateManager.m_completedStates = stateManager.m_completedStates.Set(CurrStateGenerateCollider);
+            stateManager.m_completedStates = stateManager.m_completedStates.Set(CurrStateBuildCollider);
             stateManager.m_taskRunning = false;
         }
 
         /// <summary>
         ///     Build this chunk's collision geometry
         /// </summary>
-        private bool GenerateCollider()
+        private bool BuildCollider()
         {
             if (!m_completedStates.Check(ChunkState.Generate))
                 return true;
@@ -664,20 +664,20 @@ namespace Voxelmetric.Code.Core.StateManager
             if (!SynchronizeChunk())
                 return true;
 
-            m_pendingStates = m_pendingStates.Reset(CurrStateGenerateCollider);
-            m_completedStates = m_completedStates.Reset(CurrStateGenerateCollider);
+            m_pendingStates = m_pendingStates.Reset(CurrStateBuildCollider);
+            m_completedStates = m_completedStates.Reset(CurrStateBuildCollider);
             m_completedStatesSafe = m_completedStates;
 
             if (chunk.blocks.NonEmptyBlocks > 0)
             {
-                var task = Globals.MemPools.GenerateColliderThreadPI.Pop();
-                m_poolState = m_poolState.Set(ChunkPoolItemState.GenerateColliderThreadPI);
+                var task = Globals.MemPools.BuildColliderThreadPI.Pop();
+                m_poolState = m_poolState.Set(ChunkPoolItemState.BuildColliderThreadPI);
                 m_threadPoolItem = task;
 
                 task.Set(
                     chunk.ThreadID,
-                    actionOnGenerateCollider,
-                    new SGenerateColliderWorkItem(
+                    actionOnBuildCollider,
+                    new SBuildColliderWorkItem(
                         this,
                         chunk.m_bounds.minX, chunk.m_bounds.maxX,
                         chunk.m_bounds.minY, chunk.m_bounds.maxY,
@@ -691,32 +691,32 @@ namespace Voxelmetric.Code.Core.StateManager
                 return true;
             }
 
-            OnGenerateColliderDone(this);
+            OnBuildColliderDone(this);
             return false;
         }
 
         #endregion Generate vertices
 
-        #region Generate vertices
+        #region Build render geometry
         
-        private static readonly ChunkState CurrStateGenerateVertices = ChunkState.BuildVertices | ChunkState.BuildVerticesNow;
+        private static readonly ChunkState CurrStateBuildVertices = ChunkState.BuildVertices | ChunkState.BuildVerticesNow;
 
-        private static void OnGenerateVertices(ChunkStateManagerClient client)
+        private static void OnBuildVertices(ChunkStateManagerClient client)
         {
             client.chunk.GeometryHandler.Build(0, Env.ChunkMask, 0, Env.ChunkMask, 0, Env.ChunkMask);
-            OnGenerateVerticesDone(client);
+            OnBuildVerticesDone(client);
         }
 
-        private static void OnGenerateVerticesDone(ChunkStateManagerClient stateManager)
+        private static void OnBuildVerticesDone(ChunkStateManagerClient stateManager)
         {
-            stateManager.m_completedStates = stateManager.m_completedStates.Set(CurrStateGenerateVertices);
+            stateManager.m_completedStates = stateManager.m_completedStates.Set(CurrStateBuildVertices);
             stateManager.m_taskRunning = false;
         }
 
         /// <summary>
         ///     Build this chunk's geometry
         /// </summary>
-        private bool GenerateVertices()
+        private bool BuildVertices()
         {
             if (!m_completedStates.Check(ChunkState.Generate))
                 return true;
@@ -726,8 +726,8 @@ namespace Voxelmetric.Code.Core.StateManager
 
             bool priority = m_pendingStates.Check(ChunkState.BuildVerticesNow);
 
-            m_pendingStates = m_pendingStates.Reset(CurrStateGenerateVertices);
-            m_completedStates = m_completedStates.Reset(CurrStateGenerateVertices);
+            m_pendingStates = m_pendingStates.Reset(CurrStateBuildVertices);
+            m_completedStates = m_completedStates.Reset(CurrStateBuildVertices);
             m_completedStatesSafe = m_completedStates;
 
             if (chunk.blocks.NonEmptyBlocks > 0)
@@ -738,7 +738,7 @@ namespace Voxelmetric.Code.Core.StateManager
 
                 task.Set(
                     chunk.ThreadID,
-                    actionOnGenerateVertices,
+                    actionOnBuildVertices,
                     this,
                     priority ? Globals.Watch.ElapsedTicks : long.MaxValue
                     );
@@ -749,7 +749,7 @@ namespace Voxelmetric.Code.Core.StateManager
                 return true;
             }
 
-            OnGenerateVerticesDone(this);
+            OnBuildVerticesDone(this);
             return false;
         }
 

@@ -2,7 +2,7 @@
 
 namespace Voxelmetric.Code.Core
 {
-    public struct SGenerateColliderWorkItem
+    public struct SBuildColliderWorkItem
     {
         public readonly ChunkStateManagerClient StateManager;
         public readonly int MinX;
@@ -12,7 +12,7 @@ namespace Voxelmetric.Code.Core
         public readonly int MinZ;
         public readonly int MaxZ;
 
-        public SGenerateColliderWorkItem(ChunkStateManagerClient stateManager, int minX, int maxX, int minY, int maxY, int minZ, int maxZ)
+        public SBuildColliderWorkItem(ChunkStateManagerClient stateManager, int minX, int maxX, int minY, int maxY, int minZ, int maxZ)
         {
             StateManager = stateManager;
             MinX = minX;
