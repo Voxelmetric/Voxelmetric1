@@ -36,6 +36,8 @@ namespace Voxelmetric.Code.Utilities
 
         //! If true, chunk serialization is enabled
         public const bool UseSerialization = true;
+        //! If true, chunk will be serialized when it's unloaded
+        public const bool SerializeChunkWhenUnloading = true;
         //! If true, only difference form default-generated data will be stored
         //! If there is no change no serialization is performned unless UseDifferentialSerialization_ForceSaveHeaders is enabled
         public const bool UseDifferentialSerialization = true;

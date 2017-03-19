@@ -23,6 +23,7 @@ namespace Voxelmetric.Code.Core.StateManager
         
         //! If true, removal of chunk has been requested and no further requests are going to be accepted
         protected bool m_removalRequested;
+        protected bool m_isSaveNeeded;
 
         protected ChunkStateManager(Chunk chunk)
         {
@@ -46,6 +47,7 @@ namespace Voxelmetric.Code.Core.StateManager
             m_completedStates = m_completedStates.Reset();
             m_completedStatesSafe = m_completedStates;
             m_removalRequested = false;
+            m_isSaveNeeded = false;
 
             m_taskRunning = false;
 
@@ -76,13 +78,20 @@ namespace Voxelmetric.Code.Core.StateManager
         {
             switch (state)
             {
+                case ChunkState.PrepareSaveData:
+                {
+                    m_isSaveNeeded = true;
+                }
+                break;
+
                 case ChunkState.Remove:
                 {
                     if (m_removalRequested)
                         return;
                     m_removalRequested = true;
-                    
-                    OnNotified(this, ChunkState.SaveData);
+
+                    if (Utilities.Core.SerializeChunkWhenUnloading)
+                        OnNotified(this, ChunkState.PrepareSaveData);
                     OnNotified(this, ChunkState.Remove);
                 }
                 break;
@@ -104,7 +113,7 @@ namespace Voxelmetric.Code.Core.StateManager
 
         public bool IsSavePossible
         {
-            get { return m_save!=null && !m_removalRequested && m_completedStatesSafe.Check(ChunkState.Generate | ChunkState.LoadData); }
+            get { return m_save!=null && !m_removalRequested && m_completedStatesSafe.Check(ChunkState.Generate); }
         }
 
         public abstract void SetMeshBuilt();
