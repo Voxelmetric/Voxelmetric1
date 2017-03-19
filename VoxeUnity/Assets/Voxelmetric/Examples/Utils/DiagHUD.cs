@@ -5,6 +5,7 @@ using UnityEngine;
 using Voxelmetric.Code;
 using Voxelmetric.Code.Common.Extensions;
 using Voxelmetric.Code.Common.MemoryPooling;
+using Voxelmetric.Code.Common.Threading.Managers;
 using Voxelmetric.Code.Core;
 
 namespace Client.Scripts.Misc
@@ -99,10 +100,10 @@ namespace Client.Scripts.Misc
             if (World != null)
             {
                 int chunks = World.chunks.chunkCollection.Count;
-                m_text.AppendFormat("Chunks {0}\n", chunks);
+                m_text.AppendFormat("Chunks: {0}\n", chunks);
             }
-            m_text.AppendFormat("ThreadPool items {0}\n", Globals.WorkPool.PooledItemCnt);
-            m_text.AppendFormat("TaskPool items {0}\n", Globals.IOPool.Size);
+            m_text.AppendFormat("TP tasks: {0}\n", WorkPoolManager.ToString());
+            m_text.AppendFormat("IO tasks: {0}\n", IOPoolManager.ToString());
 
             m_text.AppendLine(Globals.MemPools.ToString());
             for(int i=0; i<Globals.WorkPool.Size; i++)

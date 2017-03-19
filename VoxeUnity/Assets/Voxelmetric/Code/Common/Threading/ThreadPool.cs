@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Text;
 using UnityEngine;
 using UnityEngine.Assertions;
 using Voxelmetric.Code.Common.MemoryPooling;
@@ -12,6 +13,9 @@ namespace Voxelmetric.Code.Common.Threading
 
         //! Threads used by thread pool
         private readonly TaskPool[] m_pools;
+
+        //! Diagnostics
+        private readonly StringBuilder m_sb = new StringBuilder(128);
 
         public ThreadPool()
         {
@@ -107,6 +111,14 @@ namespace Voxelmetric.Code.Common.Threading
         public int Size
         {
             get { return m_pools.Length; }
+        }
+
+        public override string ToString()
+        {
+            m_sb.Remove(0, m_sb.Length);
+            for (int i = 0; i<m_pools.Length-1; i++)
+                m_sb.AppendFormat("{0}, ", m_pools[i]);
+            return m_sb.Append(m_pools[m_pools.Length-1]).ToString();
         }
     }
 }

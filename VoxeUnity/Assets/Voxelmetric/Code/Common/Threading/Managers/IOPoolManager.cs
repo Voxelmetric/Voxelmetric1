@@ -6,7 +6,10 @@ namespace Voxelmetric.Code.Common.Threading.Managers
     public static class IOPoolManager
     {
         private static readonly List<ITaskPoolItem> WorkItems = new List<ITaskPoolItem>(2048);
-        private static readonly TimeBudgetHandler TimeBudget = Utilities.Core.UseThreadedIO ? null : new TimeBudgetHandler(10);
+
+        private static readonly TimeBudgetHandler TimeBudget = Utilities.Core.UseThreadedIO
+                                                                   ? null
+                                                                   : new TimeBudgetHandler(10);
 
         public static void Add(ITaskPoolItem action)
         {
@@ -15,7 +18,7 @@ namespace Voxelmetric.Code.Common.Threading.Managers
 
         public static void Commit()
         {
-            if (WorkItems.Count <= 0)
+            if (WorkItems.Count<=0)
                 return;
 
             // Commit all the work we have
@@ -48,6 +51,11 @@ namespace Voxelmetric.Code.Common.Threading.Managers
 
             // Remove processed work items
             WorkItems.Clear();
+        }
+
+        public new static string ToString()
+        {
+            return Utilities.Core.UseThreadedIO ? Globals.IOPool.ToString() : WorkItems.Count.ToString();
         }
     }
 }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Text;
 using System.Threading;
 using JetBrains.Annotations;
 using UnityEngine;
@@ -19,6 +20,10 @@ namespace Voxelmetric.Code.Common.Threading
         private readonly Thread m_thread; // worker thread
 
         private bool m_stop;
+
+        //! Diagnostics
+        private int m_curr, m_max;
+        private readonly StringBuilder m_sb = new StringBuilder(32);
 
         public TaskPool()
         {
@@ -155,13 +160,14 @@ namespace Voxelmetric.Code.Common.Threading
                     actions = tmp;
                 }
 
+                m_max = actions.Count;
 
                 // Execute all tasks in a row
-                for (int i = 0; i < actions.Count; i++)
+                for (m_curr = 0; m_curr < actions.Count; m_curr++)
                 {
                     // Execute the action
                     // Note, it's up to action to provide exception handling
-                    ITaskPoolItem poolItem = actions[i];
+                    ITaskPoolItem poolItem = actions[m_curr];
 
 #if DEBUG
                     try
@@ -178,10 +184,16 @@ namespace Voxelmetric.Code.Common.Threading
 #endif
                 }
                 actions.Clear();
+                m_curr = m_max = 0;
 
                 // Wait for next tasks
                 m_event.WaitOne();
             }
+        }
+
+        public override string ToString()
+        {
+            return m_sb.Remove(0, m_sb.Length).AppendFormat("{0}/{1}", m_curr, m_max).ToString();
         }
     }
 }

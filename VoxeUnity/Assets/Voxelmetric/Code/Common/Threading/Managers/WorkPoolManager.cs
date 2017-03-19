@@ -6,7 +6,10 @@ namespace Voxelmetric.Code.Common.Threading.Managers
     public static class WorkPoolManager
     {
         private static readonly List<AThreadPoolItem> WorkItems = new List<AThreadPoolItem>(2048);
-        private static readonly TimeBudgetHandler TimeBudget = Utilities.Core.UseThreadPool ? null : new TimeBudgetHandler(10);
+
+        private static readonly TimeBudgetHandler TimeBudget = Utilities.Core.UseThreadPool
+                                                                   ? null
+                                                                   : new TimeBudgetHandler(10);
 
         public static void Add(AThreadPoolItem action)
         {
@@ -91,5 +94,10 @@ namespace Voxelmetric.Code.Common.Threading.Managers
             // Remove processed work items
             WorkItems.Clear();
         }
-    }  
+
+        public new static string ToString()
+        {
+            return Utilities.Core.UseThreadPool ? Globals.WorkPool.ToString() : WorkItems.Count.ToString();
+        }
+    }
 }
