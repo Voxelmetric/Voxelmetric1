@@ -12,6 +12,18 @@ namespace Voxelmetric.Code.Common.Memory
             m_arrays = new Dictionary<int, IArrayPool<T>>(size);
         }
 
+        public T[] PopExact(int size)
+        {
+            IArrayPool<T> pool;
+            if (!m_arrays.TryGetValue(size, out pool))
+            {
+                pool = new ArrayPool<T>(size, 4, 1);
+                m_arrays.Add(size, pool);
+            }
+
+            return pool.Pop();
+        }
+
         public T[] Pop(int size)
         {
             int length = GetRoundedSize(size);

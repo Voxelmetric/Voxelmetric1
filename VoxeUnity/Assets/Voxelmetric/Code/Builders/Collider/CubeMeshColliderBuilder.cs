@@ -187,8 +187,8 @@ namespace Voxelmetric.Code.Builders.Collider
 
                                     {
                                         LocalPools pool = chunk.pools;
-                                        VertexData[] vertexData = pool.VertexDataArrayPool.Pop(4);
-                                        VertexDataFixed[] vertexDataFixed = pool.VertexDataFixedArrayPool.Pop(4);
+                                        VertexData[] vertexData = pool.VertexDataArrayPool.PopExact(4);
+                                        VertexDataFixed[] vertexDataFixed = pool.VertexDataFixedArrayPool.PopExact(4);
                                         {
                                             for (int ii = 0; ii<4; ii++)
                                             {

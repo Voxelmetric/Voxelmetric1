@@ -17,8 +17,8 @@ public class CubeBlock: SolidBlock
     {
         bool backface = DirectionUtils.IsBackface(direction);
 
-        VertexData[] vertexData = chunk.pools.VertexDataArrayPool.Pop(4);
-        VertexDataFixed[] vertexDataFixed = chunk.pools.VertexDataFixedArrayPool.Pop(4);
+        VertexData[] vertexData = chunk.pools.VertexDataArrayPool.PopExact(4);
+        VertexDataFixed[] vertexDataFixed = chunk.pools.VertexDataFixedArrayPool.PopExact(4);
         {
             if (vertices==null)
             {

@@ -43,105 +43,62 @@ namespace Voxelmetric.Code.Configurable.Blocks.Utilities
             Vector3 vPos = localPos;
             vPos += new Vector3(offsetX, 0, offsetZ);
 
+            VertexData[] vertexData = chunk.pools.VertexDataArrayPool.PopExact(4);
+            for (int i = 0; i < 4; i++)
+                vertexData[i] = chunk.pools.VertexDataPool.Pop();
+            VertexDataFixed[] vertexDataFixed = chunk.pools.VertexDataFixedArrayPool.PopExact(4);
             {
-                VertexData[] vertexData = chunk.pools.VertexDataArrayPool.Pop(4);
-                VertexDataFixed[] vertexDataFixed = chunk.pools.VertexDataFixedArrayPool.Pop(4);
-                {
-                    for (int i = 0; i<4; i++)
-                        vertexData[i] = chunk.pools.VertexDataPool.Pop();
+                vertexData[0].Vertex = new Vector3(vPos.x-halfBlock, vPos.y-halfBlock, vPos.z+halfBlock);
+                vertexData[1].Vertex = new Vector3(vPos.x-halfBlock, vPos.y-halfBlock+blockHeight, vPos.z+halfBlock);
+                vertexData[2].Vertex = new Vector3(vPos.x+halfBlock, vPos.y-halfBlock+blockHeight, vPos.z-halfBlock);
+                vertexData[3].Vertex = new Vector3(vPos.x+halfBlock, vPos.y-halfBlock, vPos.z-halfBlock);
+                BlockUtils.PrepareTexture(chunk, localPos, vertexData, Direction.north, texture);
+                BlockUtils.SetColors(vertexData, 1, 1, 1, 1, 1);
 
-                    vertexData[0].Vertex = new Vector3(vPos.x-halfBlock, vPos.y-halfBlock, vPos.z+halfBlock);
-                    vertexData[1].Vertex = new Vector3(vPos.x-halfBlock, vPos.y-halfBlock+blockHeight, vPos.z+halfBlock);
-                    vertexData[2].Vertex = new Vector3(vPos.x+halfBlock, vPos.y-halfBlock+blockHeight, vPos.z-halfBlock);
-                    vertexData[3].Vertex = new Vector3(vPos.x+halfBlock, vPos.y-halfBlock, vPos.z-halfBlock);
-                    BlockUtils.PrepareTexture(chunk, localPos, vertexData, Direction.north, texture);
-                    BlockUtils.SetColors(vertexData, 1, 1, 1, 1, 1);
-
-                    for (int i = 0; i < 4; i++)
-                        vertexDataFixed[i] = VertexDataUtils.ClassToStruct(vertexData[i]);
-                    chunk.GeometryHandler.Batcher.AddFace(vertexDataFixed, false);
-
-                    for (int i = 0; i < 4; i++)
-                        chunk.pools.VertexDataPool.Push(vertexData[i]);
-                }
-                chunk.pools.VertexDataFixedArrayPool.Push(vertexDataFixed);
-                chunk.pools.VertexDataArrayPool.Push(vertexData);
+                for (int i = 0; i<4; i++)
+                    vertexDataFixed[i] = VertexDataUtils.ClassToStruct(vertexData[i]);
+                chunk.GeometryHandler.Batcher.AddFace(vertexDataFixed, false);
             }
-
             {
-                VertexData[] vertexData = chunk.pools.VertexDataArrayPool.Pop(4);
-                VertexDataFixed[] vertexDataFixed = chunk.pools.VertexDataFixedArrayPool.Pop(4);
-                {
-                    for (int i = 0; i<4; i++)
-                        vertexData[i] = chunk.pools.VertexDataPool.Pop();
+                vertexData[0].Vertex = new Vector3(vPos.x+halfBlock, vPos.y-halfBlock, vPos.z-halfBlock);
+                vertexData[1].Vertex = new Vector3(vPos.x+halfBlock, vPos.y-halfBlock+blockHeight, vPos.z-halfBlock);
+                vertexData[2].Vertex = new Vector3(vPos.x-halfBlock, vPos.y-halfBlock+blockHeight, vPos.z+halfBlock);
+                vertexData[3].Vertex = new Vector3(vPos.x-halfBlock, vPos.y-halfBlock, vPos.z+halfBlock);
+                BlockUtils.PrepareTexture(chunk, localPos, vertexData, Direction.north, texture);
+                BlockUtils.SetColors(vertexData, 1, 1, 1, 1, 1);
 
-                    vertexData[0].Vertex = new Vector3(vPos.x+halfBlock, vPos.y-halfBlock, vPos.z-halfBlock);
-                    vertexData[1].Vertex = new Vector3(vPos.x+halfBlock, vPos.y-halfBlock+blockHeight, vPos.z-halfBlock);
-                    vertexData[2].Vertex = new Vector3(vPos.x-halfBlock, vPos.y-halfBlock+blockHeight, vPos.z+halfBlock);
-                    vertexData[3].Vertex = new Vector3(vPos.x-halfBlock, vPos.y-halfBlock, vPos.z+halfBlock);
-                    BlockUtils.PrepareTexture(chunk, localPos, vertexData, Direction.north, texture);
-                    BlockUtils.SetColors(vertexData, 1, 1, 1, 1, 1);
-
-                    for (int i = 0; i < 4; i++)
-                        vertexDataFixed[i] = VertexDataUtils.ClassToStruct(vertexData[i]);
-                    chunk.GeometryHandler.Batcher.AddFace(vertexDataFixed, false);
-
-                    for (int i = 0; i < 4; i++)
-                        chunk.pools.VertexDataPool.Push(vertexData[i]);
-                }
-                chunk.pools.VertexDataFixedArrayPool.Push(vertexDataFixed);
-                chunk.pools.VertexDataArrayPool.Push(vertexData);
+                for (int i = 0; i<4; i++)
+                    vertexDataFixed[i] = VertexDataUtils.ClassToStruct(vertexData[i]);
+                chunk.GeometryHandler.Batcher.AddFace(vertexDataFixed, false);
             }
-
             {
-                VertexData[] vertexData = chunk.pools.VertexDataArrayPool.Pop(4);
-                VertexDataFixed[] vertexDataFixed = chunk.pools.VertexDataFixedArrayPool.Pop(4);
-                {
-                    for (int i = 0; i<4; i++)
-                        vertexData[i] = chunk.pools.VertexDataPool.Pop();
+                vertexData[0].Vertex = new Vector3(vPos.x+halfBlock, vPos.y-halfBlock, vPos.z+halfBlock);
+                vertexData[1].Vertex = new Vector3(vPos.x+halfBlock, vPos.y-halfBlock+blockHeight, vPos.z+halfBlock);
+                vertexData[2].Vertex = new Vector3(vPos.x-halfBlock, vPos.y-halfBlock+blockHeight, vPos.z-halfBlock);
+                vertexData[3].Vertex = new Vector3(vPos.x-halfBlock, vPos.y-halfBlock, vPos.z-halfBlock);
+                BlockUtils.PrepareTexture(chunk, localPos, vertexData, Direction.north, texture);
+                BlockUtils.SetColors(vertexData, 1, 1, 1, 1, 1);
 
-                    vertexData[0].Vertex = new Vector3(vPos.x+halfBlock, vPos.y-halfBlock, vPos.z+halfBlock);
-                    vertexData[1].Vertex = new Vector3(vPos.x+halfBlock, vPos.y-halfBlock+blockHeight, vPos.z+halfBlock);
-                    vertexData[2].Vertex = new Vector3(vPos.x-halfBlock, vPos.y-halfBlock+blockHeight, vPos.z-halfBlock);
-                    vertexData[3].Vertex = new Vector3(vPos.x-halfBlock, vPos.y-halfBlock, vPos.z-halfBlock);
-                    BlockUtils.PrepareTexture(chunk, localPos, vertexData, Direction.north, texture);
-                    BlockUtils.SetColors(vertexData, 1, 1, 1, 1, 1);
-
-                    for (int i = 0; i < 4; i++)
-                        vertexDataFixed[i] = VertexDataUtils.ClassToStruct(vertexData[i]);
-                    chunk.GeometryHandler.Batcher.AddFace(vertexDataFixed, false);
-
-                    for (int i = 0; i < 4; i++)
-                        chunk.pools.VertexDataPool.Push(vertexData[i]);
-                }
-                chunk.pools.VertexDataFixedArrayPool.Push(vertexDataFixed);
-                chunk.pools.VertexDataArrayPool.Push(vertexData);
+                for (int i = 0; i<4; i++)
+                    vertexDataFixed[i] = VertexDataUtils.ClassToStruct(vertexData[i]);
+                chunk.GeometryHandler.Batcher.AddFace(vertexDataFixed, false);
             }
-
             {
-                VertexData[] vertexData = chunk.pools.VertexDataArrayPool.Pop(4);
-                VertexDataFixed[] vertexDataFixed = chunk.pools.VertexDataFixedArrayPool.Pop(4);
-                {
-                    for (int i = 0; i<4; i++)
-                        vertexData[i] = chunk.pools.VertexDataPool.Pop();
+                vertexData[0].Vertex = new Vector3(vPos.x-halfBlock, vPos.y-halfBlock, vPos.z-halfBlock);
+                vertexData[1].Vertex = new Vector3(vPos.x-halfBlock, vPos.y-halfBlock+blockHeight, vPos.z-halfBlock);
+                vertexData[2].Vertex = new Vector3(vPos.x+halfBlock, vPos.y-halfBlock+blockHeight, vPos.z+halfBlock);
+                vertexData[3].Vertex = new Vector3(vPos.x+halfBlock, vPos.y-halfBlock, vPos.z+halfBlock);
+                BlockUtils.PrepareTexture(chunk, localPos, vertexData, Direction.north, texture);
+                BlockUtils.SetColors(vertexData, 1, 1, 1, 1, 1);
 
-                    vertexData[0].Vertex = new Vector3(vPos.x-halfBlock, vPos.y-halfBlock, vPos.z-halfBlock);
-                    vertexData[1].Vertex = new Vector3(vPos.x-halfBlock, vPos.y-halfBlock+blockHeight, vPos.z-halfBlock);
-                    vertexData[2].Vertex = new Vector3(vPos.x+halfBlock, vPos.y-halfBlock+blockHeight, vPos.z+halfBlock);
-                    vertexData[3].Vertex = new Vector3(vPos.x+halfBlock, vPos.y-halfBlock, vPos.z+halfBlock);
-                    BlockUtils.PrepareTexture(chunk, localPos, vertexData, Direction.north, texture);
-                    BlockUtils.SetColors(vertexData, 1, 1, 1, 1, 1);
-
-                    for (int i = 0; i < 4; i++)
-                        vertexDataFixed[i] = VertexDataUtils.ClassToStruct(vertexData[i]);
-                    chunk.GeometryHandler.Batcher.AddFace(vertexDataFixed, false);
-
-                    for (int i = 0; i < 4; i++)
-                        chunk.pools.VertexDataPool.Push(vertexData[i]);
-                }
-                chunk.pools.VertexDataFixedArrayPool.Push(vertexDataFixed);
-                chunk.pools.VertexDataArrayPool.Push(vertexData);
+                for (int i = 0; i<4; i++)
+                    vertexDataFixed[i] = VertexDataUtils.ClassToStruct(vertexData[i]);
+                chunk.GeometryHandler.Batcher.AddFace(vertexDataFixed, false);
             }
+            chunk.pools.VertexDataFixedArrayPool.Push(vertexDataFixed);
+            for (int i = 0; i < 4; i++)
+                chunk.pools.VertexDataPool.Push(vertexData[i]);
+            chunk.pools.VertexDataArrayPool.Push(vertexData);
         }
     }
 }
