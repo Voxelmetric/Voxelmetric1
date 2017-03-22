@@ -52,7 +52,7 @@ namespace Voxelmetric.Code.Configurable.Blocks.Utilities
                 vertexData[1].Vertex = new Vector3(vPos.x-halfBlock, vPos.y-halfBlock+blockHeight, vPos.z+halfBlock);
                 vertexData[2].Vertex = new Vector3(vPos.x+halfBlock, vPos.y-halfBlock+blockHeight, vPos.z-halfBlock);
                 vertexData[3].Vertex = new Vector3(vPos.x+halfBlock, vPos.y-halfBlock, vPos.z-halfBlock);
-                BlockUtils.PrepareTexture(chunk, localPos, vertexData, Direction.north, texture);
+                BlockUtils.PrepareTexture(chunk, ref localPos, vertexData, Direction.north, texture);
                 BlockUtils.SetColors(vertexData, 1, 1, 1, 1, 1);
 
                 for (int i = 0; i<4; i++)
@@ -64,7 +64,7 @@ namespace Voxelmetric.Code.Configurable.Blocks.Utilities
                 vertexData[1].Vertex = new Vector3(vPos.x+halfBlock, vPos.y-halfBlock+blockHeight, vPos.z-halfBlock);
                 vertexData[2].Vertex = new Vector3(vPos.x-halfBlock, vPos.y-halfBlock+blockHeight, vPos.z+halfBlock);
                 vertexData[3].Vertex = new Vector3(vPos.x-halfBlock, vPos.y-halfBlock, vPos.z+halfBlock);
-                BlockUtils.PrepareTexture(chunk, localPos, vertexData, Direction.north, texture);
+                BlockUtils.PrepareTexture(chunk, ref localPos, vertexData, Direction.north, texture);
                 BlockUtils.SetColors(vertexData, 1, 1, 1, 1, 1);
 
                 for (int i = 0; i<4; i++)
@@ -76,7 +76,7 @@ namespace Voxelmetric.Code.Configurable.Blocks.Utilities
                 vertexData[1].Vertex = new Vector3(vPos.x+halfBlock, vPos.y-halfBlock+blockHeight, vPos.z+halfBlock);
                 vertexData[2].Vertex = new Vector3(vPos.x-halfBlock, vPos.y-halfBlock+blockHeight, vPos.z-halfBlock);
                 vertexData[3].Vertex = new Vector3(vPos.x-halfBlock, vPos.y-halfBlock, vPos.z-halfBlock);
-                BlockUtils.PrepareTexture(chunk, localPos, vertexData, Direction.north, texture);
+                BlockUtils.PrepareTexture(chunk, ref localPos, vertexData, Direction.north, texture);
                 BlockUtils.SetColors(vertexData, 1, 1, 1, 1, 1);
 
                 for (int i = 0; i<4; i++)
@@ -88,7 +88,7 @@ namespace Voxelmetric.Code.Configurable.Blocks.Utilities
                 vertexData[1].Vertex = new Vector3(vPos.x-halfBlock, vPos.y-halfBlock+blockHeight, vPos.z-halfBlock);
                 vertexData[2].Vertex = new Vector3(vPos.x+halfBlock, vPos.y-halfBlock+blockHeight, vPos.z+halfBlock);
                 vertexData[3].Vertex = new Vector3(vPos.x+halfBlock, vPos.y-halfBlock, vPos.z+halfBlock);
-                BlockUtils.PrepareTexture(chunk, localPos, vertexData, Direction.north, texture);
+                BlockUtils.PrepareTexture(chunk, ref localPos, vertexData, Direction.north, texture);
                 BlockUtils.SetColors(vertexData, 1, 1, 1, 1, 1);
 
                 for (int i = 0; i<4; i++)

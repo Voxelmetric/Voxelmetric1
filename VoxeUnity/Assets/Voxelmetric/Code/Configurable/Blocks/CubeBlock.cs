@@ -24,7 +24,7 @@ public class CubeBlock: SolidBlock
             {
                 for (int i = 0; i<4; i++)
                     vertexData[i] = chunk.pools.VertexDataPool.Pop();
-                BlockUtils.PrepareVertices(localPos, vertexData, direction);
+                BlockUtils.PrepareVertices(ref localPos, vertexData, direction);
             }
             else
             {
@@ -35,8 +35,8 @@ public class CubeBlock: SolidBlock
                 }
             }
 
-            BlockUtils.PrepareTexture(chunk, localPos, vertexData, direction, textures);
-            BlockUtils.PrepareColors(chunk, localPos, vertexData, direction);
+            BlockUtils.PrepareTexture(chunk, ref localPos, vertexData, direction, textures);
+            BlockUtils.PrepareColors(chunk, ref localPos, vertexData, direction);
 
             for (int i = 0; i < 4; i++)
                 vertexDataFixed[i] = VertexDataUtils.ClassToStruct(vertexData[i]);

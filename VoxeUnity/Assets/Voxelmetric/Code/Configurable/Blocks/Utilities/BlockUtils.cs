@@ -1,4 +1,5 @@
 using UnityEngine;
+using Voxelmetric.Code.Common;
 using Voxelmetric.Code.Core;
 using Voxelmetric.Code.Data_types;
 using Voxelmetric.Code.Load_Resources.Textures;
@@ -69,7 +70,7 @@ namespace Voxelmetric.Code.Configurable.Blocks.Utilities
             }
         };
 
-        public static void PrepareColors(Chunk chunk, Vector3Int localPos, VertexData[] vertexData, Direction direction)
+        public static void PrepareColors(Chunk chunk, ref Vector3Int localPos, VertexData[] vertexData, Direction direction)
         {
             if (chunk.world.config.addAOToMesh)
             {
@@ -84,74 +85,152 @@ namespace Voxelmetric.Code.Configurable.Blocks.Utilities
                 bool swSolid = false;
 
                 ChunkBlocks blocks = chunk.blocks;
+                int index, index2, index3;
 
                 switch (direction)
                 {
                     case Direction.up:
-                        nSolid = blocks.Get(localPos.Add(0, 1, 1)).Solid;
-                        eSolid = blocks.Get(localPos.Add(1, 1, 0)).Solid;
-                        sSolid = blocks.Get(localPos.Add(0, 1, -1)).Solid;
-                        wSolid = blocks.Get(localPos.Add(-1, 1, 0)).Solid;
-                        
-                        wnSolid = blocks.Get(localPos.Add(-1, 1, 1)).Solid;
-                        neSolid = blocks.Get(localPos.Add(1, 1, 1)).Solid;
-                        esSolid = blocks.Get(localPos.Add(1, 1, -1)).Solid;
-                        swSolid = blocks.Get(localPos.Add(-1, 1, -1)).Solid;
+                        index = Helpers.GetChunkIndex1DFrom3D(localPos.x, localPos.y, localPos.z)+Env.ChunkSizeWithPaddingPow2; // + (0,1,0)
+                        index2 = index-Env.ChunkSizeWithPadding;
+                        index3 = index+Env.ChunkSizeWithPadding;
+
+                        //swSolid = blocks.Get(localPos.Add(-1, 1, -1)).Solid;
+                        swSolid = blocks.Get(index2-1).Solid;
+                        //sSolid = blocks.Get(localPos.Add(0, 1, -1)).Solid;
+                        sSolid = blocks.Get(index2).Solid;
+                        //esSolid = blocks.Get(localPos.Add(1, 1, -1)).Solid;
+                        esSolid = blocks.Get(index2+1).Solid;
+                        //wSolid = blocks.Get(localPos.Add(-1, 1, 0)).Solid;
+                        wSolid = blocks.Get(index-1).Solid;
+                        //eSolid = blocks.Get(localPos.Add(1, 1, 0)).Solid;
+                        eSolid = blocks.Get(index+1).Solid;
+                        //wnSolid = blocks.Get(localPos.Add(-1, 1, 1)).Solid;
+                        wnSolid = blocks.Get(index3-1).Solid;
+                        //nSolid = blocks.Get(localPos.Add(0, 1, 1)).Solid;
+                        nSolid = blocks.Get(index3).Solid;
+                        //neSolid = blocks.Get(localPos.Add(1, 1, 1)).Solid;
+                        neSolid = blocks.Get(index3+1).Solid;
+
                         break;
                     case Direction.down:
-                        nSolid = blocks.Get(localPos.Add(0, -1, -1)).Solid;
-                        eSolid = blocks.Get(localPos.Add(1, -1, 0)).Solid;
-                        sSolid = blocks.Get(localPos.Add(0, -1, 1)).Solid;
-                        wSolid = blocks.Get(localPos.Add(-1, -1, 0)).Solid;
+                        index = Helpers.GetChunkIndex1DFrom3D(localPos.x, localPos.y, localPos.z)-Env.ChunkSizeWithPaddingPow2; // - (0,1,0)
+                        index2 = index - Env.ChunkSizeWithPadding;
+                        index3 = index + Env.ChunkSizeWithPadding;
 
-                        wnSolid = blocks.Get(localPos.Add(-1, -1, -1)).Solid;
-                        neSolid = blocks.Get(localPos.Add(1, -1, -1)).Solid;
-                        esSolid = blocks.Get(localPos.Add(1, -1, 1)).Solid;
-                        swSolid = blocks.Get(localPos.Add(-1, -1, 1)).Solid;
+                        //wnSolid = blocks.Get(localPos.Add(-1, -1, -1)).Solid;
+                        wnSolid = blocks.Get(index2-1).Solid;
+                        //nSolid = blocks.Get(localPos.Add(0, -1, -1)).Solid;
+                        nSolid = blocks.Get(index2).Solid;
+                        //neSolid = blocks.Get(localPos.Add(1, -1, -1)).Solid;
+                        neSolid = blocks.Get(index2+1).Solid;
+
+                        //wSolid = blocks.Get(localPos.Add(-1, -1, 0)).Solid;
+                        wSolid = blocks.Get(index-1).Solid;
+                        //eSolid = blocks.Get(localPos.Add(1, -1, 0)).Solid;
+                        eSolid = blocks.Get(index+1).Solid;
+
+                        //swSolid = blocks.Get(localPos.Add(-1, -1, 1)).Solid;
+                        swSolid = blocks.Get(index3-1).Solid;
+                        //sSolid = blocks.Get(localPos.Add(0, -1, 1)).Solid;
+                        sSolid = blocks.Get(index3).Solid;
+                        //esSolid = blocks.Get(localPos.Add(1, -1, 1)).Solid;
+                        esSolid = blocks.Get(index3+1).Solid;
                         break;
                     case Direction.north:
-                        nSolid = blocks.Get(localPos.Add(1, 0, 1)).Solid;
-                        eSolid = blocks.Get(localPos.Add(0, 1, 1)).Solid;
-                        sSolid = blocks.Get(localPos.Add(-1, 0, 1)).Solid;
-                        wSolid = blocks.Get(localPos.Add(0, -1, 1)).Solid;
+                        index = Helpers.GetChunkIndex1DFrom3D(localPos.x, localPos.y, localPos.z)+Env.ChunkSizeWithPadding; // + (0,0,1)
+                        index2 = index - Env.ChunkSizeWithPaddingPow2;
+                        index3 = index + Env.ChunkSizeWithPaddingPow2;
 
-                        esSolid = blocks.Get(localPos.Add(-1, 1, 1)).Solid;
-                        neSolid = blocks.Get(localPos.Add(1, 1, 1)).Solid;
-                        wnSolid = blocks.Get(localPos.Add(1, -1, 1)).Solid;
-                        swSolid = blocks.Get(localPos.Add(-1, -1, 1)).Solid;
-                        break;
-                    case Direction.east:
-                        nSolid = blocks.Get(localPos.Add(1, 0, -1)).Solid;
-                        eSolid = blocks.Get(localPos.Add(1, 1, 0)).Solid;
-                        sSolid = blocks.Get(localPos.Add(1, 0, 1)).Solid;
-                        wSolid = blocks.Get(localPos.Add(1, -1, 0)).Solid;
+                        //swSolid = blocks.Get(localPos.Add(-1, -1, 1)).Solid;
+                        swSolid = blocks.Get(index2-1).Solid;
+                        //wSolid = blocks.Get(localPos.Add(0, -1, 1)).Solid;
+                        wSolid = blocks.Get(index2).Solid;
+                        //wnSolid = blocks.Get(localPos.Add(1, -1, 1)).Solid;
+                        wnSolid = blocks.Get(index2+1).Solid;
 
-                        esSolid = blocks.Get(localPos.Add(1, 1, 1)).Solid;
-                        neSolid = blocks.Get(localPos.Add(1, 1, -1)).Solid;
-                        wnSolid = blocks.Get(localPos.Add(1, -1, -1)).Solid;
-                        swSolid = blocks.Get(localPos.Add(1, -1, 1)).Solid;
+                        //sSolid = blocks.Get(localPos.Add(-1, 0, 1)).Solid;
+                        sSolid = blocks.Get(index-1).Solid;
+                        //nSolid = blocks.Get(localPos.Add(1, 0, 1)).Solid;
+                        nSolid = blocks.Get(index+1).Solid;
+
+                        //esSolid = blocks.Get(localPos.Add(-1, 1, 1)).Solid;
+                        esSolid = blocks.Get(index3-1).Solid;
+                        //eSolid = blocks.Get(localPos.Add(0, 1, 1)).Solid;
+                        eSolid = blocks.Get(index3).Solid;
+                        //neSolid = blocks.Get(localPos.Add(1, 1, 1)).Solid;
+                        neSolid = blocks.Get(index3+1).Solid;
                         break;
                     case Direction.south:
-                        nSolid = blocks.Get(localPos.Add(-1, 0, -1)).Solid;
-                        eSolid = blocks.Get(localPos.Add(0, 1, -1)).Solid;
-                        sSolid = blocks.Get(localPos.Add(1, 0, -1)).Solid;
-                        wSolid = blocks.Get(localPos.Add(0, -1, -1)).Solid;
+                        index = Helpers.GetChunkIndex1DFrom3D(localPos.x, localPos.y, localPos.z)-Env.ChunkSizeWithPadding; // - (0,0,1)
+                        index2 = index - Env.ChunkSizeWithPaddingPow2;
+                        index3 = index + Env.ChunkSizeWithPaddingPow2;
 
-                        esSolid = blocks.Get(localPos.Add(1, 1, -1)).Solid;
-                        neSolid = blocks.Get(localPos.Add(-1, 1, -1)).Solid;
-                        wnSolid = blocks.Get(localPos.Add(-1, -1, -1)).Solid;
-                        swSolid = blocks.Get(localPos.Add(1, -1, -1)).Solid;
+                        //wnSolid = blocks.Get(localPos.Add(-1, -1, -1)).Solid;
+                        wnSolid = blocks.Get(index2-1).Solid;
+                        //wSolid = blocks.Get(localPos.Add(0, -1, -1)).Solid;
+                        wSolid = blocks.Get(index2).Solid;
+                        //swSolid = blocks.Get(localPos.Add(1, -1, -1)).Solid;
+                        swSolid = blocks.Get(index2+1).Solid;
+
+                        //nSolid = blocks.Get(localPos.Add(-1, 0, -1)).Solid;
+                        nSolid = blocks.Get(index-1).Solid;
+                        //sSolid = blocks.Get(localPos.Add(1, 0, -1)).Solid;
+                        sSolid = blocks.Get(index+1).Solid;
+
+                        //neSolid = blocks.Get(localPos.Add(-1, 1, -1)).Solid;
+                        neSolid = blocks.Get(index3-1).Solid;
+                        //esSolid = blocks.Get(localPos.Add(1, 1, -1)).Solid;
+                        esSolid = blocks.Get(index3).Solid;
+                        //eSolid = blocks.Get(localPos.Add(0, 1, -1)).Solid;
+                        eSolid = blocks.Get(index3+1).Solid;
+                        break;
+                    case Direction.east:
+                        index = Helpers.GetChunkIndex1DFrom3D(localPos.x, localPos.y, localPos.z)+1; // + (1,0,0)
+                        index2 = index - Env.ChunkSizeWithPaddingPow2;
+                        index3 = index + Env.ChunkSizeWithPaddingPow2;
+
+                        //wnSolid = blocks.Get(localPos.Add(1, -1, -1)).Solid;
+                        wnSolid = blocks.Get(index2-Env.ChunkSizeWithPadding).Solid;
+                        //wSolid = blocks.Get(localPos.Add(1, -1, 0)).Solid;
+                        wSolid = blocks.Get(index2).Solid;
+                        //swSolid = blocks.Get(localPos.Add(1, -1, 1)).Solid;
+                        swSolid = blocks.Get(index2+Env.ChunkSizeWithPadding).Solid;
+
+                        //nSolid = blocks.Get(localPos.Add(1, 0, -1)).Solid;
+                        nSolid = blocks.Get(index-Env.ChunkSizeWithPadding).Solid;
+                        //sSolid = blocks.Get(localPos.Add(1, 0, 1)).Solid;
+                        sSolid = blocks.Get(index+Env.ChunkSizeWithPadding).Solid;
+
+                        //neSolid = blocks.Get(localPos.Add(1, 1, -1)).Solid;
+                        neSolid = blocks.Get(index3-Env.ChunkSizeWithPadding).Solid;
+                        //eSolid = blocks.Get(localPos.Add(1, 1, 0)).Solid;
+                        eSolid = blocks.Get(index3).Solid;
+                        //esSolid = blocks.Get(localPos.Add(1, 1, 1)).Solid;
+                        esSolid = blocks.Get(index3+Env.ChunkSizeWithPadding).Solid;
                         break;
                     case Direction.west:
-                        nSolid = blocks.Get(localPos.Add(-1, 0, 1)).Solid;
-                        eSolid = blocks.Get(localPos.Add(-1, 1, 0)).Solid;
-                        sSolid = blocks.Get(localPos.Add(-1, 0, -1)).Solid;
-                        wSolid = blocks.Get(localPos.Add(-1, -1, 0)).Solid;
+                        index = Helpers.GetChunkIndex1DFrom3D(localPos.x, localPos.y, localPos.z)-1; // - (1,0,0)
+                        index2 = index - Env.ChunkSizeWithPaddingPow2;
+                        index3 = index + Env.ChunkSizeWithPaddingPow2;
 
-                        esSolid = blocks.Get(localPos.Add(-1, 1, -1)).Solid;
-                        neSolid = blocks.Get(localPos.Add(-1, 1, 1)).Solid;
-                        wnSolid = blocks.Get(localPos.Add(-1, -1, 1)).Solid;
-                        swSolid = blocks.Get(localPos.Add(-1, -1, -1)).Solid;
+                        //swSolid = blocks.Get(localPos.Add(-1, -1, -1)).Solid;
+                        swSolid = blocks.Get(index2-Env.ChunkSizeWithPadding).Solid;
+                        //wSolid = blocks.Get(localPos.Add(-1, -1, 0)).Solid;
+                        wSolid = blocks.Get(index2).Solid;
+                        //wnSolid = blocks.Get(localPos.Add(-1, -1, 1)).Solid;
+                        wnSolid = blocks.Get(index2+Env.ChunkSizeWithPadding).Solid;
+
+                        //sSolid = blocks.Get(localPos.Add(-1, 0, -1)).Solid;
+                        sSolid = blocks.Get(index-Env.ChunkSizeWithPadding).Solid;
+                        //nSolid = blocks.Get(localPos.Add(-1, 0, 1)).Solid;
+                        nSolid = blocks.Get(index+Env.ChunkSizeWithPadding).Solid;
+
+                        //esSolid = blocks.Get(localPos.Add(-1, 1, -1)).Solid;
+                        esSolid = blocks.Get(index3-Env.ChunkSizeWithPadding).Solid;
+                        //eSolid = blocks.Get(localPos.Add(-1, 1, 0)).Solid;
+                        eSolid = blocks.Get(index3).Solid;
+                        //neSolid = blocks.Get(localPos.Add(-1, 1, 1)).Solid;
+                        neSolid = blocks.Get(index3+Env.ChunkSizeWithPadding).Solid;
                         break;
                 }
 
@@ -164,7 +243,7 @@ namespace Voxelmetric.Code.Configurable.Blocks.Utilities
             }
         }
 
-        public static void PrepareTexture(Chunk chunk, Vector3Int localPos, VertexData[] vertexData, Direction direction, TextureCollection textureCollection)
+        public static void PrepareTexture(Chunk chunk, ref Vector3Int localPos, VertexData[] vertexData, Direction direction, TextureCollection textureCollection)
         {
             Rect texture = textureCollection.GetTexture(chunk, localPos, direction);
 
@@ -174,7 +253,7 @@ namespace Voxelmetric.Code.Configurable.Blocks.Utilities
             vertexData[0].UV = new Vector2(texture.x, texture.y);
         }
 
-        public static void PrepareTexture(Chunk chunk, Vector3Int localPos, VertexData[] vertexData, Direction direction, TextureCollection[] textureCollections)
+        public static void PrepareTexture(Chunk chunk, ref Vector3Int localPos, VertexData[] vertexData, Direction direction, TextureCollection[] textureCollections)
         {
             Rect texture = textureCollections[(int)direction].GetTexture(chunk, localPos, direction);
 
@@ -184,7 +263,7 @@ namespace Voxelmetric.Code.Configurable.Blocks.Utilities
             vertexData[0].UV = new Vector2(texture.x, texture.y);
         }
 
-        public static void PrepareVertices(Vector3Int localPos, VertexData[] vertexData, Direction direction)
+        public static void PrepareVertices(ref Vector3Int localPos, VertexData[] vertexData, Direction direction)
         {
             Vector3 vPos = localPos;
             int d = DirectionUtils.Get(direction);

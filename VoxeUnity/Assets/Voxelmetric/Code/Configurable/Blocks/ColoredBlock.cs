@@ -21,7 +21,7 @@ public class ColoredBlock : SolidBlock {
             {
                 for (int i = 0; i < 4; i++)
                     vertexData[i] = chunk.pools.VertexDataPool.Pop();
-                BlockUtils.PrepareVertices(localPos, vertexData, direction);
+                BlockUtils.PrepareVertices(ref localPos, vertexData, direction);
             }
             else
             {
@@ -32,7 +32,7 @@ public class ColoredBlock : SolidBlock {
                 }
             }
 
-            BlockUtils.PrepareTexture(chunk, localPos, vertexData, direction, texture);
+            BlockUtils.PrepareTexture(chunk, ref localPos, vertexData, direction, texture);
             BlockUtils.SetColors(vertexData, ref color);
 
             for (int i = 0; i<4; i++)
