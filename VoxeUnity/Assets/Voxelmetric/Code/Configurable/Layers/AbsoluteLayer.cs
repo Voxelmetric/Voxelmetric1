@@ -43,7 +43,7 @@ public class AbsoluteLayer : TerrainLayer
         ni.lookupTable = chunk.pools.FloatArrayPool.Pop(ni.noiseGen.Size*ni.noiseGen.Size);
 
 #if UNITY_STANDALONE_WIN && !DISABLE_FASTSIMD
-        float[] noiseSet = chunk.pools.FloatArray(ni.noiseGen.Size * ni.noiseGen.Size * ni.noiseGen.Size);
+        float[] noiseSet = chunk.pools.FloatArrayPool.Pop(ni.noiseGen.Size * ni.noiseGen.Size * ni.noiseGen.Size);
 
         // Generate SIMD noise
         int offsetShift = Env.ChunkPow - ni.noiseGen.Step;
@@ -59,7 +59,7 @@ public class AbsoluteLayer : TerrainLayer
             for (int x = 0; x < ni.noiseGen.Size; x++)
                 ni.lookupTable[i++] = NoiseUtilsSIMD.GetNoise(noiseSet, ni.noiseGen.Size, x, 0, z, amplitude, noise.Gain);
 
-        chunk.pools.FloatArray(noiseSet);
+        chunk.pools.FloatArrayPool.Push(noiseSet);
 #else
         int xOffset = chunk.pos.x;
         int zOffset = chunk.pos.z;
