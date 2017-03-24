@@ -538,16 +538,26 @@ namespace Voxelmetric.Code.Core.StateManager
 
             if (chunk.blocks.NonEmptyBlocks > 0)
             {
-                var task = Globals.MemPools.SMThreadPI.Pop();
-                m_poolState = m_poolState.Set(ChunkPoolItemState.ThreadPI);
-                m_threadPoolItem = task;
+                if (chunk.blocks.NonEmptyBlocks>=Env.ChunkSizePow3-Env.ChunkPow2-1)
+                {
+                    // The bounds are known for fully filled chunks
+                    chunk.m_bounds.minX = chunk.m_bounds.minY = chunk.m_bounds.minZ = 0;
+                    chunk.m_bounds.maxX = chunk.m_bounds.maxY = chunk.m_bounds.maxZ = Env.ChunkMask;
+                    chunk.m_bounds.lowestEmptyBlock = 0;
+                }
+                else
+                {
+                    var task = Globals.MemPools.SMThreadPI.Pop();
+                    m_poolState = m_poolState.Set(ChunkPoolItemState.ThreadPI);
+                    m_threadPoolItem = task;
 
-                task.Set(chunk.ThreadID, actionOnCalculateGeometryBounds, this);
+                    task.Set(chunk.ThreadID, actionOnCalculateGeometryBounds, this);
 
-                m_taskRunning = true;
-                WorkPoolManager.Add(task);
+                    m_taskRunning = true;
+                    WorkPoolManager.Add(task);
 
-                return true;
+                    return true;
+                }
             }
 
             // Consume info about block having been modified
