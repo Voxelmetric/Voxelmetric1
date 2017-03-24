@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using UnityEngine;
 using Voxelmetric.Code.Common;
 using Voxelmetric.Code.Common.IO;
 using Voxelmetric.Code.Common.MemoryPooling;
@@ -221,7 +222,7 @@ namespace Voxelmetric.Code.Core.Serialization
 
         public bool DoCompression()
         {
-            if (IsDifferential)
+            if (Utilities.Core.UseDifferentialSerialization)
             {
                 if (m_blocks != null && m_blocks.Length>0)
                 {
