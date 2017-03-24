@@ -28,9 +28,6 @@ namespace Voxelmetric.Code.Common.MemoryPooling
         
         public readonly ObjectPool<ThreadPoolItem<ChunkStateManagerClient>> SMThreadPI =
             new ObjectPool<ThreadPoolItem<ChunkStateManagerClient>>(m => new ThreadPoolItem<ChunkStateManagerClient>(), 2048, false);
-        
-        public readonly ObjectPool<ThreadPoolItem<SBuildColliderWorkItem>> BuildColliderThreadPI =
-            new ObjectPool<ThreadPoolItem<SBuildColliderWorkItem>>(m => new ThreadPoolItem<SBuildColliderWorkItem>(), 2048, false);
 
         #endregion
 

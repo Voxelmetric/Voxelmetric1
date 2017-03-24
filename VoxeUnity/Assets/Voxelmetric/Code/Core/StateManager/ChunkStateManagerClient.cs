@@ -46,7 +46,7 @@ namespace Voxelmetric.Code.Core.StateManager
         private static readonly Action<ChunkStateManagerClient> actionOnSaveData = OnSaveData;
         private static readonly Action<ChunkStateManagerClient> actionOnCalculateGeometryBounds = OnCalculateGeometryBounds;
         private static readonly Action<ChunkStateManagerClient> actionOnBuildVertices = OnBuildVertices;
-        private static readonly Action<SBuildColliderWorkItem> actionOnBuildCollider = arg => { OnBuildCollider(ref arg); };
+        private static readonly Action<ChunkStateManagerClient> actionOnBuildCollider = OnBuildCollider;
         
         //! Flags telling us whether pool items should be returned back to the pool
         private ChunkPoolItemState m_poolState;
@@ -111,9 +111,7 @@ namespace Voxelmetric.Code.Core.StateManager
             // Therefore, each client remembers which pool it used and once the task is finished it returns
             // it back to the pool as soon as possible from the main thread
 
-            if (m_poolState.Check(ChunkPoolItemState.BuildColliderThreadPI))
-                pools.BuildColliderThreadPI.Push(m_threadPoolItem as ThreadPoolItem<SBuildColliderWorkItem>);
-            else if (m_poolState.Check(ChunkPoolItemState.ThreadPI))
+            if (m_poolState.Check(ChunkPoolItemState.ThreadPI))
                 pools.SMThreadPI.Push(m_threadPoolItem as ThreadPoolItem<ChunkStateManagerClient>);
             else if (m_poolState.Check(ChunkPoolItemState.TaskPI))
                 pools.SMTaskPI.Push(m_threadPoolItem as TaskPoolItem<ChunkStateManagerClient>);
@@ -779,11 +777,11 @@ namespace Voxelmetric.Code.Core.StateManager
 
         private const ChunkState CurrStateBuildCollider = ChunkState.BuildCollider;
 
-        private static void OnBuildCollider(ref SBuildColliderWorkItem item)
+        private static void OnBuildCollider(ChunkStateManagerClient client)
         {
-            ChunkStateManagerClient stateManager = item.StateManager;
-            stateManager.chunk.ChunkColliderGeometryHandler.Build(item.MinX, item.MaxX, item.MinY, item.MaxY, item.MinZ, item.MaxZ);
-            OnBuildColliderDone(stateManager);
+            Chunk chunk = client.chunk;
+            chunk.ChunkColliderGeometryHandler.Build(chunk.m_bounds.minX, chunk.m_bounds.maxX, chunk.m_bounds.minY, chunk.m_bounds.maxY, chunk.m_bounds.minZ, chunk.m_bounds.maxZ);
+            OnBuildColliderDone(client);
         }
 
         private static void OnBuildColliderDone(ChunkStateManagerClient stateManager)
@@ -809,19 +807,14 @@ namespace Voxelmetric.Code.Core.StateManager
 
             if (chunk.blocks.NonEmptyBlocks > 0)
             {
-                var task = Globals.MemPools.BuildColliderThreadPI.Pop();
-                m_poolState = m_poolState.Set(ChunkPoolItemState.BuildColliderThreadPI);
+                var task = Globals.MemPools.SMThreadPI.Pop();
+                m_poolState = m_poolState.Set(ChunkPoolItemState.ThreadPI);
                 m_threadPoolItem = task;
 
                 task.Set(
                     chunk.ThreadID,
                     actionOnBuildCollider,
-                    new SBuildColliderWorkItem(
-                        this,
-                        chunk.m_bounds.minX, chunk.m_bounds.maxX,
-                        chunk.m_bounds.minY, chunk.m_bounds.maxY,
-                        chunk.m_bounds.minZ, chunk.m_bounds.maxZ
-                        )
+                    this
                     );
 
                 m_taskRunning = true;
@@ -842,7 +835,8 @@ namespace Voxelmetric.Code.Core.StateManager
 
         private static void OnBuildVertices(ChunkStateManagerClient client)
         {
-            client.chunk.GeometryHandler.Build(0, Env.ChunkMask, 0, Env.ChunkMask, 0, Env.ChunkMask);
+            Chunk chunk = client.chunk;
+            chunk.GeometryHandler.Build(chunk.m_bounds.minX, chunk.m_bounds.maxX, chunk.m_bounds.minY, chunk.m_bounds.maxY, chunk.m_bounds.minZ, chunk.m_bounds.maxZ);
             OnBuildVerticesDone(client);
         }
 
