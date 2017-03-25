@@ -1,4 +1,6 @@
-﻿using Voxelmetric.Code.Common;
+﻿using System;
+using System.Diagnostics;
+using Voxelmetric.Code.Common;
 
 namespace Voxelmetric.Code.Utilities.Noise
 {
@@ -66,10 +68,19 @@ namespace Voxelmetric.Code.Utilities.Noise
             int lookupIndex = Helpers.GetIndex1DFrom2D(x0, z0, m_size);
             int lookupIndex2 = lookupIndex+m_size; // x0,z0+1
 
-            return Helpers.Interpolate(
-                Helpers.Interpolate(lookupTable[lookupIndex], lookupTable[lookupIndex+1], xs),
-                Helpers.Interpolate(lookupTable[lookupIndex2], lookupTable[lookupIndex2+1], xs),
+            try
+            {
+                return Helpers.Interpolate(
+                Helpers.Interpolate(lookupTable[lookupIndex], lookupTable[lookupIndex + 1], xs),
+                Helpers.Interpolate(lookupTable[lookupIndex2], lookupTable[lookupIndex2 + 1], xs),
                 zs);
+            }
+            catch (Exception ex)
+            {
+                UnityEngine.Debug.LogException(ex);
+                throw;
+            }
+            
         }
 
         /// <summary>

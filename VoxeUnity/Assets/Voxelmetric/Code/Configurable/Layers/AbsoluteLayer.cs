@@ -39,7 +39,7 @@ public class AbsoluteLayer : TerrainLayer
     public override void PreProcess(Chunk chunk, int layerIndex)
     {
         NoiseItem ni = chunk.pools.noiseItems[layerIndex];
-        ni.noiseGen.SetInterpBitStep(Env.ChunkSize, 2);
+        ni.noiseGen.SetInterpBitStep(Env.ChunkSizeWithPadding, 2);
         ni.lookupTable = chunk.pools.FloatArrayPool.Pop(ni.noiseGen.Size*ni.noiseGen.Size);
 
 #if UNITY_STANDALONE_WIN && !DISABLE_FASTSIMD
@@ -47,9 +47,9 @@ public class AbsoluteLayer : TerrainLayer
 
         // Generate SIMD noise
         int offsetShift = Env.ChunkPow - ni.noiseGen.Step;
-        int xStart = (chunk.pos.x >> Env.ChunkPow) << offsetShift;
-        int yStart = (chunk.pos.y >> Env.ChunkPow) << offsetShift;
-        int zStart = (chunk.pos.z >> Env.ChunkPow) << offsetShift;
+        int xStart = (chunk.pos.x * Env.ChunkSize) << offsetShift;
+        int yStart = (chunk.pos.y * Env.ChunkSize) << offsetShift;
+        int zStart = (chunk.pos.z * Env.ChunkSize) << offsetShift;
         float scaleModifier = 1 << ni.noiseGen.Step;
         noiseSIMD.Noise.FillNoiseSet(noiseSet, xStart, yStart, zStart, ni.noiseGen.Size, ni.noiseGen.Size, ni.noiseGen.Size, scaleModifier);
 

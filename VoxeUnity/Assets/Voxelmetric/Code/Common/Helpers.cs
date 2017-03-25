@@ -23,13 +23,11 @@ namespace Voxelmetric.Code.Common
 
 		public static int GetChunkIndex1DFrom3D(int x, int y, int z)
 		{
-            /*
-			 In the past, indexes were computed using:
-             x + (z << Env.ChunkPower) + (y << Env.ChunkPower2);
-			 However, since then padding was introduced and real size might no longer be a power of 2
-			*/
-            return x+Env.ChunkPadding + Env.ChunkSizeWithPadding * ((z+Env.ChunkPadding) + (y+Env.ChunkPadding) * Env.ChunkSizeWithPadding);
-        }
+		    int xx = x+Env.ChunkPadding;
+		    int yy = y+Env.ChunkPadding;
+		    int zz = z+Env.ChunkPadding;
+		    return xx+(zz<<Env.ChunkPow)+(yy<<Env.ChunkPow2);
+		}
 
 		public static void GetIndex2DFrom1D(int index, out int x, out int z, int sizeX)
 		{
@@ -46,20 +44,19 @@ namespace Voxelmetric.Code.Common
 
 	    public static void GetChunkIndex3DFrom1D(int index, out int x, out int y, out int z)
 	    {
-	        /*
-			 In the past, indexes were computed using:
-			 x = index & Env.ChunkMask;
-			 y = index >> Env.ChunkPower2;
-			 z = (index >> Env.ChunkPower) & Env.ChunkMask;
-			 However, since then padding was introduced and real size might no longer be a power of 2
-			*/
-	        x = index % Env.ChunkSizeWithPadding;
-	        y = index / Env.ChunkSizeWithPaddingPow2;
-	        z = (index / Env.ChunkSizeWithPadding) % Env.ChunkSizeWithPadding;
+			x = index & Env.ChunkMask;
+			y = index >> Env.ChunkPow2;
+			z = (index >> Env.ChunkPow) & Env.ChunkMask;
 
-	        x -= Env.ChunkPadding;
-	        y -= Env.ChunkPadding;
-	        z -= Env.ChunkPadding;
+            x -= Env.ChunkPadding;
+            y -= Env.ChunkPadding;
+            z -= Env.ChunkPadding;
+        }
+
+        // Returns a coordinate at the beggining of the chunk
+	    public static int MakeChunkCoordinate(int x)
+	    {
+	        return ((x>=0 ? x : x-Env.ChunkSize1)/Env.ChunkSize)*Env.ChunkSize;
 	    }
 
 	    public static T[] CreateArray1D<T>(int size)
@@ -133,17 +130,7 @@ namespace Voxelmetric.Code.Common
 				return (1 - s) / ds;
 			}
 		}
-
-		public static int SigNum(float x)
-		{
-			return (x > 0) ? 1 : ((x < 0) ? -1 : 0);
-		}
-
-		public static int SigShift(int value, int shift)
-		{
-			return (shift > 0) ? value << shift : value >> shift;
-		}
-
+        
 		public static int FastFloor(float val)
 		{
 			return (val > 0) ? (int)val : (int)val - 1;

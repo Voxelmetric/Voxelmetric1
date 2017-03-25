@@ -64,12 +64,13 @@ namespace Voxelmetric.Code.Core
         /// Returns the position of the chunk containing this block
         /// </summary>
         /// <returns>The position of the chunk containing this block</returns>
-        public static Vector3Int ContainingCoordinates(Vector3Int pos)
+        public static Vector3Int ContainingChunkPos(Vector3Int pos)
         {
             return new Vector3Int(
-                (pos.x>>Env.ChunkPow)<<Env.ChunkPow,
-                (pos.y>>Env.ChunkPow)<<Env.ChunkPow,
-                (pos.z>>Env.ChunkPow)<<Env.ChunkPow);
+                Helpers.MakeChunkCoordinate(pos.x),
+                Helpers.MakeChunkCoordinate(pos.y),
+                Helpers.MakeChunkCoordinate(pos.z)
+                );
         }
 
         public static void RemoveChunk(Chunk chunk)
@@ -243,11 +244,11 @@ namespace Voxelmetric.Code.Core
         {
             m_bounds.Reset();
 
-            for (int y = Env.ChunkMask; y >= 0; y--)
+            for (int y = Env.ChunkSize1; y >= 0; y--)
             {
-                for (int z = 0; z <= Env.ChunkMask; z++)
+                for (int z = 0; z <= Env.ChunkSize1; z++)
                 {
-                    for (int x = 0; x <= Env.ChunkMask; x++)
+                    for (int x = 0; x <= Env.ChunkSize1; x++)
                     {
                         AdjustMinMaxRenderBounds(x, y, z);
                     }

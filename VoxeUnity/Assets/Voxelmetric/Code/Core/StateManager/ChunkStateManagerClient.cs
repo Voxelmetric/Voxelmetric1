@@ -43,7 +43,7 @@ namespace Voxelmetric.Code.Core.StateManager
         private static readonly Action<ChunkStateManagerClient> actionOnGenerateData = OnGenerateData;
         private static readonly Action<ChunkStateManagerClient> actionOnPrepareSaveData = OnPrepareSaveData;
         private static readonly Action<ChunkStateManagerClient> actionOnSaveData = OnSaveData;
-        private static readonly Action<ChunkStateManagerClient> actionOnCalculateGeometryBounds = OnCalculateGeometryBounds;
+        //private static readonly Action<ChunkStateManagerClient> actionOnCalculateGeometryBounds = OnCalculateGeometryBounds;
         private static readonly Action<ChunkStateManagerClient> actionOnBuildVertices = OnBuildVertices;
         private static readonly Action<ChunkStateManagerClient> actionOnBuildCollider = OnBuildCollider;
         
@@ -535,7 +535,7 @@ namespace Voxelmetric.Code.Core.StateManager
 
             // Force full bounds for now
             chunk.m_bounds.minX = chunk.m_bounds.minY = chunk.m_bounds.minZ = 0;
-            chunk.m_bounds.maxX = chunk.m_bounds.maxY = chunk.m_bounds.maxZ = Env.ChunkMask;
+            chunk.m_bounds.maxX = chunk.m_bounds.maxY = chunk.m_bounds.maxZ = Env.ChunkSize1;
             chunk.m_bounds.lowestEmptyBlock = 0;
             /*if (chunk.blocks.NonEmptyBlocks > 0)
             {
@@ -543,7 +543,7 @@ namespace Voxelmetric.Code.Core.StateManager
                 {
                     // The bounds are known for fully filled chunks
                     chunk.m_bounds.minX = chunk.m_bounds.minY = chunk.m_bounds.minZ = 0;
-                    chunk.m_bounds.maxX = chunk.m_bounds.maxY = chunk.m_bounds.maxZ = Env.ChunkMask;
+                    chunk.m_bounds.maxX = chunk.m_bounds.maxY = chunk.m_bounds.maxZ = Env.ChunkSize1;
                     chunk.m_bounds.lowestEmptyBlock = 0;
                 }
                 else
@@ -609,7 +609,7 @@ namespace Voxelmetric.Code.Core.StateManager
                     // Copy the top layer of a neighbor chunk to the bottom layer of ours
                     else // if (neighborChunk.pos.y < chunk.pos.y)
                     {
-                        int srcIndex = Helpers.GetChunkIndex1DFrom3D(-1, Env.ChunkMask, -1);
+                        int srcIndex = Helpers.GetChunkIndex1DFrom3D(-1, Env.ChunkSize1, -1);
                         int dstIndex = Helpers.GetChunkIndex1DFrom3D(-1, -1, -1);
                         chunk.blocks.Copy(neighborChunk.blocks, srcIndex, dstIndex, Env.ChunkSizeWithPaddingPow2);
                     }
@@ -652,7 +652,7 @@ namespace Voxelmetric.Code.Core.StateManager
                         // Padded area - top
                         for (int x = -1; x < Env.ChunkSizePlusPadding; x++)
                         {
-                            BlockData data = neighborChunk.blocks.Get(Helpers.GetChunkIndex1DFrom3D(x, -1, Env.ChunkMask));
+                            BlockData data = neighborChunk.blocks.Get(Helpers.GetChunkIndex1DFrom3D(x, -1, Env.ChunkSize1));
                             chunk.blocks.SetRaw(Helpers.GetChunkIndex1DFrom3D(x, -1, -1), data);
                         }
 
@@ -661,7 +661,7 @@ namespace Voxelmetric.Code.Core.StateManager
                         {
                             for (int x = -1; x<Env.ChunkSizePlusPadding; x++)
                             {
-                                BlockData data = neighborChunk.blocks.Get(Helpers.GetChunkIndex1DFrom3D(x, y, Env.ChunkMask));
+                                BlockData data = neighborChunk.blocks.Get(Helpers.GetChunkIndex1DFrom3D(x, y, Env.ChunkSize1));
                                 chunk.blocks.SetRaw(Helpers.GetChunkIndex1DFrom3D(x, y, -1), data);
                             }
                         }
@@ -669,7 +669,7 @@ namespace Voxelmetric.Code.Core.StateManager
                         // Padded area - bottom
                         for (int x = -1; x < Env.ChunkSizePlusPadding; x++)
                         {
-                            BlockData data = neighborChunk.blocks.Get(Helpers.GetChunkIndex1DFrom3D(x, Env.ChunkSize, Env.ChunkMask));
+                            BlockData data = neighborChunk.blocks.Get(Helpers.GetChunkIndex1DFrom3D(x, Env.ChunkSize, Env.ChunkSize1));
                             chunk.blocks.SetRaw(Helpers.GetChunkIndex1DFrom3D(x, Env.ChunkSize, -1), data);
                         }
                     }
@@ -712,7 +712,7 @@ namespace Voxelmetric.Code.Core.StateManager
                         // Padded area - top
                         for (int z = -1; z<Env.ChunkSizePlusPadding; z++)
                         {
-                            BlockData data = neighborChunk.blocks.Get(Helpers.GetChunkIndex1DFrom3D(Env.ChunkMask, -1, z));
+                            BlockData data = neighborChunk.blocks.Get(Helpers.GetChunkIndex1DFrom3D(Env.ChunkSize1, -1, z));
                             chunk.blocks.SetRaw(Helpers.GetChunkIndex1DFrom3D(-1, -1, z), data);
                         }
 
@@ -721,7 +721,7 @@ namespace Voxelmetric.Code.Core.StateManager
                         {
                             for (int z = -1; z<Env.ChunkSizePlusPadding; z++)
                             {
-                                BlockData data = neighborChunk.blocks.Get(Helpers.GetChunkIndex1DFrom3D(Env.ChunkMask, y, z));
+                                BlockData data = neighborChunk.blocks.Get(Helpers.GetChunkIndex1DFrom3D(Env.ChunkSize1, y, z));
                                 chunk.blocks.SetRaw(Helpers.GetChunkIndex1DFrom3D(-1, y, z), data);
                             }
                         }
@@ -729,7 +729,7 @@ namespace Voxelmetric.Code.Core.StateManager
                         // Padded area - bottom
                         for (int z = -1; z < Env.ChunkSizePlusPadding; z++)
                         {
-                            BlockData data = neighborChunk.blocks.Get(Helpers.GetChunkIndex1DFrom3D(Env.ChunkMask, Env.ChunkSize, z));
+                            BlockData data = neighborChunk.blocks.Get(Helpers.GetChunkIndex1DFrom3D(Env.ChunkSize1, Env.ChunkSize, z));
                             chunk.blocks.SetRaw(Helpers.GetChunkIndex1DFrom3D(-1, Env.ChunkSize, z), data);
                         }
                     }

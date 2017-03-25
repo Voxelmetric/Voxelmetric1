@@ -35,7 +35,7 @@ namespace Voxelmetric.Code.Core
         /// <returns>The chunk that contains the given block position or null if there is none</returns>
         public Chunk Get(Vector3Int pos)
         {
-            pos = Chunk.ContainingCoordinates(pos);
+            pos = Chunk.ContainingChunkPos(pos);
 
             // If we previously searched for this chunk there is no need to look it up again
             /*if (pos == lastChunkPos && lastChunk != null)
@@ -52,7 +52,7 @@ namespace Voxelmetric.Code.Core
         public bool Set(Vector3Int pos, Chunk chunk)
         {
             Assert.IsTrue(Helpers.IsMainThread);
-            pos = Chunk.ContainingCoordinates(pos);
+            pos = Chunk.ContainingChunkPos(pos);
 
             // Let's keep it within allowed world bounds
             if (!world.IsCoordInsideWorld(pos))
@@ -82,10 +82,10 @@ namespace Voxelmetric.Code.Core
         public bool CreateOrGetChunk(Vector3Int pos, out Chunk chunk)
         {
             Assert.IsTrue(Helpers.IsMainThread);
-            pos = Chunk.ContainingCoordinates(pos);
+            Vector3Int p = Chunk.ContainingChunkPos(pos);
 
             // Let's keep it within allowed world bounds
-            if (!world.IsCoordInsideWorld(pos))
+            if (!world.IsCoordInsideWorld(p))
             {
                 chunk = null;
                 return false;
@@ -101,13 +101,14 @@ namespace Voxelmetric.Code.Core
             lastChunkPos = pos;*/
 
             // Don't recreate the chunk if it already exists
-            chunk = Get(pos);
+            chunk = Get(p);
             if (chunk!=null)
                 return false;
 
             // Create a new chunk
-            chunk = Chunk.CreateChunk(world, pos);
-            chunks.Add(pos, chunk);
+            chunk = Chunk.CreateChunk(world, p);
+            chunks.Add(p, chunk);
+            
             return true;
         }
 

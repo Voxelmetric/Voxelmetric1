@@ -29,11 +29,11 @@ public class GrassBlock: CubeBlock
 
         // Let's stay inside bounds
         int minX = localPos.x<=0 ? 0 : 1;
-        int maxX = localPos.x>=Env.ChunkMask ? 0 : 1;
+        int maxX = localPos.x>=Env.ChunkSize1 ? 0 : 1;
         int minY = localPos.y<=0 ? 0 : 1;
-        int maxY = localPos.y>=Env.ChunkMask ? 0 : 1;
+        int maxY = localPos.y>=Env.ChunkSize1 ? 0 : 1;
         int minZ = localPos.z<=0 ? 0 : 1;
-        int maxZ = localPos.z>=Env.ChunkMask ? 0 : 1;
+        int maxZ = localPos.z>=Env.ChunkSize1 ? 0 : 1;
 
         for (int x = -minX; x<=maxX; x++)
         {

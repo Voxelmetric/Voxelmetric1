@@ -103,13 +103,13 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
 
             bool isLast = rangeX==1 && rangeY==1 && rangeZ==1;
 
-            int wx = x<<Env.ChunkPow;
-            int wy = y<<Env.ChunkPow;
-            int wz = z<<Env.ChunkPow;
+            int wx = x*Env.ChunkSize;
+            int wy = y*Env.ChunkSize;
+            int wz = z*Env.ChunkSize;
 
-            int rx = rangeX<<Env.ChunkPow;
-            int ry = rangeY<<Env.ChunkPow;
-            int rz = rangeZ<<Env.ChunkPow;
+            int rx = rangeX*Env.ChunkSize;
+            int ry = rangeY*Env.ChunkSize;
+            int rz = rangeZ*Env.ChunkSize;
 
             // Stop if there is no further subdivision possible
             if (isLast)
@@ -122,9 +122,9 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
 
                 ChunkStateManagerClient stateManager = chunk.stateManager;
 
-                int xd = (m_viewerPos.x-chunk.pos.x)>>Env.ChunkPow;
-                int yd = (m_viewerPos.y-chunk.pos.y)>>Env.ChunkPow;
-                int zd = (m_viewerPos.z-chunk.pos.z)>>Env.ChunkPow;
+                int xd = (m_viewerPos.x-chunk.pos.x)/Env.ChunkSize;
+                int yd = (m_viewerPos.y-chunk.pos.y)/Env.ChunkSize;
+                int zd = (m_viewerPos.z-chunk.pos.z)/Env.ChunkSize;
                 
                 int xDist = xd*xd+zd*zd;
                 int yDist = yd*yd;
@@ -194,9 +194,9 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
 
                             ChunkStateManagerClient stateManager = chunk.stateManager;
 
-                            int xd = (m_viewerPos.x-chunk.pos.x)>>Env.ChunkPow;
-                            int yd = (m_viewerPos.y-chunk.pos.y)>>Env.ChunkPow;
-                            int zd = (m_viewerPos.z-chunk.pos.z)>>Env.ChunkPow;
+                            int xd = (m_viewerPos.x-chunk.pos.x)/Env.ChunkSize;
+                            int yd = (m_viewerPos.y-chunk.pos.y)/Env.ChunkSize;
+                            int zd = (m_viewerPos.z-chunk.pos.z)/Env.ChunkSize;
                             
                             int xDist = xd*xd+zd*zd;
                             int yDist = yd*yd;
@@ -256,17 +256,17 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
 
             Profiler.BeginSample("HandleVisibility");
             //Thread.Sleep(10);
-            int minY = m_viewerPos.y - (VerticalChunkLoadRadius << Env.ChunkPow);
-            int maxY = m_viewerPos.y + (VerticalChunkLoadRadius << Env.ChunkPow);
+            int minY = m_viewerPos.y - (VerticalChunkLoadRadius * Env.ChunkSize);
+            int maxY = m_viewerPos.y + (VerticalChunkLoadRadius * Env.ChunkSize);
             world.CapCoordYInsideWorld(ref minY, ref maxY);
 
-            minY >>= Env.ChunkPow;
-            maxY >>= Env.ChunkPow;
+            minY /= Env.ChunkSize;
+            maxY /= Env.ChunkSize;
 
             // TODO: Merge this with clipmap
             // Let's update chunk visibility info. Operate in chunk load radius so we know we're never outside cached range
             UpdateVisibility(
-                (m_viewerPos.x>>Env.ChunkPow)-HorizontalChunkLoadRadius, minY, (m_viewerPos.z>>Env.ChunkPow)-HorizontalChunkLoadRadius,
+                (m_viewerPos.x/Env.ChunkSize)-HorizontalChunkLoadRadius, minY, (m_viewerPos.z/Env.ChunkSize)-HorizontalChunkLoadRadius,
                 (HorizontalChunkLoadRadius<<1)+1, maxY-minY+1, (HorizontalChunkLoadRadius<<1)+1
                 );
 
@@ -281,8 +281,8 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
 
             Profiler.BeginSample("PostProcessChunks");
 
-            int minY = m_viewerPos.y-(VerticalChunkLoadRadius<<Env.ChunkPow);
-            int maxY = m_viewerPos.y+(VerticalChunkLoadRadius<<Env.ChunkPow);
+            int minY = m_viewerPos.y-(VerticalChunkLoadRadius*Env.ChunkSize);
+            int maxY = m_viewerPos.y+(VerticalChunkLoadRadius*Env.ChunkSize);
             world.CapCoordYInsideWorld(ref minY, ref maxY);
 
             // Cycle through the array of positions
@@ -292,9 +292,9 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
                 {
                     // Translate array postions to world/chunk positions
                     Vector3Int newChunkPos = new Vector3Int(
-                        (m_chunkPositions[i].x<<Env.ChunkPow)+m_viewerPos.x,
-                        (m_chunkPositions[i].y<<Env.ChunkPow)+y,
-                        (m_chunkPositions[i].z<<Env.ChunkPow)+m_viewerPos.z
+                        (m_chunkPositions[i].x*Env.ChunkSize)+m_viewerPos.x,
+                        (m_chunkPositions[i].y*Env.ChunkSize)+y,
+                        (m_chunkPositions[i].z*Env.ChunkSize)+m_viewerPos.z
                         );
 
                     Chunk chunk;
@@ -362,9 +362,9 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
 
             ChunkStateManagerClient stateManager = chunk.stateManager;
 
-            int xd = (m_viewerPos.x-chunk.pos.x)>>Env.ChunkPow;
-            int yd = (m_viewerPos.y-chunk.pos.y)>>Env.ChunkPow;
-            int zd = (m_viewerPos.z-chunk.pos.z)>>Env.ChunkPow;
+            int xd = (m_viewerPos.x-chunk.pos.x)/Env.ChunkSize;
+            int yd = (m_viewerPos.y-chunk.pos.y)/Env.ChunkSize;
+            int zd = (m_viewerPos.z-chunk.pos.z)/Env.ChunkSize;
 
             int hRadius = HorizontalChunkLoadRadius+1;
             int vRadius = VerticalChunkLoadRadius+1;
@@ -420,7 +420,7 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
 
         private void UpdateViewerPosition()
         {
-            Vector3Int pos = Chunk.ContainingCoordinates(transform.position);
+            Vector3Int pos = Chunk.ContainingChunkPos(transform.position);
 
             // Update the viewer position
             m_viewerPosPrev = m_viewerPos;
@@ -441,9 +441,9 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
             if (!enabled)
                 return;
 
-            int size = Mathf.FloorToInt(Env.ChunkSize*Env.BlockSize);
-            int halfSize = size>>1;
-            int smallSize = size>>4;
+            float size = Env.ChunkSize*Env.BlockSize;
+            float halfSize = size*0.5f;
+            float smallSize = size*0.25f;
 
             if (world!=null && world.chunks!=null && (Diag_DrawWorldBounds || Diag_DrawLoadRange))
             {
@@ -465,8 +465,8 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
                     if (Diag_DrawLoadRange)
                     {
                         Vector3Int pos = chunk.pos;
-                        int xd = Helpers.Abs((m_viewerPos.x-pos.x)>>Env.ChunkPow);
-                        int zd = Helpers.Abs((m_viewerPos.z-pos.z)>>Env.ChunkPow);
+                        int xd = Helpers.Abs((m_viewerPos.x-pos.x)/Env.ChunkSize);
+                        int zd = Helpers.Abs((m_viewerPos.z-pos.z)/Env.ChunkSize);
                         int dist = xd*xd+zd*zd;
                         if (dist<=HorizontalChunkLoadRadius*HorizontalChunkLoadRadius)
                         {

@@ -17,9 +17,9 @@
 
         public void Reset()
         {
-            minX = minY = minZ = Env.ChunkMask;
+            minX = minY = minZ = Env.ChunkSize1;
             maxX = maxY = maxZ = 0;
-            lowestEmptyBlock = Env.ChunkMask;
+            lowestEmptyBlock = Env.ChunkSize1;
         }
     }
 }

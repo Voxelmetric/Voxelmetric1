@@ -63,7 +63,9 @@ public class StructureLayer : TerrainLayer
                         Randomization.Random(pos.Add(0, 0, 1).GetHashCode(), 44, true)>chanceAtPos &&
                         Randomization.Random(pos.Add(0, 0, -1).GetHashCode(), 44, true)>chanceAtPos)
                     {
-                        int height = Helpers.FastFloor(terrainGen.GetTerrainHeightForChunk(chunk, x&Env.ChunkMask, z&Env.ChunkMask));
+                        int xx = Helpers.Mod(x, Env.ChunkSize);
+                        int zz = Helpers.Mod(z, Env.ChunkSize);
+                        int height = Helpers.FastFloor(terrainGen.GetTerrainHeightForChunk(chunk, xx, zz));
                         structure.Build(world, new Vector3Int(x, height, z), this);
                     }
                 }

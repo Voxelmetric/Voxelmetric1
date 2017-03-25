@@ -110,9 +110,9 @@ namespace Voxelmetric.Code.Core
             int x, y, z;
             Helpers.GetChunkIndex3DFrom1D(index, out x, out y, out z);
 
-            if (x < 0 || y < 0 || z < 0 || x > Env.ChunkMask || y > Env.ChunkMask || z > Env.ChunkMask)
+            if (x < 0 || y < 0 || z < 0 || x > Env.ChunkSize1 || y > Env.ChunkSize1 || z > Env.ChunkSize1)
             {
-                Assert.IsTrue(false, "Chunk index out of range in setBlockQueue");
+                Assert.IsTrue(false, string.Format("Chunk index out of range in setBlockQueue: [{0},{1},{2}]", x, y, z));
                 return;
             }
 
@@ -137,11 +137,11 @@ namespace Voxelmetric.Code.Core
 
             if (
                 // Only check neighbors if it is still needed
-                rebuildMaskGeometry == 0x3f ||
+                rebuildMaskGeometry==0x3f ||
                 // Only check neighbors when it is a change of a block on a chunk's edge
-                (((pos.x + 1) & Env.ChunkMask) > 1 &&
-                 ((pos.y + 1) & Env.ChunkMask) > 1 &&
-                 ((pos.z + 1) & Env.ChunkMask) > 1)
+                (pos.x>0 && pos.x<Env.ChunkSize1 &&
+                 pos.y>0 && pos.y<Env.ChunkSize1 &&
+                 pos.z>0 && pos.z<Env.ChunkSize1)
                 )
                 return;
 
@@ -182,7 +182,7 @@ namespace Voxelmetric.Code.Core
                         listenerChunk.blocks.blocks[neighborIndex] = block;
                     }
                     // Section to the right
-                    else if ((pos.x == Env.ChunkMask) && (lx - Env.ChunkSize == cx))
+                    else if ((pos.x == Env.ChunkSize1) && (lx - Env.ChunkSize == cx))
                     {
                         rebuildMaskGeometry = rebuildMaskGeometry | (1 << i);
 
@@ -204,7 +204,7 @@ namespace Voxelmetric.Code.Core
                         listenerChunk.blocks.blocks[neighborIndex] = block;
                     }
                     // Section to the top
-                    else if ((pos.y == Env.ChunkMask) && (ly - Env.ChunkSize == cy))
+                    else if ((pos.y == Env.ChunkSize1) && (ly - Env.ChunkSize == cy))
                     {
                         rebuildMaskGeometry = rebuildMaskGeometry | (1 << i);
 
@@ -226,7 +226,7 @@ namespace Voxelmetric.Code.Core
                         listenerChunk.blocks.blocks[neighborIndex] = block;
                     }
                     // Section to the front
-                    else if ((pos.z == Env.ChunkMask) && (lz - Env.ChunkSize == cz))
+                    else if ((pos.z == Env.ChunkSize1) && (lz - Env.ChunkSize == cz))
                     {
                         rebuildMaskGeometry = rebuildMaskGeometry | (1 << i);
 
