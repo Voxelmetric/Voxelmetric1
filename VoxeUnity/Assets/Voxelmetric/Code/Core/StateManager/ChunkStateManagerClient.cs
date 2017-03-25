@@ -533,7 +533,11 @@ namespace Voxelmetric.Code.Core.StateManager
             m_completedStates = m_completedStates.Reset(CurrStateCalculateBounds);
             m_completedStatesSafe = m_completedStates;
 
-            if (chunk.blocks.NonEmptyBlocks > 0)
+            // Force full bounds for now
+            chunk.m_bounds.minX = chunk.m_bounds.minY = chunk.m_bounds.minZ = 0;
+            chunk.m_bounds.maxX = chunk.m_bounds.maxY = chunk.m_bounds.maxZ = Env.ChunkMask;
+            chunk.m_bounds.lowestEmptyBlock = 0;
+            /*if (chunk.blocks.NonEmptyBlocks > 0)
             {
                 if (chunk.blocks.NonEmptyBlocks>=Env.ChunkSizePow3-Env.ChunkPow2-1)
                 {
@@ -555,7 +559,7 @@ namespace Voxelmetric.Code.Core.StateManager
 
                     return true;
                 }
-            }
+            }*/
 
             // Consume info about block having been modified
             chunk.blocks.recalculateBounds = false;
