@@ -2,18 +2,22 @@
 {
     public static class Env
     {
+        //! Size of chunk's side
         public const int ChunkPow = 5;
-        public const int ChunkPow2 = ChunkPow<<1;
-        public const int ChunkMask = (1<<ChunkPow)-1;
-
+        
+        //! Size of block when rendering
         public const float BlockSize = 1f;
-        public const float BlockSizeInv = 1f/BlockSize;
-
-        // Padding added to the size of block faces to fix floating point issues
-        // where tiny gaps can appear between block faces
-        public const float BlockFacePadding = 0.0005f;
 
         #region DO NOT CHANGE THESE!
+
+        public const float BlockSizeInv = 1f / BlockSize;
+
+        //! Padding added to the size of block faces to fix floating point issues
+        //! where tiny gaps can appear between block faces
+        public const float BlockFacePadding = 0.0005f;
+        
+        public const int ChunkPow2 = ChunkPow << 1;
+        public const int ChunkMask = (1 << ChunkPow) - 1;
 
         //! Internal chunk size including room for edge fields as well so that we do not have to check whether we are within chunk bounds.
         //! This means we will ultimately consume a bit more memory in exchange for more performance
