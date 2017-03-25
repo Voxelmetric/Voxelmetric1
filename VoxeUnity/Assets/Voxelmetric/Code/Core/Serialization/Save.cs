@@ -1,12 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using UnityEngine;
 using Voxelmetric.Code.Common;
 using Voxelmetric.Code.Common.IO;
 using Voxelmetric.Code.Common.MemoryPooling;
 using Voxelmetric.Code.Data_types;
-using Voxelmetric.Code.Utilities;
 
 namespace Voxelmetric.Code.Core.Serialization
 {
@@ -64,8 +62,8 @@ namespace Voxelmetric.Code.Core.Serialization
 
         public bool IsBinarizeNecessary()
         {
-            if (m_blocks==null && Utilities.Core.UseDifferentialSerialization &&
-                !Utilities.Core.UseDifferentialSerialization_ForceSaveHeaders &&
+            if (m_blocks==null && Features.UseDifferentialSerialization &&
+                !Features.UseDifferentialSerialization_ForceSaveHeaders &&
                 !m_hadDifferentialChange)
                 return false;
 
@@ -77,8 +75,8 @@ namespace Voxelmetric.Code.Core.Serialization
             // Do not serialize if there's no chunk data and empty chunk serialization is turned off
             if (m_blocks==null)
             {
-                if (Utilities.Core.UseDifferentialSerialization &&
-                    !Utilities.Core.UseDifferentialSerialization_ForceSaveHeaders &&
+                if (Features.UseDifferentialSerialization &&
+                    !Features.UseDifferentialSerialization_ForceSaveHeaders &&
                     !m_hadDifferentialChange
                     )
                     return false;
@@ -86,7 +84,7 @@ namespace Voxelmetric.Code.Core.Serialization
             }
 
             bw.Write(SaveVersion);
-            bw.Write(Utilities.Core.UseDifferentialSerialization);
+            bw.Write(Features.UseDifferentialSerialization);
 
             // Chunk bounds
             ChunkBounds bounds = Chunk.m_bounds;
@@ -100,7 +98,7 @@ namespace Voxelmetric.Code.Core.Serialization
             bw.Write(Chunk.blocks.NonEmptyBlocks);
 
             // Chunk data
-            if (Utilities.Core.UseDifferentialSerialization)
+            if (Features.UseDifferentialSerialization)
             {
                 if(m_blocks==null)
                     bw.Write(0);
@@ -186,7 +184,7 @@ namespace Voxelmetric.Code.Core.Serialization
                 else
                 {
                     // If somebody switched from full to differential serialization, make it so that the next time the chunk is serialized it's saved as diff
-                    if (Utilities.Core.UseDifferentialSerialization)
+                    if (Features.UseDifferentialSerialization)
                         m_hadDifferentialChange = true;
                     
                     blkLenBytes = br.ReadInt32();
@@ -222,7 +220,7 @@ namespace Voxelmetric.Code.Core.Serialization
 
         public bool DoCompression()
         {
-            if (Utilities.Core.UseDifferentialSerialization)
+            if (Features.UseDifferentialSerialization)
             {
                 if (m_blocks != null && m_blocks.Length>0)
                 {
@@ -420,7 +418,7 @@ namespace Voxelmetric.Code.Core.Serialization
 
         public void ConsumeChanges()
         {
-            if (!Utilities.Core.UseDifferentialSerialization)
+            if (!Features.UseDifferentialSerialization)
                 return;
 
             ChunkBlocks blocks = Chunk.blocks;

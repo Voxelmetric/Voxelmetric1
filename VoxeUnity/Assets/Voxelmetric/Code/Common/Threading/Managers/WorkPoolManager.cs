@@ -7,7 +7,7 @@ namespace Voxelmetric.Code.Common.Threading.Managers
     {
         private static readonly List<AThreadPoolItem> WorkItems = new List<AThreadPoolItem>(2048);
 
-        private static readonly TimeBudgetHandler TimeBudget = Utilities.Core.UseThreadPool
+        private static readonly TimeBudgetHandler TimeBudget = Features.UseThreadPool
                                                                    ? null
                                                                    : new TimeBudgetHandler(10);
 
@@ -22,7 +22,7 @@ namespace Voxelmetric.Code.Common.Threading.Managers
                 return;
 
             // Commit all the work we have
-            if (Utilities.Core.UseThreadPool)
+            if (Features.UseThreadPool)
             {
                 ThreadPool pool = Globals.WorkPool;
 
@@ -97,7 +97,7 @@ namespace Voxelmetric.Code.Common.Threading.Managers
 
         public new static string ToString()
         {
-            return Utilities.Core.UseThreadPool ? Globals.WorkPool.ToString() : WorkItems.Count.ToString();
+            return Features.UseThreadPool ? Globals.WorkPool.ToString() : WorkItems.Count.ToString();
         }
     }
 }

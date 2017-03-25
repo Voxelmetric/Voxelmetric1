@@ -3,9 +3,7 @@ using Voxelmetric.Code.Common;
 using Voxelmetric.Code.Common.MemoryPooling;
 using Voxelmetric.Code.Configurable.Blocks.Utilities;
 using Voxelmetric.Code.Core;
-using Voxelmetric.Code.Data_types;
 using Voxelmetric.Code.Rendering;
-using Voxelmetric.Code.Utilities;
 
 namespace Voxelmetric.Code.Builders.Collider
 {

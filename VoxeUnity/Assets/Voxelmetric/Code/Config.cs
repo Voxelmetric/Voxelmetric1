@@ -1,6 +1,6 @@
 ﻿using Voxelmetric.Code.Data_types;
 
-namespace Voxelmetric.Code.Utilities
+namespace Voxelmetric.Code
 {
     public static class Env
     {
@@ -29,7 +29,7 @@ namespace Voxelmetric.Code.Utilities
         public const float BlockFacePadding = 0.0005f;
     }
 
-    public static class Core
+    public static class Features
     {
         public const bool UseThreadPool = true;
         public const bool UseThreadedIO = true;

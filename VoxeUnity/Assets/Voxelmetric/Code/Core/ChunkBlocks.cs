@@ -5,7 +5,6 @@ using Voxelmetric.Code.Common;
 using Voxelmetric.Code.Core.StateManager;
 using Voxelmetric.Code.Data_types;
 using Voxelmetric.Code.Load_Resources.Blocks;
-using Voxelmetric.Code.Utilities;
 using Voxelmetric.Code.VM;
 
 namespace Voxelmetric.Code.Core
@@ -473,7 +472,7 @@ namespace Voxelmetric.Code.Core
                 if (chunk.world.networking.allowConnections)
                     chunk.world.networking.server.BroadcastChange(globalPos, blockData, -1);
 
-                if (Utilities.Core.UseSerialization && Utilities.Core.UseDifferentialSerialization)
+                if (Features.UseSerialization && Features.UseDifferentialSerialization)
                 {
                     // TODO: Memory unfriendly. Rethink the strategy
                     modifiedBlocks.Add(blockPos);

@@ -28,7 +28,7 @@ namespace Voxelmetric.Code.Core.StateManager
         protected ChunkStateManager(Chunk chunk)
         {
             this.chunk = chunk;
-            if(Utilities.Core.UseSerialization)
+            if(Features.UseSerialization)
                 m_save = new Save(chunk);
         }
 
@@ -90,7 +90,7 @@ namespace Voxelmetric.Code.Core.StateManager
                         return;
                     m_removalRequested = true;
 
-                    if (Utilities.Core.SerializeChunkWhenUnloading)
+                    if (Features.SerializeChunkWhenUnloading)
                         OnNotified(this, ChunkState.PrepareSaveData);
                     OnNotified(this, ChunkState.Remove);
                 }

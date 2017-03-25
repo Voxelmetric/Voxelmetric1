@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 using Voxelmetric.Code.Data_types;
-using Voxelmetric.Code.Utilities;
 
 namespace Voxelmetric.Code.Core
 {

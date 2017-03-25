@@ -2,9 +2,7 @@
 using UnityEngine;
 using Voxelmetric.Code.Common.Memory;
 using Voxelmetric.Code.Configurable.Blocks;
-using Voxelmetric.Code.Data_types;
 using Voxelmetric.Code.Rendering;
-using Voxelmetric.Code.Utilities;
 using Voxelmetric.Code.Utilities.Noise;
 
 namespace Voxelmetric.Code.Common.MemoryPooling

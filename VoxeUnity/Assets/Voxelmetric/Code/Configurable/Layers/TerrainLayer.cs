@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using Voxelmetric.Code;
 using Voxelmetric.Code.Common;
 using Voxelmetric.Code.Core;
 using Voxelmetric.Code.Data_types;
 using Voxelmetric.Code.Load_Resources;
-using Voxelmetric.Code.Utilities;
 using Voxelmetric.Code.Utilities.Noise;
 
 public abstract class TerrainLayer : IComparable, IEquatable<TerrainLayer>

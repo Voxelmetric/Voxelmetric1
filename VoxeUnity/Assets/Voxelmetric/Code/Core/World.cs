@@ -3,7 +3,6 @@ using Voxelmetric.Code.Data_types;
 using Voxelmetric.Code.Load_Resources;
 using Voxelmetric.Code.Load_Resources.Blocks;
 using Voxelmetric.Code.Load_Resources.Textures;
-using Voxelmetric.Code.Utilities;
 using Voxelmetric.Code.VM;
 
 namespace Voxelmetric.Code.Core

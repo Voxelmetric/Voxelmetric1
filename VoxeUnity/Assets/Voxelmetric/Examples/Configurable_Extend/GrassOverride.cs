@@ -1,7 +1,7 @@
-﻿using Voxelmetric.Code.Core;
+﻿using Voxelmetric.Code;
+using Voxelmetric.Code.Core;
 using Voxelmetric.Code.Data_types;
 using Voxelmetric.Code.Load_Resources.Blocks;
-using Voxelmetric.Code.Utilities;
 
 // This class inherits from BlockCube so that it renders just like any other
 // cube block but it replaces the RandomUpdate function with its own

@@ -4,7 +4,6 @@ using UnityEngine;
 using Voxelmetric.Code;
 using Voxelmetric.Code.Core;
 using Voxelmetric.Code.Load_Resources;
-using Voxelmetric.Code.Utilities;
 using Voxelmetric.Code.Utilities.Noise;
 
 public class TerrainGen

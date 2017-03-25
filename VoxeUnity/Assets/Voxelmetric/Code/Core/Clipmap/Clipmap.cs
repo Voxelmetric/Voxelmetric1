@@ -1,5 +1,4 @@
 ﻿using Voxelmetric.Code.Common;
-using Voxelmetric.Code.Utilities;
 
 namespace Voxelmetric.Code.Core.Clipmap
 {

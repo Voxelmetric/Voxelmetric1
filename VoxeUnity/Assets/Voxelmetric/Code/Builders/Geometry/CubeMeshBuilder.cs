@@ -5,7 +5,6 @@ using Voxelmetric.Code.Configurable.Blocks;
 using Voxelmetric.Code.Configurable.Blocks.Utilities;
 using Voxelmetric.Code.Core;
 using Voxelmetric.Code.Data_types;
-using Voxelmetric.Code.Utilities;
 
 namespace Voxelmetric.Code.Builders.Geometry
 {

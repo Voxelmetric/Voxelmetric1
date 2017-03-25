@@ -1,6 +1,5 @@
 ﻿using System;
 using UnityEngine;
-using Voxelmetric.Code.Utilities;
 
 namespace Voxelmetric.Code.Data_types
 {

@@ -1,7 +1,6 @@
 ﻿using System.IO;
 using Voxelmetric.Code.Common.IO;
 using Voxelmetric.Code.Data_types;
-using Voxelmetric.Code.Utilities;
 
 namespace Voxelmetric.Code.Core.Serialization
 {

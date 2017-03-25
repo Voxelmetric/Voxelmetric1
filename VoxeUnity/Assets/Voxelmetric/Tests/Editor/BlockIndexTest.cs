@@ -1,6 +1,6 @@
 ﻿using NUnit.Framework;
+using Voxelmetric.Code;
 using Voxelmetric.Code.Common;
-using Voxelmetric.Code.Utilities;
 
 public class BlockIndexTest
 {

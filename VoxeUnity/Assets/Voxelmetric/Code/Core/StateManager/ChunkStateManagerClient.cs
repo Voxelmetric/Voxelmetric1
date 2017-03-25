@@ -6,7 +6,6 @@ using Voxelmetric.Code.Common.Extensions;
 using Voxelmetric.Code.Common.Threading;
 using Voxelmetric.Code.Common.Threading.Managers;
 using Voxelmetric.Code.Data_types;
-using Voxelmetric.Code.Utilities;
 
 namespace Voxelmetric.Code.Core.StateManager
 {
@@ -240,7 +239,7 @@ namespace Voxelmetric.Code.Core.StateManager
             m_completedStates = m_completedStates.Reset(CurrStateLoadData);
             m_completedStatesSafe = m_completedStates;
 
-            if (Utilities.Core.UseSerialization)
+            if (Features.UseSerialization)
             {
                 var task = Globals.MemPools.SMTaskPI.Pop();
                 m_poolState = m_poolState.Set(ChunkPoolItemState.TaskPI);
@@ -308,7 +307,7 @@ namespace Voxelmetric.Code.Core.StateManager
             m_completedStates = m_completedStates.Reset(CurrStatePrepareGenerate);
             m_completedStatesSafe = m_completedStates;
 
-            if (Utilities.Core.UseSerialization)
+            if (Features.UseSerialization)
             {
                 var task = Globals.MemPools.SMThreadPI.Pop();
                 m_poolState = m_poolState.Set(ChunkPoolItemState.ThreadPI);
@@ -338,7 +337,7 @@ namespace Voxelmetric.Code.Core.StateManager
             chunk.world.terrainGen.GenerateTerrain(chunk);
 
             // Commit serialization changes if any
-            if (Utilities.Core.UseSerialization)
+            if (Features.UseSerialization)
                 stateManager.m_save.CommitChanges();
 
             // Calculate the amount of non-empty blocks
@@ -396,7 +395,7 @@ namespace Voxelmetric.Code.Core.StateManager
 
         private static void OnPrepareSaveDataDone(ChunkStateManagerClient stateManager, bool success)
         {
-            if (Utilities.Core.UseSerialization)
+            if (Features.UseSerialization)
             {
                 if (!success)
                 {
@@ -425,7 +424,7 @@ namespace Voxelmetric.Code.Core.StateManager
             m_completedStates = m_completedStates.Reset(CurrStatePrepareSaveData);
             m_completedStatesSafe = m_completedStates;
 
-            if (Utilities.Core.UseSerialization)
+            if (Features.UseSerialization)
             {
                 m_save.ConsumeChanges();
 
@@ -458,7 +457,7 @@ namespace Voxelmetric.Code.Core.StateManager
 
         private static void OnSaveDataDone(ChunkStateManagerClient stateManager, bool success)
         {
-            if (Utilities.Core.UseSerialization)
+            if (Features.UseSerialization)
             {
                 if (success)
                     // Notify listeners in case of success
@@ -486,7 +485,7 @@ namespace Voxelmetric.Code.Core.StateManager
             m_completedStates = m_completedStates.Reset(CurrStateSaveData);
             m_completedStatesSafe = m_completedStates;
 
-            if (Utilities.Core.UseSerialization)
+            if (Features.UseSerialization)
             {
                 m_save.ConsumeChanges();
 
