@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using UnityEngine.Assertions;
 using Voxelmetric.Code.Common;
 using Voxelmetric.Code.Common.Events;
+using Voxelmetric.Code.Core.StateManager;
+using Voxelmetric.Code.Data_types;
 
 namespace Voxelmetric.Code.Core
 {
@@ -44,32 +46,40 @@ namespace Voxelmetric.Code.Core
             if (listener==null || listener==this)
                 return false;
 
+            // Determine neighbors's direction as compared to current chunk
+            Chunk chunk = ((ChunkStateManager)this).chunk;
+            Chunk chunkNeighbor = ((ChunkStateManager)listener).chunk;
+            Vector3Int p = chunk.pos-chunkNeighbor.pos;
+            Direction dir = Direction.up;
+            if (p.x<0)
+                dir = Direction.east;
+            else if (p.x>0)
+                dir = Direction.west;
+            else if (p.z<0)
+                dir = Direction.north;
+            else if (p.z>0)
+                dir = Direction.south;
+            else if (p.y>0)
+                dir = Direction.down;
+
             ChunkEvent chunkListener = (ChunkEvent)listener;
 
             // Register
             if (registerListener)
             {
-                // Make sure this section is not registered yet
-                for (int i = 0; i<Listeners.Length; i++)
-                {
-                    ChunkEvent l = Listeners[i];
+                ChunkEvent l = Listeners[(int)dir];
 
-                    // Do not register if already registred
-                    if (l==listener)
-                        return false;
-                }
+                // Do not register if already registred
+                if (l==listener)
+                    return false;
 
                 // Subscribe in the first free slot
-                for (int i = 0; i < Listeners.Length; i++)
+                if (l==null)
                 {
-                    ChunkEvent l = Listeners[i];
-                    if (l==null)
-                    {
-                        ++ListenerCount;
-                        Assert.IsTrue(ListenerCount<=6);
-                        Listeners[i] = chunkListener;
-                        return true;
-                    }
+                    ++ListenerCount;
+                    Assert.IsTrue(ListenerCount<=6);
+                    Listeners[(int)dir] = chunkListener;
+                    return true;
                 }
 
                 // We want to register but there is no free space
@@ -78,24 +88,28 @@ namespace Voxelmetric.Code.Core
             // Unregister
             else
             {
-                // Only unregister already registered sections
-                for (int i = 0; i < Listeners.Length; i++)
-                {
-                    ChunkEvent l = Listeners[i];
+                ChunkEvent l = Listeners[(int)dir];
 
-                    if (l==listener)
-                    {
-                        --ListenerCount;
-                        Assert.IsTrue(ListenerCount >= 0);
-                        Listeners[i] = null;
-                        return true;
-                    }
+                // Do not unregister if it's something else than we expected
+                if (l!=listener && l!=null)
+                {
+                    Assert.IsTrue(false);
+                    return false;
+                }
+
+                // Only unregister already registered sections
+                if (l==listener)
+                {
+                    --ListenerCount;
+                    Assert.IsTrue(ListenerCount>=0);
+                    Listeners[(int)dir] = null;
+                    return true;
                 }
             }
 
             return false;
         }
-        
+
         public void NotifyAll(ChunkState state)
         {
             // Notify each registered listener

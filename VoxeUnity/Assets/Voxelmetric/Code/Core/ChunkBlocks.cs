@@ -110,11 +110,13 @@ namespace Voxelmetric.Code.Core
             int x, y, z;
             Helpers.GetChunkIndex3DFrom1D(index, out x, out y, out z);
 
+#if DEBUG
             if (x < 0 || y < 0 || z < 0 || x > Env.ChunkSize1 || y > Env.ChunkSize1 || z > Env.ChunkSize1)
             {
                 Assert.IsTrue(false, string.Format("Chunk index out of range in setBlockQueue: [{0},{1},{2}]", x, y, z));
                 return;
             }
+#endif
 
             Vector3Int pos = new Vector3Int(x, y, z);
             Vector3Int globalPos = pos + chunk.pos;
