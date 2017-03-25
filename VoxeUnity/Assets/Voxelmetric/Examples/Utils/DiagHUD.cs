@@ -102,12 +102,17 @@ namespace Client.Scripts.Misc
                 int chunks = World.chunks.chunkCollection.Count;
                 m_text.AppendFormat("Chunks: {0}\n", chunks);
             }
+
+            // Tasks
             m_text.AppendFormat("TP tasks: {0}\n", WorkPoolManager.ToString());
             m_text.AppendFormat("IO tasks: {0}\n", IOPoolManager.ToString());
-
-            m_text.AppendLine(Globals.MemPools.ToString());
+            
+            // Individual object pools
             for(int i=0; i<Globals.WorkPool.Size; i++)
-                m_text.AppendLine(Globals.WorkPool.GetPool(i).ToString());
+                m_text.AppendLine("TP #"+i+" pools: "+Globals.WorkPool.GetPool(i)); // thread pool
+            m_text.AppendLine("IO pools: " + Globals.IOPool.Pools); // io pool
+            m_text.AppendLine("Main pools: " + Globals.MemPools); // the main thread pool
+
             m_text.AppendLine(GameObjectProvider.Instance.ToString());
 
             const int width = 1280;
