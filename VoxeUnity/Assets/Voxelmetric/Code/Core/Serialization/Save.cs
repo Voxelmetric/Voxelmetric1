@@ -228,8 +228,8 @@ namespace Voxelmetric.Code.Core.Serialization
                     int blockPosSize = StructSerialization.TSSize<BlockPos>.ValueSize;
                     int blockDataSize = StructSerialization.TSSize<BlockData>.ValueSize;
 
-                    posLenBytes = m_blocks.Length * blockDataSize;
-                    blkLenBytes = m_blocks.Length * blockPosSize;
+                    posLenBytes = m_blocks.Length * blockPosSize;
+                    blkLenBytes = m_blocks.Length * blockDataSize;
                     positionsBytes = new byte[posLenBytes];
                     blocksBytes = new byte[blkLenBytes];
 
