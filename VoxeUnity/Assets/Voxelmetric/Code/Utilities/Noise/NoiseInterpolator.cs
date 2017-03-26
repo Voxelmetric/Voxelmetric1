@@ -56,31 +56,22 @@ namespace Voxelmetric.Code.Utilities.Noise
         /// <param name="lookupTable">Lookup table to be used to interpolate</param>
         public float Interpolate(int x, int z, float[] lookupTable)
         {
-            float xs = (x + 0.5f) * m_scale;
-            float zs = (z + 0.5f) * m_scale;
+            float xs = (x+0.5f)*m_scale;
+            float zs = (z+0.5f)*m_scale;
 
             int x0 = Helpers.FastFloor(xs);
             int z0 = Helpers.FastFloor(zs);
 
-            xs = (xs - x0);
-            zs = (zs - z0);
+            xs = (xs-x0);
+            zs = (zs-z0);
 
             int lookupIndex = Helpers.GetIndex1DFrom2D(x0, z0, m_size);
             int lookupIndex2 = lookupIndex+m_size; // x0,z0+1
 
-            try
-            {
-                return Helpers.Interpolate(
-                Helpers.Interpolate(lookupTable[lookupIndex], lookupTable[lookupIndex + 1], xs),
-                Helpers.Interpolate(lookupTable[lookupIndex2], lookupTable[lookupIndex2 + 1], xs),
+            return Helpers.Interpolate(
+                Helpers.Interpolate(lookupTable[lookupIndex], lookupTable[lookupIndex+1], xs),
+                Helpers.Interpolate(lookupTable[lookupIndex2], lookupTable[lookupIndex2+1], xs),
                 zs);
-            }
-            catch (Exception ex)
-            {
-                UnityEngine.Debug.LogException(ex);
-                throw;
-            }
-            
         }
 
         /// <summary>
