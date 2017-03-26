@@ -616,21 +616,12 @@ namespace Voxelmetric.Code.Core.StateManager
                 }
 
                 // Sync front and back neighbors
-                if (neighborChunk.pos.x==chunk.pos.x &&
-                    neighborChunk.pos.y==chunk.pos.y)
+                if (neighborChunk.pos.x==chunk.pos.x && neighborChunk.pos.y==chunk.pos.y)
                 {
                     // Copy the front layer of a neighbor chunk to the back layer of ours
                     if (neighborChunk.pos.z>chunk.pos.z)
                     {
-                        // Padded area - top
-                        for (int x = -1; x<Env.ChunkSizePlusPadding; x++)
-                        {
-                            BlockData data = neighborChunk.blocks.Get(Helpers.GetChunkIndex1DFrom3D(x, -1, 0));
-                            chunk.blocks.SetRaw(Helpers.GetChunkIndex1DFrom3D(x, -1, Env.ChunkSize), data);
-                        }
-
-                        // Padded area - sides
-                        for (int y = 0; y<Env.ChunkSize; y++)
+                        for (int y = -1; y<Env.ChunkSizePlusPadding; y++)
                         {
                             for (int x = -1; x<Env.ChunkSizePlusPadding; x++)
                             {
@@ -638,59 +629,29 @@ namespace Voxelmetric.Code.Core.StateManager
                                 chunk.blocks.SetRaw(Helpers.GetChunkIndex1DFrom3D(x, y, Env.ChunkSize), data);
                             }
                         }
-
-                        // Padded area - bottom
-                        for (int x = -1; x < Env.ChunkSizePlusPadding; x++)
-                        {
-                            BlockData data = neighborChunk.blocks.Get(Helpers.GetChunkIndex1DFrom3D(x, Env.ChunkSize, 0));
-                            chunk.blocks.SetRaw(Helpers.GetChunkIndex1DFrom3D(x, Env.ChunkSize, Env.ChunkSize), data);
-                        }
                     }
                     // Copy the top back layer of a neighbor chunk to the front layer of ours
                     else // if (neighborChunk.pos.z < chunk.pos.z)
                     {
-                        // Padded area - top
-                        for (int x = -1; x < Env.ChunkSizePlusPadding; x++)
-                        {
-                            BlockData data = neighborChunk.blocks.Get(Helpers.GetChunkIndex1DFrom3D(x, -1, Env.ChunkSize1));
-                            chunk.blocks.SetRaw(Helpers.GetChunkIndex1DFrom3D(x, -1, -1), data);
-                        }
-
-                        // Padded area - sides
-                        for (int y = 0; y<Env.ChunkSize; y++)
+                        for (int y = -1; y<Env.ChunkSizePlusPadding; y++)
                         {
                             for (int x = -1; x<Env.ChunkSizePlusPadding; x++)
                             {
-                                BlockData data = neighborChunk.blocks.Get(Helpers.GetChunkIndex1DFrom3D(x, y, Env.ChunkSize1));
+                                BlockData data =
+                                    neighborChunk.blocks.Get(Helpers.GetChunkIndex1DFrom3D(x, y, Env.ChunkSize1));
                                 chunk.blocks.SetRaw(Helpers.GetChunkIndex1DFrom3D(x, y, -1), data);
                             }
-                        }
-
-                        // Padded area - bottom
-                        for (int x = -1; x < Env.ChunkSizePlusPadding; x++)
-                        {
-                            BlockData data = neighborChunk.blocks.Get(Helpers.GetChunkIndex1DFrom3D(x, Env.ChunkSize, Env.ChunkSize1));
-                            chunk.blocks.SetRaw(Helpers.GetChunkIndex1DFrom3D(x, Env.ChunkSize, -1), data);
                         }
                     }
                 }
 
                 // Sync right and left neighbors
-                if (neighborChunk.pos.y==chunk.pos.y &&
-                    neighborChunk.pos.z==chunk.pos.z)
+                if (neighborChunk.pos.y==chunk.pos.y && neighborChunk.pos.z==chunk.pos.z)
                 {
                     // Copy the right layer of a neighbor chunk to the left layer of ours
                     if (neighborChunk.pos.x>chunk.pos.x)
                     {
-                        // Padded area - top
-                        for (int z = -1; z<Env.ChunkSizePlusPadding; z++)
-                        {
-                            BlockData data = neighborChunk.blocks.Get(Helpers.GetChunkIndex1DFrom3D(0, -1, z));
-                            chunk.blocks.SetRaw(Helpers.GetChunkIndex1DFrom3D(Env.ChunkSize, -1, z), data);
-                        }
-
-                        // Padded area - sides
-                        for (int y = 0; y<Env.ChunkSize; y++)
+                        for (int y = -1; y<Env.ChunkSizePlusPadding; y++)
                         {
                             for (int z = -1; z<Env.ChunkSizePlusPadding; z++)
                             {
@@ -698,45 +659,24 @@ namespace Voxelmetric.Code.Core.StateManager
                                 chunk.blocks.SetRaw(Helpers.GetChunkIndex1DFrom3D(Env.ChunkSize, y, z), data);
                             }
                         }
-
-                        // Padded area - bottom
-                        for (int z = -1; z < Env.ChunkSizePlusPadding; z++)
-                        {
-                            BlockData data = neighborChunk.blocks.Get(Helpers.GetChunkIndex1DFrom3D(0, Env.ChunkSize, z));
-                            chunk.blocks.SetRaw(Helpers.GetChunkIndex1DFrom3D(Env.ChunkSize, Env.ChunkSize, z), data);
-                        }
                     }
                     // Copy the left layer of a neighbor chunk to the right layer of ours
                     else // if (neighborChunk.pos.x < chunk.pos.x)
                     {
-                        // Padded area - top
-                        for (int z = -1; z<Env.ChunkSizePlusPadding; z++)
-                        {
-                            BlockData data = neighborChunk.blocks.Get(Helpers.GetChunkIndex1DFrom3D(Env.ChunkSize1, -1, z));
-                            chunk.blocks.SetRaw(Helpers.GetChunkIndex1DFrom3D(-1, -1, z), data);
-                        }
-
-                        // Padded area - sides
-                        for (int y = 0; y<Env.ChunkSize; y++)
+                        for (int y = -1; y<Env.ChunkSizePlusPadding; y++)
                         {
                             for (int z = -1; z<Env.ChunkSizePlusPadding; z++)
                             {
-                                BlockData data = neighborChunk.blocks.Get(Helpers.GetChunkIndex1DFrom3D(Env.ChunkSize1, y, z));
+                                BlockData data =
+                                    neighborChunk.blocks.Get(Helpers.GetChunkIndex1DFrom3D(Env.ChunkSize1, y, z));
                                 chunk.blocks.SetRaw(Helpers.GetChunkIndex1DFrom3D(-1, y, z), data);
                             }
-                        }
-
-                        // Padded area - bottom
-                        for (int z = -1; z < Env.ChunkSizePlusPadding; z++)
-                        {
-                            BlockData data = neighborChunk.blocks.Get(Helpers.GetChunkIndex1DFrom3D(Env.ChunkSize1, Env.ChunkSize, z));
-                            chunk.blocks.SetRaw(Helpers.GetChunkIndex1DFrom3D(-1, Env.ChunkSize, z), data);
                         }
                     }
                 }
             }
         }
-        
+
         private bool SynchronizeEdges()
         {
             // It is only necessary to perform the sychronization once when data is generated.

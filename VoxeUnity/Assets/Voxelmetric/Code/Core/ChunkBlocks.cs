@@ -50,6 +50,7 @@ namespace Voxelmetric.Code.Core
         public ChunkBlocks(Chunk chunk)
         {
             this.chunk = chunk;
+            Array.Clear(blocks, 0, blocks.Length);
         }
 
         public void Init()
