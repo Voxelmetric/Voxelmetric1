@@ -3,7 +3,6 @@
 [![Join the chat at https://gitter.im/richardbiely/Voxelmetric](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/richardbiely/Voxelmetric?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 [![Repo Size](https://reposs.herokuapp.com/?path=richardbiely/Voxelmetric)](https://github.com/richardbiely/Voxelmetric)
 [![License](https://img.shields.io/badge/Licence-GNU-blue.svg)](https://github.com/richardbiely/Voxelmetric/blob/alpha_3/licence)
-[![Stories in progress](https://badge.waffle.io/richardbiely/Voxelmetric.png?label=In Progress&title=In Progress)](https://waffle.io/richardbiely/Voxelmetric)
 
 This is a VoxelMetrics's fork that is slowly being merged with Voxe (https://github.com/richardbiely/Voxe) in order to make it more powerful. Once merging of all features is completed, Voxe will be discontinued and all further work will be put into this project. Even though it is a fork, it is an almost complete rewrite of the original Voxelmetric.
 
@@ -11,7 +10,7 @@ I liked how Voxelmetric was not just another voxel generator. It had some very n
 
 Voxe(lmetric) is an open source voxel framework for Unity3d. It is meant to be an easy to use, easy to extend solution for voxel games. It is currently in alpha so expect breaking changes and incomplete documentation. If anyone wants to help they are more then welcome and should feel free to make a pull request. Also use the issues to highlight bugs and suggest features.
 
-![alt tag](https://i.imgsafe.org/6e7f59856b.jpg)
+![alt tag](https://github.com/richardbiely/Voxelmetric/blob/alpha_3/voxelmetric.jpg)
 
 ## Features
 
