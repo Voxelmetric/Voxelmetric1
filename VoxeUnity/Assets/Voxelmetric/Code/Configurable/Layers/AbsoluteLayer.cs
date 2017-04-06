@@ -17,13 +17,7 @@ public class AbsoluteLayer : TerrainLayer
         // Config files for absolute layers MUST define these properties
         Block block = world.blockProvider.GetBlock(properties["blockName"]);
         blockToPlace = new BlockData(block.Type, block.Solid);
-
-        if (properties.ContainsKey("blockColors"))
-        {
-            string[] colors = properties["blockColors"].Split(',');
-            ((ColoredBlock)block).color = new Color(byte.Parse(colors[0]) / 255f, byte.Parse(colors[1]) / 255f, byte.Parse(colors[2]) / 255f);
-        }
-
+        
         noise.Frequency = 1f/float.Parse(properties["frequency"]); // Frequency in configs is in fast 1/frequency
         noise.Gain = float.Parse(properties["exponent"]);
 #if UNITY_STANDALONE_WIN && !DISABLE_FASTSIMD

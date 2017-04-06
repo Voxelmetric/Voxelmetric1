@@ -1,7 +1,7 @@
 {
     "name": "colored",
-    "textureFolder": "Configs/Colored/Textures",
-    "layerFolder": "Configs/Colored/Layers",
+    "textureFolder": "Configs/Default/Textures",
+    "layerFolder": "Configs/Default/Layers",
     "blockFolder": "Configs/Colored/Blocks",
 
     "meshFolder": "Meshes",
@@ -20,10 +20,10 @@
     "addAOToMesh": true,
     "ambientOcclusionStrength": 0.5,
 
-    "textureAtlasPadding": 0,
+    "textureAtlasPadding": 32,
     "textureAtlasFiltering": "point",
     "textureFormat": "ARGB32",
-    "useMipMaps": false,
+    "useMipMaps": true,
     "useCustomTextureAtlas": false,
     "customTextureAtlasFilePath": ""
 }

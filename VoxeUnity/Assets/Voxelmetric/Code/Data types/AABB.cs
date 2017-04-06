@@ -1,4 +1,6 @@
-﻿namespace Voxelmetric.Code.Data_types
+﻿using UnityEngine;
+
+namespace Voxelmetric.Code.Data_types
 {
     public struct AABB
     {
@@ -17,6 +19,20 @@
             maxX = x2;
             maxY = y2;
             maxZ = z2;
+        }
+
+        public bool IsInside(float x, float y, float z)
+        {
+            return x>minX && x<maxX &&
+                   y>minY && y<maxY &&
+                   z>minY && z<maxZ;
+        }
+
+        public bool IsInside(Vector3 pos)
+        {
+            return pos.x>minX && pos.x<maxX &&
+                   pos.y>minY && pos.y<maxY &&
+                   pos.z>minY && pos.z<maxZ;
         }
     }
 }

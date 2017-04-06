@@ -152,6 +152,26 @@ namespace Voxelmetric.Code.Common.Math
         }
 
         /// <summary>
+        ///     Does a check for intersection of a sphere with frustum planes.
+        /// </summary>
+        public static int TestPlanesSphere(Plane[] planes, Vector3 center, float radius)
+        {
+            for (int i = 0; i < 6; ++i)
+            {
+                Plane p = planes[i];
+
+                float dist = Vector3.Dot(p.normal, center)+p.distance;
+                if (dist < -radius)
+                    return 0; // Outside the bounds
+
+                if (Mathf.Abs(dist)<radius)
+                    return 3; // Partialy inside
+            }
+
+            return 6; // Sphere fully contained
+        }
+
+        /// <summary>
         ///     Does a check for intersection of a AABB with frustum planes. It returns
         ///     the number of intersecting planes. 0 means there is no intersection,
         ///     6 stands for aabb fully contained, anything else is a partial intersection

@@ -15,12 +15,6 @@ public class SurfaceLayer : TerrainLayer
     {
         Block block = world.blockProvider.GetBlock(properties["blockName"]);
         blockToPlace = new BlockData(block.Type, block.Solid);
-
-        if (properties.ContainsKey("blockColors"))
-        {
-            string[] colors = properties["blockColors"].Split(',');
-            ((ColoredBlock)block).color = new Color(byte.Parse(colors[0]) / 255f, byte.Parse(colors[1]) / 255f, byte.Parse(colors[2]) / 255f);
-        }
     }
 
     public override float GetHeight(Chunk chunk, int layerIndex, int x, int z, float heightSoFar, float strength)

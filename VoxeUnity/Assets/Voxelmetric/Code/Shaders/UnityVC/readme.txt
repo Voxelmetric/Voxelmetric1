@@ -1,1 +1,0 @@
-﻿UnityVC shaders by defaxer, Unity3d forums: http://forum.unity3d.com/threads/standard-shader-with-vertex-colors.316529/

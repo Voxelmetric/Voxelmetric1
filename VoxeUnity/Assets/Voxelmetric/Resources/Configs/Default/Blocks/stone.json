@@ -10,5 +10,6 @@
         "stone",
         "stone",
         "stone"
-    ]
+    ],
+    "material": "ChunkColorUV"
 }

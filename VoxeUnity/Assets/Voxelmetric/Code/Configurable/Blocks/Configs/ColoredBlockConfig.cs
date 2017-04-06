@@ -1,17 +1,44 @@
 ﻿using System.Collections;
+using Newtonsoft.Json;
+using UnityEngine;
 using Voxelmetric.Code.Core;
-using Voxelmetric.Code.Load_Resources.Textures;
 
 public class ColoredBlockConfig : SolidBlockConfig
 {
-    public TextureCollection texture;
+    public readonly Color[] colors = new Color[6];
 
     public override bool SetUp(Hashtable config, World world)
     {
         if (!base.SetUp(config, world))
             return false;
+        
+        if (config.ContainsKey("color"))
+        {
+            string colorCfg = config["color"].ToString();
+            string[] vals = colorCfg.Split(',');
+            if (vals.Length!=3)
+                return false; // Don't accept broken configs
 
-        texture = world.textureProvider.GetTextureCollection(_GetPropertyFromConfig(config, "texture", ""));
+            Color color = new Color(byte.Parse(vals[0]) / 255f, byte.Parse(vals[1]) / 255f, byte.Parse(vals[2]) / 255f);;
+            for (int i = 0; i<6; i++)
+                colors[i] = color;
+        }
+        else if (config.ContainsKey("colors"))
+        {
+            Newtonsoft.Json.Linq.JArray colorNames = (Newtonsoft.Json.Linq.JArray)JsonConvert.DeserializeObject(config["colors"].ToString());
+            if (colorNames.Count!=6)
+                return false; // Don't accept broken configs
+
+            for (int i = 0; i < 6; i++)
+            {
+                string colorCfg = colorNames[i].ToString();
+                string[] vals = colorCfg.Split(',');
+                if (vals.Length != 3)
+                    return false; // Don't accept broken configs
+
+                colors[i] = new Color(byte.Parse(vals[0]) / 255f, byte.Parse(vals[1]) / 255f, byte.Parse(vals[2]) / 255f);
+            }
+        }
 
         return true;
     }

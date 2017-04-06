@@ -89,8 +89,7 @@ namespace Voxelmetric.Code.Core
 
             stateManager = new ChunkStateManagerClient(this);
             blocks = new ChunkBlocks(this);
-
-
+            
             GeometryHandler = new ChunkRenderGeometryHandler(this);
             ChunkColliderGeometryHandler = new ChunkColliderGeometryHandler(this);
         }

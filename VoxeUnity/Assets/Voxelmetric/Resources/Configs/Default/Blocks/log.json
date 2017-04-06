@@ -10,5 +10,6 @@
         "log_side",
         "log_side",
         "log_side"
-    ]
+    ],
+    "material": "ChunkColorUV"
 }

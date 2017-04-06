@@ -1,0 +1,8 @@
+{
+    "name": "stone",
+    "type": 2,
+    "blockClass": "ColoredBlock",
+    "configClass": "ColoredBlockConfig",
+    "color": "111,113,116",
+    "material": "ChunkColor"
+}

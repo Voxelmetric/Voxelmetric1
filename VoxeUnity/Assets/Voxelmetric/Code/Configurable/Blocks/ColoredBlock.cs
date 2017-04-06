@@ -2,13 +2,14 @@
 using Voxelmetric.Code.Configurable.Blocks.Utilities;
 using Voxelmetric.Code.Core;
 using Voxelmetric.Code.Data_types;
-using Voxelmetric.Code.Load_Resources.Textures;
 using Voxelmetric.Code.Rendering;
 
-public class ColoredBlock : SolidBlock {
-
-    public Color color;
-    public TextureCollection texture { get { return ((ColoredBlockConfig)Config).texture; } }
+public class ColoredBlock : SolidBlock
+{
+    public Color[] colors
+    {
+        get { return ((ColoredBlockConfig)Config).colors; }
+    }
 
     public override void BuildFace(Chunk chunk, Vector3Int localPos, Vector3[] vertices, Direction direction)
     {
@@ -19,8 +20,12 @@ public class ColoredBlock : SolidBlock {
         {
             if (vertices == null)
             {
-                for (int i = 0; i < 4; i++)
+                for (int i = 0; i<4; i++)
+                {
                     vertexData[i] = chunk.pools.VertexDataPool.Pop();
+                    vertexData[i].Color = colors[(int)direction];
+                    vertexData[i].UV = Vector2.zero;
+                }
                 BlockUtils.PrepareVertices(ref localPos, vertexData, direction);
             }
             else
@@ -29,11 +34,12 @@ public class ColoredBlock : SolidBlock {
                 {
                     vertexData[i] = chunk.pools.VertexDataPool.Pop();
                     vertexData[i].Vertex = vertices[i];
+                    vertexData[i].Color = colors[(int)direction];
+                    vertexData[i].UV = Vector2.zero;
                 }
             }
-
-            BlockUtils.PrepareTexture(chunk, ref localPos, vertexData, direction, texture);
-            BlockUtils.SetColors(vertexData, ref color);
+            
+            BlockUtils.AdjustColors(chunk, ref localPos, vertexData, direction);
 
             for (int i = 0; i<4; i++)
                 vertexDataFixed[i]= VertexDataUtils.ClassToStruct(vertexData[i]);
@@ -44,13 +50,5 @@ public class ColoredBlock : SolidBlock {
         }
         chunk.pools.VertexDataFixedArrayPool.Push(vertexDataFixed);
         chunk.pools.VertexDataArrayPool.Push(vertexData);
-    }
-
-    public override string DisplayName
-    {
-        get
-        {
-            return base.DisplayName + " (" + color + ")";
-        }
     }
 }

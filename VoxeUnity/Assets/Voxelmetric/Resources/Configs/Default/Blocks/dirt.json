@@ -10,5 +10,6 @@
         "dirt",
         "dirt",
         "dirt"
-    ]
+    ],
+    "material": "ChunkColorUV"
 }

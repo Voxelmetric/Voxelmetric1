@@ -102,7 +102,7 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
                 return;
 
             bool isLast = rangeX==1 && rangeY==1 && rangeZ==1;
-
+            
             int wx = x*Env.ChunkSize;
             int wy = y*Env.ChunkSize;
             int wz = z*Env.ChunkSize;
@@ -140,6 +140,17 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
                 return;
             }
             
+            /*AABB bounds2 = new AABB(wx, wy, wz, wx+rx, wy+ry, wz+rz);
+            int inside = 0;
+
+            // if the camera position lies inside the bounding box we'll assume partial visibility automatically
+            if (bounds2.IsInside(m_camera.transform.position))
+                inside = 3;
+            else
+            {
+                // Check whether the bouding box lies inside the camera's frustum
+                inside = Geometry.TestPlanesAABB2(m_cameraPlanes, bounds2);
+            }*/
             // Check whether the bouding box lies inside the camera's frustum
             AABB bounds2 = new AABB(wx, wy, wz, wx+rx, wy+ry, wz+rz);
             int inside = Geometry.TestPlanesAABB2(m_cameraPlanes, bounds2);
@@ -255,7 +266,7 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
                 return;
 
             Profiler.BeginSample("HandleVisibility");
-            //Thread.Sleep(10);
+
             int minY = m_viewerPos.y - (VerticalChunkLoadRadius * Env.ChunkSize);
             int maxY = m_viewerPos.y + (VerticalChunkLoadRadius * Env.ChunkSize);
             world.CapCoordYInsideWorld(ref minY, ref maxY);
