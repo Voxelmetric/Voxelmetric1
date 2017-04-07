@@ -8,4 +8,6 @@ EditorBuildSettings:
   - enabled: 0
     path: Assets/Voxelmetric/Examples/scene_benchmarks.unity
   - enabled: 1
+    path: Assets/Voxelmetric/Examples/scene_coloredBlocks.unity
+  - enabled: 1
     path: Assets/Voxelmetric/Examples/scene_texturedBlocks.unity
