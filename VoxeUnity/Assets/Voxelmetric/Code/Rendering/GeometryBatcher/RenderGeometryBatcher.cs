@@ -179,12 +179,7 @@ namespace Voxelmetric.Code.Rendering.GeometryBatcher
                     if (go!=null)
                     {
 #if DEBUG
-                        if (!string.IsNullOrEmpty(debugName))
-                        {
-                            go.name = debugName;
-                            if (i>0)
-                                go.name = go.name+"_"+i;
-                        }
+                        go.name = debugName+"_"+i;
 #endif
 
                         Mesh mesh = Globals.MemPools.MeshPool.Pop();
