@@ -26,6 +26,22 @@ namespace Voxelmetric.Code.Core
         public Material [] renderMaterials;
         public PhysicMaterial [] physicsMaterials;
 
+        public AABBInt Bounds { get; set; }
+
+        public bool CheckInsideWorld(Vector3Int pos)
+        {
+            int offsetX = (Bounds.maxX+Bounds.minX)>>1;
+            int offsetZ = (Bounds.maxZ+Bounds.minZ)>>1;
+
+            int xx = (pos.x-offsetX)/Env.ChunkSize;
+            int zz = (pos.z-offsetZ)/Env.ChunkSize;
+            int yy = pos.y/Env.ChunkSize;
+            int horizontalRadius = (Bounds.maxX-Bounds.minX)/(2*Env.ChunkSize);
+
+            return xx*xx+zz*zz<=horizontalRadius*horizontalRadius &&
+                   yy>=(Bounds.minY/Env.ChunkSize) && yy<=(Bounds.maxY/Env.ChunkSize);
+        }
+
         void Awake()
         {
             chunks = new WorldChunks(this);
@@ -74,7 +90,7 @@ namespace Voxelmetric.Code.Core
             {
                 // Make sure there is at least one chunk worth of space in the world on the Y axis
                 if (config.maxY-config.minY<Env.ChunkSize)
-                    config.maxY = config.minY + Env.ChunkSize;
+                    config.maxY = config.minY+Env.ChunkSize;
             }
         }
 
@@ -100,16 +116,14 @@ namespace Voxelmetric.Code.Core
         {
             if (config.minY!=config.maxY)
             {
-                int offset = Env.ChunkSize; // We always load one more chunk
-                minY = Mathf.Max(minY, config.minY-offset);
-                maxY = Mathf.Min(maxY, config.maxY+offset);
+                minY = Mathf.Max(minY, config.minY);
+                maxY = Mathf.Min(maxY, config.maxY);
             }
         }
 
         public bool IsCoordInsideWorld(Vector3Int pos)
         {
-            int offset = Env.ChunkSize; // We always load one more chunk
-            return config.minY==config.maxY || (pos.y>=config.minY-offset && pos.y<=config.maxY+offset);
+            return config.minY==config.maxY || (pos.y>=config.minY && pos.y<=config.maxY);
         }
     }
 }

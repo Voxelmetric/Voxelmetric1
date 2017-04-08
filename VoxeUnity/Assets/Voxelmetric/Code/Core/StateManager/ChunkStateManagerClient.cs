@@ -582,42 +582,63 @@ namespace Voxelmetric.Code.Core.StateManager
         private bool SynchronizeNeighbors()
         {
             // 6 neighbors are necessary
-            if (ListenerCount != 6)
+            if (ListenerCount!=ListenerCountMax)
                 return false;
 
             // All neighbors have to have their data generated
             for (int i = 0; i<Listeners.Length; i++)
             {
                 var stateManager = (ChunkStateManagerClient)Listeners[i];
-                if (!stateManager.m_completedStates.Check(ChunkState.Generate))
+                if (stateManager!=null && !stateManager.m_completedStates.Check(ChunkState.Generate))
                     return false;
             }
 
             return true;
         }
 
+        // A dummy chunk. Used e.g. for copying air block to padded area of chunks missing a neighbor
+        private static readonly Chunk dummyChunk = new Chunk();
+
         private void OnSynchronizeEdges()
         {
             // Search for neighbors we are vertically aligned with
             for (int i = 0; i<Listeners.Length; i++)
             {
+                Chunk neighborChunk = dummyChunk;
+                Vector3Int neighborPos;
+
                 var chunkEvent = Listeners[i];
-                var stateManager = (ChunkStateManagerClient)chunkEvent;
-                Chunk neighborChunk = stateManager.chunk;
+                if (chunkEvent!=null)
+                {
+                    var stateManager = (ChunkStateManagerClient)chunkEvent;
+                    neighborChunk = stateManager.chunk;
+                    neighborPos = neighborChunk.pos;
+                }
+                else
+                {
+                    switch ((Direction)i)
+                    {
+                        case Direction.up: neighborPos = chunk.pos.Add(0, Env.ChunkSize, 0); break;
+                        case Direction.down: neighborPos = chunk.pos.Add(0, -Env.ChunkSize, 0); break;
+                        case Direction.north: neighborPos = chunk.pos.Add(0, 0, Env.ChunkSize); break;
+                        case Direction.south: neighborPos = chunk.pos.Add(0, 0, -Env.ChunkSize); break;
+                        case Direction.east: neighborPos = chunk.pos.Add(Env.ChunkSize, 0, 0); break;
+                        default: neighborPos = chunk.pos.Add(-Env.ChunkSize, 0, 0); break;
+                    }
+                }
 
                 // Sync vertical neighbors
-                if (neighborChunk.pos.x==chunk.pos.x &&
-                    neighborChunk.pos.z==chunk.pos.z)
+                if (neighborPos.x==chunk.pos.x && neighborPos.z==chunk.pos.z)
                 {
                     // Copy the bottom layer of a neighbor chunk to the top layer of ours
-                    if (neighborChunk.pos.y>chunk.pos.y)
+                    if (neighborPos.y>chunk.pos.y)
                     {
                         int srcIndex = Helpers.GetChunkIndex1DFrom3D(-1, 0, -1);
                         int dstIndex = Helpers.GetChunkIndex1DFrom3D(-1, Env.ChunkSize, -1);
                         chunk.blocks.Copy(neighborChunk.blocks, srcIndex, dstIndex, Env.ChunkSizeWithPaddingPow2);
                     }
                     // Copy the top layer of a neighbor chunk to the bottom layer of ours
-                    else // if (neighborChunk.pos.y < chunk.pos.y)
+                    else // if (neighborPos.y < chunk.pos.y)
                     {
                         int srcIndex = Helpers.GetChunkIndex1DFrom3D(-1, Env.ChunkSize1, -1);
                         int dstIndex = Helpers.GetChunkIndex1DFrom3D(-1, -1, -1);
@@ -626,10 +647,10 @@ namespace Voxelmetric.Code.Core.StateManager
                 }
 
                 // Sync front and back neighbors
-                if (neighborChunk.pos.x==chunk.pos.x && neighborChunk.pos.y==chunk.pos.y)
+                if (neighborPos.x==chunk.pos.x && neighborPos.y==chunk.pos.y)
                 {
                     // Copy the front layer of a neighbor chunk to the back layer of ours
-                    if (neighborChunk.pos.z>chunk.pos.z)
+                    if (neighborPos.z>chunk.pos.z)
                     {
                         for (int y = -1; y<Env.ChunkSizePlusPadding; y++)
                         {
@@ -641,14 +662,13 @@ namespace Voxelmetric.Code.Core.StateManager
                         }
                     }
                     // Copy the top back layer of a neighbor chunk to the front layer of ours
-                    else // if (neighborChunk.pos.z < chunk.pos.z)
+                    else // if (neighborPos.z < chunk.pos.z)
                     {
                         for (int y = -1; y<Env.ChunkSizePlusPadding; y++)
                         {
                             for (int x = -1; x<Env.ChunkSizePlusPadding; x++)
                             {
-                                BlockData data =
-                                    neighborChunk.blocks.Get(Helpers.GetChunkIndex1DFrom3D(x, y, Env.ChunkSize1));
+                                BlockData data = neighborChunk.blocks.Get(Helpers.GetChunkIndex1DFrom3D(x, y, Env.ChunkSize1));
                                 chunk.blocks.SetRaw(Helpers.GetChunkIndex1DFrom3D(x, y, -1), data);
                             }
                         }
@@ -656,10 +676,10 @@ namespace Voxelmetric.Code.Core.StateManager
                 }
 
                 // Sync right and left neighbors
-                if (neighborChunk.pos.y==chunk.pos.y && neighborChunk.pos.z==chunk.pos.z)
+                if (neighborPos.y==chunk.pos.y && neighborPos.z==chunk.pos.z)
                 {
                     // Copy the right layer of a neighbor chunk to the left layer of ours
-                    if (neighborChunk.pos.x>chunk.pos.x)
+                    if (neighborPos.x>chunk.pos.x)
                     {
                         for (int y = -1; y<Env.ChunkSizePlusPadding; y++)
                         {
@@ -671,14 +691,13 @@ namespace Voxelmetric.Code.Core.StateManager
                         }
                     }
                     // Copy the left layer of a neighbor chunk to the right layer of ours
-                    else // if (neighborChunk.pos.x < chunk.pos.x)
+                    else // if (neighborPos.x < chunk.pos.x)
                     {
                         for (int y = -1; y<Env.ChunkSizePlusPadding; y++)
                         {
                             for (int z = -1; z<Env.ChunkSizePlusPadding; z++)
                             {
-                                BlockData data =
-                                    neighborChunk.blocks.Get(Helpers.GetChunkIndex1DFrom3D(Env.ChunkSize1, y, z));
+                                BlockData data = neighborChunk.blocks.Get(Helpers.GetChunkIndex1DFrom3D(Env.ChunkSize1, y, z));
                                 chunk.blocks.SetRaw(Helpers.GetChunkIndex1DFrom3D(-1, y, z), data);
                             }
                         }
@@ -867,6 +886,39 @@ namespace Voxelmetric.Code.Core.StateManager
 
         #endregion Remove chunk
 
+        private static void UpdateListenersCount(ChunkStateManagerClient stateManager)
+        {
+            Chunk chunk = stateManager.chunk;
+            World world = chunk.world;
+
+            // Calculate how many listeners a chunk can have
+            int maxListeners = 0;
+            if (world.CheckInsideWorld(chunk.pos.Add(Env.ChunkSize, 0, 0)) && (chunk.pos.x!=world.Bounds.maxX))
+                ++maxListeners;
+            if (world.CheckInsideWorld(chunk.pos.Add(-Env.ChunkSize, 0, 0)) && (chunk.pos.x!=world.Bounds.minX))
+                ++maxListeners;
+            if (world.CheckInsideWorld(chunk.pos.Add(0, Env.ChunkSize, 0)) && (chunk.pos.y!=world.Bounds.maxY))
+                ++maxListeners;
+            if (world.CheckInsideWorld(chunk.pos.Add(0, -Env.ChunkSize, 0)) && (chunk.pos.y!=world.Bounds.minY))
+                ++maxListeners;
+            if (world.CheckInsideWorld(chunk.pos.Add(0, 0, Env.ChunkSize)) && (chunk.pos.z!=world.Bounds.maxZ))
+                ++maxListeners;
+            if (world.CheckInsideWorld(chunk.pos.Add(0, 0, -Env.ChunkSize)) && (chunk.pos.z!=world.Bounds.minZ))
+                ++maxListeners;
+
+            //int prevListeners = stateManager.ListenerCountMax;
+
+            // Update max listeners and request geometry update
+            stateManager.ListenerCountMax = maxListeners;
+            
+            // Request synchronization of edges and build geometry
+            //if(prevListeners<maxListeners)
+                stateManager.m_syncEdgeBlocks = true;
+
+            // Geometry needs to be rebuild
+            stateManager.RequestState(ChunkState.BuildVertices);
+        }
+
         private void SubscribeNeighbors(bool subscribe)
         {
             Vector3Int pos = chunk.pos;
@@ -876,18 +928,30 @@ namespace Voxelmetric.Code.Core.StateManager
             SubscribeTwoNeighbors(new Vector3Int(pos.x, pos.y - Env.ChunkSize, pos.z), subscribe);
             SubscribeTwoNeighbors(new Vector3Int(pos.x, pos.y, pos.z + Env.ChunkSize), subscribe);
             SubscribeTwoNeighbors(new Vector3Int(pos.x, pos.y, pos.z - Env.ChunkSize), subscribe);
+
+            // Update required listener count
+            UpdateListenersCount(this);
         }
 
         private void SubscribeTwoNeighbors(Vector3Int neighborPos, bool subscribe)
         {
-            Chunk neighbor = chunk.world.chunks.Get(neighborPos);
-            if (neighbor != null)
-            {
-                ChunkStateManagerClient stateManager = neighbor.stateManager;
-                // Subscribe with each other. Passing Idle as event - it is ignored in this case anyway
-                stateManager.Subscribe(this, ChunkState.Idle, subscribe);
-                Subscribe(stateManager, ChunkState.Idle, subscribe);
-            }
+            World world = chunk.world;
+
+            // No chunk lookup if the neighbor positions can't be contained in the world
+            //if (!world.CheckInsideWorld(neighborPos))
+              //return;
+
+            Chunk neighbor = world.chunks.Get(neighborPos);
+            if (neighbor==null)
+                return;
+
+            ChunkStateManagerClient stateManager = neighbor.stateManager;
+            // Subscribe with each other. Passing Idle as event - it is ignored in this case anyway
+            stateManager.Subscribe(this, ChunkState.Idle, subscribe);
+            Subscribe(stateManager, ChunkState.Idle, subscribe);
+
+            // Update required listener count of the neighbor
+            UpdateListenersCount(stateManager);
         }
     }
 }

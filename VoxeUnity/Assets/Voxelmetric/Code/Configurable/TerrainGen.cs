@@ -2,7 +2,9 @@
 using System.Collections.Generic;
 using UnityEngine;
 using Voxelmetric.Code;
+using Voxelmetric.Code.Common;
 using Voxelmetric.Code.Core;
+using Voxelmetric.Code.Data_types;
 using Voxelmetric.Code.Load_Resources;
 using Voxelmetric.Code.Utilities.Noise;
 
@@ -131,11 +133,20 @@ public class TerrainGen
         // Do some layer preprocessing on a chunk
         for (int i=0; i<TerrainLayers.Length; i++)
             TerrainLayers[i].PreProcess(chunk, i);
-
+        
+        /* // DEBUG CODE
+        for(int y=0; y<Env.ChunkSize; y++)
+            for (int z = 0; z < Env.ChunkSize; z++)
+                for (int x = 0; x<Env.ChunkSize; x++)
+                {
+                    int index = Helpers.GetChunkIndex1DFrom3D(x, y, z);
+                    chunk.blocks.SetRaw(index, new BlockData(4, true));
+                }
+        */
         // Generate terrain and structures
         GenerateTerrainForChunk(chunk);
         GenerateStructuresForChunk(chunk);
-
+        
         // Do some layer postprocessing on a chunk
         for (int i=0; i<TerrainLayers.Length; i++)
             TerrainLayers[i].PostProcess(chunk, i);

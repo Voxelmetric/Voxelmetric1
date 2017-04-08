@@ -4,6 +4,7 @@ using Voxelmetric.Code.Common;
 using Voxelmetric.Code.Configurable.Blocks;
 using Voxelmetric.Code.Configurable.Blocks.Utilities;
 using Voxelmetric.Code.Core;
+using Voxelmetric.Code.Core.StateManager;
 using Voxelmetric.Code.Data_types;
 
 namespace Voxelmetric.Code.Builders.Geometry
@@ -15,10 +16,8 @@ namespace Voxelmetric.Code.Builders.Geometry
 
         public void Build(Chunk chunk, int minX, int maxX, int minY, int maxY, int minZ, int maxZ)
         {
-            World world = chunk.world;
             ChunkBlocks blocks = chunk.blocks;
-
-            bool renderingRestricted = world.IsWorldCoordsRestricted() && !world.config.renderBottomWorldFaces && chunk.pos.y==chunk.world.config.minY;
+            ChunkStateManagerClient client = chunk.stateManager;
 
             int[] mins = {minX, minY, minZ};
             int[] maxes = {maxX, maxY, maxZ};
@@ -28,10 +27,11 @@ namespace Voxelmetric.Code.Builders.Geometry
             int[] du = {0, 0, 0}; // Width in a given dimension (du[u] is our current dimension)
             int[] dv = {0, 0, 0}; // Height in a given dimension (dv[v] is our current dimension)
 
+            bool customBlockMaskInitialized = false;
+
             BlockFace[] mask = chunk.pools.BlockFaceArrayPool.Pop(width * width);
             bool[] customBlockMask = chunk.pools.BoolArrayPool.Pop(Env.ChunkSizeWithPaddingPow3);
-            bool customBlockMaskInitialized = false;
-            Vector3[] vecs = chunk.pools.Vector3ArrayPool.Pop(4);
+            Vector3[] vecs = chunk.pools.Vector3ArrayPool.PopExact(4);
 
             for (bool backFace = false, b = true; b!=backFace; backFace = true, b = !b)
             {
@@ -66,10 +66,8 @@ namespace Voxelmetric.Code.Builders.Geometry
                             dir = backFace ? Direction.south : Direction.north;
                             break;
                     }
-
-                    // Do not create faces facing downwards for blocks at the bottom of the world
-                    bool ignoreBottomFace = renderingRestricted && d==1 && backFace;
-
+                    
+                    
                     // Move through the dimension from front to back
                     for (x[d] = mins[d]-1; x[d]<=maxes[d];)
                     {
@@ -150,6 +148,8 @@ namespace Voxelmetric.Code.Builders.Geometry
                                 // Compute height
                                 int h = 1;
 
+                                bool buildSingleFace = true;
+
                                 BlockFace m = mask[n];
                                 if (m.block.Custom)
                                 {
@@ -170,12 +170,25 @@ namespace Voxelmetric.Code.Builders.Geometry
                                         customBlockMask[index] = true;
                                         m.block.BuildBlock(chunk, m.pos, m.block.RenderMaterialID);
                                     }
+
+                                    buildSingleFace = false;
                                 }
-                                else if (ignoreBottomFace && x[1]==0)
+                                else if (dir!=Direction.up && client.Listeners[(int)dir]==null)
                                 {
-                                    // Skip bottom faces at the bottom of the world
+                                    // Don't render faces on edges with no neighbor. Up face is the exception
+                                    if (dir==Direction.east && x[0]==Env.ChunkSize)
+                                        buildSingleFace = false;
+                                    else if (dir==Direction.west && x[0]==0)
+                                        buildSingleFace = false;
+                                    else if (dir==Direction.north && x[2]==Env.ChunkSize)
+                                        buildSingleFace = false;
+                                    else if (dir==Direction.south && x[2]==0)
+                                        buildSingleFace = false;
+                                    else if (dir==Direction.down && x[1]==0)
+                                        buildSingleFace = false;
                                 }
-                                else
+
+                                if(buildSingleFace)
                                 {
                                     // Prepare face coordinates and dimensions
                                     x[u] = i;

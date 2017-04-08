@@ -5,13 +5,14 @@
     /// </summary>
     public enum Direction
     {
-        up = 0,
-        down = 1,
+        up = 0, // front face
+        down = 1, // back face
+
         north = 2, // front face
         south = 3, // back face
-        east = 4,
-        west = 5,
 
+        east = 4, // front face
+        west = 5 // back face
     }
 
     public static class DirectionUtils

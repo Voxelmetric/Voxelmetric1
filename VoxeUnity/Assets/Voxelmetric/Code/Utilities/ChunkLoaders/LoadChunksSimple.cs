@@ -17,10 +17,10 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
     [RequireComponent(typeof (Camera))]
     public class LoadChunksSimple: MonoBehaviour, IChunkLoader
     {
-        private const int HorizontalMinRange = 2;
+        private const int HorizontalMinRange = 0;
         private const int HorizontalMaxRange = 32;
         private const int HorizontalDefRange = 6;
-        private const int VerticalMinRange = 2;
+        private const int VerticalMinRange = 0;
         private const int VerticalMaxRange = 32;
         private const int VerticalDefRange = 3;
 
@@ -286,18 +286,28 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
 
         public void PostProcessChunks()
         {
-            // No update necessary if there was no movement
-            if (m_viewerPos==m_viewerPosPrev)
-                return;
-
-            Profiler.BeginSample("PostProcessChunks");
-
             int minY = m_viewerPos.y-(VerticalChunkLoadRadius*Env.ChunkSize);
             int maxY = m_viewerPos.y+(VerticalChunkLoadRadius*Env.ChunkSize);
             world.CapCoordYInsideWorld(ref minY, ref maxY);
 
+            world.Bounds = new AABBInt(
+                m_viewerPos.x-(HorizontalChunkLoadRadius*Env.ChunkSize), minY,
+                m_viewerPos.z-(HorizontalChunkLoadRadius*Env.ChunkSize),
+                m_viewerPos.x+(HorizontalChunkLoadRadius*Env.ChunkSize), maxY,
+                m_viewerPos.z+(HorizontalChunkLoadRadius*Env.ChunkSize));
+            
+            int expectedChunks = m_chunkPositions.Length*((maxY-minY+Env.ChunkSize) /Env.ChunkSize);
+            
+            if (// No update necessary if there was no movement
+                m_viewerPos ==m_viewerPosPrev &&
+                // However, we need to make sure that we have enough chunks loaded
+                world.chunks.chunkCollection.Count>=expectedChunks)
+                return;
+
+            Profiler.BeginSample("PostProcessChunks");
+
             // Cycle through the array of positions
-            for (int y = maxY; y > minY; y -= Env.ChunkSize)
+            for (int y = maxY; y >= minY; y -= Env.ChunkSize)
             {
                 for (int i = 0; i < m_chunkPositions.Length; i++)
                 {
@@ -377,8 +387,8 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
             int yd = (m_viewerPos.y-chunk.pos.y)/Env.ChunkSize;
             int zd = (m_viewerPos.z-chunk.pos.z)/Env.ChunkSize;
 
-            int hRadius = HorizontalChunkLoadRadius+1;
-            int vRadius = VerticalChunkLoadRadius+1;
+            int hRadius = HorizontalChunkLoadRadius;
+            int vRadius = VerticalChunkLoadRadius;
             int xDist = xd*xd+zd*zd;
             int yDist = yd*yd;
 
@@ -408,11 +418,11 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
         {
             // Make sure horizontal ranges are always correct
             HorizontalChunkLoadRadius = Mathf.Max(HorizontalMinRange, HorizontalChunkLoadRadius);
-            HorizontalChunkLoadRadius = Mathf.Min(HorizontalMaxRange-1, HorizontalChunkLoadRadius);
+            HorizontalChunkLoadRadius = Mathf.Min(HorizontalMaxRange, HorizontalChunkLoadRadius);
 
             // Make sure vertical ranges are always correct
             VerticalChunkLoadRadius = Mathf.Max(VerticalMinRange, VerticalChunkLoadRadius);
-            VerticalChunkLoadRadius = Mathf.Min(VerticalMaxRange-1, VerticalChunkLoadRadius);
+            VerticalChunkLoadRadius = Mathf.Min(VerticalMaxRange, VerticalChunkLoadRadius);
 
             bool isDifferenceXZ = HorizontalChunkLoadRadius!=m_chunkHorizontalLoadRadiusPrev || m_chunkPositions==null;
             bool isDifferenceY = VerticalChunkLoadRadius!=m_chunkVerticalLoadRadiusPrev;
@@ -421,7 +431,7 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
 
             // Rebuild precomputed chunk positions
             if (isDifferenceXZ)
-                m_chunkPositions = ChunkLoadOrder.ChunkPositions(HorizontalChunkLoadRadius+1);
+                m_chunkPositions = ChunkLoadOrder.ChunkPositions(HorizontalChunkLoadRadius);
             // Invalidate prev pos so that updated ranges can take effect right away
             if (isDifferenceXZ || isDifferenceY ||
                 HorizontalChunkLoadRadius != m_chunkHorizontalLoadRadiusPrev ||
@@ -462,8 +472,9 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
                 {
                     if (Diag_DrawWorldBounds)
                     {
-                        // Make center chunks more apparent by using yellow color
-                        Gizmos.color = chunk.pos.z==0 || chunk.pos.y==0 || chunk.pos.z==0 ? Color.yellow : Color.blue;
+                        // Make central chunks more apparent by using yellow color
+                        bool isCentral = chunk.pos.x==m_viewerPos.x || chunk.pos.y==m_viewerPos.y || chunk.pos.z==m_viewerPos.z;
+                        Gizmos.color = isCentral ? Color.yellow : Color.blue;
                         Vector3 chunkCenter = new Vector3(
                             chunk.pos.x+(Env.ChunkSize>>1),
                             chunk.pos.y+(Env.ChunkSize>>1),
@@ -482,14 +493,6 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
                         if (dist<=HorizontalChunkLoadRadius*HorizontalChunkLoadRadius)
                         {
                             Gizmos.color = Color.green;
-                            Gizmos.DrawWireCube(
-                                new Vector3(chunk.pos.x+halfSize, 0, chunk.pos.z+halfSize),
-                                new Vector3(size-1f, 0, size-1f)
-                                );
-                        }
-                        else if (dist<=(HorizontalChunkLoadRadius+1)*(HorizontalChunkLoadRadius+1))
-                        {
-                            Gizmos.color = Color.grey;
                             Gizmos.DrawWireCube(
                                 new Vector3(chunk.pos.x+halfSize, 0, chunk.pos.z+halfSize),
                                 new Vector3(size-1f, 0, size-1f)

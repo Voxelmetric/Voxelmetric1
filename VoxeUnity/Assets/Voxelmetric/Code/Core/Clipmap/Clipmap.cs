@@ -5,24 +5,19 @@ namespace Voxelmetric.Code.Core.Clipmap
     public class Clipmap
     {
         private readonly AxisInfo[] m_axes;
-        private readonly int m_diffCachedVisibleRange;
 
         public int VisibleRange { get; private set; }
-        public int CachedRange { get; private set; }
         public int RangeYMin { get; private set; }
         public int RangeYMax { get; private set; }
 
-        public Clipmap(int visibleRange, int cachedRange, int rangeYMin, int rangeYMax)
+        public Clipmap(int visibleRange, int rangeYMin, int rangeYMax)
         {
             VisibleRange = visibleRange;
-            CachedRange = cachedRange;
 
-            m_diffCachedVisibleRange = CachedRange - VisibleRange;
-
-            if (rangeYMin < -CachedRange)
-                rangeYMin = -CachedRange;
-            if (rangeYMax > CachedRange)
-                rangeYMax = CachedRange;
+            if (rangeYMin < -visibleRange)
+                rangeYMin = -visibleRange;
+            if (rangeYMax > visibleRange)
+                rangeYMax = visibleRange;
 
             RangeYMin = rangeYMin;
             RangeYMax = rangeYMax;
@@ -31,24 +26,24 @@ namespace Voxelmetric.Code.Core.Clipmap
             {
                 new AxisInfo
                 {
-                    Map = new ClipmapItem[2*CachedRange+1],
+                    Map = new ClipmapItem[2*visibleRange+1],
                     Offset = 0,
-                    RangeMin = -CachedRange,
-                    RangeMax = CachedRange
+                    RangeMin = -visibleRange,
+                    RangeMax = visibleRange
                 },
                 new AxisInfo
                 {
-                    Map = new ClipmapItem[2*CachedRange+1],
+                    Map = new ClipmapItem[2*visibleRange+1],
                     Offset = 0,
                     RangeMin = -rangeYMin,
                     RangeMax = rangeYMax
                 },
                 new AxisInfo
                 {
-                    Map = new ClipmapItem[2*CachedRange+1],
+                    Map = new ClipmapItem[2*visibleRange+1],
                     Offset = 0,
-                    RangeMin = -CachedRange,
-                    RangeMax = CachedRange
+                    RangeMin = -visibleRange,
+                    RangeMax = visibleRange
                 }
             };
         }
@@ -105,7 +100,7 @@ namespace Voxelmetric.Code.Core.Clipmap
                 int lod = DetermineLOD(distance, forceLOD, coefLOD);
                 bool isInVisibilityRange = IsInVisibilityRange(axisInfo, distance);
 
-                axisInfo.Map[distance+CachedRange] = new ClipmapItem
+                axisInfo.Map[distance+VisibleRange] = new ClipmapItem
                 {
                     LOD = lod,
                     IsInVisibleRange = isInVisibilityRange
@@ -132,7 +127,7 @@ namespace Voxelmetric.Code.Core.Clipmap
             // Adjust the coordinate depending on the offset
             x + m_axes[0].Offset
             // Center them out
-            + CachedRange;
+            + VisibleRange;
         }
 
         public int TransformY(int y)
@@ -141,7 +136,7 @@ namespace Voxelmetric.Code.Core.Clipmap
             // Adjust the coordinate depending on the offset
             y + m_axes[1].Offset
             // Center them out
-            + CachedRange;
+            + VisibleRange;
         }
 
         public int TransformZ(int z)
@@ -150,7 +145,7 @@ namespace Voxelmetric.Code.Core.Clipmap
             // Adjust the coordinate depending on the offset
             z + m_axes[2].Offset
             // Center them out
-            + CachedRange;
+            + VisibleRange;
         }
 
         public bool IsInsideBounds_Transformed(int tx, int ty, int tz)
@@ -191,9 +186,7 @@ namespace Voxelmetric.Code.Core.Clipmap
 
         private bool IsInVisibilityRange(AxisInfo axis, int distance)
         {
-            int rangeMin = axis.RangeMin+m_diffCachedVisibleRange;
-            int rangeMax = axis.RangeMax-m_diffCachedVisibleRange;
-            return distance>=rangeMin && distance<=rangeMax;
+            return distance>=axis.RangeMin && distance<=axis.RangeMax;
         }
 
         private class AxisInfo

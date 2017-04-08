@@ -12,17 +12,22 @@ namespace Voxelmetric.Code.Core
         IEventSource<ChunkState>, IEventListener<ChunkState>,
         IEventSource<ChunkStateExternal>
     {
-        //! List of chunk listeners
-        public ChunkEvent[] Listeners { get; private set; }
         //! Number of registered listeners
         protected int ListenerCount { get; private set; }
+        protected int ListenerCountMax { get; set; }
 
         //! List of external listeners
         private readonly Dictionary<ChunkStateExternal, List<IEventListener<ChunkStateExternal>>> m_listenersExternal;
+        private readonly ChunkEvent[] m_listeners;
+        //! List of chunk listeners
+        public ChunkEvent[] Listeners
+        {
+            get { return m_listeners; }
+        }
 
         protected ChunkEvent()
         {
-            Listeners = Helpers.CreateArray1D<ChunkEvent>(6);
+            m_listeners = Helpers.CreateArray1D<ChunkEvent>(6);
             m_listenersExternal = new Dictionary<ChunkStateExternal, List<IEventListener<ChunkStateExternal>>>
             {
                 {ChunkStateExternal.Saved, new List<IEventListener<ChunkStateExternal>>()}
@@ -34,6 +39,8 @@ namespace Voxelmetric.Code.Core
         public void Clear()
         {
             ListenerCount = 0;
+            ListenerCountMax = 0;
+
             for (int i = 0; i < Listeners.Length; i++)
                 Listeners[i] = null;
 

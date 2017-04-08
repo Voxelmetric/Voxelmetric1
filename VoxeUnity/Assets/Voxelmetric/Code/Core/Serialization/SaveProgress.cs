@@ -3,6 +3,7 @@ using UnityEngine;
 using UnityEngine.Assertions;
 using Voxelmetric.Code.Common.Events;
 using Voxelmetric.Code.Core.StateManager;
+using Voxelmetric.Code.Data_types;
 
 namespace Voxelmetric.Code.Core.Serialization
 {
