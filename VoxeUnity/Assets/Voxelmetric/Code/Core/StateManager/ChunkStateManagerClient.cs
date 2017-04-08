@@ -917,6 +917,10 @@ namespace Voxelmetric.Code.Core.StateManager
 
             // Geometry needs to be rebuild
             stateManager.RequestState(ChunkState.BuildVertices);
+
+            // Collider might beed to be rebuild
+            if(chunk.NeedsCollider)
+                chunk.blocks.RequestCollider();
         }
 
         private void SubscribeNeighbors(bool subscribe)

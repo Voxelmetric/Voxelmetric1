@@ -1,5 +1,4 @@
-﻿using UnityEngine;
-using Voxelmetric.Code;
+﻿using Voxelmetric.Code;
 using Voxelmetric.Code.Core;
 using Voxelmetric.Code.Data_types;
 using Voxelmetric.Code.Load_Resources;

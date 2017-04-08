@@ -18,6 +18,7 @@ namespace Voxelmetric.Code.Builders.Geometry
         {
             ChunkBlocks blocks = chunk.blocks;
             ChunkStateManagerClient client = chunk.stateManager;
+            var pools = chunk.pools;
 
             int[] mins = {minX, minY, minZ};
             int[] maxes = {maxX, maxY, maxZ};
@@ -29,9 +30,9 @@ namespace Voxelmetric.Code.Builders.Geometry
 
             bool customBlockMaskInitialized = false;
 
-            BlockFace[] mask = chunk.pools.BlockFaceArrayPool.Pop(width * width);
-            bool[] customBlockMask = chunk.pools.BoolArrayPool.Pop(Env.ChunkSizeWithPaddingPow3);
-            Vector3[] vecs = chunk.pools.Vector3ArrayPool.PopExact(4);
+            BlockFace[] mask = pools.BlockFaceArrayPool.Pop(width * width);
+            bool[] customBlockMask = pools.BoolArrayPool.Pop(Env.ChunkSizeWithPaddingPow3);
+            Vector3[] vecs = pools.Vector3ArrayPool.PopExact(4);
 
             for (bool backFace = false, b = true; b!=backFace; backFace = true, b = !b)
             {
@@ -188,7 +189,7 @@ namespace Voxelmetric.Code.Builders.Geometry
                                         buildSingleFace = false;
                                 }
 
-                                if(buildSingleFace)
+                                if (buildSingleFace)
                                 {
                                     // Prepare face coordinates and dimensions
                                     x[u] = i;
@@ -242,9 +243,9 @@ namespace Voxelmetric.Code.Builders.Geometry
                 }
             }
 
-            chunk.pools.BlockFaceArrayPool.Push(mask);
-            chunk.pools.BoolArrayPool.Push(customBlockMask);
-            chunk.pools.Vector3ArrayPool.Push(vecs);
+            pools.BlockFaceArrayPool.Push(mask);
+            pools.BoolArrayPool.Push(customBlockMask);
+            pools.Vector3ArrayPool.Push(vecs);
         }
     }
 }

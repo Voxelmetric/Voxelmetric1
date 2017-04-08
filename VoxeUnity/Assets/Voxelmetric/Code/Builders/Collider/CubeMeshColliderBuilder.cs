@@ -3,6 +3,8 @@ using Voxelmetric.Code.Common;
 using Voxelmetric.Code.Common.MemoryPooling;
 using Voxelmetric.Code.Configurable.Blocks.Utilities;
 using Voxelmetric.Code.Core;
+using Voxelmetric.Code.Core.StateManager;
+using Voxelmetric.Code.Data_types;
 using Voxelmetric.Code.Rendering;
 
 namespace Voxelmetric.Code.Builders.Collider
@@ -17,18 +19,15 @@ namespace Voxelmetric.Code.Builders.Collider
 
         public void Build(Chunk chunk, int minX, int maxX, int minY, int maxY, int minZ, int maxZ)
         {
-            World world = chunk.world;
             ChunkBlocks blocks = chunk.blocks;
+            ChunkStateManagerClient client = chunk.stateManager;
             var pools = chunk.pools;
-
-            bool colliderRestricted = world.IsWorldCoordsRestricted() && chunk.pos.y==chunk.world.config.minY;
 
             int[] mins = {minX, minY, minZ};
             int[] maxes = {maxX, maxY, maxZ};
 
             int[] x = {0, 0, 0}; // Relative position of a block
-            int[] q = {0, 0, 0};
-            // Direction in which we compare neighbors when building mask (q[d] is our current direction)
+            int[] q = {0, 0, 0}; // Direction in which we compare neighbors when building mask (q[d] is our current direction)
             int[] du = {0, 0, 0}; // Width in a given dimension (du[u] is our current dimension)
             int[] dv = {0, 0, 0}; // Height in a given dimension (dv[v] is our current dimension)
 
@@ -54,7 +53,7 @@ namespace Voxelmetric.Code.Builders.Collider
                     q[2] = 0;
                     q[d] = stepSize;
 
-                    /*// Determine which side we're meshing
+                    // Determine which side we're meshing
                     Direction dir = 0;
                     switch (d)
                     {
@@ -67,11 +66,8 @@ namespace Voxelmetric.Code.Builders.Collider
                         case 2:
                             dir = backFace ? Direction.south : Direction.north;
                             break;
-                    }*/
-
-                    // Do not create faces facing downwards for blocks at the bottom of the world
-                    bool ignoreBottomFace = colliderRestricted && d==1 && backFace;
-
+                    }
+                    
                     // Move through the dimension from front to back
                     for (x[d] = mins[d]-1; x[d]<=maxes[d];)
                     {
@@ -158,11 +154,24 @@ namespace Voxelmetric.Code.Builders.Collider
                                         break;
                                 }
 
-                                if (ignoreBottomFace && x[1]==0)
+                                bool buildSingleFace = true;
+
+                                if (dir != Direction.up && client.Listeners[(int)dir] == null)
                                 {
-                                    // Skip bottom faces at the bottom of the world
+                                    // Don't render faces on edges with no neighbor. Up face is the exception
+                                    if (dir == Direction.east && x[0] == Env.ChunkSize)
+                                        buildSingleFace = false;
+                                    else if (dir == Direction.west && x[0] == 0)
+                                        buildSingleFace = false;
+                                    else if (dir == Direction.north && x[2] == Env.ChunkSize)
+                                        buildSingleFace = false;
+                                    else if (dir == Direction.south && x[2] == 0)
+                                        buildSingleFace = false;
+                                    else if (dir == Direction.down && x[1] == 0)
+                                        buildSingleFace = false;
                                 }
-                                else
+
+                                if (buildSingleFace)
                                 {
                                     // Prepare face coordinates and dimensions
                                     x[u] = i;
