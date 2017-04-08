@@ -13,7 +13,7 @@ public class CubeBlock: SolidBlock
         get { return ((CubeBlockConfig)Config).textures; }
     }
 
-    public override void BuildFace(Chunk chunk, Vector3Int localPos, Vector3[] vertices, Direction direction)
+    public override void BuildFace(Chunk chunk, Vector3Int localPos, Vector3[] vertices, Direction direction, int materialID)
     {
         bool backface = DirectionUtils.IsBackface(direction);
 
@@ -40,7 +40,7 @@ public class CubeBlock: SolidBlock
 
             for (int i = 0; i < 4; i++)
                 vertexDataFixed[i] = VertexDataUtils.ClassToStruct(vertexData[i]);
-            chunk.GeometryHandler.Batcher.AddFace(vertexDataFixed, backface);
+            chunk.GeometryHandler.Batcher.AddFace(vertexDataFixed, backface, materialID);
 
             for (int i = 0; i < 4; i++)
                 chunk.pools.VertexDataPool.Push(vertexData[i]);

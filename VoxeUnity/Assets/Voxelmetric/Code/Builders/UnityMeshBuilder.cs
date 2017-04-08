@@ -18,7 +18,7 @@ namespace Voxelmetric.Code.Builders
             Vector2[] uvs = pools.Vector2ArrayPool.Pop(size);
             Color32[] colors = pools.Color32ArrayPool.Pop(size);
             Vector3[] normals = pools.Vector3ArrayPool.Pop(size);
-            Vector4[] tangents = pools.Vector4ArrayPool.Pop(size);
+            //Vector4[] tangents = pools.Vector4ArrayPool.Pop(size);
 
             // Fill buffers with data
             for (int i = 0; i<size; i++)
@@ -28,7 +28,7 @@ namespace Voxelmetric.Code.Builders
                 uvs[i] = vertexData.UV;
                 colors[i] = vertexData.Color;
                 normals[i] = vertexData.Normal;
-                tangents[i] = vertexData.Tangent;
+                //tangents[i] = vertexData.Tangent;
             }
 
             // Due to the way the memory pools work we might have received more
@@ -40,7 +40,7 @@ namespace Voxelmetric.Code.Builders
                 uvs[i] = Vector2.zero;
                 colors[i] = Color.clear;
                 normals[i] = Vector3.zero;
-                tangents[i] = Vector4.zero;
+                //tangents[i] = Vector4.zero;
             }
 
             // Prepare mesh
@@ -48,7 +48,7 @@ namespace Voxelmetric.Code.Builders
             mesh.uv = uvs;
             mesh.colors32 = colors;
             mesh.normals = normals;
-            mesh.tangents = tangents;
+            mesh.tangents = null;//tangents;
             mesh.SetTriangles(buffer.Triangles, 0);
             mesh.RecalculateNormals();
 
@@ -57,7 +57,7 @@ namespace Voxelmetric.Code.Builders
             pools.Vector2ArrayPool.Push(uvs);
             pools.Color32ArrayPool.Push(colors);
             pools.Vector3ArrayPool.Push(normals);
-            pools.Vector4ArrayPool.Push(tangents);
+            //pools.Vector4ArrayPool.Push(tangents);
         }
 
         /// <summary>

@@ -28,7 +28,5 @@
     "westXOffset": "-0.5",
 
     "raycastHitOnRemoval": true,
-    "raycastHit": true,
-    
-    "material": "ChunkColorUV"
+    "raycastHit": true
 }

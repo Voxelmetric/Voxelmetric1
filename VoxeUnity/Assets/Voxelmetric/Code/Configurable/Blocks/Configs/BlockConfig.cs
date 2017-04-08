@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections;
+using System.Linq;
 using UnityEngine;
 using Voxelmetric.Code.Core;
 
@@ -42,6 +43,8 @@ public class BlockConfig
     public bool canBeWalkedThrough { get; protected set; }
     public bool raycastHit { get; protected set; }
     public bool raycastHitOnRemoval { get; protected set; }
+    public int renderMaterialID { get; protected set; }
+    public int physicMaterialID { get; protected set; }
 
     public bool custom { get; protected set; }
 
@@ -88,8 +91,7 @@ public class BlockConfig
             }
             typeInConfig = (ushort)tmpTypeInConfig;
         }
-
-
+        
         // Optional parameters
         {
             className = _GetPropertyFromConfig(config, "blockClass", "Block");
@@ -100,6 +102,30 @@ public class BlockConfig
             raycastHit = _GetPropertyFromConfig(config, "raycastHit", solid);
             raycastHitOnRemoval = _GetPropertyFromConfig(config, "raycastHitOnRemoval", solid);
             custom = _GetPropertyFromConfig(config, "custom", false);
+
+            // Try to associate requested render materials with one of world's materials
+            {
+                renderMaterialID = 0;
+                string materialName = _GetPropertyFromConfig(config, "material", "");
+                for (int i = 0; i<world.renderMaterials.Length; i++)
+                    if (world.renderMaterials[i].name.Equals(materialName))
+                    {
+                        renderMaterialID = i;
+                        break;
+                    }
+            }
+
+            // Try to associate requested physic materials with one of world's materials
+            {
+                physicMaterialID = 0;
+                string materialName = _GetPropertyFromConfig(config, "materialPx", "");
+                for (int i = 0; i < world.physicsMaterials.Length; i++)
+                    if (world.physicsMaterials[i].name.Equals(materialName))
+                    {
+                        physicMaterialID = i;
+                        break;
+                    }
+            }
         }
 
         return true;

@@ -11,7 +11,7 @@ public class ColoredBlock : SolidBlock
         get { return ((ColoredBlockConfig)Config).colors; }
     }
 
-    public override void BuildFace(Chunk chunk, Vector3Int localPos, Vector3[] vertices, Direction direction)
+    public override void BuildFace(Chunk chunk, Vector3Int localPos, Vector3[] vertices, Direction direction, int materialID)
     {
         bool backFace = DirectionUtils.IsBackface(direction);
 
@@ -43,7 +43,7 @@ public class ColoredBlock : SolidBlock
 
             for (int i = 0; i<4; i++)
                 vertexDataFixed[i]= VertexDataUtils.ClassToStruct(vertexData[i]);
-            chunk.GeometryHandler.Batcher.AddFace(vertexDataFixed, backFace);
+            chunk.GeometryHandler.Batcher.AddFace(vertexDataFixed, backFace, materialID);
 
             for (int i = 0; i < 4; i++)
                 chunk.pools.VertexDataPool.Push(vertexData[i]);

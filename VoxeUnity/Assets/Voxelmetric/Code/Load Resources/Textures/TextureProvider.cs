@@ -8,10 +8,9 @@ namespace Voxelmetric.Code.Load_Resources.Textures
         WorldConfig config;
         TextureConfig[] configs;
 
-        // Texture atlas
+        //! Texture atlas
         public readonly Dictionary<string, TextureCollection> textures;
-
-        [HideInInspector]
+        //! Texture atlas
         public Texture2D atlas;
 
         public static TextureProvider Create(WorldConfig config)

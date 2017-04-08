@@ -1,4 +1,5 @@
-﻿using Voxelmetric.Code.Rendering.GeometryHandler;
+﻿using UnityEngine;
+using Voxelmetric.Code.Rendering.GeometryHandler;
 
 namespace Voxelmetric.Code.Core.GeometryHandler
 {
@@ -7,7 +8,7 @@ namespace Voxelmetric.Code.Core.GeometryHandler
         private const string PoolEntryName = "Collidable";
         private readonly Chunk chunk;
 
-        public ChunkColliderGeometryHandler(Chunk chunk): base(PoolEntryName)
+        public ChunkColliderGeometryHandler(Chunk chunk, PhysicMaterial[] materials): base(PoolEntryName, materials)
         {
             this.chunk = chunk;
         }
@@ -22,7 +23,7 @@ namespace Voxelmetric.Code.Core.GeometryHandler
         {
             Batcher.Commit(
                 chunk.world.transform.rotation*chunk.pos+chunk.world.transform.position,
-                chunk.world.transform.rotation, chunk.world.physicsMaterial
+                chunk.world.transform.rotation
 #if DEBUG
                 , chunk.pos+"C"
 #endif

@@ -8,7 +8,7 @@ namespace Voxelmetric.Code.Configurable.Blocks.Utilities
 {
     public static class MeshUtils {
 
-        public static void BuildCrossMesh(Chunk chunk, Vector3Int localPos, TextureCollection texture, bool useOffset = true)
+        public static void BuildCrossMesh(Chunk chunk, Vector3Int localPos, TextureCollection texture, bool useOffset, int materialID)
         {
             float halfBlock = (Env.BlockSize / 2) + Env.BlockFacePadding;
 
@@ -56,7 +56,7 @@ namespace Voxelmetric.Code.Configurable.Blocks.Utilities
 
                 for (int i = 0; i<4; i++)
                     vertexDataFixed[i] = VertexDataUtils.ClassToStruct(vertexData[i]);
-                chunk.GeometryHandler.Batcher.AddFace(vertexDataFixed, false);
+                chunk.GeometryHandler.Batcher.AddFace(vertexDataFixed, false, materialID);
             }
             {
                 vertexData[0].Vertex = new Vector3(vPos.x+halfBlock, vPos.y-halfBlock, vPos.z-halfBlock);
@@ -68,7 +68,7 @@ namespace Voxelmetric.Code.Configurable.Blocks.Utilities
 
                 for (int i = 0; i<4; i++)
                     vertexDataFixed[i] = VertexDataUtils.ClassToStruct(vertexData[i]);
-                chunk.GeometryHandler.Batcher.AddFace(vertexDataFixed, false);
+                chunk.GeometryHandler.Batcher.AddFace(vertexDataFixed, false, materialID);
             }
             {
                 vertexData[0].Vertex = new Vector3(vPos.x+halfBlock, vPos.y-halfBlock, vPos.z+halfBlock);
@@ -80,7 +80,7 @@ namespace Voxelmetric.Code.Configurable.Blocks.Utilities
 
                 for (int i = 0; i<4; i++)
                     vertexDataFixed[i] = VertexDataUtils.ClassToStruct(vertexData[i]);
-                chunk.GeometryHandler.Batcher.AddFace(vertexDataFixed, false);
+                chunk.GeometryHandler.Batcher.AddFace(vertexDataFixed, false, materialID);
             }
             {
                 vertexData[0].Vertex = new Vector3(vPos.x-halfBlock, vPos.y-halfBlock, vPos.z-halfBlock);
@@ -92,7 +92,7 @@ namespace Voxelmetric.Code.Configurable.Blocks.Utilities
 
                 for (int i = 0; i<4; i++)
                     vertexDataFixed[i] = VertexDataUtils.ClassToStruct(vertexData[i]);
-                chunk.GeometryHandler.Batcher.AddFace(vertexDataFixed, false);
+                chunk.GeometryHandler.Batcher.AddFace(vertexDataFixed, false, materialID);
             }
             chunk.pools.VertexDataFixedArrayPool.Push(vertexDataFixed);
             for (int i = 0; i < 4; i++)

@@ -89,9 +89,6 @@ namespace Voxelmetric.Code.Core
 
             stateManager = new ChunkStateManagerClient(this);
             blocks = new ChunkBlocks(this);
-            
-            GeometryHandler = new ChunkRenderGeometryHandler(this);
-            ChunkColliderGeometryHandler = new ChunkColliderGeometryHandler(this);
         }
 
         private void Init(World world, Vector3Int pos)
@@ -101,6 +98,11 @@ namespace Voxelmetric.Code.Core
 
             stateManager = new ChunkStateManagerClient(this);
             logic = world.config.randomUpdateFrequency>0.0f ? new ChunkLogic(this) : null;
+
+            if(GeometryHandler==null)
+                GeometryHandler = new ChunkRenderGeometryHandler(this, world.renderMaterials);
+            if(ChunkColliderGeometryHandler==null)
+                ChunkColliderGeometryHandler = new ChunkColliderGeometryHandler(this, world.physicsMaterials);
 
             WorldBounds = new AABB(
                 pos.x, pos.y, pos.z,

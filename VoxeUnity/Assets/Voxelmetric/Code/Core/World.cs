@@ -23,8 +23,8 @@ namespace Voxelmetric.Code.Core
         public TextureProvider textureProvider;
         public TerrainGen terrainGen;
 
-        public Material renderMaterial;
-        public PhysicMaterial physicsMaterial;
+        public Material [] renderMaterials;
+        public PhysicMaterial [] physicsMaterials;
 
         void Awake()
         {
@@ -54,7 +54,10 @@ namespace Voxelmetric.Code.Core
             textureProvider = Voxelmetric.resources.GetTextureProvider(this);
             blockProvider = Voxelmetric.resources.GetBlockProvider(this);
 
-            renderMaterial.mainTexture = textureProvider.atlas;
+            foreach (var renderMaterial in renderMaterials)
+            {
+                renderMaterial.mainTexture = textureProvider.atlas;
+            }
         }
 
         private void VerifyConfig()

@@ -9,8 +9,13 @@ namespace Voxelmetric.Code.Rendering.GeometryBatcher
     public class ColliderGeometryBatcher: IGeometryBatcher<PhysicMaterial>
     {
         private readonly string m_prefabName;
-        private readonly List<GeometryBuffer> m_buffers;
+        //! Materials our meshes are to use
+        private readonly PhysicMaterial[] m_materials;
+        //! A list of buffers for each material
+        private readonly List<GeometryBuffer>[] m_buffers;
+        //! GameObjects used to hold our geometry
         private readonly List<GameObject> m_objects;
+        //! A list of renderer used to render our geometry
         private readonly List<Collider> m_colliders;
 
         private bool m_enabled;
@@ -32,14 +37,28 @@ namespace Voxelmetric.Code.Rendering.GeometryBatcher
             }
         }
 
-        public ColliderGeometryBatcher(string prefabName)
+        public ColliderGeometryBatcher(string prefabName, PhysicMaterial[] materials)
         {
             m_prefabName = prefabName;
-            m_buffers = new List<GeometryBuffer>(1)
+            m_materials = materials;
+
+            int buffersLen = (materials==null || materials.Length<1) ? 1 : materials.Length;
+            m_buffers = new List<GeometryBuffer>[buffersLen];
+            for (int i = 0; i < m_buffers.Length; i++)
             {
-                // Default render buffer
-                new GeometryBuffer()
-            };
+                /* TODO: Let's be optimistic and allocate enough room for just one buffer. It's going to suffice
+                 * in >99% of cases. However, this prediction should maybe be based on chunk size rather then
+                 * optimism. The bigger the chunk the more likely we're going to need to create more meshes to
+                 * hold its geometry because of Unity's 65k-vertices limit per mesh. For chunks up to 32^3 big
+                 * this should not be an issue, though.
+                 */
+                m_buffers[i] = new List<GeometryBuffer>(1)
+                {
+                    // Default render buffer
+                    new GeometryBuffer()
+                };
+            }
+
             m_objects = new List<GameObject>();
             m_colliders = new List<Collider>();
 
@@ -51,11 +70,10 @@ namespace Voxelmetric.Code.Rendering.GeometryBatcher
         /// </summary>
         public void Clear()
         {
-            for (int i = 0; i<m_buffers.Count; i++)
+            foreach (var holder in m_buffers)
             {
-                GeometryBuffer buffer = m_buffers[i];
-                if (!buffer.IsEmpty())
-                    m_buffers[i].Clear();
+                for (int i = 0; i < holder.Count; i++)
+                    holder[i].Clear();
             }
 
             ReleaseOldData();
@@ -67,17 +85,18 @@ namespace Voxelmetric.Code.Rendering.GeometryBatcher
         ///     Addds one face to our render buffer
         /// </summary>
         /// <param name="vertexData"> An array of 4 vertices forming the face</param>
-        public void AddFace(VertexDataFixed[] vertexData, bool backFace)
+        public void AddFace(VertexDataFixed[] vertexData, bool backFace, int materialID=0)
         {
-            Assert.IsTrue(vertexData.Length>=4);
+            Assert.IsTrue(vertexData.Length == 4);
 
-            GeometryBuffer buffer = m_buffers[m_buffers.Count-1];
+            List<GeometryBuffer> holder = m_buffers[materialID];
+            GeometryBuffer buffer = holder[holder.Count - 1];
 
             // If there are too many vertices we need to create a new separate buffer for them
-            if (buffer.Vertices.Count+4>65000)
+            if (buffer.Vertices.Count + 4 > 65000)
             {
                 buffer = new GeometryBuffer();
-                m_buffers.Add(buffer);
+                holder.Add(buffer);
             }
 
             // Add data to the render buffer
@@ -91,55 +110,60 @@ namespace Voxelmetric.Code.Rendering.GeometryBatcher
         /// <summary>
         ///     Finalize the draw calls
         /// </summary>
-        public void Commit(Vector3 position, Quaternion rotation, PhysicMaterial material
+        public void Commit(Vector3 position, Quaternion rotation
 #if DEBUG
             , string debugName = null
 #endif
             )
         {
             ReleaseOldData();
-
-            // No data means there's no mesh to build
-            if (m_buffers[0].IsEmpty())
-                return;
-
-            for (int i = 0; i<m_buffers.Count; i++)
+            
+            for (int j = 0; j<m_buffers.Length; j++)
             {
-                GeometryBuffer buffer = m_buffers[i];
+                var holder = m_buffers[j];
 
-                // Create a game object for collider. Unfortunatelly, we can't use object pooling
-                // here for otherwise, unity would have to rebake because of change in object position
-                // and that is very time consuming.
-                GameObject prefab = GameObjectProvider.GetPool(m_prefabName).Prefab;
-                GameObject go = Object.Instantiate(prefab);
-                go.transform.parent = GameObjectProvider.Instance.ProviderGameObject.transform;
-
+                for (int i = 0; i< holder.Count; i++)
                 {
-#if DEBUG
-                    if (!string.IsNullOrEmpty(debugName))
+                    GeometryBuffer buffer = holder[i];
+
+                    // No data means there's no mesh to build
+                    if (buffer.IsEmpty())
+                        continue;
+
+                    // Create a game object for collider. Unfortunatelly, we can't use object pooling
+                    // here for otherwise, unity would have to rebake because of change in object position
+                    // and that is very time consuming.
+                    GameObject prefab = GameObjectProvider.GetPool(m_prefabName).Prefab;
+                    GameObject go = Object.Instantiate(prefab);
+                    go.transform.parent = GameObjectProvider.Instance.ProviderGameObject.transform;
+
                     {
-                        go.name = debugName;
-                        if (i>0)
-                            go.name = go.name+"_"+i;
-                    }
+#if DEBUG
+                        if (!string.IsNullOrEmpty(debugName))
+                        {
+                            go.name = debugName;
+                            if (i>0)
+                                go.name = go.name+"_"+i;
+                        }
 #endif
 
-                    Mesh mesh = Globals.MemPools.MeshPool.Pop();
-                    Assert.IsTrue(mesh.vertices.Length<=0);
-                    UnityMeshBuilder.BuildColliderMesh(mesh, buffer);
+                        Mesh mesh = Globals.MemPools.MeshPool.Pop();
+                        Assert.IsTrue(mesh.vertices.Length<=0);
+                        UnityMeshBuilder.BuildColliderMesh(mesh, buffer);
 
-                    MeshCollider collider = go.GetComponent<MeshCollider>();
-                    collider.sharedMesh = null;
-                    collider.sharedMesh = mesh;
-                    collider.transform.position = position;
-                    collider.transform.rotation = rotation;
-                    collider.sharedMaterial = material;
+                        MeshCollider collider = go.GetComponent<MeshCollider>();
+                        collider.sharedMesh = null;
+                        collider.sharedMesh = mesh;
+                        collider.transform.position = position;
+                        collider.transform.rotation = rotation;
+                        collider.sharedMaterial = (m_materials==null || m_materials.Length<1) ? null : m_materials[j];
 
-                    m_objects.Add(go);
-                    m_colliders.Add(collider);
+                        m_objects.Add(go);
+                        m_colliders.Add(collider);
+                    }
+
+                    buffer.Clear();
                 }
-
-                buffer.Clear();
             }
         }
         

@@ -14,6 +14,8 @@ public class Block
     public bool CanBeWalkedOn;
     public bool CanBeWalkedThrough;
     public bool Custom;
+    public int RenderMaterialID;
+    public int PhysicMaterialID;
 
     public Block()
     {
@@ -31,6 +33,9 @@ public class Block
         CanBeWalkedOn = config.canBeWalkedOn;
         CanBeWalkedThrough = config.canBeWalkedThrough;
         Custom = config.custom;
+
+        RenderMaterialID = config.renderMaterialID;
+        PhysicMaterialID = config.physicMaterialID;
     }
     
     public virtual string DisplayName
@@ -42,13 +47,14 @@ public class Block
     {
     }
 
-    public virtual void BuildBlock(Chunk chunk, Vector3Int localpos)
+    public virtual void BuildBlock(Chunk chunk, Vector3Int localpos, int materialID)
     {
     }
 
     public virtual bool CanBuildFaceWith(Block adjacentBlock)
     {
-        return Config.custom; // custom blocks will be considered as able to create face with others by default
+        return Config.custom // custom blocks will be considered as able to create face with others by default
+               && RenderMaterialID==adjacentBlock.RenderMaterialID;
     }
 
     public virtual bool CanMergeFaceWith(Block adjacentBlock)
@@ -56,7 +62,7 @@ public class Block
         return false;
     }
 
-    public virtual void BuildFace(Chunk chunk, Vector3Int localPos, Vector3[] vertices, Direction dir)
+    public virtual void BuildFace(Chunk chunk, Vector3Int localPos, Vector3[] vertices, Direction dir, int materialID)
     {
     }
 

@@ -7,7 +7,8 @@ namespace Voxelmetric.Code.Load_Resources.Textures
 {
     public class TextureCollection
     {
-        public string textureName;
+        public readonly string textureName;
+
         private bool usesConnectedTextures = false;
         private readonly Rect[] connectedTextures = new Rect[48];
         private readonly List<Rect> textures = new List<Rect>();

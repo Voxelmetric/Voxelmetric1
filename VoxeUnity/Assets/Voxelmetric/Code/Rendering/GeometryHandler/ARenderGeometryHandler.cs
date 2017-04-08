@@ -1,4 +1,5 @@
-﻿using Voxelmetric.Code.Rendering.GeometryBatcher;
+﻿using UnityEngine;
+using Voxelmetric.Code.Rendering.GeometryBatcher;
 
 namespace Voxelmetric.Code.Rendering.GeometryHandler
 {
@@ -6,9 +7,9 @@ namespace Voxelmetric.Code.Rendering.GeometryHandler
     {
         public RenderGeometryBatcher Batcher { get; private set; }
 
-        protected ARenderGeometryHandler(string prefabName)
+        protected ARenderGeometryHandler(string prefabName, Material[] materials)
         {
-            Batcher = new RenderGeometryBatcher(prefabName);
+            Batcher = new RenderGeometryBatcher(prefabName, materials);
         }
 
         public void Reset()

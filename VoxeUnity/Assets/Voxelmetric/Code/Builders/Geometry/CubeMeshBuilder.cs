@@ -168,7 +168,7 @@ namespace Voxelmetric.Code.Builders.Geometry
                                     if (customBlockMask[index]==false)
                                     {
                                         customBlockMask[index] = true;
-                                        m.block.BuildBlock(chunk, m.pos);
+                                        m.block.BuildBlock(chunk, m.pos, m.block.RenderMaterialID);
                                     }
                                 }
                                 else if (ignoreBottomFace && x[1]==0)
@@ -207,7 +207,7 @@ namespace Voxelmetric.Code.Builders.Geometry
                                         vecs[3] = new Vector3(x[0]+dv[0], x[1]+dv[1], x[2]+dv[2])-BlockUtils.HalfBlockVector;
                                     }
 
-                                    m.block.BuildFace(chunk, m.pos, vecs, m.side);
+                                    m.block.BuildFace(chunk, m.pos, vecs, m.side, m.block.RenderMaterialID);
                                 }
 
                                 // Zero out the mask

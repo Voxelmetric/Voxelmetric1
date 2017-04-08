@@ -1,4 +1,5 @@
-﻿using Voxelmetric.Code.Rendering.GeometryBatcher;
+﻿using UnityEngine;
+using Voxelmetric.Code.Rendering.GeometryBatcher;
 
 namespace Voxelmetric.Code.Rendering.GeometryHandler
 {
@@ -6,9 +7,9 @@ namespace Voxelmetric.Code.Rendering.GeometryHandler
     {
         public ColliderGeometryBatcher Batcher { get; private set; }
 
-        protected AColliderGeometryHandler(string prefabName)
+        protected AColliderGeometryHandler(string prefabName, PhysicMaterial[] materials)
         {
-            Batcher = new ColliderGeometryBatcher(prefabName);
+            Batcher = new ColliderGeometryBatcher(prefabName, materials);
         }
 
         public void Reset()

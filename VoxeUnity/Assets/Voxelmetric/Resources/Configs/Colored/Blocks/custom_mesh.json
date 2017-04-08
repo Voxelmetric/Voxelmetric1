@@ -9,5 +9,5 @@
     "raycastHitOnRemoval": true,
     "raycastHit": true,
     "custom": true,
-    "material": "ChunkColorUV"
+    "material": "pyramidMat"
 }

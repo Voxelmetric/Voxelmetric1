@@ -11,7 +11,7 @@ public class SolidBlock : Block
         return Solid || adjacentBlock.Type!=Type;
     }
 
-    public override void BuildBlock(Chunk chunk, Vector3Int localPos)
+    public override void BuildBlock(Chunk chunk, Vector3Int localPos, int materialID)
     {
         ChunkBlocks blocks = chunk.blocks;
 
@@ -20,7 +20,7 @@ public class SolidBlock : Block
             Direction dir = DirectionUtils.Get(d);
             Block adjacentBlock = blocks.GetBlock(localPos.Add(dir));
             if (CanBuildFaceWith(adjacentBlock))
-                BuildFace(chunk, localPos, null, dir);
+                BuildFace(chunk, localPos, null, dir, materialID);
         }
     }
 }

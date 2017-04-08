@@ -23,7 +23,7 @@ public class ConnectedMeshBlock: CustomMeshBlock
         }
     }
 
-    public override void BuildFace(Chunk chunk, Vector3Int localPos, Vector3[] vertices, Direction dir)
+    public override void BuildFace(Chunk chunk, Vector3Int localPos, Vector3[] vertices, Direction dir, int materialID)
     {
         if (!connectedMeshConfig.directionalTris.ContainsKey(dir))
             return;
@@ -35,7 +35,7 @@ public class ConnectedMeshBlock: CustomMeshBlock
         if (connectedMeshConfig.connectsToSolid && blocks.Get(localPos + dir).Solid)
         {
             texture = connectedMeshConfig.texture.GetTexture(chunk, localPos, dir);
-            batcher.AddMeshData(connectedMeshConfig.directionalTris[dir], connectedMeshConfig.directionalVerts[dir], texture, localPos);
+            batcher.AddMeshData(connectedMeshConfig.directionalTris[dir], connectedMeshConfig.directionalVerts[dir], texture, localPos, materialID);
         }
         else if (connectedMeshConfig.connectsToTypes.Length!=0)
         {
@@ -45,26 +45,26 @@ public class ConnectedMeshBlock: CustomMeshBlock
                 if (neighborType==connectedMeshConfig.connectsToTypes[i])
                 {
                     texture = connectedMeshConfig.texture.GetTexture(chunk, localPos, dir);
-                    batcher.AddMeshData(connectedMeshConfig.directionalTris[dir], connectedMeshConfig.directionalVerts[dir], texture, localPos);
+                    batcher.AddMeshData(connectedMeshConfig.directionalTris[dir], connectedMeshConfig.directionalVerts[dir], texture, localPos, materialID);
                     break;
                 }
             }
         }
 
         texture = customMeshConfig.texture.GetTexture(chunk, localPos, Direction.down);
-        batcher.AddMeshData(customMeshConfig.tris, customMeshConfig.verts, texture, localPos);
+        batcher.AddMeshData(customMeshConfig.tris, customMeshConfig.verts, texture, localPos, materialID);
     }
 
-    public override void BuildBlock(Chunk chunk, Vector3Int localPos)
+    public override void BuildBlock(Chunk chunk, Vector3Int localPos, int materialID)
     {
         for (int d = 0; d<6; d++)
         {
             Direction dir = DirectionUtils.Get(d);
-            BuildFace(chunk, localPos, null, dir);
+            BuildFace(chunk, localPos, null, dir, materialID);
         }
 
         Rect texture = customMeshConfig.texture.GetTexture(chunk, localPos, Direction.down);
         RenderGeometryBatcher batcher = chunk.GeometryHandler.Batcher;
-        batcher.AddMeshData(customMeshConfig.tris, customMeshConfig.verts, texture, localPos);
+        batcher.AddMeshData(customMeshConfig.tris, customMeshConfig.verts, texture, localPos, materialID);
     }
 }

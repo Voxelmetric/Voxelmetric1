@@ -7,13 +7,13 @@ public class CustomMeshBlock : Block {
 
     public CustomMeshBlockConfig customMeshConfig { get { return (CustomMeshBlockConfig)Config; } }
 
-    public override void BuildBlock(Chunk chunk, Vector3Int localPos)
+    public override void BuildBlock(Chunk chunk, Vector3Int localPos, int materialID)
     {
         Rect texture = customMeshConfig.texture!=null
                            ? customMeshConfig.texture.GetTexture(chunk, localPos, Direction.down)
                            : new Rect();
 
         RenderGeometryBatcher batcher = chunk.GeometryHandler.Batcher;
-        batcher.AddMeshData(customMeshConfig.tris, customMeshConfig.verts, texture, localPos);
+        batcher.AddMeshData(customMeshConfig.tris, customMeshConfig.verts, texture, localPos, materialID);
     }
 }
