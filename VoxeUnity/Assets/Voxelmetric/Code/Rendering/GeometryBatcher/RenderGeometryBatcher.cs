@@ -80,6 +80,14 @@ namespace Voxelmetric.Code.Rendering.GeometryBatcher
             m_enabled = false;
         }
 
+        /// <summary>
+        ///     Addds one face to our render buffer
+        /// </summary>
+        /// <param name="tris">Triangles to be processed</param>
+        /// <param name="verts">Vertices to be processed</param>
+        /// <param name="texture">Texture coordinates</param>
+        /// <param name="offset">Offset to apply to verts</param>
+        /// <param name="materialID">ID of material to use when building the mesh</param>
         public void AddMeshData(int[] tris, VertexDataFixed[] verts, Rect texture, Vector3 offset, int materialID)
         {
             List<GeometryBuffer> holder = m_buffers[materialID];
@@ -120,6 +128,7 @@ namespace Voxelmetric.Code.Rendering.GeometryBatcher
         /// </summary>
         /// <param name="vertexData"> An array of 4 vertices forming the face</param>
         /// <param name="backFace">If false, vertices are added clock-wise</param>
+        /// <param name="materialID">ID of material to use when building the mesh</param>
         public void AddFace(VertexDataFixed[] vertexData, bool backFace, int materialID)
         {
             Assert.IsTrue(vertexData.Length==4);
