@@ -98,6 +98,9 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
         
         private void UpdateVisibility(int x, int y, int z, int rangeX, int rangeY, int rangeZ)
         {
+            if (rangeX==0 || rangeY==0 || rangeZ==0)
+                return;
+
             bool isLast = rangeX==1 && rangeY==1 && rangeZ==1;
             
             int wx = x*Env.ChunkSize;
@@ -132,11 +135,11 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
 
                 return;
             }
-
+            
             int rx = rangeX*Env.ChunkSize;
             int ry = rangeY*Env.ChunkSize;
             int rz = rangeZ*Env.ChunkSize;
-            
+
             /*AABB bounds2 = new AABB(wx, wy, wz, wx+rx, wy+ry, wz+rz);
             int inside = 0;
 
@@ -230,26 +233,18 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
                 offX = rangeX>>1;
                 rangeX = (rangeX+1)>>1; // ceil the number
             }
-            else if(rangeX==0)
-                return;
-
             int offY = rangeY;
             if (rangeY>1)
             {
                 offY = rangeY>>1;
                 rangeY = (rangeY+1)>>1; // ceil the number
             }
-            else if (rangeY==0)
-                return;
-
             int offZ = rangeZ;
             if (rangeZ>1)
             {
                 offZ = rangeZ>>1;
                 rangeZ = (rangeZ+1)>>1; // ceil the number
             }
-            else if (rangeZ==0)
-                return;
 
             // Subdivide if possible
             // TODO: Avoid the recursion
