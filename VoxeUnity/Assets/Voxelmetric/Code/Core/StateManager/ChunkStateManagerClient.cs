@@ -25,7 +25,17 @@ namespace Voxelmetric.Code.Core.StateManager
             }
             set
             {
-                chunk.GeometryHandler.Batcher.Enabled = value;
+                var batcher = chunk.GeometryHandler.Batcher;
+                bool prev = batcher.Enabled;
+
+                if (!value && prev)
+                    // Chunk made invisible. We no longer need to build geometry for it
+                    m_pendingStates = m_pendingStates.Reset(CurrStateBuildVertices);
+                else if(value && !prev)
+                    // Chunk made visible. Make a request
+                    m_pendingStates = m_pendingStates.Set(ChunkState.BuildVertices);
+
+                batcher.Enabled = value;
             }
         }
         //! Says whether or not building of geometry can be triggered
