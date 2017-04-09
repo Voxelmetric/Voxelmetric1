@@ -53,9 +53,9 @@ namespace Voxelmetric.Examples
             }
 
             // Movement
-            bool turbo = Input.GetKeyDown(KeyCode.LeftShift) || Input.GetKeyDown(KeyCode.RightShift);
-            cam.transform.position += cam.transform.forward*40*(turbo ? 3 : 1)*Input.GetAxis("Vertical")*Time.deltaTime;
-            cam.transform.position += cam.transform.right*40*(turbo ? 3 : 1)*Input.GetAxis("Horizontal")*Time.deltaTime;
+            bool turbo = Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift);
+            cam.transform.position += cam.transform.forward*40*(turbo ? 2 : 1)*Input.GetAxis("Vertical")*Time.deltaTime;
+            cam.transform.position += cam.transform.right*40*(turbo ? 2 : 1)*Input.GetAxis("Horizontal")*Time.deltaTime;
 
             // Screenspace mouse cursor coordinates
             var mousePos = cam.ScreenToWorldPoint(new Vector3(Input.mousePosition.x, Input.mousePosition.y, 10));
