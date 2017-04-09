@@ -243,7 +243,7 @@ namespace Voxelmetric.Code.Core
 
         public void CalculateGeometryBounds()
         {
-            m_bounds.Reset();
+            m_bounds.Init();
 
             for (int y = Env.ChunkSize1; y >= 0; y--)
             {

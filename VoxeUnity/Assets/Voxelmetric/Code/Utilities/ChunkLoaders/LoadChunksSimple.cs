@@ -299,7 +299,7 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
             int expectedChunks = m_chunkPositions.Length*((maxY-minY+Env.ChunkSize) /Env.ChunkSize);
             
             if (// No update necessary if there was no movement
-                m_viewerPos ==m_viewerPosPrev &&
+                m_viewerPos==m_viewerPosPrev &&
                 // However, we need to make sure that we have enough chunks loaded
                 world.chunks.chunkCollection.Count>=expectedChunks)
                 return;

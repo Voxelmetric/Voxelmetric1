@@ -17,6 +17,13 @@
 
         public void Reset()
         {
+            minX = minY = minZ = 0;
+            maxX = maxY = maxZ = Env.ChunkSize1;
+            lowestEmptyBlock = 0;
+        }
+
+        public void Init()
+        {
             minX = minY = minZ = Env.ChunkSize1;
             maxX = maxY = maxZ = 0;
             lowestEmptyBlock = Env.ChunkSize1;
