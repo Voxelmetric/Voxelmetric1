@@ -1,4 +1,6 @@
-﻿namespace Voxelmetric.Code
+﻿using Voxelmetric.Code.Data_types;
+
+namespace Voxelmetric.Code
 {
     public static class Env
     {
@@ -40,6 +42,9 @@
 
     public static class Features
     {
+        //! A mask saying which world edges should not have their faces rendered
+        public const Side DontRenderWorldEdgesMask = /*Side.up|*/Side.down|Side.north|Side.south|Side.west|Side.east;
+
         public const bool UseThreadPool = true;
         public const bool UseThreadedIO = true;
 

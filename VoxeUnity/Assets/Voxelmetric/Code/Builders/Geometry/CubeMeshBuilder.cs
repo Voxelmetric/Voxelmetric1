@@ -152,6 +152,10 @@ namespace Voxelmetric.Code.Builders.Geometry
                                 bool buildSingleFace = true;
 
                                 BlockFace m = mask[n];
+                                
+                                // Custom blocks are treated differently. They are build whole at once instead of
+                                // being build face by face. Therefore, we remember those we processed and skip
+                                // them next time
                                 if (m.block.Custom)
                                 {
                                     // Only clear the mask when necessary
@@ -161,10 +165,7 @@ namespace Voxelmetric.Code.Builders.Geometry
 
                                         Array.Clear(customBlockMask, 0, Env.ChunkSizeWithPaddingPow3);
                                     }
-
-                                    // Custom blocks are treated differently. They are build whole at once instead of
-                                    // being build face by face. Therefore, we remember those we processed and skip
-                                    // them next time
+                                    
                                     int index = Helpers.GetChunkIndex1DFrom3D(m.pos.x, m.pos.y, m.pos.z);
                                     if (customBlockMask[index]==false)
                                     {
@@ -174,18 +175,26 @@ namespace Voxelmetric.Code.Builders.Geometry
 
                                     buildSingleFace = false;
                                 }
-                                else if (dir!=Direction.up && client.Listeners[(int)dir]==null)
+                                // Don't render faces on world's edges for chunks with no neighbor
+                                else if (Features.DontRenderWorldEdgesMask>0 && client.Listeners[(int)dir]==null)
                                 {
-                                    // Don't render faces on edges with no neighbor. Up face is the exception
-                                    if (dir==Direction.east && x[0]==Env.ChunkSize)
+                                    if (dir==Direction.up && x[1]==Env.ChunkSize &&
+                                        (Features.DontRenderWorldEdgesMask&Side.up)!=0)
                                         buildSingleFace = false;
-                                    else if (dir==Direction.west && x[0]==0)
+                                    else if (dir==Direction.down && x[1]==0 &&
+                                             (Features.DontRenderWorldEdgesMask&Side.down)!=0)
                                         buildSingleFace = false;
-                                    else if (dir==Direction.north && x[2]==Env.ChunkSize)
+                                    else if (dir==Direction.east && x[0]==Env.ChunkSize &&
+                                             (Features.DontRenderWorldEdgesMask&Side.east)!=0)
                                         buildSingleFace = false;
-                                    else if (dir==Direction.south && x[2]==0)
+                                    else if (dir==Direction.west && x[0]==0 &&
+                                             (Features.DontRenderWorldEdgesMask&Side.west)!=0)
                                         buildSingleFace = false;
-                                    else if (dir==Direction.down && x[1]==0)
+                                    else if (dir==Direction.north && x[2]==Env.ChunkSize &&
+                                             (Features.DontRenderWorldEdgesMask&Side.north)!=0)
+                                        buildSingleFace = false;
+                                    else if (dir==Direction.south && x[2]==0 &&
+                                             (Features.DontRenderWorldEdgesMask&Side.south)!=0)
                                         buildSingleFace = false;
                                 }
 
