@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using UnityEngine;
 using UnityEngine.Assertions;
 using Voxelmetric.Code.Common;
 using Voxelmetric.Code.Common.IO;
@@ -540,87 +541,90 @@ namespace Voxelmetric.Code.Core
 
         #region Compression
 
-        private bool ExpandX(ref bool[] mask, ushort type, int y1, int z1, ref int x2, int y2, int z2)
+        private bool ExpandX(ref bool[] mask, int indexBackup, ushort type, int y1, int z1, ref int x2, int y2, int z2)
         {
             // Check the quad formed by YZ axes and try to expand the X asix
-            for (int y = y1; y<y2; ++y)
+            int index = indexBackup;
+            for (int y = y1; y<y2; ++y, index += Env.ChunkSizeWithPaddingPow2)
             {
-                for (int z = z1; z<z2; ++z)
+                for (int z = z1; z<z2; ++z, index += Env.ChunkSizeWithPadding)
                 {
-                    int newIndex = Helpers.GetChunkIndex1DFrom3D(x2, y, z);
-                    if (x2>=Env.ChunkSizePlusPadding || mask[newIndex] || blocks[newIndex].Type!=type)
+                    if (x2>=Env.ChunkSizePlusPadding || mask[index] || blocks[index].Type!=type)
                         return false;
                 }
             }
 
             // If the box can expand, mark the position as tested and expand the X axis
-            for (int y = y1; y<y2; ++y)
+            index = indexBackup;
+            for (int y = y1; y<y2; ++y, index += Env.ChunkSizeWithPaddingPow2)
             {
-                for (int z = z1; z<z2; ++z)
+                for (int z = z1; z<z2; ++z, index += Env.ChunkSizeWithPadding)
                 {
-                    int newIndex = Helpers.GetChunkIndex1DFrom3D(x2, y, z);
-                    mask[newIndex] = true;
+                    mask[index] = true;
                 }
             }
-            ++x2;
 
+            ++x2;
             return true;
         }
 
-        private bool ExpandY(ref bool[] mask, ushort type, int x1, int z1, int x2, ref int y2, int z2)
+        private bool ExpandY(ref bool[] mask, int indexBackup, ushort type, int x1, int z1, int x2, ref int y2, int z2)
         {
             // Check the quad formed by XZ axes and try to expand the Y asix
-            for (int z = z1; z<z2; ++z)
+            int index = indexBackup;
+            for (int z = z1; z<z2; ++z, index += Env.ChunkSizeWithPadding)
             {
-                for (int x = x1; x<x2; ++x)
+                for (int x = x1; x<x2; ++x, ++index)
                 {
-                    int newIndex = Helpers.GetChunkIndex1DFrom3D(x, y2, z);
-                    if (y2>=Env.ChunkSizePlusPadding || mask[newIndex] || blocks[newIndex].Type!=type)
+                    if (y2>=Env.ChunkSizePlusPadding || mask[index] || blocks[index].Type!=type)
                         return false;
                 }
             }
 
             // If the box can expand, mark the position as tested and expand the X axis
-            for (int z = z1; z<z2; ++z)
+            index = indexBackup;
+            for (int z = z1; z<z2; ++z, index += Env.ChunkSizeWithPadding)
             {
-                for (int x = x1; x<x2; ++x)
+                for (int x = x1; x<x2; ++x, ++index)
                 {
-                    int newIndex = Helpers.GetChunkIndex1DFrom3D(x, y2, z);
-                    mask[newIndex] = true;
+                    mask[index] = true;
                 }
             }
-            ++y2;
 
+            ++y2;
             return true;
         }
 
-        private bool ExpandZ(ref bool[] mask, ushort type, int x1, int y1, int x2, int y2, ref int z2)
+        private bool ExpandZ(ref bool[] mask, int indexBackup, ushort type, int x1, int y1, int x2, int y2, ref int z2)
         {
             // Check the quad formed by XY axes and try to expand the Z asix
-            for (int y = y1; y<y2; ++y)
+            int index = indexBackup;
+            for (int y = y1; y<y2; ++y, index += Env.ChunkSizeWithPaddingPow2)
             {
-                for (int x = x1; x<x2; ++x)
+                for (int x = x1; x<x2; ++x, ++index)
                 {
-                    int newIndex = Helpers.GetChunkIndex1DFrom3D(x, y, z2);
-                    if (z2>=Env.ChunkSizePlusPadding || mask[newIndex] || blocks[newIndex].Type!=type)
+                    if (z2>=Env.ChunkSizePlusPadding || mask[index] || blocks[index].Type!=type)
                         return false;
                 }
             }
 
             // If the box can expand, mark the position as tested and expand the X axis
-            for (int y = y1; y<y2; ++y)
+            index = indexBackup;
+            for (int y = y1; y<y2; ++y, index += Env.ChunkSizeWithPaddingPow2)
             {
-                for (int x = x1; x<x2; ++x)
+                for (int x = x1; x<x2; ++x, ++index)
                 {
-                    int newIndex = Helpers.GetChunkIndex1DFrom3D(x, y, z2);
-                    mask[newIndex] = true;
+                    mask[index] = true;
                 }
             }
-            ++z2;
 
+            ++z2;
             return true;
         }
 
+        /// <summary>
+        /// Compresses chunk's memory.
+        /// </summary>
         public void Compress()
         {
             var pools = chunk.pools;
@@ -629,6 +633,8 @@ namespace Voxelmetric.Code.Core
             Array.Clear(mask, 0, mask.Length);
             blockCompressed.Clear();
 
+            // This compression is essentialy RLE. However, instead of working on 1 axis
+            // it works in 3 dimensions.
             int index = 0;
             for (int y = -1; y<Env.ChunkSizePlusPadding; ++y)
             {
@@ -662,28 +668,27 @@ namespace Voxelmetric.Code.Core
 
                             if (expandX)
                             {
-                                expandX = ExpandX(ref mask, type, y1, z1, ref x2, y2, z2);
+                                expandX = ExpandX(ref mask, index, type, y1, z1, ref x2, y2, z2);
                                 expand = expandX;
                             }
                             if (expandY)
                             {
-                                expandY = ExpandY(ref mask, type, x1, z1, x2, ref y2, z2);
+                                expandY = ExpandY(ref mask, index, type, x1, z1, x2, ref y2, z2);
                                 expand = expand|expandY;
                             }
                             if (expandZ)
                             {
-                                expandZ = ExpandZ(ref mask, type, x1, y1, x2, y2, ref z2);
+                                expandZ = ExpandZ(ref mask, index, type, x1, y1, x2, y2, ref z2);
                                 expand = expand|expandZ;
                             }
                         } while (expand);
 
                         blockCompressed.Add(new BlockDataAABB(data, x1, y1, z1, x2, y2, z2));
 
-                        // Let's make sure that we don't take too much space
-                        /*int compressedSize = blockCompressed.Count*StructSerialization.TSSize<BlockDataAABB>.ValueSize;
-                        int decompressedSize = Env.ChunkSizeWithPaddingPow3*
-                                               StructSerialization.TSSize<BlockData>.ValueSize;
-                        if (compressedSize>=decompressedSize)
+                        /*// Let's make sure that we don't take too much space
+                        int compressedSize = blockCompressed.Count*StructSerialization.TSSize<BlockDataAABB>.ValueSize;
+                        int decompressedSize = Env.ChunkSizeWithPaddingPow3*StructSerialization.TSSize<BlockData>.ValueSize;
+                        if (compressedSize>=(decompressedSize>>1))
                         {
                             blockCompressed.Clear();
                             pools.BoolArrayPool.Push(mask);
@@ -696,6 +701,9 @@ namespace Voxelmetric.Code.Core
             pools.BoolArrayPool.Push(mask);
         }
 
+        /// <summary>
+        /// Decompresses chunk's memory.
+        /// </summary>
         public void Decompress()
         {
             for (int i = 0; i<blockCompressed.Count; ++i)

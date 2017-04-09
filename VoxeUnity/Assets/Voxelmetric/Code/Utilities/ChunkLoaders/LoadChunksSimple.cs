@@ -3,6 +3,7 @@ using UnityEngine;
 using UnityEngine.Assertions;
 using UnityEngine.Profiling;
 using Voxelmetric.Code.Common;
+using Voxelmetric.Code.Common.IO;
 using Voxelmetric.Code.Common.Math;
 using Voxelmetric.Code.Core;
 using Voxelmetric.Code.Core.StateManager;
@@ -375,6 +376,20 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
             FullLoadOnStartUp = false;
 
             Profiler.EndSample();
+
+            // Memory savings diagnostic
+            /*{
+                long compressedMem = 0;
+                foreach (var chunk in world.chunks.chunkCollection)
+                {
+                    compressedMem += chunk.blocks.BlocksCompressed.Count*
+                                     StructSerialization.TSSize<BlockDataAABB>.ValueSize;
+                }
+
+                long uncompressedMem = (long)world.chunks.chunkCollection.Count*Env.ChunkSizeWithPaddingPow3*
+                                       StructSerialization.TSSize<BlockData>.ValueSize;
+                Debug.LogFormat("mem: {0}/{1} ({2}%)", compressedMem, uncompressedMem, (int)((double)compressedMem/(double)uncompressedMem*100.0));
+            }*/
         }
 
         public void ProcessChunk(Chunk chunk)

@@ -395,7 +395,7 @@ namespace Voxelmetric.Examples
             }
         }
 
-        void Compression(Chunk chunk, int blockTypes)
+        void Compression(StreamWriter writer, Chunk chunk, int blockTypes, int probabiltyOfChange)
         {
             const int iters = 100;
             var blocks = chunk.blocks;
@@ -403,6 +403,8 @@ namespace Voxelmetric.Examples
             // Initialize the block array. Padded area contains zeros, the rest is random
             {
                 Random r = new Random(0);
+                ushort type = (ushort)r.Next(0, blockTypes);
+                
                 int index = 0;
                 for (int y = 0; y < Env.ChunkSize; ++y)
                 {
@@ -410,15 +412,21 @@ namespace Voxelmetric.Examples
                     {
                         for (int x = 0; x < Env.ChunkSize; ++x, ++index)
                         {
-                            blocks.SetRaw(index, new BlockData((ushort)r.Next(0, blockTypes)));
+                            int prob = r.Next(0, 99);
+                            if (prob<probabiltyOfChange)
+                                type = (ushort)r.Next(0, blockTypes);
+                            blocks.SetRaw(index, new BlockData(type));
                         }
                     }
                 }
             }
 
-            Debug.LogFormat("Bechmark - compression ({0} block types)", blockTypes);
-            using (StreamWriter writer = File.CreateText("compression.txt"))
+            StringBuilder s = new StringBuilder();
             {
+                s.AppendFormat("Bechmark - compression ({0} block types, probability of change: {1})", blockTypes, probabiltyOfChange);
+                Debug.Log(s);
+                writer.WriteLine(s);
+
                 // Compression
                 {
                     float[] number = { 0 };
@@ -428,14 +436,14 @@ namespace Voxelmetric.Examples
                             blocks.Compress();
                         }, iters);
 
-                    StringBuilder s = new StringBuilder();
-                    s.AppendFormat("Compression -> out:{0}, time:{1}, boxes created {2}, mem {3}, uncompressed mem {4}", number[0],
+                    s.Remove(0, s.Length);
+                    s.AppendFormat("Compression -> out:{0}, time:{1}, boxes created: {2}, mem: {3}/{4}", number[0],
                                    (t/iters).ToString(CultureInfo.InvariantCulture), blocks.BlocksCompressed.Count,
                                    blocks.BlocksCompressed.Count*StructSerialization.TSSize<BlockDataAABB>.ValueSize,
                                    Env.ChunkSizeWithPaddingPow3*StructSerialization.TSSize<BlockData>.ValueSize);
-                    Debug.Log(s);
-                    writer.WriteLine(s);
                 }
+                Debug.Log(s);
+                writer.WriteLine(s);
 
                 // Decompression
                 {
@@ -446,22 +454,34 @@ namespace Voxelmetric.Examples
                             blocks.Decompress();
                         }, iters);
 
-                    StringBuilder s = new StringBuilder();
+                    s.Remove(0, s.Length);
                     s.AppendFormat("Decompression -> out:{0}, time:{1}", number[0],
                                    (t/iters).ToString(CultureInfo.InvariantCulture));
-                    Debug.Log(s);
-                    writer.WriteLine(s);
                 }
+                Debug.Log(s);
+                writer.WriteLine(s);
             }
         }
 
         void Benchmark_Compression()
         {
             Chunk chunk = new Chunk();
-            Compression(chunk, 2);
-            Compression(chunk, 4);
-            Compression(chunk, 8);
-            Compression(chunk, 12);
+
+            using (StreamWriter writer = File.CreateText("compression.txt"))
+            {
+                Compression(writer, chunk, 2, 100);
+                Compression(writer, chunk, 4, 100);
+                Compression(writer, chunk, 8, 100);
+                Compression(writer, chunk, 12, 100);
+                Compression(writer, chunk, 2, 20);
+                Compression(writer, chunk, 4, 20);
+                Compression(writer, chunk, 8, 20);
+                Compression(writer, chunk, 12, 20);
+                Compression(writer, chunk, 2, 10);
+                Compression(writer, chunk, 4, 10);
+                Compression(writer, chunk, 8, 10);
+                Compression(writer, chunk, 12, 10);
+            }
         }
     }
 }
