@@ -6,24 +6,29 @@ namespace Voxelmetric.Code.Data_types
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
     public struct BlockData: IEquatable<BlockData>
     {
+        public static readonly ushort TypeMask = 0x7FFF;
+
         /* Bits
          * 15 - solid
-         * 14, 13, 12 - rotation
-         * 11 - 0 - block type
+         * 14 - 0 - block type
         */
         private readonly ushort m_data;
-
+        
         public BlockData(ushort data)
         {
             m_data = data;
         }
 
-        public BlockData(ushort type, bool solid, Direction dir = Direction.up)
+        public BlockData(ushort type, bool solid)
         {
-            m_data = (ushort)(type&0xFFF);
-            m_data |= (ushort)((ushort)dir<<12);
+            m_data = (ushort)(type&0x7FFF);
             if (solid)
                 m_data |= 0x8000;
+        }
+        
+        public ushort Data
+        {
+            get { return m_data; }
         }
 
         /// <summary>
@@ -35,20 +40,11 @@ namespace Voxelmetric.Code.Data_types
         }
 
         /// <summary>
-        /// Information about the direction the block faces
-        /// TODO: Just a placeholder
-        /// </summary>
-        public Direction Rotation
-        {
-            get { return (Direction)((m_data>>12)&8); }
-        }
-
-        /// <summary>
         /// Information about block's type
         /// </summary>
         public ushort Type
         {
-            get { return (ushort)(m_data&0xFFF); }
+            get { return (ushort)(m_data&TypeMask); }
         }
 
         public static ushort RestoreBlockData(byte[] data, int offset)

@@ -30,8 +30,8 @@ namespace Voxelmetric.Code.Builders.Geometry
 
             bool customBlockMaskInitialized = false;
 
-            BlockFace[] mask = pools.BlockFaceArrayPool.Pop(width * width);
-            bool[] customBlockMask = pools.BoolArrayPool.Pop(Env.ChunkSizeWithPaddingPow3);
+            BlockFace[] mask = pools.BlockFaceArrayPool.PopExact(width*width);
+            bool[] customBlockMask = pools.BoolArrayPool.PopExact(Env.ChunkSizeWithPaddingPow3);
             Vector3[] vecs = pools.Vector3ArrayPool.PopExact(4);
 
             for (bool backFace = false, b = true; b!=backFace; backFace = true, b = !b)

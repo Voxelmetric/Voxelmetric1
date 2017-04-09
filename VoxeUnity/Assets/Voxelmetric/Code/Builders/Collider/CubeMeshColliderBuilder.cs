@@ -31,7 +31,7 @@ namespace Voxelmetric.Code.Builders.Collider
             int[] du = {0, 0, 0}; // Width in a given dimension (du[u] is our current dimension)
             int[] dv = {0, 0, 0}; // Height in a given dimension (dv[v] is our current dimension)
 
-            bool[] mask = pools.BoolArrayPool.Pop(width*width);
+            bool[] mask = pools.BoolArrayPool.PopExact(width*width);
             Vector3[] vecs = pools.Vector3ArrayPool.PopExact(4);
 
             for (bool backFace = false, b = true; b!=backFace; backFace = true, b = !b)

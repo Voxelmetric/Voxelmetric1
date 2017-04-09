@@ -253,7 +253,7 @@ namespace Voxelmetric.Code.Core.Serialization
                                 // Convert block types from internal optimized version into global types
                                 ushort typeInConfig = provider.GetConfig(bd->Type).typeInConfig;
 
-                                *(BlockData*)&pDst[j] = new BlockData(typeInConfig, bd->Solid, bd->Rotation);
+                                *(BlockData*)&pDst[j] = new BlockData(typeInConfig, bd->Solid);
                             }
                         }
                     }
@@ -297,7 +297,7 @@ namespace Voxelmetric.Code.Core.Serialization
                                 {
                                     fixed (byte* pDst = tmp)
                                     {
-                                        *(BlockData*)&pDst[i] = new BlockData(typeInConfig, bd.Solid, bd.Rotation);
+                                        *(BlockData*)&pDst[i] = new BlockData(typeInConfig, bd.Solid);
                                     }
                                 }
                             }
@@ -354,7 +354,7 @@ namespace Voxelmetric.Code.Core.Serialization
                                 // Convert global block types into internal optimized version
                                 ushort type = provider.GetTypeFromTypeInConfig(bd->Type);
 
-                                m_blocks[j] = new BlockData(type, bd->Solid, bd->Rotation);
+                                m_blocks[j] = new BlockData(type, bd->Solid);
                             }
                         }
                     }
@@ -396,7 +396,7 @@ namespace Voxelmetric.Code.Core.Serialization
                                         // Convert global block type into internal optimized version
                                         ushort type = provider.GetTypeFromTypeInConfig(bd->Type);
 
-                                        blocks.SetRaw(index, new BlockData(type, bd->Solid, bd->Rotation));
+                                        blocks.SetRaw(index, new BlockData(type, bd->Solid));
                                     }
                                 }
                             }
