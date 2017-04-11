@@ -354,8 +354,8 @@ namespace Voxelmetric.Code.Core.StateManager
             // Calculate the amount of non-empty blocks
             chunk.blocks.CalculateEmptyBlocks();
 
-            chunk.blocks.Compress();
-            chunk.blocks.Decompress();
+            //chunk.blocks.Compress();
+            //chunk.blocks.Decompress();
 
             OnGenerateDataDone(stateManager);
         }
