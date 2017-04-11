@@ -543,9 +543,11 @@ namespace Voxelmetric.Code.Core
 
         private bool ExpandX(ref bool[] mask, int indexBackup, ushort type, int y1, int z1, ref int x2, int y2, int z2)
         {
+            int yIter = Env.ChunkSizeWithPaddingPow2-(z2-z1);
+
             // Check the quad formed by YZ axes and try to expand the X asix
             int index = indexBackup;
-            for (int y = y1; y<y2; ++y, index += Env.ChunkSizeWithPaddingPow2)
+            for (int y = y1; y<y2; ++y, index += yIter)
             {
                 for (int z = z1; z<z2; ++z, index += Env.ChunkSizeWithPadding)
                 {
@@ -556,7 +558,7 @@ namespace Voxelmetric.Code.Core
 
             // If the box can expand, mark the position as tested and expand the X axis
             index = indexBackup;
-            for (int y = y1; y<y2; ++y, index += Env.ChunkSizeWithPaddingPow2)
+            for (int y = y1; y<y2; ++y, index += yIter)
             {
                 for (int z = z1; z<z2; ++z, index += Env.ChunkSizeWithPadding)
                 {
@@ -570,9 +572,11 @@ namespace Voxelmetric.Code.Core
 
         private bool ExpandY(ref bool[] mask, int indexBackup, ushort type, int x1, int z1, int x2, ref int y2, int z2)
         {
+            int zIter = Env.ChunkSizeWithPadding-(x2-x1);
+
             // Check the quad formed by XZ axes and try to expand the Y asix
             int index = indexBackup;
-            for (int z = z1; z<z2; ++z, index += Env.ChunkSizeWithPadding)
+            for (int z = z1; z<z2; ++z, index += zIter)
             {
                 for (int x = x1; x<x2; ++x, ++index)
                 {
@@ -583,7 +587,7 @@ namespace Voxelmetric.Code.Core
 
             // If the box can expand, mark the position as tested and expand the X axis
             index = indexBackup;
-            for (int z = z1; z<z2; ++z, index += Env.ChunkSizeWithPadding)
+            for (int z = z1; z<z2; ++z, index += zIter)
             {
                 for (int x = x1; x<x2; ++x, ++index)
                 {
@@ -597,9 +601,11 @@ namespace Voxelmetric.Code.Core
 
         private bool ExpandZ(ref bool[] mask, int indexBackup, ushort type, int x1, int y1, int x2, int y2, ref int z2)
         {
+            int yIter = Env.ChunkSizeWithPaddingPow2-(x2-x1);
+
             // Check the quad formed by XY axes and try to expand the Z asix
             int index = indexBackup;
-            for (int y = y1; y<y2; ++y, index += Env.ChunkSizeWithPaddingPow2)
+            for (int y = y1; y<y2; ++y, index += yIter)
             {
                 for (int x = x1; x<x2; ++x, ++index)
                 {
@@ -610,7 +616,7 @@ namespace Voxelmetric.Code.Core
 
             // If the box can expand, mark the position as tested and expand the X axis
             index = indexBackup;
-            for (int y = y1; y<y2; ++y, index += Env.ChunkSizeWithPaddingPow2)
+            for (int y = y1; y<y2; ++y, index += yIter)
             {
                 for (int x = x1; x<x2; ++x, ++index)
                 {

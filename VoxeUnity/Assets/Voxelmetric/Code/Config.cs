@@ -37,6 +37,8 @@ namespace Voxelmetric.Code
         public const int ChunkSizeWithPaddingPow2 = ChunkSizeWithPadding*ChunkSizeWithPadding;
         public const int ChunkSizeWithPaddingPow3 = ChunkSizeWithPadding*ChunkSizeWithPaddingPow2;
 
+        public const int ChunkIterXY = ChunkSizeWithPaddingPow2-ChunkSizeWithPadding;
+
         #endregion
     }
 
