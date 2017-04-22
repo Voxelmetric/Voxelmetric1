@@ -34,6 +34,8 @@ namespace Voxelmetric.Code.Builders.Geometry
             bool[] customBlockMask = pools.BoolArrayPool.PopExact(Env.ChunkSizeWithPaddingPow3);
             Vector3[] vecs = pools.Vector3ArrayPool.PopExact(4);
 
+            int l, k, w, h, n;
+
             for (bool backFace = false, b = true; b!=backFace; backFace = true, b = !b)
             {
                 // Iterate over 3 dimensions. Once for front faces, once for back faces
@@ -73,7 +75,7 @@ namespace Voxelmetric.Code.Builders.Geometry
                     for (x[d] = mins[d]-1; x[d]<=maxes[d];)
                     {
                         // Compute the mask
-                        int n = 0;
+                        n = 0;
 
                         for (x[v] = 0; x[v]<mins[v]; x[v]++)
                         {
@@ -143,16 +145,44 @@ namespace Voxelmetric.Code.Builders.Geometry
                                     n++;
                                     continue;
                                 }
-
-                                // Compute width
-                                int w = 1;
-                                // Compute height
-                                int h = 1;
-
+                                
                                 bool buildSingleFace = true;
 
                                 BlockFace m = mask[n];
-                                
+
+                                // Compute width
+                                if (chunk.world.config.addAOToMesh)
+                                {
+                                    w = 1;
+                                    h = 1;
+                                }
+                                else
+                                {
+                                    int maskIndex = n+1;
+                                    for (w = 1; i+w<width;)
+                                    {
+                                        var blk = mask[maskIndex].block;
+                                        if (blk==null || !blk.CanMergeFaceWith(m.block))
+                                            break;
+
+                                        ++w;
+                                        ++maskIndex;
+                                    }
+
+                                    // Compute height
+                                    for (h = 1; j+h<width; h++)
+                                    {
+                                        maskIndex = n+h*width;
+                                        for (k = 0; k<w; k++, maskIndex++)
+                                        {
+                                            var blk = mask[maskIndex].block;
+                                            if (blk==null || !blk.CanMergeFaceWith(m.block))
+                                                goto cont;
+                                        }
+                                    }
+                                }
+
+                                cont:
                                 // Custom blocks are treated differently. They are build whole at once instead of
                                 // being build face by face. Therefore, we remember those we processed and skip
                                 // them next time
@@ -234,10 +264,8 @@ namespace Voxelmetric.Code.Builders.Geometry
                                 }
 
                                 // Zero out the mask
-                                int l;
                                 for (l = 0; l<h; ++l)
                                 {
-                                    int k;
                                     for (k = 0; k<w; ++k)
                                     {
                                         mask[n+k+l*width] = new BlockFace();

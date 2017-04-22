@@ -51,15 +51,14 @@ public class Block
     {
     }
 
-    public virtual bool CanBuildFaceWith(Block adjacentBlock)
+    public bool CanBuildFaceWith(Block adjacentBlock)
     {
-        return Config.custom // custom blocks will be considered as able to create face with others by default
-               && RenderMaterialID==adjacentBlock.RenderMaterialID;
+        return adjacentBlock.Solid ? !Solid : (Solid || Type!=adjacentBlock.Type);
     }
 
-    public virtual bool CanMergeFaceWith(Block adjacentBlock)
+    public bool CanMergeFaceWith(Block adjacentBlock)
     {
-        return false;
+        return Type==adjacentBlock.Type;
     }
 
     public virtual void BuildFace(Chunk chunk, Vector3Int localPos, Vector3[] vertices, Direction dir, int materialID)

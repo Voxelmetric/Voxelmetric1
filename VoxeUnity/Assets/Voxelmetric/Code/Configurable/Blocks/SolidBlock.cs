@@ -1,16 +1,9 @@
-﻿using Voxelmetric.Code.Core;
+﻿using Voxelmetric.Code;
+using Voxelmetric.Code.Core;
 using Voxelmetric.Code.Data_types;
 
 public class SolidBlock : Block
 {
-    public override bool CanBuildFaceWith(Block adjacentBlock)
-    {
-        if (adjacentBlock.Solid)
-            return !Solid;
-
-        return Solid || adjacentBlock.Type!=Type;
-    }
-
     public override void BuildBlock(Chunk chunk, Vector3Int localPos, int materialID)
     {
         ChunkBlocks blocks = chunk.blocks;

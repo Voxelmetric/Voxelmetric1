@@ -5,7 +5,6 @@
     "configClass": "CustomMeshBlockConfig",
     "meshFileLocation": "CustomMesh",
     "texture": "pyramid",
-    "solid": false,
     "raycastHitOnRemoval": true,
     "raycastHit": true,
     "custom": true,

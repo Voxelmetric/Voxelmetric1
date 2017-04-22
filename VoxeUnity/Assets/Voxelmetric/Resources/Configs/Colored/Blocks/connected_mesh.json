@@ -5,7 +5,6 @@
     "configClass": "ConnectedMeshBlockConfig",
     "meshFileLocation": "CustomMesh",
     "texture": "pyramid",
-    "solid": false,
     "custom": true,
 
     "connectsToSolid": true,
