@@ -1,4 +1,4 @@
-﻿using Voxelmetric.Code;
+﻿using Voxelmetric.Code.Configurable.Blocks;
 using Voxelmetric.Code.Core;
 using Voxelmetric.Code.Data_types;
 
@@ -12,8 +12,17 @@ public class SolidBlock : Block
         {
             Direction dir = DirectionUtils.Get(d);
             Block adjacentBlock = blocks.GetBlock(localPos.Add(dir));
+
+            BlockFace face = new BlockFace
+            {
+                block = blocks.GetBlock(localPos.Add(dir)),
+                pos = localPos,
+                side = dir,
+                light = new BlockLightData(0),
+            };
+
             if (CanBuildFaceWith(adjacentBlock))
-                BuildFace(chunk, localPos, null, dir, materialID);
+                BuildFace(chunk, null, ref face);
         }
     }
 }

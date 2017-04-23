@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using Voxelmetric.Code.Configurable.Blocks;
 using Voxelmetric.Code.Configurable.Blocks.Utilities;
 using Voxelmetric.Code.Core;
 using Voxelmetric.Code.Data_types;
@@ -13,9 +14,9 @@ public class CubeBlock: SolidBlock
         get { return ((CubeBlockConfig)Config).textures; }
     }
 
-    public override void BuildFace(Chunk chunk, Vector3Int localPos, Vector3[] vertices, Direction direction, int materialID)
+    public override void BuildFace(Chunk chunk, Vector3[] vertices, ref BlockFace face)
     {
-        bool backface = DirectionUtils.IsBackface(direction);
+        bool backface = DirectionUtils.IsBackface(face.side);
 
         VertexData[] vertexData = chunk.pools.VertexDataArrayPool.PopExact(4);
         VertexDataFixed[] vertexDataFixed = chunk.pools.VertexDataFixedArrayPool.PopExact(4);
@@ -24,7 +25,7 @@ public class CubeBlock: SolidBlock
             {
                 for (int i = 0; i<4; i++)
                     vertexData[i] = chunk.pools.VertexDataPool.Pop();
-                BlockUtils.PrepareVertices(ref localPos, vertexData, direction);
+                BlockUtils.PrepareVertices(ref face.pos, vertexData, face.side);
             }
             else
             {
@@ -35,12 +36,12 @@ public class CubeBlock: SolidBlock
                 }
             }
 
-            BlockUtils.PrepareTexture(chunk, ref localPos, vertexData, direction, textures);
-            BlockUtils.PrepareColors(chunk, ref localPos, vertexData, direction);
+            BlockUtils.PrepareTexture(chunk, ref face.pos, vertexData, face.side, textures);
+            BlockUtils.PrepareColors(chunk, ref face.pos, vertexData, face.side);
 
             for (int i = 0; i < 4; i++)
                 vertexDataFixed[i] = VertexDataUtils.ClassToStruct(vertexData[i]);
-            chunk.GeometryHandler.Batcher.AddFace(vertexDataFixed, backface, materialID);
+            chunk.GeometryHandler.Batcher.AddFace(vertexDataFixed, backface, face.materialID);
 
             for (int i = 0; i < 4; i++)
                 chunk.pools.VertexDataPool.Push(vertexData[i]);

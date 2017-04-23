@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using Voxelmetric.Code.Configurable.Blocks;
 using Voxelmetric.Code.Configurable.Blocks.Utilities;
 using Voxelmetric.Code.Core;
 using Voxelmetric.Code.Data_types;
@@ -11,9 +12,9 @@ public class ColoredBlock : SolidBlock
         get { return ((ColoredBlockConfig)Config).colors; }
     }
 
-    public override void BuildFace(Chunk chunk, Vector3Int localPos, Vector3[] vertices, Direction direction, int materialID)
+    public override void BuildFace(Chunk chunk, Vector3[] vertices, ref BlockFace face)
     {
-        bool backFace = DirectionUtils.IsBackface(direction);
+        bool backFace = DirectionUtils.IsBackface(face.side);
 
         VertexData[] vertexData = chunk.pools.VertexDataArrayPool.PopExact(4);
         VertexDataFixed[] vertexDataFixed = chunk.pools.VertexDataFixedArrayPool.PopExact(4);
@@ -23,10 +24,10 @@ public class ColoredBlock : SolidBlock
                 for (int i = 0; i<4; i++)
                 {
                     vertexData[i] = chunk.pools.VertexDataPool.Pop();
-                    vertexData[i].Color = colors[(int)direction];
+                    vertexData[i].Color = colors[(int)face.side];
                     vertexData[i].UV = Vector2.zero;
                 }
-                BlockUtils.PrepareVertices(ref localPos, vertexData, direction);
+                BlockUtils.PrepareVertices(ref face.pos, vertexData, face.side);
             }
             else
             {
@@ -34,16 +35,16 @@ public class ColoredBlock : SolidBlock
                 {
                     vertexData[i] = chunk.pools.VertexDataPool.Pop();
                     vertexData[i].Vertex = vertices[i];
-                    vertexData[i].Color = colors[(int)direction];
+                    vertexData[i].Color = colors[(int)face.side];
                     vertexData[i].UV = Vector2.zero;
                 }
             }
             
-            BlockUtils.AdjustColors(chunk, ref localPos, vertexData, direction);
+            BlockUtils.AdjustColors(chunk, vertexData, face.side, face.light);
 
             for (int i = 0; i<4; i++)
                 vertexDataFixed[i]= VertexDataUtils.ClassToStruct(vertexData[i]);
-            chunk.GeometryHandler.Batcher.AddFace(vertexDataFixed, backFace, materialID);
+            chunk.GeometryHandler.Batcher.AddFace(vertexDataFixed, backFace, face.materialID);
 
             for (int i = 0; i < 4; i++)
                 chunk.pools.VertexDataPool.Push(vertexData[i]);

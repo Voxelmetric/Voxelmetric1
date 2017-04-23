@@ -24,7 +24,8 @@ namespace Voxelmetric.Code.Builders.Geometry
             int[] maxes = {maxX, maxY, maxZ};
 
             int[] x = {0, 0, 0}; // Relative position of a block
-            int[] q = {0, 0, 0}; // Direction in which we compare neighbors when building the mask (q[d] is our current direction)
+            int[] q = {0, 0, 0};
+                // Direction in which we compare neighbors when building the mask (q[d] is our current direction)
             int[] du = {0, 0, 0}; // Width in a given dimension (du[u] is our current dimension)
             int[] dv = {0, 0, 0}; // Height in a given dimension (dv[v] is our current dimension)
 
@@ -41,10 +42,10 @@ namespace Voxelmetric.Code.Builders.Geometry
                 // Iterate over 3 dimensions. Once for front faces, once for back faces
                 for (uint d = 0; d<3; d++)
                 {
-                    uint u = d + 1;
-                    if (u > 2) u = u - 3; // u = (d+1)%3; <-- we know the range is within 1..3 so we can improvize
-                    uint v = d + 2;
-                    if (v > 2) v = v - 3; // v = (d+2)%3; <-- we know the range is within 2..4 so we can improvize
+                    uint u = d+1;
+                    if (u>2) u = u-3; // u = (d+1)%3; <-- we know the range is within 1..3 so we can improvize
+                    uint v = d+2;
+                    if (v>2) v = v-3; // v = (d+2)%3; <-- we know the range is within 2..4 so we can improvize
 
                     x[0] = 0;
                     x[1] = 0;
@@ -69,8 +70,8 @@ namespace Voxelmetric.Code.Builders.Geometry
                             dir = backFace ? Direction.south : Direction.north;
                             break;
                     }
-                    
-                    
+
+
                     // Move through the dimension from front to back
                     for (x[d] = mins[d]-1; x[d]<=maxes[d];)
                     {
@@ -100,23 +101,46 @@ namespace Voxelmetric.Code.Builders.Geometry
                                 Block voxelFace0 = blocks.GetBlock(index0);
                                 Block voxelFace1 = blocks.GetBlock(index1);
 
-                                mask[n++] = backFace
-                                                ? (voxelFace1.CanBuildFaceWith(voxelFace0)
-                                                       ? new BlockFace
-                                                       {
-                                                           block = voxelFace1,
-                                                           pos = new Vector3Int(realX+q[0], realY+q[1], realZ+q[2]),
-                                                           side = dir
-                                                       }
-                                                       : new BlockFace())
-                                                : (voxelFace0.CanBuildFaceWith(voxelFace1)
-                                                       ? new BlockFace
-                                                       {
-                                                           block = voxelFace0,
-                                                           pos = new Vector3Int(realX, realY, realZ),
-                                                           side = dir
-                                                       }
-                                                       : new BlockFace());
+                                if (backFace)
+                                {
+                                    // Let's see whether we can merge faces
+                                    if (voxelFace1.CanBuildFaceWith(voxelFace0))
+                                    {
+                                        Vector3Int blockPos1 = new Vector3Int(realX + q[0], realY + q[1], realZ + q[2]);
+                                        mask[n++] = new BlockFace
+                                        {
+                                            block = voxelFace1,
+                                            pos = blockPos1,
+                                            side = dir,
+                                            light = voxelFace1.Custom ? new BlockLightData(0) : BlockUtils.CalculateColors(chunk, ref blockPos1, dir),
+                                            materialID = voxelFace1.RenderMaterialID
+                                        };
+                                    }
+                                    else
+                                    {
+                                        mask[n++] = new BlockFace();
+                                    }
+                                }
+                                else
+                                {
+                                    // Let's see whether we can merge faces
+                                    if (voxelFace0.CanBuildFaceWith(voxelFace1))
+                                    {
+                                        Vector3Int blockPos0 = new Vector3Int(realX, realY, realZ);
+                                        mask[n++] = new BlockFace
+                                        {
+                                            block = voxelFace0,
+                                            pos = blockPos0,
+                                            side = dir,
+                                            light = voxelFace0.Custom ? new BlockLightData(0) : BlockUtils.CalculateColors(chunk, ref blockPos0, dir),
+                                            materialID = voxelFace0.RenderMaterialID
+                                        };
+                                    }
+                                    else
+                                    {
+                                        mask[n++] = new BlockFace();
+                                    }
+                                }
                             }
 
                             for (x[u] = maxes[u]+1; x[u]<width; x[u]++)
@@ -145,47 +169,15 @@ namespace Voxelmetric.Code.Builders.Geometry
                                     n++;
                                     continue;
                                 }
-                                
+
+                                w = 1;
+                                h = 1;
                                 bool buildSingleFace = true;
-
                                 BlockFace m = mask[n];
-
-                                // Compute width
-                                if (chunk.world.config.addAOToMesh)
-                                {
-                                    w = 1;
-                                    h = 1;
-                                }
-                                else
-                                {
-                                    int maskIndex = n+1;
-                                    for (w = 1; i+w<width;)
-                                    {
-                                        var blk = mask[maskIndex].block;
-                                        if (blk==null || !blk.CanMergeFaceWith(m.block))
-                                            break;
-
-                                        ++w;
-                                        ++maskIndex;
-                                    }
-
-                                    // Compute height
-                                    for (h = 1; j+h<width; h++)
-                                    {
-                                        maskIndex = n+h*width;
-                                        for (k = 0; k<w; k++, maskIndex++)
-                                        {
-                                            var blk = mask[maskIndex].block;
-                                            if (blk==null || !blk.CanMergeFaceWith(m.block))
-                                                goto cont;
-                                        }
-                                    }
-                                }
-
-                                cont:
-                                // Custom blocks are treated differently. They are build whole at once instead of
-                                // being build face by face. Therefore, we remember those we processed and skip
-                                // them next time
+                                
+                                // Custom blocks are treated differently. They are built whole at once instead of
+                                // being build face by face. Therefore, we remember those we already processed and
+                                // skip them the next time we come across them again
                                 if (m.block.Custom)
                                 {
                                     // Only clear the mask when necessary
@@ -195,9 +187,9 @@ namespace Voxelmetric.Code.Builders.Geometry
 
                                         Array.Clear(customBlockMask, 0, Env.ChunkSizeWithPaddingPow3);
                                     }
-                                    
+
                                     int index = Helpers.GetChunkIndex1DFrom3D(m.pos.x, m.pos.y, m.pos.z);
-                                    if (customBlockMask[index]==false)
+                                    if (!customBlockMask[index])
                                     {
                                         customBlockMask[index] = true;
                                         m.block.BuildBlock(chunk, m.pos, m.block.RenderMaterialID);
@@ -230,6 +222,34 @@ namespace Voxelmetric.Code.Builders.Geometry
 
                                 if (buildSingleFace)
                                 {
+                                    // Compute width
+                                    int maskIndex = n + 1;
+                                    for (w = 1; i + w < width;)
+                                    {
+                                        var blk = mask[maskIndex].block;
+                                        if (blk == null ||
+                                            !blk.CanMergeFaceWith(m.block) ||
+                                            !mask[maskIndex].light.Equals(m.light))
+                                            break;
+
+                                        ++w;
+                                        ++maskIndex;
+                                    }
+
+                                    // Compute height
+                                    for (h = 1; j + h < width; h++)
+                                    {
+                                        maskIndex = n + h * width;
+                                        for (k = 0; k < w; k++, maskIndex++)
+                                        {
+                                            var blk = mask[maskIndex].block;
+                                            if (blk == null ||
+                                                !blk.CanMergeFaceWith(m.block) ||
+                                                !mask[maskIndex].light.Equals(m.light))
+                                                goto cont;
+                                        }
+                                    }
+                                    cont:
                                     // Prepare face coordinates and dimensions
                                     x[u] = i;
                                     x[v] = j;
@@ -260,7 +280,7 @@ namespace Voxelmetric.Code.Builders.Geometry
                                         vecs[3] = new Vector3(x[0]+dv[0], x[1]+dv[1], x[2]+dv[2])-BlockUtils.HalfBlockVector;
                                     }
 
-                                    m.block.BuildFace(chunk, m.pos, vecs, m.side, m.block.RenderMaterialID);
+                                    m.block.BuildFace(chunk, vecs, ref m);
                                 }
 
                                 // Zero out the mask

@@ -1,5 +1,6 @@
 ﻿using JetBrains.Annotations;
 using UnityEngine;
+using Voxelmetric.Code.Configurable.Blocks;
 using Voxelmetric.Code.Core;
 using Voxelmetric.Code.Data_types;
 using Voxelmetric.Code.Load_Resources.Blocks;
@@ -7,15 +8,14 @@ using Voxelmetric.Code.Load_Resources.Blocks;
 public class Block
 {
     protected BlockConfig Config;
-
-    public ushort Type;
     public string Name;
+    public ushort Type;
+    public int RenderMaterialID;
+    public int PhysicMaterialID;
     public bool Solid;
     public bool CanBeWalkedOn;
     public bool CanBeWalkedThrough;
     public bool Custom;
-    public int RenderMaterialID;
-    public int PhysicMaterialID;
 
     public Block()
     {
@@ -61,7 +61,7 @@ public class Block
         return Type==adjacentBlock.Type;
     }
 
-    public virtual void BuildFace(Chunk chunk, Vector3Int localPos, Vector3[] vertices, Direction dir, int materialID)
+    public virtual void BuildFace(Chunk chunk, Vector3[] vertices, ref BlockFace face)
     {
     }
 

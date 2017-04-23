@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using Voxelmetric.Code.Configurable.Blocks;
 using Voxelmetric.Code.Core;
 using Voxelmetric.Code.Data_types;
 using Voxelmetric.Code.Load_Resources.Blocks;
@@ -23,36 +24,36 @@ public class ConnectedMeshBlock: CustomMeshBlock
         }
     }
 
-    public override void BuildFace(Chunk chunk, Vector3Int localPos, Vector3[] vertices, Direction dir, int materialID)
+    public override void BuildFace(Chunk chunk, Vector3[] vertices, ref BlockFace face)
     {
-        if (!connectedMeshConfig.directionalTris.ContainsKey(dir))
+        if (!connectedMeshConfig.directionalTris.ContainsKey(face.side))
             return;
 
         Rect texture;
         RenderGeometryBatcher batcher = chunk.GeometryHandler.Batcher;
         ChunkBlocks blocks = chunk.blocks;
 
-        if (connectedMeshConfig.connectsToSolid && blocks.Get(localPos + dir).Solid)
+        if (connectedMeshConfig.connectsToSolid && blocks.Get(face.pos + face.side).Solid)
         {
-            texture = connectedMeshConfig.texture.GetTexture(chunk, localPos, dir);
-            batcher.AddMeshData(connectedMeshConfig.directionalTris[dir], connectedMeshConfig.directionalVerts[dir], texture, localPos, materialID);
+            texture = connectedMeshConfig.texture.GetTexture(chunk, face.pos, face.side);
+            batcher.AddMeshData(connectedMeshConfig.directionalTris[face.side], connectedMeshConfig.directionalVerts[face.side], texture, face.pos, face.materialID);
         }
         else if (connectedMeshConfig.connectsToTypes.Length!=0)
         {
-            int neighborType = blocks.Get(localPos.Add(dir)).Type;
+            int neighborType = blocks.Get(face.pos.Add(face.side)).Type;
             for (int i = 0; i<connectedMeshConfig.connectsToTypes.Length; i++)
             {
                 if (neighborType==connectedMeshConfig.connectsToTypes[i])
                 {
-                    texture = connectedMeshConfig.texture.GetTexture(chunk, localPos, dir);
-                    batcher.AddMeshData(connectedMeshConfig.directionalTris[dir], connectedMeshConfig.directionalVerts[dir], texture, localPos, materialID);
+                    texture = connectedMeshConfig.texture.GetTexture(chunk, face.pos, face.side);
+                    batcher.AddMeshData(connectedMeshConfig.directionalTris[face.side], connectedMeshConfig.directionalVerts[face.side], texture, face.pos, face.materialID);
                     break;
                 }
             }
         }
 
-        texture = customMeshConfig.texture.GetTexture(chunk, localPos, Direction.down);
-        batcher.AddMeshData(customMeshConfig.tris, customMeshConfig.verts, texture, localPos, materialID);
+        texture = customMeshConfig.texture.GetTexture(chunk, face.pos, Direction.down);
+        batcher.AddMeshData(customMeshConfig.tris, customMeshConfig.verts, texture, face.pos, face.materialID);
     }
 
     public override void BuildBlock(Chunk chunk, Vector3Int localPos, int materialID)
@@ -60,7 +61,17 @@ public class ConnectedMeshBlock: CustomMeshBlock
         for (int d = 0; d<6; d++)
         {
             Direction dir = DirectionUtils.Get(d);
-            BuildFace(chunk, localPos, null, dir, materialID);
+
+            BlockFace face = new BlockFace()
+            {
+                block = null,
+                pos = localPos,
+                side = dir,
+                light = new BlockLightData(0),
+                materialID = materialID
+            };
+
+            BuildFace(chunk, null, ref face);
         }
 
         Rect texture = customMeshConfig.texture.GetTexture(chunk, localPos, Direction.down);

@@ -377,7 +377,16 @@ namespace Voxelmetric.Code.Core
         /// <returns>The block at the position</returns>
         public BlockData Get(int index)
         {
-            return blocks[index];
+            try
+            {
+                return blocks[index];
+            }
+            catch (Exception ex)
+            {
+                
+                Debug.LogException(ex);
+                return blocks[0];
+            }
         }
 
         /// <summary>

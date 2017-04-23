@@ -32,6 +32,20 @@ namespace Voxelmetric.Code.Core
             return chunk.blocks.Get(Helpers.GetChunkIndex1DFrom3D(xx, yy, zz));
         }
 
+        public BlockData Get(Vector3Int pos)
+        {
+            // Return air for chunk that do not exist
+            Chunk chunk = world.chunks.Get(ref pos);
+            if (chunk == null)
+                return BlockProvider.AirBlock;
+
+            int xx = Helpers.Mod(pos.x, Env.ChunkSize);
+            int yy = Helpers.Mod(pos.y, Env.ChunkSize);
+            int zz = Helpers.Mod(pos.z, Env.ChunkSize);
+
+            return chunk.blocks.Get(Helpers.GetChunkIndex1DFrom3D(xx, yy, zz));
+        }
+
         /// <summary>
         /// Retrives the block at given world coordinates
         /// </summary>
