@@ -35,7 +35,7 @@ namespace Voxelmetric.Code.Utilities
             Vector3 dist;
 
             //The block at bPos
-            Block hitBlock = world.blocks.GetBlock(bPos);
+            Block hitBlock = world.blocks.GetBlock(ref bPos);
             while (!hitBlock.RaycastHit(pos, dir, bPos, removalRequested) && Vector3.Distance(ray.origin, pos) < range)
             {
                 // Get the nearest upcoming boundary for each direction
@@ -73,7 +73,7 @@ namespace Voxelmetric.Code.Utilities
                 // and will need to use the corresponding direction sign to decide which side of the boundary to fall on
                 adjacentBPos = bPos;
                 bPos = new Vector3Int(ResolveBlockPos(pos.x, dirS.x), ResolveBlockPos(pos.y, dirS.y), ResolveBlockPos(pos.z, dirS.z));
-                hitBlock = world.blocks.GetBlock(bPos);
+                hitBlock = world.blocks.GetBlock(ref bPos);
 
                 // The while loop then evaluates if hitblock is a viable block to stop on and
                 // if not does it all again starting from the new position

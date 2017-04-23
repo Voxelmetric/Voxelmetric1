@@ -14,7 +14,7 @@ public class BlockPosTest {
     }
 
     private static void AssertContainingChunkCoordinates(Vector3Int pos) {
-        Assert.AreEqual(ExpContainingChunkCoordinates(pos), Chunk.ContainingChunkPos(pos), pos.ToString());
+        Assert.AreEqual(ExpContainingChunkCoordinates(pos), Chunk.ContainingChunkPos(ref pos), pos.ToString());
     }
 
     //returns the position of the chunk containing this block

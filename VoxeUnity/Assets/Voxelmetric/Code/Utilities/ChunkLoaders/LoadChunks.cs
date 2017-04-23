@@ -126,7 +126,7 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
             {
                 // Update chunk's visibility information
                 Vector3Int chunkPos = new Vector3Int(wx, wy, wz);
-                Chunk chunk = world.chunks.Get(chunkPos);
+                Chunk chunk = world.chunks.Get(ref chunkPos);
                 if (chunk==null)
                     return;
 
@@ -167,7 +167,7 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
                         {
                             // Update chunk's visibility information
                             Vector3Int chunkPos = new Vector3Int(cx, cy, cz);
-                            Chunk chunk = world.chunks.Get(chunkPos);
+                            Chunk chunk = world.chunks.Get(ref chunkPos);
                             if (chunk==null)
                                 continue;
 
@@ -198,7 +198,7 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
                         {
                             // Update chunk's visibility information
                             Vector3Int chunkPos = new Vector3Int(cx, cy, cz);
-                            Chunk chunk = world.chunks.Get(chunkPos);
+                            Chunk chunk = world.chunks.Get(ref chunkPos);
                             if (chunk==null)
                                 continue;
 
@@ -317,7 +317,7 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
                         
                     // Create and register chunks
                     Chunk chunk;
-                    if (!world.chunks.CreateOrGetChunk(newChunkPos, out chunk))
+                    if (!world.chunks.CreateOrGetChunk(ref newChunkPos, out chunk))
                         continue;
 
                     if (FullLoadOnStartUp)
@@ -466,7 +466,8 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
 
         private void UpdateViewerPosition()
         {
-            Vector3Int pos = Chunk.ContainingChunkPos(transform.position);
+            Vector3Int chunkPos = transform.position;
+            Vector3Int pos = Chunk.ContainingChunkPos(ref chunkPos);
 
             // Update the viewer position
             m_viewerPosPrev = m_viewerPos;

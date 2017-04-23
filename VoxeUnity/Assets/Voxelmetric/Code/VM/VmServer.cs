@@ -120,7 +120,7 @@ namespace Voxelmetric.Code.VM
             }
         }
 
-        public void RequestChunk(Vector3Int pos, int id)
+        public void RequestChunk(ref Vector3Int pos, int id)
         {
             Chunk chunk = null;
             if (world == null)
@@ -129,7 +129,7 @@ namespace Voxelmetric.Code.VM
                                + " world not set (" + pos + ", " + id + ")");
             }
             else
-                chunk = world.chunks.Get(pos);
+                chunk = world.chunks.Get(ref pos);
 
             byte[] data;
 
@@ -204,10 +204,10 @@ namespace Voxelmetric.Code.VM
             }
         }
 
-        public void ReceiveChange(Vector3Int pos, ushort data, int id)
+        public void ReceiveChange(ref Vector3Int pos, ushort data, int id)
         {
             BlockData blockData = new BlockData(data);
-            world.blocks.Modify(pos, blockData, true);
+            world.blocks.Modify(ref pos, blockData, true);
             BroadcastChange(pos, blockData, id);
         }
     }

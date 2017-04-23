@@ -18,10 +18,10 @@ namespace Voxelmetric.Code.Core
         /// Gets the chunk and retrives the block data at the given coordinates
         /// </summary>
         /// <param name="pos">Global position of the block data</param>
-        public BlockData Get(Vector3Int pos)
+        public BlockData Get(ref Vector3Int pos)
         {
             // Return air for chunk that do not exist
-            Chunk chunk = world.chunks.Get(pos);
+            Chunk chunk = world.chunks.Get(ref pos);
             if (chunk==null)
                 return BlockProvider.AirBlock;
 
@@ -36,10 +36,10 @@ namespace Voxelmetric.Code.Core
         /// Retrives the block at given world coordinates
         /// </summary>
         /// <param name="pos">Global position of the block</param>
-        public Block GetBlock(Vector3Int pos)
+        public Block GetBlock(ref Vector3Int pos)
         {
             // Return air for chunk that do not exist
-            Chunk chunk = world.chunks.Get(pos);
+            Chunk chunk = world.chunks.Get(ref pos);
             if (chunk==null)
                 return world.blockProvider.BlockTypes[BlockProvider.AirType];
 
@@ -56,9 +56,9 @@ namespace Voxelmetric.Code.Core
         /// </summary>
         /// <param name="pos">Global position of the block</param>
         /// <param name="blockData">A block to be placed on a given position</param>
-        public void Set(Vector3Int pos, BlockData blockData)
+        public void Set(ref Vector3Int pos, BlockData blockData)
         {
-            Chunk chunk = world.chunks.Get(pos);
+            Chunk chunk = world.chunks.Get(ref pos);
             if (chunk==null)
                 return;
 
@@ -75,9 +75,9 @@ namespace Voxelmetric.Code.Core
         /// </summary>
         /// <param name="pos">Global position of the block</param>
         /// <param name="blockData">A block to be placed on a given position</param>
-        public void SetRaw(Vector3Int pos, BlockData blockData)
+        public void SetRaw(ref Vector3Int pos, BlockData blockData)
         {
-            Chunk chunk = world.chunks.Get(pos);
+            Chunk chunk = world.chunks.Get(ref pos);
             if (chunk==null)
                 return;
 
@@ -94,37 +94,73 @@ namespace Voxelmetric.Code.Core
         /// <param name="posFrom">Starting position in local chunk coordinates</param>
         /// <param name="posTo">Ending position in local chunk coordinates</param>
         /// <param name="blockData">A block to be placed on a given position</param>
-        public void SetRange(Vector3Int posFrom, Vector3Int posTo, BlockData blockData)
+        public void SetRange(ref Vector3Int posFrom, ref Vector3Int posTo, BlockData blockData)
         {
-            Vector3Int chunkPosFrom = Chunk.ContainingChunkPos(posFrom);
-            Vector3Int chunkPosTo = Chunk.ContainingChunkPos(posTo);
+            // Let's make sure that ranges are okay
+            int x1, x2, y1, y2, z1, z2;
+            if (posFrom.x > posTo.x)
+            {
+                x1 = posTo.x;
+                x2 = posFrom.x;
+            }
+            else
+            {
+                x1 = posFrom.x;
+                x2 = posTo.x;
+            }
+            if (posFrom.y > posTo.y)
+            {
+                y1 = posTo.y;
+                y2 = posFrom.y;
+            }
+            else
+            {
+                y1 = posFrom.y;
+                y2 = posTo.y;
+            }
+            if (posFrom.z > posTo.z)
+            {
+                z1 = posTo.z;
+                z2 = posFrom.z;
+            }
+            else
+            {
+                z1 = posFrom.z;
+                z2 = posTo.z;
+            }
+            Vector3Int pFrom = new Vector3Int(x1, y1, z1);
+            Vector3Int pTo = new Vector3Int(x2, y2, z2);
+
+            Vector3Int chunkPosFrom = Chunk.ContainingChunkPos(ref pFrom);
+            Vector3Int chunkPosTo = Chunk.ContainingChunkPos(ref pTo);
 
             // Update all chunks in range
-            int minY = Helpers.Mod(posFrom.y+chunkPosFrom.y,Env.ChunkSize);
+            int minY = Helpers.Mod(pFrom.y+chunkPosFrom.y,Env.ChunkSize);
             for (int cy = chunkPosFrom.y; cy<=chunkPosTo.y; cy += Env.ChunkSize, minY = 0)
             {
                 int maxY = Helpers.MakeChunkCoordinate(minY);
-                maxY = Helpers.Mod(Math.Min(maxY+cy-1, posTo.y),Env.ChunkSize);
-                int minZ = Helpers.Mod(posFrom.z+chunkPosFrom.z,Env.ChunkSize);
+                maxY = Helpers.Mod(Math.Min(maxY+cy-1, pTo.y),Env.ChunkSize);
+                int minZ = Helpers.Mod(pFrom.z+chunkPosFrom.z,Env.ChunkSize);
 
                 for (int cz = chunkPosFrom.z; cz<=chunkPosTo.z; cz += Env.ChunkSize, minZ = 0)
                 {
                     int maxZ = Helpers.MakeChunkCoordinate(minZ);
-                    maxZ = Helpers.Mod(Math.Min(maxZ+cz-1, posTo.z),Env.ChunkSize);
-                    int minX = Helpers.Mod(posFrom.x+chunkPosFrom.x,Env.ChunkSize);
+                    maxZ = Helpers.Mod(Math.Min(maxZ+cz-1, pTo.z),Env.ChunkSize);
+                    int minX = Helpers.Mod(pFrom.x+chunkPosFrom.x,Env.ChunkSize);
 
                     for (int cx = chunkPosFrom.x; cx<=chunkPosTo.x; cx += Env.ChunkSize, minX = 0)
                     {
-                        Chunk chunk = world.chunks.Get(new Vector3Int(cx, cy, cz));
+                        Vector3Int chunkPos = new Vector3Int(cx, cy, cz);
+                        Chunk chunk = world.chunks.Get(ref chunkPos);
                         if (chunk==null)
                             continue;
 
                         int maxX = Helpers.MakeChunkCoordinate(minX);
-                        maxX = Helpers.Mod(Math.Min(maxX+cx-1, posTo.x),Env.ChunkSize);
+                        maxX = Helpers.Mod(Math.Min(maxX+cx-1, pTo.x),Env.ChunkSize);
 
                         Vector3Int from = new Vector3Int(minX, minY, minZ);
                         Vector3Int to = new Vector3Int(maxX, maxY, maxZ);
-                        chunk.blocks.SetRange(from, to, blockData);
+                        chunk.blocks.SetRange(ref from, ref to, blockData);
                     }
                 }
             }
@@ -137,9 +173,9 @@ namespace Voxelmetric.Code.Core
         /// <param name="pos">Global position of the block</param>
         /// <param name="blockData">The block be placed</param>
         /// <param name="setBlockModified">Set to true to mark chunk data as modified</param>
-        public void Modify(Vector3Int pos, BlockData blockData, bool setBlockModified)
+        public void Modify(ref Vector3Int pos, BlockData blockData, bool setBlockModified)
         {
-            Chunk chunk = world.chunks.Get(pos);
+            Chunk chunk = world.chunks.Get(ref pos);
             if (chunk==null)
                 return;
 
@@ -149,7 +185,7 @@ namespace Voxelmetric.Code.Core
                 Helpers.Mod(pos.z, Env.ChunkSize)
                 );
 
-            chunk.blocks.Modify(vector3Int, blockData, setBlockModified);
+            chunk.blocks.Modify(ref vector3Int, blockData, setBlockModified);
         }
 
         /// <summary>
@@ -159,37 +195,73 @@ namespace Voxelmetric.Code.Core
         /// <param name="posTo">Ending position in local chunk coordinates</param>
         /// <param name="blockData">BlockData to place at the given location</param>
         /// <param name="setBlockModified">Set to true to mark chunk data as modified</param>
-        public void ModifyRange(Vector3Int posFrom, Vector3Int posTo, BlockData blockData, bool setBlockModified)
+        public void ModifyRange(ref Vector3Int posFrom, ref Vector3Int posTo, BlockData blockData, bool setBlockModified)
         {
-            Vector3Int chunkPosFrom = Chunk.ContainingChunkPos(posFrom);
-            Vector3Int chunkPosTo = Chunk.ContainingChunkPos(posTo);
+            // Let's make sure that ranges are okay
+            int x1, x2, y1, y2, z1, z2;
+            if (posFrom.x>posTo.x)
+            {
+                x1 = posTo.x;
+                x2 = posFrom.x;
+            }
+            else
+            {
+                x1 = posFrom.x;
+                x2 = posTo.x;
+            }
+            if (posFrom.y > posTo.y)
+            {
+                y1 = posTo.y;
+                y2 = posFrom.y;
+            }
+            else
+            {
+                y1 = posFrom.y;
+                y2 = posTo.y;
+            }
+            if (posFrom.z > posTo.z)
+            {
+                z1 = posTo.z;
+                z2 = posFrom.z;
+            }
+            else
+            {
+                z1 = posFrom.z;
+                z2 = posTo.z;
+            }
+            Vector3Int pFrom = new Vector3Int(x1, y1, z1);
+            Vector3Int pTo = new Vector3Int(x2, y2, z2);
+
+            Vector3Int chunkPosFrom = Chunk.ContainingChunkPos(ref pFrom);
+            Vector3Int chunkPosTo = Chunk.ContainingChunkPos(ref pTo);
 
             // Update all chunks in range
-            int minY = Helpers.Mod(posFrom.y+chunkPosFrom.y,Env.ChunkSize);
+            int minY = Helpers.Mod(pFrom.y+chunkPosFrom.y,Env.ChunkSize);
             for (int cy = chunkPosFrom.y; cy<=chunkPosTo.y; cy += Env.ChunkSize, minY = 0)
             {
                 int maxY = Helpers.MakeChunkCoordinate(minY);
-                maxY = Helpers.Mod(Math.Min(maxY+cy-1, posTo.y),Env.ChunkSize);
-                int minZ = Helpers.Mod(posFrom.z+chunkPosFrom.z,Env.ChunkSize);
+                maxY = Helpers.Mod(Math.Min(maxY+cy-1, pTo.y),Env.ChunkSize);
+                int minZ = Helpers.Mod(pFrom.z+chunkPosFrom.z,Env.ChunkSize);
 
                 for (int cz = chunkPosFrom.z; cz<=chunkPosTo.z; cz += Env.ChunkSize, minZ = 0)
                 {
                     int maxZ = Helpers.MakeChunkCoordinate(minZ);
-                    maxZ = Helpers.Mod(Math.Min(maxZ+cz-1, posTo.z),Env.ChunkSize);
-                    int minX = Helpers.Mod(posFrom.x+chunkPosFrom.x,Env.ChunkSize);
+                    maxZ = Helpers.Mod(Math.Min(maxZ+cz-1, pTo.z),Env.ChunkSize);
+                    int minX = Helpers.Mod(pFrom.x+chunkPosFrom.x,Env.ChunkSize);
 
                     for (int cx = chunkPosFrom.x; cx<=chunkPosTo.x; cx += Env.ChunkSize, minX = 0)
                     {
-                        Chunk chunk = world.chunks.Get(new Vector3Int(cx, cy, cz));
+                        Vector3Int chunkPos = new Vector3Int(cx, cy, cz);
+                        Chunk chunk = world.chunks.Get(ref chunkPos);
                         if (chunk==null)
                             continue;
 
                         int maxX = Helpers.MakeChunkCoordinate(minX);
-                        maxX = Helpers.Mod(Math.Min(maxX+cx-1, posTo.x),Env.ChunkSize);
+                        maxX = Helpers.Mod(Math.Min(maxX+cx-1, pTo.x),Env.ChunkSize);
 
                         Vector3Int from = new Vector3Int(minX, minY, minZ);
                         Vector3Int to = new Vector3Int(maxX, maxY, maxZ);
-                        chunk.blocks.ModifyRange(from, to, blockData, setBlockModified);
+                        chunk.blocks.ModifyRange(ref from, ref to, blockData, setBlockModified);
                     }
                 }
             }

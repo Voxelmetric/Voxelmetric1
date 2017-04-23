@@ -64,7 +64,7 @@ namespace Voxelmetric.Code.Core
         /// Returns the position of the chunk containing this block
         /// </summary>
         /// <returns>The position of the chunk containing this block</returns>
-        public static Vector3Int ContainingChunkPos(Vector3Int pos)
+        public static Vector3Int ContainingChunkPos(ref Vector3Int pos)
         {
             return new Vector3Int(
                 Helpers.MakeChunkCoordinate(pos.x),

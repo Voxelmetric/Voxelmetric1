@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
+using Voxelmetric.Code;
 using Voxelmetric.Code.Core;
 using Voxelmetric.Code.Core.Serialization;
 using Voxelmetric.Code.Data_types;
@@ -70,7 +71,7 @@ namespace Voxelmetric.Examples
 
                 // Display the type of the selected block
                 if (selectedBlockText!=null)
-                    selectedBlockText.text = Code.Voxelmetric.GetBlock(world, hit.vector3Int).DisplayName;
+                    selectedBlockText.text = Code.Voxelmetric.GetBlock(world, ref hit.vector3Int).DisplayName;
 
                 // Save current world status
                 if (saveProgressText != null)
@@ -82,7 +83,8 @@ namespace Voxelmetric.Examples
                     if (hit.block.Type!=BlockProvider.AirType)
                     {
                         bool adjacent = block.Type!=BlockProvider.AirType;
-                        Code.Voxelmetric.SetBlock(world, adjacent ? hit.adjacentPos : hit.vector3Int, new BlockData(block.Type, block.Solid));
+                        Vector3Int blockPos = adjacent ? hit.adjacentPos : hit.vector3Int;
+                        Code.Voxelmetric.SetBlock(world, ref blockPos, new BlockData(block.Type, block.Solid));
                     }
                 }
 
@@ -112,7 +114,9 @@ namespace Voxelmetric.Examples
                 // Test of ranged block setting
                 if (Input.GetKeyDown(KeyCode.T))
                 {
-                    Code.Voxelmetric.SetBlockRange(world, new Vector3Int(-44, -44, -44), new Vector3Int(44, 44, 44), BlockProvider.AirBlock);
+                    Vector3Int fromPos = new Vector3Int(-44,-44,-44);
+                    Vector3Int toPos = new Vector3Int(44, 44, 44);
+                    Code.Voxelmetric.SetBlockRange(world, ref fromPos, ref toPos, BlockProvider.AirBlock);
                 }
             }
         }

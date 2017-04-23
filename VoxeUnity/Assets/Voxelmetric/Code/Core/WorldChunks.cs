@@ -33,9 +33,9 @@ namespace Voxelmetric.Code.Core
         /// <summary> Returns the chunk at the given position </summary>
         /// <param name="pos">Position of the chunk in the world coordinates</param>
         /// <returns>The chunk that contains the given block position or null if there is none</returns>
-        public Chunk Get(Vector3Int pos)
+        public Chunk Get(ref Vector3Int pos)
         {
-            pos = Chunk.ContainingChunkPos(pos);
+            pos = Chunk.ContainingChunkPos(ref pos);
 
             // If we previously searched for this chunk there is no need to look it up again
             /*if (pos == lastChunkPos && lastChunk != null)
@@ -49,13 +49,13 @@ namespace Voxelmetric.Code.Core
             return containerChunk;
         }
 
-        public bool Set(Vector3Int pos, Chunk chunk)
+        public bool Set(ref Vector3Int pos, Chunk chunk)
         {
             Assert.IsTrue(Helpers.IsMainThread);
-            pos = Chunk.ContainingChunkPos(pos);
+            pos = Chunk.ContainingChunkPos(ref pos);
 
             // Let's keep it within allowed world bounds
-            if (!world.IsCoordInsideWorld(pos))
+            if (!world.IsCoordInsideWorld(ref pos))
                 return false;
 
             chunks[pos] = chunk;
@@ -79,13 +79,13 @@ namespace Voxelmetric.Code.Core
         /// <param name="pos">Position to create this chunk on in the world coordinates.</param>
         /// <param name="chunk">Chunk at a given world position</param>
         /// <returns>True if a new chunk was created. False otherwise</returns>
-        public bool CreateOrGetChunk(Vector3Int pos, out Chunk chunk)
+        public bool CreateOrGetChunk(ref Vector3Int pos, out Chunk chunk)
         {
             Assert.IsTrue(Helpers.IsMainThread);
-            Vector3Int p = Chunk.ContainingChunkPos(pos);
+            Vector3Int p = Chunk.ContainingChunkPos(ref pos);
 
             // Let's keep it within allowed world bounds
-            if (!world.IsCoordInsideWorld(p))
+            if (!world.IsCoordInsideWorld(ref p))
             {
                 chunk = null;
                 return false;
@@ -101,7 +101,7 @@ namespace Voxelmetric.Code.Core
             lastChunkPos = pos;*/
 
             // Don't recreate the chunk if it already exists
-            chunk = Get(p);
+            chunk = Get(ref p);
             if (chunk!=null)
                 return false;
 

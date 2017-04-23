@@ -12,19 +12,19 @@ namespace Voxelmetric.Code
         //Used as a manager class with references to classes treated like singletons
         public static readonly VoxelmetricResources resources = new VoxelmetricResources ();
 
-        public static void SetBlock(World world, Vector3Int pos, BlockData blockData)
+        public static void SetBlock(World world, ref Vector3Int pos, BlockData blockData)
         {
-            world.blocks.Modify(pos, blockData, true);
+            world.blocks.Modify(ref pos, blockData, true);
         }
 
-        public static void SetBlockRange(World world, Vector3Int posFrom, Vector3Int posTo, BlockData blockData)
+        public static void SetBlockRange(World world, ref Vector3Int posFrom, ref Vector3Int posTo, BlockData blockData)
         {
-            world.blocks.ModifyRange(posFrom, posTo, blockData, true);
+            world.blocks.ModifyRange(ref posFrom, ref posTo, blockData, true);
         }
 
-        public static Block GetBlock(World world, Vector3Int pos)
+        public static Block GetBlock(World world, ref Vector3Int pos)
         {
-            Block block = world.blocks.GetBlock(pos);
+            Block block = world.blocks.GetBlock(ref pos);
             return block;
         }
 

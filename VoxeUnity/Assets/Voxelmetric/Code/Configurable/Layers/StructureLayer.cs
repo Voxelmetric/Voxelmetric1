@@ -66,7 +66,9 @@ public class StructureLayer : TerrainLayer
                         int xx = Helpers.Mod(x, Env.ChunkSize);
                         int zz = Helpers.Mod(z, Env.ChunkSize);
                         int height = Helpers.FastFloor(terrainGen.GetTerrainHeightForChunk(chunk, xx, zz));
-                        structure.Build(world, new Vector3Int(x, height, z), this);
+
+                        Vector3Int blockPos = new Vector3Int(x, height, z);
+                        structure.Build(world, ref blockPos, this);
                     }
                 }
             }

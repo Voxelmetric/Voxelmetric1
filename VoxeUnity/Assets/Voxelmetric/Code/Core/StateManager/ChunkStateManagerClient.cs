@@ -965,7 +965,7 @@ namespace Voxelmetric.Code.Core.StateManager
             //if (!world.CheckInsideWorld(neighborPos))
               //return;
 
-            Chunk neighbor = world.chunks.Get(neighborPos);
+            Chunk neighbor = world.chunks.Get(ref neighborPos);
             if (neighbor==null)
                 return;
 

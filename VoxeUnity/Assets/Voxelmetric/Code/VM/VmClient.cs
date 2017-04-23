@@ -154,7 +154,7 @@ namespace Voxelmetric.Code.VM
                 case VmNetworking.SendBlockChange:
                     Vector3Int pos = Vector3Int.FromBytes(receivedData, 1);
                     ushort data = BitConverter.ToUInt16(receivedData, 13);
-                    ReceiveChange(pos, new BlockData(data));
+                    ReceiveChange(ref pos, new BlockData(data));
                     break;
                 case VmNetworking.transmitChunkData:
                     ReceiveChunk(receivedData);
@@ -176,7 +176,7 @@ namespace Voxelmetric.Code.VM
         private void ReceiveChunk(byte[] data)
         {
             Vector3Int pos = Vector3Int.FromBytes(data, 1);
-            Chunk chunk = world.chunks.Get(pos);
+            Chunk chunk = world.chunks.Get(ref pos);
             // for now just issue an error if it isn't yet loaded
             if (chunk == null)
             {
@@ -198,9 +198,9 @@ namespace Voxelmetric.Code.VM
             Send(data);
         }
 
-        private void ReceiveChange(Vector3Int pos, BlockData block)
+        private void ReceiveChange(ref Vector3Int pos, BlockData block)
         {
-            world.blocks.Modify(pos, block, false);
+            world.blocks.Modify(ref pos, block, false);
         }
 
         public void Disconnect()

@@ -121,7 +121,7 @@ namespace Voxelmetric.Code.Core
             }
         }
 
-        public bool IsCoordInsideWorld(Vector3Int pos)
+        public bool IsCoordInsideWorld(ref Vector3Int pos)
         {
             return config.minY==config.maxY || (pos.y>=config.minY && pos.y<=config.maxY);
         }

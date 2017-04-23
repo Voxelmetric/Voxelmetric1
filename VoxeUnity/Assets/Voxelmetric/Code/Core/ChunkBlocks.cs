@@ -141,7 +141,7 @@ namespace Voxelmetric.Code.Core
 
             if (setBlockModified)
             {
-                BlockModified(new BlockPos(x, y, z), globalPos, block);
+                BlockModified(new BlockPos(x, y, z), ref globalPos, block);
 
                 chunk.blocks.recalculateBounds = true;
             }
@@ -428,7 +428,7 @@ namespace Voxelmetric.Code.Core
         /// <param name="posFrom">Starting position in local chunk coordinates</param>
         /// <param name="posTo">Ending position in local chunk coordinates</param>
         /// <param name="blockData">A block to be placed on a given position</param>
-        public void SetRange(Vector3Int posFrom, Vector3Int posTo, BlockData blockData)
+        public void SetRange(ref Vector3Int posFrom, ref Vector3Int posTo, BlockData blockData)
         {
             for (int y = posFrom.y; y<=posTo.y; y++)
             {
@@ -448,7 +448,7 @@ namespace Voxelmetric.Code.Core
         /// <param name="pos">Position in local chunk coordinates</param>
         /// <param name="blockData">BlockData to place at the given location</param>
         /// <param name="setBlockModified">Set to true to mark chunk data as modified</param>
-        public void Modify(Vector3Int pos, BlockData blockData, bool setBlockModified)
+        public void Modify(ref Vector3Int pos, BlockData blockData, bool setBlockModified)
         {
             int index = Helpers.GetChunkIndex1DFrom3D(pos.x, pos.y, pos.z);
 
@@ -467,7 +467,7 @@ namespace Voxelmetric.Code.Core
         /// <param name="posTo">Ending position in local chunk coordinates</param>
         /// <param name="blockData">BlockData to place at the given location</param>
         /// <param name="setBlockModified">Set to true to mark chunk data as modified</param>
-        public void ModifyRange(Vector3Int posFrom, Vector3Int posTo, BlockData blockData, bool setBlockModified)
+        public void ModifyRange(ref Vector3Int posFrom, ref Vector3Int posTo, BlockData blockData, bool setBlockModified)
         {
             int indexFrom = Helpers.GetChunkIndex1DFrom3D(posFrom.x, posFrom.y, posFrom.z);
             int indexTo = Helpers.GetChunkIndex1DFrom3D(posTo.x, posTo.y, posTo.z);
@@ -475,7 +475,7 @@ namespace Voxelmetric.Code.Core
             m_setBlockQueue.Add(new SetBlockContext(indexFrom, indexTo, blockData, setBlockModified));
         }
 
-        public void BlockModified(BlockPos blockPos, Vector3Int globalPos, BlockData blockData)
+        public void BlockModified(BlockPos blockPos, ref Vector3Int globalPos, BlockData blockData)
         {
             // If this is the server log the changed block so that it can be saved
             if (chunk.world.networking.isServer)

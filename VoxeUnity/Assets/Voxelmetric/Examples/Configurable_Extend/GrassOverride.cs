@@ -49,7 +49,7 @@ public class GrassBlock: CubeBlock
                     //!TODO 1: This does seem to replace the dirt with grass. Fix me
                     //!TODO 2: Why does this keep going after placing the first block?
                     if (blocks.Get(newPos.Add(0,1,0)).Equals(air))
-                        blocks.Modify(newPos, grass, true);
+                        blocks.Modify(ref newPos, grass, true);
                 }
             }
         }

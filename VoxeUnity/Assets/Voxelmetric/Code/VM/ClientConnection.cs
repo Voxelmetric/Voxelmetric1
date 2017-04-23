@@ -83,7 +83,7 @@ namespace Voxelmetric.Code.VM
                 case VmNetworking.SendBlockChange:
                     pos = Vector3Int.FromBytes(receivedData, 1);
                     ushort data = BlockData.RestoreBlockData(receivedData, 13);
-                    server.ReceiveChange(pos, data, ID);
+                    server.ReceiveChange(ref pos, data, ID);
                     break;
                 case VmNetworking.RequestChunkData:
                     pos = Vector3Int.FromBytes(receivedData, 1);
@@ -92,7 +92,7 @@ namespace Voxelmetric.Code.VM
                         Debug.Log("ClientConnection.HandleMessage (" + Thread.CurrentThread.ManagedThreadId + "): " + ID
                                   + " " + pos);
 
-                    server.RequestChunk(pos, ID);
+                    server.RequestChunk(ref pos, ID);
                     break;
             }
         }

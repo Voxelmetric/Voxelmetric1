@@ -52,7 +52,7 @@ namespace Voxelmetric.Code.Utilities
             this.range = range;
             startLocation = start.Add(Direction.down);
             targetLocation = target.Add(Direction.down);
-            distanceFromStartToTarget = Distance(startLocation, targetLocation);
+            distanceFromStartToTarget = Distance(ref startLocation, ref targetLocation);
             this.world = world;
             this.entityHeight = entityHeight;
 
@@ -114,7 +114,7 @@ namespace Voxelmetric.Code.Utilities
             Heuristics parent;
             open.TryGetValue(bestPos, out parent);
 
-            if (Distance(((Vector3)bestPos), targetLocation) <= range)
+            if (Distance(ref bestPos, ref targetLocation) <= range)
             {
                 PathComplete(bestPos);
                 status = Status.succeeded;
@@ -190,15 +190,16 @@ namespace Voxelmetric.Code.Utilities
 
             for (int i = 0; i<adjacentPositions.Count; i++)
             {
-                if(!closed.ContainsKey(adjacentPositions[i])){
+                if(!closed.ContainsKey(adjacentPositions[i]))
+                {
+                    Vector3Int adjPos = adjacentPositions[i];
 
                     var h = new Heuristics(
                         distanceFromStart[i],
-                        Distance(targetLocation,
-                                 adjacentPositions[i]),
+                        Distance(ref targetLocation, ref adjPos),
                         pos);
 
-                    if (IsWalkable(world, adjacentPositions[i]))
+                    if (IsWalkable(world, ref adjPos))
                     {
 
                         Heuristics existingTile;
@@ -220,15 +221,16 @@ namespace Voxelmetric.Code.Utilities
 
         }
 
-        public bool IsWalkable(World world, Vector3Int pos)
+        public bool IsWalkable(World world, ref Vector3Int pos)
         {
-            Block block = world.blocks.GetBlock(pos);
+            Block block = world.blocks.GetBlock(ref pos);
             if (!block.CanBeWalkedOn)
                 return false;
 
             for (int y = 1; y < entityHeight + 1; y++)
             {
-                block = world.blocks.GetBlock(pos.Add(0, y, 0));
+                Vector3Int blockPos = pos.Add(0, y, 0);
+                block = world.blocks.GetBlock(ref blockPos);
                 if (!block.CanBeWalkedThrough)
                     return false;
             }
@@ -237,11 +239,11 @@ namespace Voxelmetric.Code.Utilities
 
         }
 
-        public static float Distance(Vector3Int a, Vector3Int b)
+        public static float Distance(ref Vector3Int a, ref Vector3Int b)
         {
-            var x = a.x - b.x;
-            var y = a.y - b.y;
-            var z = a.z - b.z;
+            int x = a.x - b.x;
+            int y = a.y - b.y;
+            int z = a.z - b.z;
 
             if (x < 0)
                 x *= -1;
