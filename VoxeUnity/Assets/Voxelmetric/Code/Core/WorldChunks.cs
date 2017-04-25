@@ -35,16 +35,16 @@ namespace Voxelmetric.Code.Core
         /// <returns>The chunk that contains the given block position or null if there is none</returns>
         public Chunk Get(ref Vector3Int pos)
         {
-            pos = Chunk.ContainingChunkPos(ref pos);
+            Vector3Int p = Chunk.ContainingChunkPos(ref pos);
 
             // If we previously searched for this chunk there is no need to look it up again
-            /*if (pos == lastChunkPos && lastChunk != null)
+            /*if (p == lastChunkPos && lastChunk != null)
                 return lastChunk;
 
-            lastChunkPos = pos;*/
+            lastChunkPos = p;*/
 
             Chunk containerChunk;
-            chunks.TryGetValue(pos, out containerChunk);
+            chunks.TryGetValue(p, out containerChunk);
 
             return containerChunk;
         }
@@ -52,13 +52,13 @@ namespace Voxelmetric.Code.Core
         public bool Set(ref Vector3Int pos, Chunk chunk)
         {
             Assert.IsTrue(Helpers.IsMainThread);
-            pos = Chunk.ContainingChunkPos(ref pos);
+            Vector3Int p = Chunk.ContainingChunkPos(ref pos);
 
             // Let's keep it within allowed world bounds
-            if (!world.IsCoordInsideWorld(ref pos))
+            if (!world.IsCoordInsideWorld(ref p))
                 return false;
 
-            chunks[pos] = chunk;
+            chunks[p] = chunk;
             return true;
         }
 

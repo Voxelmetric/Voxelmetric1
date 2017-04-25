@@ -9,5 +9,6 @@
     "raycastHitOnRemoval": true,
     "raycastHit": false,
     "custom": true,
+    "solid": false,
     "material": "ChunkColorUV"
 }
