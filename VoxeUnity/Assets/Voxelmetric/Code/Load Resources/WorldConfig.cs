@@ -14,8 +14,12 @@ namespace Voxelmetric.Code.Load_Resources
         public bool useCollisionMesh;
         public bool renderBottomWorldFaces;
 
+        public int minX;
+        public int maxX;
         public int maxY;
         public int minY;
+        public int minZ;
+        public int maxZ;
 
         public float randomUpdateFrequency;
 

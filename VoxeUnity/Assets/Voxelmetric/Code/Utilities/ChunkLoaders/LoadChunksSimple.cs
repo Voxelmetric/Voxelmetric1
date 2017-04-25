@@ -3,7 +3,6 @@ using UnityEngine;
 using UnityEngine.Assertions;
 using UnityEngine.Profiling;
 using Voxelmetric.Code.Common;
-using Voxelmetric.Code.Common.IO;
 using Voxelmetric.Code.Common.Math;
 using Voxelmetric.Code.Core;
 using Voxelmetric.Code.Core.StateManager;
@@ -34,8 +33,12 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
         [Range(HorizontalMinRange, HorizontalMaxRange)] public int HorizontalChunkLoadRadius = HorizontalDefRange;
         // Distance in chunks for loading chunks
         [Range(VerticalMinRange, VerticalMaxRange)] public int VerticalChunkLoadRadius = VerticalDefRange;
+        // Makes the world regenerate around the attached camera. If false, X sticks at 0.
+        public bool FollowCameraX;
         // Makes the world regenerate around the attached camera. If false, Y sticks at 0.
-        public bool FollowCamera;
+        public bool FollowCameraY;
+        // Makes the world regenerate around the attached camera. If false, Z sticks at 0.
+        public bool FollowCameraZ;
         // Toogles frustum culling
         public bool UseFrustumCulling;
         // If false, only visible part of map is loaded on startup
@@ -268,34 +271,43 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
 
             Profiler.BeginSample("HandleVisibility");
 
-            int minY = m_viewerPos.y - (VerticalChunkLoadRadius * Env.ChunkSize);
-            int maxY = m_viewerPos.y + (VerticalChunkLoadRadius * Env.ChunkSize);
+            int minX = m_viewerPos.x-(HorizontalChunkLoadRadius*Env.ChunkSize);
+            int maxX = m_viewerPos.x+(HorizontalChunkLoadRadius*Env.ChunkSize);
+            int minY = m_viewerPos.y-(VerticalChunkLoadRadius*Env.ChunkSize);
+            int maxY = m_viewerPos.y+(VerticalChunkLoadRadius*Env.ChunkSize);
+            int minZ = m_viewerPos.z-(HorizontalChunkLoadRadius*Env.ChunkSize);
+            int maxZ = m_viewerPos.z+(HorizontalChunkLoadRadius*Env.ChunkSize);
+            world.CapCoordXInsideWorld(ref minX, ref maxX);
             world.CapCoordYInsideWorld(ref minY, ref maxY);
+            world.CapCoordZInsideWorld(ref minZ, ref maxZ);
 
+            minX /= Env.ChunkSize;
+            maxX /= Env.ChunkSize;
             minY /= Env.ChunkSize;
             maxY /= Env.ChunkSize;
+            minZ /= Env.ChunkSize;
+            maxZ /= Env.ChunkSize;
 
             // TODO: Merge this with clipmap
             // Let's update chunk visibility info. Operate in chunk load radius so we know we're never outside cached range
-            UpdateVisibility(
-                (m_viewerPos.x/Env.ChunkSize)-HorizontalChunkLoadRadius, minY, (m_viewerPos.z/Env.ChunkSize)-HorizontalChunkLoadRadius,
-                (HorizontalChunkLoadRadius<<1)+1, maxY-minY+1, (HorizontalChunkLoadRadius<<1)+1
-                );
+            UpdateVisibility(minX, minY, minZ, maxX-minX+1, maxY-minY+1, maxZ-minZ+1);
 
             Profiler.EndSample();
         }
 
         public void PostProcessChunks()
         {
+            int minX = m_viewerPos.x-(HorizontalChunkLoadRadius*Env.ChunkSize);
+            int maxX = m_viewerPos.x+(HorizontalChunkLoadRadius*Env.ChunkSize);
             int minY = m_viewerPos.y-(VerticalChunkLoadRadius*Env.ChunkSize);
             int maxY = m_viewerPos.y+(VerticalChunkLoadRadius*Env.ChunkSize);
+            int minZ = m_viewerPos.z-(HorizontalChunkLoadRadius*Env.ChunkSize);
+            int maxZ = m_viewerPos.z+(HorizontalChunkLoadRadius*Env.ChunkSize);
+            world.CapCoordXInsideWorld(ref minX, ref maxX);
             world.CapCoordYInsideWorld(ref minY, ref maxY);
+            world.CapCoordZInsideWorld(ref minZ, ref maxZ);
 
-            world.Bounds = new AABBInt(
-                m_viewerPos.x-(HorizontalChunkLoadRadius*Env.ChunkSize), minY,
-                m_viewerPos.z-(HorizontalChunkLoadRadius*Env.ChunkSize),
-                m_viewerPos.x+(HorizontalChunkLoadRadius*Env.ChunkSize), maxY,
-                m_viewerPos.z+(HorizontalChunkLoadRadius*Env.ChunkSize));
+            world.Bounds = new AABBInt(minX, minY, minZ, maxX, maxY, maxZ);
             
             int expectedChunks = m_chunkPositions.Length*((maxY-minY+Env.ChunkSize) /Env.ChunkSize);
             
@@ -312,13 +324,19 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
             {
                 for (int i = 0; i < m_chunkPositions.Length; i++)
                 {
-                    // Translate array postions to world/chunk positions
-                    Vector3Int newChunkPos = new Vector3Int(
-                        (m_chunkPositions[i].x*Env.ChunkSize)+m_viewerPos.x,
-                        (m_chunkPositions[i].y*Env.ChunkSize)+y,
-                        (m_chunkPositions[i].z*Env.ChunkSize)+m_viewerPos.z
-                        );
+                    // Skip loading chunks which are off limits
+                    int cx = (m_chunkPositions[i].x*Env.ChunkSize)+m_viewerPos.x;
+                    if (cx>maxX || cx<minX)
+                        continue;
+                    int cy = (m_chunkPositions[i].y*Env.ChunkSize)+y;
+                    if (cy>maxY || cy<minY)
+                        continue;
+                    int cz = (m_chunkPositions[i].z*Env.ChunkSize)+m_viewerPos.z;
+                    if (cz>maxZ || cz<minZ)
+                        continue;
 
+                    // Create a new chunk if possible
+                    Vector3Int newChunkPos = new Vector3Int(cx, cy, cz);
                     Chunk chunk;
                     if (!world.chunks.CreateOrGetChunk(ref newChunkPos, out chunk))
                         continue;
@@ -463,14 +481,30 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
             m_viewerPosPrev = m_viewerPos;
 
             // Do not let y overflow
+            int x = 0;
+            if (FollowCameraX)
+            {
+                x = pos.x;
+                world.CapCoordXInsideWorld(ref x, ref x);
+            }
+
+            // Do not let y overflow
             int y = 0;
-            if (FollowCamera)
+            if (FollowCameraY)
             {
                 y = pos.y;
                 world.CapCoordYInsideWorld(ref y, ref y);
             }
 
-            m_viewerPos = new Vector3Int(pos.x, y, pos.z);
+            // Do not let y overflow
+            int z = 0;
+            if (FollowCameraZ)
+            {
+                z = pos.z;
+                world.CapCoordZInsideWorld(ref z, ref z);
+            }
+
+            m_viewerPos = new Vector3Int(x, y, z);
         }
         
         private void OnDrawGizmosSelected()

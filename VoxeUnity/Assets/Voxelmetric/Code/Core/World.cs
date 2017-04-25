@@ -78,19 +78,49 @@ namespace Voxelmetric.Code.Core
 
         private void VerifyConfig()
         {
+            // minX can't be greater then maxX
+            if (config.minX > config.maxX)
+            {
+                int tmp = config.minX;
+                config.maxX = config.minX;
+                config.minX = tmp;
+            }
+
+            if (config.minX != config.maxX)
+            {
+                // Make sure there is at least one chunk worth of space in the world on the X axis
+                if (config.maxX - config.minX < Env.ChunkSize)
+                    config.maxX = config.minX + Env.ChunkSize;
+            }
+
             // minY can't be greater then maxY
-            if (config.minY>config.maxY)
+            if (config.minY > config.maxY)
             {
                 int tmp = config.minY;
                 config.maxY = config.minY;
                 config.minY = tmp;
             }
 
-            if (config.minY!=config.maxY)
+            if (config.minY != config.maxY)
             {
                 // Make sure there is at least one chunk worth of space in the world on the Y axis
-                if (config.maxY-config.minY<Env.ChunkSize)
-                    config.maxY = config.minY+Env.ChunkSize;
+                if (config.maxY - config.minY < Env.ChunkSize)
+                    config.maxY = config.minY + Env.ChunkSize;
+            }
+
+            // minZ can't be greater then maxZ
+            if (config.minZ>config.maxZ)
+            {
+                int tmp = config.minZ;
+                config.maxZ = config.minZ;
+                config.minZ = tmp;
+            }
+
+            if (config.minZ!=config.maxZ)
+            {
+                // Make sure there is at least one chunk worth of space in the world on the Z axis
+                if (config.maxZ-config.minZ<Env.ChunkSize)
+                    config.maxZ = config.minZ+Env.ChunkSize;
             }
         }
 
@@ -107,9 +137,13 @@ namespace Voxelmetric.Code.Core
             networking.EndConnections();
         }
 
-        public bool IsWorldCoordsRestricted()
+        public void CapCoordXInsideWorld(ref int minX, ref int maxX)
         {
-            return config.minY!=config.maxY;
+            if (config.minX!=config.maxX)
+            {
+                minX = Mathf.Max(minX, config.minX);
+                maxX = Mathf.Min(maxX, config.maxX);
+            }
         }
 
         public void CapCoordYInsideWorld(ref int minY, ref int maxY)
@@ -121,9 +155,21 @@ namespace Voxelmetric.Code.Core
             }
         }
 
+        public void CapCoordZInsideWorld(ref int minZ, ref int maxZ)
+        {
+            if (config.minZ!=config.maxZ)
+            {
+                minZ = Mathf.Max(minZ, config.minZ);
+                maxZ = Mathf.Min(maxZ, config.maxZ);
+            }
+        }
+
         public bool IsCoordInsideWorld(ref Vector3Int pos)
         {
-            return config.minY==config.maxY || (pos.y>=config.minY && pos.y<=config.maxY);
+            return
+                config.minX==config.maxX || (pos.x>=config.minX && pos.x<=config.maxX) ||
+                config.minY==config.maxY || (pos.y>=config.minY && pos.y<=config.maxY) ||
+                config.minZ==config.maxZ || (pos.z>=config.minZ && pos.z<=config.maxZ);
         }
     }
 }

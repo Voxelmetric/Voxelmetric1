@@ -7,7 +7,10 @@ EditorBuildSettings:
   m_Scenes:
   - enabled: 0
     path: Assets/Voxelmetric/Examples/scene_benchmarks.unity
+    guid: 5367f341f3075f74685ee176e1100e23
   - enabled: 1
     path: Assets/Voxelmetric/Examples/scene_coloredBlocks.unity
-  - enabled: 1
+    guid: 781a611e9ac645344aa0f73895a18f1b
+  - enabled: 0
     path: Assets/Voxelmetric/Examples/scene_texturedBlocks.unity
+    guid: a52609f8226249b43960441266a53618
