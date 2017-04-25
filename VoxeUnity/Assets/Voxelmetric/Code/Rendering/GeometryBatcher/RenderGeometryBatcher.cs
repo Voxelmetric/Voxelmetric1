@@ -88,7 +88,7 @@ namespace Voxelmetric.Code.Rendering.GeometryBatcher
         /// <param name="texture">Texture coordinates</param>
         /// <param name="offset">Offset to apply to verts</param>
         /// <param name="materialID">ID of material to use when building the mesh</param>
-        public void AddMeshData(int[] tris, VertexDataFixed[] verts, Rect texture, Vector3 offset, int materialID)
+        public void AddMeshData(int[] tris, VertexDataFixed[] verts, ref Rect texture, Vector3 offset, int materialID)
         {
             List<GeometryBuffer> holder = m_buffers[materialID];
             GeometryBuffer buffer = holder[holder.Count - 1];

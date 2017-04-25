@@ -267,7 +267,7 @@ namespace Voxelmetric.Code.Configurable.Blocks.Utilities
 
         public static void PrepareTexture(Chunk chunk, ref Vector3Int localPos, VertexData[] vertexData, Direction direction, TextureCollection textureCollection)
         {
-            Rect texture = textureCollection.GetTexture(chunk, localPos, direction);
+            Rect texture = textureCollection.GetTexture(chunk, ref localPos, direction);
 
             vertexData[3].UV = new Vector2(texture.x+texture.width, texture.y);
             vertexData[2].UV = new Vector2(texture.x+texture.width, texture.y+texture.height);
@@ -277,7 +277,7 @@ namespace Voxelmetric.Code.Configurable.Blocks.Utilities
 
         public static void PrepareTexture(Chunk chunk, ref Vector3Int localPos, VertexData[] vertexData, Direction direction, TextureCollection[] textureCollections)
         {
-            Rect texture = textureCollections[(int)direction].GetTexture(chunk, localPos, direction);
+            Rect texture = textureCollections[(int)direction].GetTexture(chunk, ref localPos, direction);
 
             vertexData[3].UV = new Vector2(texture.x+texture.width, texture.y);
             vertexData[2].UV = new Vector2(texture.x+texture.width, texture.y+texture.height);

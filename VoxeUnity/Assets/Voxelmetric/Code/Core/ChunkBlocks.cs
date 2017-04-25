@@ -134,8 +134,8 @@ namespace Voxelmetric.Code.Core
 
             Block oldBlock = m_blockTypes[oldBlockData.Type];
             Block newBlock = m_blockTypes[block.Type];
-            oldBlock.OnDestroy(chunk, pos);
-            newBlock.OnCreate(chunk, pos);
+            oldBlock.OnDestroy(chunk, ref pos);
+            newBlock.OnCreate(chunk, ref pos);
 
             SetInner(index, block);
 
@@ -353,7 +353,7 @@ namespace Voxelmetric.Code.Core
         /// </summary>
         /// <param name="pos">Position in local chunk coordinates</param>
         /// <returns>The block at the position</returns>
-        public BlockData Get(Vector3Int pos)
+        public BlockData Get(ref Vector3Int pos)
         {
             int index = Helpers.GetChunkIndex1DFrom3D(pos.x, pos.y, pos.z);
             return blocks[index];
@@ -364,7 +364,7 @@ namespace Voxelmetric.Code.Core
         /// </summary>
         /// <param name="pos">Position in local chunk coordinates</param>
         /// <returns>The block at the position</returns>
-        public Block GetBlock(Vector3Int pos)
+        public Block GetBlock(ref Vector3Int pos)
         {
             int index = Helpers.GetChunkIndex1DFrom3D(pos.x, pos.y, pos.z);
             return m_blockTypes[blocks[index].Type];

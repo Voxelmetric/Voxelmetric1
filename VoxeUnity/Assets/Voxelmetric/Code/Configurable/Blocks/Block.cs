@@ -47,7 +47,7 @@ public class Block
     {
     }
 
-    public virtual void BuildBlock(Chunk chunk, Vector3Int localpos, int materialID)
+    public virtual void BuildBlock(Chunk chunk, ref Vector3Int localpos, int materialID)
     {
     }
 
@@ -65,23 +65,23 @@ public class Block
     {
     }
 
-    public virtual void OnCreate(Chunk chunk, Vector3Int localPos)
+    public virtual void OnCreate(Chunk chunk, ref Vector3Int localPos)
     {
     }
 
-    public virtual void OnDestroy(Chunk chunk, Vector3Int localPos)
+    public virtual void OnDestroy(Chunk chunk, ref Vector3Int localPos)
     {
     }
 
-    public virtual void RandomUpdate(Chunk chunk, Vector3Int localPos)
+    public virtual void RandomUpdate(Chunk chunk, ref Vector3Int localPos)
     {
     }
 
-    public virtual void ScheduledUpdate(Chunk chunk, Vector3Int localPos)
+    public virtual void ScheduledUpdate(Chunk chunk, ref Vector3Int localPos)
     {
     }
 
-    public virtual bool RaycastHit(Vector3 pos, Vector3 dir, Vector3Int bPos, bool removalRequested)
+    public virtual bool RaycastHit(ref Vector3 pos, Vector3 dir, ref Vector3Int bPos, bool removalRequested)
     {
         return removalRequested ? Config.raycastHitOnRemoval : Config.raycastHit;
     }

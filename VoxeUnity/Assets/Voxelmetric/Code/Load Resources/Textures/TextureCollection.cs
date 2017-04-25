@@ -39,20 +39,20 @@ namespace Voxelmetric.Code.Load_Resources.Textures
             }
         }
 
-        public Rect GetTexture(Chunk chunk, Vector3Int localPos, Direction direction)
+        public Rect GetTexture(Chunk chunk, ref Vector3Int localPos, Direction direction)
         {
             if (usesConnectedTextures)
             {
-                int blockType = chunk.blocks.Get(localPos).Type;
+                int blockType = chunk.blocks.Get(ref localPos).Type;
 
-                bool wn = ConnectedTextures.IsSame(chunk, localPos, -1, 1, direction, blockType);
-                bool n = ConnectedTextures.IsSame(chunk, localPos, 0, 1, direction, blockType);
-                bool ne = ConnectedTextures.IsSame(chunk, localPos, 1, 1, direction, blockType);
-                bool w = ConnectedTextures.IsSame(chunk, localPos, -1, 0, direction, blockType);
-                bool e = ConnectedTextures.IsSame(chunk, localPos, 1, 0, direction, blockType);
-                bool es = ConnectedTextures.IsSame(chunk, localPos, 1, -1, direction, blockType);
-                bool s = ConnectedTextures.IsSame(chunk, localPos, 0, -1, direction, blockType);
-                bool sw = ConnectedTextures.IsSame(chunk, localPos, -1, -1, direction, blockType);
+                bool wn = ConnectedTextures.IsSame(chunk, ref localPos, -1, 1, direction, blockType);
+                bool n = ConnectedTextures.IsSame(chunk, ref localPos, 0, 1, direction, blockType);
+                bool ne = ConnectedTextures.IsSame(chunk, ref localPos, 1, 1, direction, blockType);
+                bool w = ConnectedTextures.IsSame(chunk, ref localPos, -1, 0, direction, blockType);
+                bool e = ConnectedTextures.IsSame(chunk, ref localPos, 1, 0, direction, blockType);
+                bool es = ConnectedTextures.IsSame(chunk, ref localPos, 1, -1, direction, blockType);
+                bool s = ConnectedTextures.IsSame(chunk, ref localPos, 0, -1, direction, blockType);
+                bool sw = ConnectedTextures.IsSame(chunk, ref localPos, -1, -1, direction, blockType);
 
                 return connectedTextures[ConnectedTextures.GetTexture(n, e, s, w, wn, ne, es, sw)];
             }

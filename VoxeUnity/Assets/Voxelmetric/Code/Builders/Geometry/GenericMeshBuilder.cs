@@ -16,11 +16,11 @@ namespace Voxelmetric.Code.Builders.Geometry
                     {
                         Vector3Int localVector3Int = new Vector3Int(x, y, z);
 
-                        Block block = chunk.blocks.GetBlock(localVector3Int);
+                        Block block = chunk.blocks.GetBlock(ref localVector3Int);
                         if (block.Type==BlockProvider.AirType)
                             continue;
 
-                        block.BuildBlock(chunk, localVector3Int, block.RenderMaterialID);
+                        block.BuildBlock(chunk, ref localVector3Int, block.RenderMaterialID);
                     }
                 }
             }

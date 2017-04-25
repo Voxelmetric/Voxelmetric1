@@ -4,19 +4,20 @@ using Voxelmetric.Code.Data_types;
 
 public class SolidBlock : Block
 {
-    public override void BuildBlock(Chunk chunk, Vector3Int localPos, int materialID)
+    public override void BuildBlock(Chunk chunk, ref Vector3Int localPos, int materialID)
     {
         ChunkBlocks blocks = chunk.blocks;
 
         for (int d = 0; d < 6; d++)
         {
             Direction dir = DirectionUtils.Get(d);
-            Block adjacentBlock = blocks.GetBlock(localPos.Add(dir));
+            Vector3Int blockPos = localPos.Add(dir);
+            Block adjacentBlock = blocks.GetBlock(ref blockPos);
 
             BlockFace face = new BlockFace
             {
-                block = blocks.GetBlock(localPos.Add(dir)),
-                pos = localPos,
+                block = blocks.GetBlock(ref blockPos),
+                pos = blockPos,
                 side = dir,
                 light = new BlockLightData(0),
             };

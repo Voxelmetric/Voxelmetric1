@@ -7,12 +7,13 @@ namespace Voxelmetric.Code.Load_Resources.Textures
 {
     public static class ConnectedTextures {
 
-        public static bool IsSame(Chunk chunk, Vector3Int localPos, int h, int v, Direction dir, int type)
+        public static bool IsSame(Chunk chunk, ref Vector3Int localPos, int h, int v, Direction dir, int type)
         {
-            return chunk.blocks.Get(RelativePos(localPos, h, v, dir)).Type == type;
+            Vector3Int relPos = RelativePos(ref localPos, h, v, dir);
+            return chunk.blocks.Get(ref relPos).Type == type;
         }
 
-        public static Vector3Int RelativePos(Vector3Int pos, int h, int v, Direction dir)
+        public static Vector3Int RelativePos(ref Vector3Int pos, int h, int v, Direction dir)
         {
             switch (dir)
             {

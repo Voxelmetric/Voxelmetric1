@@ -23,7 +23,7 @@ public class GrassBlock: CubeBlock
     }
 
     // On random Update spread grass to any nearby dirt blocks on the surface
-    public override void RandomUpdate(Chunk chunk, Vector3Int localPos)
+    public override void RandomUpdate(Chunk chunk, ref Vector3Int localPos)
     {
         ChunkBlocks blocks = chunk.blocks;
 
@@ -42,13 +42,14 @@ public class GrassBlock: CubeBlock
                 for (int z = -minZ; z<=maxZ; z++)
                 {
                     Vector3Int newPos = localPos.Add(x, y, z);
-                    if (!blocks.Get(newPos).Equals(dirt))
+                    if (!blocks.Get(ref newPos).Equals(dirt))
                         continue;
 
                     // Turn the air above dirt into grass
                     //!TODO 1: This does seem to replace the dirt with grass. Fix me
                     //!TODO 2: Why does this keep going after placing the first block?
-                    if (blocks.Get(newPos.Add(0,1,0)).Equals(air))
+                    Vector3Int grassPos = newPos.Add(0, 1, 0);
+                    if (blocks.Get(ref grassPos).Equals(air))
                         blocks.Modify(ref newPos, grass, true);
                 }
             }

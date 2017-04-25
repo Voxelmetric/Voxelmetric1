@@ -1,5 +1,6 @@
 ﻿using System;
 using UnityEngine;
+using UnityEngine.Profiling;
 using Voxelmetric.Code.Common;
 using Voxelmetric.Code.Configurable.Blocks;
 using Voxelmetric.Code.Configurable.Blocks.Utilities;
@@ -16,6 +17,8 @@ namespace Voxelmetric.Code.Builders.Geometry
 
         public void Build(Chunk chunk, int minX, int maxX, int minY, int maxY, int minZ, int maxZ)
         {
+            Profiler.BeginSample("CubeMeshBuild");
+
             ChunkBlocks blocks = chunk.blocks;
             ChunkStateManagerClient client = chunk.stateManager;
             var pools = chunk.pools;
@@ -78,18 +81,12 @@ namespace Voxelmetric.Code.Builders.Geometry
                         // Compute the mask
                         n = 0;
 
-                        for (x[v] = 0; x[v]<mins[v]; x[v]++)
-                        {
-                            for (x[u] = 0; x[u]<width; x[u]++)
-                                mask[n++] = new BlockFace();
-                        }
+                        Profiler.BeginSample("Calculate mask");
+                        Array.Clear(mask, 0, mask.Length);
 
                         for (x[v] = mins[v]; x[v]<=maxes[v]; x[v]++)
                         {
-                            for (x[u] = 0; x[u]<mins[u]; x[u]++)
-                                mask[n++] = new BlockFace();
-
-                            for (x[u] = mins[u]; x[u]<=maxes[u]; x[u]++)
+                            for (x[u] = mins[u]; x[u]<=maxes[u]; x[u]++, n++)
                             {
                                 int realX = x[0];
                                 int realY = x[1];
@@ -106,7 +103,7 @@ namespace Voxelmetric.Code.Builders.Geometry
                                     // Let's see whether we can merge faces
                                     if (voxelFace1.CanBuildFaceWith(voxelFace0))
                                     {
-                                        mask[n++] = new BlockFace
+                                        mask[n] = new BlockFace
                                         {
                                             block = voxelFace1,
                                             pos = new Vector3Int(realX + q[0], realY + q[1], realZ + q[2]),
@@ -115,17 +112,13 @@ namespace Voxelmetric.Code.Builders.Geometry
                                             materialID = voxelFace1.RenderMaterialID
                                         };
                                     }
-                                    else
-                                    {
-                                        mask[n++] = new BlockFace();
-                                    }
                                 }
                                 else
                                 {
                                     // Let's see whether we can merge faces
                                     if (voxelFace0.CanBuildFaceWith(voxelFace1))
                                     {
-                                        mask[n++] = new BlockFace
+                                        mask[n] = new BlockFace
                                         {
                                             block = voxelFace0,
                                             pos = new Vector3Int(realX, realY, realZ),
@@ -134,22 +127,11 @@ namespace Voxelmetric.Code.Builders.Geometry
                                             materialID = voxelFace0.RenderMaterialID
                                         };
                                     }
-                                    else
-                                    {
-                                        mask[n++] = new BlockFace();
-                                    }
                                 }
                             }
-
-                            for (x[u] = maxes[u]+1; x[u]<width; x[u]++)
-                                mask[n++] = new BlockFace();
                         }
 
-                        for (x[v] = maxes[v]+1; x[v]<width; x[v]++)
-                        {
-                            for (x[u] = 0; x[u]<width; x[u]++)
-                                mask[n++] = new BlockFace();
-                        }
+                        Profiler.EndSample();
 
                         x[d]++;
                         n = 0;
@@ -178,6 +160,7 @@ namespace Voxelmetric.Code.Builders.Geometry
                                 // skip them the next time we come across them again
                                 if (m.block.Custom)
                                 {
+                                    Profiler.BeginSample("CustomBlock");
                                     // Only clear the mask when necessary
                                     if (!customBlockMaskInitialized)
                                     {
@@ -190,10 +173,11 @@ namespace Voxelmetric.Code.Builders.Geometry
                                     if (!customBlockMask[index])
                                     {
                                         customBlockMask[index] = true;
-                                        m.block.BuildBlock(chunk, m.pos, m.block.RenderMaterialID);
+                                        m.block.BuildBlock(chunk, ref m.pos, m.block.RenderMaterialID);
                                     }
 
                                     buildSingleFace = false;
+                                    Profiler.EndSample();
                                 }
                                 // Don't render faces on world's edges for chunks with no neighbor
                                 else if (Features.DontRenderWorldEdgesMask>0 && client.Listeners[(int)dir]==null)
@@ -220,6 +204,7 @@ namespace Voxelmetric.Code.Builders.Geometry
 
                                 if (buildSingleFace)
                                 {
+                                    Profiler.BeginSample("NonCustomBlock");
                                     // Compute width
                                     int maskIndex = n + 1;
                                     for (w = 1; i + w < width;)
@@ -279,6 +264,8 @@ namespace Voxelmetric.Code.Builders.Geometry
                                     }
 
                                     m.block.BuildFace(chunk, vecs, ref m);
+
+                                    Profiler.EndSample();
                                 }
 
                                 // Zero out the mask
@@ -301,6 +288,8 @@ namespace Voxelmetric.Code.Builders.Geometry
             pools.BlockFaceArrayPool.Push(mask);
             pools.BoolArrayPool.Push(customBlockMask);
             pools.Vector3ArrayPool.Push(vecs);
+
+            Profiler.EndSample();
         }
     }
 }
