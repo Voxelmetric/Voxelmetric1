@@ -17,8 +17,6 @@ namespace Voxelmetric.Code.Builders.Geometry
 
         public void Build(Chunk chunk, int minX, int maxX, int minY, int maxY, int minZ, int maxZ)
         {
-            Profiler.BeginSample("CubeMeshBuild");
-
             ChunkBlocks blocks = chunk.blocks;
             ChunkStateManagerClient client = chunk.stateManager;
             var pools = chunk.pools;
@@ -80,8 +78,6 @@ namespace Voxelmetric.Code.Builders.Geometry
                     {
                         // Compute the mask
                         n = 0;
-
-                        Profiler.BeginSample("Calculate mask");
                         Array.Clear(mask, 0, mask.Length);
 
                         for (x[v] = mins[v]; x[v]<=maxes[v]; x[v]++)
@@ -131,8 +127,6 @@ namespace Voxelmetric.Code.Builders.Geometry
                             }
                         }
 
-                        Profiler.EndSample();
-
                         x[d]++;
                         n = 0;
 
@@ -160,7 +154,6 @@ namespace Voxelmetric.Code.Builders.Geometry
                                 // skip them the next time we come across them again
                                 if (m.block.Custom)
                                 {
-                                    Profiler.BeginSample("CustomBlock");
                                     // Only clear the mask when necessary
                                     if (!customBlockMaskInitialized)
                                     {
@@ -177,7 +170,6 @@ namespace Voxelmetric.Code.Builders.Geometry
                                     }
 
                                     buildSingleFace = false;
-                                    Profiler.EndSample();
                                 }
                                 // Don't render faces on world's edges for chunks with no neighbor
                                 else if (Features.DontRenderWorldEdgesMask>0 && client.Listeners[(int)dir]==null)
@@ -204,7 +196,6 @@ namespace Voxelmetric.Code.Builders.Geometry
 
                                 if (buildSingleFace)
                                 {
-                                    Profiler.BeginSample("NonCustomBlock");
                                     // Compute width
                                     int maskIndex = n + 1;
                                     for (w = 1; i + w < width;)
@@ -264,8 +255,6 @@ namespace Voxelmetric.Code.Builders.Geometry
                                     }
 
                                     m.block.BuildFace(chunk, vecs, ref m);
-
-                                    Profiler.EndSample();
                                 }
 
                                 // Zero out the mask
@@ -288,8 +277,6 @@ namespace Voxelmetric.Code.Builders.Geometry
             pools.BlockFaceArrayPool.Push(mask);
             pools.BoolArrayPool.Push(customBlockMask);
             pools.Vector3ArrayPool.Push(vecs);
-
-            Profiler.EndSample();
         }
     }
 }
