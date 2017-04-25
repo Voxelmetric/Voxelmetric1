@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using Voxelmetric.Code.Common.MemoryPooling;
 using Voxelmetric.Code.Configurable.Blocks;
 using Voxelmetric.Code.Configurable.Blocks.Utilities;
 using Voxelmetric.Code.Core;
@@ -16,14 +17,15 @@ public class ColoredBlock : SolidBlock
     {
         bool backFace = DirectionUtils.IsBackface(face.side);
 
-        VertexData[] vertexData = chunk.pools.VertexDataArrayPool.PopExact(4);
-        VertexDataFixed[] vertexDataFixed = chunk.pools.VertexDataFixedArrayPool.PopExact(4);
+        LocalPools pools = chunk.pools;
+        VertexData[] vertexData = pools.VertexDataArrayPool.PopExact(4);
+        VertexDataFixed[] vertexDataFixed = pools.VertexDataFixedArrayPool.PopExact(4);
         {
             if (vertices == null)
             {
                 for (int i = 0; i<4; i++)
                 {
-                    vertexData[i] = chunk.pools.VertexDataPool.Pop();
+                    vertexData[i] = pools.VertexDataPool.Pop();
                     vertexData[i].Color = colors[(int)face.side];
                     vertexData[i].UV = Vector2.zero;
                 }
@@ -33,7 +35,7 @@ public class ColoredBlock : SolidBlock
             {
                 for (int i = 0; i < 4; i++)
                 {
-                    vertexData[i] = chunk.pools.VertexDataPool.Pop();
+                    vertexData[i] = pools.VertexDataPool.Pop();
                     vertexData[i].Vertex = vertices[i];
                     vertexData[i].Color = colors[(int)face.side];
                     vertexData[i].UV = Vector2.zero;
@@ -47,9 +49,9 @@ public class ColoredBlock : SolidBlock
             chunk.GeometryHandler.Batcher.AddFace(vertexDataFixed, backFace, face.materialID);
 
             for (int i = 0; i < 4; i++)
-                chunk.pools.VertexDataPool.Push(vertexData[i]);
+                pools.VertexDataPool.Push(vertexData[i]);
         }
-        chunk.pools.VertexDataFixedArrayPool.Push(vertexDataFixed);
-        chunk.pools.VertexDataArrayPool.Push(vertexData);
+        pools.VertexDataFixedArrayPool.Push(vertexDataFixed);
+        pools.VertexDataArrayPool.Push(vertexData);
     }
 }
