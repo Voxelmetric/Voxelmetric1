@@ -106,13 +106,12 @@ namespace Voxelmetric.Code.Builders.Geometry
                                     // Let's see whether we can merge faces
                                     if (voxelFace1.CanBuildFaceWith(voxelFace0))
                                     {
-                                        Vector3Int blockPos1 = new Vector3Int(realX + q[0], realY + q[1], realZ + q[2]);
                                         mask[n++] = new BlockFace
                                         {
                                             block = voxelFace1,
-                                            pos = blockPos1,
+                                            pos = new Vector3Int(realX + q[0], realY + q[1], realZ + q[2]),
                                             side = dir,
-                                            light = voxelFace1.Custom ? new BlockLightData(0) : BlockUtils.CalculateColors(chunk, ref blockPos1, dir),
+                                            light = voxelFace1.Custom ? new BlockLightData(0) : BlockUtils.CalculateColors(chunk, index1, dir),
                                             materialID = voxelFace1.RenderMaterialID
                                         };
                                     }
@@ -126,13 +125,12 @@ namespace Voxelmetric.Code.Builders.Geometry
                                     // Let's see whether we can merge faces
                                     if (voxelFace0.CanBuildFaceWith(voxelFace1))
                                     {
-                                        Vector3Int blockPos0 = new Vector3Int(realX, realY, realZ);
                                         mask[n++] = new BlockFace
                                         {
                                             block = voxelFace0,
-                                            pos = blockPos0,
+                                            pos = new Vector3Int(realX, realY, realZ),
                                             side = dir,
-                                            light = voxelFace0.Custom ? new BlockLightData(0) : BlockUtils.CalculateColors(chunk, ref blockPos0, dir),
+                                            light = voxelFace0.Custom ? new BlockLightData(0) : BlockUtils.CalculateColors(chunk, index0, dir),
                                             materialID = voxelFace0.RenderMaterialID
                                         };
                                     }

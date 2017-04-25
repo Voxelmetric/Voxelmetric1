@@ -37,7 +37,7 @@ public class CubeBlock: SolidBlock
             }
 
             BlockUtils.PrepareTexture(chunk, ref face.pos, vertexData, face.side, textures);
-            BlockUtils.PrepareColors(chunk, ref face.pos, vertexData, face.side);
+            BlockUtils.PrepareColors(chunk, vertexData, face.side, ref face.light);
 
             for (int i = 0; i < 4; i++)
                 vertexDataFixed[i] = VertexDataUtils.ClassToStruct(vertexData[i]);
