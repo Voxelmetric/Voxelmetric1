@@ -1,5 +1,4 @@
 using UnityEngine;
-using Voxelmetric.Code.Common;
 using Voxelmetric.Code.Core;
 using Voxelmetric.Code.Data_types;
 using Voxelmetric.Code.Load_Resources.Textures;
@@ -394,46 +393,50 @@ namespace Voxelmetric.Code.Configurable.Blocks.Utilities
 
         public static void SetColors(VertexData[] data, float ne, float es, float sw, float wn, float light, Direction direction=Direction.up)
         {
-            wn = (wn * light);
-            ne = (ne * light);
-            es = (es * light);
-            sw = (sw * light);
+            byte wn_ = (byte)(wn*light*255.0f);
+            byte ne_ = (byte)(ne*light*255.0f);
+            byte es_ = (byte)(es*light*255.0f);
+            byte sw_ = (byte)(sw*light*255.0f);
 
             switch (direction)
             {
                 case Direction.down:
-                    data[0].Color = new Color(wn, wn, wn);
-                    data[3].Color = new Color(ne, ne, ne);
-                    data[2].Color = new Color(es, es, es);
-                    data[1].Color = new Color(sw, sw, sw);
+                    data[0].Color = new Color32(wn_, wn_, wn_, 255);
+                    data[3].Color = new Color32(ne_, ne_, ne_, 255);
+                    data[2].Color = new Color32(es_, es_, es_, 255);
+                    data[1].Color = new Color32(sw_, sw_, sw_, 255);
                     break;
                 case Direction.up:
-                    data[1].Color = new Color(wn, wn, wn);
-                    data[2].Color = new Color(ne, ne, ne);
-                    data[3].Color = new Color(es, es, es);
-                    data[0].Color = new Color(sw, sw, sw);
+                    data[1].Color = new Color32(wn_, wn_, wn_, 255);
+                    data[2].Color = new Color32(ne_, ne_, ne_, 255);
+                    data[3].Color = new Color32(es_, es_, es_, 255);
+                    data[0].Color = new Color32(sw_, sw_, sw_, 255);
                     break;
                 case Direction.north:
                 case Direction.east:
-                    data[0].Color = new Color(wn, wn, wn);
-                    data[1].Color = new Color(ne, ne, ne);
-                    data[2].Color = new Color(es, es, es);
-                    data[3].Color = new Color(sw, sw, sw);
+                    data[0].Color = new Color32(wn_, wn_, wn_, 255);
+                    data[1].Color = new Color32(ne_, ne_, ne_, 255);
+                    data[2].Color = new Color32(es_, es_, es_, 255);
+                    data[3].Color = new Color32(sw_, sw_, sw_, 255);
                     break;
                 default: // east, south
-                    data[3].Color = new Color(wn, wn, wn);
-                    data[2].Color = new Color(ne, ne, ne);
-                    data[1].Color = new Color(es, es, es);
-                    data[0].Color = new Color(sw, sw, sw);
+                    data[3].Color = new Color32(wn_, wn_, wn_, 255);
+                    data[2].Color = new Color32(ne_, ne_, ne_, 255);
+                    data[1].Color = new Color32(es_, es_, es_, 255);
+                    data[0].Color = new Color32(sw_, sw_, sw_, 255);
                     break;
             }
         }
 
-        private static Color ToColor(ref Color32 col, float coef)
+        private static Color32 ToColor32(ref Color32 col, float coef)
         {
-            return new Color((col.r/255.0f)*coef, (col.g/255.0f)*coef, (col.b/255.0f)*coef);
+            return new Color32(
+                (byte)((float)col.r*coef*100.0f/100.0f),
+                (byte)((float)col.g*coef*100.0f/100.0f),
+                (byte)((float)col.b*coef*100.0f/100.0f),
+                col.a
+                );
         }
-
         public static void AdjustColors(VertexData[] data, float ne, float es, float sw, float wn, float light, Direction direction = Direction.up)
         {
             wn = (wn * light);
@@ -444,41 +447,31 @@ namespace Voxelmetric.Code.Configurable.Blocks.Utilities
             switch (direction)
             {
                 case Direction.down:
-                {
-                    data[0].Color = ToColor(ref data[0].Color, wn);
-                    data[3].Color = ToColor(ref data[3].Color, ne);
-                    data[2].Color = ToColor(ref data[2].Color, es);
-                    data[1].Color = ToColor(ref data[1].Color, sw);
-                }
+                    data[0].Color = ToColor32(ref data[0].Color, wn);
+                    data[3].Color = ToColor32(ref data[3].Color, ne);
+                    data[2].Color = ToColor32(ref data[2].Color, es);
+                    data[1].Color = ToColor32(ref data[1].Color, sw);
                     break;
                 case Direction.up:
-                    data[1].Color = ToColor(ref data[1].Color, wn);
-                    data[2].Color = ToColor(ref data[2].Color, ne);
-                    data[3].Color = ToColor(ref data[3].Color, es);
-                    data[0].Color = ToColor(ref data[0].Color, sw);
+                    data[1].Color = ToColor32(ref data[1].Color, wn);
+                    data[2].Color = ToColor32(ref data[2].Color, ne);
+                    data[3].Color = ToColor32(ref data[3].Color, es);
+                    data[0].Color = ToColor32(ref data[0].Color, sw);
                     break;
                 case Direction.north:
                 case Direction.east:
-                    data[0].Color = ToColor(ref data[0].Color, wn);
-                    data[1].Color = ToColor(ref data[1].Color, ne);
-                    data[2].Color = ToColor(ref data[2].Color, es);
-                    data[3].Color = ToColor(ref data[3].Color, sw);
+                    data[0].Color = ToColor32(ref data[0].Color, wn);
+                    data[1].Color = ToColor32(ref data[1].Color, ne);
+                    data[2].Color = ToColor32(ref data[2].Color, es);
+                    data[3].Color = ToColor32(ref data[3].Color, sw);
                     break;
                 default: // east, south
-                    data[3].Color = ToColor(ref data[3].Color, wn);
-                    data[2].Color = ToColor(ref data[2].Color, ne);
-                    data[1].Color = ToColor(ref data[1].Color, es);
-                    data[0].Color = ToColor(ref data[0].Color, sw);
+                    data[3].Color = ToColor32(ref data[3].Color, wn);
+                    data[2].Color = ToColor32(ref data[2].Color, ne);
+                    data[1].Color = ToColor32(ref data[1].Color, es);
+                    data[0].Color = ToColor32(ref data[0].Color, sw);
                     break;
             }
-        }
-
-        public static void SetColors(VertexData[] data, ref Color color)
-        {
-            data[0].Color = color;
-            data[1].Color = color;
-            data[2].Color = color;
-            data[3].Color = color;
         }
     }
 }

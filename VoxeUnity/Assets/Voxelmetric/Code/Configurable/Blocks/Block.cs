@@ -81,7 +81,7 @@ public class Block
     {
     }
 
-    public virtual bool RaycastHit(ref Vector3 pos, Vector3 dir, ref Vector3Int bPos, bool removalRequested)
+    public virtual bool RaycastHit(ref Vector3 pos, ref Vector3 dir, ref Vector3Int bPos, bool removalRequested)
     {
         return removalRequested ? Config.raycastHitOnRemoval : Config.raycastHit;
     }

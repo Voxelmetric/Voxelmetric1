@@ -36,7 +36,7 @@ namespace Voxelmetric.Code.Utilities
 
             //The block at bPos
             Block hitBlock = world.blocks.GetBlock(ref bPos);
-            while (!hitBlock.RaycastHit(ref pos, dir, ref bPos, removalRequested) && Vector3.Distance(ray.origin, pos) < range)
+            while (!hitBlock.RaycastHit(ref pos, ref dir, ref bPos, removalRequested) && Vector3.Distance(ray.origin, pos) < range)
             {
                 // Get the nearest upcoming boundary for each direction
                 boundary.x = MakeBoundary(dirS.x, pos.x);
