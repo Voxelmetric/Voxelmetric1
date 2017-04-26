@@ -24,7 +24,7 @@ namespace Voxelmetric.Code.Common.Threading
             // If the number of threads is not correctly specified, create as many as possible minus one (taking
             // all available core is not effective - there's still the main thread we should not forget).
             // Allways create at least one thread, however.
-            int threadCnt = Mathf.Max(Environment.ProcessorCount-1, 1);
+            int threadCnt = Features.UseThreadPool ? Mathf.Max(Environment.ProcessorCount-1, 1) : 1;
             m_pools = Helpers.CreateArray1D<TaskPool>(threadCnt);
             // NOTE: Normally, I would simply call CreateAndInitArray1D, however, any attempt to allocate memory
             // for TaskPool in this contructor ends up with Unity3D crashing :(
