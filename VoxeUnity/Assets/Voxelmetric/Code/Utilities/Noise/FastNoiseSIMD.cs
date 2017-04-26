@@ -1,4 +1,4 @@
-﻿#if UNITY_STANDALONE || UNITY_EDITOR
+﻿#if (UNITY_STANDALONE_WIN || UNITY_EDITOR_WIN) && !DISABLE_FASTSIMD
 using System.Runtime.InteropServices;
 #if UNITY_64|| UNITY_EDITOR64
 using POINTER = System.UInt64;

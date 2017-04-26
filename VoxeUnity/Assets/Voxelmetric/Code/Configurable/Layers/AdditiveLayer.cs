@@ -35,7 +35,7 @@ public class AdditiveLayer: TerrainLayer
         ni.noiseGen.SetInterpBitStep(Env.ChunkSizeWithPadding, 2);
         ni.lookupTable = chunk.pools.FloatArrayPool.Pop(ni.noiseGen.Size * ni.noiseGen.Size);
 
-#if UNITY_STANDALONE_WIN && !DISABLE_FASTSIMD
+#if (UNITY_STANDALONE_WIN || UNITY_EDITOR_WIN) && !DISABLE_FASTSIMD
         float[] noiseSet = chunk.pools.FloatArrayPool.Pop(ni.noiseGen.Size * ni.noiseGen.Size * ni.noiseGen.Size);
 
         // Generate SIMD noise
