@@ -77,7 +77,7 @@ namespace Voxelmetric.Code.Rendering
 
         public void GenerateTangents(LocalPools pools)
         {
-            var tan1 = pools.Vector3ArrayPool.Pop(Vertices.Count);
+            /*var tan1 = pools.Vector3ArrayPool.Pop(Vertices.Count);
             var tan2 = pools.Vector3ArrayPool.Pop(Vertices.Count);
 
             for (int t = 0; t < Triangles.Count; t += 3)
@@ -149,7 +149,7 @@ namespace Voxelmetric.Code.Rendering
             }
 
             pools.Vector3ArrayPool.Push(tan1);
-            pools.Vector3ArrayPool.Push(tan2);
+            pools.Vector3ArrayPool.Push(tan2);*/
         }
     }
 }

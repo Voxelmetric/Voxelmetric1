@@ -108,7 +108,7 @@ namespace Voxelmetric.Code.Rendering.GeometryBatcher
                 {
                     Color = verts[i].Color,
                     Normal = verts[i].Normal,
-                    Tangent = verts[i].Tangent,
+                    //Tangent = verts[i].Tangent,
                     // Adjust UV coordinates based on provided texture atlas
                     UV = new Vector2(
                         (verts[i].UV.x*texture.width)+texture.x,
