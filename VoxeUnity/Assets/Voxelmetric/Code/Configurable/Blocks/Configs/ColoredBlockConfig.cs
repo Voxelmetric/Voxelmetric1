@@ -5,7 +5,7 @@ using Voxelmetric.Code.Core;
 
 public class ColoredBlockConfig : SolidBlockConfig
 {
-    public readonly Color[] colors = new Color[6];
+    public readonly Color32[] colors = new Color32[6];
 
     public override bool SetUp(Hashtable config, World world)
     {
@@ -19,7 +19,7 @@ public class ColoredBlockConfig : SolidBlockConfig
             if (vals.Length!=3)
                 return false; // Don't accept broken configs
 
-            Color color = new Color(byte.Parse(vals[0]) / 255f, byte.Parse(vals[1]) / 255f, byte.Parse(vals[2]) / 255f);;
+            Color color = new Color32(byte.Parse(vals[0]), byte.Parse(vals[1]), byte.Parse(vals[2]), 255);
             for (int i = 0; i<6; i++)
                 colors[i] = color;
         }
@@ -36,7 +36,7 @@ public class ColoredBlockConfig : SolidBlockConfig
                 if (vals.Length != 3)
                     return false; // Don't accept broken configs
 
-                colors[i] = new Color(byte.Parse(vals[0]) / 255f, byte.Parse(vals[1]) / 255f, byte.Parse(vals[2]) / 255f);
+                colors[i] = new Color32(byte.Parse(vals[0]), byte.Parse(vals[1]), byte.Parse(vals[2]), 255);
             }
         }
 

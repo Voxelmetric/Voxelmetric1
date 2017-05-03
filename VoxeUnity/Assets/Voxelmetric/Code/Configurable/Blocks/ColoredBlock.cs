@@ -8,7 +8,7 @@ using Voxelmetric.Code.Rendering;
 
 public class ColoredBlock : SolidBlock
 {
-    public Color[] colors
+    public Color32[] colors
     {
         get { return ((ColoredBlockConfig)Config).colors; }
     }
