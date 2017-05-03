@@ -58,8 +58,8 @@ namespace Voxelmetric.Code.Rendering.GeometryBatcher
                 };
             }
 
-            m_objects = new List<GameObject>();
-            m_renderers = new List<Renderer>();
+            m_objects = new List<GameObject>(1);
+            m_renderers = new List<Renderer>(1);
 
             Clear();
         }
