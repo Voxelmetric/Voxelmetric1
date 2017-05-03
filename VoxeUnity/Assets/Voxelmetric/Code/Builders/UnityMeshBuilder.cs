@@ -21,27 +21,33 @@ namespace Voxelmetric.Code.Builders
             //Vector4[] tangents = pools.Vector4ArrayPool.Pop(size);
 
             // Fill buffers with data
-            for (int i = 0; i<size; i++)
-            {
-                VertexDataFixed vertexData = buffer.Vertices[i];
-                vertices[i] = vertexData.Vertex;
-                uvs[i] = vertexData.UV;
-                colors[i] = vertexData.Color;
-                normals[i] = vertexData.Normal;
-                //tangents[i] = vertexData.Tangent;
-            }
-
             // Due to the way the memory pools work we might have received more
             // data than necessary. This little overhead is well worth it, though.
             // Fill unused data with "zeroes"
+            for (int i = 0; i<size; i++)
+                vertices[i] = buffer.Vertices[i].Vertex;
             for (int i = size; i<vertices.Length; i++)
-            {
                 vertices[i] = Vector3.zero;
+
+            for (int i = 0; i<size; i++)
+                uvs[i] = buffer.Vertices[i].UV;
+            for (int i = size; i<uvs.Length; i++)
                 uvs[i] = Vector2.zero;
-                colors[i] = Color.clear;
+
+            for (int i = 0; i<size; i++)
+                colors[i] = buffer.Vertices[i].Color;
+            for (int i = size; i<colors.Length; i++)
+                colors[i] = new Color32();
+
+            for (int i = 0; i<size; i++)
+                normals[i] = buffer.Vertices[i].Normal;
+            for (int i = size; i<normals.Length; i++)
                 normals[i] = Vector3.zero;
-                //tangents[i] = Vector4.zero;
-            }
+
+            //for (int i = 0; i < size; i++)
+            //  tangents[i] = buffer.Vertices[i].Tangent;
+            //for (int i = size; i<tangents.Length; i++)
+            //  tangents[i] = Vector4.zero;
 
             // Prepare mesh
             mesh.vertices = vertices;
@@ -72,16 +78,16 @@ namespace Voxelmetric.Code.Builders
             Vector3[] vertices = pool.Pop(size);
 
             // Fill buffers with data
-            for (int i = 0; i < size; i++)
+            for (int i = 0; i<size; i++)
             {
-                VertexDataFixed vertexData = buffer.Vertices[i];
+                VertexData vertexData = buffer.Vertices[i];
                 vertices[i] = vertexData.Vertex;
             }
 
             // Due to the way the memory pools work we might have received more
             // data than necessary. This little overhead is well worth it, though.
             // Fill unused data with "zeroes"
-            for (int i = size; i < vertices.Length; i++)
+            for (int i = size; i<vertices.Length; i++)
             {
                 vertices[i] = Vector3.zero;
             }

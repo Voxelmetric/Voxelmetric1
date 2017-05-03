@@ -182,34 +182,22 @@ namespace Voxelmetric.Code.Builders.Collider
                                     du[u] = w;
                                     dv[v] = h;
 
-                                    // Face vertices transformed to world coordinates
-                                    // 0--1
-                                    // |  |
-                                    // |  |
-                                    // 3--2
-                                    vecs[0] = new Vector3(x[0], x[1], x[2])-BlockUtils.HalfBlockVector;
-                                    vecs[1] = new Vector3(x[0]+du[0], x[1]+du[1], x[2]+du[2])-BlockUtils.HalfBlockVector;
-                                    vecs[2] = new Vector3(x[0]+du[0]+dv[0], x[1]+du[1]+dv[1], x[2]+du[2]+dv[2])-BlockUtils.HalfBlockVector;
-                                    vecs[3] = new Vector3(x[0]+dv[0], x[1]+dv[1], x[2]+dv[2])-BlockUtils.HalfBlockVector;
-
                                     {
                                         LocalPools pool = chunk.pools;
                                         VertexData[] vertexData = pool.VertexDataArrayPool.PopExact(4);
-                                        VertexDataFixed[] vertexDataFixed = pool.VertexDataFixedArrayPool.PopExact(4);
                                         {
-                                            for (int ii = 0; ii<4; ii++)
-                                            {
-                                                vertexData[ii] = pool.VertexDataPool.Pop();
-                                                vertexData[ii].Vertex = vecs[ii];
-                                                vertexDataFixed[ii] = VertexDataUtils.ClassToStruct(vertexData[ii]);
-                                            }
-
-                                            chunk.ChunkColliderGeometryHandler.Batcher.AddFace(vertexDataFixed, backFace);
-
-                                            for (int ii = 0; ii<4; ii++)
-                                                pool.VertexDataPool.Push(vertexData[ii]);
+                                            // Face vertices transformed to world coordinates
+                                            // 0--1
+                                            // |  |
+                                            // |  |
+                                            // 3--2
+                                            vertexData[0].Vertex = new Vector3(x[0], x[1], x[2]) - BlockUtils.HalfBlockVector;
+                                            vertexData[1].Vertex = new Vector3(x[0] + du[0], x[1] + du[1], x[2] + du[2]) - BlockUtils.HalfBlockVector;
+                                            vertexData[2].Vertex = new Vector3(x[0] + du[0] + dv[0], x[1] + du[1] + dv[1], x[2] + du[2] + dv[2]) - BlockUtils.HalfBlockVector;
+                                            vertexData[3].Vertex = new Vector3(x[0] + dv[0], x[1] + dv[1], x[2] + dv[2]) - BlockUtils.HalfBlockVector;
+                                            
+                                            chunk.ChunkColliderGeometryHandler.Batcher.AddFace(vertexData, backFace);
                                         }
-                                        pool.VertexDataFixedArrayPool.Push(vertexDataFixed);
                                         pool.VertexDataArrayPool.Push(vertexData);
                                     }
                                 }

@@ -23,34 +23,24 @@ public class CubeBlock: SolidBlock
 
         LocalPools pools = chunk.pools;
         VertexData[] vertexData = pools.VertexDataArrayPool.PopExact(4);
-        VertexDataFixed[] vertexDataFixed = pools.VertexDataFixedArrayPool.PopExact(4);
         {
             if (vertices==null)
             {
-                for (int i = 0; i<4; i++)
-                    vertexData[i] = pools.VertexDataPool.Pop();
                 BlockUtils.PrepareVertices(ref face.pos, vertexData, face.side);
             }
             else
             {
                 for (int i = 0; i<4; i++)
                 {
-                    vertexData[i] = pools.VertexDataPool.Pop();
                     vertexData[i].Vertex = vertices[i];
                 }
             }
 
             BlockUtils.PrepareTexture(chunk, ref face.pos, vertexData, face.side, textures);
             BlockUtils.PrepareColors(chunk, vertexData, face.side, ref face.light);
-
-            for (int i = 0; i < 4; i++)
-                vertexDataFixed[i] = VertexDataUtils.ClassToStruct(vertexData[i]);
-            chunk.GeometryHandler.Batcher.AddFace(vertexDataFixed, backface, face.materialID);
-
-            for (int i = 0; i < 4; i++)
-                pools.VertexDataPool.Push(vertexData[i]);
+            
+            chunk.GeometryHandler.Batcher.AddFace(vertexData, backface, face.materialID);
         }
-        pools.VertexDataFixedArrayPool.Push(vertexDataFixed);
         pools.VertexDataArrayPool.Push(vertexData);
     }
 }

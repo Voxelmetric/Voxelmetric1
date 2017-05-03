@@ -14,14 +14,8 @@ namespace Voxelmetric.Code.Common.MemoryPooling
     {
         public NoiseItem[] noiseItems;
         
-        public readonly ObjectPool<VertexData> VertexDataPool =
-            new ObjectPool<VertexData>(ch => new VertexData(), 65535, false);
-
         public readonly ArrayPoolCollection<VertexData> VertexDataArrayPool =
             new ArrayPoolCollection<VertexData>(128);
-
-        public readonly ArrayPoolCollection<VertexDataFixed> VertexDataFixedArrayPool =
-            new ArrayPoolCollection<VertexDataFixed>(128);
 
         public readonly ArrayPoolCollection<Vector3> Vector3ArrayPool =
             new ArrayPoolCollection<Vector3>(128);
@@ -45,11 +39,7 @@ namespace Voxelmetric.Code.Common.MemoryPooling
         {
             StringBuilder sb = new StringBuilder();
             sb.Append("VertexData=");
-            sb.Append(VertexDataPool);
-            sb.Append(",VertexDataArray=");
             sb.Append(VertexDataArrayPool);
-            sb.Append(",VertexDataFixed=");
-            sb.Append(VertexDataFixedArrayPool);
             sb.Append(",Vec3Arr=");
             sb.Append(Vector3ArrayPool);
             sb.Append(",BoolArr=");

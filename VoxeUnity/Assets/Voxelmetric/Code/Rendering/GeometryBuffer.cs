@@ -9,7 +9,7 @@ namespace Voxelmetric.Code.Rendering
     /// </summary>
     public class GeometryBuffer
     {
-        public readonly List<VertexDataFixed> Vertices = new List<VertexDataFixed>();
+        public readonly List<VertexData> Vertices = new List<VertexData>();
         public readonly List<int> Triangles = new List<int>();
 
         /// <summary>
@@ -65,12 +65,12 @@ namespace Voxelmetric.Code.Rendering
         /// <summary>
         ///     Adds the vertices to the render buffer.
         /// </summary>
-        public void AddVertices(VertexDataFixed[] vertices)
+        public void AddVertices(VertexData[] vertices)
         {
             Vertices.AddRange(vertices);
         }
 
-        public void AddVertex(ref VertexDataFixed vertex)
+        public void AddVertex(ref VertexData vertex)
         {
             Vertices.Add(vertex);
         }
@@ -86,9 +86,9 @@ namespace Voxelmetric.Code.Rendering
                 int i2 = Triangles[t + 1];
                 int i3 = Triangles[t + 2];
 
-                VertexDataFixed vd1 = Vertices[i1];
-                VertexDataFixed vd2 = Vertices[i2];
-                VertexDataFixed vd3 = Vertices[i3];
+                VertexData vd1 = Vertices[i1];
+                VertexData vd2 = Vertices[i2];
+                VertexData vd3 = Vertices[i3];
 
                 Vector3 v1 = vd1.Vertex;
                 Vector3 v2 = vd2.Vertex;
@@ -130,7 +130,7 @@ namespace Voxelmetric.Code.Rendering
 
             for (int v = 0; v < Vertices.Count; ++v)
             {
-                VertexDataFixed vd = Vertices[v];
+                VertexData vd = Vertices[v];
 
                 Vector3 n = vd.Normal;
                 Vector3 t = tan1[v];

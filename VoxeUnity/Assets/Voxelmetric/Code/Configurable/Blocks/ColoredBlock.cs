@@ -19,13 +19,11 @@ public class ColoredBlock : SolidBlock
 
         LocalPools pools = chunk.pools;
         VertexData[] vertexData = pools.VertexDataArrayPool.PopExact(4);
-        VertexDataFixed[] vertexDataFixed = pools.VertexDataFixedArrayPool.PopExact(4);
         {
             if (vertices == null)
             {
                 for (int i = 0; i<4; i++)
                 {
-                    vertexData[i] = pools.VertexDataPool.Pop();
                     vertexData[i].Color = colors[(int)face.side];
                     vertexData[i].UV = Vector2.zero;
                 }
@@ -35,7 +33,6 @@ public class ColoredBlock : SolidBlock
             {
                 for (int i = 0; i < 4; i++)
                 {
-                    vertexData[i] = pools.VertexDataPool.Pop();
                     vertexData[i].Vertex = vertices[i];
                     vertexData[i].Color = colors[(int)face.side];
                     vertexData[i].UV = Vector2.zero;
@@ -43,15 +40,9 @@ public class ColoredBlock : SolidBlock
             }
             
             BlockUtils.AdjustColors(chunk, vertexData, face.side, face.light);
-
-            for (int i = 0; i<4; i++)
-                vertexDataFixed[i]= VertexDataUtils.ClassToStruct(vertexData[i]);
-            chunk.GeometryHandler.Batcher.AddFace(vertexDataFixed, backFace, face.materialID);
-
-            for (int i = 0; i < 4; i++)
-                pools.VertexDataPool.Push(vertexData[i]);
+            
+            chunk.GeometryHandler.Batcher.AddFace(vertexData, backFace, face.materialID);
         }
-        pools.VertexDataFixedArrayPool.Push(vertexDataFixed);
         pools.VertexDataArrayPool.Push(vertexData);
     }
 }

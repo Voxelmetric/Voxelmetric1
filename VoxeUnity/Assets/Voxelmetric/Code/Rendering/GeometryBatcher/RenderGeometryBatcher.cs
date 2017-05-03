@@ -88,7 +88,7 @@ namespace Voxelmetric.Code.Rendering.GeometryBatcher
         /// <param name="texture">Texture coordinates</param>
         /// <param name="offset">Offset to apply to verts</param>
         /// <param name="materialID">ID of material to use when building the mesh</param>
-        public void AddMeshData(int[] tris, VertexDataFixed[] verts, ref Rect texture, Vector3 offset, int materialID)
+        public void AddMeshData(int[] tris, VertexData[] verts, ref Rect texture, Vector3 offset, int materialID)
         {
             List<GeometryBuffer> holder = m_buffers[materialID];
             GeometryBuffer buffer = holder[holder.Count - 1];
@@ -104,7 +104,7 @@ namespace Voxelmetric.Code.Rendering.GeometryBatcher
                     holder.Add(buffer);
                 }
 
-                VertexDataFixed v = new VertexDataFixed()
+                VertexData v = new VertexData()
                 {
                     Color = verts[i].Color,
                     Normal = verts[i].Normal,
@@ -129,7 +129,7 @@ namespace Voxelmetric.Code.Rendering.GeometryBatcher
         /// <param name="vertexData"> An array of 4 vertices forming the face</param>
         /// <param name="backFace">If false, vertices are added clock-wise</param>
         /// <param name="materialID">ID of material to use when building the mesh</param>
-        public void AddFace(VertexDataFixed[] vertexData, bool backFace, int materialID)
+        public void AddFace(VertexData[] vertexData, bool backFace, int materialID)
         {
             Assert.IsTrue(vertexData.Length==4);
 
@@ -144,10 +144,7 @@ namespace Voxelmetric.Code.Rendering.GeometryBatcher
             }
 
             // Add data to the render buffer
-            buffer.AddVertex(ref vertexData[0]);
-            buffer.AddVertex(ref vertexData[1]);
-            buffer.AddVertex(ref vertexData[2]);
-            buffer.AddVertex(ref vertexData[3]);
+            buffer.AddVertices(vertexData);
             buffer.AddIndices(buffer.Vertices.Count, backFace);
         }
 
