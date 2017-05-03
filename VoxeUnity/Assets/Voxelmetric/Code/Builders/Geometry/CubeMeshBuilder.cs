@@ -173,23 +173,17 @@ namespace Voxelmetric.Code.Builders.Geometry
                                 // Don't render faces on world's edges for chunks with no neighbor
                                 else if (Features.DontRenderWorldEdgesMask>0 && client.Listeners[(int)dir]==null)
                                 {
-                                    if (dir==Direction.up && x[1]==Env.ChunkSize &&
-                                        (Features.DontRenderWorldEdgesMask&Side.up)!=0)
+                                    if ((Features.DontRenderWorldEdgesMask&Side.up)!=0 && dir==Direction.up && x[1]==Env.ChunkSize)
                                         buildSingleFace = false;
-                                    else if (dir==Direction.down && x[1]==0 &&
-                                             (Features.DontRenderWorldEdgesMask&Side.down)!=0)
+                                    else if ((Features.DontRenderWorldEdgesMask&Side.down)!=0 && dir==Direction.down && x[1]==0)
                                         buildSingleFace = false;
-                                    else if (dir==Direction.east && x[0]==Env.ChunkSize &&
-                                             (Features.DontRenderWorldEdgesMask&Side.east)!=0)
+                                    else if ((Features.DontRenderWorldEdgesMask&Side.east)!=0 && dir==Direction.east && x[0]==Env.ChunkSize)
                                         buildSingleFace = false;
-                                    else if (dir==Direction.west && x[0]==0 &&
-                                             (Features.DontRenderWorldEdgesMask&Side.west)!=0)
+                                    else if ((Features.DontRenderWorldEdgesMask&Side.west)!=0 && dir==Direction.west && x[0]==0)
                                         buildSingleFace = false;
-                                    else if (dir==Direction.north && x[2]==Env.ChunkSize &&
-                                             (Features.DontRenderWorldEdgesMask&Side.north)!=0)
+                                    else if ((Features.DontRenderWorldEdgesMask&Side.north)!=0 && dir==Direction.north && x[2]==Env.ChunkSize)
                                         buildSingleFace = false;
-                                    else if (dir==Direction.south && x[2]==0 &&
-                                             (Features.DontRenderWorldEdgesMask&Side.south)!=0)
+                                    else if ((Features.DontRenderWorldEdgesMask&Side.south)!=0 && dir==Direction.south && x[2]==0)
                                         buildSingleFace = false;
                                 }
 
