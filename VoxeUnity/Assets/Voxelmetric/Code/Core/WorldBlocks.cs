@@ -112,7 +112,7 @@ namespace Voxelmetric.Code.Core
         {
             // Let's make sure that ranges are okay
             int x1, x2, y1, y2, z1, z2;
-            if (posFrom.x > posTo.x)
+            if (posFrom.x>posTo.x)
             {
                 x1 = posTo.x;
                 x2 = posFrom.x;
@@ -122,7 +122,7 @@ namespace Voxelmetric.Code.Core
                 x1 = posFrom.x;
                 x2 = posTo.x;
             }
-            if (posFrom.y > posTo.y)
+            if (posFrom.y>posTo.y)
             {
                 y1 = posTo.y;
                 y2 = posFrom.y;
@@ -132,7 +132,7 @@ namespace Voxelmetric.Code.Core
                 y1 = posFrom.y;
                 y2 = posTo.y;
             }
-            if (posFrom.z > posTo.z)
+            if (posFrom.z>posTo.z)
             {
                 z1 = posTo.z;
                 z2 = posFrom.z;
@@ -149,18 +149,17 @@ namespace Voxelmetric.Code.Core
             Vector3Int chunkPosTo = Chunk.ContainingChunkPos(ref pTo);
 
             // Update all chunks in range
-            int minY = Helpers.Mod(pFrom.y+chunkPosFrom.y,Env.ChunkSize);
+            int minY = Helpers.Mod(pFrom.y+chunkPosFrom.y, Env.ChunkSize);
+
             for (int cy = chunkPosFrom.y; cy<=chunkPosTo.y; cy += Env.ChunkSize, minY = 0)
             {
-                int maxY = Helpers.MakeChunkCoordinate(minY);
-                maxY = Helpers.Mod(Math.Min(maxY+cy-1, pTo.y),Env.ChunkSize);
-                int minZ = Helpers.Mod(pFrom.z+chunkPosFrom.z,Env.ChunkSize);
+                int maxY = Math.Min(pTo.y-cy, Env.ChunkSize1);
+                int minZ = Helpers.Mod(pFrom.z+chunkPosFrom.z, Env.ChunkSize);
 
                 for (int cz = chunkPosFrom.z; cz<=chunkPosTo.z; cz += Env.ChunkSize, minZ = 0)
                 {
-                    int maxZ = Helpers.MakeChunkCoordinate(minZ);
-                    maxZ = Helpers.Mod(Math.Min(maxZ+cz-1, pTo.z),Env.ChunkSize);
-                    int minX = Helpers.Mod(pFrom.x+chunkPosFrom.x,Env.ChunkSize);
+                    int maxZ = Math.Min(pTo.z-cz, Env.ChunkSize1);
+                    int minX = Helpers.Mod(pFrom.x+chunkPosFrom.x, Env.ChunkSize);
 
                     for (int cx = chunkPosFrom.x; cx<=chunkPosTo.x; cx += Env.ChunkSize, minX = 0)
                     {
@@ -169,8 +168,7 @@ namespace Voxelmetric.Code.Core
                         if (chunk==null)
                             continue;
 
-                        int maxX = Helpers.MakeChunkCoordinate(minX);
-                        maxX = Helpers.Mod(Math.Min(maxX+cx-1, pTo.x),Env.ChunkSize);
+                        int maxX = Math.Min(pTo.x-cx, Env.ChunkSize1);
 
                         Vector3Int from = new Vector3Int(minX, minY, minZ);
                         Vector3Int to = new Vector3Int(maxX, maxY, maxZ);
@@ -223,7 +221,7 @@ namespace Voxelmetric.Code.Core
                 x1 = posFrom.x;
                 x2 = posTo.x;
             }
-            if (posFrom.y > posTo.y)
+            if (posFrom.y>posTo.y)
             {
                 y1 = posTo.y;
                 y2 = posFrom.y;
@@ -233,7 +231,7 @@ namespace Voxelmetric.Code.Core
                 y1 = posFrom.y;
                 y2 = posTo.y;
             }
-            if (posFrom.z > posTo.z)
+            if (posFrom.z>posTo.z)
             {
                 z1 = posTo.z;
                 z2 = posFrom.z;
@@ -250,18 +248,17 @@ namespace Voxelmetric.Code.Core
             Vector3Int chunkPosTo = Chunk.ContainingChunkPos(ref pTo);
 
             // Update all chunks in range
-            int minY = Helpers.Mod(pFrom.y+chunkPosFrom.y,Env.ChunkSize);
+            int minY = Helpers.Mod(pFrom.y+chunkPosFrom.y, Env.ChunkSize);
+
             for (int cy = chunkPosFrom.y; cy<=chunkPosTo.y; cy += Env.ChunkSize, minY = 0)
             {
-                int maxY = Helpers.MakeChunkCoordinate(minY);
-                maxY = Helpers.Mod(Math.Min(maxY+cy-1, pTo.y),Env.ChunkSize);
-                int minZ = Helpers.Mod(pFrom.z+chunkPosFrom.z,Env.ChunkSize);
+                int maxY = Math.Min(pTo.y-cy, Env.ChunkSize1);
+                int minZ = Helpers.Mod(pFrom.z+chunkPosFrom.z, Env.ChunkSize);
 
                 for (int cz = chunkPosFrom.z; cz<=chunkPosTo.z; cz += Env.ChunkSize, minZ = 0)
                 {
-                    int maxZ = Helpers.MakeChunkCoordinate(minZ);
-                    maxZ = Helpers.Mod(Math.Min(maxZ+cz-1, pTo.z),Env.ChunkSize);
-                    int minX = Helpers.Mod(pFrom.x+chunkPosFrom.x,Env.ChunkSize);
+                    int maxZ = Math.Min(pTo.z-cz, Env.ChunkSize1);
+                    int minX = Helpers.Mod(pFrom.x+chunkPosFrom.x, Env.ChunkSize);
 
                     for (int cx = chunkPosFrom.x; cx<=chunkPosTo.x; cx += Env.ChunkSize, minX = 0)
                     {
@@ -270,8 +267,7 @@ namespace Voxelmetric.Code.Core
                         if (chunk==null)
                             continue;
 
-                        int maxX = Helpers.MakeChunkCoordinate(minX);
-                        maxX = Helpers.Mod(Math.Min(maxX+cx-1, pTo.x),Env.ChunkSize);
+                        int maxX = Math.Min(pTo.x-cx, Env.ChunkSize1);
 
                         Vector3Int from = new Vector3Int(minX, minY, minZ);
                         Vector3Int to = new Vector3Int(maxX, maxY, maxZ);
