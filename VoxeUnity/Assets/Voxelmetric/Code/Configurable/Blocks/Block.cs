@@ -56,11 +56,6 @@ public class Block
         return adjacentBlock.Solid ? !Solid : (Solid || Type!=adjacentBlock.Type);
     }
 
-    public bool CanMergeFaceWith(Block adjacentBlock)
-    {
-        return Type==adjacentBlock.Type;
-    }
-
     public virtual void BuildFace(Chunk chunk, Vector3[] vertices, ref BlockFace face)
     {
     }

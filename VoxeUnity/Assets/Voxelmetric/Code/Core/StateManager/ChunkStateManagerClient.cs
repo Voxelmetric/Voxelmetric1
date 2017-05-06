@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Text;
-using UnityEngine;
 using Voxelmetric.Code.Common;
 using Voxelmetric.Code.Common.Events;
 using Voxelmetric.Code.Common.Extensions;
@@ -54,7 +53,6 @@ namespace Voxelmetric.Code.Core.StateManager
         private static readonly Action<ChunkStateManagerClient> actionOnGenerateData = OnGenerateData;
         private static readonly Action<ChunkStateManagerClient> actionOnPrepareSaveData = OnPrepareSaveData;
         private static readonly Action<ChunkStateManagerClient> actionOnSaveData = OnSaveData;
-        //private static readonly Action<ChunkStateManagerClient> actionOnCalculateGeometryBounds = OnCalculateGeometryBounds;
         private static readonly Action<ChunkStateManagerClient> actionOnBuildVertices = OnBuildVertices;
         private static readonly Action<ChunkStateManagerClient> actionOnBuildCollider = OnBuildCollider;
         
@@ -173,10 +171,6 @@ namespace Voxelmetric.Code.Core.StateManager
                     return;
 
                 ProcessNotifyState();
-                if (m_pendingStates.Check(ChunkState.CalculateBounds) && CalculateBounds())
-                    return;
-
-                ProcessNotifyState();
                 if (m_pendingStates.Check(ChunkState.PrepareSaveData) && PrepareSaveData())
                     return;
 
@@ -283,21 +277,17 @@ namespace Voxelmetric.Code.Core.StateManager
         private static void OnPrepareGenerateDone(ChunkStateManagerClient stateManager, bool success)
         {
             // Consume info about invalidated chunk
-            Chunk chunk = stateManager.chunk;
             stateManager.m_completedStates = stateManager.m_completedStates.Set(CurrStatePrepareGenerate);
 
             if (success)
             {
-                chunk.blocks.recalculateBounds = false;
-
                 if (stateManager.m_save.IsDifferential)
                 {
-                    stateManager.m_completedStates = stateManager.m_completedStates.Set(ChunkState.CalculateBounds);
                     stateManager.m_nextState = NextStatePrepareGenerate;
                 }
                 else
                 {
-                    stateManager.m_completedStates = stateManager.m_completedStates.Set(ChunkState.CalculateBounds | ChunkState.Generate);
+                    stateManager.m_completedStates = stateManager.m_completedStates.Set(ChunkState.Generate);
                     stateManager.m_nextState = ChunkState.BuildVertices;
                 }
             }
@@ -519,70 +509,7 @@ namespace Voxelmetric.Code.Core.StateManager
         }
 
         #endregion Save chunk data
-
-        #region Calculate bounds
-
-        private const ChunkState CurrStateCalculateBounds = ChunkState.CalculateBounds;
-        private const ChunkState NextStateCalculateBounds = ChunkState.Idle;
-
-        private static void OnCalculateGeometryBounds(ChunkStateManagerClient client)
-        {
-            client.chunk.CalculateGeometryBounds();
-            OnCalculateGeometryBoundsDone(client);
-        }
-
-        private static void OnCalculateGeometryBoundsDone(ChunkStateManagerClient client)
-        {
-            client.m_completedStates = client.m_completedStates.Set(CurrStateCalculateBounds);
-            client.m_nextState = NextStateCalculateBounds;
-            client.m_taskRunning = false;
-        }
-
-        private bool CalculateBounds()
-        {
-            if (!m_completedStates.Check(ChunkState.Generate))
-                return true;
-
-            m_pendingStates = m_pendingStates.Reset(CurrStateCalculateBounds);
-            m_completedStates = m_completedStates.Reset(CurrStateCalculateBounds);
-            m_completedStatesSafe = m_completedStates;
-
-            // Force full bounds for now
-            chunk.m_bounds.minX = chunk.m_bounds.minY = chunk.m_bounds.minZ = 0;
-            chunk.m_bounds.maxX = chunk.m_bounds.maxY = chunk.m_bounds.maxZ = Env.ChunkSize1;
-            chunk.m_bounds.lowestEmptyBlock = 0;
-            /*if (chunk.blocks.NonEmptyBlocks > 0)
-            {
-                if (chunk.blocks.NonEmptyBlocks>=Env.ChunkSizePow3-Env.ChunkPow2-1)
-                {
-                    // The bounds are known for fully filled chunks
-                    chunk.m_bounds.minX = chunk.m_bounds.minY = chunk.m_bounds.minZ = 0;
-                    chunk.m_bounds.maxX = chunk.m_bounds.maxY = chunk.m_bounds.maxZ = Env.ChunkSize1;
-                    chunk.m_bounds.lowestEmptyBlock = 0;
-                }
-                else
-                {
-                    var task = Globals.MemPools.SMThreadPI.Pop();
-                    m_poolState = m_poolState.Set(ChunkPoolItemState.ThreadPI);
-                    m_threadPoolItem = task;
-
-                    task.Set(chunk.ThreadID, actionOnCalculateGeometryBounds, this);
-
-                    m_taskRunning = true;
-                    WorkPoolManager.Add(task);
-
-                    return true;
-                }
-            }*/
-
-            // Consume info about block having been modified
-            chunk.blocks.recalculateBounds = false;
-            OnCalculateGeometryBoundsDone(this);
-            return false;
-        }
-
-        #endregion
-
+        
         private bool SynchronizeNeighbors()
         {
             // 6 neighbors are necessary
@@ -755,13 +682,6 @@ namespace Voxelmetric.Code.Core.StateManager
             if (!SynchronizeEdges())
                 return false;
             
-            // We need to calculate our chunk's bounds if it was invalidated
-            if (chunk.blocks.recalculateBounds && chunk.blocks.NonEmptyBlocks>0)
-            {
-                RequestState(ChunkState.CalculateBounds);
-                return false;
-            }
-
             return true;
         }
 
@@ -772,7 +692,7 @@ namespace Voxelmetric.Code.Core.StateManager
         private static void OnBuildCollider(ChunkStateManagerClient client)
         {
             Chunk chunk = client.chunk;
-            chunk.ChunkColliderGeometryHandler.Build(chunk.m_bounds.minX, chunk.m_bounds.maxX, chunk.m_bounds.minY, chunk.m_bounds.maxY, chunk.m_bounds.minZ, chunk.m_bounds.maxZ);
+            chunk.ChunkColliderGeometryHandler.Build();
             OnBuildColliderDone(client);
         }
 
@@ -828,7 +748,7 @@ namespace Voxelmetric.Code.Core.StateManager
         private static void OnBuildVertices(ChunkStateManagerClient client)
         {
             Chunk chunk = client.chunk;
-            chunk.GeometryHandler.Build(chunk.m_bounds.minX, chunk.m_bounds.maxX, chunk.m_bounds.minY, chunk.m_bounds.maxY, chunk.m_bounds.minZ, chunk.m_bounds.maxZ);
+            chunk.GeometryHandler.Build();
             OnBuildVerticesDone(client);
         }
 

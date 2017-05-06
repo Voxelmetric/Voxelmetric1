@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using UnityEngine;
 using UnityEngine.Assertions;
 using Voxelmetric.Code.Common;
-using Voxelmetric.Code.Common.IO;
 using Voxelmetric.Code.Core.StateManager;
 using Voxelmetric.Code.Data_types;
 using Voxelmetric.Code.Load_Resources.Blocks;
@@ -42,7 +40,6 @@ namespace Voxelmetric.Code.Core
         private int rebuildMaskCollider;
 
         public readonly List<BlockPos> modifiedBlocks = new List<BlockPos>();
-        public bool recalculateBounds;
 
         private static byte[] emptyBytes;
         public static byte[] EmptyBytes
@@ -81,8 +78,6 @@ namespace Voxelmetric.Code.Core
             lastUpdateTimeCollider = 0;
             rebuildMaskGeometry = -1;
             rebuildMaskCollider = -1;
-
-            recalculateBounds = true;
 
             modifiedBlocks.Clear();
         }
@@ -142,8 +137,6 @@ namespace Voxelmetric.Code.Core
             if (setBlockModified)
             {
                 BlockModified(new BlockPos(x, y, z), ref globalPos, block);
-
-                chunk.blocks.recalculateBounds = true;
             }
 
             if (
@@ -541,87 +534,75 @@ namespace Voxelmetric.Code.Core
 
         #region Compression
 
-        private bool ExpandX(ref bool[] mask, int indexBackup, ushort type, int y1, int z1, ref int x2, int y2, int z2)
+        private bool ExpandX(ref bool[] mask, ushort type, int y1, int z1, ref int x2, int y2, int z2)
         {
-            int yIter = Env.ChunkSizeWithPaddingPow2-(z2-z1);
-
             // Check the quad formed by YZ axes and try to expand the X asix
-            int index = indexBackup;
-            for (int y = y1; y<y2; ++y, index += yIter)
+            for (int y = y1; y<y2; ++y)
             {
+                int index = Helpers.GetChunkIndex1DFrom3D(x2, y, z1);
                 for (int z = z1; z<z2; ++z, index += Env.ChunkSizeWithPadding)
                 {
-                    if (x2>=Env.ChunkSizePlusPadding || mask[index] || blocks[index].Type!=type)
+                    if (mask[index] || blocks[index].Type!=type)
                         return false;
                 }
             }
 
             // If the box can expand, mark the position as tested and expand the X axis
-            index = indexBackup;
-            for (int y = y1; y<y2; ++y, index += yIter)
+            for (int y = y1; y<y2; ++y)
             {
+                int index = Helpers.GetChunkIndex1DFrom3D(x2, y, z1);
                 for (int z = z1; z<z2; ++z, index += Env.ChunkSizeWithPadding)
-                {
                     mask[index] = true;
-                }
             }
 
             ++x2;
             return true;
         }
 
-        private bool ExpandY(ref bool[] mask, int indexBackup, ushort type, int x1, int z1, int x2, ref int y2, int z2)
+        private bool ExpandY(ref bool[] mask, ushort type, int x1, int z1, int x2, ref int y2, int z2)
         {
-            int zIter = Env.ChunkSizeWithPadding-(x2-x1);
-
             // Check the quad formed by XZ axes and try to expand the Y asix
-            int index = indexBackup;
-            for (int z = z1; z<z2; ++z, index += zIter)
+            for (int z = z1; z<z2; ++z)
             {
+                int index = Helpers.GetChunkIndex1DFrom3D(x1, y2, z);
                 for (int x = x1; x<x2; ++x, ++index)
                 {
-                    if (y2>=Env.ChunkSizePlusPadding || mask[index] || blocks[index].Type!=type)
+                    if (mask[index] || blocks[index].Type!=type)
                         return false;
                 }
             }
 
             // If the box can expand, mark the position as tested and expand the X axis
-            index = indexBackup;
-            for (int z = z1; z<z2; ++z, index += zIter)
+            for (int z = z1; z<z2; ++z)
             {
+                int index = Helpers.GetChunkIndex1DFrom3D(x1, y2, z);
                 for (int x = x1; x<x2; ++x, ++index)
-                {
                     mask[index] = true;
-                }
             }
 
             ++y2;
             return true;
         }
 
-        private bool ExpandZ(ref bool[] mask, int indexBackup, ushort type, int x1, int y1, int x2, int y2, ref int z2)
+        private bool ExpandZ(ref bool[] mask, ushort type, int x1, int y1, int x2, int y2, ref int z2)
         {
-            int yIter = Env.ChunkSizeWithPaddingPow2-(x2-x1);
-
             // Check the quad formed by XY axes and try to expand the Z asix
-            int index = indexBackup;
-            for (int y = y1; y<y2; ++y, index += yIter)
+            for (int y = y1; y<y2; ++y)
             {
+                int index = Helpers.GetChunkIndex1DFrom3D(x1, y, z2);
                 for (int x = x1; x<x2; ++x, ++index)
                 {
-                    if (z2>=Env.ChunkSizePlusPadding || mask[index] || blocks[index].Type!=type)
+                    if (mask[index] || blocks[index].Type!=type)
                         return false;
                 }
             }
 
             // If the box can expand, mark the position as tested and expand the X axis
-            index = indexBackup;
-            for (int y = y1; y<y2; ++y, index += yIter)
+            for (int y = y1; y<y2; ++y)
             {
+                int index = Helpers.GetChunkIndex1DFrom3D(x1, y, z2);
                 for (int x = x1; x<x2; ++x, ++index)
-                {
                     mask[index] = true;
-                }
             }
 
             ++z2;
@@ -674,17 +655,20 @@ namespace Voxelmetric.Code.Core
 
                             if (expandX)
                             {
-                                expandX = ExpandX(ref mask, index, type, y1, z1, ref x2, y2, z2);
+                                expandX = x2<Env.ChunkSizePlusPadding &&
+                                          ExpandX(ref mask, type, y1, z1, ref x2, y2, z2);
                                 expand = expandX;
                             }
                             if (expandY)
                             {
-                                expandY = ExpandY(ref mask, index, type, x1, z1, x2, ref y2, z2);
+                                expandY = y2<Env.ChunkSizePlusPadding &&
+                                          ExpandY(ref mask, type, x1, z1, x2, ref y2, z2);
                                 expand = expand|expandY;
                             }
                             if (expandZ)
                             {
-                                expandZ = ExpandZ(ref mask, index, type, x1, y1, x2, y2, ref z2);
+                                expandZ = z2<Env.ChunkSizePlusPadding &&
+                                          ExpandZ(ref mask, type, x1, y1, x2, y2, ref z2);
                                 expand = expand|expandZ;
                             }
                         } while (expand);

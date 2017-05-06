@@ -400,26 +400,27 @@ namespace Voxelmetric.Code.Configurable.Blocks.Utilities
 
             switch (direction)
             {
+                case Direction.south:
                 case Direction.down:
                     data[0].Color = new Color32(wn_, wn_, wn_, 255);
                     data[3].Color = new Color32(ne_, ne_, ne_, 255);
                     data[2].Color = new Color32(es_, es_, es_, 255);
                     data[1].Color = new Color32(sw_, sw_, sw_, 255);
                     break;
+                case Direction.north:
                 case Direction.up:
                     data[1].Color = new Color32(wn_, wn_, wn_, 255);
                     data[2].Color = new Color32(ne_, ne_, ne_, 255);
                     data[3].Color = new Color32(es_, es_, es_, 255);
                     data[0].Color = new Color32(sw_, sw_, sw_, 255);
                     break;
-                case Direction.north:
                 case Direction.east:
                     data[0].Color = new Color32(wn_, wn_, wn_, 255);
                     data[1].Color = new Color32(ne_, ne_, ne_, 255);
                     data[2].Color = new Color32(es_, es_, es_, 255);
                     data[3].Color = new Color32(sw_, sw_, sw_, 255);
                     break;
-                default: // east, south
+                default: // west
                     data[3].Color = new Color32(wn_, wn_, wn_, 255);
                     data[2].Color = new Color32(ne_, ne_, ne_, 255);
                     data[1].Color = new Color32(es_, es_, es_, 255);
@@ -446,26 +447,27 @@ namespace Voxelmetric.Code.Configurable.Blocks.Utilities
 
             switch (direction)
             {
+                case Direction.south:
                 case Direction.down:
                     data[0].Color = ToColor32(ref data[0].Color, wn);
                     data[3].Color = ToColor32(ref data[3].Color, ne);
                     data[2].Color = ToColor32(ref data[2].Color, es);
                     data[1].Color = ToColor32(ref data[1].Color, sw);
                     break;
+                case Direction.north:
                 case Direction.up:
                     data[1].Color = ToColor32(ref data[1].Color, wn);
                     data[2].Color = ToColor32(ref data[2].Color, ne);
                     data[3].Color = ToColor32(ref data[3].Color, es);
                     data[0].Color = ToColor32(ref data[0].Color, sw);
                     break;
-                case Direction.north:
                 case Direction.east:
                     data[0].Color = ToColor32(ref data[0].Color, wn);
                     data[1].Color = ToColor32(ref data[1].Color, ne);
                     data[2].Color = ToColor32(ref data[2].Color, es);
                     data[3].Color = ToColor32(ref data[3].Color, sw);
                     break;
-                default: // east, south
+                default: // west
                     data[3].Color = ToColor32(ref data[3].Color, wn);
                     data[2].Color = ToColor32(ref data[2].Color, ne);
                     data[1].Color = ToColor32(ref data[1].Color, es);

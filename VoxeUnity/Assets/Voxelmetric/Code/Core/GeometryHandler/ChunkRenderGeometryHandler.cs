@@ -14,9 +14,9 @@ namespace Voxelmetric.Code.Core.GeometryHandler
         }
 
         /// <summary> Updates the chunk based on its contents </summary>
-        public override void Build(int minX, int maxX, int minY, int maxY, int minZ, int maxZ)
+        public override void Build()
         {
-            Globals.CubeMeshBuilder.Build(chunk, minX, maxX, minY, maxY, minZ, maxZ);
+            Globals.CubeMeshBuilder.Build(chunk);
         }
 
         public override void Commit()

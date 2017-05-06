@@ -4,272 +4,661 @@ using Voxelmetric.Code.Common;
 using Voxelmetric.Code.Configurable.Blocks;
 using Voxelmetric.Code.Configurable.Blocks.Utilities;
 using Voxelmetric.Code.Core;
-using Voxelmetric.Code.Core.StateManager;
 using Voxelmetric.Code.Data_types;
 
 namespace Voxelmetric.Code.Builders.Geometry
 {
-    public class CubeMeshBuilder: IMeshBuilder
+    /// <summary>
+    /// Generates a cubical mesh with merged faces
+    /// </summary>
+    public class CubeMeshBuilder: MergedFacesMeshBuilder
     {
-        private static readonly int stepSize = 1;
-        private static readonly int width = Env.ChunkSize;
-
-        public void Build(Chunk chunk, int minX, int maxX, int minY, int maxY, int minZ, int maxZ)
+        protected override void BuildBox(Chunk chunk, int minX, int minY, int minZ, int maxX, int maxY, int maxZ)
         {
-            ChunkBlocks blocks = chunk.blocks;
-            ChunkStateManagerClient client = chunk.stateManager;
+            var blocks = chunk.blocks;
             var pools = chunk.pools;
+            var listeners = chunk.stateManager.Listeners;
+            Block block = blocks.GetBlock(Helpers.GetChunkIndex1DFrom3D(minX, minY, minZ));
 
-            int[] mins = {minX, minY, minZ};
-            int[] maxes = {maxX, maxY, maxZ};
-
-            int[] x = {0, 0, 0}; // Relative position of a block
-            int[] q = {0, 0, 0};
-                // Direction in which we compare neighbors when building the mask (q[d] is our current direction)
-            int[] du = {0, 0, 0}; // Width in a given dimension (du[u] is our current dimension)
-            int[] dv = {0, 0, 0}; // Height in a given dimension (dv[v] is our current dimension)
-
-            bool customBlockMaskInitialized = false;
-
-            BlockFace[] mask = pools.BlockFaceArrayPool.PopExact(width*width);
-            bool[] customBlockMask = pools.BoolArrayPool.PopExact(Env.ChunkSizeWithPaddingPow3);
-            Vector3[] vecs = pools.Vector3ArrayPool.PopExact(4);
-
-            int l, k, w, h, n;
-
-            for (bool backFace = false, b = true; b!=backFace; backFace = true, b = !b)
+            // Custom blocks have their own rules
+            if (block.Custom)
             {
-                // Iterate over 3 dimensions. Once for front faces, once for back faces
-                for (uint d = 0; d<3; d++)
+                for (int yy = minY; yy<maxY; yy++)
                 {
-                    uint u = d+1;
-                    if (u>2) u = u-3; // u = (d+1)%3; <-- we know the range is within 1..3 so we can improvize
-                    uint v = d+2;
-                    if (v>2) v = v-3; // v = (d+2)%3; <-- we know the range is within 2..4 so we can improvize
-
-                    x[0] = 0;
-                    x[1] = 0;
-                    x[2] = 0;
-
-                    q[0] = 0;
-                    q[1] = 0;
-                    q[2] = 0;
-                    q[d] = stepSize;
-
-                    // Determine which side we're meshing
-                    Direction dir = 0;
-                    switch (d)
+                    for (int zz = minZ; zz<maxZ; zz++)
                     {
-                        case 0:
-                            dir = backFace ? Direction.west : Direction.east;
-                            break;
-                        case 1:
-                            dir = backFace ? Direction.down : Direction.up;
-                            break;
-                        case 2:
-                            dir = backFace ? Direction.south : Direction.north;
-                            break;
+                        for (int xx = minX; xx<maxX; xx++)
+                        {
+                            Vector3Int pos = new Vector3Int(xx, yy, zz);
+                            block.BuildBlock(chunk, ref pos, block.RenderMaterialID);
+                        }
                     }
+                }
 
+                return;
+            }
 
-                    // Move through the dimension from front to back
-                    for (x[d] = mins[d]-1; x[d]<=maxes[d];)
+            int n, w, h, l, k, maskIndex;
+            Vector3Int texturePos = new Vector3Int(minX, minY, minZ);
+
+            Vector3[] face = pools.Vector3ArrayPool.PopExact(4);
+            BlockFace[] mask = pools.BlockFaceArrayPool.PopExact(sideSize*sideSize);
+
+            // Top
+            if (listeners[(int)Direction.up]!=null ||
+                // Don't render faces on world's edges for chunks with no neighbor
+                (Features.DontRenderWorldEdgesMask&Side.up)==0 ||
+                maxY!=Env.ChunkSize)
+            {
+                Array.Clear(mask, 0, mask.Length);
+
+                // x axis - width
+                // z axis - height
+
+                // Build the mask
+                for (int zz = minZ; zz<maxZ; ++zz)
+                {
+                    n = minX+zz*sideSize;
+                    for (int xx = minX; xx<maxX; ++xx, ++n)
                     {
-                        // Compute the mask
-                        n = 0;
-                        Array.Clear(mask, 0, mask.Length);
+                        int currentIndex = Helpers.GetChunkIndex1DFrom3D(xx, maxY-1, zz);
+                        int neighborIndex = Helpers.GetChunkIndex1DFrom3D(xx, maxY, zz);
+                        Block neighborBlock = blocks.GetBlock(neighborIndex);
 
-                        for (x[v] = mins[v]; x[v]<=maxes[v]; x[v]++)
+                        // Let's see whether we can merge faces
+                        if (block.CanBuildFaceWith(neighborBlock))
                         {
-                            for (x[u] = mins[u]; x[u]<=maxes[u]; x[u]++, n++)
+                            mask[n] = new BlockFace
                             {
-                                int realX = x[0];
-                                int realY = x[1];
-                                int realZ = x[2];
+                                block = block,
+                                pos = texturePos,
+                                side = Direction.up,
+                                light = BlockUtils.CalculateColors(chunk, currentIndex, Direction.up),
+                                materialID = block.RenderMaterialID
+                            };
+                        }
+                    }
+                }
 
-                                int index0 = Helpers.GetChunkIndex1DFrom3D(realX, realY, realZ);
-                                int index1 = Helpers.GetChunkIndex1DFrom3D(realX+q[0], realY+q[1], realZ+q[2]);
-
-                                Block voxelFace0 = blocks.GetBlock(index0);
-                                Block voxelFace1 = blocks.GetBlock(index1);
-
-                                if (backFace)
-                                {
-                                    // Let's see whether we can merge faces
-                                    if (voxelFace1.CanBuildFaceWith(voxelFace0))
-                                    {
-                                        mask[n] = new BlockFace
-                                        {
-                                            block = voxelFace1,
-                                            pos = new Vector3Int(realX + q[0], realY + q[1], realZ + q[2]),
-                                            side = dir,
-                                            light = voxelFace1.Custom ? new BlockLightData(0) : BlockUtils.CalculateColors(chunk, index1, dir),
-                                            materialID = voxelFace1.RenderMaterialID
-                                        };
-                                    }
-                                }
-                                else
-                                {
-                                    // Let's see whether we can merge faces
-                                    if (voxelFace0.CanBuildFaceWith(voxelFace1))
-                                    {
-                                        mask[n] = new BlockFace
-                                        {
-                                            block = voxelFace0,
-                                            pos = new Vector3Int(realX, realY, realZ),
-                                            side = dir,
-                                            light = voxelFace0.Custom ? new BlockLightData(0) : BlockUtils.CalculateColors(chunk, index0, dir),
-                                            materialID = voxelFace0.RenderMaterialID
-                                        };
-                                    }
-                                }
-                            }
+                // Build faces from the mask if it's possible
+                for (int zz = minZ; zz<maxZ; ++zz)
+                {
+                    n = minX+zz*sideSize;
+                    for (int xx = minX; xx<maxX;)
+                    {
+                        if (mask[n].block==null)
+                        {
+                            ++xx;
+                            ++n;
+                            continue;
                         }
 
-                        x[d]++;
-                        n = 0;
-
-                        // Build faces from the mask if it's possible
-                        int j;
-                        for (j = 0; j<width; j++)
+                        // Compute width
+                        maskIndex = n+1;
+                        for (w = 1; xx+w<sideSize;)
                         {
-                            int i;
-                            for (i = 0; i<width;)
+                            var blk = mask[maskIndex].block;
+                            if (blk==null ||
+                                blk.Type!=mask[n].block.Type ||
+                                !mask[maskIndex].light.Equals(mask[n].light))
+                                break;
+
+                            ++w;
+                            ++maskIndex;
+                        }
+
+                        // Compute height
+                        for (h = 1; zz+h<sideSize; h++)
+                        {
+                            maskIndex = n+h*sideSize;
+                            for (k = 0; k<w; k++, maskIndex++)
                             {
-                                if (mask[n].block==null)
-                                {
-                                    i++;
-                                    n++;
-                                    continue;
-                                }
-
-                                w = 1;
-                                h = 1;
-                                bool buildSingleFace = true;
-                                BlockFace m = mask[n];
-                                
-                                // Custom blocks are treated differently. They are built whole at once instead of
-                                // being build face by face. Therefore, we remember those we already processed and
-                                // skip them the next time we come across them again
-                                if (m.block.Custom)
-                                {
-                                    // Only clear the mask when necessary
-                                    if (!customBlockMaskInitialized)
-                                    {
-                                        customBlockMaskInitialized = true;
-
-                                        Array.Clear(customBlockMask, 0, Env.ChunkSizeWithPaddingPow3);
-                                    }
-
-                                    int index = Helpers.GetChunkIndex1DFrom3D(m.pos.x, m.pos.y, m.pos.z);
-                                    if (!customBlockMask[index])
-                                    {
-                                        customBlockMask[index] = true;
-                                        m.block.BuildBlock(chunk, ref m.pos, m.block.RenderMaterialID);
-                                    }
-
-                                    buildSingleFace = false;
-                                }
-                                // Don't render faces on world's edges for chunks with no neighbor
-                                else if (Features.DontRenderWorldEdgesMask>0 && client.Listeners[(int)dir]==null)
-                                {
-                                    if ((Features.DontRenderWorldEdgesMask&Side.up)!=0 && dir==Direction.up && x[1]==Env.ChunkSize)
-                                        buildSingleFace = false;
-                                    else if ((Features.DontRenderWorldEdgesMask&Side.down)!=0 && dir==Direction.down && x[1]==0)
-                                        buildSingleFace = false;
-                                    else if ((Features.DontRenderWorldEdgesMask&Side.east)!=0 && dir==Direction.east && x[0]==Env.ChunkSize)
-                                        buildSingleFace = false;
-                                    else if ((Features.DontRenderWorldEdgesMask&Side.west)!=0 && dir==Direction.west && x[0]==0)
-                                        buildSingleFace = false;
-                                    else if ((Features.DontRenderWorldEdgesMask&Side.north)!=0 && dir==Direction.north && x[2]==Env.ChunkSize)
-                                        buildSingleFace = false;
-                                    else if ((Features.DontRenderWorldEdgesMask&Side.south)!=0 && dir==Direction.south && x[2]==0)
-                                        buildSingleFace = false;
-                                }
-
-                                if (buildSingleFace)
-                                {
-                                    // Compute width
-                                    int maskIndex = n + 1;
-                                    for (w = 1; i + w < width;)
-                                    {
-                                        var blk = mask[maskIndex].block;
-                                        if (blk == null ||
-                                            !blk.CanMergeFaceWith(m.block) ||
-                                            !mask[maskIndex].light.Equals(m.light))
-                                            break;
-
-                                        ++w;
-                                        ++maskIndex;
-                                    }
-
-                                    // Compute height
-                                    for (h = 1; j + h < width; h++)
-                                    {
-                                        maskIndex = n + h * width;
-                                        for (k = 0; k < w; k++, maskIndex++)
-                                        {
-                                            var blk = mask[maskIndex].block;
-                                            if (blk == null ||
-                                                !blk.CanMergeFaceWith(m.block) ||
-                                                !mask[maskIndex].light.Equals(m.light))
-                                                goto cont;
-                                        }
-                                    }
-                                    cont:
-                                    // Prepare face coordinates and dimensions
-                                    x[u] = i;
-                                    x[v] = j;
-
-                                    du[0] = du[1] = du[2] = 0;
-                                    dv[0] = dv[1] = dv[2] = 0;
-                                    du[u] = w;
-                                    dv[v] = h;
-
-                                    // Face vertices transformed to world coordinates
-                                    // 0--1
-                                    // |  |
-                                    // |  |
-                                    // 3--2
-                                    if (d==2)
-                                    {
-                                        // Rotate north and south by 90 degrees counter clockwise
-                                        vecs[3] = new Vector3(x[0], x[1], x[2])-BlockUtils.HalfBlockVector;
-                                        vecs[0] = new Vector3(x[0]+du[0], x[1]+du[1], x[2]+du[2])-BlockUtils.HalfBlockVector;
-                                        vecs[1] = new Vector3(x[0]+du[0]+dv[0], x[1]+du[1]+dv[1], x[2]+du[2]+dv[2])-BlockUtils.HalfBlockVector;
-                                        vecs[2] = new Vector3(x[0]+dv[0], x[1]+dv[1], x[2]+dv[2])-BlockUtils.HalfBlockVector;
-                                    }
-                                    else
-                                    {
-                                        vecs[0] = new Vector3(x[0], x[1], x[2])-BlockUtils.HalfBlockVector;
-                                        vecs[1] = new Vector3(x[0]+du[0], x[1]+du[1], x[2]+du[2])-BlockUtils.HalfBlockVector;
-                                        vecs[2] = new Vector3(x[0]+du[0]+dv[0], x[1]+du[1]+dv[1], x[2]+du[2]+dv[2])-BlockUtils.HalfBlockVector;
-                                        vecs[3] = new Vector3(x[0]+dv[0], x[1]+dv[1], x[2]+dv[2])-BlockUtils.HalfBlockVector;
-                                    }
-
-                                    m.block.BuildFace(chunk, vecs, ref m);
-                                }
-
-                                // Zero out the mask
-                                for (l = 0; l<h; ++l)
-                                {
-                                    for (k = 0; k<w; ++k)
-                                    {
-                                        mask[n+k+l*width] = new BlockFace();
-                                    }
-                                }
-
-                                i += w;
-                                n += w;
+                                var blk = mask[maskIndex].block;
+                                if (blk==null ||
+                                    blk.Type!=mask[n].block.Type ||
+                                    !mask[maskIndex].light.Equals(mask[n].light))
+                                    goto cont;
                             }
                         }
+                        cont:
+
+                        // Build face
+                        // 1--2
+                        // |  |
+                        // |  |
+                        // 0--3
+                        face[0] = new Vector3(xx, maxY, zz);
+                        face[1] = new Vector3(xx, maxY, zz+h);
+                        face[2] = new Vector3(xx+w, maxY, zz+h);
+                        face[3] = new Vector3(xx+w, maxY, zz);
+                        block.BuildFace(chunk, face, ref mask[n]);
+
+                        // Zero out the mask. We don't need to process the same fields again
+                        for (l = 0; l<h; ++l)
+                        {
+                            maskIndex = n+l*sideSize;
+                            for (k = 0; k<w; ++k, ++maskIndex)
+                                mask[maskIndex] = new BlockFace();
+                        }
+
+                        xx += w;
+                        n += w;
+                    }
+                }
+            }
+            // Bottom
+            if (listeners[(int)Direction.down]!=null ||
+                // Don't render faces on world's edges for chunks with no neighbor
+                (Features.DontRenderWorldEdgesMask&Side.down)==0 ||
+                minY!=0)
+            {
+                Array.Clear(mask, 0, mask.Length);
+
+                // x axis - width
+                // z axis - height
+
+                // Build the mask
+                for (int zz = minZ; zz<maxZ; ++zz)
+                {
+                    n = minX+zz*sideSize;
+                    for (int xx = minX; xx<maxX; ++xx, ++n)
+                    {
+                        int currentIndex = Helpers.GetChunkIndex1DFrom3D(xx, minY, zz);
+                        int neighborIndex = Helpers.GetChunkIndex1DFrom3D(xx, minY-1, zz);
+                        Block neighborBlock = blocks.GetBlock(neighborIndex);
+
+                        // Let's see whether we can merge faces
+                        if (block.CanBuildFaceWith(neighborBlock))
+                        {
+                            mask[n] = new BlockFace
+                            {
+                                block = block,
+                                pos = texturePos,
+                                side = Direction.down,
+                                light = BlockUtils.CalculateColors(chunk, currentIndex, Direction.down),
+                                materialID = block.RenderMaterialID
+                            };
+                        }
+                    }
+                }
+
+                // Build faces from the mask if it's possible
+                for (int zz = minZ; zz<maxZ; ++zz)
+                {
+                    n = minX+zz*sideSize;
+                    for (int xx = minX; xx<maxX;)
+                    {
+                        if (mask[n].block==null)
+                        {
+                            ++xx;
+                            ++n;
+                            continue;
+                        }
+
+                        // Compute width
+                        maskIndex = n+1;
+                        for (w = 1; xx+w<sideSize;)
+                        {
+                            var blk = mask[maskIndex].block;
+                            if (blk==null ||
+                                blk.Type!=mask[n].block.Type ||
+                                !mask[maskIndex].light.Equals(mask[n].light))
+                                break;
+
+                            ++w;
+                            ++maskIndex;
+                        }
+
+                        // Compute height
+                        for (h = 1; zz+h<sideSize; h++)
+                        {
+                            maskIndex = n+h*sideSize;
+                            for (k = 0; k<w; k++, maskIndex++)
+                            {
+                                var blk = mask[maskIndex].block;
+                                if (blk==null ||
+                                    blk.Type!=mask[n].block.Type ||
+                                    !mask[maskIndex].light.Equals(mask[n].light))
+                                    goto cont;
+                            }
+                        }
+                        cont:
+
+                        // Build face
+                        // 1--2
+                        // |  |
+                        // |  |
+                        // 0--3
+                        face[0] = new Vector3(xx, minY, zz);
+                        face[1] = new Vector3(xx, minY, zz+h);
+                        face[2] = new Vector3(xx+w, minY, zz+h);
+                        face[3] = new Vector3(xx+w, minY, zz);
+                        block.BuildFace(chunk, face, ref mask[n]);
+
+                        // Zero out the mask. We don't need to process the same fields again
+                        for (l = 0; l<h; ++l)
+                        {
+                            maskIndex = n+l*sideSize;
+                            for (k = 0; k<w; ++k, ++maskIndex)
+                                mask[maskIndex] = new BlockFace();
+                        }
+
+                        xx += w;
+                        n += w;
+                    }
+                }
+            }
+            // Right
+            if (listeners[(int)Direction.east]!=null ||
+                // Don't render faces on world's edges for chunks with no neighbor
+                (Features.DontRenderWorldEdgesMask&Side.east)==0 ||
+                maxX!=Env.ChunkSize)
+            {
+                Array.Clear(mask, 0, mask.Length);
+
+                // y axis - height
+                // z axis - width
+
+                // Build the mask
+                for (int yy = minY; yy<maxY; ++yy)
+                {
+                    n = minZ+yy*sideSize;
+                    for (int zz = minZ; zz<maxZ; ++zz, ++n)
+                    {
+                        int currentIndex = Helpers.GetChunkIndex1DFrom3D(maxX-1, yy, zz);
+                        int neighborIndex = Helpers.GetChunkIndex1DFrom3D(maxX, yy, zz);
+                        Block neighborBlock = blocks.GetBlock(neighborIndex);
+
+                        // Let's see whether we can merge faces
+                        if (block.CanBuildFaceWith(neighborBlock))
+                        {
+                            mask[n] = new BlockFace
+                            {
+                                block = block,
+                                pos = texturePos,
+                                side = Direction.east,
+                                light = BlockUtils.CalculateColors(chunk, currentIndex, Direction.east),
+                                materialID = block.RenderMaterialID
+                            };
+                        }
+                    }
+                }
+
+                // Build faces from the mask if it's possible
+                for (int yy = minY; yy<maxY; ++yy)
+                {
+                    n = minZ+yy*sideSize;
+                    for (int zz = minZ; zz<maxZ;)
+                    {
+                        if (mask[n].block==null)
+                        {
+                            ++zz;
+                            ++n;
+                            continue;
+                        }
+
+                        // Compute width
+                        maskIndex = n+1;
+                        for (w = 1; zz+w<sideSize;)
+                        {
+                            var blk = mask[maskIndex].block;
+                            if (blk==null ||
+                                blk.Type!=mask[n].block.Type ||
+                                !mask[maskIndex].light.Equals(mask[n].light))
+                                break;
+
+                            ++w;
+                            ++maskIndex;
+                        }
+
+                        // Compute height
+                        for (h = 1; yy+h<sideSize; h++)
+                        {
+                            maskIndex = n+h*sideSize;
+                            for (k = 0; k<w; k++, maskIndex++)
+                            {
+                                var blk = mask[maskIndex].block;
+                                if (blk==null ||
+                                    blk.Type!=mask[n].block.Type ||
+                                    !mask[maskIndex].light.Equals(mask[n].light))
+                                    goto cont;
+                            }
+                        }
+                        cont:
+
+                        // Build face
+                        // 1--2
+                        // |  |
+                        // |  |
+                        // 0--3
+                        face[0] = new Vector3(maxX, yy, zz);
+                        face[1] = new Vector3(maxX, yy+h, zz);
+                        face[2] = new Vector3(maxX, yy+h, zz+w);
+                        face[3] = new Vector3(maxX, yy, zz+w);
+                        block.BuildFace(chunk, face, ref mask[n]);
+
+                        // Zero out the mask. We don't need to process the same fields again
+                        for (l = 0; l<h; ++l)
+                        {
+                            maskIndex = n+l*sideSize;
+                            for (k = 0; k<w; ++k, ++maskIndex)
+                                mask[maskIndex] = new BlockFace();
+                        }
+
+                        zz += w;
+                        n += w;
+                    }
+                }
+            }
+            // Left
+            if (listeners[(int)Direction.west]!=null ||
+                // Don't render faces on world's edges for chunks with no neighbor
+                (Features.DontRenderWorldEdgesMask&Side.west)==0 ||
+                minX!=0)
+            {
+                Array.Clear(mask, 0, mask.Length);
+
+                // y axis - height
+                // z axis - width
+
+                // Build the mask
+                for (int yy = minY; yy<maxY; ++yy)
+                {
+                    n = minZ+yy*sideSize;
+                    for (int zz = minZ; zz<maxZ; ++zz, ++n)
+                    {
+                        int currentIndex = Helpers.GetChunkIndex1DFrom3D(minX, yy, zz);
+                        int neighborIndex = Helpers.GetChunkIndex1DFrom3D(minX-1, yy, zz);
+                        Block neighborBlock = blocks.GetBlock(neighborIndex);
+
+                        // Let's see whether we can merge faces
+                        if (block.CanBuildFaceWith(neighborBlock))
+                        {
+                            mask[n] = new BlockFace
+                            {
+                                block = block,
+                                pos = texturePos,
+                                side = Direction.west,
+                                light = BlockUtils.CalculateColors(chunk, currentIndex, Direction.west),
+                                materialID = block.RenderMaterialID
+                            };
+                        }
+                    }
+                }
+
+                // Build faces from the mask if it's possible
+                for (int yy = minY; yy<maxY; ++yy)
+                {
+                    n = minZ+yy*sideSize;
+                    for (int zz = minZ; zz<maxZ;)
+                    {
+                        if (mask[n].block==null)
+                        {
+                            ++zz;
+                            ++n;
+                            continue;
+                        }
+
+                        // Compute width
+                        maskIndex = n+1;
+                        for (w = 1; zz+w<sideSize;)
+                        {
+                            var blk = mask[maskIndex].block;
+                            if (blk==null ||
+                                blk.Type!=mask[n].block.Type ||
+                                !mask[maskIndex].light.Equals(mask[n].light))
+                                break;
+
+                            ++w;
+                            ++maskIndex;
+                        }
+
+                        // Compute height
+                        for (h = 1; yy+h<sideSize; h++)
+                        {
+                            maskIndex = n+h*sideSize;
+                            for (k = 0; k<w; k++, maskIndex++)
+                            {
+                                var blk = mask[maskIndex].block;
+                                if (blk==null ||
+                                    blk.Type!=mask[n].block.Type ||
+                                    !mask[maskIndex].light.Equals(mask[n].light))
+                                    goto cont;
+                            }
+                        }
+                        cont:
+
+                        // Build face
+                        // 1--2
+                        // |  |
+                        // |  |
+                        // 0--3
+                        face[0] = new Vector3(minX, yy, zz);
+                        face[1] = new Vector3(minX, yy+h, zz);
+                        face[2] = new Vector3(minX, yy+h, zz+w);
+                        face[3] = new Vector3(minX, yy, zz+w);
+                        block.BuildFace(chunk, face, ref mask[n]);
+
+                        // Zero out the mask. We don't need to process the same fields again
+                        for (l = 0; l<h; ++l)
+                        {
+                            maskIndex = n+l*sideSize;
+                            for (k = 0; k<w; ++k, ++maskIndex)
+                                mask[maskIndex] = new BlockFace();
+                        }
+
+                        zz += w;
+                        n += w;
+                    }
+                }
+            }
+            // Front
+            if (listeners[(int)Direction.north]!=null ||
+                // Don't render faces on world's edges for chunks with no neighbor
+                (Features.DontRenderWorldEdgesMask&Side.north)==0 ||
+                maxZ!=Env.ChunkSize)
+            {
+                Array.Clear(mask, 0, mask.Length);
+
+                // x axis - width
+                // y axis - height
+
+                // Build the mask
+                for (int yy = minY; yy<maxY; ++yy)
+                {
+                    n = minX+yy*sideSize;
+                    for (int xx = minX; xx<maxX; ++xx, ++n)
+                    {
+                        int currentIndex = Helpers.GetChunkIndex1DFrom3D(xx, yy, maxZ-1);
+                        int neighborIndex = Helpers.GetChunkIndex1DFrom3D(xx, yy, maxZ);
+                        Block neighborBlock = blocks.GetBlock(neighborIndex);
+
+                        // Let's see whether we can merge faces
+                        if (block.CanBuildFaceWith(neighborBlock))
+                        {
+                            mask[n] = new BlockFace
+                            {
+                                block = block,
+                                pos = texturePos,
+                                side = Direction.north,
+                                light = BlockUtils.CalculateColors(chunk, currentIndex, Direction.north),
+                                materialID = block.RenderMaterialID
+                            };
+                        }
+                    }
+                }
+
+                // Build faces from the mask if it's possible
+                for (int yy = minY; yy<maxY; ++yy)
+                {
+                    n = minX+yy*sideSize;
+                    for (int xx = minX; xx<maxX;)
+                    {
+                        if (mask[n].block==null)
+                        {
+                            ++xx;
+                            ++n;
+                            continue;
+                        }
+
+                        // Compute width
+                        maskIndex = n+1;
+                        for (w = 1; xx+w<sideSize;)
+                        {
+                            var blk = mask[maskIndex].block;
+                            if (blk==null ||
+                                blk.Type!=mask[n].block.Type ||
+                                !mask[maskIndex].light.Equals(mask[n].light))
+                                break;
+
+                            ++w;
+                            ++maskIndex;
+                        }
+
+                        // Compute height
+                        for (h = 1; yy+h<sideSize; h++)
+                        {
+                            maskIndex = n+h*sideSize;
+                            for (k = 0; k<w; k++, maskIndex++)
+                            {
+                                var blk = mask[maskIndex].block;
+                                if (blk==null ||
+                                    blk.Type!=mask[n].block.Type ||
+                                    !mask[maskIndex].light.Equals(mask[n].light))
+                                    goto cont;
+                            }
+                        }
+                        cont:
+
+                        // Build face
+                        // 3--2
+                        // |  |
+                        // |  |
+                        // 0--1
+                        face[0] = new Vector3(xx, yy, maxZ);
+                        face[1] = new Vector3(xx+w, yy, maxZ);
+                        face[2] = new Vector3(xx+w, yy+h, maxZ);
+                        face[3] = new Vector3(xx, yy+h, maxZ);
+                        block.BuildFace(chunk, face, ref mask[n]);
+
+                        // Zero out the mask. We don't need to process the same fields again
+                        for (l = 0; l<h; ++l)
+                        {
+                            maskIndex = n+l*sideSize;
+                            for (k = 0; k<w; ++k, ++maskIndex)
+                                mask[maskIndex] = new BlockFace();
+                        }
+
+                        xx += w;
+                        n += w;
+                    }
+                }
+            }
+            // Back
+            if (listeners[(int)Direction.south]!=null ||
+                // Don't render faces on world's edges for chunks with no neighbor
+                (Features.DontRenderWorldEdgesMask&Side.south)==0 ||
+                minZ!=0)
+            {
+                Array.Clear(mask, 0, mask.Length);
+
+                // x axis - width
+                // y axis - height
+
+                // Build the mask
+                for (int yy = minY; yy<maxY; ++yy)
+                {
+                    n = minX+yy*sideSize;
+                    for (int xx = minX; xx<maxX; ++xx, ++n)
+                    {
+                        int currentIndex = Helpers.GetChunkIndex1DFrom3D(xx, yy, minZ);
+                        int neighborIndex = Helpers.GetChunkIndex1DFrom3D(xx, yy, minZ-1);
+                        Block neighborBlock = blocks.GetBlock(neighborIndex);
+
+                        // Let's see whether we can merge faces
+                        if (block.CanBuildFaceWith(neighborBlock))
+                        {
+                            mask[n] = new BlockFace
+                            {
+                                block = block,
+                                pos = texturePos,
+                                side = Direction.south,
+                                light = BlockUtils.CalculateColors(chunk, currentIndex, Direction.south),
+                                materialID = block.RenderMaterialID
+                            };
+                        }
+                    }
+                }
+
+                // Build faces from the mask if it's possible
+                for (int yy = minY; yy<maxY; ++yy)
+                {
+                    n = minX+yy*sideSize;
+                    for (int xx = minX; xx<maxX;)
+                    {
+                        if (mask[n].block==null)
+                        {
+                            ++xx;
+                            ++n;
+                            continue;
+                        }
+
+                        // Compute width
+                        maskIndex = n+1;
+                        for (w = 1; xx+w<sideSize;)
+                        {
+                            var blk = mask[maskIndex].block;
+                            if (blk==null ||
+                                blk.Type!=mask[n].block.Type ||
+                                !mask[maskIndex].light.Equals(mask[n].light))
+                                break;
+
+                            ++w;
+                            ++maskIndex;
+                        }
+
+                        // Compute height
+                        for (h = 1; yy+h<sideSize; h++)
+                        {
+                            maskIndex = n+h*sideSize;
+                            for (k = 0; k<w; k++, maskIndex++)
+                            {
+                                var blk = mask[maskIndex].block;
+                                if (blk==null ||
+                                    blk.Type!=mask[n].block.Type ||
+                                    !mask[maskIndex].light.Equals(mask[n].light))
+                                    goto cont;
+                            }
+                        }
+                        cont:
+
+                        // Build face
+                        // 3--2
+                        // |  |
+                        // |  |
+                        // 0--1
+                        face[0] = new Vector3(xx, yy, minZ);
+                        face[1] = new Vector3(xx+w, yy, minZ);
+                        face[2] = new Vector3(xx+w, yy+h, minZ);
+                        face[3] = new Vector3(xx, yy+h, minZ);
+                        block.BuildFace(chunk, face, ref mask[n]);
+
+                        // Zero out the mask. We don't need to process the same fields again
+                        for (l = 0; l<h; ++l)
+                        {
+                            maskIndex = n+l*sideSize;
+                            for (k = 0; k<w; ++k, ++maskIndex)
+                                mask[maskIndex] = new BlockFace();
+                        }
+
+                        xx += w;
+                        n += w;
                     }
                 }
             }
 
             pools.BlockFaceArrayPool.Push(mask);
-            pools.BoolArrayPool.Push(customBlockMask);
-            pools.Vector3ArrayPool.Push(vecs);
+            pools.Vector3ArrayPool.Push(face);
         }
     }
 }

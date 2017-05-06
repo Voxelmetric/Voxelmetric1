@@ -85,16 +85,6 @@ namespace Voxelmetric.Code.Core.Serialization
 
             bw.Write(SaveVersion);
             bw.Write(Features.UseDifferentialSerialization);
-
-            // Chunk bounds
-            ChunkBounds bounds = Chunk.m_bounds;
-            bw.Write((byte)bounds.minX);
-            bw.Write((byte)bounds.minY);
-            bw.Write((byte)bounds.minZ);
-            bw.Write((byte)bounds.maxX);
-            bw.Write((byte)bounds.maxY);
-            bw.Write((byte)bounds.maxZ);
-            bw.Write((byte)bounds.lowestEmptyBlock);
             bw.Write(Chunk.blocks.NonEmptyBlocks);
 
             // Chunk data
@@ -135,15 +125,6 @@ namespace Voxelmetric.Code.Core.Serialization
                 return false;
 
             IsDifferential = br.ReadBoolean();
-
-            ChunkBounds bounds = Chunk.m_bounds;
-            bounds.minX = br.ReadByte();
-            bounds.minY = br.ReadByte();
-            bounds.minZ = br.ReadByte();
-            bounds.maxX = br.ReadByte();
-            bounds.maxY = br.ReadByte();
-            bounds.maxZ = br.ReadByte();
-            bounds.lowestEmptyBlock = br.ReadByte();
             Chunk.blocks.NonEmptyBlocks = br.ReadInt32();
 
             while (true)
@@ -206,7 +187,6 @@ namespace Voxelmetric.Code.Core.Serialization
             if (!success)
             {
                 // Revert any changes we performed on our chunk
-                bounds.Reset();
                 Chunk.blocks.NonEmptyBlocks = -1;
 
                 posLenBytes = 0;

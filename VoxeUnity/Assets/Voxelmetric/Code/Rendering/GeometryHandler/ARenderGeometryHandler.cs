@@ -18,7 +18,7 @@ namespace Voxelmetric.Code.Rendering.GeometryHandler
         }
 
         /// <summary> Updates the chunk based on its contents </summary>
-        public abstract void Build(int minX, int maxX, int minY, int maxY, int minZ, int maxZ);
+        public abstract void Build();
 
         public abstract void Commit();
     }
