@@ -3,7 +3,7 @@ using Newtonsoft.Json;
 using Voxelmetric.Code.Core;
 using Voxelmetric.Code.Load_Resources.Textures;
 
-public class CubeBlockConfig: SolidBlockConfig
+public class CubeBlockConfig: BlockConfig
 {
     public TextureCollection[] textures;
 

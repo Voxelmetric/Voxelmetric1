@@ -3,7 +3,7 @@ using Newtonsoft.Json;
 using UnityEngine;
 using Voxelmetric.Code.Core;
 
-public class ColoredBlockConfig : SolidBlockConfig
+public class ColoredBlockConfig : BlockConfig
 {
     public readonly Color32[] colors = new Color32[6];
 
