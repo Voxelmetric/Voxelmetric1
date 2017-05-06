@@ -99,7 +99,7 @@ namespace Client.Scripts.Misc
 
             if (World != null)
             {
-                int chunks = World.chunks.chunkCollection.Count;
+                int chunks = World.chunks.Count;
                 m_text.AppendFormat("Chunks: {0}\n", chunks);
             }
 

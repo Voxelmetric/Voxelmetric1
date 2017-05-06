@@ -25,6 +25,11 @@ namespace Voxelmetric.Code.Core
             get { return chunks.Keys; }
         }
 
+        public int Count
+        {
+            get { return chunks.Count; }
+        }
+
         public WorldChunks(World world)
         {
             this.world = world;

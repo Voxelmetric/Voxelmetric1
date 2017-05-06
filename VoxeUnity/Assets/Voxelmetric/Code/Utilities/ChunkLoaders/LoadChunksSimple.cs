@@ -314,7 +314,7 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
             if (// No update necessary if there was no movement
                 m_viewerPos==m_viewerPosPrev &&
                 // However, we need to make sure that we have enough chunks loaded
-                world.chunks.chunkCollection.Count>=expectedChunks)
+                world.chunks.Count>=expectedChunks)
                 return;
 
             Profiler.BeginSample("PostProcessChunks");
@@ -404,7 +404,7 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
                                      StructSerialization.TSSize<BlockDataAABB>.ValueSize;
                 }
 
-                long uncompressedMem = (long)world.chunks.chunkCollection.Count*Env.ChunkSizeWithPaddingPow3*
+                long uncompressedMem = (long)world.chunks.Count*Env.ChunkSizeWithPaddingPow3*
                                        StructSerialization.TSSize<BlockData>.ValueSize;
                 Debug.LogFormat("mem: {0}/{1} ({2}%)", compressedMem, uncompressedMem, (int)((double)compressedMem/(double)uncompressedMem*100.0));
             }*/

@@ -307,7 +307,7 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
             if (// No update necessary if there was no movement
                 m_viewerPos ==m_viewerPosPrev &&
                 // However, we need to make sure that we have enough chunks loaded
-                world.chunks.chunkCollection.Count>=expectedChunks)
+                world.chunks.Count>=expectedChunks)
                 return;
 
             Profiler.BeginSample("PostProcessChunks");
