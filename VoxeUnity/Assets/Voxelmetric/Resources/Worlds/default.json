@@ -13,7 +13,7 @@
     "pathToChunkPrefab": "Prefabs/Chunk",
 
     "maxY": 640,
-    "minY": -640,
+    "minY": 0,
 
     "randomUpdateFrequency": 1,
 
