@@ -16,7 +16,7 @@ namespace Voxelmetric.Code
 
         //! Padding added to the size of block faces to fix floating point issues
         //! where tiny gaps can appear between block faces
-        public const float BlockFacePadding = 0.0005f;
+        public const float BlockFacePadding = 0.001f;
         
         public const int ChunkPow2 = ChunkPow << 1;
         public const int ChunkMask = (1 << ChunkPow) - 1;

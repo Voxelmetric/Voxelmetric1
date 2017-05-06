@@ -127,10 +127,15 @@ namespace Voxelmetric.Code.Builders.Geometry
                         // |  |
                         // |  |
                         // 0--3
-                        face[0] = new Vector3(xx, maxY, zz);
-                        face[1] = new Vector3(xx, maxY, zz+h);
-                        face[2] = new Vector3(xx+w, maxY, zz+h);
-                        face[3] = new Vector3(xx+w, maxY, zz);
+                        face[0] = new Vector3(xx, maxY, zz)+
+                                  new Vector3(-BlockUtils.blockPadding, +BlockUtils.blockPadding, -BlockUtils.blockPadding);
+                        face[1] = new Vector3(xx, maxY, zz+h)+
+                                  new Vector3(-BlockUtils.blockPadding, +BlockUtils.blockPadding, +BlockUtils.blockPadding);
+                        face[2] = new Vector3(xx+w, maxY, zz+h)+
+                                  new Vector3(+BlockUtils.blockPadding, +BlockUtils.blockPadding, +BlockUtils.blockPadding);
+                        face[3] = new Vector3(xx+w, maxY, zz)+
+                                  new Vector3(+BlockUtils.blockPadding, +BlockUtils.blockPadding, -BlockUtils.blockPadding);
+
                         block.BuildFace(chunk, face, ref mask[n]);
 
                         // Zero out the mask. We don't need to process the same fields again
@@ -229,10 +234,15 @@ namespace Voxelmetric.Code.Builders.Geometry
                         // |  |
                         // |  |
                         // 0--3
-                        face[0] = new Vector3(xx, minY, zz);
-                        face[1] = new Vector3(xx, minY, zz+h);
-                        face[2] = new Vector3(xx+w, minY, zz+h);
-                        face[3] = new Vector3(xx+w, minY, zz);
+                        face[0] = new Vector3(xx, minY, zz) +
+                                  new Vector3(-BlockUtils.blockPadding, -BlockUtils.blockPadding, -BlockUtils.blockPadding);
+                        face[1] = new Vector3(xx, minY, zz + h) +
+                                  new Vector3(-BlockUtils.blockPadding, -BlockUtils.blockPadding, +BlockUtils.blockPadding);
+                        face[2] = new Vector3(xx + w, minY, zz + h) +
+                                  new Vector3(+BlockUtils.blockPadding, -BlockUtils.blockPadding, +BlockUtils.blockPadding);
+                        face[3] = new Vector3(xx + w, minY, zz) +
+                                  new Vector3(+BlockUtils.blockPadding, -BlockUtils.blockPadding, -BlockUtils.blockPadding);
+
                         block.BuildFace(chunk, face, ref mask[n]);
 
                         // Zero out the mask. We don't need to process the same fields again
@@ -331,10 +341,15 @@ namespace Voxelmetric.Code.Builders.Geometry
                         // |  |
                         // |  |
                         // 0--3
-                        face[0] = new Vector3(maxX, yy, zz);
-                        face[1] = new Vector3(maxX, yy+h, zz);
-                        face[2] = new Vector3(maxX, yy+h, zz+w);
-                        face[3] = new Vector3(maxX, yy, zz+w);
+                        face[0] = new Vector3(maxX, yy, zz)
+                            + new Vector3(+BlockUtils.blockPadding, -BlockUtils.blockPadding, -BlockUtils.blockPadding);
+                        face[1] = new Vector3(maxX, yy+h, zz)
+                            + new Vector3(+BlockUtils.blockPadding, +BlockUtils.blockPadding, -BlockUtils.blockPadding);
+                        face[2] = new Vector3(maxX, yy+h, zz+w)
+                            + new Vector3(+BlockUtils.blockPadding, +BlockUtils.blockPadding, +BlockUtils.blockPadding);
+                        face[3] = new Vector3(maxX, yy, zz+w)
+                            + new Vector3(+BlockUtils.blockPadding, -BlockUtils.blockPadding, +BlockUtils.blockPadding);
+
                         block.BuildFace(chunk, face, ref mask[n]);
 
                         // Zero out the mask. We don't need to process the same fields again
@@ -433,10 +448,15 @@ namespace Voxelmetric.Code.Builders.Geometry
                         // |  |
                         // |  |
                         // 0--3
-                        face[0] = new Vector3(minX, yy, zz);
-                        face[1] = new Vector3(minX, yy+h, zz);
-                        face[2] = new Vector3(minX, yy+h, zz+w);
-                        face[3] = new Vector3(minX, yy, zz+w);
+                        face[0] = new Vector3(minX, yy, zz)
+                            + new Vector3(-BlockUtils.blockPadding, -BlockUtils.blockPadding, -BlockUtils.blockPadding);
+                        face[1] = new Vector3(minX, yy + h, zz)
+                            + new Vector3(-BlockUtils.blockPadding, +BlockUtils.blockPadding, -BlockUtils.blockPadding);
+                        face[2] = new Vector3(minX, yy + h, zz + w)
+                            + new Vector3(-BlockUtils.blockPadding, +BlockUtils.blockPadding, +BlockUtils.blockPadding);
+                        face[3] = new Vector3(minX, yy, zz + w)
+                            + new Vector3(-BlockUtils.blockPadding, -BlockUtils.blockPadding, +BlockUtils.blockPadding);
+
                         block.BuildFace(chunk, face, ref mask[n]);
 
                         // Zero out the mask. We don't need to process the same fields again
@@ -535,10 +555,15 @@ namespace Voxelmetric.Code.Builders.Geometry
                         // |  |
                         // |  |
                         // 0--1
-                        face[0] = new Vector3(xx, yy, maxZ);
-                        face[1] = new Vector3(xx+w, yy, maxZ);
-                        face[2] = new Vector3(xx+w, yy+h, maxZ);
-                        face[3] = new Vector3(xx, yy+h, maxZ);
+                        face[0] = new Vector3(xx, yy, maxZ)
+                            + new Vector3(-BlockUtils.blockPadding, -BlockUtils.blockPadding, +BlockUtils.blockPadding);
+                        face[1] = new Vector3(xx+w, yy, maxZ)
+                            + new Vector3(+BlockUtils.blockPadding, -BlockUtils.blockPadding, +BlockUtils.blockPadding);
+                        face[2] = new Vector3(xx+w, yy+h, maxZ)
+                            + new Vector3(+BlockUtils.blockPadding, +BlockUtils.blockPadding, +BlockUtils.blockPadding);
+                        face[3] = new Vector3(xx, yy+h, maxZ)
+                            + new Vector3(-BlockUtils.blockPadding, +BlockUtils.blockPadding, +BlockUtils.blockPadding);
+
                         block.BuildFace(chunk, face, ref mask[n]);
 
                         // Zero out the mask. We don't need to process the same fields again
@@ -637,10 +662,15 @@ namespace Voxelmetric.Code.Builders.Geometry
                         // |  |
                         // |  |
                         // 0--1
-                        face[0] = new Vector3(xx, yy, minZ);
-                        face[1] = new Vector3(xx+w, yy, minZ);
-                        face[2] = new Vector3(xx+w, yy+h, minZ);
-                        face[3] = new Vector3(xx, yy+h, minZ);
+                        face[0] = new Vector3(xx, yy, minZ)
+                            + new Vector3(-BlockUtils.blockPadding, -BlockUtils.blockPadding, -BlockUtils.blockPadding);
+                        face[1] = new Vector3(xx + w, yy, minZ)
+                            + new Vector3(+BlockUtils.blockPadding, -BlockUtils.blockPadding, -BlockUtils.blockPadding);
+                        face[2] = new Vector3(xx + w, yy + h, minZ)
+                            + new Vector3(+BlockUtils.blockPadding, +BlockUtils.blockPadding, -BlockUtils.blockPadding);
+                        face[3] = new Vector3(xx, yy + h, minZ)
+                            + new Vector3(-BlockUtils.blockPadding, +BlockUtils.blockPadding, -BlockUtils.blockPadding);
+
                         block.BuildFace(chunk, face, ref mask[n]);
 
                         // Zero out the mask. We don't need to process the same fields again

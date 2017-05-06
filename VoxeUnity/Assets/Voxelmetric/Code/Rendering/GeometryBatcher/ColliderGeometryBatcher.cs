@@ -85,7 +85,7 @@ namespace Voxelmetric.Code.Rendering.GeometryBatcher
         ///     Addds one face to our render buffer
         /// </summary>
         /// <param name="vertexData"> An array of 4 vertices forming the face</param>
-        public void AddFace(VertexData[] vertexData, bool backFace, int materialID=0)
+        public void AddFace(VertexData[] vertexData, bool backFace, int materialID)
         {
             Assert.IsTrue(vertexData.Length == 4);
 

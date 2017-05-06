@@ -40,7 +40,6 @@ namespace Voxelmetric.Code.Builders.Collider
                 return;
             }*/
 
-            Vector3[] face = pools.Vector3ArrayPool.PopExact(4);
             VertexData[] vertexData = pools.VertexDataArrayPool.PopExact(4);
             bool[] mask = pools.BoolArrayPool.PopExact(sideSize*sideSize);
 
@@ -108,12 +107,16 @@ namespace Voxelmetric.Code.Builders.Collider
                             // |  |
                             // |  |
                             // 0--3
-                            vertexData[0].Vertex = new Vector3(xx, maxY, zz)-BlockUtils.HalfBlockVector;
-                            vertexData[1].Vertex = new Vector3(xx, maxY, zz+h)-BlockUtils.HalfBlockVector;
-                            vertexData[2].Vertex = new Vector3(xx+w, maxY, zz+h)-BlockUtils.HalfBlockVector;
-                            vertexData[3].Vertex = new Vector3(xx+w, maxY, zz)-BlockUtils.HalfBlockVector;
+                            vertexData[0].Vertex = new Vector3(xx, maxY, zz) +
+                                                   new Vector3(-BlockUtils.blockPadding, +BlockUtils.blockPadding, -BlockUtils.blockPadding);
+                            vertexData[1].Vertex = new Vector3(xx, maxY, zz+h) +
+                                                   new Vector3(-BlockUtils.blockPadding, +BlockUtils.blockPadding, +BlockUtils.blockPadding);
+                            vertexData[2].Vertex = new Vector3(xx+w, maxY, zz+h) +
+                                                   new Vector3(+BlockUtils.blockPadding, +BlockUtils.blockPadding, +BlockUtils.blockPadding);
+                            vertexData[3].Vertex = new Vector3(xx+w, maxY, zz) +
+                                                   new Vector3(+BlockUtils.blockPadding, +BlockUtils.blockPadding, -BlockUtils.blockPadding);
 
-                            chunk.ChunkColliderGeometryHandler.Batcher.AddFace(vertexData, DirectionUtils.IsBackface(Direction.up));
+                            chunk.ChunkColliderGeometryHandler.Batcher.AddFace(vertexData, DirectionUtils.IsBackface(Direction.up), block.PhysicMaterialID);
                         }
 
                         // Zero out the mask. We don't need to process the same fields again
@@ -191,12 +194,16 @@ namespace Voxelmetric.Code.Builders.Collider
                             // |  |
                             // |  |
                             // 0--3
-                            vertexData[0].Vertex = new Vector3(xx, minY, zz)-BlockUtils.HalfBlockVector;
-                            vertexData[1].Vertex = new Vector3(xx, minY, zz+h)-BlockUtils.HalfBlockVector;
-                            vertexData[2].Vertex = new Vector3(xx+w, minY, zz+h)-BlockUtils.HalfBlockVector;
-                            vertexData[3].Vertex = new Vector3(xx+w, minY, zz)-BlockUtils.HalfBlockVector;
+                            vertexData[0].Vertex = new Vector3(xx, minY, zz) +
+                                                   new Vector3(-BlockUtils.blockPadding, -BlockUtils.blockPadding, -BlockUtils.blockPadding);
+                            vertexData[1].Vertex = new Vector3(xx, minY, zz+h) +
+                                                   new Vector3(-BlockUtils.blockPadding, -BlockUtils.blockPadding, +BlockUtils.blockPadding);
+                            vertexData[2].Vertex = new Vector3(xx+w, minY, zz+h) +
+                                                   new Vector3(+BlockUtils.blockPadding, -BlockUtils.blockPadding, +BlockUtils.blockPadding);
+                            vertexData[3].Vertex = new Vector3(xx+w, minY, zz) +
+                                                   new Vector3(+BlockUtils.blockPadding, -BlockUtils.blockPadding, -BlockUtils.blockPadding);
 
-                            chunk.ChunkColliderGeometryHandler.Batcher.AddFace(vertexData, DirectionUtils.IsBackface(Direction.down));
+                            chunk.ChunkColliderGeometryHandler.Batcher.AddFace(vertexData, DirectionUtils.IsBackface(Direction.down), block.PhysicMaterialID);
                         }
 
                         // Zero out the mask. We don't need to process the same fields again
@@ -274,12 +281,16 @@ namespace Voxelmetric.Code.Builders.Collider
                             // |  |
                             // |  |
                             // 0--3
-                            vertexData[0].Vertex = new Vector3(minX, yy, zz)-BlockUtils.HalfBlockVector;
-                            vertexData[1].Vertex = new Vector3(minX, yy+h, zz)-BlockUtils.HalfBlockVector;
-                            vertexData[2].Vertex = new Vector3(minX, yy+h, zz+w)-BlockUtils.HalfBlockVector;
-                            vertexData[3].Vertex = new Vector3(minX, yy, zz+w)-BlockUtils.HalfBlockVector;
+                            vertexData[0].Vertex = new Vector3(maxX, yy, zz) +
+                                                   new Vector3(+BlockUtils.blockPadding, -BlockUtils.blockPadding, -BlockUtils.blockPadding);
+                            vertexData[1].Vertex = new Vector3(maxX, yy+h, zz) +
+                                                   new Vector3(+BlockUtils.blockPadding, +BlockUtils.blockPadding, -BlockUtils.blockPadding);
+                            vertexData[2].Vertex = new Vector3(maxX, yy+h, zz+w) +
+                                                   new Vector3(+BlockUtils.blockPadding, +BlockUtils.blockPadding, +BlockUtils.blockPadding);
+                            vertexData[3].Vertex = new Vector3(maxX, yy, zz+w) +
+                                                   new Vector3(+BlockUtils.blockPadding, -BlockUtils.blockPadding, +BlockUtils.blockPadding);
 
-                            chunk.ChunkColliderGeometryHandler.Batcher.AddFace(vertexData, DirectionUtils.IsBackface(Direction.east));
+                            chunk.ChunkColliderGeometryHandler.Batcher.AddFace(vertexData, DirectionUtils.IsBackface(Direction.east), block.PhysicMaterialID);
                         }
 
                         // Zero out the mask. We don't need to process the same fields again
@@ -357,12 +368,16 @@ namespace Voxelmetric.Code.Builders.Collider
                             // |  |
                             // |  |
                             // 0--3
-                            vertexData[0].Vertex = new Vector3(maxX, yy, zz)-BlockUtils.HalfBlockVector;
-                            vertexData[1].Vertex = new Vector3(maxX, yy+h, zz)-BlockUtils.HalfBlockVector;
-                            vertexData[2].Vertex = new Vector3(maxX, yy+h, zz+w)-BlockUtils.HalfBlockVector;
-                            vertexData[3].Vertex = new Vector3(maxX, yy, zz+w)-BlockUtils.HalfBlockVector;
+                            vertexData[0].Vertex = new Vector3(maxX, yy, zz) +
+                                                   new Vector3(+BlockUtils.blockPadding, -BlockUtils.blockPadding, -BlockUtils.blockPadding);
+                            vertexData[1].Vertex = new Vector3(maxX, yy+h, zz) +
+                                                   new Vector3(+BlockUtils.blockPadding, +BlockUtils.blockPadding, -BlockUtils.blockPadding);
+                            vertexData[2].Vertex = new Vector3(maxX, yy+h, zz+w) +
+                                                   new Vector3(+BlockUtils.blockPadding, +BlockUtils.blockPadding, +BlockUtils.blockPadding);
+                            vertexData[3].Vertex = new Vector3(maxX, yy, zz+w) +
+                                                   new Vector3(+BlockUtils.blockPadding, -BlockUtils.blockPadding, +BlockUtils.blockPadding);
 
-                            chunk.ChunkColliderGeometryHandler.Batcher.AddFace(vertexData, DirectionUtils.IsBackface(Direction.west));
+                            chunk.ChunkColliderGeometryHandler.Batcher.AddFace(vertexData, DirectionUtils.IsBackface(Direction.west), block.PhysicMaterialID);
                         }
 
                         // Zero out the mask. We don't need to process the same fields again
@@ -440,12 +455,16 @@ namespace Voxelmetric.Code.Builders.Collider
                             // |  |
                             // |  |
                             // 0--1
-                            vertexData[0].Vertex = new Vector3(xx, yy, maxZ)-BlockUtils.HalfBlockVector;
-                            vertexData[1].Vertex = new Vector3(xx+w, yy, maxZ)-BlockUtils.HalfBlockVector;
-                            vertexData[2].Vertex = new Vector3(xx+w, yy+h, maxZ)-BlockUtils.HalfBlockVector;
-                            vertexData[3].Vertex = new Vector3(xx, yy+h, maxZ)-BlockUtils.HalfBlockVector;
+                            vertexData[0].Vertex = new Vector3(xx, yy, maxZ) +
+                                                   new Vector3(-BlockUtils.blockPadding, -BlockUtils.blockPadding, +BlockUtils.blockPadding);
+                            vertexData[1].Vertex = new Vector3(xx+w, yy, maxZ) +
+                                                   new Vector3(+BlockUtils.blockPadding, -BlockUtils.blockPadding, +BlockUtils.blockPadding);
+                            vertexData[2].Vertex = new Vector3(xx+w, yy+h, maxZ) +
+                                                   new Vector3(+BlockUtils.blockPadding, +BlockUtils.blockPadding, +BlockUtils.blockPadding);
+                            vertexData[3].Vertex = new Vector3(xx, yy+h, maxZ) +
+                                                   new Vector3(-BlockUtils.blockPadding, +BlockUtils.blockPadding, +BlockUtils.blockPadding);
 
-                            chunk.ChunkColliderGeometryHandler.Batcher.AddFace(vertexData, DirectionUtils.IsBackface(Direction.north));
+                            chunk.ChunkColliderGeometryHandler.Batcher.AddFace(vertexData, DirectionUtils.IsBackface(Direction.north), block.PhysicMaterialID);
                         }
 
                         // Zero out the mask. We don't need to process the same fields again
@@ -523,12 +542,16 @@ namespace Voxelmetric.Code.Builders.Collider
                             // |  |
                             // |  |
                             // 0--1
-                            vertexData[0].Vertex = new Vector3(xx, yy, minZ)-BlockUtils.HalfBlockVector;
-                            vertexData[1].Vertex = new Vector3(xx+w, yy, minZ)-BlockUtils.HalfBlockVector;
-                            vertexData[2].Vertex = new Vector3(xx+w, yy+h, minZ)-BlockUtils.HalfBlockVector;
-                            vertexData[3].Vertex = new Vector3(xx, yy+h, minZ)-BlockUtils.HalfBlockVector;
+                            vertexData[0].Vertex = new Vector3(xx, yy, minZ) +
+                                                   new Vector3(-BlockUtils.blockPadding, -BlockUtils.blockPadding, -BlockUtils.blockPadding);
+                            vertexData[1].Vertex = new Vector3(xx+w, yy, minZ) +
+                                                   new Vector3(+BlockUtils.blockPadding, -BlockUtils.blockPadding, -BlockUtils.blockPadding);
+                            vertexData[2].Vertex = new Vector3(xx+w, yy+h, minZ) +
+                                                   new Vector3(+BlockUtils.blockPadding, +BlockUtils.blockPadding, -BlockUtils.blockPadding);
+                            vertexData[3].Vertex = new Vector3(xx, yy+h, minZ) +
+                                                   new Vector3(-BlockUtils.blockPadding, +BlockUtils.blockPadding, -BlockUtils.blockPadding);
 
-                            chunk.ChunkColliderGeometryHandler.Batcher.AddFace(vertexData, DirectionUtils.IsBackface(Direction.south));
+                            chunk.ChunkColliderGeometryHandler.Batcher.AddFace(vertexData, DirectionUtils.IsBackface(Direction.south), block.PhysicMaterialID);
                         }
 
                         // Zero out the mask. We don't need to process the same fields again
@@ -546,7 +569,6 @@ namespace Voxelmetric.Code.Builders.Collider
             }
 
             pools.BoolArrayPool.Push(mask);
-            pools.Vector3ArrayPool.Push(face);
             pools.VertexDataArrayPool.Push(vertexData);
         }
     }

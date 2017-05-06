@@ -10,61 +10,59 @@ namespace Voxelmetric.Code.Configurable.Blocks.Utilities
     {
         //Adding a tiny overlap between block meshes may solve floating point imprecision
         //errors causing pixel size gaps between blocks when looking closely
-        public static readonly float halfBlock = (Env.BlockSize/2)+Env.BlockFacePadding;
-
-        public static readonly Vector3 HalfBlockVector = new Vector3(halfBlock, halfBlock, halfBlock);
-
-        public static readonly Vector3[][] HalfBlockOffsets =
+        public static readonly float blockPadding = Env.BlockFacePadding;
+        
+        public static readonly Vector3[][] PaddingOffsets =
         {
             new[]
             {
                 // Direction.up
-                new Vector3(-halfBlock, +halfBlock, +halfBlock),
-                new Vector3(+halfBlock, +halfBlock, +halfBlock),
-                new Vector3(+halfBlock, +halfBlock, -halfBlock),
-                new Vector3(-halfBlock, +halfBlock, -halfBlock)
+                new Vector3(-blockPadding, +blockPadding, +blockPadding),
+                new Vector3(+blockPadding, +blockPadding, +blockPadding),
+                new Vector3(+blockPadding, +blockPadding, -blockPadding),
+                new Vector3(-blockPadding, +blockPadding, -blockPadding)
             },
             new[]
             {
                 // Direction.down
-                new Vector3(-halfBlock, -halfBlock, -halfBlock),
-                new Vector3(+halfBlock, -halfBlock, -halfBlock),
-                new Vector3(+halfBlock, -halfBlock, +halfBlock),
-                new Vector3(-halfBlock, -halfBlock, +halfBlock),
+                new Vector3(-blockPadding, -blockPadding, -blockPadding),
+                new Vector3(+blockPadding, -blockPadding, -blockPadding),
+                new Vector3(+blockPadding, -blockPadding, +blockPadding),
+                new Vector3(-blockPadding, -blockPadding, +blockPadding),
             },
 
             new[]
             {
                 // Direction.north
-                new Vector3(+halfBlock, -halfBlock, +halfBlock),
-                new Vector3(+halfBlock, +halfBlock, +halfBlock),
-                new Vector3(-halfBlock, +halfBlock, +halfBlock),
-                new Vector3(-halfBlock, -halfBlock, +halfBlock)
+                new Vector3(+blockPadding, -blockPadding, +blockPadding),
+                new Vector3(+blockPadding, +blockPadding, +blockPadding),
+                new Vector3(-blockPadding, +blockPadding, +blockPadding),
+                new Vector3(-blockPadding, -blockPadding, +blockPadding)
             },
             new[]
             {
                 // Direction.south
-                new Vector3(-halfBlock, -halfBlock, -halfBlock),
-                new Vector3(-halfBlock, +halfBlock, -halfBlock),
-                new Vector3(+halfBlock, +halfBlock, -halfBlock),
-                new Vector3(+halfBlock, -halfBlock, -halfBlock),
+                new Vector3(-blockPadding, -blockPadding, -blockPadding),
+                new Vector3(-blockPadding, +blockPadding, -blockPadding),
+                new Vector3(+blockPadding, +blockPadding, -blockPadding),
+                new Vector3(+blockPadding, -blockPadding, -blockPadding),
             },
 
             new[]
             {
                 // Direction.east
-                new Vector3(+halfBlock, -halfBlock, -halfBlock),
-                new Vector3(+halfBlock, +halfBlock, -halfBlock),
-                new Vector3(+halfBlock, +halfBlock, +halfBlock),
-                new Vector3(+halfBlock, -halfBlock, +halfBlock)
+                new Vector3(+blockPadding, -blockPadding, -blockPadding),
+                new Vector3(+blockPadding, +blockPadding, -blockPadding),
+                new Vector3(+blockPadding, +blockPadding, +blockPadding),
+                new Vector3(+blockPadding, -blockPadding, +blockPadding)
             },
             new[]
             {
                 // Direction.west
-                new Vector3(-halfBlock, -halfBlock, +halfBlock),
-                new Vector3(-halfBlock, +halfBlock, +halfBlock),
-                new Vector3(-halfBlock, +halfBlock, -halfBlock),
-                new Vector3(-halfBlock, -halfBlock, -halfBlock),
+                new Vector3(-blockPadding, -blockPadding, +blockPadding),
+                new Vector3(-blockPadding, +blockPadding, +blockPadding),
+                new Vector3(-blockPadding, +blockPadding, -blockPadding),
+                new Vector3(-blockPadding, -blockPadding, -blockPadding),
             }
         };
 
@@ -283,18 +281,7 @@ namespace Voxelmetric.Code.Configurable.Blocks.Utilities
             vertexData[1].UV = new Vector2(texture.x, texture.y+texture.height);
             vertexData[0].UV = new Vector2(texture.x, texture.y);
         }
-
-        public static void PrepareVertices(ref Vector3Int localPos, VertexData[] vertexData, Direction direction)
-        {
-            Vector3 vPos = localPos;
-            int d = DirectionUtils.Get(direction);
-
-            vertexData[0].Vertex = vPos+HalfBlockOffsets[d][0];
-            vertexData[1].Vertex = vPos+HalfBlockOffsets[d][1];
-            vertexData[2].Vertex = vPos+HalfBlockOffsets[d][2];
-            vertexData[3].Vertex = vPos+HalfBlockOffsets[d][3];
-        }
-
+        
         private static void SetColorsAO(VertexData[] vertexData, bool wnSolid, bool nSolid, bool neSolid, bool eSolid, bool esSolid, bool sSolid, bool swSolid, bool wSolid, float strength, Direction direction)
         {
             float ne = 1f;

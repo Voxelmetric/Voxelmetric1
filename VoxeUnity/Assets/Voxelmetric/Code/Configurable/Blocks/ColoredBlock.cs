@@ -6,7 +6,7 @@ using Voxelmetric.Code.Core;
 using Voxelmetric.Code.Data_types;
 using Voxelmetric.Code.Rendering;
 
-public class ColoredBlock : SolidBlock
+public class ColoredBlock : Block
 {
     public Color32[] colors
     {
@@ -16,31 +16,52 @@ public class ColoredBlock : SolidBlock
     public override void BuildFace(Chunk chunk, Vector3[] vertices, ref BlockFace face)
     {
         bool backFace = DirectionUtils.IsBackface(face.side);
+        int d = DirectionUtils.Get(face.side);
 
         LocalPools pools = chunk.pools;
         VertexData[] vertexData = pools.VertexDataArrayPool.PopExact(4);
         {
-            if (vertices == null)
+            if (vertices==null)
             {
-                for (int i = 0; i<4; i++)
-                {
-                    vertexData[i].Color = colors[(int)face.side];
-                    vertexData[i].UV = Vector2.zero;
-                }
-                BlockUtils.PrepareVertices(ref face.pos, vertexData, face.side);
+                Vector3 pos = face.pos;
+
+                vertexData[0].Vertex = pos+BlockUtils.PaddingOffsets[d][0];
+                vertexData[0].Color = colors[d];
+                vertexData[0].UV = Vector2.zero;
+
+                vertexData[1].Vertex = pos+BlockUtils.PaddingOffsets[d][1];
+                vertexData[1].Color = colors[d];
+                vertexData[1].UV = Vector2.zero;
+
+                vertexData[2].Vertex = pos+BlockUtils.PaddingOffsets[d][2];
+                vertexData[2].Color = colors[d];
+                vertexData[2].UV = Vector2.zero;
+
+                vertexData[3].Vertex = pos+BlockUtils.PaddingOffsets[d][3];
+                vertexData[3].Color = colors[d];
+                vertexData[3].UV = Vector2.zero;
             }
             else
             {
-                for (int i = 0; i < 4; i++)
-                {
-                    vertexData[i].Vertex = vertices[i];
-                    vertexData[i].Color = colors[(int)face.side];
-                    vertexData[i].UV = Vector2.zero;
-                }
+                vertexData[0].Vertex = vertices[0];
+                vertexData[0].Color = colors[d];
+                vertexData[0].UV = Vector2.zero;
+
+                vertexData[1].Vertex = vertices[1];
+                vertexData[1].Color = colors[d];
+                vertexData[1].UV = Vector2.zero;
+
+                vertexData[2].Vertex = vertices[2];
+                vertexData[2].Color = colors[d];
+                vertexData[2].UV = Vector2.zero;
+
+                vertexData[3].Vertex = vertices[3];
+                vertexData[3].Color = colors[d];
+                vertexData[3].UV = Vector2.zero;
             }
-            
+
             BlockUtils.AdjustColors(chunk, vertexData, face.side, face.light);
-            
+
             chunk.GeometryHandler.Batcher.AddFace(vertexData, backFace, face.materialID);
         }
         pools.VertexDataArrayPool.Push(vertexData);
