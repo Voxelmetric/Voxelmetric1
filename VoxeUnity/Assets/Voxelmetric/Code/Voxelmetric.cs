@@ -53,10 +53,5 @@ namespace Voxelmetric.Code
 
             return chunksToSave;
         }
-
-        public static VmRaycastHit Raycast(Ray ray, World world, float range, bool removalRequested)
-        {
-            return VmRaycast.Raycast(ray, world, range, removalRequested);
-        }
     }
 }

@@ -64,7 +64,7 @@ namespace Voxelmetric.Examples
             if (world!=null)
             {
                 Block block = world.blockProvider.GetBlock(blockToPlace);
-                VmRaycastHit hit = Code.Voxelmetric.Raycast(
+                VmRaycastHit hit = VmRaycast.Raycast(
                     new Ray(cam.transform.position, mousePos-cam.transform.position),
                     world, 100, block.Type==BlockProvider.AirType
                     );

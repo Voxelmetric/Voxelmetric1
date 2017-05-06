@@ -13,43 +13,41 @@ public class CrossMeshBlock : Block
     private static readonly float coef = 1.0f / 64.0f;
 
     public TextureCollection texture { get { return ((CrossMeshBlockConfig)Config).texture; } }
-    
+
     public override void BuildBlock(Chunk chunk, ref Vector3Int localPos, int materialID)
     {
         LocalPools pools = chunk.pools;
         RenderGeometryBatcher batcher = chunk.GeometryHandler.Batcher;
 
-        float halfBlock = Env.BlockSize*0.5f;
-
         // Using the block positions hash is much better for random numbers than saving the offset and height in the block data
         int hash = localPos.GetHashCode();
-        if (hash < 0)
+        if (hash<0)
             hash *= -1;
 
         float blockHeight = (hash&63)*coef*Env.BlockSize;
 
         hash *= 39;
-        if (hash < 0)
+        if (hash<0)
             hash *= -1;
 
-        float offsetX = (hash&63)*coef*halfBlock-halfBlock*0.5f;
+        float offsetX = (hash&63)*coef*Env.BlockSizeHalf-Env.BlockSizeHalf*0.5f;
 
         hash *= 39;
-        if (hash < 0)
+        if (hash<0)
             hash *= -1;
 
-        float offsetZ = (hash&63)*coef*halfBlock-halfBlock*0.5f;
+        float offsetZ = (hash&63)*coef*Env.BlockSizeHalf-Env.BlockSizeHalf*0.5f;
 
         // Converting the position to a vector adjusts it based on block size and gives us real world coordinates for x, y and z
         Vector3 vPos = localPos;
         vPos += new Vector3(offsetX, 0, offsetZ);
 
-        float x1 = vPos.x - BlockUtils.blockPadding - halfBlock;
-        float x2 = vPos.x + BlockUtils.blockPadding + halfBlock;
-        float y1 = vPos.y - BlockUtils.blockPadding;
-        float y2 = vPos.y + BlockUtils.blockPadding + blockHeight;
-        float z1 = vPos.z - BlockUtils.blockPadding - halfBlock;
-        float z2 = vPos.z + BlockUtils.blockPadding + halfBlock;
+        float x1 = vPos.x-BlockUtils.blockPadding-Env.BlockSizeHalf;
+        float x2 = vPos.x+BlockUtils.blockPadding+Env.BlockSizeHalf;
+        float y1 = vPos.y-BlockUtils.blockPadding;
+        float y2 = vPos.y+BlockUtils.blockPadding+blockHeight;
+        float z1 = vPos.z-BlockUtils.blockPadding-Env.BlockSizeHalf;
+        float z2 = vPos.z+BlockUtils.blockPadding+Env.BlockSizeHalf;
 
         VertexData[] vertexData = pools.VertexDataArrayPool.PopExact(4);
         {

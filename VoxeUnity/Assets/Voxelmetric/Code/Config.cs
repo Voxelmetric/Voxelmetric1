@@ -12,6 +12,7 @@ namespace Voxelmetric.Code
 
         #region DO NOT CHANGE THESE!
 
+        public const float BlockSizeHalf = BlockSize / 2f;
         public const float BlockSizeInv = 1f / BlockSize;
 
         //! Padding added to the size of block faces to fix floating point issues

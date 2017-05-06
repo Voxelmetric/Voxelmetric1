@@ -1,5 +1,6 @@
 ﻿using System;
 using UnityEngine;
+using Voxelmetric.Code.Configurable.Blocks.Utilities;
 using Voxelmetric.Code.Core;
 using Voxelmetric.Code.Data_types;
 
@@ -16,6 +17,7 @@ namespace Voxelmetric.Code.Utilities
 
             //Transform the ray to match the rotation and position of the world:
             pos -= world.transform.position;
+            pos -= new Vector3(Env.BlockSizeHalf, Env.BlockSizeHalf, Env.BlockSizeHalf);
             pos = Quaternion.Inverse(world.gameObject.transform.rotation) * pos;
             dir = Quaternion.Inverse(world.transform.rotation) * dir;
 
@@ -91,7 +93,7 @@ namespace Voxelmetric.Code.Utilities
             };
         }
 
-        //Resolve a component of a vector3 into an int for a blockPos by using the sign
+        // Resolve a component of a vector3 into an int for a blockPos by using the sign
         // of the corresponding direction to decide if the position is on a boundary
         private static int ResolveBlockPos(float pos, int dirS)
         {
