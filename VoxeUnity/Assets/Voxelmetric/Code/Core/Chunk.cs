@@ -1,12 +1,10 @@
 ﻿using System.Text;
-using UnityEngine;
 using UnityEngine.Profiling;
 using Voxelmetric.Code.Common;
 using Voxelmetric.Code.Common.MemoryPooling;
 using Voxelmetric.Code.Core.GeometryHandler;
 using Voxelmetric.Code.Core.StateManager;
 using Voxelmetric.Code.Data_types;
-using Voxelmetric.Code.Load_Resources.Blocks;
 
 namespace Voxelmetric.Code.Core
 {

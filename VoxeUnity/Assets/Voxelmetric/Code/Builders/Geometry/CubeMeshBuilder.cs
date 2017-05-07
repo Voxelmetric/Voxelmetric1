@@ -15,6 +15,12 @@ namespace Voxelmetric.Code.Builders.Geometry
     {
         protected override void BuildBox(Chunk chunk, int minX, int minY, int minZ, int maxX, int maxY, int maxZ)
         {
+            // All faces in the are build in the following order:
+            //     1--2
+            //     |  |
+            //     |  |
+            //     0--3
+
             var blocks = chunk.blocks;
             var pools = chunk.pools;
             var listeners = chunk.stateManager.Listeners;
@@ -122,11 +128,7 @@ namespace Voxelmetric.Code.Builders.Geometry
                         }
                         cont:
 
-                        // Build face
-                        // 1--2
-                        // |  |
-                        // |  |
-                        // 0--3
+                        // Build the face
                         face[0] = new Vector3(xx, maxY, zz)+
                                   new Vector3(-BlockUtils.blockPadding, +BlockUtils.blockPadding, -BlockUtils.blockPadding);
                         face[1] = new Vector3(xx, maxY, zz+h)+
@@ -229,11 +231,7 @@ namespace Voxelmetric.Code.Builders.Geometry
                         }
                         cont:
 
-                        // Build face
-                        // 1--2
-                        // |  |
-                        // |  |
-                        // 0--3
+                        // Build the face
                         face[0] = new Vector3(xx, minY, zz) +
                                   new Vector3(-BlockUtils.blockPadding, -BlockUtils.blockPadding, -BlockUtils.blockPadding);
                         face[1] = new Vector3(xx, minY, zz + h) +
@@ -336,11 +334,7 @@ namespace Voxelmetric.Code.Builders.Geometry
                         }
                         cont:
 
-                        // Build face
-                        // 1--2
-                        // |  |
-                        // |  |
-                        // 0--3
+                        // Build the face
                         face[0] = new Vector3(maxX, yy, zz)
                             + new Vector3(+BlockUtils.blockPadding, -BlockUtils.blockPadding, -BlockUtils.blockPadding);
                         face[1] = new Vector3(maxX, yy+h, zz)
@@ -443,11 +437,7 @@ namespace Voxelmetric.Code.Builders.Geometry
                         }
                         cont:
 
-                        // Build face
-                        // 1--2
-                        // |  |
-                        // |  |
-                        // 0--3
+                        // Build the face
                         face[0] = new Vector3(minX, yy, zz)
                             + new Vector3(-BlockUtils.blockPadding, -BlockUtils.blockPadding, -BlockUtils.blockPadding);
                         face[1] = new Vector3(minX, yy + h, zz)
@@ -550,19 +540,15 @@ namespace Voxelmetric.Code.Builders.Geometry
                         }
                         cont:
 
-                        // Build face
-                        // 3--2
-                        // |  |
-                        // |  |
-                        // 0--1
+                        // Build the face
                         face[0] = new Vector3(xx, yy, maxZ)
                             + new Vector3(-BlockUtils.blockPadding, -BlockUtils.blockPadding, +BlockUtils.blockPadding);
-                        face[1] = new Vector3(xx+w, yy, maxZ)
-                            + new Vector3(+BlockUtils.blockPadding, -BlockUtils.blockPadding, +BlockUtils.blockPadding);
+                        face[1] = new Vector3(xx, yy+h, maxZ)
+                            + new Vector3(-BlockUtils.blockPadding, +BlockUtils.blockPadding, +BlockUtils.blockPadding);
                         face[2] = new Vector3(xx+w, yy+h, maxZ)
                             + new Vector3(+BlockUtils.blockPadding, +BlockUtils.blockPadding, +BlockUtils.blockPadding);
-                        face[3] = new Vector3(xx, yy+h, maxZ)
-                            + new Vector3(-BlockUtils.blockPadding, +BlockUtils.blockPadding, +BlockUtils.blockPadding);
+                        face[3] = new Vector3(xx+w, yy, maxZ)
+                            + new Vector3(+BlockUtils.blockPadding, -BlockUtils.blockPadding, +BlockUtils.blockPadding);
 
                         block.BuildFace(chunk, face, ref mask[n]);
 
@@ -657,19 +643,15 @@ namespace Voxelmetric.Code.Builders.Geometry
                         }
                         cont:
 
-                        // Build face
-                        // 3--2
-                        // |  |
-                        // |  |
-                        // 0--1
+                        // Build the face
                         face[0] = new Vector3(xx, yy, minZ)
                             + new Vector3(-BlockUtils.blockPadding, -BlockUtils.blockPadding, -BlockUtils.blockPadding);
-                        face[1] = new Vector3(xx + w, yy, minZ)
-                            + new Vector3(+BlockUtils.blockPadding, -BlockUtils.blockPadding, -BlockUtils.blockPadding);
-                        face[2] = new Vector3(xx + w, yy + h, minZ)
-                            + new Vector3(+BlockUtils.blockPadding, +BlockUtils.blockPadding, -BlockUtils.blockPadding);
-                        face[3] = new Vector3(xx, yy + h, minZ)
+                        face[1] = new Vector3(xx, yy+h, minZ)
                             + new Vector3(-BlockUtils.blockPadding, +BlockUtils.blockPadding, -BlockUtils.blockPadding);
+                        face[2] = new Vector3(xx+w, yy+h, minZ)
+                            + new Vector3(+BlockUtils.blockPadding, +BlockUtils.blockPadding, -BlockUtils.blockPadding);
+                        face[3] = new Vector3(xx+w, yy, minZ)
+                            + new Vector3(+BlockUtils.blockPadding, -BlockUtils.blockPadding, -BlockUtils.blockPadding);
 
                         block.BuildFace(chunk, face, ref mask[n]);
 

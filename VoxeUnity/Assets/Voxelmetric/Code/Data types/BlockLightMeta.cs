@@ -5,11 +5,11 @@ namespace Voxelmetric.Code.Data_types
     public struct BlockLightData: IEquatable<BlockLightData>
     {
         /*
-         * 0-wnSolid
+         * 0-nwSolid
          * 1-nSolid
          * 2-neSolid
          * 3-eSolid
-         * 4-esSolid
+         * 4-seSolid
          * 5-sSolid
          * 6-swSolid
          * 7-wSolid
@@ -24,18 +24,18 @@ namespace Voxelmetric.Code.Data_types
         }
 
         public BlockLightData(
-            bool wnSolid, bool nSolid, bool neSolid, bool eSolid,
-            bool esSolid, bool sSolid, bool swSolid, bool wSolid
+            bool nwSolid, bool nSolid, bool neSolid, bool eSolid,
+            bool seSolid, bool sSolid, bool swSolid, bool wSolid
             )
         {
-            mask = wnSolid ? 0x01 : 0;
+            mask = nwSolid ? 0x01 : 0;
             if (nSolid)
                 mask |= 0x02;
             if (neSolid)
                 mask |= 0x04;
             if (eSolid)
                 mask |= 0x08;
-            if (esSolid)
+            if (seSolid)
                 mask |= 0x10;
             if (sSolid)
                 mask |= 0x20;
@@ -45,7 +45,7 @@ namespace Voxelmetric.Code.Data_types
                 mask |= 0x80;
         }
 
-        public bool wnSolid
+        public bool nwSolid
         {
             get { return (mask&0x01)!=0; }
         }
@@ -65,7 +65,7 @@ namespace Voxelmetric.Code.Data_types
             get { return (mask&0x08)!=0; }
         }
 
-        public bool esSolid
+        public bool seSolid
         {
             get { return (mask&0x10)!=0; }
         }

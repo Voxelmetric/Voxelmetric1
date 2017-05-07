@@ -8,8 +8,8 @@
         up = 0, // front face
         down = 1, // back face
 
-        north = 2, // front face
-        south = 3, // back face
+        south = 2, // back face
+        north = 3, // front face
 
         east = 4, // front face
         west = 5 // back face
