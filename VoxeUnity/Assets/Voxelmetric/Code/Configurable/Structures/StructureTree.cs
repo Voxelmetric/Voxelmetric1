@@ -25,8 +25,8 @@ public class StructureTree: GeneratedStructure
 
     public override void Build(World world, ref Vector3Int worldPos, TerrainLayer layer)
     {
-        int noise = Helpers.FastFloor(NoiseUtils.GetNoise(layer.Noise.Noise, worldPos.x, worldPos.y, worldPos.z, 1f, minCrownSize, 1f));
-        int leavesRange = noise + 3;
+        int noise = Helpers.FastFloor(NoiseUtils.GetNoise(layer.Noise.Noise, worldPos.x, worldPos.y, worldPos.z, 1f, 3, 1f));
+        int leavesRange = minCrownSize + noise;
         int leavesRange1 = leavesRange-1;
         int trunkHeight = maxTrunkSize - noise;
 
