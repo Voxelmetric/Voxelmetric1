@@ -25,20 +25,26 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
         private const int VerticalMaxRange = 32;
         private const int VerticalDefRange = 3;
 
-        // The world we are attached to
+        //! The world we are attached to
         public World world;
-        // The camera against which we perform frustrum checks
+        //! The camera against which we perform frustrum checks
         private Camera m_camera;
+        //! Position of the camera when the game started
+        private Vector3 m_cameraStartPos;
 
-        // Distance in chunks for loading chunks
+        //! Distance in chunks for loading chunks
         [Range(HorizontalMinRange, HorizontalMaxRange)] public int HorizontalChunkLoadRadius = HorizontalDefRange;
-        // Distance in chunks for loading chunks
+        //! Distance in chunks for loading chunks
         [Range(VerticalMinRange, VerticalMaxRange)] public int VerticalChunkLoadRadius = VerticalDefRange;
-        // Makes the world regenerate around the attached camera. If false, Y sticks at 0.
-        public bool FollowCamera;
-        // Toogles frustum culling
+        //! Makes the world regenerate around the attached camera. If false, X sticks at 0.
+        public bool FollowCameraX;
+        //! Makes the world regenerate around the attached camera. If false, Y sticks at 0.
+        public bool FollowCameraY;
+        //! Makes the world regenerate around the attached camera. If false, Z sticks at 0.
+        public bool FollowCameraZ;
+        //! Toogles frustum culling
         public bool UseFrustumCulling;
-        // If false, only visible part of map is loaded on startup
+        //! If false, only visible part of map is loaded on startup
         public bool FullLoadOnStartUp = true;
 
         public bool Diag_DrawWorldBounds;
@@ -66,6 +72,8 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
         {
             m_chunkHorizontalLoadRadiusPrev = HorizontalChunkLoadRadius;
             m_chunkVerticalLoadRadiusPrev = VerticalChunkLoadRadius;
+
+            m_cameraStartPos = m_camera.transform.position;
 
             UpdateViewerPosition();
             // Add some arbirtary value so that m_viewerPosPrev is different from m_viewerPos
@@ -489,14 +497,30 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
             m_viewerPosPrev = m_viewerPos;
 
             // Do not let y overflow
-            int y = 0;
-            if (FollowCamera)
+            int x = (int)m_cameraStartPos.x;
+            if (FollowCameraX)
+            {
+                x = pos.x;
+                world.CapCoordXInsideWorld(ref x, ref x);
+            }
+
+            // Do not let y overflow
+            int y = (int)m_cameraStartPos.y;
+            if (FollowCameraY)
             {
                 y = pos.y;
                 world.CapCoordYInsideWorld(ref y, ref y);
             }
 
-            m_viewerPos = new Vector3Int(pos.x, y, pos.z);
+            // Do not let y overflow
+            int z = (int)m_cameraStartPos.z;
+            if (FollowCameraZ)
+            {
+                z = pos.z;
+                world.CapCoordZInsideWorld(ref z, ref z);
+            }
+
+            m_viewerPos = new Vector3Int(x, y, z);
         }
         
         private void OnDrawGizmosSelected()
