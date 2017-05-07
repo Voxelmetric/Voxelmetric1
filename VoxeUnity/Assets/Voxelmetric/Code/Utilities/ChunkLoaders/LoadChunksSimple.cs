@@ -72,10 +72,11 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
             m_chunkVerticalLoadRadiusPrev = VerticalChunkLoadRadius;
 
             m_cameraStartPos = m_camera.transform.position;
-
+            
             UpdateViewerPosition();
+
             // Add some arbirtary value so that m_viewerPosPrev is different from m_viewerPos
-            m_viewerPos += Vector3Int.one;
+            m_viewerPosPrev += Vector3Int.one;
         }
 
         void Update()
@@ -487,7 +488,7 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
             m_viewerPosPrev = m_viewerPos;
 
             // Do not let y overflow
-            int x = (int)m_cameraStartPos.x;
+            int x = m_viewerPos.x;
             if (FollowCameraX)
             {
                 x = pos.x;
@@ -495,7 +496,7 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
             }
 
             // Do not let y overflow
-            int y = (int)m_cameraStartPos.y;
+            int y = m_viewerPos.y;
             if (FollowCameraY)
             {
                 y = pos.y;
@@ -503,7 +504,7 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
             }
 
             // Do not let y overflow
-            int z = (int)m_cameraStartPos.z;
+            int z = m_viewerPos.z;
             if (FollowCameraZ)
             {
                 z = pos.z;
