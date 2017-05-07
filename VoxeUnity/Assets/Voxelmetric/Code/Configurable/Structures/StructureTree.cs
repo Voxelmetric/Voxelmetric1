@@ -1,23 +1,18 @@
-﻿using Voxelmetric.Code.Common;
+﻿using System;
+using Voxelmetric.Code;
+using Voxelmetric.Code.Common;
 using Voxelmetric.Code.Core;
 using Voxelmetric.Code.Data_types;
 using Voxelmetric.Code.Utilities.Noise;
 
 public class StructureTree: GeneratedStructure
 {
-    protected WorldBlocks blocks;
-    protected BlockData leaves;
-    protected BlockData log;
+    private WorldBlocks blocks;
+    private BlockData leaves;
+    private BlockData log;
 
-    public StructureTree()
-    {
-        negX = 3;
-        posX = 3;
-        negZ = 3;
-        posZ = 3;
-        posY = 6;
-        negY = 0;
-    }
+    private static readonly int minCrownSize = 3;
+    private static readonly int maxTrunkSize = 3;
 
     public override void Init(World world)
     {
@@ -30,29 +25,71 @@ public class StructureTree: GeneratedStructure
 
     public override void Build(World world, ref Vector3Int pos, TerrainLayer layer)
     {
-        int noise = Helpers.FastFloor(NoiseUtils.GetNoise(layer.Noise.Noise, pos.x, pos.y, pos.z, 1f, 3, 1f));
+        int noise = Helpers.FastFloor(NoiseUtils.GetNoise(layer.Noise.Noise, pos.x, pos.y, pos.z, 1f, minCrownSize, 1f));
         int leavesRange = noise + 3;
-        int leavesRange2 = leavesRange*leavesRange;
-        int trunkHeight = posY - noise;
+        int leavesRange1 = leavesRange-1;
+        int trunkHeight = maxTrunkSize - noise;
 
-        float a2inv = 1.0f / leavesRange2;
-        float b2inv = 1.0f / ((leavesRange-1)*(leavesRange-1));
-
-        for (int y = -leavesRange+1; y <= leavesRange-1; y++)
+        // Make the crown an ellipsoid flattened on the y axis
+        float a2inv = 1.0f/(leavesRange*leavesRange);
+        float b2inv = 1.0f/(leavesRange1*leavesRange1);
+        
+        int x1 = pos.x-leavesRange;
+        int x2 = pos.x+leavesRange;
+        int y1 = pos.y+1+trunkHeight;
+        int y2 = y1 + 1+2*leavesRange1;
+        int z1 = pos.z-leavesRange;
+        int z2 = pos.z+leavesRange;
+        
+        // Generate the crown
+        Vector3Int posFrom = new Vector3Int(x1, y1, z1);
+        Vector3Int posTo = new Vector3Int(x2, y2, z2);
+        Vector3Int chunkPosFrom = Chunk.ContainingChunkPos(ref posFrom);
+        Vector3Int chunkPosTo = Chunk.ContainingChunkPos(ref posTo);
+        
+        int minY = Helpers.Mod(posFrom.y, Env.ChunkSize);
+        for (int cy = chunkPosFrom.y; cy <= chunkPosTo.y; cy += Env.ChunkSize, minY = 0)
         {
-            for (int z = -leavesRange; z <= leavesRange; z++)
+            int maxY = Math.Min(posTo.y - cy, Env.ChunkSize1);
+            int minZ = Helpers.Mod(posFrom.z, Env.ChunkSize);
+            for (int cz = chunkPosFrom.z; cz <= chunkPosTo.z; cz += Env.ChunkSize, minZ = 0)
             {
-                for (int x = -leavesRange; x <= leavesRange; x++)
+                int maxZ = Math.Min(posTo.z - cz, Env.ChunkSize1);
+                int minX = Helpers.Mod(posFrom.x, Env.ChunkSize);
+                for (int cx = chunkPosFrom.x; cx <= chunkPosTo.x; cx += Env.ChunkSize, minX = 0)
                 {
-                    if (x*x*a2inv +z*z*a2inv + y*y*b2inv<=1.0f) // An ellipsoid flattened on the y axis
+                    Vector3Int chunkPos = new Vector3Int(cx, cy, cz);
+                    Chunk chunk = world.chunks.Get(ref chunkPos);
+                    if (chunk == null)
+                        continue;
+
+                    int maxX = Math.Min(posTo.x-cx, Env.ChunkSize1);
+                    for (int y = minY; y <= maxY; ++y)
                     {
-                        Vector3Int blockPos = pos.Add(x, y+trunkHeight, z);
-                        blocks.SetRaw(ref blockPos, leaves);
+                        for (int z =minZ; z <= maxZ; ++z)
+                        {
+                            for (int x = minX; x <= maxX; ++x)
+                            {
+                                float xx = cx+x-pos.x;
+                                float yy = cy+y-y1-leavesRange1;
+                                float zz = cz+z-pos.z;
+
+                                float _x = xx*xx*a2inv;
+                                float _y = yy*yy*b2inv;
+                                float _z = zz*zz*a2inv;
+                                if (_x+_y+_z<=1.0f)
+                                {
+                                    int index = Helpers.GetChunkIndex1DFrom3D(x, y, z);
+                                    chunk.blocks.SetRaw(index, leaves);
+                                }
+                            }
+                        }
                     }
                 }
             }
         }
 
+        // Genrate the trunk
         blocks.SetRaw(ref pos, log);
         for (int y = 1; y <= trunkHeight; y++)
         {
