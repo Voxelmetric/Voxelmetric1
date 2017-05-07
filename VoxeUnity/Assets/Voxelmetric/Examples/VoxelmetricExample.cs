@@ -1,8 +1,10 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 using Voxelmetric.Code;
 using Voxelmetric.Code.Core;
+using Voxelmetric.Code.Core.Operations;
 using Voxelmetric.Code.Core.Serialization;
 using Voxelmetric.Code.Data_types;
 using Voxelmetric.Code.Load_Resources.Blocks;
@@ -114,9 +116,11 @@ namespace Voxelmetric.Examples
                 // Test of ranged block setting
                 if (Input.GetKeyDown(KeyCode.T))
                 {
+                    Action<ModifyBlockContext> action = context => { Debug.Log("Action performed"); };
+
                     Vector3Int fromPos = new Vector3Int(-44,-44,-44);
                     Vector3Int toPos = new Vector3Int(44, 44, 44);
-                    Code.Voxelmetric.SetBlockRange(world, ref fromPos, ref toPos, BlockProvider.AirBlock);
+                    Code.Voxelmetric.SetBlockRange(world, ref fromPos, ref toPos, BlockProvider.AirBlock, action);
                 }
             }
         }

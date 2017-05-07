@@ -1,9 +1,9 @@
-﻿using System.Collections.Generic;
-using UnityEngine;
+﻿using System;
+using System.Collections.Generic;
 using Voxelmetric.Code.Core;
+using Voxelmetric.Code.Core.Operations;
 using Voxelmetric.Code.Core.StateManager;
 using Voxelmetric.Code.Data_types;
-using Voxelmetric.Code.Utilities;
 
 namespace Voxelmetric.Code
 {
@@ -12,20 +12,19 @@ namespace Voxelmetric.Code
         //Used as a manager class with references to classes treated like singletons
         public static readonly VoxelmetricResources resources = new VoxelmetricResources ();
 
-        public static void SetBlock(World world, ref Vector3Int pos, BlockData blockData)
+        public static void SetBlock(World world, ref Vector3Int pos, BlockData blockData, Action<ModifyBlockContext> onAction = null)
         {
-            world.blocks.Modify(ref pos, blockData, true);
+            world.blocks.Modify(ref pos, blockData, true, onAction);
         }
 
-        public static void SetBlockRange(World world, ref Vector3Int posFrom, ref Vector3Int posTo, BlockData blockData)
+        public static void SetBlockRange(World world, ref Vector3Int posFrom, ref Vector3Int posTo, BlockData blockData, Action<ModifyBlockContext> onAction=null)
         {
-            world.blocks.ModifyRange(ref posFrom, ref posTo, blockData, true);
+            world.blocks.ModifyRange(ref posFrom, ref posTo, blockData, true, onAction);
         }
 
         public static Block GetBlock(World world, ref Vector3Int pos)
         {
-            Block block = world.blocks.GetBlock(ref pos);
-            return block;
+            return world.blocks.GetBlock(ref pos);
         }
 
         /// <summary>

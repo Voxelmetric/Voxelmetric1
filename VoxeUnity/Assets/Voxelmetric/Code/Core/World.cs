@@ -1,4 +1,6 @@
-﻿using UnityEngine;
+﻿using System.Collections.Generic;
+using UnityEngine;
+using Voxelmetric.Code.Core.Operations;
 using Voxelmetric.Code.Data_types;
 using Voxelmetric.Code.Load_Resources;
 using Voxelmetric.Code.Load_Resources.Blocks;
@@ -27,6 +29,8 @@ namespace Voxelmetric.Code.Core
         public PhysicMaterial [] physicsMaterials;
 
         public AABBInt Bounds { get; set; }
+
+        private readonly List<ModifyBlockContext> modifyRangeQueue = new List<ModifyBlockContext>();
 
         public bool CheckInsideWorld(Vector3Int pos)
         {
@@ -170,6 +174,19 @@ namespace Voxelmetric.Code.Core
                 config.minX==config.maxX || (pos.x>=config.minX && pos.x<=config.maxX) ||
                 config.minY==config.maxY || (pos.y>=config.minY && pos.y<=config.maxY) ||
                 config.minZ==config.maxZ || (pos.z>=config.minZ && pos.z<=config.maxZ);
+        }
+        
+        public void RegisterModifyRange(ModifyBlockContext onModified)
+        {
+            modifyRangeQueue.Add(onModified);
+        }
+
+        public void PerformBlockActions()
+        {
+            for (int i = 0; i<modifyRangeQueue.Count; i++)
+                modifyRangeQueue[i].PerformAction();
+
+            modifyRangeQueue.Clear();
         }
     }
 }

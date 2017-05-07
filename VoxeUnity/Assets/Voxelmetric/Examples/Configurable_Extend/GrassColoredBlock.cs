@@ -5,7 +5,7 @@ using Voxelmetric.Code.Load_Resources.Blocks;
 
 // This class inherits from BlockCube so that it renders just like any other
 // cube block but it replaces the RandomUpdate function with its own
-// Use this class for a block by setting the config's controller to GrassOverride
+// Use this class for a block by setting the config's controller to GrassColoredBlock
 
 public class GrassColoredBlock: ColoredBlock
 {

@@ -393,6 +393,8 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
                 ++i;
             }
 
+            world.PerformBlockActions();
+
             FullLoadOnStartUp = false;
 
             Profiler.EndSample();

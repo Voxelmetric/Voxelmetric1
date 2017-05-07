@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine.Assertions;
 using Voxelmetric.Code.Common;
+using Voxelmetric.Code.Core.Operations;
 using Voxelmetric.Code.Core.StateManager;
 using Voxelmetric.Code.Data_types;
 using Voxelmetric.Code.Load_Resources.Blocks;
@@ -261,6 +262,9 @@ namespace Voxelmetric.Code.Core
                     if (!context.IsRange())
                     {
                         ProcessSetBlockQueue(context.Block, context.IndexFrom, context.SetBlockModified);
+
+                        if (context.ParentContext != null)
+                            context.ParentContext.ChildActionFinished();
                     }
                     else
                     {
@@ -276,6 +280,9 @@ namespace Voxelmetric.Code.Core
                                 {
                                     int index = Helpers.GetChunkIndex1DFrom3D(x, y, z);
                                     ProcessSetBlockQueue(context.Block, index, context.SetBlockModified);
+
+                                    if (context.ParentContext != null)
+                                        context.ParentContext.ChildActionFinished();
                                 }
                             }
                         }
@@ -405,8 +412,8 @@ namespace Voxelmetric.Code.Core
         }
 
         /// <summary>
-        /// Sets the block at the given position. It does not perform any logic. It simply sets to block
-        /// Use this function only for generating your terrain and structures
+        /// Sets the block at the given position. It does not perform any logic. It simply sets the block.
+        /// Use this function only when generating the terrain and structures.
         /// </summary>
         /// <param name="index">Index in local chunk data</param>
         /// <param name="blockData">A block to be placed on a given position</param>
@@ -436,21 +443,41 @@ namespace Voxelmetric.Code.Core
         }
 
         /// <summary>
+        /// Sets blocks to a given value in a given range. It does not perform any logic. It simply sets the blocks.
+        /// Use this function only when generating the terrain and structures.
+        /// </summary>
+        /// <param name="posFrom">Starting position in local chunk coordinates</param>
+        /// <param name="posTo">Ending position in local chunk coordinates</param>
+        /// <param name="blockData">A block to be placed on a given position</param>
+        public void SetRangeRaw(ref Vector3Int posFrom, ref Vector3Int posTo, BlockData blockData)
+        {
+            for (int y = posFrom.y; y <= posTo.y; y++)
+            {
+                for (int z = posFrom.z; z <= posTo.z; z++)
+                {
+                    for (int x = posFrom.x; x <= posTo.x; x++)
+                    {
+                        SetRaw(Helpers.GetChunkIndex1DFrom3D(x, y, z), blockData);
+                    }
+                }
+            }
+        }
+
+        /// <summary>
         /// Queues a modification of a block on a given position
         /// </summary>
         /// <param name="pos">Position in local chunk coordinates</param>
         /// <param name="blockData">BlockData to place at the given location</param>
         /// <param name="setBlockModified">Set to true to mark chunk data as modified</param>
-        public void Modify(ref Vector3Int pos, BlockData blockData, bool setBlockModified)
+        /// <param name="parentContext">Context of a parent which performed this operation</param>
+        public void Modify(ref Vector3Int pos, BlockData blockData, bool setBlockModified, ModifyBlockContext parentContext=null)
         {
             int index = Helpers.GetChunkIndex1DFrom3D(pos.x, pos.y, pos.z);
+            
+            m_setBlockQueue.Add(new SetBlockContext(index, blockData, setBlockModified, parentContext));
 
-            // Nothing for us to do if the block did not change
-            BlockData oldBlockData = blocks[index];
-            if (oldBlockData.Type==blockData.Type)
-                return;
-
-            m_setBlockQueue.Add(new SetBlockContext(index, blockData, setBlockModified));
+            if (parentContext != null)
+                parentContext.RegisterChildAction();
         }
 
         /// <summary>
@@ -460,12 +487,16 @@ namespace Voxelmetric.Code.Core
         /// <param name="posTo">Ending position in local chunk coordinates</param>
         /// <param name="blockData">BlockData to place at the given location</param>
         /// <param name="setBlockModified">Set to true to mark chunk data as modified</param>
-        public void ModifyRange(ref Vector3Int posFrom, ref Vector3Int posTo, BlockData blockData, bool setBlockModified)
+        /// <param name="parentContext">Context of a parent which performed this operation</param>
+        public void ModifyRange(ref Vector3Int posFrom, ref Vector3Int posTo, BlockData blockData, bool setBlockModified, ModifyBlockContext parentContext=null)
         {
             int indexFrom = Helpers.GetChunkIndex1DFrom3D(posFrom.x, posFrom.y, posFrom.z);
             int indexTo = Helpers.GetChunkIndex1DFrom3D(posTo.x, posTo.y, posTo.z);
 
-            m_setBlockQueue.Add(new SetBlockContext(indexFrom, indexTo, blockData, setBlockModified));
+            m_setBlockQueue.Add(new SetBlockContext(indexFrom, indexTo, blockData, setBlockModified, parentContext));
+
+            if (parentContext!=null)
+                parentContext.RegisterChildAction();
         }
 
         public void BlockModified(BlockPos blockPos, ref Vector3Int globalPos, BlockData blockData)
