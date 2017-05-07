@@ -4,27 +4,25 @@ using Voxelmetric.Code.Load_Resources.Blocks;
 using Voxelmetric.Code.Utilities.Noise;
 
 
-public class CavesLayer : TerrainLayer
+public class CavesLayer: TerrainLayer
 {
     protected override void SetUp(LayerConfig config)
     {
-        // Doesn't currently support customization via config but you can add them like this:
-        // frequency = 1f/float.Parse(properties["frequency"]); // Frequency in configs is in fast 1/frequency
-        // and it will fetch an element in the config's property object called frequency
     }
 
     public override float GetHeight(Chunk chunk, int layerIndex, int x, int z, float heightSoFar, float strength)
     {
-        float caveBottom = NoiseUtils.GetNoise(noise.Noise, x+chunk.pos.x, -1000.0f, z+chunk.pos.z, 500.0f, 70, 1.0f);
-        float caveHeight = NoiseUtils.GetNoise(noise.Noise, x + chunk.pos.x, 1000.0f, z+chunk.pos.z, 50.0f, 30, 1.0f) + caveBottom;
+        int caveBottom = (int)NoiseUtils.GetNoise(noise.Noise, x+chunk.pos.x, -1000f, z+chunk.pos.z, 500f, 70, 1f)+
+                           world.config.minY;
+        int caveHeight = (int)NoiseUtils.GetNoise(noise.Noise, x+chunk.pos.x, 1000f, z+chunk.pos.z, 50f, 30, 1f)+caveBottom;
 
-        caveHeight -= 20f;
+        caveHeight -= 10;
 
-        if (caveHeight > caveBottom)
+        if (caveHeight>caveBottom)
         {
-            caveBottom -= caveHeight / 2f;
-            float caveTop = caveHeight / 2f;
-            if (caveTop > heightSoFar && caveBottom < heightSoFar)
+            caveBottom -= (caveHeight>>1);
+            int caveTop = (caveHeight>>1);
+            if (caveTop>heightSoFar && caveBottom<heightSoFar)
                 return caveBottom;
         }
 
@@ -33,18 +31,19 @@ public class CavesLayer : TerrainLayer
 
     public override float GenerateLayer(Chunk chunk, int layerIndex, int x, int z, float heightSoFar, float strength)
     {
-        float caveBottom = NoiseUtils.GetNoise(noise.Noise, x + chunk.pos.x, -1000.0f, z+chunk.pos.z, 500.0f, 70, 1.0f);
-        float caveHeight = NoiseUtils.GetNoise(noise.Noise, x + chunk.pos.x, 1000.0f, z+chunk.pos.z, 50.0f, 30, 1.0f) + caveBottom;
+        int caveBottom = (int)NoiseUtils.GetNoise(noise.Noise, x+chunk.pos.x, -1000f, z+chunk.pos.z, 500f, 70, 1f)+
+                           world.config.minY;
+        int caveHeight = (int)NoiseUtils.GetNoise(noise.Noise, x+chunk.pos.x, 1000f, z+chunk.pos.z, 50f, 30, 1f)+caveBottom;
 
-        caveHeight -= 20;
+        caveHeight -= 10;
 
-        if (caveHeight > caveBottom)
+        if (caveHeight>caveBottom)
         {
-            caveBottom -= caveHeight / 2f;
-            float caveTop = caveHeight / 2f;
-            SetBlocks(chunk, x, z, (int)caveBottom, (int)caveTop, BlockProvider.AirBlock);
+            caveBottom -= (caveHeight>>1);
+            int caveTop = (caveHeight>>1);
+            SetBlocks(chunk, x, z, caveBottom, caveTop, BlockProvider.AirBlock);
 
-            if (caveTop > heightSoFar && caveBottom < heightSoFar)
+            if (caveTop>heightSoFar && caveBottom<heightSoFar)
                 return caveBottom;
         }
 
