@@ -3,8 +3,8 @@ using Voxelmetric.Code.Core;
 using Voxelmetric.Code.Data_types;
 using Voxelmetric.Code.Load_Resources.Blocks;
 
-// This class inherits from BlockCube so that it renders just like any other
-// cube block but it replaces the RandomUpdate function with its own
+// This class inherits from CubeBlock so that it renders just like any other
+// cube block but it replaces the RandomUpdate function with its own.
 // Use this class for a block by setting the config's controller to GrassBlock
 
 public class GrassBlock: CubeBlock
@@ -35,22 +35,21 @@ public class GrassBlock: CubeBlock
         int minZ = localPos.z<=0 ? 0 : 1;
         int maxZ = localPos.z>=Env.ChunkSize1 ? 0 : 1;
 
-        for (int x = -minX; x<=maxX; x++)
+        for (int y = -minY; y<=maxY; y++)
         {
-            for (int y = -minY; y<=maxY; y++)
+            for (int z = -minZ; z<=maxZ; z++)
             {
-                for (int z = -minZ; z<=maxZ; z++)
+                for (int x = -minX; x<=maxX; x++)
                 {
-                    Vector3Int newPos = localPos.Add(x, y, z);
-                    if (!blocks.Get(ref newPos).Equals(dirt))
+                    // There has to be dirt above our block
+                    Vector3Int grassPos = localPos.Add(x, y, z);
+                    if (!blocks.Get(ref grassPos).Equals(dirt))
                         continue;
 
-                    // Turn the air above dirt into grass
-                    //!TODO 1: This does seem to replace the dirt with grass. Fix me
-                    //!TODO 2: Why does this keep going after placing the first block?
-                    Vector3Int grassPos = newPos.Add(0, 1, 0);
-                    if (blocks.Get(ref grassPos).Equals(air))
-                        blocks.Modify(ref newPos, grass, true);
+                    // There has to be air above the dirt
+                    Vector3Int airPos = grassPos.Add(0, 1, 0);
+                    if (blocks.Get(ref airPos).Equals(air))
+                        blocks.Modify(ref grassPos, grass, true);
                 }
             }
         }
