@@ -23,9 +23,9 @@ public class StructureTree: GeneratedStructure
         log = new BlockData(blk.Type, blk.Solid);
     }
 
-    public override void Build(World world, ref Vector3Int pos, TerrainLayer layer)
+    public override void Build(World world, ref Vector3Int worldPos, TerrainLayer layer)
     {
-        int noise = Helpers.FastFloor(NoiseUtils.GetNoise(layer.Noise.Noise, pos.x, pos.y, pos.z, 1f, minCrownSize, 1f));
+        int noise = Helpers.FastFloor(NoiseUtils.GetNoise(layer.Noise.Noise, worldPos.x, worldPos.y, worldPos.z, 1f, minCrownSize, 1f));
         int leavesRange = noise + 3;
         int leavesRange1 = leavesRange-1;
         int trunkHeight = maxTrunkSize - noise;
@@ -34,12 +34,12 @@ public class StructureTree: GeneratedStructure
         float a2inv = 1.0f/(leavesRange*leavesRange);
         float b2inv = 1.0f/(leavesRange1*leavesRange1);
         
-        int x1 = pos.x-leavesRange;
-        int x2 = pos.x+leavesRange;
-        int y1 = pos.y+1+trunkHeight;
+        int x1 = worldPos.x-leavesRange;
+        int x2 = worldPos.x+leavesRange;
+        int y1 = worldPos.y+1+trunkHeight;
         int y2 = y1 + 1+2*leavesRange1;
-        int z1 = pos.z-leavesRange;
-        int z2 = pos.z+leavesRange;
+        int z1 = worldPos.z-leavesRange;
+        int z2 = worldPos.z+leavesRange;
         
         // Generate the crown
         Vector3Int posFrom = new Vector3Int(x1, y1, z1);
@@ -59,8 +59,8 @@ public class StructureTree: GeneratedStructure
                 for (int cx = chunkPosFrom.x; cx <= chunkPosTo.x; cx += Env.ChunkSize, minX = 0)
                 {
                     Vector3Int chunkPos = new Vector3Int(cx, cy, cz);
-                    Chunk chunk = world.chunks.Get(ref chunkPos);
-                    if (chunk == null)
+                    Chunk ch = world.chunks.Get(ref chunkPos);
+                    if (ch == null)
                         continue;
 
                     int maxX = Math.Min(posTo.x-cx, Env.ChunkSize1);
@@ -70,9 +70,9 @@ public class StructureTree: GeneratedStructure
                         {
                             for (int x = minX; x <= maxX; ++x)
                             {
-                                float xx = cx+x-pos.x;
+                                float xx = cx+x-worldPos.x;
                                 float yy = cy+y-y1-leavesRange1;
-                                float zz = cz+z-pos.z;
+                                float zz = cz+z-worldPos.z;
 
                                 float _x = xx*xx*a2inv;
                                 float _y = yy*yy*b2inv;
@@ -80,7 +80,7 @@ public class StructureTree: GeneratedStructure
                                 if (_x+_y+_z<=1.0f)
                                 {
                                     int index = Helpers.GetChunkIndex1DFrom3D(x, y, z);
-                                    chunk.blocks.SetRaw(index, leaves);
+                                    ch.blocks.SetRaw(index, leaves);
                                 }
                             }
                         }
@@ -90,10 +90,10 @@ public class StructureTree: GeneratedStructure
         }
 
         // Genrate the trunk
-        blocks.SetRaw(ref pos, log);
+        blocks.SetRaw(ref worldPos, log);
         for (int y = 1; y <= trunkHeight; y++)
         {
-            Vector3Int blockPos = pos.Add(0, y, 0);
+            Vector3Int blockPos = worldPos.Add(0, y, 0);
             blocks.SetRaw(ref blockPos, log);
         }
     }

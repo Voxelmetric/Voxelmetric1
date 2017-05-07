@@ -45,9 +45,9 @@ public class StructureLayer : TerrainLayer
     public override void GenerateStructures(Chunk chunk, int layerIndex)
     {
         int minX = chunk.pos.x;
-        int maxX = chunk.pos.x + Env.ChunkMask;
+        int maxX = chunk.pos.x + Env.ChunkSize1;
         int minZ = chunk.pos.z;
-        int maxZ = chunk.pos.z + Env.ChunkMask;
+        int maxZ = chunk.pos.z + Env.ChunkSize1;
 
         for (int x = minX; x<=maxX; x++)
         {
@@ -67,8 +67,8 @@ public class StructureLayer : TerrainLayer
                         int zz = Helpers.Mod(z, Env.ChunkSize);
                         int height = Helpers.FastFloor(terrainGen.GetTerrainHeightForChunk(chunk, xx, zz));
 
-                        Vector3Int blockPos = new Vector3Int(x, height, z);
-                        structure.Build(world, ref blockPos, this);
+                        Vector3Int worldPos = new Vector3Int(x, height, z);
+                        structure.Build(world, ref worldPos, this);
                     }
                 }
             }
