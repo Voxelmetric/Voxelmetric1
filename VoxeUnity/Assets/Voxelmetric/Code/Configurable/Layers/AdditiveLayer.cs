@@ -19,7 +19,7 @@ public class AdditiveLayer: TerrainLayer
         
         noise.Frequency = 1f/float.Parse(properties["frequency"]); // Frequency in configs is in fast 1/frequency
         noise.Gain = float.Parse(properties["exponent"]);
-#if UNITY_STANDALONE_WIN && !DISABLE_FASTSIMD
+#if (UNITY_STANDALONE_WIN || UNITY_EDITOR_WIN) && ENABLE_FASTSIMD
         noiseSIMD.Frequency = noise.Frequency;
         noiseSIMD.Gain = noise.Gain;
 #endif
@@ -35,7 +35,7 @@ public class AdditiveLayer: TerrainLayer
         ni.noiseGen.SetInterpBitStep(Env.ChunkSizeWithPadding, 2);
         ni.lookupTable = chunk.pools.FloatArrayPool.Pop(ni.noiseGen.Size * ni.noiseGen.Size);
 
-#if (UNITY_STANDALONE_WIN || UNITY_EDITOR_WIN) && !DISABLE_FASTSIMD
+#if (UNITY_STANDALONE_WIN || UNITY_EDITOR_WIN) && ENABLE_FASTSIMD
         float[] noiseSet = chunk.pools.FloatArrayPool.Pop(ni.noiseGen.Size * ni.noiseGen.Size * ni.noiseGen.Size);
 
         // Generate SIMD noise

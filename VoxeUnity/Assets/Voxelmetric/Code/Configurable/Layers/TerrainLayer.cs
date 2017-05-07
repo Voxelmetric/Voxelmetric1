@@ -13,7 +13,7 @@ public abstract class TerrainLayer : IComparable, IEquatable<TerrainLayer>
     protected TerrainGen terrainGen;
     protected readonly Dictionary<string, string> properties = new Dictionary<string, string>();
     protected NoiseWrapper noise;
-#if UNITY_STANDALONE_WIN && !DISABLE_FASTSIMD
+#if (UNITY_STANDALONE_WIN || UNITY_EDITOR_WIN) && ENABLE_FASTSIMD
     protected NoiseWrapperSIMD noiseSIMD;
 #endif
 
@@ -22,7 +22,7 @@ public abstract class TerrainLayer : IComparable, IEquatable<TerrainLayer>
     public bool isStructure { get; private set; }
 
     public NoiseWrapper Noise { get { return noise; } }
-#if UNITY_STANDALONE_WIN && !DISABLE_FASTSIMD
+#if (UNITY_STANDALONE_WIN || UNITY_EDITOR_WIN) && ENABLE_FASTSIMD
     public NoiseWrapperSIMD NoiseSIMD { get {return noiseSIMD;} }
 #endif
 
@@ -35,7 +35,7 @@ public abstract class TerrainLayer : IComparable, IEquatable<TerrainLayer>
         index = config.index;
 
         noise = new NoiseWrapper(world.name);
-#if UNITY_STANDALONE_WIN && !DISABLE_FASTSIMD
+#if (UNITY_STANDALONE_WIN || UNITY_EDITOR_WIN) && ENABLE_FASTSIMD
         noiseSIMD = new NoiseWrapperSIMD(world.name);
 #endif
 

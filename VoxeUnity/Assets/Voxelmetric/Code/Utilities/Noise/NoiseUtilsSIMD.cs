@@ -1,4 +1,4 @@
-﻿#if UNITY_STANDALONE_WIN && !DISABLE_FASTSIMD
+﻿#if (UNITY_STANDALONE_WIN || UNITY_EDITOR_WIN) && ENABLE_FASTSIMD
 using System;
 using UnityEngine;
 using Voxelmetric.Code.Common;
