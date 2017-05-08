@@ -405,7 +405,7 @@ namespace Voxelmetric.Code.Core
 
             if (type==BlockProvider.AirType)
                 --NonEmptyBlocks;
-            else
+            else if (oldBlockData.Type == BlockProvider.AirType)
                 ++NonEmptyBlocks;
 
             blocks[index] = blockData;
