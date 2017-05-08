@@ -279,13 +279,13 @@ namespace Voxelmetric.Code.Core
                                 for (int x = sx; x<=ex; x++)
                                 {
                                     int index = Helpers.GetChunkIndex1DFrom3D(x, y, z);
-                                    ProcessSetBlockQueue(context.Block, index, context.SetBlockModified);
-
-                                    if (context.ParentContext != null)
-                                        context.ParentContext.ChildActionFinished();
+                                    ProcessSetBlockQueue(context.Block, index, context.SetBlockModified);                                    
                                 }
                             }
                         }
+
+                        if (context.ParentContext != null)
+                            context.ParentContext.ChildActionFinished();
                     }
                 }
 
