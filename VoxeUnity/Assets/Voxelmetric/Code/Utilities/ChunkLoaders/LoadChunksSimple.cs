@@ -322,41 +322,48 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
                 world.chunks.Count>=expectedChunks)
                 return;
 
-            Profiler.BeginSample("PostProcessChunks");
+            // Unregister any non-necessary pending structures
+            Profiler.BeginSample("UnregisterStructures");
+            {
+                world.UnregisterPendingStructures();
+            }
+            Profiler.EndSample();
 
             // Cycle through the array of positions
-            for (int y = maxY; y >= minY; y -= Env.ChunkSize)
+            Profiler.BeginSample("PostProcessChunks");
             {
-                for (int i = 0; i < m_chunkPositions.Length; i++)
+                for (int y = maxY; y>=minY; y -= Env.ChunkSize)
                 {
-                    // Skip loading chunks which are off limits
-                    int cx = (m_chunkPositions[i].x*Env.ChunkSize)+m_viewerPos.x;
-                    if (cx>maxX || cx<minX)
-                        continue;
-                    int cy = (m_chunkPositions[i].y*Env.ChunkSize)+y;
-                    if (cy>maxY || cy<minY)
-                        continue;
-                    int cz = (m_chunkPositions[i].z*Env.ChunkSize)+m_viewerPos.z;
-                    if (cz>maxZ || cz<minZ)
-                        continue;
-
-                    // Create a new chunk if possible
-                    Vector3Int newChunkPos = new Vector3Int(cx, cy, cz);
-                    Chunk chunk;
-                    if (!world.chunks.CreateOrGetChunk(ref newChunkPos, out chunk))
-                        continue;
-
-                    if (FullLoadOnStartUp)
+                    for (int i = 0; i<m_chunkPositions.Length; i++)
                     {
-                        ChunkStateManagerClient stateManager = chunk.stateManager;
-                        stateManager.PossiblyVisible = true;
-                        stateManager.Visible = false;
-                    }
+                        // Skip loading chunks which are off limits
+                        int cx = (m_chunkPositions[i].x*Env.ChunkSize)+m_viewerPos.x;
+                        if (cx>maxX || cx<minX)
+                            continue;
+                        int cy = (m_chunkPositions[i].y*Env.ChunkSize)+y;
+                        if (cy>maxY || cy<minY)
+                            continue;
+                        int cz = (m_chunkPositions[i].z*Env.ChunkSize)+m_viewerPos.z;
+                        if (cz>maxZ || cz<minZ)
+                            continue;
 
-                    m_updateRequests.Add(chunk);
+                        // Create a new chunk if possible
+                        Vector3Int newChunkPos = new Vector3Int(cx, cy, cz);
+                        Chunk chunk;
+                        if (!world.chunks.CreateOrGetChunk(ref newChunkPos, out chunk))
+                            continue;
+
+                        if (FullLoadOnStartUp)
+                        {
+                            ChunkStateManagerClient stateManager = chunk.stateManager;
+                            stateManager.PossiblyVisible = true;
+                            stateManager.Visible = false;
+                        }
+
+                        m_updateRequests.Add(chunk);
+                    }
                 }
             }
-
             Profiler.EndSample();
         }
 
@@ -365,12 +372,12 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
             Profiler.BeginSample("ProcessChunks");
 
             HandleVisibility();
-
+            
             // Process removal requests
             for (int i = 0; i<m_updateRequests.Count;)
             {
                 Chunk chunk = m_updateRequests[i];
-
+                
                 ProcessChunk(chunk);
 
                 // Update the chunk if possible
@@ -390,6 +397,7 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
 
                     // Unregister from updates
                     m_updateRequests.RemoveAt(i);
+                    
                     continue;
                 }
 

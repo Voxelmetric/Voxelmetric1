@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Runtime.InteropServices;
-using UnityEngine.Assertions;
 
 namespace Voxelmetric.Code.Data_types
 {
@@ -11,9 +10,6 @@ namespace Voxelmetric.Code.Data_types
 
         public BlockPos(int x, int y, int z)
         {
-            Assert.IsTrue(x>=0 && x<byte.MaxValue);
-            Assert.IsTrue(y>=0 && y<byte.MaxValue);
-            Assert.IsTrue(z>=0 && z<byte.MaxValue);
             this.x = (byte)x;
             this.y = (byte)y;
             this.z = (byte)z;

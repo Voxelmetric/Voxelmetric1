@@ -1,5 +1,4 @@
 ﻿using System;
-using JetBrains.Annotations;
 using UnityEngine.Assertions;
 using Voxelmetric.Code.Data_types;
 
@@ -22,7 +21,8 @@ namespace Voxelmetric.Code.Core.Operations
         //! If true we want to mark the block as modified
         public readonly bool SetBlockModified;
 
-        public ModifyBlockContext(Action<ModifyBlockContext> action, World world, int index, BlockData block, bool setBlockModified)
+        public ModifyBlockContext(Action<ModifyBlockContext> action, World world, int index, BlockData block,
+            bool setBlockModified)
         {
             World = world;
             Action = action;
@@ -32,7 +32,8 @@ namespace Voxelmetric.Code.Core.Operations
             SetBlockModified = setBlockModified;
         }
 
-        public ModifyBlockContext(Action<ModifyBlockContext> action, World world, int indexFrom, int indexTo, BlockData block, bool setBlockModified)
+        public ModifyBlockContext(Action<ModifyBlockContext> action, World world, int indexFrom, int indexTo,
+            BlockData block, bool setBlockModified)
         {
             World = world;
             Action = action;
@@ -52,7 +53,7 @@ namespace Voxelmetric.Code.Core.Operations
         {
             // Once all child actions are performed register this action in the world
             --ChildActionsPending;
-            //Assert.IsTrue(ChildActionsPending>=0);
+            Assert.IsTrue(ChildActionsPending>=0);
             if (ChildActionsPending==0)
                 World.RegisterModifyRange(this);
         }

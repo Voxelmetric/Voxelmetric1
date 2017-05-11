@@ -1,5 +1,7 @@
 ﻿using Voxelmetric.Code;
+using Voxelmetric.Code.Common;
 using Voxelmetric.Code.Core;
+using Voxelmetric.Code.Core.Operations;
 using Voxelmetric.Code.Data_types;
 using Voxelmetric.Code.Load_Resources.Blocks;
 
@@ -42,14 +44,14 @@ public class GrassBlock: CubeBlock
                 for (int x = -minX; x<=maxX; x++)
                 {
                     // There has to be dirt above our block
-                    Vector3Int grassPos = localPos.Add(x, y, z);
-                    if (!blocks.Get(ref grassPos).Equals(dirt))
+                    int grassIndex = Helpers.GetChunkIndex1DFrom3D(localPos.x+x, localPos.y+y, localPos.z+z);
+                    if (!blocks.Get(grassIndex).Equals(dirt))
                         continue;
 
                     // There has to be air above the dirt
-                    Vector3Int airPos = grassPos.Add(0, 1, 0);
-                    if (blocks.Get(ref airPos).Equals(air))
-                        blocks.Modify(ref grassPos, grass, true);
+                    int airIndex = grassIndex+Env.ChunkSizePow2;
+                    if (blocks.Get(airIndex).Equals(air))
+                        blocks.Modify(new ModifyOpBlock(grass, grassIndex, true));
                 }
             }
         }

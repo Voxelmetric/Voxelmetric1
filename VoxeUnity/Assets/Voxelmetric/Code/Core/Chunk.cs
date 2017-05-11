@@ -21,6 +21,9 @@ namespace Voxelmetric.Code.Core
         public ChunkColliderGeometryHandler ChunkColliderGeometryHandler { get; private set; }
         public LocalPools pools { get; private set; }
 
+        public bool NeedApplyStructure;
+        public int MaxPendingStructureListIndex;
+
         //! Chunk position in world coordinates
         public Vector3Int pos { get; private set; }
 
@@ -71,8 +74,11 @@ namespace Voxelmetric.Code.Core
 
         public static void RemoveChunk(Chunk chunk)
         {
+            // Reset the chunk back to defaults
             chunk.Reset();
-            chunk.world = null;
+            chunk.world = null; // Can't do inside Reset!!
+
+            // Return the chunk pack to object pool
             Globals.MemPools.ChunkPool.Push(chunk);
         }
 
@@ -82,7 +88,7 @@ namespace Voxelmetric.Code.Core
             // This is necessary in order to have lock-free caches
             ThreadID = Globals.WorkPool.GetThreadIDFromIndex(s_id++);
             pools = Globals.WorkPool.GetPool(ThreadID);
-
+            
             stateManager = new ChunkStateManagerClient(this);
             blocks = new ChunkBlocks(this);
         }
@@ -113,6 +119,9 @@ namespace Voxelmetric.Code.Core
 
         private void Reset()
         {
+            NeedApplyStructure = true;
+            MaxPendingStructureListIndex = 0;
+
             stateManager.Reset();
             blocks.Reset();
             if (logic!=null)
@@ -150,8 +159,14 @@ namespace Voxelmetric.Code.Core
             // Do not update our chunk until it has all its data prepared
             if (stateManager.IsStateCompleted(ChunkState.Generate))
             {
+                // Apply pending structures
+                world.ApplyPendingStructures(this);
+
+                // Update logic
                 if (logic!=null)
                     logic.Update();
+
+                // Update blocks
                 blocks.Update();
             }
 

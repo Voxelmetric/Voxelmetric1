@@ -125,24 +125,24 @@ namespace Voxelmetric.Code.Builders
                         do
                         {
                             expand = false;
-
-                            if (expandX)
-                            {
-                                expandX = x2<Env.ChunkSize &&
-                                          ExpandX(blocks, ref mask, type, y1, z1, ref x2, y2, z2);
-                                expand = expandX;
-                            }
+                            
                             if (expandY)
                             {
                                 expandY = y2<Env.ChunkSize &&
                                           ExpandY(blocks, ref mask, type, x1, z1, x2, ref y2, z2);
-                                expand = expand|expandY;
+                                expand = expandY;
                             }
                             if (expandZ)
                             {
                                 expandZ = z2<Env.ChunkSize &&
                                           ExpandZ(blocks, ref mask, type, x1, y1, x2, y2, ref z2);
                                 expand = expand|expandZ;
+                            }
+                            if (expandX)
+                            {
+                                expandX = x2 < Env.ChunkSize &&
+                                          ExpandX(blocks, ref mask, type, y1, z1, ref x2, y2, z2);
+                                expand = expand|expandX;
                             }
                         } while (expand);
 

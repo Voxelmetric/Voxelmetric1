@@ -44,31 +44,35 @@ public class StructureLayer : TerrainLayer
 
     public override void GenerateStructures(Chunk chunk, int layerIndex)
     {
+        //if (chunk.pos.x!=-30 || chunk.pos.y!=30 || chunk.pos.z!=0) return;
+
         int minX = chunk.pos.x;
         int maxX = chunk.pos.x + Env.ChunkSize1;
         int minZ = chunk.pos.z;
         int maxZ = chunk.pos.z + Env.ChunkSize1;
+
+        int structureID = 0;
 
         for (int x = minX; x<=maxX; x++)
         {
             for (int z = minZ; z<=maxZ; z++)
             {
                 Vector3Int pos = new Vector3Int(x, 0, z);
-                float chanceAtPos = Randomization.Random(pos.GetHashCode(), 44, true);
+                float chanceAtPos = Randomization.RandomPrecise(pos.GetHashCode(), 44);
 
                 if (chance>chanceAtPos)
                 {
-                    if (Randomization.Random(pos.Add(1, 0, 0).GetHashCode(), 44, true)>chanceAtPos &&
-                        Randomization.Random(pos.Add(-1, 0, 0).GetHashCode(), 44, true)>chanceAtPos &&
-                        Randomization.Random(pos.Add(0, 0, 1).GetHashCode(), 44, true)>chanceAtPos &&
-                        Randomization.Random(pos.Add(0, 0, -1).GetHashCode(), 44, true)>chanceAtPos)
+                    if (Randomization.RandomPrecise(pos.Add(1, 0, 0).GetHashCode(), 44)>chanceAtPos &&
+                        Randomization.RandomPrecise(pos.Add(-1, 0, 0).GetHashCode(), 44)>chanceAtPos &&
+                        Randomization.RandomPrecise(pos.Add(0, 0, 1).GetHashCode(), 44)>chanceAtPos &&
+                        Randomization.RandomPrecise(pos.Add(0, 0, -1).GetHashCode(), 44)>chanceAtPos)
                     {
                         int xx = Helpers.Mod(x, Env.ChunkSize);
                         int zz = Helpers.Mod(z, Env.ChunkSize);
                         int height = Helpers.FastFloor(terrainGen.GetTerrainHeightForChunk(chunk, xx, zz));
-
+                        
                         Vector3Int worldPos = new Vector3Int(x, height, z);
-                        structure.Build(world, ref worldPos, this);
+                        structure.Build(chunk, structureID++, ref worldPos, this);
                     }
                 }
             }

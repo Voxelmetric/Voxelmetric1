@@ -90,5 +90,14 @@ namespace Voxelmetric.Code
                 return s_edgeSyncBudget;
             }
         }
+
+        private static readonly TimeBudgetHandler s_setBlockBudget = new TimeBudgetHandler(4); // 4 ms a frame for edge synchronization
+        public static TimeBudgetHandler SetBlockBudget
+        {
+            get
+            {
+                return s_setBlockBudget;
+            }
+        }
     }
 }

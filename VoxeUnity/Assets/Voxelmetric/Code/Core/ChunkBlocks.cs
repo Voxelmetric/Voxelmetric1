@@ -1,12 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
-using UnityEngine.Assertions;
 using Voxelmetric.Code.Common;
 using Voxelmetric.Code.Core.Operations;
 using Voxelmetric.Code.Core.StateManager;
 using Voxelmetric.Code.Data_types;
 using Voxelmetric.Code.Load_Resources.Blocks;
 using Voxelmetric.Code.VM;
+using Assert = UnityEngine.Assertions.Assert;
 
 namespace Voxelmetric.Code.Core
 {
@@ -30,7 +30,7 @@ namespace Voxelmetric.Code.Core
         public int NonEmptyBlocks;
 
         //! Queue of setBlock operations to execute
-        private readonly List<SetBlockContext> m_setBlockQueue = new List<SetBlockContext>();
+        private readonly List<ModifyOp> m_setBlockQueue = new List<ModifyOp>();
 
         private byte[] receiveBuffer;
         private int receiveIndex;
@@ -110,44 +110,109 @@ namespace Voxelmetric.Code.Core
             }
         }
 
-        private void ProcessSetBlockQueue(BlockData block, int index, bool setBlockModified)
+        public bool NeedToHandleNeighbors(ref Vector3Int pos)
         {
-            int x, y, z;
-            Helpers.GetChunkIndex3DFrom1D(index, out x, out y, out z);
+            return rebuildMaskGeometry!=0x3f &&
+                   // Only check neighbors when it is a change of a block on a chunk's edge
+                   (pos.x<=0 || pos.x>=Env.ChunkSize1 ||
+                    pos.y<=0 || pos.y>=Env.ChunkSize1 ||
+                    pos.z<=0 || pos.z>=Env.ChunkSize1);
+        }
 
-#if DEBUG
-            if (x < 0 || y < 0 || z < 0 || x > Env.ChunkSize1 || y > Env.ChunkSize1 || z > Env.ChunkSize1)
-            {
-                Assert.IsTrue(false, string.Format("Chunk index out of range in setBlockQueue: [{0},{1},{2}]", x, y, z));
+        public void HandleNeighbor(BlockData block, ref Vector3Int pos, Direction dir)
+        {
+            int cx = chunk.pos.x;
+            int cy = chunk.pos.y;
+            int cz = chunk.pos.z;
+
+            ChunkStateManagerClient stateManager = chunk.stateManager;
+            int i = DirectionUtils.Get(dir);
+
+            // If it is an edge position, notify neighbor as well
+            // Iterate over neighbors and decide which ones should be notified to rebuild
+            var listeners = stateManager.Listeners;
+            ChunkEvent listener = listeners[i];
+            if (listener == null)
                 return;
-            }
-#endif
 
-            Vector3Int pos = new Vector3Int(x, y, z);
-            Vector3Int globalPos = pos + chunk.pos;
+            ChunkStateManagerClient listenerClient = (ChunkStateManagerClient)listener;
+            Chunk listenerChunk = listenerClient.chunk;
+            ChunkBlocks listenerChunkBlocks = listenerChunk.blocks;
 
-            BlockData oldBlockData = blocks[index];
+            int lx = listenerChunk.pos.x;
+            int ly = listenerChunk.pos.y;
+            int lz = listenerChunk.pos.z;
 
-            Block oldBlock = m_blockTypes[oldBlockData.Type];
-            Block newBlock = m_blockTypes[block.Type];
-            oldBlock.OnDestroy(chunk, ref pos);
-            newBlock.OnCreate(chunk, ref pos);
-
-            SetInner(index, block);
-
-            if (setBlockModified)
+            if (ly == cy || lz == cz)
             {
-                BlockModified(new BlockPos(x, y, z), ref globalPos, block);
+                // Section to the left
+                if ((pos.x == 0) && (lx + Env.ChunkSize == cx))
+                {
+                    rebuildMaskGeometry = rebuildMaskGeometry | (1 << i);
+
+                    // Mirror the block to the neighbor edge
+                    int neighborIndex = Helpers.GetChunkIndex1DFrom3D(Env.ChunkSize, pos.y, pos.z);
+                    listenerChunkBlocks.blocks[neighborIndex] = block;
+                }
+                // Section to the right
+                else if ((pos.x == Env.ChunkSize1) && (lx - Env.ChunkSize == cx))
+                {
+                    rebuildMaskGeometry = rebuildMaskGeometry | (1 << i);
+
+                    // Mirror the block to the neighbor edge
+                    int neighborIndex = Helpers.GetChunkIndex1DFrom3D(-1, pos.y, pos.z);
+                    listenerChunkBlocks.blocks[neighborIndex] = block;
+                }
             }
 
-            if (
-                // Only check neighbors if it is still needed
-                rebuildMaskGeometry==0x3f ||
-                // Only check neighbors when it is a change of a block on a chunk's edge
-                (pos.x>0 && pos.x<Env.ChunkSize1 &&
-                 pos.y>0 && pos.y<Env.ChunkSize1 &&
-                 pos.z>0 && pos.z<Env.ChunkSize1)
-                )
+            if (lx == cx || lz == cz)
+            {
+                // Section to the bottom
+                if ((pos.y == 0) && (ly + Env.ChunkSize == cy))
+                {
+                    rebuildMaskGeometry = rebuildMaskGeometry | (1 << i);
+
+                    // Mirror the block to the neighbor edge
+                    int neighborIndex = Helpers.GetChunkIndex1DFrom3D(pos.x, Env.ChunkSize, pos.z);
+                    listenerChunkBlocks.blocks[neighborIndex] = block;
+                }
+                // Section to the top
+                else if ((pos.y == Env.ChunkSize1) && (ly - Env.ChunkSize == cy))
+                {
+                    rebuildMaskGeometry = rebuildMaskGeometry | (1 << i);
+
+                    // Mirror the block to the neighbor edge
+                    int neighborIndex = Helpers.GetChunkIndex1DFrom3D(pos.x, -1, pos.z);
+                    listenerChunkBlocks.blocks[neighborIndex] = block;
+                }
+            }
+
+            if (ly == cy || lx == cx)
+            {
+                // Section to the back
+                if ((pos.z == 0) && (lz + Env.ChunkSize == cz))
+                {
+                    rebuildMaskGeometry = rebuildMaskGeometry | (1 << i);
+
+                    // Mirror the block to the neighbor edge
+                    int neighborIndex = Helpers.GetChunkIndex1DFrom3D(pos.x, pos.y, Env.ChunkSize);
+                    listenerChunkBlocks.blocks[neighborIndex] = block;
+                }
+                // Section to the front
+                else if ((pos.z == Env.ChunkSize1) && (lz - Env.ChunkSize == cz))
+                {
+                    rebuildMaskGeometry = rebuildMaskGeometry | (1 << i);
+
+                    // Mirror the block to the neighbor edge
+                    int neighborIndex = Helpers.GetChunkIndex1DFrom3D(pos.x, pos.y, -1);
+                    listenerChunkBlocks.blocks[neighborIndex] = block;
+                }
+            }
+        }
+
+        public void HandleNeighbors(BlockData block, Vector3Int pos)
+        {
+            if (!NeedToHandleNeighbors(ref pos))
                 return;
 
             int cx = chunk.pos.x;
@@ -158,18 +223,16 @@ namespace Voxelmetric.Code.Core
 
             // If it is an edge position, notify neighbor as well
             // Iterate over neighbors and decide which ones should be notified to rebuild
-            for (int i = 0; i < stateManager.Listeners.Length; i++)
+            var listeners = stateManager.Listeners;
+            for (int i = 0; i < listeners.Length; i++)
             {
-                ChunkEvent listener = stateManager.Listeners[i];
+                ChunkEvent listener = listeners[i];
                 if (listener == null)
                     continue;
 
-                // No further checks needed once we know all neighbors need to be notified
-                if (rebuildMaskGeometry == 0x3f)
-                    break;
-
                 ChunkStateManagerClient listenerClient = (ChunkStateManagerClient)listener;
                 Chunk listenerChunk = listenerClient.chunk;
+                ChunkBlocks listenerChunkBlocks = listenerChunk.blocks;
 
                 int lx = listenerChunk.pos.x;
                 int ly = listenerChunk.pos.y;
@@ -183,8 +246,8 @@ namespace Voxelmetric.Code.Core
                         rebuildMaskGeometry = rebuildMaskGeometry | (1 << i);
 
                         // Mirror the block to the neighbor edge
-                        int neighborIndex = Helpers.GetChunkIndex1DFrom3D(Env.ChunkSize, y, z);
-                        listenerChunk.blocks.blocks[neighborIndex] = block;
+                        int neighborIndex = Helpers.GetChunkIndex1DFrom3D(Env.ChunkSize, pos.y, pos.z);
+                        listenerChunkBlocks.blocks[neighborIndex] = block;
                     }
                     // Section to the right
                     else if ((pos.x == Env.ChunkSize1) && (lx - Env.ChunkSize == cx))
@@ -192,8 +255,8 @@ namespace Voxelmetric.Code.Core
                         rebuildMaskGeometry = rebuildMaskGeometry | (1 << i);
 
                         // Mirror the block to the neighbor edge
-                        int neighborIndex = Helpers.GetChunkIndex1DFrom3D(-1, y, z);
-                        listenerChunk.blocks.blocks[neighborIndex] = block;
+                        int neighborIndex = Helpers.GetChunkIndex1DFrom3D(-1, pos.y, pos.z);
+                        listenerChunkBlocks.blocks[neighborIndex] = block;
                     }
                 }
 
@@ -205,8 +268,8 @@ namespace Voxelmetric.Code.Core
                         rebuildMaskGeometry = rebuildMaskGeometry | (1 << i);
 
                         // Mirror the block to the neighbor edge
-                        int neighborIndex = Helpers.GetChunkIndex1DFrom3D(x, Env.ChunkSize, z);
-                        listenerChunk.blocks.blocks[neighborIndex] = block;
+                        int neighborIndex = Helpers.GetChunkIndex1DFrom3D(pos.x, Env.ChunkSize, pos.z);
+                        listenerChunkBlocks.blocks[neighborIndex] = block;
                     }
                     // Section to the top
                     else if ((pos.y == Env.ChunkSize1) && (ly - Env.ChunkSize == cy))
@@ -214,8 +277,8 @@ namespace Voxelmetric.Code.Core
                         rebuildMaskGeometry = rebuildMaskGeometry | (1 << i);
 
                         // Mirror the block to the neighbor edge
-                        int neighborIndex = Helpers.GetChunkIndex1DFrom3D(x, -1, z);
-                        listenerChunk.blocks.blocks[neighborIndex] = block;
+                        int neighborIndex = Helpers.GetChunkIndex1DFrom3D(pos.x, -1, pos.z);
+                        listenerChunkBlocks.blocks[neighborIndex] = block;
                     }
                 }
 
@@ -227,8 +290,8 @@ namespace Voxelmetric.Code.Core
                         rebuildMaskGeometry = rebuildMaskGeometry | (1 << i);
 
                         // Mirror the block to the neighbor edge
-                        int neighborIndex = Helpers.GetChunkIndex1DFrom3D(x, y, Env.ChunkSize);
-                        listenerChunk.blocks.blocks[neighborIndex] = block;
+                        int neighborIndex = Helpers.GetChunkIndex1DFrom3D(pos.x, pos.y, Env.ChunkSize);
+                        listenerChunkBlocks.blocks[neighborIndex] = block;
                     }
                     // Section to the front
                     else if ((pos.z == Env.ChunkSize1) && (lz - Env.ChunkSize == cz))
@@ -236,16 +299,53 @@ namespace Voxelmetric.Code.Core
                         rebuildMaskGeometry = rebuildMaskGeometry | (1 << i);
 
                         // Mirror the block to the neighbor edge
-                        int neighborIndex = Helpers.GetChunkIndex1DFrom3D(x, y, -1);
-                        listenerChunk.blocks.blocks[neighborIndex] = block;
+                        int neighborIndex = Helpers.GetChunkIndex1DFrom3D(pos.x, pos.y, -1);
+                        listenerChunkBlocks.blocks[neighborIndex] = block;
                     }
                 }
+
+                // No further checks needed once we know all neighbors need to be notified
+                if (rebuildMaskGeometry == 0x3f)
+                    break;
+            }
+        }
+
+        public void ProcessSetBlock(BlockData block, int index, bool setBlockModified)
+        {
+            int x, y, z;
+            Helpers.GetChunkIndex3DFrom1D(index, out x, out y, out z);
+            Vector3Int pos = new Vector3Int(x, y, z);
+
+#if DEBUG
+            if (pos.x<0 || pos.y<0 || pos.z<0 || pos.x>Env.ChunkSize1 || pos.y>Env.ChunkSize1 || pos.z>Env.ChunkSize1)
+            {
+                // Chunk index out of range?!
+                Assert.IsTrue(false);
+                return;
+            }
+#endif
+
+            BlockData oldBlockData = blocks[index];
+            Block oldBlock = m_blockTypes[oldBlockData.Type];
+            Block newBlock = m_blockTypes[block.Type];
+
+            oldBlock.OnDestroy(chunk, ref pos);
+            newBlock.OnCreate(chunk, ref pos);
+
+            SetInner(index, block);
+
+            if (setBlockModified)
+            {
+                Vector3Int globalPos = pos+chunk.pos;
+                BlockModified(new BlockPos(pos.x, pos.y, pos.z), ref globalPos, block);
             }
         }
 
         public void Update()
         {
             ChunkStateManagerClient stateManager = chunk.stateManager;
+
+            //UnityEngine.Debug.Log(m_setBlockQueue.Count);
 
             if (m_setBlockQueue.Count>0)
             {
@@ -254,44 +354,33 @@ namespace Voxelmetric.Code.Core
                 if (rebuildMaskCollider<0)
                     rebuildMaskCollider = 0;
 
+                var timeBudget = Globals.SetBlockBudget;
+                
                 // Modify blocks
-                for (int j = 0; j<m_setBlockQueue.Count; j++)
+                int j;
+                for (j = 0; j<m_setBlockQueue.Count; j++)
                 {
-                    SetBlockContext context = m_setBlockQueue[j];
+                    timeBudget.StartMeasurement();
+                    m_setBlockQueue[j].Apply(this);
+                    timeBudget.StopMeasurement();
 
-                    if (!context.IsRange())
+                    // Sync edges if there's enough time
+                    if (!timeBudget.HasTimeBudget)
                     {
-                        ProcessSetBlockQueue(context.Block, context.IndexFrom, context.SetBlockModified);
-
-                        if (context.ParentContext != null)
-                            context.ParentContext.ChildActionFinished();
-                    }
-                    else
-                    {
-                        int sx, sy, sz, ex, ey, ez;
-                        Helpers.GetChunkIndex3DFrom1D(context.IndexFrom, out sx, out sy, out sz);
-                        Helpers.GetChunkIndex3DFrom1D(context.IndexTo, out ex, out ey, out ez);
-
-                        for (int y = sy; y<=ey; y++)
-                        {
-                            for (int z = sz; z<=ez; z++)
-                            {
-                                for (int x = sx; x<=ex; x++)
-                                {
-                                    int index = Helpers.GetChunkIndex1DFrom3D(x, y, z);
-                                    ProcessSetBlockQueue(context.Block, index, context.SetBlockModified);
-
-                                    if (context.ParentContext != null)
-                                        context.ParentContext.ChildActionFinished();
-                                }
-                            }
-                        }
+                        ++j;
+                        break;
                     }
                 }
 
                 rebuildMaskCollider |= rebuildMaskGeometry;
 
-                m_setBlockQueue.Clear();
+                if (j==m_setBlockQueue.Count)
+                    m_setBlockQueue.Clear();
+                else
+                {
+                    m_setBlockQueue.RemoveRange(0, j);
+                    return;
+                }
             }
 
             long now = Globals.Watch.ElapsedMilliseconds;
@@ -307,9 +396,10 @@ namespace Voxelmetric.Code.Core
                 // Notify neighbors that they need to rebuilt their geometry
                 if (rebuildMaskGeometry>0)
                 {
-                    for (int j = 0; j<stateManager.Listeners.Length; j++)
+                    var listeners = stateManager.Listeners;
+                    for (int j = 0; j<listeners.Length; j++)
                     {
-                        ChunkStateManagerClient listener = (ChunkStateManagerClient)stateManager.Listeners[j];
+                        ChunkStateManagerClient listener = (ChunkStateManagerClient)listeners[j];
                         if (listener!=null && ((rebuildMaskGeometry>>j)&1)!=0)
                         {
                             // Request rebuild on neighbor chunks
@@ -332,9 +422,10 @@ namespace Voxelmetric.Code.Core
                 // Notify neighbors that they need to rebuilt their geometry
                 if (rebuildMaskCollider > 0)
                 {
-                    for (int j = 0; j < stateManager.Listeners.Length; j++)
+                    var listeners = stateManager.Listeners;
+                    for (int j = 0; j < listeners.Length; j++)
                     {
-                        ChunkStateManagerClient listener = (ChunkStateManagerClient)stateManager.Listeners[j];
+                        ChunkStateManagerClient listener = (ChunkStateManagerClient)listeners[j];
                         if (listener != null && ((rebuildMaskCollider >> j) & 1) != 0)
                         {
                             // Request rebuild on neighbor chunks
@@ -430,13 +521,14 @@ namespace Voxelmetric.Code.Core
         /// <param name="blockData">A block to be placed on a given position</param>
         public void SetRange(ref Vector3Int posFrom, ref Vector3Int posTo, BlockData blockData)
         {
-            for (int y = posFrom.y; y<=posTo.y; y++)
+            for (int y = posFrom.y; y<=posTo.y; ++y)
             {
-                for (int z = posFrom.z; z<=posTo.z; z++)
+                for (int z = posFrom.z; z<=posTo.z; ++z)
                 {
-                    for (int x = posFrom.x; x<=posTo.x; x++)
+                    int index = Helpers.GetChunkIndex1DFrom3D(posFrom.x, y, z);
+                    for (int x = posFrom.x; x<=posTo.x; ++x, ++index)
                     {
-                        SetInner(Helpers.GetChunkIndex1DFrom3D(x, y, z), blockData);
+                        SetInner(index, blockData);
                     }
                 }
             }
@@ -451,61 +543,37 @@ namespace Voxelmetric.Code.Core
         /// <param name="blockData">A block to be placed on a given position</param>
         public void SetRangeRaw(ref Vector3Int posFrom, ref Vector3Int posTo, BlockData blockData)
         {
-            for (int y = posFrom.y; y <= posTo.y; y++)
+            for (int y = posFrom.y; y <= posTo.y; ++y)
             {
-                for (int z = posFrom.z; z <= posTo.z; z++)
+                for (int z = posFrom.z; z <= posTo.z; ++z)
                 {
-                    for (int x = posFrom.x; x <= posTo.x; x++)
+                    int index = Helpers.GetChunkIndex1DFrom3D(posFrom.x, y, z);
+                    for (int x = posFrom.x; x<=posTo.x; ++x, ++index)
                     {
-                        SetRaw(Helpers.GetChunkIndex1DFrom3D(x, y, z), blockData);
+                        SetRaw(index, blockData);
                     }
                 }
             }
         }
-
-        /// <summary>
-        /// Queues a modification of a block on a given position
-        /// </summary>
-        /// <param name="pos">Position in local chunk coordinates</param>
-        /// <param name="blockData">BlockData to place at the given location</param>
-        /// <param name="setBlockModified">Set to true to mark chunk data as modified</param>
-        /// <param name="parentContext">Context of a parent which performed this operation</param>
-        public void Modify(ref Vector3Int pos, BlockData blockData, bool setBlockModified, ModifyBlockContext parentContext=null)
-        {
-            int index = Helpers.GetChunkIndex1DFrom3D(pos.x, pos.y, pos.z);
-            
-            m_setBlockQueue.Add(new SetBlockContext(index, blockData, setBlockModified, parentContext));
-
-            if (parentContext != null)
-                parentContext.RegisterChildAction();
-        }
-
+        
         /// <summary>
         /// Queues a modification of blocks in a given range
         /// </summary>
-        /// <param name="posFrom">Starting positon in local chunk coordinates</param>
-        /// <param name="posTo">Ending position in local chunk coordinates</param>
-        /// <param name="blockData">BlockData to place at the given location</param>
-        /// <param name="setBlockModified">Set to true to mark chunk data as modified</param>
-        /// <param name="parentContext">Context of a parent which performed this operation</param>
-        public void ModifyRange(ref Vector3Int posFrom, ref Vector3Int posTo, BlockData blockData, bool setBlockModified, ModifyBlockContext parentContext=null)
+        /// <param name="op">Set operation to be performed</param>
+        public void Modify(ModifyOp op)
         {
-            int indexFrom = Helpers.GetChunkIndex1DFrom3D(posFrom.x, posFrom.y, posFrom.z);
-            int indexTo = Helpers.GetChunkIndex1DFrom3D(posTo.x, posTo.y, posTo.z);
-
-            m_setBlockQueue.Add(new SetBlockContext(indexFrom, indexTo, blockData, setBlockModified, parentContext));
-
-            if (parentContext!=null)
-                parentContext.RegisterChildAction();
+            m_setBlockQueue.Add(op);
         }
 
         public void BlockModified(BlockPos blockPos, ref Vector3Int globalPos, BlockData blockData)
         {
+            VmNetworking ntw = chunk.world.networking;
+
             // If this is the server log the changed block so that it can be saved
-            if (chunk.world.networking.isServer)
+            if (ntw.isServer)
             {
-                if (chunk.world.networking.allowConnections)
-                    chunk.world.networking.server.BroadcastChange(globalPos, blockData, -1);
+                if (ntw.allowConnections)
+                    ntw.server.BroadcastChange(globalPos, blockData, -1);
 
                 if (Features.UseSerialization && Features.UseDifferentialSerialization)
                 {
@@ -515,7 +583,7 @@ namespace Voxelmetric.Code.Core
             }
             else // if this is not the server send the change to the server to sync
             {
-                chunk.world.networking.client.BroadcastChange(globalPos, blockData);
+                ntw.client.BroadcastChange(globalPos, blockData);
             }
         }
 
@@ -683,24 +751,24 @@ namespace Voxelmetric.Code.Core
                         do
                         {
                             expand = false;
-
-                            if (expandX)
-                            {
-                                expandX = x2<Env.ChunkSizePlusPadding &&
-                                          ExpandX(ref mask, type, y1, z1, ref x2, y2, z2);
-                                expand = expandX;
-                            }
+                            
                             if (expandY)
                             {
                                 expandY = y2<Env.ChunkSizePlusPadding &&
                                           ExpandY(ref mask, type, x1, z1, x2, ref y2, z2);
-                                expand = expand|expandY;
+                                expand = expandY;
                             }
                             if (expandZ)
                             {
                                 expandZ = z2<Env.ChunkSizePlusPadding &&
                                           ExpandZ(ref mask, type, x1, y1, x2, y2, ref z2);
                                 expand = expand|expandZ;
+                            }
+                            if (expandX)
+                            {
+                                expandX = x2 < Env.ChunkSizePlusPadding &&
+                                          ExpandX(ref mask, type, y1, z1, ref x2, y2, z2);
+                                expand = expand|expandX;
                             }
                         } while (expand);
 

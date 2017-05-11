@@ -226,7 +226,7 @@ namespace Voxelmetric.Code.Core
             if (onModified!=null)
                 context = new ModifyBlockContext(onModified, world, index, index, blockData, setBlockModified);
 
-            chunk.blocks.Modify(ref blockPos, blockData, setBlockModified, context);
+            chunk.blocks.Modify(new ModifyOpBlock(blockData, index, setBlockModified, context));
         }
 
         /// <summary>
@@ -275,10 +275,15 @@ namespace Voxelmetric.Code.Core
                             continue;
 
                         int maxX = Math.Min(posTo.x-cx, Env.ChunkSize1);
-
-                        Vector3Int from = new Vector3Int(minX, minY, minZ);
-                        Vector3Int to = new Vector3Int(maxX, maxY, maxZ);
-                        chunk.blocks.ModifyRange(ref from, ref to, blockData, setBlockModified, context);
+                        
+                        chunk.blocks.Modify(
+                            new ModifyOpCuboid(
+                                blockData,
+                                new Vector3Int(minX, minY, minZ),
+                                new Vector3Int(maxX, maxY, maxZ),
+                                setBlockModified,
+                                context)
+                            );
                     }
                 }
             }

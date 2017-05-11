@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
+using Voxelmetric.Code.Configurable.Structures;
 using Voxelmetric.Code.Core.Operations;
 using Voxelmetric.Code.Data_types;
 using Voxelmetric.Code.Load_Resources;
@@ -31,6 +32,10 @@ namespace Voxelmetric.Code.Core
         public AABBInt Bounds { get; set; }
 
         private readonly List<ModifyBlockContext> modifyRangeQueue = new List<ModifyBlockContext>();
+
+        private readonly object pendingStructureMutex = new object();
+        private readonly Dictionary<Vector3Int, List<StructureContext>> pendingStructures = new Dictionary<Vector3Int, List<StructureContext>>();
+        private readonly List<StructureInfo> pendingStructureInfo = new List<StructureInfo>();
 
         public bool CheckInsideWorld(Vector3Int pos)
         {
@@ -187,6 +192,116 @@ namespace Voxelmetric.Code.Core
                 modifyRangeQueue[i].PerformAction();
 
             modifyRangeQueue.Clear();
+        }
+
+        public void RegisterPendingStructure(StructureInfo info, StructureContext context)
+        {
+            if (info==null || context==null)
+                return;
+
+            lock (pendingStructureMutex)
+            {
+                //if (info!=null)
+                {
+                    bool alreadyThere = false;
+
+                    // Do not register the same thing twice
+                    for (int i = 0; i<pendingStructureInfo.Count; i++)
+                    {
+                        if (pendingStructureInfo[i].Equals(info))
+                        {
+                            alreadyThere = true;
+                            break;
+                        }
+                    }
+
+                    if (!alreadyThere)
+                        pendingStructureInfo.Add(info);
+                }
+
+                List<StructureContext> list;
+                if (pendingStructures.TryGetValue(context.chunkPos, out list))
+                    list.Add(context);
+                else
+                    pendingStructures.Add(context.chunkPos, new List<StructureContext> { context });
+
+                // Let the chunk know it needs an update if it exists
+                Chunk chunk = chunks.Get(ref context.chunkPos);
+                if (chunk != null)
+                    chunk.NeedApplyStructure = true;
+            }
+        }
+
+        public void UnregisterPendingStructures()
+        {
+            // TODO: This is not exactly optimal. A lot of iterations for one mutex. On the other hand, I expect only
+            // a small amount of structures stored here. Definitelly not hundreds or more. But there's a room for
+            // improvement...
+            lock (pendingStructureMutex)
+            {
+                // Let's see whether we can unload any positions
+                for (int i=0; i<pendingStructureInfo.Count;)
+                {
+                    var info = pendingStructureInfo[i];
+
+                    // See whether we can remove the structure
+                    if (!Bounds.IsInside(ref info.chunkPos))
+                        pendingStructureInfo.RemoveAt(i);
+                    else
+                    {
+                        ++i;
+                        continue;
+                    }
+
+                    // Structure removed. We need to remove any associated world positions now
+                    for (int y = info.bounds.minY; y<info.bounds.maxY; y += Env.ChunkSize)
+                    {
+                        for (int z = info.bounds.minZ; z<info.bounds.maxZ; z += Env.ChunkSize)
+                        {
+                            for (int x = info.bounds.minX; x<info.bounds.maxX; x += Env.ChunkSize)
+                            {
+                                List<StructureContext> list;
+                                if (!pendingStructures.TryGetValue(new Vector3Int(x,y,z), out list) || list.Count <= 0)
+                                    continue;
+
+                                // Remove any occurence of this structure from pending positions
+                                for (int j = 0; j<list.Count; )
+                                {
+                                    if (list[i].id==info.id)
+                                        list.RemoveAt(j);
+                                    else
+                                        ++j;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        public void ApplyPendingStructures(Chunk chunk)
+        {
+            List<StructureContext> list;
+            int cnt;
+
+            lock (pendingStructureMutex)
+            {
+                if (!chunk.NeedApplyStructure)
+                    return;
+                
+                // Consume the event
+                chunk.NeedApplyStructure = false;
+
+                if (!pendingStructures.TryGetValue(chunk.pos, out list))
+                    return;
+                
+                cnt = list.Count;
+            }
+            
+            // Apply changes to the chunk
+            for (int i = chunk.MaxPendingStructureListIndex; i<cnt; i++)
+                list[i].Apply(chunk);
+            chunk.MaxPendingStructureListIndex = cnt-1;
         }
     }
 }

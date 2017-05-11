@@ -163,14 +163,14 @@ namespace Voxelmetric.Code.Data_types
             return x==other.x && y==other.y && z==other.z;
         }
 
-        public static bool operator ==(Vector3Int pos1, Vector3Int pos2)
+        public static bool operator ==(Vector3Int a, Vector3Int b)
         {
-            return pos1.x==pos2.x && pos1.y==pos2.y && pos1.z==pos2.z;
+            return a.x==b.x && a.y==b.y && a.z==b.z;
         }
 
-        public static bool operator !=(Vector3Int pos1, Vector3Int pos2)
+        public static bool operator !=(Vector3Int a, Vector3Int b)
         {
-            return !(pos1 == pos2);
+            return a.x!=b.x || a.y!=b.y || a.z!=b.z;
         }
 
         #endregion
@@ -179,7 +179,7 @@ namespace Voxelmetric.Code.Data_types
         //"block at " + BlockPos + " is broken."
         public override string ToString()
         {
-            return "(" + x + ", " + y + ", " + z + ")";
+            return "[" + x + ", " + y + ", " + z + "]";
         }
 
         //
