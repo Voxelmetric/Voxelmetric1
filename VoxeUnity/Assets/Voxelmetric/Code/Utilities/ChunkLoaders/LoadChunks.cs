@@ -330,6 +330,8 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
             // Cycle through the array of positions
             Profiler.BeginSample("PostProcessChunks");
             {
+                WorldChunks chunks = world.chunks;
+
                 // Cycle through the array of positions
                 for (int y = maxY; y>=minY; y -= Env.ChunkSize)
                 {
@@ -349,7 +351,7 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
                         // Create a new chunk if possible
                         Vector3Int newChunkPos = new Vector3Int(cx, cy, cz);
                         Chunk chunk;
-                        if (!world.chunks.CreateOrGetChunk(ref newChunkPos, out chunk))
+                        if (!chunks.CreateOrGetChunk(ref newChunkPos, out chunk))
                             continue;
 
                         if (FullLoadOnStartUp)

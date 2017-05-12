@@ -7,9 +7,9 @@ namespace Voxelmetric.Code.Configurable.Structures
     public class StructureInfo: IEquatable<StructureInfo>, IEqualityComparer<StructureInfo>
     {
         //! Total bounds in world coordinates
-        public AABBInt bounds;
+        public readonly AABBInt bounds;
         //! A chunk this structure belongs to
-        public Vector3Int chunkPos;
+        public readonly Vector3Int chunkPos;
         //! Id of this structure comes from
         public readonly int id;
 

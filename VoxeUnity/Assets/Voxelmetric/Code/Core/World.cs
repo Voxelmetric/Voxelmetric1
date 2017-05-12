@@ -201,7 +201,6 @@ namespace Voxelmetric.Code.Core
 
             lock (pendingStructureMutex)
             {
-                //if (info!=null)
                 {
                     bool alreadyThere = false;
 
@@ -223,10 +222,16 @@ namespace Voxelmetric.Code.Core
                 if (pendingStructures.TryGetValue(context.chunkPos, out list))
                     list.Add(context);
                 else
-                    pendingStructures.Add(context.chunkPos, new List<StructureContext> { context });
+                    pendingStructures.Add(context.chunkPos, new List<StructureContext> {context});
+            }
 
-                // Let the chunk know it needs an update if it exists
-                Chunk chunk = chunks.Get(ref context.chunkPos);
+            {
+                Chunk chunk;
+                lock (chunks)
+                {
+                    // Let the chunk know it needs an update if it exists
+                    chunk = chunks.Get(ref context.chunkPos);
+                }
                 if (chunk != null)
                     chunk.NeedApplyStructure = true;
             }
@@ -243,9 +248,10 @@ namespace Voxelmetric.Code.Core
                 for (int i=0; i<pendingStructureInfo.Count;)
                 {
                     var info = pendingStructureInfo[i];
+                    var pos = info.chunkPos;
 
                     // See whether we can remove the structure
-                    if (!Bounds.IsInside(ref info.chunkPos))
+                    if (!Bounds.IsInside(ref pos))
                         pendingStructureInfo.RemoveAt(i);
                     else
                     {
@@ -281,6 +287,10 @@ namespace Voxelmetric.Code.Core
 
         public void ApplyPendingStructures(Chunk chunk)
         {
+            // Check this unlocked first
+            if (!chunk.NeedApplyStructure)
+                return;
+
             List<StructureContext> list;
             int cnt;
 

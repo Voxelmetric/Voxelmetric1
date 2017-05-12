@@ -112,8 +112,12 @@ namespace Voxelmetric.Code.Core
 
             // Create a new chunk
             chunk = Chunk.CreateChunk(world, p);
-            chunks.Add(p, chunk);
-            
+
+            lock (chunks)
+            {
+                chunks.Add(p, chunk);
+            }
+
             return true;
         }
 

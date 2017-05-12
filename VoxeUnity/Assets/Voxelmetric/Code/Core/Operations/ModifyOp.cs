@@ -5,7 +5,7 @@ namespace Voxelmetric.Code.Core.Operations
     public abstract class ModifyOp
     {
         //! Parent action
-        public readonly ModifyBlockContext parentContext;
+        protected readonly ModifyBlockContext parentContext;
         //! Block which is to be worked with
         protected readonly BlockData blockData;
         //! If true we want to mark the block as modified
