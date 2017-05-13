@@ -129,7 +129,7 @@ namespace Voxelmetric.Code.Builders.Geometry
                         cont:
 
                         // Build the face
-                        bool rotated = mask[n].light.rotated;
+                        bool rotated = BlockLightData.IsRotatedFace(mask[n].light);
                         if (!rotated)
                         {
                             face[0] = new Vector3(xx, maxY, zz)
@@ -247,7 +247,7 @@ namespace Voxelmetric.Code.Builders.Geometry
                         cont:
 
                         // Build the face
-                        bool rotated = mask[n].light.rotated;
+                        bool rotated = BlockLightData.IsRotatedFace(mask[n].light);
                         if (!rotated)
                         { 
                             face[0] = new Vector3(xx, minY, zz)
@@ -365,7 +365,7 @@ namespace Voxelmetric.Code.Builders.Geometry
                         cont:
 
                         // Build the face
-                        bool rotated = mask[n].light.rotated;
+                        bool rotated = BlockLightData.IsRotatedFace(mask[n].light);
                         if (!rotated)
                         {
                             face[0] = new Vector3(maxX, yy, zz)
@@ -483,7 +483,7 @@ namespace Voxelmetric.Code.Builders.Geometry
                         cont:
 
                         // Build the face
-                        bool rotated = mask[n].light.rotated;
+                        bool rotated = BlockLightData.IsRotatedFace(mask[n].light);
                         if (!rotated)
                         {
                             face[0] = new Vector3(minX, yy, zz)
@@ -601,7 +601,7 @@ namespace Voxelmetric.Code.Builders.Geometry
                         cont:
 
                         // Build the face
-                        bool rotated = mask[n].light.rotated;
+                        bool rotated = BlockLightData.IsRotatedFace(mask[n].light);
                         if (!rotated)
                         {
                             face[0] = new Vector3(xx, yy, maxZ)
@@ -719,7 +719,7 @@ namespace Voxelmetric.Code.Builders.Geometry
                         cont:
 
                         // Build the face
-                        bool rotated = mask[n].light.rotated;
+                        bool rotated = BlockLightData.IsRotatedFace(mask[n].light);
                         if (!rotated)
                         {
                             face[0] = new Vector3(xx, yy, minZ)

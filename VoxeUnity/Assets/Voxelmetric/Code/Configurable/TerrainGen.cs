@@ -2,7 +2,9 @@
 using System.Collections.Generic;
 using UnityEngine;
 using Voxelmetric.Code;
+using Voxelmetric.Code.Common;
 using Voxelmetric.Code.Core;
+using Voxelmetric.Code.Data_types;
 using Voxelmetric.Code.Load_Resources;
 using Voxelmetric.Code.Utilities.Noise;
 
@@ -64,8 +66,8 @@ public class TerrainGen
                 // Do not allow any two layers share the same index
                 if (structLayersIndexes.Contains(layer.index))
                 {
-                    Debug.LogError("Could not create structure layer " + config.layerType + " : " + config.name + ". Index " + layer.index +
-                                   " already defined");
+                    Debug.LogError("Could not create structure layer "+config.layerType+" : "+config.name+". Index "+
+                                   layer.index.ToString()+" already defined");
                     layersConfigs.RemoveAt(i);
                     continue;
                 }
@@ -79,8 +81,8 @@ public class TerrainGen
                 // Do not allow any two layers share the same index
                 if (terrainLayersIndexes.Contains(layer.index))
                 {
-                    Debug.LogError("Could not create terrain layer "+config.layerType+" : "+config.name+". Index "+layer.index+
-                                   " already defined");
+                    Debug.LogError("Could not create terrain layer "+config.layerType+" : "+config.name+". Index "+
+                                   layer.index.ToString()+" already defined");
                     layersConfigs.RemoveAt(i);
                     continue;
                 }
@@ -131,7 +133,7 @@ public class TerrainGen
         // Do some layer preprocessing on a chunk
         for (int i=0; i<TerrainLayers.Length; i++)
             TerrainLayers[i].PreProcess(chunk, i);
-        
+
         /* // DEBUG CODE
         for(int y=0; y<Env.ChunkSize; y++)
             for (int z = 0; z < Env.ChunkSize; z++)

@@ -18,7 +18,7 @@
     "randomUpdateFrequency": 1,
 
     "addAOToMesh": true,
-    "ambientOcclusionStrength": 0.5,
+    "ambientOcclusionStrength": 1,
 
     "textureAtlasPadding": 32,
     "textureAtlasFiltering": "point",

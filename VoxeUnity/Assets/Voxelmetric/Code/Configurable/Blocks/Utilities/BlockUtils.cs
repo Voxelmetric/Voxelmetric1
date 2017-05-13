@@ -76,13 +76,9 @@ namespace Voxelmetric.Code.Configurable.Blocks.Utilities
         public static void PrepareColors(Chunk chunk, VertexData[] vertexData, Direction direction, ref BlockLightData light)
         {
             if (chunk.world.config.addAOToMesh)
-            {
                 SetColorsAO(vertexData, light, chunk.world.config.ambientOcclusionStrength, direction);
-            }
             else
-            {
                 SetColors(vertexData, 1f, 1f, 1f, 1f, false, 1f);
-            }
         }
 
         public static BlockLightData CalculateColors(Chunk chunk, int localPosIndex, Direction direction)
@@ -91,15 +87,10 @@ namespace Voxelmetric.Code.Configurable.Blocks.Utilities
             if (!chunk.world.config.addAOToMesh)
                 return new BlockLightData(0);
 
-            bool nSolid = false;
-            bool eSolid = false;
-            bool sSolid = false;
-            bool wSolid = false;
-
-            bool nwSolid = false;
-            bool neSolid = false;
-            bool seSolid = false;
-            bool swSolid = false;
+            // Side blocks
+            bool nSolid, eSolid, sSolid, wSolid;
+            // Corner blocks
+            bool nwSolid, neSolid, seSolid, swSolid;
 
             ChunkBlocks blocks = chunk.blocks;
             int index, index2, index3;
@@ -176,7 +167,7 @@ namespace Voxelmetric.Code.Configurable.Blocks.Utilities
                     nSolid = blocks.Get(index3).Solid;                              // 1, 1, 0
                     neSolid = blocks.Get(index3 + Env.ChunkSizeWithPadding).Solid;  // 1, 1, 1
                     break;
-                case Direction.west:
+                default://case Direction.west:
                     index = localPosIndex-1; // - (1,0,0)
                     index2 = index - Env.ChunkSizeWithPaddingPow2; // - (0,1,0)
                     index3 = index + Env.ChunkSizeWithPaddingPow2; // + (0,1,0)
@@ -243,103 +234,27 @@ namespace Voxelmetric.Code.Configurable.Blocks.Utilities
             }
         }
 
-        private static void SetColorsAO(VertexData[] vertexData, BlockLightData light, float strength, Direction direction)
+        private static void SetColorsAO(VertexData[] vertexData, BlockLightData light, float strength,  Direction direction)
         {
-            float ne = 1f;
-            float es = 1f;
-            float sw = 1f;
-            float wn = 1f;
+            float ne = 1f-(light.neAO * 0.25f) * strength;
+            float se = 1f-(light.seAO * 0.25f) * strength;
+            float sw = 1f-(light.swAO * 0.25f) * strength;
+            float nw = 1f-(light.nwAO * 0.25f) * strength;
 
-            strength *= 0.5f;
-
-            if (light.nSolid)
-            {
-                wn -= strength;
-                ne -= strength;
-            }
-
-            if (light.eSolid)
-            {
-                ne -= strength;
-                es -= strength;
-            }
-
-            if (light.sSolid)
-            {
-                es -= strength;
-                sw -= strength;
-            }
-
-            if (light.wSolid)
-            {
-                sw -= strength;
-                wn -= strength;
-            }
-
-            if (light.neSolid)
-                ne -= strength;
-
-            if (light.swSolid)
-                sw -= strength;
-
-            if (light.nwSolid)
-                wn -= strength;
-
-            if (light.seSolid)
-                es -= strength;
-
-            SetColors(vertexData, sw, wn, ne, es, light.rotated, 1f, direction);
+            SetColors(vertexData, sw, nw, ne, se, BlockLightData.IsRotatedFace(light), 1f);
         }
 
         private static void AdjustColorsAO(VertexData[] vertexData, BlockLightData light, float strength, Direction direction)
         {
-            float ne = 1f;
-            float nw = 1f;
-            float se = 1f;
-            float sw = 1f;
+            float ne = 1f-(light.neAO * 0.25f) * strength;
+            float se = 1f-(light.seAO * 0.25f) * strength;
+            float sw = 1f-(light.swAO * 0.25f) * strength;
+            float nw = 1f-(light.nwAO * 0.25f) * strength;
 
-            strength *= 0.5f;
-
-            if (light.nSolid)
-            {
-                nw -= strength;
-                ne -= strength;
-            }
-
-            if (light.eSolid)
-            {
-                ne -= strength;
-                se -= strength;
-            }
-
-            if (light.sSolid)
-            {
-                se -= strength;
-                sw -= strength;
-            }
-
-            if (light.wSolid)
-            {
-                sw -= strength;
-                nw -= strength;
-            }
-
-            if (light.neSolid)
-                ne -= strength;
-
-            if (light.swSolid)
-                sw -= strength;
-
-            if (light.nwSolid)
-                nw -= strength;
-
-            if (light.seSolid)
-                se -= strength;
-
-            AdjustColors(vertexData, sw, nw, ne, se, light.rotated, 1f, direction);
+            AdjustColors(vertexData, sw, nw, ne, se, BlockLightData.IsRotatedFace(light), 1f, direction);
         }
 
-        public static void SetColors(VertexData[] data, float sw, float nw, float ne, float se, bool rotated, float light, Direction direction = Direction.up)
+        public static void SetColors(VertexData[] data, float sw, float nw, float ne, float se, bool rotated, float light)
         {
             float _sw = (sw*light*255.0f).Clamp(0f,255f);
             float _nw = (nw*light*255.0f).Clamp(0f,255f);
@@ -393,10 +308,10 @@ namespace Voxelmetric.Code.Configurable.Blocks.Utilities
             }
             else
             {
-                data[0].Color = ToColor32(ref data[1].Color, nw);
-                data[1].Color = ToColor32(ref data[2].Color, ne);
-                data[2].Color = ToColor32(ref data[3].Color, se);
-                data[3].Color = ToColor32(ref data[0].Color, sw);
+                data[0].Color = ToColor32(ref data[0].Color, nw);
+                data[1].Color = ToColor32(ref data[1].Color, ne);
+                data[2].Color = ToColor32(ref data[2].Color, se);
+                data[3].Color = ToColor32(ref data[3].Color, sw);
             }
         }
     }
