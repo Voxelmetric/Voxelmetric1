@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
+using Voxelmetric.Code.Common;
 using Voxelmetric.Code.Core;
 using Voxelmetric.Code.Data_types;
 
@@ -43,24 +44,24 @@ namespace Voxelmetric.Code.Load_Resources.Textures
         {
             if (usesConnectedTextures)
             {
-                int blockType = chunk.blocks.Get(ref localPos).Type;
+                ChunkBlocks blocks = chunk.blocks;
+                int index = Helpers.GetChunkIndex1DFrom3D(localPos.x, localPos.y, localPos.z);
+                ushort blockType = blocks.Get(index).Type;
 
-                bool wn = ConnectedTextures.IsSame(chunk, ref localPos, -1, 1, direction, blockType);
-                bool n = ConnectedTextures.IsSame(chunk, ref localPos, 0, 1, direction, blockType);
-                bool ne = ConnectedTextures.IsSame(chunk, ref localPos, 1, 1, direction, blockType);
-                bool w = ConnectedTextures.IsSame(chunk, ref localPos, -1, 0, direction, blockType);
-                bool e = ConnectedTextures.IsSame(chunk, ref localPos, 1, 0, direction, blockType);
-                bool es = ConnectedTextures.IsSame(chunk, ref localPos, 1, -1, direction, blockType);
-                bool s = ConnectedTextures.IsSame(chunk, ref localPos, 0, -1, direction, blockType);
-                bool sw = ConnectedTextures.IsSame(chunk, ref localPos, -1, -1, direction, blockType);
+                bool nw = ConnectedTextures.IsSame(blocks, index, -1, 1, direction, blockType);
+                bool n = ConnectedTextures.IsSame(blocks, index, 0, 1, direction, blockType);
+                bool ne = ConnectedTextures.IsSame(blocks, index, 1, 1, direction, blockType);
+                bool w = ConnectedTextures.IsSame(blocks, index, -1, 0, direction, blockType);
+                bool e = ConnectedTextures.IsSame(blocks, index, 1, 0, direction, blockType);
+                bool se = ConnectedTextures.IsSame(blocks, index, 1, -1, direction, blockType);
+                bool s = ConnectedTextures.IsSame(blocks, index, 0, -1, direction, blockType);
+                bool sw = ConnectedTextures.IsSame(blocks, index, -1, -1, direction, blockType);
 
-                return connectedTextures[ConnectedTextures.GetTexture(n, e, s, w, wn, ne, es, sw)];
+                return connectedTextures[ConnectedTextures.GetTexture(n, e, s, w, nw, ne, se, sw)];
             }
 
             if (textures.Count == 1)
-            {
                 return textures[0];
-            }
 
             if (textures.Count > 1)
             {

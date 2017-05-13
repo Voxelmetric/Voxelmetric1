@@ -149,7 +149,7 @@ namespace Voxelmetric.Code.Load_Resources.Textures
 
                 if (allConfigs[i].connectedTextures)
                 {
-                    //Create all 48 possibilities from the 5 supplied textures
+                    // Create all 48 possibilities from the 5 supplied textures
                     Texture2D[] newTextures = ConnectedTextures.ConnectedTexturesFromBaseTextures(allConfigs[i].textures);
                     TextureConfig.Texture[] connectedTextures = new TextureConfig.Texture[48];
 
