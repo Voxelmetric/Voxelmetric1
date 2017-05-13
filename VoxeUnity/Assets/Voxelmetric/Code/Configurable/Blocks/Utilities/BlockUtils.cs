@@ -1,4 +1,5 @@
 using UnityEngine;
+using Voxelmetric.Code.Common;
 using Voxelmetric.Code.Core;
 using Voxelmetric.Code.Data_types;
 using Voxelmetric.Code.Load_Resources.Textures;
@@ -322,15 +323,20 @@ namespace Voxelmetric.Code.Configurable.Blocks.Utilities
             if (seSolid)
                 se -= strength;
 
-            AdjustColors(vertexData, sw, nw, ne, se, 1, direction);
+            AdjustColors(vertexData, sw, nw, ne, se, 1f, direction);
         }
 
-        public static void SetColors(VertexData[] data, float sw, float nw, float ne, float se, float light, Direction direction=Direction.up)
+        public static void SetColors(VertexData[] data, float sw, float nw, float ne, float se, float light, Direction direction = Direction.up)
         {
-            byte sw_ = (byte)(sw*light*255.0f);
-            byte nw_ = (byte)(nw*light*255.0f);
-            byte ne_ = (byte)(ne*light*255.0f);
-            byte se_ = (byte)(se*light*255.0f);
+            float _sw = (sw*light*255.0f).Clamp(0f,255f);
+            float _nw = (nw*light*255.0f).Clamp(0f,255f);
+            float _ne = (ne*light*255.0f).Clamp(0f,255f);
+            float _se = (se*light*255.0f).Clamp(0f,255f);
+
+            byte sw_ = (byte)_sw;
+            byte nw_ = (byte)_nw;
+            byte ne_ = (byte)_ne;
+            byte se_ = (byte)_se;
 
             data[0].Color = new Color32(sw_, sw_, sw_, 255);
             data[1].Color = new Color32(nw_, nw_, nw_, 255);
@@ -347,12 +353,13 @@ namespace Voxelmetric.Code.Configurable.Blocks.Utilities
                 col.a
                 );
         }
+
         public static void AdjustColors(VertexData[] data, float sw, float nw, float ne, float se, float light, Direction direction = Direction.up)
         {
-            sw = (sw * light);
-            nw = (nw * light);
-            ne = (ne * light);
-            se = (se * light);
+            sw = (sw*light).Clamp(0f,1f);
+            nw = (nw*light).Clamp(0f,1f);
+            ne = (ne*light).Clamp(0f,1f);
+            se = (se*light).Clamp(0f,1f);
 
             data[0].Color = ToColor32(ref data[0].Color, sw);
             data[1].Color = ToColor32(ref data[1].Color, nw);
