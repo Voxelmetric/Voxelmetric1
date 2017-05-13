@@ -110,20 +110,28 @@ namespace Voxelmetric.Code.Load_Resources.Textures
 
             for (int i = 0; i < configs.Length; i++)
             {
-                for (int j = 0; j < configs[i].textures.Length; j++)
+                var cfg = configs[i];
+
+                for (int j = 0; j < cfg.textures.Length; j++)
                 {
-                    Rect texture = new Rect(configs[i].textures[j].xPos / (float)atlas.width, configs[i].textures[j].yPos/ (float)atlas.height,
-                                            configs[i].textures[j].width/ (float)atlas.width, configs[i].textures[j].height/ (float)atlas.height);
+                    var cfgTextures = cfg.textures[j];
+
+                    Rect texture = new Rect(
+                        cfgTextures.xPos / (float)atlas.width,
+                        cfgTextures.yPos / (float)atlas.height,
+                        cfgTextures.width / (float)atlas.width,
+                        cfgTextures.height / (float)atlas.height
+                    );
 
                     TextureCollection collection;
-                    if (!textures.TryGetValue(configs[i].name, out collection))
+                    if (!textures.TryGetValue(cfg.name, out collection))
                     {
-                        collection = new TextureCollection(configs[i].name);
-                        textures.Add(configs[i].name, collection);
+                        collection = new TextureCollection(cfg.name);
+                        textures.Add(cfg.name, collection);
                     }
 
                     int connectedTextureType = -1;
-                    if (configs[i].connectedTextures)
+                    if (cfg.connectedTextures)
                         connectedTextureType = configs[i].textures[j].connectedType;
 
                     collection.AddTexture(texture, connectedTextureType, configs[i].textures[j].weight);
@@ -144,13 +152,15 @@ namespace Voxelmetric.Code.Load_Resources.Textures
 
             for (int i = 0; i < allConfigs.Length; i++)
             {
-                for (int n = 0; n < allConfigs[i].textures.Length; n++)
-                    allConfigs[i].textures[n].texture2d = Texture2DFromConfig(allConfigs[i].textures[n], sourceTexturesLookup);
+                var cfg = allConfigs[i];
 
-                if (allConfigs[i].connectedTextures)
+                for (int n = 0; n < cfg.textures.Length; n++)
+                    cfg.textures[n].texture2d = Texture2DFromConfig(cfg.textures[n], sourceTexturesLookup);
+
+                if (cfg.connectedTextures)
                 {
                     // Create all 48 possibilities from the 5 supplied textures
-                    Texture2D[] newTextures = ConnectedTextures.ConnectedTexturesFromBaseTextures(allConfigs[i].textures);
+                    Texture2D[] newTextures = ConnectedTextures.ConnectedTexturesFromBaseTextures(cfg.textures);
                     TextureConfig.Texture[] connectedTextures = new TextureConfig.Texture[48];
 
                     for (int x = 0; x < newTextures.Length; x++)
@@ -159,7 +169,7 @@ namespace Voxelmetric.Code.Load_Resources.Textures
                         connectedTextures[x].texture2d = newTextures[x];
                     }
 
-                    allConfigs[i].textures = connectedTextures;
+                    cfg.textures = connectedTextures;
                 }
             }
 
