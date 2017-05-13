@@ -39,7 +39,7 @@ public class CubeBlock: Block
             }
 
             BlockUtils.PrepareTexture(chunk, ref face.pos, vertexData, face.side, textures, rotated);
-            BlockUtils.PrepareColors(chunk, vertexData, face.side, ref face.light);
+            BlockUtils.PrepareColors(chunk, vertexData, ref face.light);
             
             chunk.GeometryHandler.Batcher.AddFace(vertexData, backface, face.materialID);
         }

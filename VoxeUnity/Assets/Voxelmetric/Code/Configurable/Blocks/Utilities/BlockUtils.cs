@@ -73,7 +73,7 @@ namespace Voxelmetric.Code.Configurable.Blocks.Utilities
             }
         };
 
-        public static void PrepareColors(Chunk chunk, VertexData[] vertexData, Direction direction, ref BlockLightData light)
+        public static void PrepareColors(Chunk chunk, VertexData[] vertexData, ref BlockLightData light)
         {
             if (chunk.world.config.addAOToMesh)
                 SetColorsAO(vertexData, light, chunk.world.config.ambientOcclusionStrength);
