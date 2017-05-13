@@ -81,7 +81,7 @@ namespace Client.Scripts.Misc
         // Use this for initialization
         public void OnGUI()
         {
-            if (!Show || (!Application.isPlaying && !ShowInEditor))
+            if (!Show || !Application.isPlaying && !ShowInEditor)
                 return;
 
             m_text.Remove(0, m_text.Length);
@@ -91,11 +91,8 @@ namespace Client.Scripts.Misc
             m_text.AppendFormat("Last collected: {0}\n", m_collectAlloc.GetKiloString());
             m_text.AppendFormat("Allocation rate: {0}\n", m_allocRate.GetKiloString());
 
-            m_text.AppendFormat("Collection freq: {0}s\n", m_delta.ToString("0.00"));
-            m_text.AppendFormat("Last collect delta: {0}s ({1} FPS)\n",
-                m_lastDeltaTime.ToString("0.000"),
-                (1F / m_lastDeltaTime).ToString("0.0")
-                );
+            m_text.AppendFormat("Collection freq: {0:0.00}s\n", m_delta);
+            m_text.AppendFormat("Last collect delta: {0:0.000}s ({1:0.0} FPS)\n", m_lastDeltaTime, 1f/m_lastDeltaTime);
 
             if (World != null)
             {
@@ -115,8 +112,8 @@ namespace Client.Scripts.Misc
 
             m_text.AppendLine(GameObjectProvider.Instance.ToString());
 
-            const int width = 1280;
-            const int height = 640;
+            const int width = 720;
+            const int height = 320;
             GUI.Box(new Rect(Screen.width-width, Screen.height-height, width, height), "");
             GUI.Label(new Rect(Screen.width-width+10, Screen.height-height+10, width-10, height-10), m_text.ToString());
         }

@@ -56,10 +56,7 @@ namespace Voxelmetric.Code.Utilities
             {
                 if (!Stopwatch.IsHighResolution)
                     throw new NotSupportedException("Your hardware doesn't support high resolution counter");
-
-                // Prevent the JIT compiler from optimizing Fkt calls away
-                long seed = Environment.TickCount;
-
+                
                 // Use the second core/processor for the test
                 Process.GetCurrentProcess().ProcessorAffinity = new IntPtr(2);
 

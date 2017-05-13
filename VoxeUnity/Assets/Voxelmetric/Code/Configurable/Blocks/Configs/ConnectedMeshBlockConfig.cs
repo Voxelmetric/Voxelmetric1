@@ -1,6 +1,5 @@
 ﻿using UnityEngine;
 using System.Collections;
-using System.Collections.Generic;
 using Voxelmetric.Code.Core;
 using Voxelmetric.Code.Data_types;
 using Voxelmetric.Code.Load_Resources.Textures;
@@ -8,9 +7,9 @@ using Voxelmetric.Code.Rendering;
 
 public class ConnectedMeshBlockConfig : CustomMeshBlockConfig
 {
-    public readonly Dictionary<Direction, int[]> directionalTris = new Dictionary<Direction, int[]>();
-    public readonly Dictionary<Direction, VertexData[]> directionalVerts = new Dictionary<Direction, VertexData[]>();
-    public readonly Dictionary<Direction, TextureCollection> directionalTextures = new Dictionary<Direction, TextureCollection>();
+    public readonly int[][] directionalTris = new int[6][];
+    public readonly VertexData[][] directionalVerts = new VertexData[6][];
+    public readonly TextureCollection[] directionalTextures = new TextureCollection[6];
 
     public int[] connectsToTypes;
     public string[] connectsToNames;
@@ -30,7 +29,7 @@ public class ConnectedMeshBlockConfig : CustomMeshBlockConfig
             if (_GetPropertyFromConfig(config, direction + "FileLocation", "") == "")
                 continue;
 
-            directionalTextures.Add(direction, world.textureProvider.GetTextureCollection(_GetPropertyFromConfig(config, direction + "Texture", "")));
+            directionalTextures[dir] = world.textureProvider.GetTextureCollection(_GetPropertyFromConfig(config, direction+"Texture", ""));
 
             Vector3 offset;
             offset.x = float.Parse(_GetPropertyFromConfig(config, direction + "XOffset", "0"));
@@ -43,8 +42,8 @@ public class ConnectedMeshBlockConfig : CustomMeshBlockConfig
 
             SetUpMesh(meshLocation, offset, out newTris, out newVerts);
 
-            directionalTris.Add(direction, newTris);
-            directionalVerts.Add(direction, newVerts);
+            directionalTris[dir] = newTris;
+            directionalVerts[dir] = newVerts;
         }
 
         return true;

@@ -6,6 +6,15 @@ namespace Voxelmetric.Code.Data_types
     [Serializable]
     public struct Vector3Int : IEquatable<Vector3Int>
     {
+        public static readonly Vector3Int zero = new Vector3Int(0, 0, 0);
+        public static readonly Vector3Int one = new Vector3Int(1, 1, 1);
+        public static readonly Vector3Int up = new Vector3Int(0, 1, 0);
+        public static readonly Vector3Int down = new Vector3Int(0, -1, 0);
+        public static readonly Vector3Int north = new Vector3Int(0, 0, 1);
+        public static readonly Vector3Int south = new Vector3Int(0, 0, -1);
+        public static readonly Vector3Int east = new Vector3Int(1, 0, 0);
+        public static readonly Vector3Int west = new Vector3Int(-1, 0, 0);
+
         public readonly int x, y, z;
 
         public Vector3Int(int x, int y, int z)
@@ -76,19 +85,17 @@ namespace Voxelmetric.Code.Data_types
         {
             switch (d) {
                 case Direction.up:
-                    return new Vector3Int(0, 1, 0);
+                    return up;
                 case Direction.down:
-                    return new Vector3Int(0, -1, 0);
+                    return down;
                 case Direction.north:
-                    return new Vector3Int(0, 0, 1);
-                case Direction.east:
-                    return new Vector3Int(1, 0, 0);
+                    return north;
                 case Direction.south:
-                    return new Vector3Int(0, 0, -1);
-                case Direction.west:
-                    return new Vector3Int(-1, 0, 0);
-                default:
-                    return new Vector3Int();
+                    return south;
+                case Direction.east:
+                    return east;
+                default:// Direction.west:
+                    return west;
             }
         }
 
@@ -174,21 +181,10 @@ namespace Voxelmetric.Code.Data_types
         }
 
         #endregion
-
-        //You can safely use BlockPos as part of a string like this:
-        //"block at " + BlockPos + " is broken."
+        
         public override string ToString()
         {
             return "[" + x + ", " + y + ", " + z + "]";
         }
-
-        //
-        // Summary:
-        //     Shorthand for writing BlockPos(0, 0, 0).
-        public static readonly Vector3Int zero = new Vector3Int(0, 0, 0);
-        //
-        // Summary:
-        //     Shorthand for writing BlockPos(1, 1, 1).
-        public static readonly Vector3Int one = new Vector3Int(1, 1, 1);
     }
 }

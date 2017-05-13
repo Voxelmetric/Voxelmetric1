@@ -6,7 +6,7 @@ using Voxelmetric.Code.Common.MemoryPooling;
 
 namespace Voxelmetric.Code.Rendering.GeometryBatcher
 {
-    public class ColliderGeometryBatcher: IGeometryBatcher<PhysicMaterial>
+    public class ColliderGeometryBatcher: IGeometryBatcher
     {
         private readonly string m_prefabName;
         //! Materials our meshes are to use

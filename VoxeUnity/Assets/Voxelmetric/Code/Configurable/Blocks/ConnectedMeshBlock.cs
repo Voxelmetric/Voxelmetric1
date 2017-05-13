@@ -26,18 +26,22 @@ public class ConnectedMeshBlock: CustomMeshBlock
 
     public override void BuildFace(Chunk chunk, Vector3[] vertices, ref BlockFace face, bool rotated)
     {
-        if (!connectedMeshConfig.directionalTris.ContainsKey(face.side))
+        var tris = connectedMeshConfig.directionalTris[(int)face.side];
+        if (null==tris)
             return;
 
-        Rect texture;
+        var verts = connectedMeshConfig.directionalVerts[(int)face.side];
+        var texture = connectedMeshConfig.texture;
+
+        Rect rect;
         RenderGeometryBatcher batcher = chunk.GeometryHandler.Batcher;
         ChunkBlocks blocks = chunk.blocks;
 
         Vector3Int sidePos = face.pos.Add(face.side);
         if (connectedMeshConfig.connectsToSolid && blocks.Get(ref sidePos).Solid)
         {
-            texture = connectedMeshConfig.texture.GetTexture(chunk, ref face.pos, face.side);
-            batcher.AddMeshData(connectedMeshConfig.directionalTris[face.side], connectedMeshConfig.directionalVerts[face.side], ref texture, face.pos, face.materialID);
+            rect = connectedMeshConfig.texture.GetTexture(chunk, ref face.pos, face.side);
+            batcher.AddMeshData(tris, verts, ref rect, face.pos, face.materialID);
         }
         else if (connectedMeshConfig.connectsToTypes.Length!=0)
         {
@@ -46,15 +50,15 @@ public class ConnectedMeshBlock: CustomMeshBlock
             {
                 if (neighborType==connectedMeshConfig.connectsToTypes[i])
                 {
-                    texture = connectedMeshConfig.texture.GetTexture(chunk, ref face.pos, face.side);
-                    batcher.AddMeshData(connectedMeshConfig.directionalTris[face.side], connectedMeshConfig.directionalVerts[face.side], ref texture, face.pos, face.materialID);
+                    rect = texture.GetTexture(chunk, ref face.pos, face.side);
+                    batcher.AddMeshData(tris, verts, ref rect, face.pos, face.materialID);
                     break;
                 }
             }
         }
 
-        texture = customMeshConfig.texture.GetTexture(chunk, ref face.pos, Direction.down);
-        batcher.AddMeshData(customMeshConfig.tris, customMeshConfig.verts, ref texture, face.pos, face.materialID);
+        rect = customMeshConfig.texture.GetTexture(chunk, ref face.pos, Direction.down);
+        batcher.AddMeshData(customMeshConfig.tris, customMeshConfig.verts, ref rect, face.pos, face.materialID);
     }
 
     public override void BuildBlock(Chunk chunk, ref Vector3Int localPos, int materialID)

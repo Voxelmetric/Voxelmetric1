@@ -37,12 +37,13 @@ namespace Voxelmetric.Code.Configurable.Structures
         {
             if (ReferenceEquals(null, obj))
                 return false;
-            return obj is StructureInfo && Equals((StructureInfo)obj);
+            StructureInfo a = obj as StructureInfo;
+            return a!=null && Equals(a);
         }
 
         public bool Equals(StructureInfo other)
         {
-            return id==other.id && chunkPos==other.chunkPos && bounds==other.bounds;
+            return other!=null && id==other.id && chunkPos==other.chunkPos && bounds==other.bounds;
         }
 
         public bool Equals(StructureInfo x, StructureInfo y)
