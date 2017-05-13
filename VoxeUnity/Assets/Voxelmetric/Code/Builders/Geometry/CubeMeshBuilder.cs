@@ -132,25 +132,17 @@ namespace Voxelmetric.Code.Builders.Geometry
                         bool rotated = mask[n].light.FaceRotationNecessary;
                         if (!rotated)
                         {
-                            face[0] = new Vector3(xx, maxY, zz)
-                                + new Vector3(-BlockUtils.blockPadding, +BlockUtils.blockPadding, -BlockUtils.blockPadding);
-                            face[1] = new Vector3(xx, maxY, zz+h)
-                                + new Vector3(-BlockUtils.blockPadding, +BlockUtils.blockPadding, +BlockUtils.blockPadding);
-                            face[2] = new Vector3(xx+w, maxY, zz+h)
-                                + new Vector3(+BlockUtils.blockPadding, +BlockUtils.blockPadding, +BlockUtils.blockPadding);
-                            face[3] = new Vector3(xx+w, maxY, zz)
-                                + new Vector3(+BlockUtils.blockPadding, +BlockUtils.blockPadding, -BlockUtils.blockPadding);
+                            face[0] = new Vector3(xx, maxY, zz) + BlockUtils.PaddingOffsets[(int)Direction.up][0];
+                            face[1] = new Vector3(xx, maxY, zz+h) + BlockUtils.PaddingOffsets[(int)Direction.up][1];
+                            face[2] = new Vector3(xx+w, maxY, zz+h) + BlockUtils.PaddingOffsets[(int)Direction.up][2];
+                            face[3] = new Vector3(xx+w, maxY, zz) + BlockUtils.PaddingOffsets[(int)Direction.up][3];
                         }
                         else
                         {
-                            face[0] = new Vector3(xx, maxY, zz + h)
-                                + new Vector3(-BlockUtils.blockPadding, +BlockUtils.blockPadding, +BlockUtils.blockPadding);
-                            face[1] = new Vector3(xx + w, maxY, zz + h)
-                                + new Vector3(+BlockUtils.blockPadding, +BlockUtils.blockPadding, +BlockUtils.blockPadding);
-                            face[2] = new Vector3(xx + w, maxY, zz)
-                                + new Vector3(+BlockUtils.blockPadding, +BlockUtils.blockPadding, -BlockUtils.blockPadding);
-                            face[3] = new Vector3(xx, maxY, zz)
-                                + new Vector3(-BlockUtils.blockPadding, +BlockUtils.blockPadding, -BlockUtils.blockPadding);
+                            face[0] = new Vector3(xx, maxY, zz + h) + BlockUtils.PaddingOffsets[(int)Direction.up][1];
+                            face[1] = new Vector3(xx + w, maxY, zz + h) + BlockUtils.PaddingOffsets[(int)Direction.up][2];
+                            face[2] = new Vector3(xx + w, maxY, zz) + BlockUtils.PaddingOffsets[(int)Direction.up][3];
+                            face[3] = new Vector3(xx, maxY, zz) + BlockUtils.PaddingOffsets[(int)Direction.up][0];
                         }
 
                         block.BuildFace(chunk, face, ref mask[n], rotated);
@@ -250,25 +242,17 @@ namespace Voxelmetric.Code.Builders.Geometry
                         bool rotated = mask[n].light.FaceRotationNecessary;
                         if (!rotated)
                         { 
-                            face[0] = new Vector3(xx, minY, zz)
-                                + new Vector3(-BlockUtils.blockPadding, -BlockUtils.blockPadding, -BlockUtils.blockPadding);
-                            face[1] = new Vector3(xx, minY, zz+h)
-                                + new Vector3(-BlockUtils.blockPadding, -BlockUtils.blockPadding, +BlockUtils.blockPadding);
-                            face[2] = new Vector3(xx+w, minY, zz+h)
-                                + new Vector3(+BlockUtils.blockPadding, -BlockUtils.blockPadding, +BlockUtils.blockPadding);
-                            face[3] = new Vector3(xx+w, minY, zz)
-                                + new Vector3(+BlockUtils.blockPadding, -BlockUtils.blockPadding, -BlockUtils.blockPadding);
+                            face[0] = new Vector3(xx, minY, zz) + BlockUtils.PaddingOffsets[(int)Direction.down][0];
+                            face[1] = new Vector3(xx, minY, zz+h) + BlockUtils.PaddingOffsets[(int)Direction.down][1];
+                            face[2] = new Vector3(xx+w, minY, zz+h) + BlockUtils.PaddingOffsets[(int)Direction.down][2];
+                            face[3] = new Vector3(xx+w, minY, zz) + BlockUtils.PaddingOffsets[(int)Direction.down][3];
                         }
                         else
                         {
-                            face[0] = new Vector3(xx, minY, zz + h)
-                                + new Vector3(-BlockUtils.blockPadding, -BlockUtils.blockPadding, +BlockUtils.blockPadding);
-                            face[1] = new Vector3(xx + w, minY, zz + h)
-                                + new Vector3(+BlockUtils.blockPadding, -BlockUtils.blockPadding, +BlockUtils.blockPadding);
-                            face[2] = new Vector3(xx + w, minY, zz)
-                                + new Vector3(+BlockUtils.blockPadding, -BlockUtils.blockPadding, -BlockUtils.blockPadding);
-                            face[3] = new Vector3(xx, minY, zz)
-                                + new Vector3(-BlockUtils.blockPadding, -BlockUtils.blockPadding, -BlockUtils.blockPadding);
+                            face[0] = new Vector3(xx, minY, zz + h) + BlockUtils.PaddingOffsets[(int)Direction.down][1];
+                            face[1] = new Vector3(xx + w, minY, zz + h) + BlockUtils.PaddingOffsets[(int)Direction.down][2];
+                            face[2] = new Vector3(xx + w, minY, zz) + BlockUtils.PaddingOffsets[(int)Direction.down][3];
+                            face[3] = new Vector3(xx, minY, zz) + BlockUtils.PaddingOffsets[(int)Direction.down][0];
                         }
 
                         block.BuildFace(chunk, face, ref mask[n], rotated);
@@ -368,25 +352,17 @@ namespace Voxelmetric.Code.Builders.Geometry
                         bool rotated = mask[n].light.FaceRotationNecessary;
                         if (!rotated)
                         {
-                            face[0] = new Vector3(maxX, yy, zz)
-                                + new Vector3(+BlockUtils.blockPadding, -BlockUtils.blockPadding, -BlockUtils.blockPadding);
-                            face[1] = new Vector3(maxX, yy+h, zz)
-                                + new Vector3(+BlockUtils.blockPadding, +BlockUtils.blockPadding, -BlockUtils.blockPadding);
-                            face[2] = new Vector3(maxX, yy+h, zz+w)
-                                + new Vector3(+BlockUtils.blockPadding, +BlockUtils.blockPadding, +BlockUtils.blockPadding);
-                            face[3] = new Vector3(maxX, yy, zz+w)
-                                + new Vector3(+BlockUtils.blockPadding, -BlockUtils.blockPadding, +BlockUtils.blockPadding);
+                            face[0] = new Vector3(maxX, yy, zz) + BlockUtils.PaddingOffsets[(int)Direction.east][0];
+                            face[1] = new Vector3(maxX, yy+h, zz) + BlockUtils.PaddingOffsets[(int)Direction.east][1];
+                            face[2] = new Vector3(maxX, yy+h, zz+w) + BlockUtils.PaddingOffsets[(int)Direction.east][2];
+                            face[3] = new Vector3(maxX, yy, zz+w) + BlockUtils.PaddingOffsets[(int)Direction.east][3];
                         }
                         else
                         {
-                            face[0] = new Vector3(maxX, yy + h, zz)
-                                + new Vector3(+BlockUtils.blockPadding, +BlockUtils.blockPadding, -BlockUtils.blockPadding);
-                            face[1] = new Vector3(maxX, yy + h, zz + w)
-                                + new Vector3(+BlockUtils.blockPadding, +BlockUtils.blockPadding, +BlockUtils.blockPadding);
-                            face[2] = new Vector3(maxX, yy, zz + w)
-                                + new Vector3(+BlockUtils.blockPadding, -BlockUtils.blockPadding, +BlockUtils.blockPadding);
-                            face[3] = new Vector3(maxX, yy, zz)
-                                + new Vector3(+BlockUtils.blockPadding, -BlockUtils.blockPadding, -BlockUtils.blockPadding);
+                            face[0] = new Vector3(maxX, yy + h, zz) + BlockUtils.PaddingOffsets[(int)Direction.east][1];
+                            face[1] = new Vector3(maxX, yy + h, zz + w) + BlockUtils.PaddingOffsets[(int)Direction.east][2];
+                            face[2] = new Vector3(maxX, yy, zz + w) + BlockUtils.PaddingOffsets[(int)Direction.east][3];
+                            face[3] = new Vector3(maxX, yy, zz) + BlockUtils.PaddingOffsets[(int)Direction.east][0];
                         }
 
                         block.BuildFace(chunk, face, ref mask[n], rotated);
@@ -486,25 +462,17 @@ namespace Voxelmetric.Code.Builders.Geometry
                         bool rotated = mask[n].light.FaceRotationNecessary;
                         if (!rotated)
                         {
-                            face[0] = new Vector3(minX, yy, zz)
-                                + new Vector3(-BlockUtils.blockPadding, -BlockUtils.blockPadding, -BlockUtils.blockPadding);
-                            face[1] = new Vector3(minX, yy + h, zz)
-                                + new Vector3(-BlockUtils.blockPadding, +BlockUtils.blockPadding, -BlockUtils.blockPadding);
-                            face[2] = new Vector3(minX, yy + h, zz + w)
-                                + new Vector3(-BlockUtils.blockPadding, +BlockUtils.blockPadding, +BlockUtils.blockPadding);
-                            face[3] = new Vector3(minX, yy, zz + w)
-                                + new Vector3(-BlockUtils.blockPadding, -BlockUtils.blockPadding, +BlockUtils.blockPadding);
+                            face[0] = new Vector3(minX, yy, zz) + BlockUtils.PaddingOffsets[(int)Direction.west][0];
+                            face[1] = new Vector3(minX, yy + h, zz) + BlockUtils.PaddingOffsets[(int)Direction.west][1];
+                            face[2] = new Vector3(minX, yy + h, zz + w) + BlockUtils.PaddingOffsets[(int)Direction.west][2];
+                            face[3] = new Vector3(minX, yy, zz + w) + BlockUtils.PaddingOffsets[(int)Direction.west][3];
                         }
                         else
                         {
-                            face[0] = new Vector3(minX, yy + h, zz)
-                                + new Vector3(-BlockUtils.blockPadding, +BlockUtils.blockPadding, -BlockUtils.blockPadding);
-                            face[1] = new Vector3(minX, yy + h, zz + w)
-                                + new Vector3(-BlockUtils.blockPadding, +BlockUtils.blockPadding, +BlockUtils.blockPadding);
-                            face[2] = new Vector3(minX, yy, zz + w)
-                                + new Vector3(-BlockUtils.blockPadding, -BlockUtils.blockPadding, +BlockUtils.blockPadding);
-                            face[3] = new Vector3(minX, yy, zz)
-                                + new Vector3(-BlockUtils.blockPadding, -BlockUtils.blockPadding, -BlockUtils.blockPadding);
+                            face[0] = new Vector3(minX, yy + h, zz) + BlockUtils.PaddingOffsets[(int)Direction.west][1];
+                            face[1] = new Vector3(minX, yy + h, zz + w) + BlockUtils.PaddingOffsets[(int)Direction.west][2];
+                            face[2] = new Vector3(minX, yy, zz + w) + BlockUtils.PaddingOffsets[(int)Direction.west][3];
+                            face[3] = new Vector3(minX, yy, zz) + BlockUtils.PaddingOffsets[(int)Direction.west][0];
                         }
 
                         block.BuildFace(chunk, face, ref mask[n], rotated);
@@ -604,25 +572,17 @@ namespace Voxelmetric.Code.Builders.Geometry
                         bool rotated = mask[n].light.FaceRotationNecessary;
                         if (!rotated)
                         {
-                            face[0] = new Vector3(xx, yy, maxZ)
-                                + new Vector3(-BlockUtils.blockPadding, -BlockUtils.blockPadding, +BlockUtils.blockPadding);
-                            face[1] = new Vector3(xx, yy + h, maxZ)
-                                + new Vector3(-BlockUtils.blockPadding, +BlockUtils.blockPadding, +BlockUtils.blockPadding);
-                            face[2] = new Vector3(xx + w, yy + h, maxZ)
-                                + new Vector3(+BlockUtils.blockPadding, +BlockUtils.blockPadding, +BlockUtils.blockPadding);
-                            face[3] = new Vector3(xx + w, yy, maxZ)
-                                + new Vector3(+BlockUtils.blockPadding, -BlockUtils.blockPadding, +BlockUtils.blockPadding);
+                            face[0] = new Vector3(xx, yy, maxZ) + BlockUtils.PaddingOffsets[(int)Direction.north][0];
+                            face[1] = new Vector3(xx, yy + h, maxZ) + BlockUtils.PaddingOffsets[(int)Direction.north][1];
+                            face[2] = new Vector3(xx + w, yy + h, maxZ) + BlockUtils.PaddingOffsets[(int)Direction.north][2];
+                            face[3] = new Vector3(xx + w, yy, maxZ) + BlockUtils.PaddingOffsets[(int)Direction.north][3];
                         }
                         else
                         {
-                            face[0] = new Vector3(xx, yy + h, maxZ)
-                                + new Vector3(-BlockUtils.blockPadding, +BlockUtils.blockPadding, +BlockUtils.blockPadding);
-                            face[1] = new Vector3(xx + w, yy + h, maxZ)
-                                + new Vector3(+BlockUtils.blockPadding, +BlockUtils.blockPadding, +BlockUtils.blockPadding);
-                            face[2] = new Vector3(xx + w, yy, maxZ)
-                                + new Vector3(+BlockUtils.blockPadding, -BlockUtils.blockPadding, +BlockUtils.blockPadding);
-                            face[3] = new Vector3(xx, yy, maxZ)
-                                + new Vector3(-BlockUtils.blockPadding, -BlockUtils.blockPadding, +BlockUtils.blockPadding);
+                            face[0] = new Vector3(xx, yy + h, maxZ) + BlockUtils.PaddingOffsets[(int)Direction.north][1];
+                            face[1] = new Vector3(xx + w, yy + h, maxZ) + BlockUtils.PaddingOffsets[(int)Direction.north][2];
+                            face[2] = new Vector3(xx + w, yy, maxZ) + BlockUtils.PaddingOffsets[(int)Direction.north][3];
+                            face[3] = new Vector3(xx, yy, maxZ) + BlockUtils.PaddingOffsets[(int)Direction.north][0];
                         }
 
                         block.BuildFace(chunk, face, ref mask[n], rotated);
@@ -722,25 +682,17 @@ namespace Voxelmetric.Code.Builders.Geometry
                         bool rotated = mask[n].light.FaceRotationNecessary;
                         if (!rotated)
                         {
-                            face[0] = new Vector3(xx, yy, minZ)
-                                + new Vector3(-BlockUtils.blockPadding, -BlockUtils.blockPadding, -BlockUtils.blockPadding);
-                            face[1] = new Vector3(xx, yy + h, minZ)
-                                + new Vector3(-BlockUtils.blockPadding, +BlockUtils.blockPadding, -BlockUtils.blockPadding);
-                            face[2] = new Vector3(xx + w, yy + h, minZ)
-                                + new Vector3(+BlockUtils.blockPadding, +BlockUtils.blockPadding, -BlockUtils.blockPadding);
-                            face[3] = new Vector3(xx + w, yy, minZ)
-                                + new Vector3(+BlockUtils.blockPadding, -BlockUtils.blockPadding, -BlockUtils.blockPadding);
+                            face[0] = new Vector3(xx, yy, minZ) + BlockUtils.PaddingOffsets[(int)Direction.south][0];
+                            face[1] = new Vector3(xx, yy + h, minZ) + BlockUtils.PaddingOffsets[(int)Direction.south][1];
+                            face[2] = new Vector3(xx + w, yy + h, minZ) + BlockUtils.PaddingOffsets[(int)Direction.south][2];
+                            face[3] = new Vector3(xx + w, yy, minZ) + BlockUtils.PaddingOffsets[(int)Direction.south][3];
                         }
                         else
                         {
-                            face[0] = new Vector3(xx, yy + h, minZ)
-                                + new Vector3(-BlockUtils.blockPadding, +BlockUtils.blockPadding, -BlockUtils.blockPadding);
-                            face[1] = new Vector3(xx + w, yy + h, minZ)
-                                + new Vector3(+BlockUtils.blockPadding, +BlockUtils.blockPadding, -BlockUtils.blockPadding);
-                            face[2] = new Vector3(xx + w, yy, minZ)
-                                + new Vector3(+BlockUtils.blockPadding, -BlockUtils.blockPadding, -BlockUtils.blockPadding);
-                            face[3] = new Vector3(xx, yy, minZ)
-                                + new Vector3(-BlockUtils.blockPadding, -BlockUtils.blockPadding, -BlockUtils.blockPadding);
+                            face[0] = new Vector3(xx, yy + h, minZ) + BlockUtils.PaddingOffsets[(int)Direction.south][1];
+                            face[1] = new Vector3(xx + w, yy + h, minZ) + BlockUtils.PaddingOffsets[(int)Direction.south][2];
+                            face[2] = new Vector3(xx + w, yy, minZ) + BlockUtils.PaddingOffsets[(int)Direction.south][3];
+                            face[3] = new Vector3(xx, yy, minZ) + BlockUtils.PaddingOffsets[(int)Direction.south][0];
                         }
 
                         block.BuildFace(chunk, face, ref mask[n], rotated);
