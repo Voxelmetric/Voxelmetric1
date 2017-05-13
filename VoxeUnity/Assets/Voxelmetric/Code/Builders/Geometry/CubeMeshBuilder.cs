@@ -153,7 +153,7 @@ namespace Voxelmetric.Code.Builders.Geometry
                                 + new Vector3(-BlockUtils.blockPadding, +BlockUtils.blockPadding, -BlockUtils.blockPadding);
                         }
 
-                        block.BuildFace(chunk, face, ref mask[n], false);
+                        block.BuildFace(chunk, face, ref mask[n], rotated);
 
                         // Zero out the mask. We don't need to process the same fields again
                         for (l = 0; l<h; ++l)
@@ -271,7 +271,7 @@ namespace Voxelmetric.Code.Builders.Geometry
                                 + new Vector3(-BlockUtils.blockPadding, -BlockUtils.blockPadding, -BlockUtils.blockPadding);
                         }
 
-                    block.BuildFace(chunk, face, ref mask[n], false);
+                        block.BuildFace(chunk, face, ref mask[n], rotated);
 
                         // Zero out the mask. We don't need to process the same fields again
                         for (l = 0; l<h; ++l)
@@ -389,7 +389,7 @@ namespace Voxelmetric.Code.Builders.Geometry
                                 + new Vector3(+BlockUtils.blockPadding, -BlockUtils.blockPadding, -BlockUtils.blockPadding);
                         }
 
-                        block.BuildFace(chunk, face, ref mask[n], false);
+                        block.BuildFace(chunk, face, ref mask[n], rotated);
 
                         // Zero out the mask. We don't need to process the same fields again
                         for (l = 0; l<h; ++l)
@@ -507,7 +507,7 @@ namespace Voxelmetric.Code.Builders.Geometry
                                 + new Vector3(-BlockUtils.blockPadding, -BlockUtils.blockPadding, -BlockUtils.blockPadding);
                         }
 
-                        block.BuildFace(chunk, face, ref mask[n], false);
+                        block.BuildFace(chunk, face, ref mask[n], rotated);
 
                         // Zero out the mask. We don't need to process the same fields again
                         for (l = 0; l<h; ++l)
@@ -625,7 +625,7 @@ namespace Voxelmetric.Code.Builders.Geometry
                                 + new Vector3(-BlockUtils.blockPadding, -BlockUtils.blockPadding, +BlockUtils.blockPadding);
                         }
 
-                        block.BuildFace(chunk, face, ref mask[n], false);
+                        block.BuildFace(chunk, face, ref mask[n], rotated);
 
                         // Zero out the mask. We don't need to process the same fields again
                         for (l = 0; l<h; ++l)
