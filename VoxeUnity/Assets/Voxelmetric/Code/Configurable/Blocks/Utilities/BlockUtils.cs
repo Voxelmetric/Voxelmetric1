@@ -76,7 +76,7 @@ namespace Voxelmetric.Code.Configurable.Blocks.Utilities
         public static void PrepareColors(Chunk chunk, VertexData[] vertexData, Direction direction, ref BlockLightData light)
         {
             if (chunk.world.config.addAOToMesh)
-                SetColorsAO(vertexData, light, chunk.world.config.ambientOcclusionStrength, direction);
+                SetColorsAO(vertexData, light, chunk.world.config.ambientOcclusionStrength);
             else
                 SetColors(vertexData, 1f, 1f, 1f, 1f, false, 1f);
         }
@@ -191,7 +191,7 @@ namespace Voxelmetric.Code.Configurable.Blocks.Utilities
             if (!chunk.world.config.addAOToMesh)
                 return;
 
-            AdjustColorsAO(vertexData, light, chunk.world.config.ambientOcclusionStrength, direction);
+            AdjustColorsAO(vertexData, light, chunk.world.config.ambientOcclusionStrength);
         }
 
         public static void PrepareTexture(Chunk chunk, ref Vector3Int localPos, VertexData[] vertexData, Direction direction, TextureCollection textureCollection, bool rotated)
@@ -234,24 +234,24 @@ namespace Voxelmetric.Code.Configurable.Blocks.Utilities
             }
         }
 
-        private static void SetColorsAO(VertexData[] vertexData, BlockLightData light, float strength,  Direction direction)
+        private static void SetColorsAO(VertexData[] vertexData, BlockLightData light, float strength)
         {
             float ne = 1f-(light.neAO * 0.25f) * strength;
             float se = 1f-(light.seAO * 0.25f) * strength;
             float sw = 1f-(light.swAO * 0.25f) * strength;
             float nw = 1f-(light.nwAO * 0.25f) * strength;
 
-            SetColors(vertexData, sw, nw, ne, se, BlockLightData.IsRotatedFace(light), 1f);
+            SetColors(vertexData, sw, nw, ne, se, light.FaceRotationNecessary, 1f);
         }
 
-        private static void AdjustColorsAO(VertexData[] vertexData, BlockLightData light, float strength, Direction direction)
+        private static void AdjustColorsAO(VertexData[] vertexData, BlockLightData light, float strength)
         {
             float ne = 1f-(light.neAO * 0.25f) * strength;
             float se = 1f-(light.seAO * 0.25f) * strength;
             float sw = 1f-(light.swAO * 0.25f) * strength;
             float nw = 1f-(light.nwAO * 0.25f) * strength;
 
-            AdjustColors(vertexData, sw, nw, ne, se, BlockLightData.IsRotatedFace(light), 1f, direction);
+            AdjustColors(vertexData, sw, nw, ne, se, light.FaceRotationNecessary, 1f);
         }
 
         public static void SetColors(VertexData[] data, float sw, float nw, float ne, float se, bool rotated, float light)
@@ -292,7 +292,7 @@ namespace Voxelmetric.Code.Configurable.Blocks.Utilities
                 );
         }
 
-        public static void AdjustColors(VertexData[] data, float sw, float nw, float ne, float se, bool rotated, float light, Direction direction = Direction.up)
+        public static void AdjustColors(VertexData[] data, float sw, float nw, float ne, float se, bool rotated, float light)
         {
             sw = (sw*light).Clamp(0f,1f);
             nw = (nw*light).Clamp(0f,1f);

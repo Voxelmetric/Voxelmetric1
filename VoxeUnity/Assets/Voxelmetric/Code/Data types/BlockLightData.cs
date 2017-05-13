@@ -9,6 +9,7 @@ namespace Voxelmetric.Code.Data_types
          * 2- 3: nw
          * 4- 5: nw
          * 6- 7: se
+         * 8: necessity of face rotation
          * 8-15: reserved
          */
         private readonly short mask;
@@ -36,9 +37,9 @@ namespace Voxelmetric.Code.Data_types
 
             mask = (short)(sw|(nw<<2)|(ne<<4)|(se<<6));
 
-            // Flag for evenly lit
-            //if (sw==nw && nw==ne && ne==se)
-                //mask |= (1<<6);
+            // Rotation flag
+            if (sw+ne>nw+se)
+                mask |= (1<<8);
         }
 
         private static int GetVertexAO(bool side1, bool side2, bool corner)
@@ -52,16 +53,7 @@ namespace Voxelmetric.Code.Data_types
 
             return s1 + s2 + c;
         }
-
-        public static bool IsRotatedFace(BlockLightData mask)
-        {
-            int sw = mask.swAO;
-            int nw = mask.nwAO;
-            int ne = mask.neAO;
-            int se = mask.seAO;
-            return sw + ne > nw + se;
-        }
-
+        
         public int swAO
         {
             get { return (mask&0x03); }
@@ -80,6 +72,11 @@ namespace Voxelmetric.Code.Data_types
         public int seAO
         {
             get { return (mask&0xC0)>>6; }
+        }
+
+        public bool FaceRotationNecessary
+        {
+            get { return ((mask>>8)&1)!=0; }
         }
 
         public override bool Equals(object obj)
