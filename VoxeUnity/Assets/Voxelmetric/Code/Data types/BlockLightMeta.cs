@@ -13,11 +13,13 @@ namespace Voxelmetric.Code.Data_types
          * 5-sSolid
          * 6-swSolid
          * 7-wSolid
+         * 8-rotated
+         * 9-15*reserved
          */
-        private readonly int mask;
+        private readonly short mask;
 
         public BlockLightData(
-            int lightMask
+            short lightMask
             )
         {
             mask = lightMask;
@@ -28,7 +30,7 @@ namespace Voxelmetric.Code.Data_types
             bool seSolid, bool sSolid, bool swSolid, bool wSolid
             )
         {
-            mask = nwSolid ? 0x01 : 0;
+            mask = (short)(nwSolid ? 0x01 : 0);
             if (nSolid)
                 mask |= 0x02;
             if (neSolid)
@@ -43,6 +45,16 @@ namespace Voxelmetric.Code.Data_types
                 mask |= 0x40;
             if (wSolid)
                 mask |= 0x80;
+
+            // rotation flag
+            if ((swSolid && !wSolid && !sSolid) ||
+                (neSolid && !eSolid && !nSolid))
+                mask |= 0x100;
+        }
+
+        public bool rotated
+        {
+            get { return (mask&0x100)!=0; }
         }
 
         public bool nwSolid

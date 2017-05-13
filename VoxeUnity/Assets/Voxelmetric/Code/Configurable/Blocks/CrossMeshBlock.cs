@@ -55,8 +55,8 @@ public class CrossMeshBlock : Block
             vertexData[1].Vertex = new Vector3(x1, y2, z2);
             vertexData[2].Vertex = new Vector3(x2, y2, z1);
             vertexData[3].Vertex = new Vector3(x2, y1, z1);
-            BlockUtils.PrepareTexture(chunk, ref localPos, vertexData, Direction.north, texture);
-            BlockUtils.SetColors(vertexData, 1, 1, 1, 1, 1);
+            BlockUtils.PrepareTexture(chunk, ref localPos, vertexData, Direction.north, texture, false);
+            BlockUtils.SetColors(vertexData, 1f, 1f, 1f, 1f, false, 1f);
             batcher.AddFace(vertexData, false, materialID);
         }
         {
@@ -64,8 +64,8 @@ public class CrossMeshBlock : Block
             vertexData[1].Vertex = new Vector3(x2, y2, z1);
             vertexData[2].Vertex = new Vector3(x1, y2, z2);
             vertexData[3].Vertex = new Vector3(x1, y1, z2);
-            BlockUtils.PrepareTexture(chunk, ref localPos, vertexData, Direction.north, texture);
-            BlockUtils.SetColors(vertexData, 1, 1, 1, 1, 1);
+            BlockUtils.PrepareTexture(chunk, ref localPos, vertexData, Direction.north, texture, false);
+            BlockUtils.SetColors(vertexData, 1f, 1f, 1f, 1f, false, 1f);
             batcher.AddFace(vertexData, false, materialID);
         }
         {
@@ -73,8 +73,8 @@ public class CrossMeshBlock : Block
             vertexData[1].Vertex = new Vector3(x2, y2, z2);
             vertexData[2].Vertex = new Vector3(x1, y2, z1);
             vertexData[3].Vertex = new Vector3(x1, y1, z1);
-            BlockUtils.PrepareTexture(chunk, ref localPos, vertexData, Direction.north, texture);
-            BlockUtils.SetColors(vertexData, 1, 1, 1, 1, 1);
+            BlockUtils.PrepareTexture(chunk, ref localPos, vertexData, Direction.north, texture, false);
+            BlockUtils.SetColors(vertexData, 1f, 1f, 1f, 1f, false, 1f);
             batcher.AddFace(vertexData, false, materialID);
         }
         {
@@ -82,8 +82,8 @@ public class CrossMeshBlock : Block
             vertexData[1].Vertex = new Vector3(x1, y2, z1);
             vertexData[2].Vertex = new Vector3(x2, y2, z2);
             vertexData[3].Vertex = new Vector3(x2, y1, z2);
-            BlockUtils.PrepareTexture(chunk, ref localPos, vertexData, Direction.north, texture);
-            BlockUtils.SetColors(vertexData, 1, 1, 1, 1, 1);
+            BlockUtils.PrepareTexture(chunk, ref localPos, vertexData, Direction.north, texture, false);
+            BlockUtils.SetColors(vertexData, 1f, 1f, 1f, 1f, false, 1f);
             batcher.AddFace(vertexData, false, materialID);
         }
         pools.VertexDataArrayPool.Push(vertexData);

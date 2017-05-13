@@ -129,16 +129,31 @@ namespace Voxelmetric.Code.Builders.Geometry
                         cont:
 
                         // Build the face
-                        face[0] = new Vector3(xx, maxY, zz)+
-                                  new Vector3(-BlockUtils.blockPadding, +BlockUtils.blockPadding, -BlockUtils.blockPadding);
-                        face[1] = new Vector3(xx, maxY, zz+h)+
-                                  new Vector3(-BlockUtils.blockPadding, +BlockUtils.blockPadding, +BlockUtils.blockPadding);
-                        face[2] = new Vector3(xx+w, maxY, zz+h)+
-                                  new Vector3(+BlockUtils.blockPadding, +BlockUtils.blockPadding, +BlockUtils.blockPadding);
-                        face[3] = new Vector3(xx+w, maxY, zz)+
-                                  new Vector3(+BlockUtils.blockPadding, +BlockUtils.blockPadding, -BlockUtils.blockPadding);
+                        bool rotated = mask[n].light.rotated;
+                        if (!rotated)
+                        {
+                            face[0] = new Vector3(xx, maxY, zz)
+                                + new Vector3(-BlockUtils.blockPadding, +BlockUtils.blockPadding, -BlockUtils.blockPadding);
+                            face[1] = new Vector3(xx, maxY, zz+h)
+                                + new Vector3(-BlockUtils.blockPadding, +BlockUtils.blockPadding, +BlockUtils.blockPadding);
+                            face[2] = new Vector3(xx+w, maxY, zz+h)
+                                + new Vector3(+BlockUtils.blockPadding, +BlockUtils.blockPadding, +BlockUtils.blockPadding);
+                            face[3] = new Vector3(xx+w, maxY, zz)
+                                + new Vector3(+BlockUtils.blockPadding, +BlockUtils.blockPadding, -BlockUtils.blockPadding);
+                        }
+                        else
+                        {
+                            face[0] = new Vector3(xx, maxY, zz + h)
+                                + new Vector3(-BlockUtils.blockPadding, +BlockUtils.blockPadding, +BlockUtils.blockPadding);
+                            face[1] = new Vector3(xx + w, maxY, zz + h)
+                                + new Vector3(+BlockUtils.blockPadding, +BlockUtils.blockPadding, +BlockUtils.blockPadding);
+                            face[2] = new Vector3(xx + w, maxY, zz)
+                                + new Vector3(+BlockUtils.blockPadding, +BlockUtils.blockPadding, -BlockUtils.blockPadding);
+                            face[3] = new Vector3(xx, maxY, zz)
+                                + new Vector3(-BlockUtils.blockPadding, +BlockUtils.blockPadding, -BlockUtils.blockPadding);
+                        }
 
-                        block.BuildFace(chunk, face, ref mask[n]);
+                        block.BuildFace(chunk, face, ref mask[n], false);
 
                         // Zero out the mask. We don't need to process the same fields again
                         for (l = 0; l<h; ++l)
@@ -232,16 +247,31 @@ namespace Voxelmetric.Code.Builders.Geometry
                         cont:
 
                         // Build the face
-                        face[0] = new Vector3(xx, minY, zz) +
-                                  new Vector3(-BlockUtils.blockPadding, -BlockUtils.blockPadding, -BlockUtils.blockPadding);
-                        face[1] = new Vector3(xx, minY, zz + h) +
-                                  new Vector3(-BlockUtils.blockPadding, -BlockUtils.blockPadding, +BlockUtils.blockPadding);
-                        face[2] = new Vector3(xx + w, minY, zz + h) +
-                                  new Vector3(+BlockUtils.blockPadding, -BlockUtils.blockPadding, +BlockUtils.blockPadding);
-                        face[3] = new Vector3(xx + w, minY, zz) +
-                                  new Vector3(+BlockUtils.blockPadding, -BlockUtils.blockPadding, -BlockUtils.blockPadding);
+                        bool rotated = mask[n].light.rotated;
+                        if (!rotated)
+                        { 
+                            face[0] = new Vector3(xx, minY, zz)
+                                + new Vector3(-BlockUtils.blockPadding, -BlockUtils.blockPadding, -BlockUtils.blockPadding);
+                            face[1] = new Vector3(xx, minY, zz+h)
+                                + new Vector3(-BlockUtils.blockPadding, -BlockUtils.blockPadding, +BlockUtils.blockPadding);
+                            face[2] = new Vector3(xx+w, minY, zz+h)
+                                + new Vector3(+BlockUtils.blockPadding, -BlockUtils.blockPadding, +BlockUtils.blockPadding);
+                            face[3] = new Vector3(xx+w, minY, zz)
+                                + new Vector3(+BlockUtils.blockPadding, -BlockUtils.blockPadding, -BlockUtils.blockPadding);
+                        }
+                        else
+                        {
+                            face[0] = new Vector3(xx, minY, zz + h)
+                                + new Vector3(-BlockUtils.blockPadding, -BlockUtils.blockPadding, +BlockUtils.blockPadding);
+                            face[1] = new Vector3(xx + w, minY, zz + h)
+                                + new Vector3(+BlockUtils.blockPadding, -BlockUtils.blockPadding, +BlockUtils.blockPadding);
+                            face[2] = new Vector3(xx + w, minY, zz)
+                                + new Vector3(+BlockUtils.blockPadding, -BlockUtils.blockPadding, -BlockUtils.blockPadding);
+                            face[3] = new Vector3(xx, minY, zz)
+                                + new Vector3(-BlockUtils.blockPadding, -BlockUtils.blockPadding, -BlockUtils.blockPadding);
+                        }
 
-                        block.BuildFace(chunk, face, ref mask[n]);
+                    block.BuildFace(chunk, face, ref mask[n], false);
 
                         // Zero out the mask. We don't need to process the same fields again
                         for (l = 0; l<h; ++l)
@@ -335,16 +365,31 @@ namespace Voxelmetric.Code.Builders.Geometry
                         cont:
 
                         // Build the face
-                        face[0] = new Vector3(maxX, yy, zz)
-                            + new Vector3(+BlockUtils.blockPadding, -BlockUtils.blockPadding, -BlockUtils.blockPadding);
-                        face[1] = new Vector3(maxX, yy+h, zz)
-                            + new Vector3(+BlockUtils.blockPadding, +BlockUtils.blockPadding, -BlockUtils.blockPadding);
-                        face[2] = new Vector3(maxX, yy+h, zz+w)
-                            + new Vector3(+BlockUtils.blockPadding, +BlockUtils.blockPadding, +BlockUtils.blockPadding);
-                        face[3] = new Vector3(maxX, yy, zz+w)
-                            + new Vector3(+BlockUtils.blockPadding, -BlockUtils.blockPadding, +BlockUtils.blockPadding);
+                        bool rotated = mask[n].light.rotated;
+                        if (!rotated)
+                        {
+                            face[0] = new Vector3(maxX, yy, zz)
+                                + new Vector3(+BlockUtils.blockPadding, -BlockUtils.blockPadding, -BlockUtils.blockPadding);
+                            face[1] = new Vector3(maxX, yy+h, zz)
+                                + new Vector3(+BlockUtils.blockPadding, +BlockUtils.blockPadding, -BlockUtils.blockPadding);
+                            face[2] = new Vector3(maxX, yy+h, zz+w)
+                                + new Vector3(+BlockUtils.blockPadding, +BlockUtils.blockPadding, +BlockUtils.blockPadding);
+                            face[3] = new Vector3(maxX, yy, zz+w)
+                                + new Vector3(+BlockUtils.blockPadding, -BlockUtils.blockPadding, +BlockUtils.blockPadding);
+                        }
+                        else
+                        {
+                            face[0] = new Vector3(maxX, yy + h, zz)
+                                + new Vector3(+BlockUtils.blockPadding, +BlockUtils.blockPadding, -BlockUtils.blockPadding);
+                            face[1] = new Vector3(maxX, yy + h, zz + w)
+                                + new Vector3(+BlockUtils.blockPadding, +BlockUtils.blockPadding, +BlockUtils.blockPadding);
+                            face[2] = new Vector3(maxX, yy, zz + w)
+                                + new Vector3(+BlockUtils.blockPadding, -BlockUtils.blockPadding, +BlockUtils.blockPadding);
+                            face[3] = new Vector3(maxX, yy, zz)
+                                + new Vector3(+BlockUtils.blockPadding, -BlockUtils.blockPadding, -BlockUtils.blockPadding);
+                        }
 
-                        block.BuildFace(chunk, face, ref mask[n]);
+                        block.BuildFace(chunk, face, ref mask[n], false);
 
                         // Zero out the mask. We don't need to process the same fields again
                         for (l = 0; l<h; ++l)
@@ -438,16 +483,31 @@ namespace Voxelmetric.Code.Builders.Geometry
                         cont:
 
                         // Build the face
-                        face[0] = new Vector3(minX, yy, zz)
-                            + new Vector3(-BlockUtils.blockPadding, -BlockUtils.blockPadding, -BlockUtils.blockPadding);
-                        face[1] = new Vector3(minX, yy + h, zz)
-                            + new Vector3(-BlockUtils.blockPadding, +BlockUtils.blockPadding, -BlockUtils.blockPadding);
-                        face[2] = new Vector3(minX, yy + h, zz + w)
-                            + new Vector3(-BlockUtils.blockPadding, +BlockUtils.blockPadding, +BlockUtils.blockPadding);
-                        face[3] = new Vector3(minX, yy, zz + w)
-                            + new Vector3(-BlockUtils.blockPadding, -BlockUtils.blockPadding, +BlockUtils.blockPadding);
+                        bool rotated = mask[n].light.rotated;
+                        if (!rotated)
+                        {
+                            face[0] = new Vector3(minX, yy, zz)
+                                + new Vector3(-BlockUtils.blockPadding, -BlockUtils.blockPadding, -BlockUtils.blockPadding);
+                            face[1] = new Vector3(minX, yy + h, zz)
+                                + new Vector3(-BlockUtils.blockPadding, +BlockUtils.blockPadding, -BlockUtils.blockPadding);
+                            face[2] = new Vector3(minX, yy + h, zz + w)
+                                + new Vector3(-BlockUtils.blockPadding, +BlockUtils.blockPadding, +BlockUtils.blockPadding);
+                            face[3] = new Vector3(minX, yy, zz + w)
+                                + new Vector3(-BlockUtils.blockPadding, -BlockUtils.blockPadding, +BlockUtils.blockPadding);
+                        }
+                        else
+                        {
+                            face[0] = new Vector3(minX, yy + h, zz)
+                                + new Vector3(-BlockUtils.blockPadding, +BlockUtils.blockPadding, -BlockUtils.blockPadding);
+                            face[1] = new Vector3(minX, yy + h, zz + w)
+                                + new Vector3(-BlockUtils.blockPadding, +BlockUtils.blockPadding, +BlockUtils.blockPadding);
+                            face[2] = new Vector3(minX, yy, zz + w)
+                                + new Vector3(-BlockUtils.blockPadding, -BlockUtils.blockPadding, +BlockUtils.blockPadding);
+                            face[3] = new Vector3(minX, yy, zz)
+                                + new Vector3(-BlockUtils.blockPadding, -BlockUtils.blockPadding, -BlockUtils.blockPadding);
+                        }
 
-                        block.BuildFace(chunk, face, ref mask[n]);
+                        block.BuildFace(chunk, face, ref mask[n], false);
 
                         // Zero out the mask. We don't need to process the same fields again
                         for (l = 0; l<h; ++l)
@@ -541,16 +601,31 @@ namespace Voxelmetric.Code.Builders.Geometry
                         cont:
 
                         // Build the face
-                        face[0] = new Vector3(xx, yy, maxZ)
-                            + new Vector3(-BlockUtils.blockPadding, -BlockUtils.blockPadding, +BlockUtils.blockPadding);
-                        face[1] = new Vector3(xx, yy+h, maxZ)
-                            + new Vector3(-BlockUtils.blockPadding, +BlockUtils.blockPadding, +BlockUtils.blockPadding);
-                        face[2] = new Vector3(xx+w, yy+h, maxZ)
-                            + new Vector3(+BlockUtils.blockPadding, +BlockUtils.blockPadding, +BlockUtils.blockPadding);
-                        face[3] = new Vector3(xx+w, yy, maxZ)
-                            + new Vector3(+BlockUtils.blockPadding, -BlockUtils.blockPadding, +BlockUtils.blockPadding);
+                        bool rotated = mask[n].light.rotated;
+                        if (!rotated)
+                        {
+                            face[0] = new Vector3(xx, yy, maxZ)
+                                + new Vector3(-BlockUtils.blockPadding, -BlockUtils.blockPadding, +BlockUtils.blockPadding);
+                            face[1] = new Vector3(xx, yy + h, maxZ)
+                                + new Vector3(-BlockUtils.blockPadding, +BlockUtils.blockPadding, +BlockUtils.blockPadding);
+                            face[2] = new Vector3(xx + w, yy + h, maxZ)
+                                + new Vector3(+BlockUtils.blockPadding, +BlockUtils.blockPadding, +BlockUtils.blockPadding);
+                            face[3] = new Vector3(xx + w, yy, maxZ)
+                                + new Vector3(+BlockUtils.blockPadding, -BlockUtils.blockPadding, +BlockUtils.blockPadding);
+                        }
+                        else
+                        {
+                            face[0] = new Vector3(xx, yy + h, maxZ)
+                                + new Vector3(-BlockUtils.blockPadding, +BlockUtils.blockPadding, +BlockUtils.blockPadding);
+                            face[1] = new Vector3(xx + w, yy + h, maxZ)
+                                + new Vector3(+BlockUtils.blockPadding, +BlockUtils.blockPadding, +BlockUtils.blockPadding);
+                            face[2] = new Vector3(xx + w, yy, maxZ)
+                                + new Vector3(+BlockUtils.blockPadding, -BlockUtils.blockPadding, +BlockUtils.blockPadding);
+                            face[3] = new Vector3(xx, yy, maxZ)
+                                + new Vector3(-BlockUtils.blockPadding, -BlockUtils.blockPadding, +BlockUtils.blockPadding);
+                        }
 
-                        block.BuildFace(chunk, face, ref mask[n]);
+                        block.BuildFace(chunk, face, ref mask[n], false);
 
                         // Zero out the mask. We don't need to process the same fields again
                         for (l = 0; l<h; ++l)
@@ -644,16 +719,31 @@ namespace Voxelmetric.Code.Builders.Geometry
                         cont:
 
                         // Build the face
-                        face[0] = new Vector3(xx, yy, minZ)
-                            + new Vector3(-BlockUtils.blockPadding, -BlockUtils.blockPadding, -BlockUtils.blockPadding);
-                        face[1] = new Vector3(xx, yy+h, minZ)
-                            + new Vector3(-BlockUtils.blockPadding, +BlockUtils.blockPadding, -BlockUtils.blockPadding);
-                        face[2] = new Vector3(xx+w, yy+h, minZ)
-                            + new Vector3(+BlockUtils.blockPadding, +BlockUtils.blockPadding, -BlockUtils.blockPadding);
-                        face[3] = new Vector3(xx+w, yy, minZ)
-                            + new Vector3(+BlockUtils.blockPadding, -BlockUtils.blockPadding, -BlockUtils.blockPadding);
+                        bool rotated = mask[n].light.rotated;
+                        if (!rotated)
+                        {
+                            face[0] = new Vector3(xx, yy, minZ)
+                                + new Vector3(-BlockUtils.blockPadding, -BlockUtils.blockPadding, -BlockUtils.blockPadding);
+                            face[1] = new Vector3(xx, yy + h, minZ)
+                                + new Vector3(-BlockUtils.blockPadding, +BlockUtils.blockPadding, -BlockUtils.blockPadding);
+                            face[2] = new Vector3(xx + w, yy + h, minZ)
+                                + new Vector3(+BlockUtils.blockPadding, +BlockUtils.blockPadding, -BlockUtils.blockPadding);
+                            face[3] = new Vector3(xx + w, yy, minZ)
+                                + new Vector3(+BlockUtils.blockPadding, -BlockUtils.blockPadding, -BlockUtils.blockPadding);
+                        }
+                        else
+                        {
+                            face[0] = new Vector3(xx, yy + h, minZ)
+                                + new Vector3(-BlockUtils.blockPadding, +BlockUtils.blockPadding, -BlockUtils.blockPadding);
+                            face[1] = new Vector3(xx + w, yy + h, minZ)
+                                + new Vector3(+BlockUtils.blockPadding, +BlockUtils.blockPadding, -BlockUtils.blockPadding);
+                            face[2] = new Vector3(xx + w, yy, minZ)
+                                + new Vector3(+BlockUtils.blockPadding, -BlockUtils.blockPadding, -BlockUtils.blockPadding);
+                            face[3] = new Vector3(xx, yy, minZ)
+                                + new Vector3(-BlockUtils.blockPadding, -BlockUtils.blockPadding, -BlockUtils.blockPadding);
+                        }
 
-                        block.BuildFace(chunk, face, ref mask[n]);
+                        block.BuildFace(chunk, face, ref mask[n], rotated);
 
                         // Zero out the mask. We don't need to process the same fields again
                         for (l = 0; l<h; ++l)

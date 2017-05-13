@@ -24,7 +24,7 @@ public class ConnectedMeshBlock: CustomMeshBlock
         }
     }
 
-    public override void BuildFace(Chunk chunk, Vector3[] vertices, ref BlockFace face)
+    public override void BuildFace(Chunk chunk, Vector3[] vertices, ref BlockFace face, bool rotated)
     {
         if (!connectedMeshConfig.directionalTris.ContainsKey(face.side))
             return;
@@ -72,7 +72,7 @@ public class ConnectedMeshBlock: CustomMeshBlock
                 materialID = materialID
             };
 
-            BuildFace(chunk, null, ref face);
+            BuildFace(chunk, null, ref face, false);
         }
 
         Rect texture = customMeshConfig.texture.GetTexture(chunk, ref localPos, Direction.down);

@@ -56,7 +56,7 @@ public class Block
         return adjacentBlock.Solid ? !Solid : (Solid || Type!=adjacentBlock.Type);
     }
 
-    public virtual void BuildFace(Chunk chunk, Vector3[] vertices, ref BlockFace face)
+    public virtual void BuildFace(Chunk chunk, Vector3[] vertices, ref BlockFace face, bool rotated)
     {
     }
 

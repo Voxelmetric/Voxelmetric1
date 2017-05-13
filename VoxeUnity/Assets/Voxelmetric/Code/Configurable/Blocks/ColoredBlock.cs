@@ -13,7 +13,7 @@ public class ColoredBlock : Block
         get { return ((ColoredBlockConfig)Config).colors; }
     }
 
-    public override void BuildFace(Chunk chunk, Vector3[] vertices, ref BlockFace face)
+    public override void BuildFace(Chunk chunk, Vector3[] vertices, ref BlockFace face, bool rotated)
     {
         bool backFace = DirectionUtils.IsBackface(face.side);
         int d = DirectionUtils.Get(face.side);

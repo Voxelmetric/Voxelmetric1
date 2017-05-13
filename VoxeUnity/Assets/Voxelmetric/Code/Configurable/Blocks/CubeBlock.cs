@@ -14,7 +14,7 @@ public class CubeBlock: Block
         get { return ((CubeBlockConfig)Config).textures; }
     }
 
-    public override void BuildFace(Chunk chunk, Vector3[] vertices, ref BlockFace face)
+    public override void BuildFace(Chunk chunk, Vector3[] vertices, ref BlockFace face, bool rotated)
     {
         bool backface = DirectionUtils.IsBackface(face.side);
         int d = DirectionUtils.Get(face.side);
@@ -38,7 +38,7 @@ public class CubeBlock: Block
                 vertexData[3].Vertex = vertices[3];
             }
 
-            BlockUtils.PrepareTexture(chunk, ref face.pos, vertexData, face.side, textures);
+            BlockUtils.PrepareTexture(chunk, ref face.pos, vertexData, face.side, textures, rotated);
             BlockUtils.PrepareColors(chunk, vertexData, face.side, ref face.light);
             
             chunk.GeometryHandler.Batcher.AddFace(vertexData, backface, face.materialID);
