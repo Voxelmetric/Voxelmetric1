@@ -491,8 +491,6 @@ namespace Voxelmetric.Code.Core.StateManager
 
             if (Features.UseSerialization)
             {
-                m_save.ConsumeChanges();
-
                 var task = Globals.MemPools.SMTaskPI.Pop();
                 m_poolState = m_poolState.Set(ChunkPoolItemState.TaskPI);
                 m_threadPoolItem = task;

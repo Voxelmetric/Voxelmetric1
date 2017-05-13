@@ -349,6 +349,8 @@ namespace Voxelmetric.Code.Core
         public void Update()
         {
             ChunkStateManagerClient stateManager = chunk.stateManager;
+            if (!stateManager.IsUpdateBlocksPossible)
+                return;
 
             //UnityEngine.Debug.Log(m_setBlockQueue.Count);
 

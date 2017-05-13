@@ -116,6 +116,11 @@ namespace Voxelmetric.Code.Core.StateManager
             get { return m_save!=null && !m_removalRequested && m_completedStatesSafe.Check(ChunkState.Generate); }
         }
 
+        public bool IsUpdateBlocksPossible
+        {
+            get { return !m_pendingStates.Check(ChunkState.PrepareSaveData) && !m_pendingStates.Check(ChunkState.SaveData); }
+        }
+
         public abstract void SetMeshBuilt();
         public abstract void SetColliderBuilt();
     }
