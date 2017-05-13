@@ -21,33 +21,25 @@ public class CrossMeshBlock : Block
 
         // Using the block positions hash is much better for random numbers than saving the offset and height in the block data
         int hash = localPos.GetHashCode();
-        if (hash<0)
-            hash *= -1;
 
         float blockHeight = (hash&63)*coef*Env.BlockSize;
-
+        
         hash *= 39;
-        if (hash<0)
-            hash *= -1;
-
         float offsetX = (hash&63)*coef*Env.BlockSizeHalf-Env.BlockSizeHalf*0.5f;
 
         hash *= 39;
-        if (hash<0)
-            hash *= -1;
-
         float offsetZ = (hash&63)*coef*Env.BlockSizeHalf-Env.BlockSizeHalf*0.5f;
 
         // Converting the position to a vector adjusts it based on block size and gives us real world coordinates for x, y and z
         Vector3 vPos = localPos;
         vPos += new Vector3(offsetX, 0, offsetZ);
 
-        float x1 = vPos.x-BlockUtils.blockPadding-Env.BlockSizeHalf;
-        float x2 = vPos.x+BlockUtils.blockPadding+Env.BlockSizeHalf;
+        float x1 = vPos.x-BlockUtils.blockPadding;
+        float x2 = vPos.x+BlockUtils.blockPadding+Env.BlockSize;
         float y1 = vPos.y-BlockUtils.blockPadding;
         float y2 = vPos.y+BlockUtils.blockPadding+blockHeight;
-        float z1 = vPos.z-BlockUtils.blockPadding-Env.BlockSizeHalf;
-        float z2 = vPos.z+BlockUtils.blockPadding+Env.BlockSizeHalf;
+        float z1 = vPos.z-BlockUtils.blockPadding;
+        float z2 = vPos.z+BlockUtils.blockPadding+Env.BlockSize;
 
         VertexData[] vertexData = pools.VertexDataArrayPool.PopExact(4);
         {
