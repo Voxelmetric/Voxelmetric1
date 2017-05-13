@@ -40,7 +40,7 @@ namespace Voxelmetric.Code.Core
         private int rebuildMaskGeometry;
         private int rebuildMaskCollider;
 
-        public readonly List<BlockPos> modifiedBlocks = new List<BlockPos>();
+        public List<BlockPos> modifiedBlocks = new List<BlockPos>();
 
         private static byte[] emptyBytes;
         public static byte[] EmptyBytes
@@ -80,7 +80,12 @@ namespace Voxelmetric.Code.Core
             rebuildMaskGeometry = -1;
             rebuildMaskCollider = -1;
 
-            modifiedBlocks.Clear();
+            // We have to reallocate the list. Otherwise, the array could potentially grow
+            // to Env.ChunkSizePow3 size.
+            if (modifiedBlocks==null || modifiedBlocks.Count>Env.ChunkSize*3) // Reallocation threshold
+                modifiedBlocks = new List<BlockPos>();
+            else
+                modifiedBlocks.Clear();
         }
 
         public void RequestCollider()
@@ -575,7 +580,7 @@ namespace Voxelmetric.Code.Core
                 if (ntw.allowConnections)
                     ntw.server.BroadcastChange(globalPos, blockData, -1);
 
-                if (Features.UseSerialization && Features.UseDifferentialSerialization)
+                if (Features.UseDifferentialSerialization)
                 {
                     // TODO: Memory unfriendly. Rethink the strategy
                     modifiedBlocks.Add(blockPos);

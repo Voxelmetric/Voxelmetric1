@@ -21,14 +21,14 @@ namespace Voxelmetric.Code.Core.Serialization
 
         //! A list of modified positions
         private BlockPos[] m_positions;
-        //! A list if modified blocks
+        //! A list of modified blocks
         private BlockData[] m_blocks;
 
         // Temporary structures
-        private int posLenBytes;
-        private byte[] positionsBytes;
-        private int blkLenBytes;
-        private byte[] blocksBytes;
+        private int m_posLenBytes;
+        private byte[] m_positionsBytes;
+        private int m_blkLenBytes;
+        private byte[] m_blocksBytes;
         
 
         public Save(Chunk chunk)
@@ -43,10 +43,10 @@ namespace Voxelmetric.Code.Core.Serialization
             MarkAsProcessed();
             
             // Reset temporary buffers
-            posLenBytes = 0;
-            positionsBytes = null;
-            blkLenBytes = 0;
-            blocksBytes = null;
+            m_posLenBytes = 0;
+            m_positionsBytes = null;
+            m_blkLenBytes = 0;
+            m_blocksBytes = null;
 
             // Release the memory allocated by temporary buffers
             m_positions = null;
@@ -62,7 +62,7 @@ namespace Voxelmetric.Code.Core.Serialization
 
         public bool IsBinarizeNecessary()
         {
-            if (m_blocks==null && Features.UseDifferentialSerialization &&
+            if (m_blocks==null &&
                 !Features.UseDifferentialSerialization_ForceSaveHeaders &&
                 !m_hadDifferentialChange)
                 return false;
@@ -75,8 +75,7 @@ namespace Voxelmetric.Code.Core.Serialization
             // Do not serialize if there's no chunk data and empty chunk serialization is turned off
             if (m_blocks==null)
             {
-                if (Features.UseDifferentialSerialization &&
-                    !Features.UseDifferentialSerialization_ForceSaveHeaders &&
+                if (!Features.UseDifferentialSerialization_ForceSaveHeaders &&
                     !m_hadDifferentialChange
                     )
                     return false;
@@ -84,7 +83,8 @@ namespace Voxelmetric.Code.Core.Serialization
             }
 
             bw.Write(SaveVersion);
-            bw.Write(Features.UseDifferentialSerialization);
+            bw.Write((byte)(Features.UseDifferentialSerialization ? 1 : 0));
+            bw.Write(Env.ChunkSizePow3);
             bw.Write(Chunk.blocks.NonEmptyBlocks);
 
             // Chunk data
@@ -95,22 +95,29 @@ namespace Voxelmetric.Code.Core.Serialization
                 else
                 {
                     bw.Write(m_blocks.Length);
-                    bw.Write(positionsBytes, 0, posLenBytes);
-                    bw.Write(blocksBytes, 0, blkLenBytes);
+                    try
+                    {
+                        bw.Write(m_positionsBytes, 0, m_posLenBytes);
+                    }
+                    catch (Exception ex)
+                    {
+                        string s = ex.Message;
+                    }
+                    bw.Write(m_blocksBytes, 0, m_blkLenBytes);
                 }
             }
             else
             {
                 // Write compressed data to file
-                bw.Write(blkLenBytes);
-                bw.Write(blocksBytes, 0, blkLenBytes);
+                bw.Write(m_blkLenBytes);
+                bw.Write(m_blocksBytes, 0, m_blkLenBytes);
             }
 
             // We no longer need the temporary buffers
-            posLenBytes = 0;
-            positionsBytes = null;
-            blkLenBytes = 0;
-            blocksBytes = null;
+            m_posLenBytes = 0;
+            m_positionsBytes = null;
+            m_blkLenBytes = 0;
+            m_blocksBytes = null;
 
             return true;
         }
@@ -124,42 +131,65 @@ namespace Voxelmetric.Code.Core.Serialization
             if (version!=SaveVersion)
                 return false;
 
-            IsDifferential = br.ReadBoolean();
-            Chunk.blocks.NonEmptyBlocks = br.ReadInt32();
+            // 0/1 allowed for IsDifferential
+            byte isDifferential = br.ReadByte();
+            if (isDifferential!=0 && isDifferential!=1)
+            {
+                success = false;
+                goto deserializeFail;
+            }
+            IsDifferential = isDifferential==1;
 
+            // Current chunk size must match the saved chunk size
+            int chunkBlocks = br.ReadInt32();
+            if (chunkBlocks!=Env.ChunkSizePow3)
+            {
+                success = false;
+                goto deserializeFail;
+            }
+
+            // NonEmptyBlocks must be a sane number in chunkBlocks range
+            int nonEmptyBlocks = br.ReadInt32();
+            if (nonEmptyBlocks<0 || nonEmptyBlocks>chunkBlocks)
+            {
+                success = false;
+                goto deserializeFail;
+            }
+            Chunk.blocks.NonEmptyBlocks = nonEmptyBlocks;
+            
             while (true)
             {
                 if (IsDifferential)
                 {
-                    int blockPosSize = StructSerialization.TSSize<BlockPos>.ValueSize;
-                    int blockDataSize = StructSerialization.TSSize<BlockData>.ValueSize;
-
                     int lenBlocks = br.ReadInt32();
-                    posLenBytes = lenBlocks*blockPosSize;
-                    blkLenBytes = lenBlocks*blockDataSize;
-
                     if (lenBlocks > 0)
                     {
-                        positionsBytes = new byte[posLenBytes];
-                        if (br.Read(positionsBytes, 0, posLenBytes)!=posLenBytes)
+                        int blockPosSize = StructSerialization.TSSize<BlockPos>.ValueSize;
+                        int blockDataSize = StructSerialization.TSSize<BlockData>.ValueSize;
+
+                        m_posLenBytes = lenBlocks * blockPosSize;
+                        m_blkLenBytes = lenBlocks * blockDataSize;
+
+                        m_positionsBytes = new byte[m_posLenBytes];
+                        if (br.Read(m_positionsBytes, 0, m_posLenBytes)!=m_posLenBytes)
                         {
                             // Length must match
                             success = false;
-                            break;
+                            goto deserializeFail;
                         }
 
-                        blocksBytes = new byte[blkLenBytes];
-                        if (br.Read(blocksBytes, 0, blkLenBytes)!=blkLenBytes)
+                        m_blocksBytes = new byte[m_blkLenBytes];
+                        if (br.Read(m_blocksBytes, 0, m_blkLenBytes)!=m_blkLenBytes)
                         {
                             // Length must match
                             success = false;
-                            break;
+                            goto deserializeFail;
                         }
                     }
                     else
                     {
-                        blocksBytes = null;
-                        positionsBytes = null;
+                        m_blocksBytes = null;
+                        m_positionsBytes = null;
                     }
                 }
                 else
@@ -168,31 +198,31 @@ namespace Voxelmetric.Code.Core.Serialization
                     if (Features.UseDifferentialSerialization)
                         m_hadDifferentialChange = true;
                     
-                    blkLenBytes = br.ReadInt32();
-                    blocksBytes = new byte[blkLenBytes];
+                    m_blkLenBytes = br.ReadInt32();
+                    m_blocksBytes = new byte[m_blkLenBytes];
 
                     // Read raw data
-                    int readLength = br.Read(blocksBytes, 0, blkLenBytes);
-                    if (readLength!= blkLenBytes)
+                    int readLength = br.Read(m_blocksBytes, 0, m_blkLenBytes);
+                    if (readLength!= m_blkLenBytes)
                     {
                         // Length must match
                         success = false;
-                        break;
+                        goto deserializeFail;
                     }
                 }
 
                 break;
             }
-
+        deserializeFail:
             if (!success)
             {
                 // Revert any changes we performed on our chunk
                 Chunk.blocks.NonEmptyBlocks = -1;
 
-                posLenBytes = 0;
-                positionsBytes = null;
-                blkLenBytes = 0;
-                blocksBytes = null;
+                m_posLenBytes = 0;
+                m_positionsBytes = null;
+                m_blkLenBytes = 0;
+                m_blocksBytes = null;
             }
 
             return success;
@@ -208,15 +238,15 @@ namespace Voxelmetric.Code.Core.Serialization
                     int blockPosSize = StructSerialization.TSSize<BlockPos>.ValueSize;
                     int blockDataSize = StructSerialization.TSSize<BlockData>.ValueSize;
 
-                    posLenBytes = m_blocks.Length * blockPosSize;
-                    blkLenBytes = m_blocks.Length * blockDataSize;
-                    positionsBytes = new byte[posLenBytes];
-                    blocksBytes = new byte[blkLenBytes];
+                    m_posLenBytes = m_blocks.Length * blockPosSize;
+                    m_blkLenBytes = m_blocks.Length * blockDataSize;
+                    m_positionsBytes = new byte[m_posLenBytes];
+                    m_blocksBytes = new byte[m_blkLenBytes];
 
                     unsafe
                     {
                         // Pack positions to a byte array
-                        fixed (byte* pDst = positionsBytes)
+                        fixed (byte* pDst = m_positionsBytes)
                         {
                             for (int i = 0, j = 0; i < m_blocks.Length; i++, j += blockPosSize)
                             {
@@ -225,7 +255,7 @@ namespace Voxelmetric.Code.Core.Serialization
                         }
                         // Pack block data to a byte array
                         fixed (BlockData* pBD = m_blocks)
-                        fixed (byte* pDst = blocksBytes)
+                        fixed (byte* pDst = m_blocksBytes)
                         {
                             for (int i = 0, j = 0; i < m_blocks.Length; i++, j += blockDataSize)
                             {
@@ -240,10 +270,10 @@ namespace Voxelmetric.Code.Core.Serialization
                 }
                 else
                 {
-                    posLenBytes = 0;
-                    blkLenBytes = 0;
-                    positionsBytes = null;
-                    blocksBytes = null;
+                    m_posLenBytes = 0;
+                    m_blkLenBytes = 0;
+                    m_positionsBytes = null;
+                    m_blocksBytes = null;
                 }
             }
             else
@@ -285,11 +315,11 @@ namespace Voxelmetric.Code.Core.Serialization
                     }
 
                     // Compress bytes
-                    blkLenBytes = CLZF2.lzf_compress(tmp, requestedByteSize, ref bytesCompressed);
-                    blocksBytes = new byte[blkLenBytes];
+                    m_blkLenBytes = CLZF2.lzf_compress(tmp, requestedByteSize, ref bytesCompressed);
+                    m_blocksBytes = new byte[m_blkLenBytes];
 
                     // Copy data from a temporary buffer to block buffer
-                    Array.Copy(bytesCompressed, 0, blocksBytes, 0, blkLenBytes);
+                    Array.Copy(bytesCompressed, 0, m_blocksBytes, 0, m_blkLenBytes);
                 }
                 // Return our temporary buffer back to the pool
                 pools.ByteArrayPool.Push(bytesCompressed);
@@ -306,29 +336,29 @@ namespace Voxelmetric.Code.Core.Serialization
 
             if (IsDifferential)
             {
-                if (posLenBytes>0 && blkLenBytes>0)
+                if (m_posLenBytes>0 && m_blkLenBytes>0)
                 {
                     int blockPosSize = StructSerialization.TSSize<BlockPos>.ValueSize;
                     int blockDataSize = StructSerialization.TSSize<BlockData>.ValueSize;
 
-                    m_positions = new BlockPos[posLenBytes/blockPosSize];
-                    m_blocks = new BlockData[blkLenBytes/blockDataSize];
+                    m_positions = new BlockPos[m_posLenBytes/blockPosSize];
+                    m_blocks = new BlockData[m_blkLenBytes/blockDataSize];
 
                     int i, j;
                     unsafe
                     {
                         // Extract positions
-                        fixed (byte* pSrc = positionsBytes)
+                        fixed (byte* pSrc = m_positionsBytes)
                         {
-                            for (i = 0, j = 0; i<posLenBytes; i += blockPosSize, j++)
+                            for (i = 0, j = 0; i<m_posLenBytes; i += blockPosSize, j++)
                             {
                                 m_positions[j] = *(BlockPos*)&pSrc[i];
                             }
                         }
                         // Extract block data
-                        fixed (byte* pSrc = blocksBytes)
+                        fixed (byte* pSrc = m_blocksBytes)
                         {
-                            for (i = 0, j = 0; i<blkLenBytes; i += blockDataSize, j++)
+                            for (i = 0, j = 0; i<m_blkLenBytes; i += blockDataSize, j++)
                             {
                                 BlockData* bd = (BlockData*)&pSrc[i];
                                 // Convert global block types into internal optimized version
@@ -349,11 +379,11 @@ namespace Voxelmetric.Code.Core.Serialization
                 var bytes = pools.ByteArrayPool.Pop(requestedByteSize);
                 {
                     // Decompress data
-                    int decompressedLength = CLZF2.lzf_decompress(blocksBytes, blkLenBytes, ref bytes);
+                    int decompressedLength = CLZF2.lzf_decompress(m_blocksBytes, m_blkLenBytes, ref bytes);
                     if (decompressedLength!=Env.ChunkSizePow3*blockDataSize)
                     {
-                        blkLenBytes = 0;
-                        blocksBytes = null;
+                        m_blkLenBytes = 0;
+                        m_blocksBytes = null;
                         return false;
                     }
 
@@ -388,10 +418,10 @@ namespace Voxelmetric.Code.Core.Serialization
             }
 
             // We no longer need the temporary buffers
-            posLenBytes = 0;
-            positionsBytes = null;
-            blkLenBytes = 0;
-            blocksBytes = null;
+            m_posLenBytes = 0;
+            m_positionsBytes = null;
+            m_blkLenBytes = 0;
+            m_blocksBytes = null;
 
             return true;
         }

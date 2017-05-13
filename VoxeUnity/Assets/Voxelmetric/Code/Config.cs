@@ -54,12 +54,12 @@ namespace Voxelmetric.Code
         //! If true, chunk serialization is enabled
         public const bool UseSerialization = true;
         //! If true, chunk will be serialized when it's unloaded
-        public const bool SerializeChunkWhenUnloading = true;
+        public const bool SerializeChunkWhenUnloading = UseSerialization && true;
         //! If true, only difference form default-generated data will be stored
         //! If there is no change no serialization is performned unless UseDifferentialSerialization_ForceSaveHeaders is enabled
-        public const bool UseDifferentialSerialization = true;
+        public const bool UseDifferentialSerialization = UseSerialization && true;
         //! If true, even if there is no difference in data, at least basic info about chunk structure is stored
-        public const bool UseDifferentialSerialization_ForceSaveHeaders = false;
+        public const bool UseDifferentialSerialization_ForceSaveHeaders = UseDifferentialSerialization && false;
     }
 
     public static class Directories

@@ -34,7 +34,7 @@ namespace Voxelmetric.Code
         /// <returns>List of chunks waiting to be saved.</returns>
         public static List<Chunk> SaveAll (World world)
         {
-            if (world==null)
+            if (world==null || !Features.UseSerialization)
                 return null;
 
             List<Chunk> chunksToSave = new List<Chunk> ();
