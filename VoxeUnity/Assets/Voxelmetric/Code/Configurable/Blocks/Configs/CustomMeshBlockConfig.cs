@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using Voxelmetric.Code;
 using Voxelmetric.Code.Core;
 using Voxelmetric.Code.Load_Resources.Textures;
 using Voxelmetric.Code.Rendering;
@@ -25,9 +26,9 @@ public class CustomMeshBlockConfig: BlockConfig
         texture = world.textureProvider.GetTextureCollection(_GetPropertyFromConfig(config, "texture", ""));
 
         Vector3 meshOffset;
-        meshOffset.x = float.Parse(_GetPropertyFromConfig(config, "meshXOffset", "0"));
-        meshOffset.y = float.Parse(_GetPropertyFromConfig(config, "meshYOffset", "0"));
-        meshOffset.z = float.Parse(_GetPropertyFromConfig(config, "meshZOffset", "0"));
+        meshOffset.x = Env.BlockSizeHalf + float.Parse(_GetPropertyFromConfig(config, "meshXOffset", "0"));
+        meshOffset.y = Env.BlockSizeHalf + float.Parse(_GetPropertyFromConfig(config, "meshYOffset", "0"));
+        meshOffset.z = Env.BlockSizeHalf + float.Parse(_GetPropertyFromConfig(config, "meshZOffset", "0"));
 
         SetUpMesh(world.config.meshFolder + "/" + _GetPropertyFromConfig(config, "meshFileLocation", ""), meshOffset, out m_triangles, out m_vertices);
 
