@@ -78,7 +78,7 @@ namespace Voxelmetric.Code.Configurable.Blocks.Utilities
             if (chunk.world.config.addAOToMesh)
                 SetColorsAO(vertexData, light, chunk.world.config.ambientOcclusionStrength);
             else
-                SetColors(vertexData, 1f, 1f, 1f, 1f, false, 1f);
+                SetColors(vertexData, 1f, 1f, 1f, 1f, false);
         }
 
         public static BlockLightData CalculateColors(Chunk chunk, int localPosIndex, Direction direction)
@@ -186,7 +186,7 @@ namespace Voxelmetric.Code.Configurable.Blocks.Utilities
             return new BlockLightData(nwSolid, nSolid, neSolid, eSolid, seSolid, sSolid, swSolid, wSolid);
         }
         
-        public static void AdjustColors(Chunk chunk, VertexData[] vertexData, Direction direction, BlockLightData light)
+        public static void AdjustColors(Chunk chunk, VertexData[] vertexData, BlockLightData light)
         {
             if (!chunk.world.config.addAOToMesh)
                 return;
@@ -236,30 +236,30 @@ namespace Voxelmetric.Code.Configurable.Blocks.Utilities
 
         private static void SetColorsAO(VertexData[] vertexData, BlockLightData light, float strength)
         {
-            float ne = 1f-(light.neAO * 0.25f) * strength;
-            float se = 1f-(light.seAO * 0.25f) * strength;
-            float sw = 1f-(light.swAO * 0.25f) * strength;
-            float nw = 1f-(light.nwAO * 0.25f) * strength;
+            float ne = 1f-light.neAO * 0.25f * strength;
+            float se = 1f-light.seAO * 0.25f * strength;
+            float sw = 1f-light.swAO * 0.25f * strength;
+            float nw = 1f-light.nwAO * 0.25f * strength;
 
-            SetColors(vertexData, sw, nw, ne, se, light.FaceRotationNecessary, 1f);
+            SetColors(vertexData, sw, nw, ne, se, light.FaceRotationNecessary);
         }
 
         private static void AdjustColorsAO(VertexData[] vertexData, BlockLightData light, float strength)
         {
-            float ne = 1f-(light.neAO * 0.25f) * strength;
-            float se = 1f-(light.seAO * 0.25f) * strength;
-            float sw = 1f-(light.swAO * 0.25f) * strength;
-            float nw = 1f-(light.nwAO * 0.25f) * strength;
+            float ne = 1f-light.neAO * 0.25f * strength;
+            float se = 1f-light.seAO * 0.25f * strength;
+            float sw = 1f-light.swAO * 0.25f * strength;
+            float nw = 1f-light.nwAO * 0.25f * strength;
 
-            AdjustColors(vertexData, sw, nw, ne, se, light.FaceRotationNecessary, 1f);
+            AdjustColors(vertexData, sw, nw, ne, se, light.FaceRotationNecessary);
         }
 
-        public static void SetColors(VertexData[] data, float sw, float nw, float ne, float se, bool rotated, float light)
+        public static void SetColors(VertexData[] data, float sw, float nw, float ne, float se, bool rotated)
         {
-            float _sw = (sw*light*255.0f).Clamp(0f,255f);
-            float _nw = (nw*light*255.0f).Clamp(0f,255f);
-            float _ne = (ne*light*255.0f).Clamp(0f,255f);
-            float _se = (se*light*255.0f).Clamp(0f,255f);
+            float _sw = (sw*255.0f).Clamp(0f,255f);
+            float _nw = (nw*255.0f).Clamp(0f,255f);
+            float _ne = (ne*255.0f).Clamp(0f,255f);
+            float _se = (se*255.0f).Clamp(0f,255f);
 
             byte sw_ = (byte)_sw;
             byte nw_ = (byte)_nw;
@@ -292,12 +292,12 @@ namespace Voxelmetric.Code.Configurable.Blocks.Utilities
                 );
         }
 
-        public static void AdjustColors(VertexData[] data, float sw, float nw, float ne, float se, bool rotated, float light)
+        public static void AdjustColors(VertexData[] data, float sw, float nw, float ne, float se, bool rotated)
         {
-            sw = (sw*light).Clamp(0f,1f);
-            nw = (nw*light).Clamp(0f,1f);
-            ne = (ne*light).Clamp(0f,1f);
-            se = (se*light).Clamp(0f,1f);
+            sw = sw.Clamp(0f,1f);
+            nw = nw.Clamp(0f,1f);
+            ne = ne.Clamp(0f,1f);
+            se = se.Clamp(0f,1f);
 
             if (!rotated)
             {

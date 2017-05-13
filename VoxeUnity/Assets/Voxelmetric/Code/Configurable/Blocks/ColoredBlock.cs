@@ -60,7 +60,7 @@ public class ColoredBlock : Block
                 vertexData[3].UV = Vector2.zero;
             }
 
-            BlockUtils.AdjustColors(chunk, vertexData, face.side, face.light);
+            BlockUtils.AdjustColors(chunk, vertexData, face.light);
 
             chunk.GeometryHandler.Batcher.AddFace(vertexData, backFace, face.materialID);
         }
