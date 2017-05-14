@@ -6,7 +6,7 @@
 
 Voxe(lmetric) is an open source voxel framework for Unity3d. It is meant to be an easy to use, easy to extend solution for voxel games. It is currently in alpha so expect breaking changes and incomplete documentation. Any help with the project is more then welcome. Feel free to create a pull request, ask questions or suggest new features.
 
-This project is a result of mergin my original project Voxe (https://github.com/richardbiely/Voxe) with Voxelmetric (https://github.com/Voxelmetric/Voxelmetric1). It takes the best from both worlds - Voxe's performance and Voxelmetric's features. A lot of work has been put into improving both and it hardly resembles its predecessors now.
+This project is a result of mergin my original project Voxe (https://github.com/richardbiely/Voxe) with Voxelmetric (https://github.com/Voxelmetric/Voxelmetric1). It takes the best from both worlds - Voxe's performance and Voxelmetric's features. A lot of work has been put into this project and it barely resembles its predecessors now.
 
 ![alt tag](https://github.com/richardbiely/Voxelmetric/blob/alpha_3/voxelmetric.jpg)
 
@@ -21,7 +21,10 @@ Generate realistic looking terrain with caves and landmarks like trees.
 Save and load your changes to the world at will.
 
 ##### Infinite Terrain
-Terrain generates around a given object and is removed when you move too far away, there are no borders or limits neither in horizontal nor vertical direction.
+Terrain generates around a given object and is removed when you move too far away, there are no borders or limits neither in horizontal nor vertical direction unless you deliberately configure them.
+
+#### Structures
+Not only terrain but user defined structures are possible with Voxel(metric) as well. There is no limit to their size (although it's recommended to keep them spreading over just a few chunks at most). Be it buildings or clutter only your imagination is the limit.
 
 ### Special features
 
