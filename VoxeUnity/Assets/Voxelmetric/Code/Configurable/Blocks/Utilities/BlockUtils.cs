@@ -236,20 +236,22 @@ namespace Voxelmetric.Code.Configurable.Blocks.Utilities
 
         private static void SetColorsAO(VertexData[] vertexData, BlockLightData light, float strength)
         {
-            float ne = 1f-light.neAO * 0.25f * strength;
-            float se = 1f-light.seAO * 0.25f * strength;
-            float sw = 1f-light.swAO * 0.25f * strength;
-            float nw = 1f-light.nwAO * 0.25f * strength;
+            // 0.33f for there are 3 degrees of AO darkening (0.33f * 3 =~ 1f)
+            float ne = 1f-light.neAO * 0.33f * strength;
+            float se = 1f-light.seAO * 0.33f * strength;
+            float sw = 1f-light.swAO * 0.33f * strength;
+            float nw = 1f-light.nwAO * 0.33f * strength;
 
             SetColors(vertexData, sw, nw, ne, se, light.FaceRotationNecessary);
         }
 
         private static void AdjustColorsAO(VertexData[] vertexData, BlockLightData light, float strength)
         {
-            float ne = 1f-light.neAO * 0.25f * strength;
-            float se = 1f-light.seAO * 0.25f * strength;
-            float sw = 1f-light.swAO * 0.25f * strength;
-            float nw = 1f-light.nwAO * 0.25f * strength;
+            // 0.33f for there are 3 degrees of AO darkening (0.33f * 3 =~ 1f)
+            float ne = 1f-light.neAO * 0.33f * strength;
+            float se = 1f-light.seAO * 0.33f * strength;
+            float sw = 1f-light.swAO * 0.33f * strength;
+            float nw = 1f-light.nwAO * 0.33f * strength;
 
             AdjustColors(vertexData, sw, nw, ne, se, light.FaceRotationNecessary);
         }
