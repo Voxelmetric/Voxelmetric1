@@ -26,8 +26,9 @@ namespace Voxelmetric.Code.Core.Operations
             OnSetBlocks(blocks);
             OnPostSetBlocks(blocks);
         }
-
+        
         protected abstract void OnSetBlocks(ChunkBlocks blocks);
+        protected abstract void OnSetBlocksRaw(ChunkBlocks blocks, ref Vector3Int min, ref Vector3Int max);
         protected abstract void OnPostSetBlocks(ChunkBlocks blocks);
         protected abstract bool IsRanged();
     }

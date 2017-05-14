@@ -1,4 +1,5 @@
-﻿using Voxelmetric.Code.Common;
+﻿using System;
+using Voxelmetric.Code.Common;
 using Voxelmetric.Code.Data_types;
 
 namespace Voxelmetric.Code.Core.Operations
@@ -23,6 +24,11 @@ namespace Voxelmetric.Code.Core.Operations
         protected override void OnSetBlocks(ChunkBlocks blocks)
         {
             blocks.ProcessSetBlock(blockData, index, setBlockModified);
+        }
+
+        protected override void OnSetBlocksRaw(ChunkBlocks blocks, ref Vector3Int min, ref Vector3Int max)
+        {
+            throw new Exception("ModifyOpBlock::OnSetBlocksRaw should never get called!");
         }
 
         protected override void OnPostSetBlocks(ChunkBlocks blocks)

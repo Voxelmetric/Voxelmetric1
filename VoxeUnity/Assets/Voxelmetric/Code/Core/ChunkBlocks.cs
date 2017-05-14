@@ -124,94 +124,214 @@ namespace Voxelmetric.Code.Core
                     pos.z<=0 || pos.z>=Env.ChunkSize1);
         }
 
-        public void HandleNeighbor(BlockData block, ref Vector3Int pos, Direction dir)
+        private ChunkBlocks HandleNeighborRight(ref Vector3Int pos)
         {
-            int cx = chunk.pos.x;
-            int cy = chunk.pos.y;
-            int cz = chunk.pos.z;
-
             ChunkStateManagerClient stateManager = chunk.stateManager;
-            int i = DirectionUtils.Get(dir);
+            int i = DirectionUtils.Get(Direction.east);
 
             // If it is an edge position, notify neighbor as well
             // Iterate over neighbors and decide which ones should be notified to rebuild
             var listeners = stateManager.Listeners;
             ChunkEvent listener = listeners[i];
             if (listener == null)
-                return;
+                return null;
 
             ChunkStateManagerClient listenerClient = (ChunkStateManagerClient)listener;
             Chunk listenerChunk = listenerClient.chunk;
-            ChunkBlocks listenerChunkBlocks = listenerChunk.blocks;
 
+            int cx = chunk.pos.x;
+            int cy = chunk.pos.y;
+            int cz = chunk.pos.z;
             int lx = listenerChunk.pos.x;
             int ly = listenerChunk.pos.y;
             int lz = listenerChunk.pos.z;
 
-            if (ly == cy || lz == cz)
+            if (ly!=cy && lz!=cz)
+                return null;
+
+            if ((pos.x!=Env.ChunkSize1) || (lx-Env.ChunkSize!=cx))
+                return null;
+
+            rebuildMaskGeometry = rebuildMaskGeometry | (1 << i);
+            return listenerChunk.blocks;
+        }
+
+        private ChunkBlocks HandleNeighborLeft(ref Vector3Int pos)
+        {
+            ChunkStateManagerClient stateManager = chunk.stateManager;
+            int i = DirectionUtils.Get(Direction.west);
+
+            // If it is an edge position, notify neighbor as well
+            // Iterate over neighbors and decide which ones should be notified to rebuild
+            var listeners = stateManager.Listeners;
+            ChunkEvent listener = listeners[i];
+            if (listener == null)
+                return null;
+
+            ChunkStateManagerClient listenerClient = (ChunkStateManagerClient)listener;
+            Chunk listenerChunk = listenerClient.chunk;
+
+            int cx = chunk.pos.x;
+            int cy = chunk.pos.y;
+            int cz = chunk.pos.z;
+            int lx = listenerChunk.pos.x;
+            int ly = listenerChunk.pos.y;
+            int lz = listenerChunk.pos.z;
+
+            if (ly != cy && lz != cz)
+                return null;
+
+            if ((pos.x!=0) || (lx+Env.ChunkSize!=cx))
+                return null;
+
+            rebuildMaskGeometry = rebuildMaskGeometry | (1 << i);
+            return listenerChunk.blocks;
+        }
+
+        private ChunkBlocks HandleNeighborUp(ref Vector3Int pos)
+        {
+            ChunkStateManagerClient stateManager = chunk.stateManager;
+            int i = DirectionUtils.Get(Direction.up);
+
+            // If it is an edge position, notify neighbor as well
+            // Iterate over neighbors and decide which ones should be notified to rebuild
+            var listeners = stateManager.Listeners;
+            ChunkEvent listener = listeners[i];
+            if (listener == null)
+                return null;
+
+            ChunkStateManagerClient listenerClient = (ChunkStateManagerClient)listener;
+            Chunk listenerChunk = listenerClient.chunk;
+
+            int cx = chunk.pos.x;
+            int cy = chunk.pos.y;
+            int cz = chunk.pos.z;
+            int lx = listenerChunk.pos.x;
+            int ly = listenerChunk.pos.y;
+            int lz = listenerChunk.pos.z;
+
+            if (lx!=cx && lz!=cz)
+                return null;
+
+            if ((pos.y!=Env.ChunkSize1) || (ly-Env.ChunkSize!=cy))
+                return null;
+
+            rebuildMaskGeometry = rebuildMaskGeometry | (1 << i);
+            return listenerChunk.blocks;
+        }
+
+        private ChunkBlocks HandleNeighborDown(ref Vector3Int pos)
+        {
+            ChunkStateManagerClient stateManager = chunk.stateManager;
+            int i = DirectionUtils.Get(Direction.down);
+
+            // If it is an edge position, notify neighbor as well
+            // Iterate over neighbors and decide which ones should be notified to rebuild
+            var listeners = stateManager.Listeners;
+            ChunkEvent listener = listeners[i];
+            if (listener == null)
+                return null;
+
+            ChunkStateManagerClient listenerClient = (ChunkStateManagerClient)listener;
+            Chunk listenerChunk = listenerClient.chunk;
+
+            int cx = chunk.pos.x;
+            int cy = chunk.pos.y;
+            int cz = chunk.pos.z;
+            int lx = listenerChunk.pos.x;
+            int ly = listenerChunk.pos.y;
+            int lz = listenerChunk.pos.z;
+
+            if (lx != cx && lz != cz)
+                return null;
+
+            if ((pos.y!=0) || (ly+Env.ChunkSize!=cy))
+                return null;
+
+            rebuildMaskGeometry = rebuildMaskGeometry | (1 << i);
+            return listenerChunk.blocks;
+        }
+
+        private ChunkBlocks HandleNeighborFront(ref Vector3Int pos)
+        {
+            ChunkStateManagerClient stateManager = chunk.stateManager;
+            int i = DirectionUtils.Get(Direction.north);
+
+            // If it is an edge position, notify neighbor as well
+            // Iterate over neighbors and decide which ones should be notified to rebuild
+            var listeners = stateManager.Listeners;
+            ChunkEvent listener = listeners[i];
+            if (listener == null)
+                return null;
+            
+            ChunkStateManagerClient listenerClient = (ChunkStateManagerClient)listener;
+            Chunk listenerChunk = listenerClient.chunk;
+
+            int cx = chunk.pos.x;
+            int cy = chunk.pos.y;
+            int cz = chunk.pos.z;
+            int lx = listenerChunk.pos.x;
+            int ly = listenerChunk.pos.y;
+            int lz = listenerChunk.pos.z;
+
+            if (ly!=cy && lx!=cx)
+                return null;
+
+            if ((pos.z!=Env.ChunkSize1) || (lz-Env.ChunkSize!=cz))
+                return null;
+
+            rebuildMaskGeometry = rebuildMaskGeometry | (1 << i);
+            return listenerChunk.blocks;
+        }
+
+        private ChunkBlocks HandleNeighborBack(ref Vector3Int pos)
+        {
+            ChunkStateManagerClient stateManager = chunk.stateManager;
+            int i = DirectionUtils.Get(Direction.south);
+
+            // If it is an edge position, notify neighbor as well
+            // Iterate over neighbors and decide which ones should be notified to rebuild
+            var listeners = stateManager.Listeners;
+            ChunkEvent listener = listeners[i];
+            if (listener == null)
+                return null;
+            
+            ChunkStateManagerClient listenerClient = (ChunkStateManagerClient)listener;
+            Chunk listenerChunk = listenerClient.chunk;
+
+            int cx = chunk.pos.x;
+            int cy = chunk.pos.y;
+            int cz = chunk.pos.z;
+            int lx = listenerChunk.pos.x;
+            int ly = listenerChunk.pos.y;
+            int lz = listenerChunk.pos.z;
+
+            if (ly != cy && lx != cx)
+                return null;
+
+            if (pos.z!=0 || (lz+Env.ChunkSize!=cz))
+                return null;
+
+            rebuildMaskGeometry = rebuildMaskGeometry | (1 << i);
+            return listenerChunk.blocks;
+        }
+
+        public ChunkBlocks HandleNeighbor(ref Vector3Int pos, Direction dir)
+        {
+            switch (dir)
             {
-                // Section to the left
-                if ((pos.x == 0) && (lx + Env.ChunkSize == cx))
-                {
-                    rebuildMaskGeometry = rebuildMaskGeometry | (1 << i);
-
-                    // Mirror the block to the neighbor edge
-                    int neighborIndex = Helpers.GetChunkIndex1DFrom3D(Env.ChunkSize, pos.y, pos.z);
-                    listenerChunkBlocks.blocks[neighborIndex] = block;
-                }
-                // Section to the right
-                else if ((pos.x == Env.ChunkSize1) && (lx - Env.ChunkSize == cx))
-                {
-                    rebuildMaskGeometry = rebuildMaskGeometry | (1 << i);
-
-                    // Mirror the block to the neighbor edge
-                    int neighborIndex = Helpers.GetChunkIndex1DFrom3D(-1, pos.y, pos.z);
-                    listenerChunkBlocks.blocks[neighborIndex] = block;
-                }
-            }
-
-            if (lx == cx || lz == cz)
-            {
-                // Section to the bottom
-                if ((pos.y == 0) && (ly + Env.ChunkSize == cy))
-                {
-                    rebuildMaskGeometry = rebuildMaskGeometry | (1 << i);
-
-                    // Mirror the block to the neighbor edge
-                    int neighborIndex = Helpers.GetChunkIndex1DFrom3D(pos.x, Env.ChunkSize, pos.z);
-                    listenerChunkBlocks.blocks[neighborIndex] = block;
-                }
-                // Section to the top
-                else if ((pos.y == Env.ChunkSize1) && (ly - Env.ChunkSize == cy))
-                {
-                    rebuildMaskGeometry = rebuildMaskGeometry | (1 << i);
-
-                    // Mirror the block to the neighbor edge
-                    int neighborIndex = Helpers.GetChunkIndex1DFrom3D(pos.x, -1, pos.z);
-                    listenerChunkBlocks.blocks[neighborIndex] = block;
-                }
-            }
-
-            if (ly == cy || lx == cx)
-            {
-                // Section to the back
-                if ((pos.z == 0) && (lz + Env.ChunkSize == cz))
-                {
-                    rebuildMaskGeometry = rebuildMaskGeometry | (1 << i);
-
-                    // Mirror the block to the neighbor edge
-                    int neighborIndex = Helpers.GetChunkIndex1DFrom3D(pos.x, pos.y, Env.ChunkSize);
-                    listenerChunkBlocks.blocks[neighborIndex] = block;
-                }
-                // Section to the front
-                else if ((pos.z == Env.ChunkSize1) && (lz - Env.ChunkSize == cz))
-                {
-                    rebuildMaskGeometry = rebuildMaskGeometry | (1 << i);
-
-                    // Mirror the block to the neighbor edge
-                    int neighborIndex = Helpers.GetChunkIndex1DFrom3D(pos.x, pos.y, -1);
-                    listenerChunkBlocks.blocks[neighborIndex] = block;
-                }
+                case Direction.up:
+                    return HandleNeighborUp(ref pos);
+                case Direction.down:
+                    return HandleNeighborDown(ref pos);
+                case Direction.north:
+                    return HandleNeighborFront(ref pos);
+                case Direction.south:
+                    return HandleNeighborBack(ref pos);
+                case Direction.east:
+                    return HandleNeighborRight(ref pos);
+                default: //Direction.west
+                    return HandleNeighborLeft(ref pos);
             }
         }
 
@@ -227,7 +347,7 @@ namespace Voxelmetric.Code.Core
             ChunkStateManagerClient stateManager = chunk.stateManager;
 
             // If it is an edge position, notify neighbor as well
-            // Iterate over neighbors and decide which ones should be notified to rebuild
+            // Iterate over neighbors and decide which ones should be notified to rebuild their geometry
             var listeners = stateManager.Listeners;
             for (int i = 0; i < listeners.Length; i++)
             {
@@ -372,11 +492,11 @@ namespace Voxelmetric.Code.Core
                     timeBudget.StopMeasurement();
 
                     // Sync edges if there's enough time
-                    if (!timeBudget.HasTimeBudget)
+                    /*if (!timeBudget.HasTimeBudget)
                     {
                         ++j;
                         break;
-                    }
+                    }*/
                 }
 
                 rebuildMaskCollider |= rebuildMaskGeometry;
@@ -400,7 +520,7 @@ namespace Voxelmetric.Code.Core
                 // Request rebuild on this chunk
                 stateManager.RequestState(ChunkState.BuildVerticesNow);
 
-                // Notify neighbors that they need to rebuilt their geometry
+                // Notify neighbors that they need to rebuild their geometry
                 if (rebuildMaskGeometry>0)
                 {
                     var listeners = stateManager.Listeners;

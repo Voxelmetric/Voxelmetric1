@@ -53,5 +53,30 @@ namespace Voxelmetric.Code.Core.Operations
                 }
             }
         }
+
+        protected override void OnSetBlocksRaw(ChunkBlocks blocks, ref Vector3Int from, ref Vector3Int to)
+        {
+            for (int y = from.y; y <= to.y; ++y)
+            {
+                for (int z = from.z; z <= to.z; ++z)
+                {
+                    for (int x = from.x; x <= to.x; ++x)
+                    {
+                        int xx = x + offset.x;
+                        int yy = y + offset.y;
+                        int zz = z + offset.z;
+
+                        float _x = xx * xx * a2inv;
+                        float _y = yy * yy * b2inv;
+                        float _z = zz * zz * a2inv;
+                        if (_x + _y + _z <= 1.0f)
+                        {
+                            int index = Helpers.GetChunkIndex1DFrom3D(x, y, z);
+                            blocks.SetRaw(index, blockData);
+                        }
+                    }
+                }
+            }
+        }
     }
 }

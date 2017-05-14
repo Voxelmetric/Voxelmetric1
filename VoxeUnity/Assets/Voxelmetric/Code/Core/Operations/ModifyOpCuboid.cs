@@ -17,7 +17,7 @@ namespace Voxelmetric.Code.Core.Operations
             ModifyBlockContext parentContext = null): base(blockData, min, max, setBlockModified, parentContext)
         {
         }
-
+        
         protected override void OnSetBlocks(ChunkBlocks blocks)
         {
             for (int y = min.y; y<=max.y; ++y)
@@ -28,6 +28,21 @@ namespace Voxelmetric.Code.Core.Operations
                     for (int x = min.x; x<=max.x; ++x, ++index)
                     {
                         blocks.ProcessSetBlock(blockData, index, setBlockModified);
+                    }
+                }
+            }
+        }
+
+        protected override void OnSetBlocksRaw(ChunkBlocks blocks, ref Vector3Int from, ref Vector3Int to)
+        {
+            for (int y = from.y; y <= to.y; ++y)
+            {
+                for (int z = from.z; z <= to.z; ++z)
+                {
+                    int index = Helpers.GetChunkIndex1DFrom3D(from.x, y, z);
+                    for (int x = from.x; x <= to.x; ++x, ++index)
+                    {
+                        blocks.SetRaw(index, blockData);
                     }
                 }
             }
