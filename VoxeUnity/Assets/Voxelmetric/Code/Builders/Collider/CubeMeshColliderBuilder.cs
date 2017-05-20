@@ -342,10 +342,10 @@ namespace Voxelmetric.Code.Builders.Collider
 
                         // Build the face
                         {
-                            vertexData[0].Vertex = new Vector3(maxX, yy, zz) + BlockUtils.PaddingOffsets[(int)Direction.west][0];
-                            vertexData[1].Vertex = new Vector3(maxX, yy+h, zz) + BlockUtils.PaddingOffsets[(int)Direction.west][1];
-                            vertexData[2].Vertex = new Vector3(maxX, yy+h, zz+w) + BlockUtils.PaddingOffsets[(int)Direction.west][2];
-                            vertexData[3].Vertex = new Vector3(maxX, yy, zz+w) + BlockUtils.PaddingOffsets[(int)Direction.west][3];
+                            vertexData[0].Vertex = new Vector3(minX, yy, zz) + BlockUtils.PaddingOffsets[(int)Direction.west][0];
+                            vertexData[1].Vertex = new Vector3(minX, yy+h, zz) + BlockUtils.PaddingOffsets[(int)Direction.west][1];
+                            vertexData[2].Vertex = new Vector3(minX, yy+h, zz+w) + BlockUtils.PaddingOffsets[(int)Direction.west][2];
+                            vertexData[3].Vertex = new Vector3(minX, yy, zz+w) + BlockUtils.PaddingOffsets[(int)Direction.west][3];
 
                             chunk.ChunkColliderGeometryHandler.Batcher.AddFace(vertexData, DirectionUtils.IsBackface(Direction.west), block.PhysicMaterialID);
                         }
