@@ -1,5 +1,4 @@
-﻿using JetBrains.Annotations;
-using UnityEngine;
+﻿using UnityEngine;
 using Voxelmetric.Code.Configurable.Blocks;
 using Voxelmetric.Code.Core;
 using Voxelmetric.Code.Data_types;
@@ -13,9 +12,12 @@ public class Block
     public int RenderMaterialID;
     public int PhysicMaterialID;
     public bool Solid;
-    public bool CanBeWalkedOn;
-    public bool CanBeWalkedThrough;
     public bool Custom;
+
+    public bool CanCollide
+    {
+        get { return PhysicMaterialID >= 0; }
+    }
 
     public Block()
     {
@@ -23,19 +25,17 @@ public class Block
         Config = null;
     }
 
-    public void Init(ushort type, [NotNull] BlockConfig config)
+    public void Init(ushort type, BlockConfig config)
     {
         Type = type;
         Config = config;
 
-        Name = config.name;
-        Solid = config.solid;
-        CanBeWalkedOn = config.canBeWalkedOn;
-        CanBeWalkedThrough = config.canBeWalkedThrough;
-        Custom = config.custom;
-
         RenderMaterialID = config.renderMaterialID;
         PhysicMaterialID = config.physicMaterialID;
+
+        Name = config.name;
+        Solid = config.solid;
+        Custom = config.custom;
     }
     
     public virtual string DisplayName

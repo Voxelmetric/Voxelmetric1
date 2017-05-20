@@ -224,16 +224,18 @@ namespace Voxelmetric.Code.Utilities
         public bool IsWalkable(World world, ref Vector3Int pos)
         {
             Block block = world.blocks.GetBlock(ref pos);
-            if (!block.CanBeWalkedOn)
+            if (!block.CanCollide)
                 return false;
 
-            for (int y = 1; y < entityHeight + 1; y++)
+            // There has to be enough free space above the object
+            // TODO: There has to be some space left around
+            /*for (int y = 1; y < entityHeight + 1; y++)
             {
                 Vector3Int blockPos = pos.Add(0, y, 0);
                 block = world.blocks.GetBlock(ref blockPos);
-                if (!block.CanBeWalkedThrough)
+                if (!block.CanCollide)
                     return false;
-            }
+            }*/
 
             return true;
 

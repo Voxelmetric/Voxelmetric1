@@ -5,6 +5,7 @@ using Voxelmetric.Code.Configurable.Blocks;
 using Voxelmetric.Code.Configurable.Blocks.Utilities;
 using Voxelmetric.Code.Core;
 using Voxelmetric.Code.Data_types;
+using Voxelmetric.Code.Load_Resources.Blocks;
 
 namespace Voxelmetric.Code.Builders.Geometry
 {
@@ -13,7 +14,18 @@ namespace Voxelmetric.Code.Builders.Geometry
     /// </summary>
     public class CubeMeshBuilder: MergedFacesMeshBuilder
     {
-        protected override void BuildBox(Chunk chunk, int minX, int minY, int minZ, int maxX, int maxY, int maxZ)
+        protected override bool CanConsiderBlock(Block block)
+        {
+            // Skip air data
+            return block.Type!=BlockProvider.AirType;
+        }
+
+        protected override bool CanCreateBox(Block block, Block neighbor)
+        {
+            return block.Type==neighbor.Type;
+        }
+
+        protected override void BuildBox(Chunk chunk, Block block, int minX, int minY, int minZ, int maxX, int maxY, int maxZ)
         {
             // All faces in the are build in the following order:
             //     1--2
@@ -24,7 +36,6 @@ namespace Voxelmetric.Code.Builders.Geometry
             var blocks = chunk.blocks;
             var pools = chunk.pools;
             var listeners = chunk.stateManager.Listeners;
-            Block block = blocks.GetBlock(Helpers.GetChunkIndex1DFrom3D(minX, minY, minZ));
 
             // Custom blocks have their own rules
             if (block.Custom)

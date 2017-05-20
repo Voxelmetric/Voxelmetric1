@@ -38,8 +38,6 @@ public class BlockConfig
 
     public bool solid { get; protected set; }
     public bool transparent { get; protected set; }
-    public bool canBeWalkedOn { get; protected set; }
-    public bool canBeWalkedThrough { get; protected set; }
     public bool raycastHit { get; protected set; }
     public bool raycastHitOnRemoval { get; protected set; }
     public int renderMaterialID { get; protected set; }
@@ -57,10 +55,9 @@ public class BlockConfig
             typeInConfig = 0,
             className = "Block",
             solid = false,
-            canBeWalkedOn = false,
             transparent = true,
-            canBeWalkedThrough = true,
             custom = false,
+            physicMaterialID = -1
         };
     }
 
@@ -96,8 +93,6 @@ public class BlockConfig
             className = _GetPropertyFromConfig(config, "blockClass", "Block");
             solid = _GetPropertyFromConfig(config, "solid", true);
             transparent = _GetPropertyFromConfig(config, "transparent", false);
-            canBeWalkedOn = _GetPropertyFromConfig(config, "canBeWalkedOn", true);
-            canBeWalkedThrough = _GetPropertyFromConfig(config, "canBeWalkedThrough", false);
             raycastHit = _GetPropertyFromConfig(config, "raycastHit", solid);
             raycastHitOnRemoval = _GetPropertyFromConfig(config, "raycastHitOnRemoval", solid);
             custom = _GetPropertyFromConfig(config, "custom", false);
@@ -116,7 +111,7 @@ public class BlockConfig
 
             // Try to associate requested physic materials with one of world's materials
             {
-                physicMaterialID = 0;
+                physicMaterialID = solid ? 0 : -1; // solid objects will collide by default
                 string materialName = _GetPropertyFromConfig(config, "materialPx", "");
                 for (int i = 0; i < world.physicsMaterials.Length; i++)
                     if (world.physicsMaterials[i].name.Equals(materialName))

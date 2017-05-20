@@ -4,11 +4,10 @@
     "blockClass": "CrossMeshBlock",
     "configClass": "CrossMeshBlockConfig",
     "texture": "wild_grass",
-    "canBeWalkedOn": false,
     "canBeWalkedThrough": true,
     "raycastHitOnRemoval": true,
     "raycastHit": false,
     "custom": true,
     "solid": false,
-    "material": "ChunkColorUV"
+    "material": "ChunkColorUV"    
 }

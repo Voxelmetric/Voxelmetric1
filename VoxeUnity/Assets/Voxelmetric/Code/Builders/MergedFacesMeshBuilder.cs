@@ -1,8 +1,6 @@
 ﻿using System;
 using Voxelmetric.Code.Common;
 using Voxelmetric.Code.Core;
-using Voxelmetric.Code.Data_types;
-using Voxelmetric.Code.Load_Resources.Blocks;
 
 namespace Voxelmetric.Code.Builders
 {
@@ -10,7 +8,7 @@ namespace Voxelmetric.Code.Builders
     {
         protected static readonly int sideSize = Env.ChunkSize;
 
-        private static bool ExpandX(ChunkBlocks blocks, ref bool[] mask, ushort type, int y1, int z1, ref int x2, int y2, int z2)
+        private bool ExpandX(ChunkBlocks blocks, ref bool[] mask, Block block, int y1, int z1, ref int x2, int y2, int z2)
         {
             int yOffset = Env.ChunkSizeWithPaddingPow2-(z2-z1)*Env.ChunkSizeWithPadding;
             int index0 = Helpers.GetChunkIndex1DFrom3D(x2, y1, z1);
@@ -21,7 +19,7 @@ namespace Voxelmetric.Code.Builders
             {
                 for (int z = z1; z<z2; ++z, index += Env.ChunkSizeWithPadding)
                 {
-                    if (mask[index] || blocks.Get(index).Type!=type)
+                    if (mask[index] || !CanCreateBox(block, blocks.GetBlock(index)))
                         return false;
                 }
             }
@@ -38,7 +36,7 @@ namespace Voxelmetric.Code.Builders
             return true;
         }
 
-        private static bool ExpandY(ChunkBlocks blocks, ref bool[] mask, ushort type, int x1, int z1, int x2, ref int y2, int z2)
+        private bool ExpandY(ChunkBlocks blocks, ref bool[] mask, Block block, int x1, int z1, int x2, ref int y2, int z2)
         {
             int zOffset = Env.ChunkSizeWithPadding-x2+x1;
             int index0 = Helpers.GetChunkIndex1DFrom3D(x1, y2, z1);
@@ -49,7 +47,7 @@ namespace Voxelmetric.Code.Builders
             {
                 for (int x = x1; x<x2; ++x, ++index)
                 {
-                    if (mask[index] || blocks.Get(index).Type!=type)
+                    if (mask[index] || !CanCreateBox(block, blocks.GetBlock(index)))
                         return false;
                 }
             }
@@ -66,7 +64,7 @@ namespace Voxelmetric.Code.Builders
             return true;
         }
 
-        private static bool ExpandZ(ChunkBlocks blocks, ref bool[] mask, ushort type, int x1, int y1, int x2, int y2, ref int z2)
+        private bool ExpandZ(ChunkBlocks blocks, ref bool[] mask, Block block, int x1, int y1, int x2, int y2, ref int z2)
         {
             int yOffset = Env.ChunkSizeWithPaddingPow2-x2+x1;
             int index0 = Helpers.GetChunkIndex1DFrom3D(x1, y1, z2);
@@ -77,7 +75,7 @@ namespace Voxelmetric.Code.Builders
             {
                 for (int x = x1; x<x2; ++x, ++index)
                 {
-                    if (mask[index] || blocks.Get(index).Type!=type)
+                    if (mask[index] || !CanCreateBox(block, blocks.GetBlock(index)))
                         return false;
                 }
             }
@@ -118,11 +116,11 @@ namespace Voxelmetric.Code.Builders
                             continue;
 
                         mask[index] = true;
+                        
+                        Block block = blocks.GetBlock(index);
 
-                        // Skip air data
-                        ushort data = blocks.Get(index).Data;
-                        ushort type = (ushort)(data&BlockData.TypeMask);
-                        if (type==BlockProvider.AirType)
+                        // Skip blocks we're not interested in right away
+                        if (!CanConsiderBlock(block))
                             continue;
 
                         int x1 = x, y1 = y, z1 = z, x2 = x+1, y2 = y+1, z2 = z+1;
@@ -140,24 +138,24 @@ namespace Voxelmetric.Code.Builders
                             if (expandY)
                             {
                                 expandY = y2<Env.ChunkSize &&
-                                          ExpandY(blocks, ref mask, type, x1, z1, x2, ref y2, z2);
+                                          ExpandY(blocks, ref mask, block, x1, z1, x2, ref y2, z2);
                                 expand = expandY;
                             }
                             if (expandZ)
                             {
                                 expandZ = z2<Env.ChunkSize &&
-                                          ExpandZ(blocks, ref mask, type, x1, y1, x2, y2, ref z2);
+                                          ExpandZ(blocks, ref mask, block, x1, y1, x2, y2, ref z2);
                                 expand = expand|expandZ;
                             }
                             if (expandX)
                             {
-                                expandX = x2 < Env.ChunkSize &&
-                                          ExpandX(blocks, ref mask, type, y1, z1, ref x2, y2, z2);
+                                expandX = x2<Env.ChunkSize &&
+                                          ExpandX(blocks, ref mask, block, y1, z1, ref x2, y2, z2);
                                 expand = expand|expandX;
                             }
                         } while (expand);
 
-                        BuildBox(chunk, x1, y1, z1, x2, y2, z2);
+                        BuildBox(chunk, block, x1, y1, z1, x2, y2, z2);
                     }
                 }
             }
@@ -165,6 +163,8 @@ namespace Voxelmetric.Code.Builders
             pools.BoolArrayPool.Push(mask);
         }
 
-        protected abstract void BuildBox(Chunk chunk, int minX, int minY, int minZ, int maxX, int maxY, int maxZ);
+        protected abstract bool CanConsiderBlock(Block block);
+        protected abstract bool CanCreateBox(Block block, Block neighbor);
+        protected abstract void BuildBox(Chunk chunk, Block block, int minX, int minY, int minZ, int maxX, int maxY, int maxZ);
     }
 }

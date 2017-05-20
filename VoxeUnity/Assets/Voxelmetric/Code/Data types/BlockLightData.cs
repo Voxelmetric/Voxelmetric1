@@ -10,7 +10,7 @@ namespace Voxelmetric.Code.Data_types
          * 4- 5: nw
          * 6- 7: se
          * 8: necessity of face rotation
-         * 8-15: reserved
+         * 9-15: reserved
          */
         private readonly short mask;
 

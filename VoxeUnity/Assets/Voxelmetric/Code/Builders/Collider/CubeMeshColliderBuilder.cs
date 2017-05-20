@@ -13,7 +13,17 @@ namespace Voxelmetric.Code.Builders.Collider
     /// </summary>
     public class CubeMeshColliderBuilder: MergedFacesMeshBuilder
     {
-        protected override void BuildBox(Chunk chunk, int minX, int minY, int minZ, int maxX, int maxY, int maxZ)
+        protected override bool CanConsiderBlock(Block block)
+        {
+            return block.CanCollide;
+        }
+
+        protected override bool CanCreateBox(Block block, Block neighbor)
+        {
+            return block.PhysicMaterialID==neighbor.PhysicMaterialID;
+        }
+
+        protected override void BuildBox(Chunk chunk, Block block, int minX, int minY, int minZ, int maxX, int maxY, int maxZ)
         {
             // All faces in the are build in the following order:
             //     1--2
@@ -24,9 +34,6 @@ namespace Voxelmetric.Code.Builders.Collider
             var blocks = chunk.blocks;
             var pools = chunk.pools;
             var listeners = chunk.stateManager.Listeners;
-
-            Block block = blocks.GetBlock(Helpers.GetChunkIndex1DFrom3D(minX, minY, minZ));
-            bool canBeWalkedOn = block.CanBeWalkedOn;
 
             // Custom blocks have their own rules
             // TODO: Implement custom block colliders
@@ -70,10 +77,8 @@ namespace Voxelmetric.Code.Builders.Collider
                     n = minX+zz*sideSize;
                     for (int xx = minX; xx<maxX; ++xx, ++n, ++neighborIndex)
                     {
-                        bool neighborCanBeWalkedOn = blocks.GetBlock(neighborIndex).CanBeWalkedOn;
-
-                        // Let's see whether we can merge these faces
-                        if ((!canBeWalkedOn || !neighborCanBeWalkedOn) && canBeWalkedOn)
+                        // Let's see whether we can merge the faces
+                        if (!blocks.GetBlock(neighborIndex).CanCollide)
                             mask[n] = true;
                     }
                 }
@@ -152,10 +157,8 @@ namespace Voxelmetric.Code.Builders.Collider
                     n = minX+zz*sideSize;
                     for (int xx = minX; xx<maxX; ++xx, ++n, ++neighborIndex)
                     {
-                        bool neighborCanBeWalkedOn = blocks.GetBlock(neighborIndex).CanBeWalkedOn;
-
-                        // Let's see whether we can merge these faces
-                        if ((!canBeWalkedOn || !neighborCanBeWalkedOn) && canBeWalkedOn)
+                        // Let's see whether we can merge the faces
+                        if (!blocks.GetBlock(neighborIndex).CanCollide)
                             mask[n] = true;
                     }
                 }
@@ -234,10 +237,8 @@ namespace Voxelmetric.Code.Builders.Collider
                     n = minZ+yy*sideSize;
                     for (int zz = minZ; zz<maxZ; ++zz, ++n, neighborIndex+=Env.ChunkSizeWithPadding)
                     {
-                        bool neighborCanBeWalkedOn = blocks.GetBlock(neighborIndex).CanBeWalkedOn;
-
-                        // Let's see whether we can merge these faces
-                        if ((!canBeWalkedOn || !neighborCanBeWalkedOn) && canBeWalkedOn)
+                        // Let's see whether we can merge the faces
+                        if (!blocks.GetBlock(neighborIndex).CanCollide)
                             mask[n] = true;
                     }
                 }
@@ -316,10 +317,8 @@ namespace Voxelmetric.Code.Builders.Collider
                     n = minZ+yy*sideSize;
                     for (int zz = minZ; zz<maxZ; ++zz, ++n, neighborIndex+=Env.ChunkSizeWithPadding)
                     {
-                        bool neighborCanBeWalkedOn = blocks.GetBlock(neighborIndex).CanBeWalkedOn;
-
-                        // Let's see whether we can merge these faces
-                        if ((!canBeWalkedOn || !neighborCanBeWalkedOn) && canBeWalkedOn)
+                        // Let's see whether we can merge the faces
+                        if (!blocks.GetBlock(neighborIndex).CanCollide)
                             mask[n] = true;
                     }
                 }
@@ -398,10 +397,8 @@ namespace Voxelmetric.Code.Builders.Collider
                     n = minX+yy*sideSize;
                     for (int xx = minX; xx<maxX; ++xx, ++n, ++neighborIndex)
                     {
-                        bool neighborCanBeWalkedOn = blocks.GetBlock(neighborIndex).CanBeWalkedOn;
-
-                        // Let's see whether we can merge these faces
-                        if ((!canBeWalkedOn || !neighborCanBeWalkedOn) && canBeWalkedOn)
+                        // Let's see whether we can merge the faces
+                        if (!blocks.GetBlock(neighborIndex).CanCollide)
                             mask[n] = true;
                     }
                 }
@@ -480,10 +477,8 @@ namespace Voxelmetric.Code.Builders.Collider
                     n = minX+yy*sideSize;
                     for (int xx = minX; xx<maxX; ++xx, ++n, ++neighborIndex)
                     {
-                        bool neighborCanBeWalkedOn = blocks.GetBlock(neighborIndex).CanBeWalkedOn;
-
-                        // Let's see whether we can merge these faces
-                        if ((!canBeWalkedOn || !neighborCanBeWalkedOn) && canBeWalkedOn)
+                        // Let's see whether we can merge the faces
+                        if (!blocks.GetBlock(neighborIndex).CanCollide)
                             mask[n] = true;
                     }
                 }
