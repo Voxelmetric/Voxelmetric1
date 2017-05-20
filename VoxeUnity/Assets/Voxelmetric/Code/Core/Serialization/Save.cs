@@ -297,12 +297,16 @@ namespace Voxelmetric.Code.Core.Serialization
                 {
                     ChunkBlocks blocks = Chunk.blocks;
                     int i = 0;
-                    for (int y = 0; y<Env.ChunkSize; y++)
+
+                    int index = Helpers.ZeroChunkIndex;
+                    int yOffset = Env.ChunkSizeWithPaddingPow2- Env.ChunkSize*Env.ChunkSizeWithPadding;
+                    int zOffset = Env.ChunkSizeWithPadding-Env.ChunkSize;
+
+                    for (int y = 0; y<Env.ChunkSize; ++y, index+=yOffset)
                     {
-                        for (int z = 0; z<Env.ChunkSize; z++)
+                        for (int z = 0; z<Env.ChunkSize; ++z, index+=zOffset)
                         {
-                            int index = Helpers.GetChunkIndex1DFrom3D(0, y, z);
-                            for (int x = 0; x<Env.ChunkSize; x++, i += blockDataSize)
+                            for (int x = 0; x<Env.ChunkSize; ++x, i += blockDataSize, ++index)
                             {
                                 // Convert block types from internal optimized version into global types
                                 BlockData bd = blocks.Get(index+x);
@@ -402,12 +406,15 @@ namespace Voxelmetric.Code.Core.Serialization
                         {
                             fixed (byte* pSrc = bytes)
                             {
-                                for (int y = 0; y<Env.ChunkSize; y++)
+                                int index = Helpers.ZeroChunkIndex;
+                                int yOffset = Env.ChunkSizeWithPaddingPow2- Env.ChunkSize*Env.ChunkSizeWithPadding;
+                                int zOffset = Env.ChunkSizeWithPadding-Env.ChunkSize;
+
+                                for (int y = 0; y<Env.ChunkSize; ++y, index+=yOffset)
                                 {
-                                    for (int z = 0; z<Env.ChunkSize; z++)
+                                    for (int z = 0; z<Env.ChunkSize; ++z, index+=zOffset)
                                     {
-                                        int index = Helpers.GetChunkIndex1DFrom3D(0, y, z);
-                                        for (int x = 0; x<Env.ChunkSize; x++, i += blockDataSize)
+                                        for (int x = 0; x<Env.ChunkSize; ++x, i += blockDataSize, ++index)
                                         {
                                             BlockData* bd = (BlockData*)&pSrc[i];
 
@@ -465,7 +472,7 @@ namespace Voxelmetric.Code.Core.Serialization
             {
                 m_blocksModified[index] = pair.Value;
                 m_positionsModified[index] = pair.Key;
-                index++;
+                ++index;
             }
         }
 

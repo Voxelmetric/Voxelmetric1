@@ -50,7 +50,7 @@ namespace Voxelmetric.Code.Builders.Geometry
             Vector3[] face = pools.Vector3ArrayPool.PopExact(4);
             BlockFace[] mask = pools.BlockFaceArrayPool.PopExact(sideSize*sideSize);
 
-            // Top
+            #region Top face
             if (listeners[(int)Direction.up]!=null ||
                 // Don't render faces on world's edges for chunks with no neighbor
                 (Features.DontRenderWorldEdgesMask&Side.up)==0 ||
@@ -61,14 +61,16 @@ namespace Voxelmetric.Code.Builders.Geometry
                 // x axis - width
                 // z axis - height
 
+                int neighborIndex = Helpers.GetChunkIndex1DFrom3D(minX, maxY, minZ);
+                int zOffset = Env.ChunkSizeWithPadding-maxX+minX;
+
                 // Build the mask
-                for (int zz = minZ; zz<maxZ; ++zz)
+                for (int zz = minZ; zz<maxZ; ++zz, neighborIndex+=zOffset)
                 {
                     n = minX+zz*sideSize;
-                    for (int xx = minX; xx<maxX; ++xx, ++n)
+                    for (int xx = minX; xx<maxX; ++xx, ++n, ++neighborIndex)
                     {
-                        int currentIndex = Helpers.GetChunkIndex1DFrom3D(xx, maxY-1, zz);
-                        int neighborIndex = Helpers.GetChunkIndex1DFrom3D(xx, maxY, zz);
+                        int currentIndex = neighborIndex-Env.ChunkSizeWithPaddingPow2; // (xx, maxY-1, zz);
                         Block neighborBlock = blocks.GetBlock(neighborIndex);
 
                         // Let's see whether we can merge faces
@@ -160,7 +162,9 @@ namespace Voxelmetric.Code.Builders.Geometry
                     }
                 }
             }
-            // Bottom
+            #endregion
+
+            #region Bottom face
             if (listeners[(int)Direction.down]!=null ||
                 // Don't render faces on world's edges for chunks with no neighbor
                 (Features.DontRenderWorldEdgesMask&Side.down)==0 ||
@@ -171,14 +175,16 @@ namespace Voxelmetric.Code.Builders.Geometry
                 // x axis - width
                 // z axis - height
 
+                int currentIndex = Helpers.GetChunkIndex1DFrom3D(minX, minY, minZ);
+                int zOffset = Env.ChunkSizeWithPadding-maxX+minX;
+
                 // Build the mask
-                for (int zz = minZ; zz<maxZ; ++zz)
+                for (int zz = minZ; zz<maxZ; ++zz, currentIndex+=zOffset)
                 {
                     n = minX+zz*sideSize;
-                    for (int xx = minX; xx<maxX; ++xx, ++n)
+                    for (int xx = minX; xx<maxX; ++xx, ++n, ++currentIndex)
                     {
-                        int currentIndex = Helpers.GetChunkIndex1DFrom3D(xx, minY, zz);
-                        int neighborIndex = Helpers.GetChunkIndex1DFrom3D(xx, minY-1, zz);
+                        int neighborIndex = currentIndex-Env.ChunkSizeWithPaddingPow2;
                         Block neighborBlock = blocks.GetBlock(neighborIndex);
 
                         // Let's see whether we can merge faces
@@ -270,7 +276,9 @@ namespace Voxelmetric.Code.Builders.Geometry
                     }
                 }
             }
-            // Right
+            #endregion
+
+            #region Right face
             if (listeners[(int)Direction.east]!=null ||
                 // Don't render faces on world's edges for chunks with no neighbor
                 (Features.DontRenderWorldEdgesMask&Side.east)==0 ||
@@ -281,14 +289,16 @@ namespace Voxelmetric.Code.Builders.Geometry
                 // y axis - height
                 // z axis - width
 
+                int neighborIndex = Helpers.GetChunkIndex1DFrom3D(maxX, minY, minZ);
+                int yOffset = Env.ChunkSizeWithPaddingPow2-(maxZ-minZ)*Env.ChunkSizeWithPadding;;
+
                 // Build the mask
-                for (int yy = minY; yy<maxY; ++yy)
+                for (int yy = minY; yy<maxY; ++yy, neighborIndex+=yOffset)
                 {
                     n = minZ+yy*sideSize;
-                    for (int zz = minZ; zz<maxZ; ++zz, ++n)
+                    for (int zz = minZ; zz<maxZ; ++zz, ++n, neighborIndex+=Env.ChunkSizeWithPadding)
                     {
-                        int currentIndex = Helpers.GetChunkIndex1DFrom3D(maxX-1, yy, zz);
-                        int neighborIndex = Helpers.GetChunkIndex1DFrom3D(maxX, yy, zz);
+                        int currentIndex = neighborIndex-1;
                         Block neighborBlock = blocks.GetBlock(neighborIndex);
 
                         // Let's see whether we can merge faces
@@ -380,7 +390,9 @@ namespace Voxelmetric.Code.Builders.Geometry
                     }
                 }
             }
-            // Left
+            #endregion
+
+            #region Left face
             if (listeners[(int)Direction.west]!=null ||
                 // Don't render faces on world's edges for chunks with no neighbor
                 (Features.DontRenderWorldEdgesMask&Side.west)==0 ||
@@ -391,14 +403,16 @@ namespace Voxelmetric.Code.Builders.Geometry
                 // y axis - height
                 // z axis - width
 
+                int currentIndex = Helpers.GetChunkIndex1DFrom3D(minX, minY, minZ);
+                int yOffset = Env.ChunkSizeWithPaddingPow2-(maxZ-minZ)*Env.ChunkSizeWithPadding;
+
                 // Build the mask
-                for (int yy = minY; yy<maxY; ++yy)
+                for (int yy = minY; yy<maxY; ++yy, currentIndex+=yOffset)
                 {
                     n = minZ+yy*sideSize;
-                    for (int zz = minZ; zz<maxZ; ++zz, ++n)
+                    for (int zz = minZ; zz<maxZ; ++zz, ++n, currentIndex+=Env.ChunkSizeWithPadding)
                     {
-                        int currentIndex = Helpers.GetChunkIndex1DFrom3D(minX, yy, zz);
-                        int neighborIndex = Helpers.GetChunkIndex1DFrom3D(minX-1, yy, zz);
+                        int neighborIndex = currentIndex-1;
                         Block neighborBlock = blocks.GetBlock(neighborIndex);
 
                         // Let's see whether we can merge faces
@@ -490,7 +504,9 @@ namespace Voxelmetric.Code.Builders.Geometry
                     }
                 }
             }
-            // Front
+            #endregion
+
+            #region Front face
             if (listeners[(int)Direction.north]!=null ||
                 // Don't render faces on world's edges for chunks with no neighbor
                 (Features.DontRenderWorldEdgesMask&Side.north)==0 ||
@@ -501,14 +517,16 @@ namespace Voxelmetric.Code.Builders.Geometry
                 // x axis - width
                 // y axis - height
 
+                int neighborIndex = Helpers.GetChunkIndex1DFrom3D(minX, minY, maxZ);
+                int yOffset = Env.ChunkSizeWithPaddingPow2-maxX+minX;
+
                 // Build the mask
-                for (int yy = minY; yy<maxY; ++yy)
+                for (int yy = minY; yy<maxY; ++yy, neighborIndex+=yOffset)
                 {
                     n = minX+yy*sideSize;
-                    for (int xx = minX; xx<maxX; ++xx, ++n)
+                    for (int xx = minX; xx<maxX; ++xx, ++n, ++neighborIndex)
                     {
-                        int currentIndex = Helpers.GetChunkIndex1DFrom3D(xx, yy, maxZ-1);
-                        int neighborIndex = Helpers.GetChunkIndex1DFrom3D(xx, yy, maxZ);
+                        int currentIndex = neighborIndex-Env.ChunkSizeWithPadding;
                         Block neighborBlock = blocks.GetBlock(neighborIndex);
 
                         // Let's see whether we can merge faces
@@ -600,7 +618,9 @@ namespace Voxelmetric.Code.Builders.Geometry
                     }
                 }
             }
-            // Back
+            #endregion
+
+            #region Back face
             if (listeners[(int)Direction.south]!=null ||
                 // Don't render faces on world's edges for chunks with no neighbor
                 (Features.DontRenderWorldEdgesMask&Side.south)==0 ||
@@ -611,14 +631,16 @@ namespace Voxelmetric.Code.Builders.Geometry
                 // x axis - width
                 // y axis - height
 
+                int currentIndex = Helpers.GetChunkIndex1DFrom3D(minX, minY, minZ);
+                int yOffset = Env.ChunkSizeWithPaddingPow2-maxX+minX;
+
                 // Build the mask
-                for (int yy = minY; yy<maxY; ++yy)
+                for (int yy = minY; yy<maxY; ++yy, currentIndex+=yOffset)
                 {
                     n = minX+yy*sideSize;
-                    for (int xx = minX; xx<maxX; ++xx, ++n)
+                    for (int xx = minX; xx<maxX; ++xx, ++n, ++currentIndex)
                     {
-                        int currentIndex = Helpers.GetChunkIndex1DFrom3D(xx, yy, minZ);
-                        int neighborIndex = Helpers.GetChunkIndex1DFrom3D(xx, yy, minZ-1);
+                        int neighborIndex = currentIndex-Env.ChunkSizeWithPadding;
                         Block neighborBlock = blocks.GetBlock(neighborIndex);
 
                         // Let's see whether we can merge faces
@@ -710,6 +732,7 @@ namespace Voxelmetric.Code.Builders.Geometry
                     }
                 }
             }
+            #endregion
 
             pools.BlockFaceArrayPool.Push(mask);
             pools.Vector3ArrayPool.Push(face);

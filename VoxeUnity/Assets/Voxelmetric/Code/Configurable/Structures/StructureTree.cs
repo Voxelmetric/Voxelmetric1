@@ -134,11 +134,14 @@ public class StructureTree: GeneratedStructure
 
                     // Actual crown construction
                     ChunkBlocks blocks = chunk.blocks;
-                    for (int y = minY; y<=maxY; ++y)
+                    int index = Helpers.GetChunkIndex1DFrom3D(minX, minY, minZ);
+                    int yOffset = Env.ChunkSizeWithPaddingPow2-(maxZ-minZ+1)*Env.ChunkSizeWithPadding;
+                    int zOffset = Env.ChunkSizeWithPadding-(maxX-minX+1);
+                    for (int y = minY; y<=maxY; ++y, index+=yOffset)
                     {
-                        for (int z = minZ; z<=maxZ; ++z)
+                        for (int z = minZ; z<=maxZ; ++z, index+=zOffset)
                         {
-                            for (int x = minX; x<=maxX; ++x)
+                            for (int x = minX; x<=maxX; ++x, ++index)
                             {
                                 int xx = x+xOff;
                                 int yy = y+yOff;
@@ -148,10 +151,7 @@ public class StructureTree: GeneratedStructure
                                 float _y = yy*yy*b2inv;
                                 float _z = zz*zz*a2inv;
                                 if (_x+_y+_z<=1.0f)
-                                {
-                                    int index = Helpers.GetChunkIndex1DFrom3D(x, y, z);
                                     blocks.SetRaw(index, leaves);
-                                }
                             }
                         }
                     }
@@ -194,7 +194,7 @@ public class StructureTree: GeneratedStructure
             // Actual trunk construction
             ChunkBlocks blocks = chunk.blocks;
             int index = Helpers.GetChunkIndex1DFrom3D(tx, minY, tz);
-            for (int y = minY; y<=maxY; y++, index += Env.ChunkSizeWithPaddingPow2)
+            for (int y = minY; y<=maxY; ++y, index += Env.ChunkSizeWithPaddingPow2)
                 blocks.SetRaw(index, log);
         }
     }

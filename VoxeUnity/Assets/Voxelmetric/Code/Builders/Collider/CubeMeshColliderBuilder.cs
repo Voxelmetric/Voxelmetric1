@@ -51,7 +51,7 @@ namespace Voxelmetric.Code.Builders.Collider
 
             int n, w, h, l, k, maskIndex;
 
-            // Top
+            #region Top face
             if (listeners[(int)Direction.up]!=null ||
                 // Don't render faces on world's edges for chunks with no neighbor
                 maxY!=Env.ChunkSize)
@@ -61,13 +61,15 @@ namespace Voxelmetric.Code.Builders.Collider
                 // x axis - width
                 // z axis - height
 
+                int neighborIndex = Helpers.GetChunkIndex1DFrom3D(minX, maxY, minZ);
+                int zOffset = Env.ChunkSizeWithPadding-maxX+minX;
+
                 // Build the mask
-                for (int zz = minZ; zz<maxZ; ++zz)
+                for (int zz = minZ; zz<maxZ; ++zz, neighborIndex+=zOffset)
                 {
                     n = minX+zz*sideSize;
-                    for (int xx = minX; xx<maxX; ++xx, ++n)
+                    for (int xx = minX; xx<maxX; ++xx, ++n, ++neighborIndex)
                     {
-                        int neighborIndex = Helpers.GetChunkIndex1DFrom3D(xx, maxY, zz);
                         bool neighborCanBeWalkedOn = blocks.GetBlock(neighborIndex).CanBeWalkedOn;
 
                         // Let's see whether we can merge these faces
@@ -129,7 +131,9 @@ namespace Voxelmetric.Code.Builders.Collider
                     }
                 }
             }
-            // Bottom
+            #endregion
+
+            #region Bottom face
             if (listeners[(int)Direction.down]!=null ||
                 // Don't render faces on world's edges for chunks with no neighbor
                 minY!=0)
@@ -139,13 +143,15 @@ namespace Voxelmetric.Code.Builders.Collider
                 // x axis - width
                 // z axis - height
 
+                int neighborIndex = Helpers.GetChunkIndex1DFrom3D(minX, minY-1, minZ);
+                int zOffset = Env.ChunkSizeWithPadding-maxX+minX;
+
                 // Build the mask
-                for (int zz = minZ; zz<maxZ; ++zz)
+                for (int zz = minZ; zz<maxZ; ++zz, neighborIndex+=zOffset)
                 {
                     n = minX+zz*sideSize;
-                    for (int xx = minX; xx<maxX; ++xx, ++n)
+                    for (int xx = minX; xx<maxX; ++xx, ++n, ++neighborIndex)
                     {
-                        int neighborIndex = Helpers.GetChunkIndex1DFrom3D(xx, minY-1, zz);
                         bool neighborCanBeWalkedOn = blocks.GetBlock(neighborIndex).CanBeWalkedOn;
 
                         // Let's see whether we can merge these faces
@@ -207,7 +213,9 @@ namespace Voxelmetric.Code.Builders.Collider
                     }
                 }
             }
-            // Right
+            #endregion
+
+            #region Right face
             if (listeners[(int)Direction.east]!=null ||
                 // Don't render faces on world's edges for chunks with no neighbor
                 maxX!=Env.ChunkSize)
@@ -217,13 +225,15 @@ namespace Voxelmetric.Code.Builders.Collider
                 // y axis - height
                 // z axis - width
 
+                int neighborIndex = Helpers.GetChunkIndex1DFrom3D(maxX, minY, minZ);
+                int yOffset = Env.ChunkSizeWithPaddingPow2-(maxZ-minZ)*Env.ChunkSizeWithPadding;
+
                 // Build the mask
-                for (int yy = minY; yy<maxY; ++yy)
+                for (int yy = minY; yy<maxY; ++yy, neighborIndex+=yOffset)
                 {
                     n = minZ+yy*sideSize;
-                    for (int zz = minZ; zz<maxZ; ++zz, ++n)
+                    for (int zz = minZ; zz<maxZ; ++zz, ++n, neighborIndex+=Env.ChunkSizeWithPadding)
                     {
-                        int neighborIndex = Helpers.GetChunkIndex1DFrom3D(maxX, yy, zz);
                         bool neighborCanBeWalkedOn = blocks.GetBlock(neighborIndex).CanBeWalkedOn;
 
                         // Let's see whether we can merge these faces
@@ -285,7 +295,9 @@ namespace Voxelmetric.Code.Builders.Collider
                     }
                 }
             }
-            // Left
+            #endregion
+
+            #region Left face
             if (listeners[(int)Direction.west]!=null ||
                 // Don't render faces on world's edges for chunks with no neighbor
                 minX!=0)
@@ -295,13 +307,15 @@ namespace Voxelmetric.Code.Builders.Collider
                 // y axis - height
                 // z axis - width
 
+                int neighborIndex = Helpers.GetChunkIndex1DFrom3D(minX-1, minY, minZ);
+                int yOffset = Env.ChunkSizeWithPaddingPow2-(maxZ-minZ)*Env.ChunkSizeWithPadding;
+
                 // Build the mask
-                for (int yy = minY; yy<maxY; ++yy)
+                for (int yy = minY; yy<maxY; ++yy, neighborIndex+=yOffset)
                 {
                     n = minZ+yy*sideSize;
-                    for (int zz = minZ; zz<maxZ; ++zz, ++n)
+                    for (int zz = minZ; zz<maxZ; ++zz, ++n, neighborIndex+=Env.ChunkSizeWithPadding)
                     {
-                        int neighborIndex = Helpers.GetChunkIndex1DFrom3D(minX-1, yy, zz);
                         bool neighborCanBeWalkedOn = blocks.GetBlock(neighborIndex).CanBeWalkedOn;
 
                         // Let's see whether we can merge these faces
@@ -363,7 +377,9 @@ namespace Voxelmetric.Code.Builders.Collider
                     }
                 }
             }
-            // Front
+            #endregion
+
+            #region Front face
             if (listeners[(int)Direction.north]!=null ||
                 // Don't render faces on world's edges for chunks with no neighbor
                 maxZ!=Env.ChunkSize)
@@ -373,13 +389,15 @@ namespace Voxelmetric.Code.Builders.Collider
                 // x axis - width
                 // y axis - height
 
+                int neighborIndex = Helpers.GetChunkIndex1DFrom3D(minX, minY, maxZ);
+                int yOffset = Env.ChunkSizeWithPaddingPow2-maxX+minX;
+
                 // Build the mask
-                for (int yy = minY; yy<maxY; ++yy)
+                for (int yy = minY; yy<maxY; ++yy, neighborIndex+=yOffset)
                 {
                     n = minX+yy*sideSize;
-                    for (int xx = minX; xx<maxX; ++xx, ++n)
+                    for (int xx = minX; xx<maxX; ++xx, ++n, ++neighborIndex)
                     {
-                        int neighborIndex = Helpers.GetChunkIndex1DFrom3D(xx, yy, maxZ);
                         bool neighborCanBeWalkedOn = blocks.GetBlock(neighborIndex).CanBeWalkedOn;
 
                         // Let's see whether we can merge these faces
@@ -441,7 +459,9 @@ namespace Voxelmetric.Code.Builders.Collider
                     }
                 }
             }
-            // Back
+            #endregion
+
+            #region Back face
             if (listeners[(int)Direction.south]!=null ||
                 // Don't render faces on world's edges for chunks with no neighbor
                 minZ!=0)
@@ -451,13 +471,15 @@ namespace Voxelmetric.Code.Builders.Collider
                 // x axis - width
                 // y axis - height
 
+                int neighborIndex = Helpers.GetChunkIndex1DFrom3D(minX, minY, minZ-1);
+                int yOffset = Env.ChunkSizeWithPaddingPow2-maxX+minX;
+
                 // Build the mask
-                for (int yy = minY; yy<maxY; ++yy)
+                for (int yy = minY; yy<maxY; ++yy, neighborIndex+=yOffset)
                 {
                     n = minX+yy*sideSize;
-                    for (int xx = minX; xx<maxX; ++xx, ++n)
+                    for (int xx = minX; xx<maxX; ++xx, ++n, ++neighborIndex)
                     {
-                        int neighborIndex = Helpers.GetChunkIndex1DFrom3D(xx, yy, minZ-1);
                         bool neighborCanBeWalkedOn = blocks.GetBlock(neighborIndex).CanBeWalkedOn;
 
                         // Let's see whether we can merge these faces
@@ -519,6 +541,7 @@ namespace Voxelmetric.Code.Builders.Collider
                     }
                 }
             }
+            #endregion
 
             pools.BoolArrayPool.Push(mask);
             pools.VertexDataArrayPool.Push(vertexData);

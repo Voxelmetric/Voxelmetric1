@@ -12,10 +12,13 @@ namespace Voxelmetric.Code.Builders
 
         private static bool ExpandX(ChunkBlocks blocks, ref bool[] mask, ushort type, int y1, int z1, ref int x2, int y2, int z2)
         {
-            // Check the quad formed by YZ axes and try to expand the X asix
-            for (int y = y1; y<y2; ++y)
+            int yOffset = Env.ChunkSizeWithPaddingPow2-(z2-z1)*Env.ChunkSizeWithPadding;
+            int index0 = Helpers.GetChunkIndex1DFrom3D(x2, y1, z1);
+
+            // Check the quad formed by YZ axes and try to expand the X axis
+            int index = index0;
+            for (int y = y1; y<y2; ++y, index+=yOffset)
             {
-                int index = Helpers.GetChunkIndex1DFrom3D(x2, y, z1);
                 for (int z = z1; z<z2; ++z, index += Env.ChunkSizeWithPadding)
                 {
                     if (mask[index] || blocks.Get(index).Type!=type)
@@ -24,9 +27,9 @@ namespace Voxelmetric.Code.Builders
             }
 
             // If the box can expand, mark the position as tested and expand the X axis
-            for (int y = y1; y<y2; ++y)
+            index = index0;
+            for (int y = y1; y<y2; ++y, index+=yOffset)
             {
-                int index = Helpers.GetChunkIndex1DFrom3D(x2, y, z1);
                 for (int z = z1; z<z2; ++z, index += Env.ChunkSizeWithPadding)
                     mask[index] = true;
             }
@@ -37,10 +40,13 @@ namespace Voxelmetric.Code.Builders
 
         private static bool ExpandY(ChunkBlocks blocks, ref bool[] mask, ushort type, int x1, int z1, int x2, ref int y2, int z2)
         {
-            // Check the quad formed by XZ axes and try to expand the Y asix
-            for (int z = z1; z<z2; ++z)
+            int zOffset = Env.ChunkSizeWithPadding-x2+x1;
+            int index0 = Helpers.GetChunkIndex1DFrom3D(x1, y2, z1);
+
+            // Check the quad formed by XZ axes and try to expand the Y axis
+            int index = index0;
+            for (int z = z1; z<z2; ++z, index+=zOffset)
             {
-                int index = Helpers.GetChunkIndex1DFrom3D(x1, y2, z);
                 for (int x = x1; x<x2; ++x, ++index)
                 {
                     if (mask[index] || blocks.Get(index).Type!=type)
@@ -49,9 +55,9 @@ namespace Voxelmetric.Code.Builders
             }
 
             // If the box can expand, mark the position as tested and expand the X axis
-            for (int z = z1; z<z2; ++z)
+            index = index0;
+            for (int z = z1; z<z2; ++z, index+=zOffset)
             {
-                int index = Helpers.GetChunkIndex1DFrom3D(x1, y2, z);
                 for (int x = x1; x<x2; ++x, ++index)
                     mask[index] = true;
             }
@@ -62,10 +68,13 @@ namespace Voxelmetric.Code.Builders
 
         private static bool ExpandZ(ChunkBlocks blocks, ref bool[] mask, ushort type, int x1, int y1, int x2, int y2, ref int z2)
         {
-            // Check the quad formed by XY axes and try to expand the Z asix
-            for (int y = y1; y<y2; ++y)
+            int yOffset = Env.ChunkSizeWithPaddingPow2-x2+x1;
+            int index0 = Helpers.GetChunkIndex1DFrom3D(x1, y1, z2);
+            
+            // Check the quad formed by XY axes and try to expand the Z axis
+            int index = index0;
+            for (int y = y1; y<y2; ++y, index+=yOffset)
             {
-                int index = Helpers.GetChunkIndex1DFrom3D(x1, y, z2);
                 for (int x = x1; x<x2; ++x, ++index)
                 {
                     if (mask[index] || blocks.Get(index).Type!=type)
@@ -74,9 +83,9 @@ namespace Voxelmetric.Code.Builders
             }
 
             // If the box can expand, mark the position as tested and expand the X axis
-            for (int y = y1; y<y2; ++y)
+            index = index0;
+            for (int y = y1; y<y2; ++y, index+=yOffset)
             {
-                int index = Helpers.GetChunkIndex1DFrom3D(x1, y, z2);
                 for (int x = x1; x<x2; ++x, ++index)
                     mask[index] = true;
             }
@@ -95,11 +104,13 @@ namespace Voxelmetric.Code.Builders
 
             // This compression is essentialy RLE. However, instead of working on 1 axis
             // it works in 3 dimensions.
-            for (int y = 0; y<Env.ChunkSize; ++y)
+            int index = Helpers.ZeroChunkIndex;
+            int yOffset = Env.ChunkSizeWithPaddingPow2 - Env.ChunkSize*Env.ChunkSizeWithPadding;
+            int zOffset = Env.ChunkSizeWithPadding-Env.ChunkSize;
+            for (int y = 0; y<Env.ChunkSize; ++y, index+=yOffset)
             {
-                for (int z = 0; z<Env.ChunkSize; ++z)
+                for (int z = 0; z<Env.ChunkSize; ++z, index+=zOffset)
                 {
-                    int index = Helpers.GetChunkIndex1DFrom3D(0, y, z);
                     for (int x = 0; x<Env.ChunkSize; ++x, ++index)
                     {
                         // Skip already checked blocks

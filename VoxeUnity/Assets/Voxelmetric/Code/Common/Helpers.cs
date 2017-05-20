@@ -21,7 +21,9 @@ namespace Voxelmetric.Code.Common
 			return x + sizeX * (z + y * sizeZ);
 		}
 
-		public static int GetChunkIndex1DFrom3D(int x, int y, int z)
+	    public static int ZeroChunkIndex = Env.ChunkPadding+(Env.ChunkPadding<<Env.ChunkPow)+(Env.ChunkPadding<<Env.ChunkPow2);
+
+        public static int GetChunkIndex1DFrom3D(int x, int y, int z)
 		{
 		    int xx = x+Env.ChunkPadding;
 		    int yy = y+Env.ChunkPadding;
