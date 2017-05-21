@@ -273,7 +273,7 @@ namespace Voxelmetric.Code.Core
                                 // Remove any occurence of this structure from pending positions
                                 for (int j = 0; j<list.Count; )
                                 {
-                                    if (list[i].id==info.id)
+                                    if (list[j].id==info.id)
                                         list.RemoveAt(j);
                                     else
                                         ++j;
