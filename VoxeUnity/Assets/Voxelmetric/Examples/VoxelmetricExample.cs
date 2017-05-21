@@ -79,38 +79,59 @@ namespace Voxelmetric.Examples
                 if (saveProgressText != null)
                     saveProgressText.text = saveProgress != null ? SaveStatus() : "Save";
 
-                // Clicking voxel blocks
-                if (Input.GetMouseButtonDown(0) && eventSystem!=null && !eventSystem.IsPointerOverGameObject())
+                if (eventSystem!=null && !eventSystem.IsPointerOverGameObject())
                 {
                     if (hit.block.Type!=BlockProvider.AirType)
                     {
                         bool adjacent = block.Type!=BlockProvider.AirType;
                         Vector3Int blockPos = adjacent ? hit.adjacentPos : hit.vector3Int;
-                        Code.Voxelmetric.SetBlock(world, ref blockPos, new BlockData(block.Type, block.Solid));
+                        Debug.DrawLine(cam.transform.position, blockPos, Color.red);
                     }
-                }
 
-                // Pathfinding
-                if (Input.GetKeyDown(KeyCode.I))
-                {
-                    pfStart = hit.vector3Int;
-                }
+                    // Clicking voxel blocks
+                    if (Input.GetMouseButtonDown(0))
+                    {
+                        if (hit.block.Type!=BlockProvider.AirType)
+                        {
+                            bool adjacent = block.Type!=BlockProvider.AirType;
+                            Vector3Int blockPos = adjacent ? hit.adjacentPos : hit.vector3Int;
+                            Code.Voxelmetric.SetBlock(world, ref blockPos, new BlockData(block.Type, block.Solid));
+                        }
+                    }
 
-                if (Input.GetKeyDown(KeyCode.O))
-                {
-                    pfStop = hit.vector3Int;
-                }
+                    // Pathfinding
+                    if (Input.GetKeyDown(KeyCode.I))
+                    {
+                        if (hit.block.Type!=BlockProvider.AirType)
+                        {
+                            bool adjacent = block.Type!=BlockProvider.AirType;
+                            pfStart = adjacent ? hit.adjacentPos : hit.vector3Int;
+                        }
+                    }
 
-                if (Input.GetKeyDown(KeyCode.P))
-                {
-                    pf = new PathFinder(pfStart, pfStop, world, 2);
-                    Debug.Log(pf.path.Count);
-                }
+                    if (Input.GetKeyDown(KeyCode.O))
+                    {
+                        if (hit.block.Type!=BlockProvider.AirType)
+                        {
+                            bool adjacent = block.Type!=BlockProvider.AirType;
+                            pfStop = adjacent ? hit.adjacentPos : hit.vector3Int;
+                        }
+                    }
 
-                if (pf!=null && pf.path.Count!=0)
-                {
-                    for (int i = 0; i<pf.path.Count-1; i++)
-                        Debug.DrawLine(pf.path[i].Add(0, 1, 0), pf.path[i+1].Add(0, 1, 0));
+                    if (Input.GetKeyDown(KeyCode.P))
+                    {
+                        pf = new PathFinder(pfStart, pfStop, world, 0);
+                    }
+
+                    if (pf!=null && pf.path.Count!=0)
+                    {
+                        for (int i = 0; i<pf.path.Count-1; i++)
+                        {
+                            Vector3 p0 = (Vector3)pf.path[i]+Env.HalfBlockOffset;
+                            Vector3 p1 = (Vector3)pf.path[i+1]+Env.HalfBlockOffset;
+                            Debug.DrawLine(p0, p1, Color.red);
+                        }
+                    }
                 }
 
                 // Test of ranged block setting
@@ -124,7 +145,7 @@ namespace Voxelmetric.Examples
                 }
             }
         }
-
+        
         public void SaveAll()
         {
             var chunksToSave = Code.Voxelmetric.SaveAll(world);
@@ -136,7 +157,7 @@ namespace Voxelmetric.Examples
             if (saveProgress == null)
                 return "";
 
-            return saveProgress.GetProgress() + "%";
+            return saveProgress.GetProgress().ToString() + "%";
         }
 
     }

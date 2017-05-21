@@ -1,42 +1,43 @@
-﻿using System.Collections.Generic;
-using UnityEngine;
+﻿using System;
+using System.Collections.Generic;
+using System.Threading;
 using Voxelmetric.Code.Common.Threading;
 using Voxelmetric.Code.Common.Threading.Managers;
 using Voxelmetric.Code.Core;
 using Voxelmetric.Code.Data_types;
+using ThreadPool = Voxelmetric.Code.Common.Threading.ThreadPool;
 
 namespace Voxelmetric.Code.Utilities
 {
-    public class PathFinder {
+    public class PathFinder
+    {
+        private const float maxDistToTravelAfterDirect = 800;
+        private const float maxDistToTravelMultiplier = 10;
 
-        World world;
-        Dictionary<Vector3Int, Heuristics> open = new Dictionary<Vector3Int, Heuristics>();
-        Dictionary<Vector3Int, Heuristics> closed = new Dictionary<Vector3Int, Heuristics>();
+        public readonly List<Vector3Int> path;
 
-        public List<Vector3Int> path = new List<Vector3Int>();
+        private readonly World world;
+        private readonly Dictionary<Vector3Int, Heuristics> open;
+        private readonly Dictionary<Vector3Int, Heuristics> closed;
+        
+        private readonly Vector3Int target;
+        private readonly Vector3Int start;
 
-        Vector3Int targetLocation;
-        Vector3Int startLocation;
-
-        int entityHeight;
-
-        public float range = 0.5f;
-        float distanceFromStartToTarget = 0;
-        float maxDistToTravelAfterDirect = 800;
-        float maxDistToTravelMultiplier = 10;
+        private readonly int entityHeight;
+        private readonly float range = 0.5f;
+        private readonly float distanceFromStartToTarget = 0;
 
         public enum Status { stopped, working, failed, succeeded };
-
         public Status status;
 
-        struct Heuristics
+        private struct Heuristics
         {
-            /// Real distance from start
-            public float g;
-            /// Estimated distance to target
-            public float h;
-
-            public Vector3Int parent;
+            //! Parent block position
+            public readonly Vector3Int parent;
+            //! Real distance from start
+            public readonly float g;
+            //! Estimated distance to target
+            public readonly float h;
 
             public Heuristics(float g, float h, Vector3Int parent)
             {
@@ -44,20 +45,27 @@ namespace Voxelmetric.Code.Utilities
                 this.h = h;
                 this.parent = parent;
             }
-        };
+        }
 
         public PathFinder(Vector3Int start, Vector3Int target, World world, float range = 0.5f, int entityHeight=1)
         {
-            status = Status.working;
-            this.range = range;
-            startLocation = start.Add(Direction.down);
-            targetLocation = target.Add(Direction.down);
-            distanceFromStartToTarget = Distance(ref startLocation, ref targetLocation);
+            // Don't search the path if our target is too close
+            if (start.Distance2(ref target)<=range*range)
+                return;
+            
+            path = new List<Vector3Int>();
+            open = new Dictionary<Vector3Int, Heuristics>();
+            closed = new Dictionary<Vector3Int, Heuristics>();
+
             this.world = world;
+            this.range = range;
             this.entityHeight = entityHeight;
+            this.start = start;
+            this.target = target;
 
-            open.Add(startLocation, new Heuristics(0, distanceFromStartToTarget, startLocation));
-
+            distanceFromStartToTarget = start.Distance2(ref target);
+            open.Add(start, new Heuristics(0, distanceFromStartToTarget, start));
+            status = Status.working;
             WorkPoolManager.Add(
                 new ThreadPoolItem<PathFinder>(
                     Globals.WorkPool,
@@ -86,7 +94,7 @@ namespace Voxelmetric.Code.Utilities
 
             open.TryGetValue(lastTile, out pos);
 
-            while (!pos.parent.Equals(startLocation))
+            while (pos.parent!=start)
             {
                 path.Insert(0, pos.parent.Add(Direction.up));
                 if (!closed.TryGetValue(pos.parent, out pos))
@@ -95,11 +103,11 @@ namespace Voxelmetric.Code.Utilities
 
         }
 
-        private static Vector3Int FailedPos = new Vector3Int(0, int.MaxValue, 0);
+        private static readonly Vector3Int FailedPos = new Vector3Int(0, int.MaxValue, 0);
 
         private void ProcessBest()
         {
-            float shortestDist = (distanceFromStartToTarget*maxDistToTravelMultiplier) + maxDistToTravelAfterDirect;
+            float shortestDist = distanceFromStartToTarget*maxDistToTravelMultiplier + maxDistToTravelAfterDirect;
             Vector3Int bestPos = FailedPos;
 
             foreach (var tile in open)
@@ -114,14 +122,14 @@ namespace Voxelmetric.Code.Utilities
             Heuristics parent;
             open.TryGetValue(bestPos, out parent);
 
-            if (Distance(ref bestPos, ref targetLocation) <= range)
+            if (target.Distance2(ref bestPos) <= range*range)
             {
                 PathComplete(bestPos);
                 status = Status.succeeded;
                 return;
             }
 
-            if (bestPos.Equals(FailedPos))
+            if (bestPos==FailedPos)
             {
                 status = Status.failed;
             }
@@ -143,82 +151,92 @@ namespace Voxelmetric.Code.Utilities
             CheckAdjacent(pos, h);
         }
 
+        [ThreadStatic] private static Vector3Int[] adjacentPositions;
+        [ThreadStatic] private static float[] distanceFromStart;
+
         private void CheckAdjacent(Vector3Int pos, Heuristics dist)
         {
-            List<Vector3Int> adjacentPositions = new List<Vector3Int>();
-            List<float> distanceFromStart= new List<float>();
-
-            //Cardinal directions
-            adjacentPositions.Add(new Vector3Int(pos.x, pos.y, pos.z + 1));
-            distanceFromStart.Add(dist.g +1);
-            adjacentPositions.Add(new Vector3Int(pos.x + 1, pos.y, pos.z));
-            distanceFromStart.Add(dist.g +1);
-            adjacentPositions.Add(new Vector3Int(pos.x, pos.y, pos.z - 1));
-            distanceFromStart.Add(dist.g +1);
-            adjacentPositions.Add(new Vector3Int(pos.x - 1, pos.y, pos.z));
-            distanceFromStart.Add(dist.g +1);
-
-            ////diagonal directions
-            //adjacentPositions.Add(new BlockPos(pos.x + 1, pos.y, pos.z + 1));
-            //distanceFromStart.Add(dist.g +1.414f);
-            //adjacentPositions.Add(new BlockPos(pos.x + 1, pos.y, pos.z - 1));
-            //distanceFromStart.Add(dist.g +1.414f);
-            //adjacentPositions.Add(new BlockPos(pos.x - 1, pos.y, pos.z - 1));
-            //distanceFromStart.Add(dist.g +1.414f);
-            //adjacentPositions.Add(new BlockPos(pos.x - 1, pos.y, pos.z + 1));
-            //distanceFromStart.Add(dist.g +1.414f);
-
-            //climb up directions
-            adjacentPositions.Add(new Vector3Int(pos.x, pos.y+1, pos.z+1));
-            distanceFromStart.Add(dist.g + 1.414f);
-            adjacentPositions.Add(new Vector3Int(pos.x+1, pos.y+1, pos.z));
-            distanceFromStart.Add(dist.g + 1.414f);
-            adjacentPositions.Add(new Vector3Int(pos.x, pos.y+1, pos.z-1));
-            distanceFromStart.Add(dist.g + 1.414f);
-            adjacentPositions.Add(new Vector3Int(pos.x-1, pos.y+1, pos.z));
-            distanceFromStart.Add(dist.g + 1.414f);
-
-            //climb down directions
-            adjacentPositions.Add(new Vector3Int(pos.x, pos.y-1, pos.z+1));
-            distanceFromStart.Add(dist.g + 1.414f);
-            adjacentPositions.Add(new Vector3Int(pos.x+1, pos.y-1, pos.z));
-            distanceFromStart.Add(dist.g + 1.414f);
-            adjacentPositions.Add(new Vector3Int(pos.x, pos.y-1, pos.z-1));
-            distanceFromStart.Add(dist.g + 1.414f);
-            adjacentPositions.Add(new Vector3Int(pos.x-1, pos.y-1, pos.z));
-            distanceFromStart.Add(dist.g + 1.414f);
-
-            for (int i = 0; i<adjacentPositions.Count; i++)
             {
-                if(!closed.ContainsKey(adjacentPositions[i]))
+                if (adjacentPositions==null)
+                    adjacentPositions = new Vector3Int[12]; // 16 for diagonal directions
+                
+                // Cardinal directions
+                adjacentPositions[0] = new Vector3Int(pos.x, pos.y, pos.z+1);
+                adjacentPositions[1] = new Vector3Int(pos.x+1, pos.y, pos.z);
+                adjacentPositions[2] = new Vector3Int(pos.x, pos.y, pos.z-1);
+                adjacentPositions[3] = new Vector3Int(pos.x-1, pos.y, pos.z);
+                // Climb up directions
+                adjacentPositions[4] = new Vector3Int(pos.x, pos.y+1, pos.z+1);
+                adjacentPositions[5] = new Vector3Int(pos.x+1, pos.y+1, pos.z);
+                adjacentPositions[6] = new Vector3Int(pos.x, pos.y+1, pos.z-1);
+                adjacentPositions[7] = new Vector3Int(pos.x-1, pos.y+1, pos.z);
+                // Climb down directions
+                adjacentPositions[8] = new Vector3Int(pos.x, pos.y-1, pos.z+1);
+                adjacentPositions[9] = new Vector3Int(pos.x+1, pos.y-1, pos.z);
+                adjacentPositions[10] = new Vector3Int(pos.x, pos.y-1, pos.z-1);
+                adjacentPositions[11] = new Vector3Int(pos.x-1, pos.y-1, pos.z);
+                // Diagonal directions
+                //adjacentPositions[12] = new Vector3Int(pos.x+1, pos.y, pos.z+1);
+                //adjacentPositions[13] = new Vector3Int(pos.x+1, pos.y, pos.z-1);
+                //adjacentPositions[14] = new Vector3Int(pos.x-1, pos.y, pos.z-1);
+                //adjacentPositions[15] = new Vector3Int(pos.x-1, pos.y, pos.z+1);
+            }
+
+            {
+                if (distanceFromStart==null)
+                    distanceFromStart = new float[12]; // 16 for diagonal directions
+                
+                // Cardinal directions
+                distanceFromStart[0] = dist.g+1;
+                distanceFromStart[1] = dist.g+1;
+                distanceFromStart[2] = dist.g+1;
+                distanceFromStart[3] = dist.g+1;
+                // Climb up directions
+                distanceFromStart[4] = dist.g+1.414f;
+                distanceFromStart[5] = dist.g+1.414f;
+                distanceFromStart[6] = dist.g+1.414f;
+                distanceFromStart[7] = dist.g+1.414f;
+                // Climb down directions
+                distanceFromStart[8] = dist.g+1.414f;
+                distanceFromStart[9] = dist.g+1.414f;
+                distanceFromStart[10] = dist.g+1.414f;
+                distanceFromStart[11] = dist.g+1.414f;
+                // Diagonal directions
+                //distanceFromStart[12] = dist.g+1.414f;
+                //distanceFromStart[13] = dist.g+1.414f;
+                //distanceFromStart[14] = dist.g+1.414f;
+                //distanceFromStart[15] = dist.g+1.414f;
+            }
+
+            for (int i = 0; i<12/*16*/; i++)
+            {
+                if (!closed.ContainsKey(adjacentPositions[i]))
                 {
                     Vector3Int adjPos = adjacentPositions[i];
 
                     var h = new Heuristics(
                         distanceFromStart[i],
-                        Distance(ref targetLocation, ref adjPos),
+                        target.Distance2(ref adjPos),
                         pos);
 
                     if (IsWalkable(world, ref adjPos))
                     {
-
                         Heuristics existingTile;
                         if (open.TryGetValue(adjacentPositions[i], out existingTile))
                         {
-                            if(existingTile.g > distanceFromStart[i]){
+                            if (existingTile.g>distanceFromStart[i])
+                            {
                                 open.Remove(adjacentPositions[i]);
                                 open.Add(adjacentPositions[i], h);
                             }
-
-                        } else {
-                            open.Add(adjacentPositions[i],h);
                         }
-
+                        else
+                        {
+                            open.Add(adjacentPositions[i], h);
+                        }
                     }
                 }
-
             }
-
         }
 
         public bool IsWalkable(World world, ref Vector3Int pos)
@@ -227,36 +245,17 @@ namespace Voxelmetric.Code.Utilities
             if (!block.CanCollide)
                 return false;
 
-            // There has to be enough free space above the object
-            // TODO: There has to be some space left around
-            /*for (int y = 1; y < entityHeight + 1; y++)
+            // There has to be enough free space above the position
+            for (int y = 1; y<=entityHeight; y++)
             {
                 Vector3Int blockPos = pos.Add(0, y, 0);
                 block = world.blocks.GetBlock(ref blockPos);
-                if (!block.CanCollide)
+                if (block.CanCollide)
                     return false;
-            }*/
+            }
 
             return true;
 
-        }
-
-        public static float Distance(ref Vector3Int a, ref Vector3Int b)
-        {
-            int x = a.x - b.x;
-            int y = a.y - b.y;
-            int z = a.z - b.z;
-
-            if (x < 0)
-                x *= -1;
-
-            if (y < 0)
-                y *= -1;
-
-            if (z < 0)
-                z *= -1;
-
-            return x + y + z;
         }
     }
 }

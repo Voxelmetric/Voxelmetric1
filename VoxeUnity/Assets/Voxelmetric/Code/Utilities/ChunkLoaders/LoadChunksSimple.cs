@@ -53,7 +53,7 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
         private int m_chunkVerticalLoadRadiusPrev;
 
         private Vector3Int[] m_chunkPositions;
-        private Plane[] m_cameraPlanes = new Plane[6];
+        private readonly Plane[] m_cameraPlanes = new Plane[6];
         private Vector3Int m_viewerPos;
         private Vector3Int m_viewerPosPrev;
         
@@ -94,7 +94,7 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
             Profiler.BeginSample("PreProcessChunks");
 
             // Recalculate camera frustum planes
-            Geometry.CalculateFrustumPlanes(m_camera, ref m_cameraPlanes);
+            Geometry.CalculateFrustumPlanes(m_camera, m_cameraPlanes);
 
             // Update clipmap based on range values
             UpdateRanges();

@@ -22,7 +22,7 @@ namespace Voxelmetric.Code.Common.Math
         ///     Calculates frustrum planes for camera.
         ///     Planes are going to be in [Left, Right, Bottom, Top, Near, Far] format
         /// </summary>
-        public static void CalculateFrustumPlanes(Camera camera, ref Plane[] outPlanes)
+        public static void CalculateFrustumPlanes(Camera camera, Plane[] outPlanes)
         {
             Matrix4x4 projectionMatrix = camera.projectionMatrix;
             Matrix4x4 worldToCameraMatrix = camera.worldToCameraMatrix;

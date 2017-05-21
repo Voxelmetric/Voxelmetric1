@@ -68,9 +68,9 @@ namespace Voxelmetric.Code.Data_types
         public static implicit operator Vector3Int(Vector3 v)
         {
             Vector3Int vector3Int = new Vector3Int(
-                Mathf.RoundToInt(v.x * Env.BlockSizeInv),
-                Mathf.RoundToInt(v.y * Env.BlockSizeInv),
-                Mathf.RoundToInt(v.z * Env.BlockSizeInv)
+                Mathf.RoundToInt(v.x),
+                Mathf.RoundToInt(v.y),
+                Mathf.RoundToInt(v.z)
                 );
 
             return vector3Int;
@@ -78,7 +78,7 @@ namespace Voxelmetric.Code.Data_types
 
         public static implicit operator Vector3(Vector3Int pos)
         {
-            return new Vector3(pos.x, pos.y, pos.z) * Env.BlockSize;
+            return new Vector3(pos.x, pos.y, pos.z);
         }
 
         public static implicit operator Vector3Int(Direction d)
@@ -97,6 +97,22 @@ namespace Voxelmetric.Code.Data_types
                 default:// Direction.west:
                     return west;
             }
+        }
+
+        public float Distance2(ref Vector3Int pos)
+        {
+            int xx = x - pos.x;
+            int yy = y - pos.y;
+            int zz = z - pos.z;
+            return xx*xx + yy*yy + zz*zz;
+        }
+
+        public static float Distance2(ref Vector3Int pos1, ref Vector3Int pos2)
+        {
+            int xx = pos1.x - pos2.x;
+            int yy = pos1.y - pos2.y;
+            int zz = pos1.z - pos2.z;
+            return xx*xx + yy*yy + zz*zz;
         }
 
         //These operators let you add and subtract BlockPos from each other

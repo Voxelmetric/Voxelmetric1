@@ -13,7 +13,7 @@ namespace Voxelmetric.Examples
         private Text txt;
 
         private Vector2 rot;
-        private Plane[] planes = new Plane[6];
+        private readonly Plane[] planes = new Plane[6];
         
         void Start()
         {
@@ -45,7 +45,7 @@ namespace Voxelmetric.Examples
 
             if (objRenderer!=null && txt!=null)
             {
-                Geometry.CalculateFrustumPlanes(cam, ref planes);
+                Geometry.CalculateFrustumPlanes(cam, planes);
                 int intersection = Geometry.TestPlanesAABB2(planes, objRenderer.bounds);
                 switch (intersection)
                 {

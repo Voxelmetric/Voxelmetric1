@@ -1,4 +1,5 @@
-﻿using Voxelmetric.Code.Data_types;
+﻿using UnityEngine;
+using Voxelmetric.Code.Data_types;
 
 namespace Voxelmetric.Code
 {
@@ -14,6 +15,8 @@ namespace Voxelmetric.Code
 
         public const float BlockSizeHalf = BlockSize / 2f;
         public const float BlockSizeInv = 1f / BlockSize;
+        public static readonly Vector3 HalfBlockOffset = new Vector3(BlockSizeHalf, BlockSizeHalf, BlockSizeHalf);
+        public static readonly Vector3 HalfBlockOffsetInv = new Vector3(BlockSizeInv, BlockSizeInv, BlockSizeInv);
 
         //! Padding added to the size of block faces to fix floating point issues
         //! where tiny gaps can appear between block faces
