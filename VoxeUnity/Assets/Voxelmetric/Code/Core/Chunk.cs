@@ -101,10 +101,10 @@ namespace Voxelmetric.Code.Core
             stateManager = new ChunkStateManagerClient(this);
             logic = world.config.randomUpdateFrequency>0.0f ? new ChunkLogic(this) : null;
 
-            // These two aways need to be reallocated. Otherwise, more and more memory would be consumed by them.
-            // This is because internal arrays grow in capacity and we can't can downsize them without reallocating them.
-            GeometryHandler = new ChunkRenderGeometryHandler(this, world.renderMaterials);
-            ChunkColliderGeometryHandler = new ChunkColliderGeometryHandler(this, world.physicsMaterials);
+            if (GeometryHandler == null)
+                GeometryHandler = new ChunkRenderGeometryHandler(this, world.renderMaterials);
+            if (ChunkColliderGeometryHandler == null)
+                ChunkColliderGeometryHandler = new ChunkColliderGeometryHandler(this, world.physicsMaterials);
 
             WorldBounds = new AABB(
                 pos.x, pos.y, pos.z,

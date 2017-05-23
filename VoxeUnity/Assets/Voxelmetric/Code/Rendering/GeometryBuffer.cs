@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using UnityEngine;
 using Voxelmetric.Code.Common.MemoryPooling;
 
 namespace Voxelmetric.Code.Rendering
@@ -24,6 +23,11 @@ namespace Voxelmetric.Code.Rendering
         public bool IsEmpty()
         {
             return (Vertices.Count <= 0);
+        }
+
+        public bool WasUsed()
+        {
+            return (Vertices.Capacity > 0);
         }
 
         /// <summary>

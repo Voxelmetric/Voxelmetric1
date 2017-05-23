@@ -14,7 +14,7 @@ namespace Voxelmetric.Code.Rendering.GeometryHandler
 
         public void Reset()
         {
-            Batcher.Clear();
+            Batcher.Reset();
         }
 
         /// <summary> Updates the chunk based on its contents </summary>

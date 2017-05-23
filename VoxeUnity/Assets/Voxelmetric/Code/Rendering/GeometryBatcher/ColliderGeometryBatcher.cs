@@ -65,6 +65,26 @@ namespace Voxelmetric.Code.Rendering.GeometryBatcher
             Clear();
         }
 
+        public void Reset()
+        {
+            // Buffers need to be reallocated. Otherwise, more and more memory would be consumed by them. This is
+            // because internal arrays grow in capacity and we can't simply release their memory by calling Clear().
+            // Objects and renderers are fine, because there's usually only 1 of them. In some extreme cases they
+            // may grow more but only by 1 or 2 (and only if Env.ChunkPow>5).
+            for (int i = 0; i < m_buffers.Length; i++)
+            {
+                var geometryBuffer = m_buffers[i];
+                for (int j = 0; j < geometryBuffer.Count; j++)
+                {
+                    if (geometryBuffer[j].WasUsed())
+                        geometryBuffer[j] = new GeometryBuffer();
+                }
+            }
+
+            ReleaseOldData();
+            m_enabled = false;
+        }
+
         /// <summary>
         ///     Clear all draw calls
         /// </summary>
@@ -77,7 +97,6 @@ namespace Voxelmetric.Code.Rendering.GeometryBatcher
             }
 
             ReleaseOldData();
-
             m_enabled = false;
         }
 
