@@ -133,22 +133,6 @@ namespace Voxelmetric.Code.Core
             m_needsCollider = false;
         }
 
-        public override string ToString()
-        {
-            StringBuilder sb = new StringBuilder();
-            sb.Append(pos);
-            if (logic!=null)
-            {
-                sb.Append(", logic=");
-                sb.Append(logic);
-            }
-            sb.Append(", render=");
-            sb.Append(GeometryHandler);
-            sb.Append(", ");
-            sb.Append(stateManager);
-            return sb.ToString();
-        }
-
         public bool CanUpdate
         {
             get { return stateManager.CanUpdate(); }

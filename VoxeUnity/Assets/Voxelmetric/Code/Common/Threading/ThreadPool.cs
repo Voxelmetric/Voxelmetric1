@@ -2,6 +2,7 @@
 using System.Text;
 using UnityEngine;
 using UnityEngine.Assertions;
+using Voxelmetric.Code.Common.Extensions;
 using Voxelmetric.Code.Common.MemoryPooling;
 
 namespace Voxelmetric.Code.Common.Threading
@@ -115,10 +116,10 @@ namespace Voxelmetric.Code.Common.Threading
 
         public override string ToString()
         {
-            m_sb.Remove(0, m_sb.Length);
+            m_sb.Length = 0;
             for (int i = 0; i<m_pools.Length-1; i++)
-                m_sb.AppendFormat("{0}, ", m_pools[i]);
-            return m_sb.Append(m_pools[m_pools.Length-1]).ToString();
+                m_sb.ConcatFormat("{0}, ", m_pools[i].ToString());
+            return m_sb.ConcatFormat("{0}", m_pools[m_pools.Length-1].ToString()).ToString();
         }
     }
 }

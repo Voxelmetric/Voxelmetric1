@@ -1,5 +1,6 @@
 ﻿using System.Text;
 using UnityEngine;
+using Voxelmetric.Code.Common.Extensions;
 using Voxelmetric.Code.Common.Memory;
 using Voxelmetric.Code.Common.Threading;
 using Voxelmetric.Code.Core;
@@ -45,19 +46,13 @@ namespace Voxelmetric.Code.Common.MemoryPooling
         
         public override string ToString()
         {
-            StringBuilder sb = new StringBuilder();
-            sb.Append("ChunkPool=");
-            sb.Append(ChunkPool);
-            sb.Append(",MeshPool=");
-            sb.Append(MeshPool);
-            sb.Append(",Vec2Arr=");
-            sb.Append(Vector2ArrayPool);
-            sb.Append(",Vec3Arr=");
-            sb.Append(Vector3ArrayPool);
-            sb.Append(",Vec4Arr=");
-            sb.Append(Vector4ArrayPool);
-            sb.Append(",ColorArr=");
-            sb.Append(Color32ArrayPool);
+            StringBuilder sb = new StringBuilder(256);
+            sb.ConcatFormat("ChunkPool={0}", ChunkPool.ToString());
+            sb.ConcatFormat(",MeshPool={0}", MeshPool.ToString());
+            sb.ConcatFormat(",Vec2Arr={0}", Vector2ArrayPool.ToString());
+            sb.ConcatFormat(",Vec3Arr={0}", Vector3ArrayPool.ToString());
+            sb.ConcatFormat(",Vec4Arr={0}", Vector4ArrayPool.ToString());
+            sb.ConcatFormat(",ColorArr={0}", Color32ArrayPool.ToString());
             return sb.ToString();
         }
     }

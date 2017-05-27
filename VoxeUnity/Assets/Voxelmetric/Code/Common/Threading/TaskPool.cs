@@ -4,6 +4,7 @@ using System.Text;
 using System.Threading;
 using JetBrains.Annotations;
 using UnityEngine;
+using Voxelmetric.Code.Common.Extensions;
 using Voxelmetric.Code.Common.MemoryPooling;
 
 namespace Voxelmetric.Code.Common.Threading
@@ -193,7 +194,8 @@ namespace Voxelmetric.Code.Common.Threading
 
         public override string ToString()
         {
-            return m_sb.Remove(0, m_sb.Length).AppendFormat("{0}/{1}", m_curr, m_max).ToString();
+            m_sb.Length = 0;
+            return m_sb.ConcatFormat("{0}/{1}", m_curr, m_max).ToString();
         }
     }
 }

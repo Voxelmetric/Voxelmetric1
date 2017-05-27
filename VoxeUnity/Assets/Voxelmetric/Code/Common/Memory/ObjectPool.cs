@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using Voxelmetric.Code.Common.Extensions;
 
 namespace Voxelmetric.Code.Common.Memory
 {
@@ -143,10 +144,8 @@ namespace Voxelmetric.Code.Common.Memory
 
         public override string ToString()
         {
-            StringBuilder sb = new StringBuilder();
-            sb.Append(m_objectIndex);
-            sb.Append("/");
-            sb.Append(Capacity);
+            StringBuilder sb = new StringBuilder(32);
+            sb.ConcatFormat("{0}/{1}", m_objectIndex, Capacity);
             return sb.ToString();
         }
     }

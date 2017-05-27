@@ -89,18 +89,6 @@ namespace Voxelmetric.Code.Core.StateManager
             m_threadPoolItem = null;
         }
 
-        public override string ToString()
-        {
-            StringBuilder sb = new StringBuilder();
-            sb.Append("N=");
-            sb.Append(m_nextState);
-            sb.Append(", P=");
-            sb.Append(m_pendingStates);
-            sb.Append(", C=");
-            sb.Append(m_completedStates);
-            return sb.ToString();
-        }
-
         public override void SetMeshBuilt()
         {
             m_completedStates = m_completedStatesSafe = m_completedStates.Reset(CurrStateBuildVertices);

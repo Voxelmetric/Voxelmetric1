@@ -29,7 +29,7 @@ namespace Client.Scripts.Misc
         private long m_collectAlloc = 0;
         private long m_peakAlloc = 0;
 
-        private readonly StringBuilder m_text = new StringBuilder();
+        private readonly StringBuilder m_text = new StringBuilder(4096, 4096);
 
         void Start()
         {
@@ -47,6 +47,8 @@ namespace Client.Scripts.Misc
         {
             while (!m_stop)
             {
+                CollectInfo();
+
                 int collCount = GC.CollectionCount(0);
 
                 if (Math.Abs(m_lastCollectNum - collCount) > Mathf.Epsilon)
@@ -78,39 +80,39 @@ namespace Client.Scripts.Misc
             }
         }
 
+        public void CollectInfo()
+        {
+            m_text.Length = 0;
+
+            m_text.ConcatFormat("Currently allocated: {0}\n", m_allocMem.GetKiloString());
+            m_text.ConcatFormat("Peak allocated: {0}\n", m_peakAlloc.GetKiloString());
+            m_text.ConcatFormat("Last collected: {0}\n", m_collectAlloc.GetKiloString());
+            m_text.ConcatFormat("Allocation rate: {0}\n", m_allocRate.GetKiloString());
+
+            m_text.ConcatFormat("Collection freq: {0:0.00}s\n", m_delta);
+            m_text.ConcatFormat("Last collect delta: {0:0.000}s ({1:0.0} FPS)\n", m_lastDeltaTime, 1f / m_lastDeltaTime);
+
+            if (World != null)
+                m_text.ConcatFormat("Chunks: {0}\n", World.chunks.Count);
+
+            // Tasks
+            m_text.ConcatFormat("TP tasks: {0}\n", WorkPoolManager.ToString());
+            m_text.ConcatFormat("IO tasks: {0}\n", IOPoolManager.ToString());
+
+            // Individual object pools
+            for (int i = 0; i < Globals.WorkPool.Size; i++)
+                m_text.ConcatFormat("TP #{0} pools: {1}\n", i, Globals.WorkPool.GetPool(i).ToString()); // thread pool
+            m_text.ConcatFormat("IO pools: {0}\n", Globals.IOPool.Pools.ToString()); // io pool
+            m_text.ConcatFormat("Main pools: {0}\n", Globals.MemPools.ToString()); // the main thread pool
+
+            m_text.ConcatFormat("{0}\n", GameObjectProvider.Instance.ToString());
+        }
+
         // Use this for initialization
         public void OnGUI()
         {
             if (!Show || !Application.isPlaying && !ShowInEditor)
                 return;
-
-            m_text.Remove(0, m_text.Length);
-
-            m_text.AppendFormat("Currently allocated: {0}\n", m_allocMem.GetKiloString());
-            m_text.AppendFormat("Peak allocated: {0}\n", m_peakAlloc.GetKiloString());
-            m_text.AppendFormat("Last collected: {0}\n", m_collectAlloc.GetKiloString());
-            m_text.AppendFormat("Allocation rate: {0}\n", m_allocRate.GetKiloString());
-
-            m_text.AppendFormat("Collection freq: {0:0.00}s\n", m_delta);
-            m_text.AppendFormat("Last collect delta: {0:0.000}s ({1:0.0} FPS)\n", m_lastDeltaTime, 1f/m_lastDeltaTime);
-
-            if (World != null)
-            {
-                int chunks = World.chunks.Count;
-                m_text.AppendFormat("Chunks: {0}\n", chunks);
-            }
-
-            // Tasks
-            m_text.AppendFormat("TP tasks: {0}\n", WorkPoolManager.ToString());
-            m_text.AppendFormat("IO tasks: {0}\n", IOPoolManager.ToString());
-            
-            // Individual object pools
-            for(int i=0; i<Globals.WorkPool.Size; i++)
-                m_text.AppendLine("TP #"+i+" pools: "+Globals.WorkPool.GetPool(i)); // thread pool
-            m_text.AppendLine("IO pools: " + Globals.IOPool.Pools); // io pool
-            m_text.AppendLine("Main pools: " + Globals.MemPools); // the main thread pool
-
-            m_text.AppendLine(GameObjectProvider.Instance.ToString());
 
             const int width = 720;
             const int height = 320;

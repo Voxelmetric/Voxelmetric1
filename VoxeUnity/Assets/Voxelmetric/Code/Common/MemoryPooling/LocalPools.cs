@@ -1,5 +1,6 @@
 ﻿using System.Text;
 using UnityEngine;
+using Voxelmetric.Code.Common.Extensions;
 using Voxelmetric.Code.Common.Memory;
 using Voxelmetric.Code.Configurable.Blocks;
 using Voxelmetric.Code.Rendering;
@@ -37,17 +38,14 @@ namespace Voxelmetric.Code.Common.MemoryPooling
         
         public override string ToString()
         {
-            StringBuilder sb = new StringBuilder();
-            sb.Append("VertexData=");
-            sb.Append(VertexDataArrayPool);
-            sb.Append(",Vec3Arr=");
-            sb.Append(Vector3ArrayPool);
-            sb.Append(",BoolArr=");
-            sb.Append(BoolArrayPool);
-            sb.Append(",FloatArr=");
-            sb.Append(FloatArrayPool);
-            sb.Append(",MarshaledBLeft=");
-            sb.Append(MarshaledPool);
+            StringBuilder sb = new StringBuilder(256);
+            sb.ConcatFormat("VertexData={0}", VertexDataArrayPool.ToString());
+            sb.ConcatFormat(",Vec3Arr={0}", Vector3ArrayPool.ToString());
+            sb.ConcatFormat(",BoolArr={0}", BoolArrayPool.ToString());
+            sb.ConcatFormat(",ByteArr={0}", ByteArrayPool.ToString());
+            sb.ConcatFormat(",FloatArr={0}", FloatArrayPool.ToString());
+            sb.ConcatFormat(",BlockFaceArr={0}", BlockFaceArrayPool.ToString());
+            sb.ConcatFormat(",MarshaledBLeft={0}", MarshaledPool.ToString());
             return sb.ToString();
         }
     }

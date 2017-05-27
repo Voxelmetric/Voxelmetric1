@@ -2,6 +2,7 @@
 using System.Text;
 using UnityEngine;
 using UnityEngine.Assertions;
+using Voxelmetric.Code.Common.Extensions;
 using Voxelmetric.Code.Common.Memory;
 
 namespace Voxelmetric.Code.Common.MemoryPooling
@@ -72,11 +73,11 @@ namespace Voxelmetric.Code.Common.MemoryPooling
 
         public override string ToString()
         {
-            m_stringBuilder.Remove(0, m_stringBuilder.Length);
+            m_stringBuilder.Length = 0;
 
             m_stringBuilder.Append("ObjectPools ");
             foreach (var entry in ObjectPools)
-                m_stringBuilder.AppendFormat("{0},", entry);
+                m_stringBuilder.ConcatFormat("{0},", entry.ToString());
             return m_stringBuilder.ToString();
         }
 
