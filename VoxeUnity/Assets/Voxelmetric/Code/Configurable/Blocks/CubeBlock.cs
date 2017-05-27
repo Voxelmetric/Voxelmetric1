@@ -6,6 +6,7 @@ using Voxelmetric.Code.Core;
 using Voxelmetric.Code.Data_types;
 using Voxelmetric.Code.Load_Resources.Textures;
 using Voxelmetric.Code.Rendering;
+using Voxelmetric.Code.Rendering.GeometryBatcher;
 
 public class CubeBlock: Block
 {
@@ -40,8 +41,11 @@ public class CubeBlock: Block
 
             BlockUtils.PrepareTexture(chunk, ref face.pos, vertexData, face.side, textures, rotated);
             BlockUtils.PrepareColors(chunk, vertexData, ref face.light);
-            
-            chunk.GeometryHandler.Batcher.AddFace(vertexData, backface, face.materialID);
+
+            RenderGeometryBatcher batcher = chunk.GeometryHandler.Batcher;
+            batcher.UseColors = true;
+            batcher.UseTextures = true;
+            batcher.AddFace(vertexData, backface, face.materialID);
         }
         pools.VertexDataArrayPool.Push(vertexData);
     }

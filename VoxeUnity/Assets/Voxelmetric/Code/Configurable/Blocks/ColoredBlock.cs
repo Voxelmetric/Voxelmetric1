@@ -5,6 +5,7 @@ using Voxelmetric.Code.Configurable.Blocks.Utilities;
 using Voxelmetric.Code.Core;
 using Voxelmetric.Code.Data_types;
 using Voxelmetric.Code.Rendering;
+using Voxelmetric.Code.Rendering.GeometryBatcher;
 
 public class ColoredBlock : Block
 {
@@ -62,7 +63,9 @@ public class ColoredBlock : Block
 
             BlockUtils.AdjustColors(chunk, vertexData, face.light);
 
-            chunk.GeometryHandler.Batcher.AddFace(vertexData, backFace, face.materialID);
+            RenderGeometryBatcher batcher = chunk.GeometryHandler.Batcher;
+            batcher.UseColors = true;
+            batcher.AddFace(vertexData, backFace, face.materialID);
         }
         pools.VertexDataArrayPool.Push(vertexData);
     }

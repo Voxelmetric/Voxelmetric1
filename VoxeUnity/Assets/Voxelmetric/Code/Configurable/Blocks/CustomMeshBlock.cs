@@ -14,6 +14,10 @@ public class CustomMeshBlock : Block {
                            : new Rect();
 
         RenderGeometryBatcher batcher = chunk.GeometryHandler.Batcher;
+        if (customMeshConfig.texture!=null)
+            batcher.UseTextures = true;
+        else
+            batcher.UseColors = true;
         batcher.AddMeshData(customMeshConfig.tris, customMeshConfig.verts, ref texture, localPos, materialID);
     }
 }

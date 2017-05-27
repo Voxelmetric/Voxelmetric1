@@ -158,12 +158,12 @@ namespace Voxelmetric.Code.Rendering.GeometryBatcher
 
                     {
 #if DEBUG
-                        go.name = debugName+"_"+i;
+                        go.name = string.Format(debugName, "_", i.ToString());
 #endif
 
                         Mesh mesh = Globals.MemPools.MeshPool.Pop();
                         Assert.IsTrue(mesh.vertices.Length<=0);
-                        UnityMeshBuilder.BuildColliderMesh(mesh, buffer);
+                        UnityMeshBuilder.BuildGeometryMesh(mesh, buffer, false, false, false);
 
                         MeshCollider collider = go.GetComponent<MeshCollider>();
                         collider.sharedMesh = null;

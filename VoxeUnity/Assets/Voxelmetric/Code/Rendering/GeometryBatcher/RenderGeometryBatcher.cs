@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Assertions;
 using Voxelmetric.Code.Builders;
@@ -17,6 +18,10 @@ namespace Voxelmetric.Code.Rendering.GeometryBatcher
         private readonly List<GameObject> m_objects;
         //! A list of renderer used to render our geometry
         private readonly List<Renderer> m_renderers;
+
+        public bool UseColors = false;
+        public bool UseTextures = false;
+        public bool UseTangents = false;
 
         private bool m_enabled;
         public bool Enabled
@@ -82,6 +87,10 @@ namespace Voxelmetric.Code.Rendering.GeometryBatcher
 
             ReleaseOldData();
             m_enabled = false;
+
+            UseColors = false;
+            UseTextures = false;
+            UseTangents = false;
         }
 
         /// <summary>
@@ -97,6 +106,10 @@ namespace Voxelmetric.Code.Rendering.GeometryBatcher
 
             ReleaseOldData();
             m_enabled = false;
+
+            UseColors = false;
+            UseTextures = false;
+            UseTangents = false;
         }
 
         /// <summary>
@@ -195,12 +208,12 @@ namespace Voxelmetric.Code.Rendering.GeometryBatcher
                     if (go!=null)
                     {
 #if DEBUG
-                        go.name = debugName+"_"+i;
+                        go.name = string.Format(debugName, "_", i.ToString());
 #endif
 
                         Mesh mesh = Globals.MemPools.MeshPool.Pop();
                         Assert.IsTrue(mesh.vertices.Length<=0);
-                        UnityMeshBuilder.BuildGeometryMesh(mesh, buffer);
+                        UnityMeshBuilder.BuildGeometryMesh(mesh, buffer, UseColors, UseTextures, UseTangents);
 
                         MeshFilter filter = go.GetComponent<MeshFilter>();
                         filter.sharedMesh = null;
@@ -218,6 +231,10 @@ namespace Voxelmetric.Code.Rendering.GeometryBatcher
                     buffer.Clear();
                 }
             }
+
+            UseColors = false;
+            UseTextures = false;
+            UseTangents = false;
         }
 
         private void ReleaseOldData()

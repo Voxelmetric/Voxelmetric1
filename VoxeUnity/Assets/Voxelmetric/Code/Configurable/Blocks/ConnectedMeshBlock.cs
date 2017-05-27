@@ -27,15 +27,17 @@ public class ConnectedMeshBlock: CustomMeshBlock
     public override void BuildFace(Chunk chunk, Vector3[] vertices, ref BlockFace face, bool rotated)
     {
         var tris = connectedMeshConfig.directionalTris[(int)face.side];
-        if (null==tris)
+        if (tris==null)
             return;
 
         var verts = connectedMeshConfig.directionalVerts[(int)face.side];
         var texture = connectedMeshConfig.texture;
 
         Rect rect;
-        RenderGeometryBatcher batcher = chunk.GeometryHandler.Batcher;
         ChunkBlocks blocks = chunk.blocks;
+
+        RenderGeometryBatcher batcher = chunk.GeometryHandler.Batcher;
+        batcher.UseTextures = true;
 
         Vector3Int sidePos = face.pos.Add(face.side);
         if (connectedMeshConfig.connectsToSolid && blocks.Get(ref sidePos).Solid)
@@ -79,8 +81,10 @@ public class ConnectedMeshBlock: CustomMeshBlock
             BuildFace(chunk, null, ref face, false);
         }
 
-        Rect texture = customMeshConfig.texture.GetTexture(chunk, ref localPos, Direction.down);
         RenderGeometryBatcher batcher = chunk.GeometryHandler.Batcher;
+        batcher.UseTextures = true;
+
+        Rect texture = customMeshConfig.texture.GetTexture(chunk, ref localPos, Direction.down);
         batcher.AddMeshData(customMeshConfig.tris, customMeshConfig.verts, ref texture, localPos, materialID);
     }
 }
