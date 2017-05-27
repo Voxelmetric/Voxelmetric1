@@ -6,9 +6,9 @@ namespace Voxelmetric.Code.Builders
     public static class UnityMeshBuilder
     {
         /// <summary>
-        ///     Copy render geometry data to a Unity mesh
+        ///     Build a Unity3D mesh from provided data
         /// </summary>
-        public static void BuildGeometryMesh(Mesh mesh, GeometryBuffer buffer, bool useColors, bool useTextures, bool useTangents)
+        public static void BuildRenderMesh(Mesh mesh, RenderGeometryBuffer buffer, bool useColors, bool useTextures, bool useTangents)
         {
             int size = buffer.Vertices.Count;
             var pools = Globals.MemPools;
@@ -73,6 +73,43 @@ namespace Voxelmetric.Code.Builders
                 pools.Color32ArrayPool.Push(colors);
             if (useTangents)
                 pools.Vector4ArrayPool.Push(tangents);
+        }
+
+        /// <summary>
+        ///     Build a Unity3D mesh from provided data
+        /// </summary>
+        public static void BuildColliderMesh(Mesh mesh, ColliderGeometryBuffer buffer)
+        {
+            int size = buffer.Vertices.Count;
+            var pools = Globals.MemPools;
+
+            // Avoid allocations by retrieving buffers from the pool
+            Vector3[] vertices = pools.Vector3ArrayPool.Pop(size);
+
+            // Fill buffers with data.
+            // Due to the way the memory pools work we might have received more
+            // data than necessary. This little overhead is well worth it, though.
+            // Fill unused data with "zeroes"
+            // TODO: Make it so that vertex count is known ahead of time
+            for (int i = 0; i < size; i++)
+                vertices[i] = buffer.Vertices[i];
+            for (int i = size; i < vertices.Length; i++)
+                vertices[i] = Vector3.zero;
+            
+            // Prepare mesh
+            mesh.vertices = vertices;
+            mesh.uv = null;
+            mesh.uv2 = null;
+            mesh.uv3 = null;
+            mesh.uv4 = null;
+            mesh.colors32 = null;
+            mesh.normals = null;
+            mesh.tangents = null;
+            mesh.SetTriangles(buffer.Triangles, 0);
+            mesh.RecalculateNormals();
+
+            // Return memory back to pool
+            pools.Vector3ArrayPool.Push(vertices);
         }
     }
 }

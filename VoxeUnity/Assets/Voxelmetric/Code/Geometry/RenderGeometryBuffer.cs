@@ -6,7 +6,7 @@ namespace Voxelmetric.Code.Geometry
     /// <summary>
     ///     A simple intermediate container for mesh data
     /// </summary>
-    public class GeometryBuffer
+    public class RenderGeometryBuffer
     {
         public readonly List<VertexData> Vertices = new List<VertexData>();
         public readonly List<int> Triangles = new List<int>();

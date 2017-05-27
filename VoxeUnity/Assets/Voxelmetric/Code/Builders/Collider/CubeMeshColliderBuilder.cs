@@ -53,7 +53,7 @@ namespace Voxelmetric.Code.Builders.Collider
                 return;
             }*/
 
-            VertexData[] vertexData = pools.VertexDataArrayPool.PopExact(4);
+            Vector3[] vertexData = pools.Vector3ArrayPool.PopExact(4);
             bool[] mask = pools.BoolArrayPool.PopExact(sideSize*sideSize);
 
             int n, w, h, l, k, maskIndex;
@@ -115,10 +115,10 @@ namespace Voxelmetric.Code.Builders.Collider
 
                         // Build the face
                         {
-                            vertexData[0].Vertex = new Vector3(xx, maxY, zz) + BlockUtils.PaddingOffsets[(int)Direction.up][0];
-                            vertexData[1].Vertex = new Vector3(xx, maxY, zz+h) + BlockUtils.PaddingOffsets[(int)Direction.up][1];
-                            vertexData[2].Vertex = new Vector3(xx+w, maxY, zz+h) + BlockUtils.PaddingOffsets[(int)Direction.up][2];
-                            vertexData[3].Vertex = new Vector3(xx+w, maxY, zz) + BlockUtils.PaddingOffsets[(int)Direction.up][3];
+                            vertexData[0] = new Vector3(xx, maxY, zz) + BlockUtils.PaddingOffsets[(int)Direction.up][0];
+                            vertexData[1] = new Vector3(xx, maxY, zz+h) + BlockUtils.PaddingOffsets[(int)Direction.up][1];
+                            vertexData[2] = new Vector3(xx+w, maxY, zz+h) + BlockUtils.PaddingOffsets[(int)Direction.up][2];
+                            vertexData[3] = new Vector3(xx+w, maxY, zz) + BlockUtils.PaddingOffsets[(int)Direction.up][3];
 
                             chunk.ChunkColliderGeometryHandler.Batcher.AddFace(vertexData, DirectionUtils.IsBackface(Direction.up), block.PhysicMaterialID);
                         }
@@ -195,10 +195,10 @@ namespace Voxelmetric.Code.Builders.Collider
 
                         // Build the face
                         {
-                            vertexData[0].Vertex = new Vector3(xx, minY, zz) + BlockUtils.PaddingOffsets[(int)Direction.down][0];
-                            vertexData[1].Vertex = new Vector3(xx, minY, zz+h) + BlockUtils.PaddingOffsets[(int)Direction.down][1];
-                            vertexData[2].Vertex = new Vector3(xx+w, minY, zz+h) + BlockUtils.PaddingOffsets[(int)Direction.down][2];
-                            vertexData[3].Vertex = new Vector3(xx+w, minY, zz) + BlockUtils.PaddingOffsets[(int)Direction.down][3];
+                            vertexData[0] = new Vector3(xx, minY, zz) + BlockUtils.PaddingOffsets[(int)Direction.down][0];
+                            vertexData[1] = new Vector3(xx, minY, zz+h) + BlockUtils.PaddingOffsets[(int)Direction.down][1];
+                            vertexData[2] = new Vector3(xx+w, minY, zz+h) + BlockUtils.PaddingOffsets[(int)Direction.down][2];
+                            vertexData[3] = new Vector3(xx+w, minY, zz) + BlockUtils.PaddingOffsets[(int)Direction.down][3];
 
                             chunk.ChunkColliderGeometryHandler.Batcher.AddFace(vertexData, DirectionUtils.IsBackface(Direction.down), block.PhysicMaterialID);
                         }
@@ -275,10 +275,10 @@ namespace Voxelmetric.Code.Builders.Collider
 
                         // Build the face
                         {
-                            vertexData[0].Vertex = new Vector3(maxX, yy, zz) + BlockUtils.PaddingOffsets[(int)Direction.east][0];
-                            vertexData[1].Vertex = new Vector3(maxX, yy+h, zz) + BlockUtils.PaddingOffsets[(int)Direction.east][1];
-                            vertexData[2].Vertex = new Vector3(maxX, yy+h, zz+w) + BlockUtils.PaddingOffsets[(int)Direction.east][2];
-                            vertexData[3].Vertex = new Vector3(maxX, yy, zz+w) + BlockUtils.PaddingOffsets[(int)Direction.east][3];
+                            vertexData[0] = new Vector3(maxX, yy, zz) + BlockUtils.PaddingOffsets[(int)Direction.east][0];
+                            vertexData[1] = new Vector3(maxX, yy+h, zz) + BlockUtils.PaddingOffsets[(int)Direction.east][1];
+                            vertexData[2] = new Vector3(maxX, yy+h, zz+w) + BlockUtils.PaddingOffsets[(int)Direction.east][2];
+                            vertexData[3] = new Vector3(maxX, yy, zz+w) + BlockUtils.PaddingOffsets[(int)Direction.east][3];
 
                             chunk.ChunkColliderGeometryHandler.Batcher.AddFace(vertexData, DirectionUtils.IsBackface(Direction.east), block.PhysicMaterialID);
                         }
@@ -355,10 +355,10 @@ namespace Voxelmetric.Code.Builders.Collider
 
                         // Build the face
                         {
-                            vertexData[0].Vertex = new Vector3(minX, yy, zz) + BlockUtils.PaddingOffsets[(int)Direction.west][0];
-                            vertexData[1].Vertex = new Vector3(minX, yy+h, zz) + BlockUtils.PaddingOffsets[(int)Direction.west][1];
-                            vertexData[2].Vertex = new Vector3(minX, yy+h, zz+w) + BlockUtils.PaddingOffsets[(int)Direction.west][2];
-                            vertexData[3].Vertex = new Vector3(minX, yy, zz+w) + BlockUtils.PaddingOffsets[(int)Direction.west][3];
+                            vertexData[0] = new Vector3(minX, yy, zz) + BlockUtils.PaddingOffsets[(int)Direction.west][0];
+                            vertexData[1] = new Vector3(minX, yy+h, zz) + BlockUtils.PaddingOffsets[(int)Direction.west][1];
+                            vertexData[2] = new Vector3(minX, yy+h, zz+w) + BlockUtils.PaddingOffsets[(int)Direction.west][2];
+                            vertexData[3] = new Vector3(minX, yy, zz+w) + BlockUtils.PaddingOffsets[(int)Direction.west][3];
 
                             chunk.ChunkColliderGeometryHandler.Batcher.AddFace(vertexData, DirectionUtils.IsBackface(Direction.west), block.PhysicMaterialID);
                         }
@@ -435,10 +435,10 @@ namespace Voxelmetric.Code.Builders.Collider
 
                         // Build the face
                         {
-                            vertexData[0].Vertex = new Vector3(xx, yy, maxZ) + BlockUtils.PaddingOffsets[(int)Direction.north][0];
-                            vertexData[1].Vertex = new Vector3(xx, yy+h, maxZ) + BlockUtils.PaddingOffsets[(int)Direction.north][1];
-                            vertexData[2].Vertex = new Vector3(xx+w, yy+h, maxZ) + BlockUtils.PaddingOffsets[(int)Direction.north][2];
-                            vertexData[3].Vertex = new Vector3(xx+w, yy, maxZ) + BlockUtils.PaddingOffsets[(int)Direction.north][3];
+                            vertexData[0] = new Vector3(xx, yy, maxZ) + BlockUtils.PaddingOffsets[(int)Direction.north][0];
+                            vertexData[1] = new Vector3(xx, yy+h, maxZ) + BlockUtils.PaddingOffsets[(int)Direction.north][1];
+                            vertexData[2] = new Vector3(xx+w, yy+h, maxZ) + BlockUtils.PaddingOffsets[(int)Direction.north][2];
+                            vertexData[3] = new Vector3(xx+w, yy, maxZ) + BlockUtils.PaddingOffsets[(int)Direction.north][3];
 
                             chunk.ChunkColliderGeometryHandler.Batcher.AddFace(vertexData, DirectionUtils.IsBackface(Direction.north), block.PhysicMaterialID);
                         }
@@ -515,10 +515,10 @@ namespace Voxelmetric.Code.Builders.Collider
 
                         // Build the face
                         {
-                            vertexData[0].Vertex = new Vector3(xx, yy, minZ) + BlockUtils.PaddingOffsets[(int)Direction.south][0];
-                            vertexData[1].Vertex = new Vector3(xx, yy+h, minZ) + BlockUtils.PaddingOffsets[(int)Direction.south][1];
-                            vertexData[2].Vertex = new Vector3(xx+w, yy+h, minZ) + BlockUtils.PaddingOffsets[(int)Direction.south][2];
-                            vertexData[3].Vertex = new Vector3(xx+w, yy, minZ) + BlockUtils.PaddingOffsets[(int)Direction.south][3];
+                            vertexData[0] = new Vector3(xx, yy, minZ) + BlockUtils.PaddingOffsets[(int)Direction.south][0];
+                            vertexData[1] = new Vector3(xx, yy+h, minZ) + BlockUtils.PaddingOffsets[(int)Direction.south][1];
+                            vertexData[2] = new Vector3(xx+w, yy+h, minZ) + BlockUtils.PaddingOffsets[(int)Direction.south][2];
+                            vertexData[3] = new Vector3(xx+w, yy, minZ) + BlockUtils.PaddingOffsets[(int)Direction.south][3];
 
                             chunk.ChunkColliderGeometryHandler.Batcher.AddFace(vertexData, DirectionUtils.IsBackface(Direction.south), block.PhysicMaterialID);
                         }
@@ -539,7 +539,7 @@ namespace Voxelmetric.Code.Builders.Collider
             #endregion
 
             pools.BoolArrayPool.Push(mask);
-            pools.VertexDataArrayPool.Push(vertexData);
+            pools.Vector3ArrayPool.Push(vertexData);
         }
     }
 }

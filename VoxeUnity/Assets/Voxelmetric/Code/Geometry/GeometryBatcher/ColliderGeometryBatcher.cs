@@ -12,7 +12,7 @@ namespace Voxelmetric.Code.Geometry.GeometryBatcher
         //! Materials our meshes are to use
         private readonly PhysicMaterial[] m_materials;
         //! A list of buffers for each material
-        private readonly List<GeometryBuffer>[] m_buffers;
+        private readonly List<ColliderGeometryBuffer>[] m_buffers;
         //! GameObjects used to hold our geometry
         private readonly List<GameObject> m_objects;
         //! A list of renderer used to render our geometry
@@ -43,7 +43,7 @@ namespace Voxelmetric.Code.Geometry.GeometryBatcher
             m_materials = materials;
 
             int buffersLen = (materials==null || materials.Length<1) ? 1 : materials.Length;
-            m_buffers = new List<GeometryBuffer>[buffersLen];
+            m_buffers = new List<ColliderGeometryBuffer>[buffersLen];
             for (int i = 0; i < m_buffers.Length; i++)
             {
                 /* TODO: Let's be optimistic and allocate enough room for just one buffer. It's going to suffice
@@ -52,10 +52,10 @@ namespace Voxelmetric.Code.Geometry.GeometryBatcher
                  * hold its geometry because of Unity's 65k-vertices limit per mesh. For chunks up to 32^3 big
                  * this should not be an issue, though.
                  */
-                m_buffers[i] = new List<GeometryBuffer>(1)
+                m_buffers[i] = new List<ColliderGeometryBuffer>(1)
                 {
                     // Default render buffer
-                    new GeometryBuffer()
+                    new ColliderGeometryBuffer()
                 };
             }
 
@@ -77,7 +77,7 @@ namespace Voxelmetric.Code.Geometry.GeometryBatcher
                 for (int j = 0; j < geometryBuffer.Count; j++)
                 {
                     if (geometryBuffer[j].WasUsed())
-                        geometryBuffer[j] = new GeometryBuffer();
+                        geometryBuffer[j] = new ColliderGeometryBuffer();
                 }
             }
 
@@ -104,25 +104,24 @@ namespace Voxelmetric.Code.Geometry.GeometryBatcher
         ///     Addds one face to our render buffer
         /// </summary>
         /// <param name="vertexData"> An array of 4 vertices forming the face</param>
-        public void AddFace(VertexData[] vertexData, bool backFace, int materialID)
+        /// <param name="backFace">If false, vertices are added clock-wise</param>
+        /// <param name="materialID">ID of material to use when building the mesh</param>
+        public void AddFace(Vector3[] vertexData, bool backFace, int materialID)
         {
             Assert.IsTrue(vertexData.Length == 4);
 
-            List<GeometryBuffer> holder = m_buffers[materialID];
-            GeometryBuffer buffer = holder[holder.Count - 1];
+            List<ColliderGeometryBuffer> holder = m_buffers[materialID];
+            ColliderGeometryBuffer buffer = holder[holder.Count - 1];
 
             // If there are too many vertices we need to create a new separate buffer for them
             if (buffer.Vertices.Count + 4 > 65000)
             {
-                buffer = new GeometryBuffer();
+                buffer = new ColliderGeometryBuffer();
                 holder.Add(buffer);
             }
 
             // Add data to the render buffer
-            buffer.AddVertex(ref vertexData[0]);
-            buffer.AddVertex(ref vertexData[1]);
-            buffer.AddVertex(ref vertexData[2]);
-            buffer.AddVertex(ref vertexData[3]);
+            buffer.AddVertices(vertexData);
             buffer.AddIndices(buffer.Vertices.Count, backFace);
         }
 
@@ -143,7 +142,7 @@ namespace Voxelmetric.Code.Geometry.GeometryBatcher
 
                 for (int i = 0; i< holder.Count; i++)
                 {
-                    GeometryBuffer buffer = holder[i];
+                    ColliderGeometryBuffer buffer = holder[i];
 
                     // No data means there's no mesh to build
                     if (buffer.IsEmpty())
@@ -163,7 +162,7 @@ namespace Voxelmetric.Code.Geometry.GeometryBatcher
 
                         Mesh mesh = Globals.MemPools.MeshPool.Pop();
                         Assert.IsTrue(mesh.vertices.Length<=0);
-                        UnityMeshBuilder.BuildGeometryMesh(mesh, buffer, false, false, false);
+                        UnityMeshBuilder.BuildColliderMesh(mesh, buffer);
 
                         MeshCollider collider = go.GetComponent<MeshCollider>();
                         collider.sharedMesh = null;

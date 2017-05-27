@@ -12,7 +12,7 @@ namespace Voxelmetric.Code.Geometry.GeometryBatcher
         //! Materials our meshes are to use
         private readonly Material[] m_materials;
         //! A list of buffers for each material
-        private readonly List<GeometryBuffer> [] m_buffers;
+        private readonly List<RenderGeometryBuffer> [] m_buffers;
         private readonly BufferProperties [] m_buffersProperties;
         //! GameObjects used to hold our geometry
         private readonly List<GameObject> m_objects;
@@ -43,7 +43,7 @@ namespace Voxelmetric.Code.Geometry.GeometryBatcher
             m_materials = materials;
 
             int buffersCount = materials == null || materials.Length < 1 ? 1 : materials.Length;
-            m_buffers = new List<GeometryBuffer>[buffersCount];
+            m_buffers = new List<RenderGeometryBuffer>[buffersCount];
             m_buffersProperties = new BufferProperties[buffersCount];
 
             for (int i = 0; i<m_buffers.Length; i++)
@@ -54,10 +54,10 @@ namespace Voxelmetric.Code.Geometry.GeometryBatcher
                  * hold its geometry because of Unity's 65k-vertices limit per mesh. For chunks up to 32^3 big
                  * this should not be an issue, though.
                  */
-                m_buffers[i] = new List<GeometryBuffer>(1)
+                m_buffers[i] = new List<RenderGeometryBuffer>(1)
                 {
                     // Default render buffer
-                    new GeometryBuffer()
+                    new RenderGeometryBuffer()
                 };
             }
 
@@ -79,7 +79,7 @@ namespace Voxelmetric.Code.Geometry.GeometryBatcher
                 for (int j = 0; j < geometryBuffer.Count; j++)
                 {
                     if (geometryBuffer[j].WasUsed())
-                        geometryBuffer[j] = new GeometryBuffer();
+                        geometryBuffer[j] = new RenderGeometryBuffer();
                 }
 
                 m_buffersProperties[i] = new BufferProperties();
@@ -119,8 +119,8 @@ namespace Voxelmetric.Code.Geometry.GeometryBatcher
         /// <param name="materialID">ID of material to use when building the mesh</param>
         public void AddMeshData(int[] tris, VertexData[] verts, ref Rect texture, Vector3 offset, int materialID)
         {
-            List<GeometryBuffer> holder = m_buffers[materialID];
-            GeometryBuffer buffer = holder[holder.Count - 1];
+            List<RenderGeometryBuffer> holder = m_buffers[materialID];
+            RenderGeometryBuffer buffer = holder[holder.Count - 1];
 
             int initialVertCount = buffer.Vertices.Count;
 
@@ -129,7 +129,7 @@ namespace Voxelmetric.Code.Geometry.GeometryBatcher
                 // If there are too many vertices we need to create a new separate buffer for them
                 if (buffer.Vertices.Count+1>65000)
                 {
-                    buffer = new GeometryBuffer();
+                    buffer = new RenderGeometryBuffer();
                     holder.Add(buffer);
                 }
 
@@ -162,13 +162,13 @@ namespace Voxelmetric.Code.Geometry.GeometryBatcher
         {
             Assert.IsTrue(vertexData.Length==4);
 
-            List<GeometryBuffer> holder = m_buffers[materialID];
-            GeometryBuffer buffer = holder[holder.Count-1];
+            List<RenderGeometryBuffer> holder = m_buffers[materialID];
+            RenderGeometryBuffer buffer = holder[holder.Count-1];
 
             // If there are too many vertices we need to create a new separate buffer for them
             if (buffer.Vertices.Count+4>65000)
             {
-                buffer = new GeometryBuffer();
+                buffer = new RenderGeometryBuffer();
                 holder.Add(buffer);
             }
 
@@ -196,7 +196,7 @@ namespace Voxelmetric.Code.Geometry.GeometryBatcher
 
                 for (int i = 0; i<holder.Count; i++)
                 {
-                    GeometryBuffer buffer = holder[i];
+                    RenderGeometryBuffer buffer = holder[i];
                     
                     // No data means there's no mesh to build
                     if (buffer.IsEmpty())
@@ -212,7 +212,7 @@ namespace Voxelmetric.Code.Geometry.GeometryBatcher
                         
                         Mesh mesh = Globals.MemPools.MeshPool.Pop();
                         Assert.IsTrue(mesh.vertices.Length<=0);
-                        UnityMeshBuilder.BuildGeometryMesh(
+                        UnityMeshBuilder.BuildRenderMesh(
                             mesh,
                             buffer,
                             BufferProperties.GetColors(propsMask),
