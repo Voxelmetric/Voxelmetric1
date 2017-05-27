@@ -1,5 +1,5 @@
 ﻿using UnityEngine;
-using Voxelmetric.Code.Rendering;
+using Voxelmetric.Code.Geometry;
 
 namespace Voxelmetric.Code.Builders
 {

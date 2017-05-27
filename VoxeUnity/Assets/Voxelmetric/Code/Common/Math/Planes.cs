@@ -3,7 +3,7 @@ using Voxelmetric.Code.Data_types;
 
 namespace Voxelmetric.Code.Common.Math
 {
-    public static class Geometry
+    public static class Planes
     {
         private enum EPlaneSide
         {

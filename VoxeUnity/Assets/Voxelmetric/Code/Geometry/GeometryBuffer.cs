@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using Voxelmetric.Code.Common.MemoryPooling;
 
-namespace Voxelmetric.Code.Rendering
+namespace Voxelmetric.Code.Geometry
 {
     /// <summary>
     ///     A simple intermediate container for mesh data

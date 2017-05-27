@@ -1,4 +1,4 @@
-﻿namespace Voxelmetric.Code.Rendering.GeometryBatcher
+﻿namespace Voxelmetric.Code.Geometry.GeometryBatcher
 {
     internal struct BufferProperties
     {

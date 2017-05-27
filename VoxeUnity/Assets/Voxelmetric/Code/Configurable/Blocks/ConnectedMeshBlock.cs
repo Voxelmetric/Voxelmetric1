@@ -3,7 +3,7 @@ using Voxelmetric.Code.Configurable.Blocks;
 using Voxelmetric.Code.Core;
 using Voxelmetric.Code.Data_types;
 using Voxelmetric.Code.Load_Resources.Blocks;
-using Voxelmetric.Code.Rendering.GeometryBatcher;
+using Voxelmetric.Code.Geometry.GeometryBatcher;
 
 public class ConnectedMeshBlock: CustomMeshBlock
 {

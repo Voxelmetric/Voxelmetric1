@@ -94,7 +94,7 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
             Profiler.BeginSample("PreProcessChunks");
 
             // Recalculate camera frustum planes
-            Geometry.CalculateFrustumPlanes(m_camera, m_cameraPlanes);
+            Planes.CalculateFrustumPlanes(m_camera, m_cameraPlanes);
 
             // Update clipmap based on range values
             UpdateRanges();
@@ -135,7 +135,7 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
                 int yDist = yd*yd;
                 
                 // Update visibility information
-                bool isVisible = Geometry.TestPlanesAABB(m_cameraPlanes, chunk.WorldBounds);
+                bool isVisible = Planes.TestPlanesAABB(m_cameraPlanes, chunk.WorldBounds);
 
                 stateManager.Visible = isVisible &&
                                         xDist<=HorizontalChunkLoadRadius*HorizontalChunkLoadRadius &&
@@ -162,7 +162,7 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
             }*/
             // Check whether the bouding box lies inside the camera's frustum
             AABB bounds2 = new AABB(wx, wy, wz, wx+rx, wy+ry, wz+rz);
-            int inside = Geometry.TestPlanesAABB2(m_cameraPlanes, bounds2);
+            int inside = Planes.TestPlanesAABB2(m_cameraPlanes, bounds2);
 
             #region Full invisibility            
 

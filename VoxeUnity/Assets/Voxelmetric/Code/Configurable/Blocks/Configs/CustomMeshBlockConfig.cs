@@ -3,7 +3,7 @@ using System.Collections;
 using Voxelmetric.Code;
 using Voxelmetric.Code.Core;
 using Voxelmetric.Code.Load_Resources.Textures;
-using Voxelmetric.Code.Rendering;
+using Voxelmetric.Code.Geometry;
 
 public class CustomMeshBlockConfig: BlockConfig
 {

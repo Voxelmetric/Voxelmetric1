@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace Voxelmetric.Code.Rendering
+namespace Voxelmetric.Code.Geometry
 {
     public struct VertexData
     {

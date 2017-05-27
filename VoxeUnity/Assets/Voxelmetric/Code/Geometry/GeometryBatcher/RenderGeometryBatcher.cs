@@ -4,7 +4,7 @@ using UnityEngine.Assertions;
 using Voxelmetric.Code.Builders;
 using Voxelmetric.Code.Common.MemoryPooling;
 
-namespace Voxelmetric.Code.Rendering.GeometryBatcher
+namespace Voxelmetric.Code.Geometry.GeometryBatcher
 {
     public class RenderGeometryBatcher: IGeometryBatcher
     {

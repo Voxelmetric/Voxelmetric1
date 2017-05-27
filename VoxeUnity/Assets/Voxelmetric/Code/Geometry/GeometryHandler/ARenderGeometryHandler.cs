@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
-using Voxelmetric.Code.Rendering.GeometryBatcher;
+using Voxelmetric.Code.Geometry.GeometryBatcher;
 
-namespace Voxelmetric.Code.Rendering.GeometryHandler
+namespace Voxelmetric.Code.Geometry.GeometryHandler
 {
     public abstract class ARenderGeometryHandler: IGeometryHandler
     {
