@@ -7,6 +7,5 @@
     "texture": "pyramid",
     "raycastHitOnRemoval": true,
     "raycastHit": true,
-    "custom": true,
     "material": "pyramidMat"
 }

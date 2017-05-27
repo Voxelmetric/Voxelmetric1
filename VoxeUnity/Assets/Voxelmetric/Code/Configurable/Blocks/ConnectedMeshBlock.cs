@@ -14,6 +14,8 @@ public class ConnectedMeshBlock: CustomMeshBlock
 
     public override void OnInit(BlockProvider blockProvider)
     {
+        Custom = true;
+
         if (connectedMeshConfig.connectsToTypes==null)
         {
             connectedMeshConfig.connectsToTypes = new int[connectedMeshConfig.connectsToNames.Length];

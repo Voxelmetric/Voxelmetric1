@@ -4,6 +4,7 @@ using Voxelmetric.Code.Common.MemoryPooling;
 using Voxelmetric.Code.Configurable.Blocks.Utilities;
 using Voxelmetric.Code.Core;
 using Voxelmetric.Code.Data_types;
+using Voxelmetric.Code.Load_Resources.Blocks;
 using Voxelmetric.Code.Load_Resources.Textures;
 using Voxelmetric.Code.Rendering;
 using Voxelmetric.Code.Rendering.GeometryBatcher;
@@ -14,11 +15,15 @@ public class CrossMeshBlock : Block
 
     public TextureCollection texture { get { return ((CrossMeshBlockConfig)Config).texture; } }
 
+    public override void OnInit(BlockProvider blockProvider)
+    {
+        Custom = true;
+    }
+
     public override void BuildBlock(Chunk chunk, ref Vector3Int localPos, int materialID)
     {
         LocalPools pools = chunk.pools;
         RenderGeometryBatcher batcher = chunk.GeometryHandler.Batcher;
-        batcher.UseColors(materialID);
         batcher.UseTextures(materialID);
 
         // Using the block positions hash is much better for random numbers than saving the offset and height in the block data
@@ -50,7 +55,6 @@ public class CrossMeshBlock : Block
             vertexData[2].Vertex = new Vector3(x2, y2, z1);
             vertexData[3].Vertex = new Vector3(x2, y1, z1);
             BlockUtils.PrepareTexture(chunk, ref localPos, vertexData, Direction.north, texture, false);
-            BlockUtils.SetColors(vertexData, 1f, 1f, 1f, 1f, false);
             batcher.AddFace(vertexData, false, materialID);
         }
         {
@@ -59,7 +63,6 @@ public class CrossMeshBlock : Block
             vertexData[2].Vertex = new Vector3(x1, y2, z2);
             vertexData[3].Vertex = new Vector3(x1, y1, z2);
             BlockUtils.PrepareTexture(chunk, ref localPos, vertexData, Direction.north, texture, false);
-            BlockUtils.SetColors(vertexData, 1f, 1f, 1f, 1f, false);
             batcher.AddFace(vertexData, false, materialID);
         }
         {
@@ -68,7 +71,6 @@ public class CrossMeshBlock : Block
             vertexData[2].Vertex = new Vector3(x1, y2, z1);
             vertexData[3].Vertex = new Vector3(x1, y1, z1);
             BlockUtils.PrepareTexture(chunk, ref localPos, vertexData, Direction.north, texture, false);
-            BlockUtils.SetColors(vertexData, 1f, 1f, 1f, 1f, false);
             batcher.AddFace(vertexData, false, materialID);
         }
         {
@@ -77,7 +79,6 @@ public class CrossMeshBlock : Block
             vertexData[2].Vertex = new Vector3(x2, y2, z2);
             vertexData[3].Vertex = new Vector3(x2, y1, z2);
             BlockUtils.PrepareTexture(chunk, ref localPos, vertexData, Direction.north, texture, false);
-            BlockUtils.SetColors(vertexData, 1f, 1f, 1f, 1f, false);
             batcher.AddFace(vertexData, false, materialID);
         }
         pools.VertexDataArrayPool.Push(vertexData);

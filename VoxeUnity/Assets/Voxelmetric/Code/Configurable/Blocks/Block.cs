@@ -35,7 +35,7 @@ public class Block
 
         Name = config.name;
         Solid = config.solid;
-        Custom = config.custom;
+        Custom = false;
     }
     
     public virtual string DisplayName

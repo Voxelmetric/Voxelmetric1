@@ -42,9 +42,7 @@ public class BlockConfig
     public bool raycastHitOnRemoval { get; protected set; }
     public int renderMaterialID { get; protected set; }
     public int physicMaterialID { get; protected set; }
-
-    public bool custom { get; protected set; }
-
+    
     #endregion
 
     public static BlockConfig CreateAirBlockConfig(World world)
@@ -56,7 +54,6 @@ public class BlockConfig
             className = "Block",
             solid = false,
             transparent = true,
-            custom = false,
             physicMaterialID = -1
         };
     }
@@ -95,7 +92,6 @@ public class BlockConfig
             transparent = _GetPropertyFromConfig(config, "transparent", false);
             raycastHit = _GetPropertyFromConfig(config, "raycastHit", solid);
             raycastHitOnRemoval = _GetPropertyFromConfig(config, "raycastHitOnRemoval", solid);
-            custom = _GetPropertyFromConfig(config, "custom", false);
 
             // Try to associate requested render materials with one of world's materials
             {

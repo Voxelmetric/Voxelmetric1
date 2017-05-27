@@ -5,7 +5,6 @@
     "configClass": "ConnectedMeshBlockConfig",
     "meshFileLocation": "CustomMesh",
     "texture": "pyramid",
-    "custom": true,
 
     "connectsToSolid": true,
     "connectsToNames": "connectedblock, leaves",
@@ -27,5 +26,7 @@
     "westXOffset": "-0.5",
 
     "raycastHitOnRemoval": true,
-    "raycastHit": true
+    "raycastHit": true,
+
+    "material": "ChunkColorUV"
 }
