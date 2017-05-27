@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Assertions;
 using Voxelmetric.Code.Builders;
@@ -14,14 +13,11 @@ namespace Voxelmetric.Code.Rendering.GeometryBatcher
         private readonly Material[] m_materials;
         //! A list of buffers for each material
         private readonly List<GeometryBuffer> [] m_buffers;
+        private readonly BufferProperties [] m_buffersProperties;
         //! GameObjects used to hold our geometry
         private readonly List<GameObject> m_objects;
         //! A list of renderer used to render our geometry
         private readonly List<Renderer> m_renderers;
-
-        public bool UseColors = false;
-        public bool UseTextures = false;
-        public bool UseTangents = false;
 
         private bool m_enabled;
         public bool Enabled
@@ -46,8 +42,10 @@ namespace Voxelmetric.Code.Rendering.GeometryBatcher
             m_prefabName = prefabName;
             m_materials = materials;
 
-            int buffersLen = materials == null || materials.Length < 1 ? 1 : materials.Length;
-            m_buffers = new List<GeometryBuffer>[buffersLen];
+            int buffersCount = materials == null || materials.Length < 1 ? 1 : materials.Length;
+            m_buffers = new List<GeometryBuffer>[buffersCount];
+            m_buffersProperties = new BufferProperties[buffersCount];
+
             for (int i = 0; i<m_buffers.Length; i++)
             {
                 /* TODO: Let's be optimistic and allocate enough room for just one buffer. It's going to suffice
@@ -83,14 +81,12 @@ namespace Voxelmetric.Code.Rendering.GeometryBatcher
                     if (geometryBuffer[j].WasUsed())
                         geometryBuffer[j] = new GeometryBuffer();
                 }
+
+                m_buffersProperties[i] = new BufferProperties();
             }
 
             ReleaseOldData();
             m_enabled = false;
-
-            UseColors = false;
-            UseTextures = false;
-            UseTangents = false;
         }
 
         /// <summary>
@@ -98,18 +94,19 @@ namespace Voxelmetric.Code.Rendering.GeometryBatcher
         /// </summary>
         public void Clear()
         {
-            foreach (var holder in m_buffers)
+            for (int i = 0; i<m_buffers.Length; i++)
             {
-                for (int i = 0; i<holder.Count; i++)
-                    holder[i].Clear();
+                var geometryBuffer = m_buffers[i];
+                for (int j = 0; j < geometryBuffer.Count; j++)
+                {
+                    geometryBuffer[j].Clear();
+                }
+
+                m_buffersProperties[i] = new BufferProperties();
             }
 
             ReleaseOldData();
             m_enabled = false;
-
-            UseColors = false;
-            UseTextures = false;
-            UseTangents = false;
         }
 
         /// <summary>
@@ -194,6 +191,8 @@ namespace Voxelmetric.Code.Rendering.GeometryBatcher
             for (int j=0; j<m_buffers.Length; j++)
             {
                 var holder = m_buffers[j];
+                var props = m_buffersProperties[j];
+                int propsMask = props.GetMask;
 
                 for (int i = 0; i<holder.Count; i++)
                 {
@@ -210,10 +209,16 @@ namespace Voxelmetric.Code.Rendering.GeometryBatcher
 #if DEBUG
                         go.name = string.Format(debugName, "_", i.ToString());
 #endif
-
+                        
                         Mesh mesh = Globals.MemPools.MeshPool.Pop();
                         Assert.IsTrue(mesh.vertices.Length<=0);
-                        UnityMeshBuilder.BuildGeometryMesh(mesh, buffer, UseColors, UseTextures, UseTangents);
+                        UnityMeshBuilder.BuildGeometryMesh(
+                            mesh,
+                            buffer,
+                            BufferProperties.GetColors(propsMask),
+                            BufferProperties.GetTextures(propsMask),
+                            BufferProperties.GetTangents(propsMask)
+                            );
 
                         MeshFilter filter = go.GetComponent<MeshFilter>();
                         filter.sharedMesh = null;
@@ -230,11 +235,9 @@ namespace Voxelmetric.Code.Rendering.GeometryBatcher
 
                     buffer.Clear();
                 }
-            }
 
-            UseColors = false;
-            UseTextures = false;
-            UseTangents = false;
+                props = new BufferProperties();
+            }
         }
 
         private void ReleaseOldData()
@@ -264,6 +267,27 @@ namespace Voxelmetric.Code.Rendering.GeometryBatcher
 
             m_objects.Clear();
             m_renderers.Clear();
+        }
+
+        public void UseColors(int materialID)
+        {
+            int mask = m_buffersProperties[materialID].GetMask;
+            mask = BufferProperties.SetColors(mask);
+            m_buffersProperties[materialID] = new BufferProperties(mask);
+        }
+
+        public void UseTextures(int materialID)
+        {
+            int mask = m_buffersProperties[materialID].GetMask;
+            mask = BufferProperties.SetTextures(mask);
+            m_buffersProperties[materialID] = new BufferProperties(mask);
+        }
+
+        public void UseTangents(int materialID)
+        {
+            int mask = m_buffersProperties[materialID].GetMask;
+            mask = BufferProperties.SetTangents(mask);
+            m_buffersProperties[materialID] = new BufferProperties(mask);
         }
     }
 }

@@ -18,8 +18,8 @@ public class CrossMeshBlock : Block
     {
         LocalPools pools = chunk.pools;
         RenderGeometryBatcher batcher = chunk.GeometryHandler.Batcher;
-        batcher.UseColors = true;
-        batcher.UseTextures = true;
+        batcher.UseColors(materialID);
+        batcher.UseTextures(materialID);
 
         // Using the block positions hash is much better for random numbers than saving the offset and height in the block data
         int hash = localPos.GetHashCode();

@@ -36,18 +36,18 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
         //! Distance in chunks for loading chunks
         [Range(VerticalMinRange, VerticalMaxRange)] public int VerticalChunkLoadRadius = VerticalDefRange;
         //! Makes the world regenerate around the attached camera. If false, X sticks at 0.
-        public bool FollowCameraX;
+        public bool FollowCameraX = true;
         //! Makes the world regenerate around the attached camera. If false, Y sticks at 0.
-        public bool FollowCameraY;
+        public bool FollowCameraY = false;
         //! Makes the world regenerate around the attached camera. If false, Z sticks at 0.
-        public bool FollowCameraZ;
+        public bool FollowCameraZ = true;
         //! Toogles frustum culling
-        public bool UseFrustumCulling;
+        public bool UseFrustumCulling = true;
         //! If false, only visible part of map is loaded on startup
         public bool FullLoadOnStartUp = true;
 
-        public bool Diag_DrawWorldBounds;
-        public bool Diag_DrawLoadRange;
+        public bool Diag_DrawWorldBounds = false;
+        public bool Diag_DrawLoadRange = false;
 
         private int m_chunkHorizontalLoadRadiusPrev;
         private int m_chunkVerticalLoadRadiusPrev;

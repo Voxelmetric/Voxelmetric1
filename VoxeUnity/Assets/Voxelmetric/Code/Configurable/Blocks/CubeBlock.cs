@@ -43,8 +43,8 @@ public class CubeBlock: Block
             BlockUtils.PrepareColors(chunk, vertexData, ref face.light);
 
             RenderGeometryBatcher batcher = chunk.GeometryHandler.Batcher;
-            batcher.UseColors = true;
-            batcher.UseTextures = true;
+            batcher.UseColors(face.materialID);
+            batcher.UseTextures(face.materialID);
             batcher.AddFace(vertexData, backface, face.materialID);
         }
         pools.VertexDataArrayPool.Push(vertexData);

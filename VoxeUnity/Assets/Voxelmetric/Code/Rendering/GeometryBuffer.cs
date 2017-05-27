@@ -18,16 +18,16 @@ namespace Voxelmetric.Code.Rendering
         {
             Vertices.Clear();
             Triangles.Clear();
-        }
+    }
 
         public bool IsEmpty()
         {
-            return (Vertices.Count <= 0);
+            return Vertices.Count <= 0;
         }
 
         public bool WasUsed()
         {
-            return (Vertices.Capacity > 0);
+            return Vertices.Capacity > 0;
         }
 
         /// <summary>

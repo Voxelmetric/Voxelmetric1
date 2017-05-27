@@ -1894,7 +1894,9 @@ MonoBehaviour:
   world: {fileID: 127}
   HorizontalChunkLoadRadius: 6
   VerticalChunkLoadRadius: 3
-  FollowCamera: 0
+  FollowCameraX: 1
+  FollowCameraY: 0
+  FollowCameraZ: 1
   UseFrustumCulling: 1
   FullLoadOnStartUp: 1
   Diag_DrawWorldBounds: 0
@@ -2562,8 +2564,8 @@ MonoBehaviour:
     isServer: 1
     allowConnections: 0
   renderMaterials:
-  - {fileID: 2100000, guid: 7fa2460a4614b844c9c80d1c0398b97d, type: 2}
   - {fileID: 2100000, guid: b577224f21b05f24f84c59e64ed429f7, type: 2}
+  - {fileID: 2100000, guid: 7fa2460a4614b844c9c80d1c0398b97d, type: 2}
   - {fileID: 2100000, guid: e4000b5530f97ed4b802340ffe324a75, type: 2}
   physicsMaterials: []
 --- !u!114 &128

@@ -64,7 +64,7 @@ public class ColoredBlock : Block
             BlockUtils.AdjustColors(chunk, vertexData, face.light);
 
             RenderGeometryBatcher batcher = chunk.GeometryHandler.Batcher;
-            batcher.UseColors = true;
+            batcher.UseColors(face.materialID);
             batcher.AddFace(vertexData, backFace, face.materialID);
         }
         pools.VertexDataArrayPool.Push(vertexData);
