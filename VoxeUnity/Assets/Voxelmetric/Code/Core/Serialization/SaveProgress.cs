@@ -8,12 +8,15 @@ namespace Voxelmetric.Code.Core.Serialization
 {
     public class SaveProgress: IEventListener<ChunkStateExternal>
     {
-        private List<Chunk> chunksToSave = new List<Chunk>();
+        private readonly List<Chunk> chunksToSave = new List<Chunk>();
         public readonly int totalChunksToSave = 0;
         private int progress = 0;
         
-        public SaveProgress(ICollection<Chunk> chunks)
+        public SaveProgress(List<Chunk> chunks)
         {
+            if (chunks==null)
+                return;
+
             if(chunks.Count<=0)
             {
                 progress = 100;

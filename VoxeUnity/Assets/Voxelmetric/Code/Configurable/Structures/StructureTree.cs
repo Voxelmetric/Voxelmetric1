@@ -218,7 +218,7 @@ public class StructureTree: GeneratedStructure
         int zOff = chunk.pos.z-worldPos.z;
 
         blocks.Modify(
-            new ModifyOpEllipsoid(leaves, min, max, new Vector3Int(xOff, yOff, zOff), a2inv, b2inv, true)
+            new ModifyOpEllipsoid(leaves, min, max, new Vector3Int(xOff, yOff, zOff), a2inv, b2inv, false)
             );
     }
 
@@ -227,7 +227,7 @@ public class StructureTree: GeneratedStructure
         ChunkBlocks blocks = chunk.blocks;
 
         blocks.Modify(
-            new ModifyOpCuboid(log, min, max, true)
+            new ModifyOpCuboid(log, min, max, false)
             );
     }
 }

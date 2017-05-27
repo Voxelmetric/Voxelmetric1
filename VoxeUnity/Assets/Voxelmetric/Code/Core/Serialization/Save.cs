@@ -97,22 +97,8 @@ namespace Voxelmetric.Code.Core.Serialization
                     int blkLenBytes = m_blocksModified.Length * blockDataSize;
 
                     bw.Write(m_blocksModified.Length);
-                    try
-                    {
-                        bw.Write(m_positionsBytes, 0, posLenBytes);
-                    }
-                    catch (Exception ex)
-                    {
-                        string s = ex.Message;
-                    }
-                    try
-                    {
-                        bw.Write(m_blocksBytes, 0, blkLenBytes);
-                    }
-                    catch (Exception ex)
-                    {
-                        string s = ex.Message;
-                    }
+                    bw.Write(m_positionsBytes, 0, posLenBytes);
+                    bw.Write(m_blocksBytes, 0, blkLenBytes);
                 }
             }
             else
@@ -346,13 +332,13 @@ namespace Voxelmetric.Code.Core.Serialization
 
             if (IsDifferential)
             {
-                if (m_positionsBytes!=null && m_blocksModified!=null)
+                if (m_positionsBytes!=null && m_blocksBytes!=null)
                 {
                     int blockPosSize = StructSerialization.TSSize<BlockPos>.ValueSize;
                     int blockDataSize = StructSerialization.TSSize<BlockData>.ValueSize;
 
                     m_positionsModified = new BlockPos[m_positionsBytes.Length / blockPosSize];
-                    m_blocksModified = new BlockData[m_blocksModified.Length / blockDataSize];
+                    m_blocksModified = new BlockData[m_blocksBytes.Length / blockDataSize];
 
                     int i, j;
                     unsafe
@@ -360,7 +346,7 @@ namespace Voxelmetric.Code.Core.Serialization
                         // Extract positions
                         fixed (byte* pSrc = m_positionsBytes)
                         {
-                            for (i = 0, j = 0; i<m_positionsBytes.Length; i += blockPosSize, j++)
+                            for (i = 0, j = 0; j<m_positionsModified.Length; i += blockPosSize, j++)
                             {
                                 m_positionsModified[j] = *(BlockPos*)&pSrc[i];
                             }
@@ -368,7 +354,7 @@ namespace Voxelmetric.Code.Core.Serialization
                         // Extract block data
                         fixed (byte* pSrc = m_blocksBytes)
                         {
-                            for (i = 0, j = 0; i<m_blocksModified.Length; i += blockDataSize, j++)
+                            for (i = 0, j = 0; j<m_blocksModified.Length; i += blockDataSize, j++)
                             {
                                 BlockData* bd = (BlockData*)&pSrc[i];
                                 // Convert global block types into internal optimized version
