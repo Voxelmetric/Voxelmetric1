@@ -6,7 +6,7 @@ namespace Voxelmetric.Code.Core
 {
     public sealed class ChunkLogic
     {
-        private Chunk chunk;
+        private readonly Chunk chunk;
         private float randomUpdateTime;
         private readonly List<BlockAndTimer> scheduledUpdates = new List<BlockAndTimer>();
 
