@@ -68,5 +68,6 @@ namespace Voxelmetric.Code
     public static class Directories
     {
         public const string SaveFolder = "VoxelSaves";
+        public const string ResourcesFolder = "Assets/Voxelmetric/Resources";
     }
 }

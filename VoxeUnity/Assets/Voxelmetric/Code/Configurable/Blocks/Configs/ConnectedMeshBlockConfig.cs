@@ -15,9 +15,9 @@ public class ConnectedMeshBlockConfig : CustomMeshBlockConfig
     public string[] connectsToNames;
     public bool connectsToSolid;
 
-    public override bool SetUp(Hashtable config, World world)
+    public override bool OnSetUp(Hashtable config, World world)
     {
-        if (!base.SetUp(config, world))
+        if (!base.OnSetUp(config, world))
             return false;
 
         connectsToNames = _GetPropertyFromConfig(config, "connectsToNames", "").Replace(" ", "").Split(',');

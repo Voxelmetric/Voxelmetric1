@@ -33,17 +33,20 @@ namespace Voxelmetric.Code.Common.MemoryPooling
         #endregion
 
         public readonly ArrayPoolCollection<Vector2> Vector2ArrayPool =
-            new ArrayPoolCollection<Vector2>(128);
+            new ArrayPoolCollection<Vector2>(64);
 
         public readonly ArrayPoolCollection<Vector3> Vector3ArrayPool =
-            new ArrayPoolCollection<Vector3>(128);
+            new ArrayPoolCollection<Vector3>(64);
 
         public readonly ArrayPoolCollection<Vector4> Vector4ArrayPool =
-            new ArrayPoolCollection<Vector4>(128);
+            new ArrayPoolCollection<Vector4>(64);
 
         public readonly ArrayPoolCollection<Color32> Color32ArrayPool =
-            new ArrayPoolCollection<Color32>(128);
-        
+            new ArrayPoolCollection<Color32>(64);
+
+        public readonly ArrayPoolCollection<byte> ByteArrayPool =
+            new ArrayPoolCollection<byte>(64);
+
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder(256);
@@ -53,6 +56,7 @@ namespace Voxelmetric.Code.Common.MemoryPooling
             sb.ConcatFormat(",Vec3Arr={0}", Vector3ArrayPool.ToString());
             sb.ConcatFormat(",Vec4Arr={0}", Vector4ArrayPool.ToString());
             sb.ConcatFormat(",ColorArr={0}", Color32ArrayPool.ToString());
+            sb.ConcatFormat(",ByteArr={0}", Color32ArrayPool.ToString());
             return sb.ToString();
         }
     }

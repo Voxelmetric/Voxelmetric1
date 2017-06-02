@@ -7,9 +7,9 @@ public class ColoredBlockConfig : BlockConfig
 {
     public readonly Color32[] colors = new Color32[6];
 
-    public override bool SetUp(Hashtable config, World world)
+    public override bool OnSetUp(Hashtable config, World world)
     {
-        if (!base.SetUp(config, world))
+        if (!base.OnSetUp(config, world))
             return false;
         
         if (config.ContainsKey("color"))

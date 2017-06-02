@@ -6,9 +6,9 @@ public class CrossMeshBlockConfig: BlockConfig
 {
     public TextureCollection texture;
 
-    public override bool SetUp(Hashtable config, World world)
+    public override bool OnSetUp(Hashtable config, World world)
     {
-        if (!base.SetUp(config, world))
+        if (!base.OnSetUp(config, world))
             return false;
 
         texture = world.textureProvider.GetTextureCollection(_GetPropertyFromConfig(config, "texture", ""));

@@ -79,6 +79,9 @@ namespace Voxelmetric.Code.Core
             textureProvider = Voxelmetric.resources.GetTextureProvider(this);
             blockProvider = Voxelmetric.resources.GetBlockProvider(this);
 
+            textureProvider.Init(config);
+            blockProvider.Init(config.blockFolder, this);
+
             foreach (var renderMaterial in renderMaterials)
             {
                 renderMaterial.mainTexture = textureProvider.atlas;

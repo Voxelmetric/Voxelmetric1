@@ -13,11 +13,9 @@ namespace Voxelmetric.Code.Load_Resources.Textures
         //! Texture atlas
         public Texture2D atlas;
 
-        public static TextureProvider Create(WorldConfig config)
+        public static TextureProvider Create()
         {
-            TextureProvider provider = new TextureProvider();
-            provider.Init(config);
-            return provider;
+            return new TextureProvider();
         }
 
         private TextureProvider()
@@ -25,7 +23,7 @@ namespace Voxelmetric.Code.Load_Resources.Textures
             textures = new Dictionary<string, TextureCollection>();
         }
 
-        private void Init(WorldConfig config)
+        public void Init(WorldConfig config)
         {
             this.config = config;
             LoadTextureIndex();

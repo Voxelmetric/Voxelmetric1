@@ -5,6 +5,7 @@ using Newtonsoft.Json;
 using UnityEngine;
 using Voxelmetric.Code.Core;
 using Voxelmetric.Code.Data_types;
+// ReSharper disable All
 
 namespace Voxelmetric.Code.Load_Resources.Blocks
 {
@@ -24,11 +25,9 @@ namespace Voxelmetric.Code.Load_Resources.Blocks
 
         public Block[] BlockTypes { get; private set; }
 
-        public static BlockProvider Create(string blockFolder, World world)
+        public static BlockProvider Create()
         {
-            BlockProvider provider = new BlockProvider();
-            provider.Init(blockFolder, world);
-            return provider;
+            return new BlockProvider();
         }
 
         private BlockProvider()
@@ -36,7 +35,7 @@ namespace Voxelmetric.Code.Load_Resources.Blocks
             m_names = new Dictionary<string, ushort>();
         }
 
-        private void Init(string blockFolder, World world)
+        public void Init(string blockFolder, World world)
         {
             // Add all the block definitions defined in the config files
             ProcessConfigs(world, blockFolder);
@@ -59,6 +58,12 @@ namespace Voxelmetric.Code.Load_Resources.Blocks
                 Block block = BlockTypes[i];
                 block.OnInit(this);
             }
+
+            // Add block types from config
+            foreach (var configFile in m_configs)
+            {
+                configFile.OnPostSetUp(world);
+            }
         }
 
         // World is only needed for setting up the textures
@@ -68,7 +73,7 @@ namespace Voxelmetric.Code.Load_Resources.Blocks
             List<BlockConfig> configs = new List<BlockConfig>(configFiles.Length);
             Dictionary<ushort, ushort> types = new Dictionary<ushort, ushort>();
 
-                // Add the static air block type
+            // Add the static air block type
             AddBlockType(configs, types, BlockConfig.CreateAirBlockConfig(world));
             
             // Add block types from config
@@ -84,7 +89,7 @@ namespace Voxelmetric.Code.Load_Resources.Blocks
                 }
 
                 BlockConfig config = (BlockConfig)Activator.CreateInstance(configType);
-                if (!config.SetUp(configHash, world))
+                if (!config.OnSetUp(configHash, world))
                     continue;
 
                 if (!VerifyBlockConfig(types, config))
@@ -148,6 +153,7 @@ namespace Voxelmetric.Code.Load_Resources.Blocks
         /// Adds a block type to the index and adds it's name to a dictionary for quick lookup
         /// </summary>
         /// <param name="configs">A list of configs</param>
+        /// <param name="types"></param>
         /// <param name="config">The controller object for this block</param>
         /// <returns>The index of the block</returns>
         private void AddBlockType(List<BlockConfig> configs, Dictionary<ushort, ushort> types, BlockConfig config)

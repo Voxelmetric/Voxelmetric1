@@ -93,7 +93,7 @@ namespace Voxelmetric.Code.Core
             blocks = new ChunkBlocks(this);
         }
 
-        private void Init(World world, Vector3Int pos)
+        public void Init(World world, Vector3Int pos)
         {
             this.world = world;
             this.pos = pos;

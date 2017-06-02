@@ -27,15 +27,7 @@ namespace Voxelmetric.Code.Common.Memory
         public T[] Pop(int size)
         {
             int length = GetRoundedSize(size);
-
-            IArrayPool<T> pool;
-            if (!m_arrays.TryGetValue(length, out pool))
-            {
-                pool = new ArrayPool<T>(length, 4, 1);
-                m_arrays.Add(length, pool);
-            }
-
-            return pool.Pop();
+            return PopExact(length);
         }
 
         public void Push(T[] array)
@@ -44,7 +36,7 @@ namespace Voxelmetric.Code.Common.Memory
 
             IArrayPool<T> pool;
             if (!m_arrays.TryGetValue(length, out pool))
-                throw new InvalidOperationException("Couldn't find an array pool of length " + length);
+                throw new InvalidOperationException("Couldn't find an array pool of length " + length.ToString());
 
             pool.Push(array);
         }
@@ -53,8 +45,8 @@ namespace Voxelmetric.Code.Common.Memory
 
         protected static int GetRoundedSize(int size)
         {
-            int rounded = size / RoundSizeBy * RoundSizeBy;
-            return rounded == size ? rounded : rounded + RoundSizeBy;
+            int rounded = (size / RoundSizeBy) * RoundSizeBy;
+            return rounded + RoundSizeBy;
         }
 
         public override string ToString()

@@ -7,9 +7,9 @@ public class CubeBlockConfig: BlockConfig
 {
     public TextureCollection[] textures;
 
-    public override bool SetUp(Hashtable config, World world)
+    public override bool OnSetUp(Hashtable config, World world)
     {
-        if (!base.SetUp(config, world))
+        if (!base.OnSetUp(config, world))
             return false;
 
         textures = new TextureCollection[6];

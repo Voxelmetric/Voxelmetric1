@@ -2,6 +2,7 @@
 using System.Collections;
 using UnityEngine;
 using Voxelmetric.Code.Core;
+using Voxelmetric.Code.Load_Resources.Blocks;
 
 /// <summary>
 /// BlockConfigs define constants for block types. Things like if the block is solid,
@@ -14,7 +15,7 @@ using Voxelmetric.Code.Core;
 public class BlockConfig
 {
     //! Block type. Set externally by BlockIndex class when config is loaded
-    public ushort type = 0;
+    public ushort type = 1;
 
     #region Parameters read from config
 
@@ -50,7 +51,7 @@ public class BlockConfig
         return new BlockConfig
         {
             name = "air",
-            typeInConfig = 0,
+            typeInConfig = BlockProvider.AirType,
             className = "Block",
             solid = false,
             transparent = true,
@@ -64,7 +65,7 @@ public class BlockConfig
     /// </summary>
     /// <param name="config">Hashtable of the json config for the block</param>
     /// <param name="world">The world this block type belongs to</param>
-    public virtual bool SetUp(Hashtable config, World world)
+    public virtual bool OnSetUp(Hashtable config, World world)
     {
         // Obligatory parameters
         {
@@ -118,6 +119,11 @@ public class BlockConfig
             }
         }
 
+        return true;
+    }
+
+    public virtual bool OnPostSetUp(World world)
+    {
         return true;
     }
 

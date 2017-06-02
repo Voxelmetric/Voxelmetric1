@@ -1,6 +1,7 @@
 ﻿using System;
 using Voxelmetric.Code.Common;
 using Voxelmetric.Code.Core;
+using Voxelmetric.Code.Data_types;
 
 namespace Voxelmetric.Code.Builders
 {
@@ -92,7 +93,7 @@ namespace Voxelmetric.Code.Builders
             return true;
         }
 
-        public void Build(Chunk chunk)
+        public void Build(Chunk chunk, Side sideMask)
         {
             var blocks = chunk.blocks;
             var pools = chunk.pools;
@@ -155,7 +156,7 @@ namespace Voxelmetric.Code.Builders
                             }
                         } while (expand);
 
-                        BuildBox(chunk, block, x1, y1, z1, x2, y2, z2);
+                        BuildBox(chunk, block, sideMask, x1, y1, z1, x2, y2, z2);
                     }
                 }
             }
@@ -165,6 +166,6 @@ namespace Voxelmetric.Code.Builders
 
         protected abstract bool CanConsiderBlock(Block block);
         protected abstract bool CanCreateBox(Block block, Block neighbor);
-        protected abstract void BuildBox(Chunk chunk, Block block, int minX, int minY, int minZ, int maxX, int maxY, int maxZ);
+        protected abstract void BuildBox(Chunk chunk, Block block, Side sideMask, int minX, int minY, int minZ, int maxX, int maxY, int maxZ);
     }
 }

@@ -16,7 +16,7 @@ namespace Voxelmetric.Code.Core.GeometryHandler
         /// <summary> Updates the chunk based on its contents </summary>
         public override void Build()
         {
-            Globals.CubeMeshColliderBuilder.Build(chunk);
+            Globals.CubeMeshColliderBuilder.Build(chunk, Features.DontRenderWorldEdgesMask);
         }
 
         public override void Commit()

@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Text;
 using Voxelmetric.Code.Common;
 using Voxelmetric.Code.Common.Events;
 using Voxelmetric.Code.Common.Extensions;
