@@ -25,7 +25,7 @@ namespace Voxelmetric.Code.Builders.Geometry
             return block.Type==neighbor.Type;
         }
 
-        protected override void BuildBox(Chunk chunk, Block block, Side sideMask, int minX, int minY, int minZ, int maxX, int maxY, int maxZ)
+        protected override void BuildBox(Chunk chunk, Block block, int minX, int minY, int minZ, int maxX, int maxY, int maxZ)
         {
             // All faces in the are build in the following order:
             //     1--2
@@ -64,7 +64,7 @@ namespace Voxelmetric.Code.Builders.Geometry
             #region Top face
             if (listeners[(int)Direction.up]!=null ||
                 // Don't render faces on world's edges for chunks with no neighbor
-                (sideMask&Side.up)==0 ||
+                (SideMask&Side.up)==0 ||
                 maxY!=Env.ChunkSize)
             {
                 Array.Clear(mask, 0, mask.Length);
@@ -178,7 +178,7 @@ namespace Voxelmetric.Code.Builders.Geometry
             #region Bottom face
             if (listeners[(int)Direction.down]!=null ||
                 // Don't render faces on world's edges for chunks with no neighbor
-                (sideMask&Side.down)==0 ||
+                (SideMask&Side.down)==0 ||
                 minY!=0)
             {
                 Array.Clear(mask, 0, mask.Length);
@@ -292,7 +292,7 @@ namespace Voxelmetric.Code.Builders.Geometry
             #region Right face
             if (listeners[(int)Direction.east]!=null ||
                 // Don't render faces on world's edges for chunks with no neighbor
-                (sideMask&Side.east)==0 ||
+                (SideMask&Side.east)==0 ||
                 maxX!=Env.ChunkSize)
             {
                 Array.Clear(mask, 0, mask.Length);
@@ -406,7 +406,7 @@ namespace Voxelmetric.Code.Builders.Geometry
             #region Left face
             if (listeners[(int)Direction.west]!=null ||
                 // Don't render faces on world's edges for chunks with no neighbor
-                (sideMask&Side.west)==0 ||
+                (SideMask&Side.west)==0 ||
                 minX!=0)
             {
                 Array.Clear(mask, 0, mask.Length);
@@ -520,7 +520,7 @@ namespace Voxelmetric.Code.Builders.Geometry
             #region Front face
             if (listeners[(int)Direction.north]!=null ||
                 // Don't render faces on world's edges for chunks with no neighbor
-                (sideMask&Side.north)==0 ||
+                (SideMask&Side.north)==0 ||
                 maxZ!=Env.ChunkSize)
             {
                 Array.Clear(mask, 0, mask.Length);
@@ -634,7 +634,7 @@ namespace Voxelmetric.Code.Builders.Geometry
             #region Back face
             if (listeners[(int)Direction.south]!=null ||
                 // Don't render faces on world's edges for chunks with no neighbor
-                (sideMask&Side.south)==0 ||
+                (SideMask&Side.south)==0 ||
                 minZ!=0)
             {
                 Array.Clear(mask, 0, mask.Length);

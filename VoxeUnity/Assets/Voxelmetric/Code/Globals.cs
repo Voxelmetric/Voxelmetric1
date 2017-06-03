@@ -35,8 +35,8 @@ namespace Voxelmetric.Code
         }
 
         // Geometry mesh builder
-        private static readonly IMeshBuilder s_cubeMeshBuilder = new CubeMeshBuilder();
-        public static IMeshBuilder CubeMeshBuilder
+        private static readonly AMeshBuilder s_cubeMeshBuilder = new CubeMeshBuilder();
+        public static AMeshBuilder CubeMeshBuilder
         {
             get
             {
@@ -45,8 +45,8 @@ namespace Voxelmetric.Code
         }
 
         // Collider mesh builder
-        private static readonly IMeshBuilder s_cubeMeshColliderBuilder = new CubeMeshColliderBuilder();
-        public static IMeshBuilder CubeMeshColliderBuilder
+        private static readonly AMeshBuilder s_cubeMeshColliderBuilder = new CubeMeshColliderBuilder();
+        public static AMeshBuilder CubeMeshColliderBuilder
         {
             get
             {

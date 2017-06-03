@@ -22,7 +22,7 @@ namespace Voxelmetric.Code.Builders.Collider
             return block.PhysicMaterialID==neighbor.PhysicMaterialID;
         }
 
-        protected override void BuildBox(Chunk chunk, Block block, Side sideMask, int minX, int minY, int minZ, int maxX, int maxY, int maxZ)
+        protected override void BuildBox(Chunk chunk, Block block, int minX, int minY, int minZ, int maxX, int maxY, int maxZ)
         {
             // All faces in the are build in the following order:
             //     1--2

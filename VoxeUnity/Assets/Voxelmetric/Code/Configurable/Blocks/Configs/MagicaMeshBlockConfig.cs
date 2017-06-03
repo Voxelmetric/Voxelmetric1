@@ -110,7 +110,8 @@ public class MagicaMeshBlockConfig: BlockConfig
                     // Build the mesh
                     MagicaMeshBuilder meshBuilder = new MagicaMeshBuilder();
                     meshBuilder.Scale = m_scale;
-                    meshBuilder.Build(chunk, 0);
+                    meshBuilder.SideMask = 0;
+                    meshBuilder.Build(chunk);
 
                     // Convert lists to arrays
                     vertsOut = m_geomBuffer.Vertices.ToArray();
