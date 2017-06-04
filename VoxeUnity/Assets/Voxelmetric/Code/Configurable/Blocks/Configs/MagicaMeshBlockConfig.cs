@@ -77,12 +77,24 @@ public class MagicaMeshBlockConfig: BlockConfig
                 if (data==null)
                     return false;
 
+                MagicaVox.MagicaVoxelChunk mvchunk = data.chunk;
+
+                // Determine the biggest side
+                int size = mvchunk.sizeX;
+                if (mvchunk.sizeY>size)
+                    size = mvchunk.sizeY;
+                if (mvchunk.sizeZ>size)
+                    size = mvchunk.sizeZ;
+
+                // Determine the necessary size
+                size += Env.ChunkPadding2;
+                int pow = 1 + (int)Math.Log(size, 2);
+                size = (1<<pow)-Env.ChunkPadding2;
+
                 // Create a temporary chunk object
-                Chunk chunk = new Chunk();
+                Chunk chunk = new Chunk(size);
                 chunk.Init(world, Vector3Int.zero);
                 ChunkBlocks blocks = chunk.blocks;
-
-                MagicaVox.MagicaVoxelChunk mvchunk = data.chunk;
 
                 // Convert the model's data to our internal system
                 for (int y = 0; y<mvchunk.sizeY; y++)
@@ -91,9 +103,9 @@ public class MagicaMeshBlockConfig: BlockConfig
                     {
                         for (int x = 0; x<mvchunk.sizeX; x++)
                         {
-                            int index = Helpers.GetChunkIndex1DFrom3D(x, y, z);
-
+                            int index = Helpers.GetChunkIndex1DFrom3D(x, y, z, pow);
                             int i = Helpers.GetIndex1DFrom3D(x, y, z, mvchunk.sizeX, mvchunk.sizeZ);
+
                             if (data.chunk.data[i]==0)
                                 blocks.SetInner(index, BlockProvider.AirBlock);
                             else
@@ -108,8 +120,7 @@ public class MagicaMeshBlockConfig: BlockConfig
                 m_geomBuffer = new RenderGeometryBuffer();
                 {
                     // Build the mesh
-                    MagicaMeshBuilder meshBuilder = new MagicaMeshBuilder();
-                    meshBuilder.Scale = m_scale;
+                    CubeMeshBuilder meshBuilder = new CubeMeshBuilder(m_scale, size);
                     meshBuilder.SideMask = 0;
                     meshBuilder.Build(chunk);
 

@@ -1,5 +1,4 @@
-﻿using System.Text;
-using UnityEngine.Profiling;
+﻿using UnityEngine.Profiling;
 using Voxelmetric.Code.Common;
 using Voxelmetric.Code.Common.MemoryPooling;
 using Voxelmetric.Code.Core.GeometryHandler;
@@ -51,6 +50,11 @@ namespace Voxelmetric.Code.Core
             }
         }
 
+        private int m_sideSize = 0;
+        public int SideSize
+        {
+            get { return m_sideSize; }
+        }
 
         public static Chunk CreateChunk(World world, Vector3Int pos)
         {
@@ -82,22 +86,24 @@ namespace Voxelmetric.Code.Core
             Globals.MemPools.ChunkPool.Push(chunk);
         }
 
-        public Chunk()
+        public Chunk(int sideSize = Env.ChunkSize)
         {
+            m_sideSize = sideSize;
+
             // Associate Chunk with a certain thread and make use of its memory pool
             // This is necessary in order to have lock-free caches
             ThreadID = Globals.WorkPool.GetThreadIDFromIndex(s_id++);
             pools = Globals.WorkPool.GetPool(ThreadID);
             
             stateManager = new ChunkStateManagerClient(this);
-            blocks = new ChunkBlocks(this);
+            blocks = new ChunkBlocks(this, sideSize);
         }
 
         public void Init(World world, Vector3Int pos)
         {
             this.world = world;
             this.pos = pos;
-
+            
             stateManager = new ChunkStateManagerClient(this);
             logic = world.config.randomUpdateFrequency>0.0f ? new ChunkLogic(this) : null;
 
@@ -108,7 +114,7 @@ namespace Voxelmetric.Code.Core
 
             WorldBounds = new AABB(
                 pos.x, pos.y, pos.z,
-                pos.x+Env.ChunkSize, pos.y+Env.ChunkSize, pos.z+Env.ChunkSize
+                pos.x+ m_sideSize, pos.y+ m_sideSize, pos.z+ m_sideSize
                 );
 
             Reset();

@@ -1,0 +1,9 @@
+{
+  "name": "Random magica cube",
+  "index": 1650,
+  "layerType": "RandomLayer",
+  "properties": {
+    "blockName": "magicacube",
+    "chance": "0.01"
+  }
+}

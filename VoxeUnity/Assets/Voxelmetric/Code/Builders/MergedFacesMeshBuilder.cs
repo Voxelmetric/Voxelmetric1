@@ -1,24 +1,35 @@
 ﻿using System;
 using Voxelmetric.Code.Common;
 using Voxelmetric.Code.Core;
-using Voxelmetric.Code.Data_types;
 
 namespace Voxelmetric.Code.Builders
 {
     public abstract class MergedFacesMeshBuilder: AMeshBuilder
     {
-        protected static readonly int sideSize = Env.ChunkSize;
+        protected readonly int m_sideSize;
+        protected readonly int m_pow;
+        protected readonly float m_scale;
+
+        protected MergedFacesMeshBuilder(float scale, int sideSize)
+        {
+            m_scale = scale;
+            m_pow = 1+(int)Math.Log(sideSize, 2);
+            m_sideSize = sideSize;
+        }
 
         private bool ExpandX(ChunkBlocks blocks, ref bool[] mask, Block block, int y1, int z1, ref int x2, int y2, int z2)
         {
-            int yOffset = Env.ChunkSizeWithPaddingPow2-(z2-z1)*Env.ChunkSizeWithPadding;
-            int index0 = Helpers.GetChunkIndex1DFrom3D(x2, y1, z1);
+            int sizeWithPadding = m_sideSize + Env.ChunkPadding2;
+            int sizeWithPaddingPow2 = sizeWithPadding * sizeWithPadding;
+
+            int yOffset = sizeWithPaddingPow2 - (z2-z1)* sizeWithPadding;
+            int index0 = Helpers.GetChunkIndex1DFrom3D(x2, y1, z1, m_pow);
 
             // Check the quad formed by YZ axes and try to expand the X axis
             int index = index0;
             for (int y = y1; y<y2; ++y, index+=yOffset)
             {
-                for (int z = z1; z<z2; ++z, index += Env.ChunkSizeWithPadding)
+                for (int z = z1; z<z2; ++z, index += sizeWithPadding)
                 {
                     if (mask[index] || !CanCreateBox(block, blocks.GetBlock(index)))
                         return false;
@@ -29,7 +40,7 @@ namespace Voxelmetric.Code.Builders
             index = index0;
             for (int y = y1; y<y2; ++y, index+=yOffset)
             {
-                for (int z = z1; z<z2; ++z, index += Env.ChunkSizeWithPadding)
+                for (int z = z1; z<z2; ++z, index += sizeWithPadding)
                     mask[index] = true;
             }
 
@@ -39,8 +50,10 @@ namespace Voxelmetric.Code.Builders
 
         private bool ExpandY(ChunkBlocks blocks, ref bool[] mask, Block block, int x1, int z1, int x2, ref int y2, int z2)
         {
-            int zOffset = Env.ChunkSizeWithPadding-x2+x1;
-            int index0 = Helpers.GetChunkIndex1DFrom3D(x1, y2, z1);
+            int sizeWithPadding = m_sideSize + Env.ChunkPadding2;
+
+            int zOffset = sizeWithPadding - x2+x1;
+            int index0 = Helpers.GetChunkIndex1DFrom3D(x1, y2, z1, m_pow);
 
             // Check the quad formed by XZ axes and try to expand the Y axis
             int index = index0;
@@ -67,8 +80,11 @@ namespace Voxelmetric.Code.Builders
 
         private bool ExpandZ(ChunkBlocks blocks, ref bool[] mask, Block block, int x1, int y1, int x2, int y2, ref int z2)
         {
-            int yOffset = Env.ChunkSizeWithPaddingPow2-x2+x1;
-            int index0 = Helpers.GetChunkIndex1DFrom3D(x1, y1, z2);
+            int sizeWithPadding = m_sideSize + Env.ChunkPadding2;
+            int sizeWithPaddingPow2 = sizeWithPadding * sizeWithPadding;
+
+            int yOffset = sizeWithPaddingPow2 - x2+x1;
+            int index0 = Helpers.GetChunkIndex1DFrom3D(x1, y1, z2, m_pow);
             
             // Check the quad formed by XY axes and try to expand the Z axis
             int index = index0;
@@ -98,19 +114,23 @@ namespace Voxelmetric.Code.Builders
             var blocks = chunk.blocks;
             var pools = chunk.pools;
 
-            bool[] mask = pools.BoolArrayPool.PopExact(Env.ChunkSizeWithPaddingPow3);
+            int sizeWithPadding = m_sideSize + Env.ChunkPadding2;
+            int sizeWithPaddingPow2 = sizeWithPadding * sizeWithPadding;
+            int sizeWithPaddingPow3 = sizeWithPaddingPow2 * sizeWithPadding;
+
+            bool[] mask = pools.BoolArrayPool.PopExact(sizeWithPaddingPow3);
             Array.Clear(mask, 0, mask.Length);
 
             // This compression is essentialy RLE. However, instead of working on 1 axis
             // it works in 3 dimensions.
-            int index = Helpers.ZeroChunkIndex;
-            int yOffset = Env.ChunkSizeWithPaddingPow2 - Env.ChunkSize*Env.ChunkSizeWithPadding;
-            int zOffset = Env.ChunkSizeWithPadding-Env.ChunkSize;
-            for (int y = 0; y<Env.ChunkSize; ++y, index+=yOffset)
+            int index = Env.ChunkPadding + (Env.ChunkPadding << m_pow) + (Env.ChunkPadding << (m_pow << 1));
+            int yOffset = sizeWithPaddingPow2 - m_sideSize*sizeWithPadding;
+            int zOffset = sizeWithPadding-m_sideSize;
+            for (int y = 0; y<m_sideSize; ++y, index+=yOffset)
             {
-                for (int z = 0; z<Env.ChunkSize; ++z, index+=zOffset)
+                for (int z = 0; z<m_sideSize; ++z, index+=zOffset)
                 {
-                    for (int x = 0; x<Env.ChunkSize; ++x, ++index)
+                    for (int x = 0; x<m_sideSize; ++x, ++index)
                     {
                         // Skip already checked blocks
                         if (mask[index])
@@ -138,19 +158,19 @@ namespace Voxelmetric.Code.Builders
                             
                             if (expandY)
                             {
-                                expandY = y2<Env.ChunkSize &&
+                                expandY = y2<m_sideSize &&
                                           ExpandY(blocks, ref mask, block, x1, z1, x2, ref y2, z2);
                                 expand = expandY;
                             }
                             if (expandZ)
                             {
-                                expandZ = z2<Env.ChunkSize &&
+                                expandZ = z2<m_sideSize &&
                                           ExpandZ(blocks, ref mask, block, x1, y1, x2, y2, ref z2);
                                 expand = expand|expandZ;
                             }
                             if (expandX)
                             {
-                                expandX = x2<Env.ChunkSize &&
+                                expandX = x2<m_sideSize &&
                                           ExpandX(blocks, ref mask, block, y1, z1, ref x2, y2, z2);
                                 expand = expand|expandX;
                             }

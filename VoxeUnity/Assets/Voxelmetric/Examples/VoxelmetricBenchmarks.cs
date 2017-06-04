@@ -466,6 +466,7 @@ namespace Voxelmetric.Examples
         void Benchmark_Compression()
         {
             Chunk chunk = new Chunk();
+            chunk.Init(null, Vector3Int.zero);
 
             using (StreamWriter writer = File.CreateText("compression.txt"))
             {

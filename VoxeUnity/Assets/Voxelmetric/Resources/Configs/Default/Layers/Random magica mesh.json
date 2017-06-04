@@ -4,6 +4,6 @@
   "layerType": "RandomLayer",
   "properties": {
     "blockName": "magicamesh",
-    "chance": "0.08"
+    "chance": "0.04"
   }
 }

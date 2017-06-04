@@ -4,12 +4,12 @@ namespace Voxelmetric.Code.Common
 {
 	public static class Helpers
 	{
-	    public static readonly int MainThreadID = Thread.CurrentThread.ManagedThreadId;
+		public static readonly int MainThreadID = Thread.CurrentThread.ManagedThreadId;
 
-	    public static bool IsMainThread
-	    {
-	        get { return Thread.CurrentThread.ManagedThreadId==MainThreadID; }
-	    }
+		public static bool IsMainThread
+		{
+			get { return Thread.CurrentThread.ManagedThreadId==MainThreadID; }
+		}
 
 		public static int GetIndex1DFrom2D(int x, int z, int sizeX)
 		{
@@ -21,14 +21,22 @@ namespace Voxelmetric.Code.Common
 			return x + sizeX * (z + y * sizeZ);
 		}
 
-	    public static readonly int ZeroChunkIndex = Env.ChunkPadding+(Env.ChunkPadding<<Env.ChunkPow)+(Env.ChunkPadding<<Env.ChunkPow2);
+		public static readonly int ZeroChunkIndex = Env.ChunkPadding+(Env.ChunkPadding<<Env.ChunkPow)+(Env.ChunkPadding<<Env.ChunkPow2);
 
-        public static int GetChunkIndex1DFrom3D(int x, int y, int z)
+		public static int GetChunkIndex1DFrom3D(int x, int y, int z)
 		{
-		    int xx = x+Env.ChunkPadding;
-		    int yy = y+Env.ChunkPadding;
-		    int zz = z+Env.ChunkPadding;
-		    return xx+(zz<<Env.ChunkPow)+(yy<<Env.ChunkPow2);
+			int xx = x+Env.ChunkPadding;
+			int yy = y+Env.ChunkPadding;
+			int zz = z+Env.ChunkPadding;
+			return xx+(zz<<Env.ChunkPow)+(yy<<Env.ChunkPow2);
+		}
+
+		public static int GetChunkIndex1DFrom3D(int x, int y, int z, int pow)
+		{
+			int xx = x+Env.ChunkPadding;
+			int yy = y+Env.ChunkPadding;
+			int zz = z+Env.ChunkPadding;
+			return xx + (zz << pow) + (yy << (pow << 1));
 		}
 
 		public static void GetIndex2DFrom1D(int index, out int x, out int z, int sizeX)
@@ -44,24 +52,40 @@ namespace Voxelmetric.Code.Common
 			z = (index / sizeX) % sizeZ;
 		}
 
-	    public static void GetChunkIndex3DFrom1D(int index, out int x, out int y, out int z)
-	    {
+		public static void GetChunkIndex3DFrom1D(int index, out int x, out int y, out int z)
+		{
 			x = index & Env.ChunkMask;
 			y = index >> Env.ChunkPow2;
 			z = (index >> Env.ChunkPow) & Env.ChunkMask;
 
-            x -= Env.ChunkPadding;
-            y -= Env.ChunkPadding;
-            z -= Env.ChunkPadding;
-        }
+			x -= Env.ChunkPadding;
+			y -= Env.ChunkPadding;
+			z -= Env.ChunkPadding;
+		}
 
-        // Returns a coordinate at the beggining of the chunk
-	    public static int MakeChunkCoordinate(int x)
-	    {
-	        return ((x>=0 ? x : x-Env.ChunkSize1)/Env.ChunkSize)*Env.ChunkSize;
-	    }
+		public static void GetChunkIndex3DFrom1D(int index, out int x, out int y, out int z, int pow)
+		{
+			x = index & Env.ChunkMask;
+			y = index >> (pow<<1);
+			z = (index >> pow) & ((1<<pow)-1);
 
-	    public static T[] CreateArray1D<T>(int size)
+			x -= Env.ChunkPadding;
+			y -= Env.ChunkPadding;
+			z -= Env.ChunkPadding;
+		}
+
+		// Returns a coordinate at the beggining of the chunk
+		public static int MakeChunkCoordinate(int x)
+		{
+			return ((x>=0 ? x : x-Env.ChunkSize1)/Env.ChunkSize)*Env.ChunkSize;
+		}
+
+		public static int MakeChunkCoordinate(int x, int size)
+		{
+	        return ((x >= 0 ? x : x - (size-1)) / size) * size;
+		}
+
+		public static T[] CreateArray1D<T>(int size)
 		{
 			return new T[size];
 		}
@@ -99,7 +123,7 @@ namespace Voxelmetric.Code.Common
 			return arr;
 		}
 
-        public static float Interpolate(float x0, float x1, float alpha)
+		public static float Interpolate(float x0, float x1, float alpha)
 		{
 			return x0 + (x1 - x0) * alpha;
 		}
@@ -132,7 +156,7 @@ namespace Voxelmetric.Code.Common
 				return (1 - s) / ds;
 			}
 		}
-        
+
 		public static int FastFloor(float val)
 		{
 			return (val > 0) ? (int)val : (int)val - 1;
@@ -149,21 +173,21 @@ namespace Voxelmetric.Code.Common
 		{
 			return (value % modulus + modulus) % modulus;
 		}
-        
-        public static uint Mod3(uint value)
-        {
-            value = (value >> 16) + (value & 0xFFFF); // sum base 2**16 digits value <= 0x1FFFE
-            value = (value >> 8) + (value & 0xFF); // sum base 2**8 digits value <= 0x2FD
-            value = (value >> 4) + (value & 0xF); // sum base 2**4 digits value <= 0x3C; worst case 0x3B
-            value = (value >> 2) + (value & 0x3); // sum base 2**2 digits value <= 0x1D; worst case 0x1B
-            value = (value >> 2) + (value & 0x3); // sum base 2**2 digits value <= 0x9; worst case 0x7
-            // Following line can be omitted at the cost of slightly more performance but less precision (would go down from 4 to 1 billion)
-            value = (value >> 2) + (value & 0x3); // sum base 2**2 digits value <= 0x4
-            if (value > 2) value = value - 3;
-            return value;
-        }
 
-        public static int Clamp(this int val, int min, int max)
+		public static uint Mod3(uint value)
+		{
+			value = (value >> 16) + (value & 0xFFFF); // sum base 2**16 digits value <= 0x1FFFE
+			value = (value >> 8) + (value & 0xFF); // sum base 2**8 digits value <= 0x2FD
+			value = (value >> 4) + (value & 0xF); // sum base 2**4 digits value <= 0x3C; worst case 0x3B
+			value = (value >> 2) + (value & 0x3); // sum base 2**2 digits value <= 0x1D; worst case 0x1B
+			value = (value >> 2) + (value & 0x3); // sum base 2**2 digits value <= 0x9; worst case 0x7
+			// Following line can be omitted at the cost of slightly more performance but less precision (would go down from 4 to 1 billion)
+			value = (value >> 2) + (value & 0x3); // sum base 2**2 digits value <= 0x4
+			if (value > 2) value = value - 3;
+			return value;
+		}
+
+		public static int Clamp(this int val, int min, int max)
 		{
 			if (val < min)
 				return min;

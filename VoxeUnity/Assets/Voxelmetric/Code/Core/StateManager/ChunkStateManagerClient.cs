@@ -517,6 +517,12 @@ namespace Voxelmetric.Code.Core.StateManager
 
         private void OnSynchronizeEdges()
         {
+            int chunkSize1 = chunk.SideSize-1;
+            int sizePlusPadding = chunk.SideSize + Env.ChunkPadding;
+            int sizeWithPadding = chunk.SideSize + Env.ChunkPadding2;
+            int sizeWithPaddingPow2 = sizeWithPadding * sizeWithPadding;
+            int chunkIterXY = sizeWithPaddingPow2 - sizeWithPadding;
+
             // Search for neighbors we are vertically aligned with
             for (int i = 0; i<Listeners.Length; i++)
             {
@@ -551,14 +557,14 @@ namespace Voxelmetric.Code.Core.StateManager
                     {
                         int srcIndex = Helpers.GetChunkIndex1DFrom3D(-1, 0, -1);
                         int dstIndex = Helpers.GetChunkIndex1DFrom3D(-1, Env.ChunkSize, -1);
-                        chunk.blocks.Copy(neighborChunk.blocks, srcIndex, dstIndex, Env.ChunkSizeWithPaddingPow2);
+                        chunk.blocks.Copy(neighborChunk.blocks, srcIndex, dstIndex, sizeWithPaddingPow2);
                     }
                     // Copy the top layer of a neighbor chunk to the bottom layer of ours
                     else // if (neighborPos.y < chunk.pos.y)
                     {
-                        int srcIndex = Helpers.GetChunkIndex1DFrom3D(-1, Env.ChunkSize1, -1);
+                        int srcIndex = Helpers.GetChunkIndex1DFrom3D(-1, chunkSize1, -1);
                         int dstIndex = Helpers.GetChunkIndex1DFrom3D(-1, -1, -1);
-                        chunk.blocks.Copy(neighborChunk.blocks, srcIndex, dstIndex, Env.ChunkSizeWithPaddingPow2);
+                        chunk.blocks.Copy(neighborChunk.blocks, srcIndex, dstIndex, sizeWithPaddingPow2);
                     }
                 }
 
@@ -571,10 +577,10 @@ namespace Voxelmetric.Code.Core.StateManager
                         int srcIndex = Helpers.GetChunkIndex1DFrom3D(-1, -1, 0);
                         int dstIndex = Helpers.GetChunkIndex1DFrom3D(-1, -1, Env.ChunkSize);
                         for (int y = -1;
-                             y<Env.ChunkSizePlusPadding;
-                             y++, srcIndex += Env.ChunkIterXY, dstIndex += Env.ChunkIterXY)
+                             y<sizePlusPadding;
+                             y++, srcIndex += chunkIterXY, dstIndex += chunkIterXY)
                         {
-                            for (int x = -1; x<Env.ChunkSizePlusPadding; x++, srcIndex++, dstIndex++)
+                            for (int x = -1; x<sizePlusPadding; x++, srcIndex++, dstIndex++)
                             {
                                 BlockData data = neighborChunk.blocks.Get(srcIndex);
                                 chunk.blocks.SetRaw(dstIndex, data);
@@ -584,13 +590,13 @@ namespace Voxelmetric.Code.Core.StateManager
                     // Copy the top back layer of a neighbor chunk to the front layer of ours
                     else // if (neighborPos.z < chunk.pos.z)
                     {
-                        int srcIndex = Helpers.GetChunkIndex1DFrom3D(-1, -1, Env.ChunkSize1);
+                        int srcIndex = Helpers.GetChunkIndex1DFrom3D(-1, -1, chunkSize1);
                         int dstIndex = Helpers.GetChunkIndex1DFrom3D(-1, -1, -1);
                         for (int y = -1;
-                             y<Env.ChunkSizePlusPadding;
-                             y++, srcIndex += Env.ChunkIterXY, dstIndex += Env.ChunkIterXY)
+                             y<sizePlusPadding;
+                             y++, srcIndex += chunkIterXY, dstIndex += chunkIterXY)
                         {
-                            for (int x = -1; x<Env.ChunkSizePlusPadding; x++, srcIndex++, dstIndex++)
+                            for (int x = -1; x<sizePlusPadding; x++, srcIndex++, dstIndex++)
                             {
                                 BlockData data = neighborChunk.blocks.Get(srcIndex);
                                 chunk.blocks.SetRaw(dstIndex, data);
@@ -607,11 +613,11 @@ namespace Voxelmetric.Code.Core.StateManager
                     {
                         int srcIndex = Helpers.GetChunkIndex1DFrom3D(0, -1, -1);
                         int dstIndex = Helpers.GetChunkIndex1DFrom3D(Env.ChunkSize, -1, -1);
-                        for (int y = -1; y<Env.ChunkSizePlusPadding; y++)
+                        for (int y = -1; y<sizePlusPadding; y++)
                         {
                             for (int z = -1;
-                                 z<Env.ChunkSizePlusPadding;
-                                 z++, srcIndex += Env.ChunkSizeWithPadding, dstIndex += Env.ChunkSizeWithPadding)
+                                 z<sizePlusPadding;
+                                 z++, srcIndex += sizeWithPadding, dstIndex += sizeWithPadding)
                             {
                                 BlockData data = neighborChunk.blocks.Get(srcIndex);
                                 chunk.blocks.SetRaw(dstIndex, data);
@@ -621,13 +627,13 @@ namespace Voxelmetric.Code.Core.StateManager
                     // Copy the left layer of a neighbor chunk to the right layer of ours
                     else // if (neighborPos.x < chunk.pos.x)
                     {
-                        int srcIndex = Helpers.GetChunkIndex1DFrom3D(Env.ChunkSize1, -1, -1);
+                        int srcIndex = Helpers.GetChunkIndex1DFrom3D(chunkSize1, -1, -1);
                         int dstIndex = Helpers.GetChunkIndex1DFrom3D(-1, -1, -1);
-                        for (int y = -1; y<Env.ChunkSizePlusPadding; y++)
+                        for (int y = -1; y<sizePlusPadding; y++)
                         {
                             for (int z = -1;
-                                 z<Env.ChunkSizePlusPadding;
-                                 z++, srcIndex += Env.ChunkSizeWithPadding, dstIndex += Env.ChunkSizeWithPadding)
+                                 z<sizePlusPadding;
+                                 z++, srcIndex += sizeWithPadding, dstIndex += sizeWithPadding)
                             {
                                 BlockData data = neighborChunk.blocks.Get(srcIndex);
                                 chunk.blocks.SetRaw(dstIndex, data);

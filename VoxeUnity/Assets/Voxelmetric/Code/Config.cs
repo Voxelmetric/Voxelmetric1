@@ -27,7 +27,8 @@ namespace Voxelmetric.Code
 
         //! Internal chunk size including room for edge fields as well so that we do not have to check whether we are within chunk bounds.
         //! This means we will ultimately consume a bit more memory in exchange for more performance
-        public const int ChunkPadding = 1; // Do not change this value
+        public const int ChunkPadding = 1;
+        public const int ChunkPadding2 = ChunkPadding*2;
 
         //! Visible chunk size
         public const int ChunkSize = (1<<ChunkPow)-2*ChunkPadding;
@@ -41,8 +42,6 @@ namespace Voxelmetric.Code
         public const int ChunkSizeWithPaddingPow2 = ChunkSizeWithPadding*ChunkSizeWithPadding;
         public const int ChunkSizeWithPaddingPow3 = ChunkSizeWithPadding*ChunkSizeWithPaddingPow2;
         
-        public const int ChunkIterXY = ChunkSizeWithPaddingPow2-ChunkSizeWithPadding;
-
         #endregion
     }
 
