@@ -290,9 +290,9 @@ namespace Voxelmetric.Code.Configurable.Blocks.Utilities
         private static Color32 ToColor32(ref Color32 col, float coef)
         {
             return new Color32(
-                (byte)((float)col.r*coef*100.0f/100.0f),
-                (byte)((float)col.g*coef*100.0f/100.0f),
-                (byte)((float)col.b*coef*100.0f/100.0f),
+                (byte)(col.r * coef),
+                (byte)(col.g * coef),
+                (byte)(col.b * coef),
                 col.a
                 );
         }
