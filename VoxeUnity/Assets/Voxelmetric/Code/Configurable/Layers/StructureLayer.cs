@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Globalization;
 using UnityEngine;
 using Voxelmetric.Code;
 using Voxelmetric.Code.Common;
@@ -15,7 +16,7 @@ public class StructureLayer : TerrainLayer
     protected override void SetUp(LayerConfig config)
     {
         // Config files for random layers MUST define these properties
-        chance = float.Parse(properties["chance"]);
+        chance = float.Parse(properties["chance"], CultureInfo.InvariantCulture);
 
         var structureType = Type.GetType(config.structure + ", " + typeof(GeneratedStructure).Assembly, false);
         if (structureType==null)

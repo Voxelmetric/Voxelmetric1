@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System.Globalization;
+using UnityEngine;
 using Voxelmetric.Code.Common.Math;
 using Voxelmetric.Code.Core;
 using Voxelmetric.Code.Data_types;
@@ -15,7 +16,7 @@ public class RandomLayer: TerrainLayer
         Block block = world.blockProvider.GetBlock(properties["blockName"]);
         blockToPlace = new BlockData(block.Type, block.Solid);
         
-        chance = float.Parse(properties["chance"]);
+        chance = float.Parse(properties["chance"], CultureInfo.InvariantCulture);
     }
     
     public override float GetHeight(Chunk chunk, int layerIndex, int x, int z, float heightSoFar, float strength)

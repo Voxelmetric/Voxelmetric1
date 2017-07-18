@@ -1,4 +1,5 @@
-﻿using Voxelmetric.Code;
+﻿using System.Globalization;
+using Voxelmetric.Code;
 using Voxelmetric.Code.Core;
 using Voxelmetric.Code.Data_types;
 using Voxelmetric.Code.Load_Resources;
@@ -17,14 +18,14 @@ public class AbsoluteLayer : TerrainLayer
         Block block = world.blockProvider.GetBlock(properties["blockName"]);
         blockToPlace = new BlockData(block.Type, block.Solid);
         
-        noise.Frequency = 1f/float.Parse(properties["frequency"]); // Frequency in configs is in fast 1/frequency
-        noise.Gain = float.Parse(properties["exponent"]);
+        noise.Frequency = 1f/float.Parse(properties["frequency"], CultureInfo.InvariantCulture); // Frequency in configs is in fast 1/frequency
+        noise.Gain = float.Parse(properties["exponent"], CultureInfo.InvariantCulture);
 #if (UNITY_STANDALONE_WIN || UNITY_EDITOR_WIN) && ENABLE_FASTSIMD
         noiseSIMD.Frequency = noise.Frequency;
         noiseSIMD.Gain = noise.Gain;
 #endif
-        minHeight = int.Parse(properties["minHeight"]);
-        maxHeight = int.Parse(properties["maxHeight"]);
+        minHeight = int.Parse(properties["minHeight"], CultureInfo.InvariantCulture);
+        maxHeight = int.Parse(properties["maxHeight"], CultureInfo.InvariantCulture);
 
         amplitude = maxHeight - minHeight;
     }

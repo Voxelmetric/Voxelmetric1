@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System.Globalization;
 using Voxelmetric.Code.Core;
 using Voxelmetric.Code.Data_types;
 using Voxelmetric.Code.Load_Resources.Textures;
@@ -32,9 +33,9 @@ public class ConnectedMeshBlockConfig : CustomMeshBlockConfig
             directionalTextures[dir] = world.textureProvider.GetTextureCollection(_GetPropertyFromConfig(config, direction+"Texture", ""));
 
             Vector3 offset;
-            offset.x = float.Parse(_GetPropertyFromConfig(config, direction + "XOffset", "0"));
-            offset.y = float.Parse(_GetPropertyFromConfig(config, direction + "YOffset", "0"));
-            offset.z = float.Parse(_GetPropertyFromConfig(config, direction + "ZOffset", "0"));
+            offset.x = float.Parse(_GetPropertyFromConfig(config, direction + "XOffset", "0"), CultureInfo.InvariantCulture);
+            offset.y = float.Parse(_GetPropertyFromConfig(config, direction + "YOffset", "0"), CultureInfo.InvariantCulture);
+            offset.z = float.Parse(_GetPropertyFromConfig(config, direction + "ZOffset", "0"), CultureInfo.InvariantCulture);
 
             int[] newTris;
             VertexData[] newVerts;

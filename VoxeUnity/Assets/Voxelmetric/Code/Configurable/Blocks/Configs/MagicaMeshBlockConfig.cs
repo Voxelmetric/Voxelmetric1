@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections;
+using System.Globalization;
 using System.IO;
 using UnityEngine;
 using UnityEngine.Assertions;
@@ -40,9 +41,9 @@ public class MagicaMeshBlockConfig: BlockConfig
         solid = _GetPropertyFromConfig(config, "solid", false);
 
         m_meshOffset = new Vector3(
-            Env.BlockSizeHalf+float.Parse(_GetPropertyFromConfig(config, "meshXOffset", "0")),
-            Env.BlockSizeHalf+float.Parse(_GetPropertyFromConfig(config, "meshYOffset", "0")),
-            Env.BlockSizeHalf+float.Parse(_GetPropertyFromConfig(config, "meshZOffset", "0"))
+            Env.BlockSizeHalf+float.Parse(_GetPropertyFromConfig(config, "meshXOffset", "0"), CultureInfo.InvariantCulture),
+            Env.BlockSizeHalf+float.Parse(_GetPropertyFromConfig(config, "meshYOffset", "0"), CultureInfo.InvariantCulture),
+            Env.BlockSizeHalf+float.Parse(_GetPropertyFromConfig(config, "meshZOffset", "0"), CultureInfo.InvariantCulture)
         );
         m_path = _GetPropertyFromConfig(config, "meshFileLocation", "");
 
@@ -59,8 +60,7 @@ public class MagicaMeshBlockConfig: BlockConfig
         return SetUpMesh(world, world.config.meshFolder+"/"+m_path, m_meshOffset, out m_triangles, out m_vertices);
     }
 
-    protected bool SetUpMesh(World world, string meshLocation, Vector3 positionOffset, out int[] trisOut,
-        out VertexData[] vertsOut)
+    protected bool SetUpMesh(World world, string meshLocation, Vector3 positionOffset, out int[] trisOut, out VertexData[] vertsOut)
     {
         trisOut = null;
         vertsOut = null;
@@ -122,6 +122,7 @@ public class MagicaMeshBlockConfig: BlockConfig
                     // Build the mesh
                     CubeMeshBuilder meshBuilder = new CubeMeshBuilder(m_scale, size);
                     meshBuilder.SideMask = 0;
+                    meshBuilder.Palette = data.palette;
                     meshBuilder.Build(chunk);
 
                     // Convert lists to arrays
