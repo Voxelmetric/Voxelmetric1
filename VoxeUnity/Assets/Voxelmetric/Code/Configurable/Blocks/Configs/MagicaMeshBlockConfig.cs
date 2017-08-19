@@ -122,7 +122,7 @@ public class MagicaMeshBlockConfig: BlockConfig
                     // Build the mesh
                     CubeMeshBuilder meshBuilder = new CubeMeshBuilder(m_scale, size);
                     meshBuilder.SideMask = 0;
-                    meshBuilder.Palette = data.palette;
+                    //meshBuilder.Palette = data.palette;
                     meshBuilder.Build(chunk);
 
                     // Convert lists to arrays
