@@ -37,7 +37,7 @@
 
 // ----------------
 
-#if UNITY_3 || UNITY_4 || UNITY_5
+#if UNITY_3 || UNITY_4 || UNITY_5 || UNITY_2017
 #define FN_DISABLE_AGGRESSIVE_INLINING
 #endif
 
