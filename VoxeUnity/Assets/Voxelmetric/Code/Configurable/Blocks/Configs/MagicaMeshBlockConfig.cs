@@ -12,6 +12,7 @@ using Voxelmetric.Code.Data_types;
 using Voxelmetric.Code.Geometry;
 using Voxelmetric.Code.Load_Resources.Blocks;
 using Voxelmetric.Code.Utilities.Import;
+using Vector3Int = Voxelmetric.Code.Data_types.Vector3Int;
 
 public class MagicaMeshBlockConfig: BlockConfig
 {

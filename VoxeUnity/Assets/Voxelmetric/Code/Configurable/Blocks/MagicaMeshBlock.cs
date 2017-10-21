@@ -6,6 +6,7 @@ using Voxelmetric.Code.Core;
 using Voxelmetric.Code.Data_types;
 using Voxelmetric.Code.Geometry;
 using Voxelmetric.Code.Geometry.GeometryBatcher;
+using Vector3Int = Voxelmetric.Code.Data_types.Vector3Int;
 
 public class MagicaMeshBlock : Block
 {

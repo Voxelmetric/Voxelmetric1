@@ -8,6 +8,7 @@ using Voxelmetric.Code.Load_Resources.Blocks;
 using Voxelmetric.Code.Load_Resources.Textures;
 using Voxelmetric.Code.Geometry;
 using Voxelmetric.Code.Geometry.GeometryBatcher;
+using Vector3Int = Voxelmetric.Code.Data_types.Vector3Int;
 
 public class CrossMeshBlock : Block
 {

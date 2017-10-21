@@ -3,6 +3,7 @@ using System.Net.Sockets;
 using System.Threading;
 using UnityEngine;
 using Voxelmetric.Code.Data_types;
+using Vector3Int = Voxelmetric.Code.Data_types.Vector3Int;
 
 namespace Voxelmetric.Code.VM
 {
