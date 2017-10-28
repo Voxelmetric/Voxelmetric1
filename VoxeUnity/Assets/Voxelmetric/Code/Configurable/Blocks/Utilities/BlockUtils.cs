@@ -3,7 +3,6 @@ using Voxelmetric.Code.Common;
 using Voxelmetric.Code.Core;
 using Voxelmetric.Code.Data_types;
 using Voxelmetric.Code.Load_Resources.Textures;
-using Voxelmetric.Code.Geometry;
 using Vector3Int = Voxelmetric.Code.Data_types.Vector3Int;
 
 namespace Voxelmetric.Code.Configurable.Blocks.Utilities
@@ -36,7 +35,7 @@ namespace Voxelmetric.Code.Configurable.Blocks.Utilities
                 new Vector3(-blockPadding, -blockPadding, -blockPadding),
                 new Vector3(-blockPadding, -blockPadding, +blockPadding),
                 new Vector3(+blockPadding, -blockPadding, +blockPadding),
-                new Vector3(+blockPadding, -blockPadding, -blockPadding),
+                new Vector3(+blockPadding, -blockPadding, -blockPadding)
             },
 
             new[]
@@ -53,7 +52,7 @@ namespace Voxelmetric.Code.Configurable.Blocks.Utilities
                 new Vector3(-blockPadding, -blockPadding, -blockPadding),
                 new Vector3(-blockPadding, +blockPadding, -blockPadding),
                 new Vector3(+blockPadding, +blockPadding, -blockPadding),
-                new Vector3(+blockPadding, -blockPadding, -blockPadding),
+                new Vector3(+blockPadding, -blockPadding, -blockPadding)
             },
 
             new[]
@@ -70,16 +69,16 @@ namespace Voxelmetric.Code.Configurable.Blocks.Utilities
                 new Vector3(-blockPadding, -blockPadding, -blockPadding),
                 new Vector3(-blockPadding, +blockPadding, -blockPadding),
                 new Vector3(-blockPadding, +blockPadding, +blockPadding),
-                new Vector3(-blockPadding, -blockPadding, +blockPadding),
+                new Vector3(-blockPadding, -blockPadding, +blockPadding)
             }
         };
 
-        public static void PrepareColors(Chunk chunk, VertexData[] vertexData, ref BlockLightData light)
+        public static void PrepareColors(Chunk chunk, Color32[] data, ref BlockLightData light)
         {
             if (chunk.world.config.addAOToMesh)
-                SetColorsAO(vertexData, light, chunk.world.config.ambientOcclusionStrength);
+                SetColorsAO(data, light, chunk.world.config.ambientOcclusionStrength);
             else
-                SetColors(vertexData, 1f, 1f, 1f, 1f, false);
+                SetColors(data, 1f, 1f, 1f, 1f, false);
         }
 
         public static BlockLightData CalculateColors(Chunk chunk, int localPosIndex, Direction direction)
@@ -190,77 +189,77 @@ namespace Voxelmetric.Code.Configurable.Blocks.Utilities
             return new BlockLightData(nwSolid, nSolid, neSolid, eSolid, seSolid, sSolid, swSolid, wSolid);
         }
         
-        public static void AdjustColors(Chunk chunk, VertexData[] vertexData, BlockLightData light)
+        public static void AdjustColors(Chunk chunk, Color32[] data, BlockLightData light)
         {
             if (!chunk.world.config.addAOToMesh)
                 return;
 
-            AdjustColorsAO(vertexData, light, chunk.world.config.ambientOcclusionStrength);
+            AdjustColorsAO(data, light, chunk.world.config.ambientOcclusionStrength);
         }
 
-        public static void PrepareTexture(Chunk chunk, ref Vector3Int localPos, VertexData[] vertexData, Direction direction, TextureCollection textureCollection, bool rotated)
+        public static void PrepareTexture(Chunk chunk, ref Vector3Int localPos, Vector2[] data, Direction direction, TextureCollection textureCollection, bool rotated)
         {
             Rect texture = textureCollection.GetTexture(chunk, ref localPos, direction);
 
             if (!rotated)
             {
-                vertexData[0].UV = new Vector2(texture.x, texture.y);
-                vertexData[1].UV = new Vector2(texture.x, texture.y+texture.height);
-                vertexData[2].UV = new Vector2(texture.x+texture.width, texture.y+texture.height);
-                vertexData[3].UV = new Vector2(texture.x+texture.width, texture.y);
+                data[0] = new Vector2(texture.x, texture.y);
+                data[1] = new Vector2(texture.x, texture.y+texture.height);
+                data[2] = new Vector2(texture.x+texture.width, texture.y+texture.height);
+                data[3] = new Vector2(texture.x+texture.width, texture.y);
             }
             else
             {
-                vertexData[0].UV = new Vector2(texture.x, texture.y+texture.height);
-                vertexData[1].UV = new Vector2(texture.x+texture.width, texture.y+texture.height);
-                vertexData[2].UV = new Vector2(texture.x+texture.width, texture.y);
-                vertexData[3].UV = new Vector2(texture.x, texture.y);
+                data[0] = new Vector2(texture.x, texture.y+texture.height);
+                data[1] = new Vector2(texture.x+texture.width, texture.y+texture.height);
+                data[2] = new Vector2(texture.x+texture.width, texture.y);
+                data[3] = new Vector2(texture.x, texture.y);
             }
         }
 
-        public static void PrepareTexture(Chunk chunk, ref Vector3Int localPos, VertexData[] vertexData, Direction direction, TextureCollection[] textureCollections, bool rotated)
+        public static void PrepareTexture(Chunk chunk, ref Vector3Int localPos, Vector2[] data, Direction direction, TextureCollection[] textureCollections, bool rotated)
         {
             Rect texture = textureCollections[(int)direction].GetTexture(chunk, ref localPos, direction);
 
             if (!rotated)
             {
-                vertexData[0].UV = new Vector2(texture.x, texture.y);
-                vertexData[1].UV = new Vector2(texture.x, texture.y+texture.height);
-                vertexData[2].UV = new Vector2(texture.x+texture.width, texture.y+texture.height);
-                vertexData[3].UV = new Vector2(texture.x+texture.width, texture.y);
+                data[0] = new Vector2(texture.x, texture.y);
+                data[1] = new Vector2(texture.x, texture.y+texture.height);
+                data[2] = new Vector2(texture.x+texture.width, texture.y+texture.height);
+                data[3] = new Vector2(texture.x+texture.width, texture.y);
             }
             else
             {
-                vertexData[0].UV = new Vector2(texture.x, texture.y+texture.height);
-                vertexData[1].UV = new Vector2(texture.x+texture.width, texture.y+texture.height);
-                vertexData[2].UV = new Vector2(texture.x+texture.width, texture.y);
-                vertexData[3].UV = new Vector2(texture.x, texture.y);
+                data[0] = new Vector2(texture.x, texture.y+texture.height);
+                data[1] = new Vector2(texture.x+texture.width, texture.y+texture.height);
+                data[2] = new Vector2(texture.x+texture.width, texture.y);
+                data[3] = new Vector2(texture.x, texture.y);
             }
         }
 
-        private static void SetColorsAO(VertexData[] vertexData, BlockLightData light, float strength)
+        private static void SetColorsAO(Color32[] data, BlockLightData light, float strength)
         {
             // 0.33f for there are 3 degrees of AO darkening (0.33f * 3 =~ 1f)
-            float ne = 1f-light.neAO * 0.33f * strength;
-            float se = 1f-light.seAO * 0.33f * strength;
-            float sw = 1f-light.swAO * 0.33f * strength;
-            float nw = 1f-light.nwAO * 0.33f * strength;
+            float ne = 1f - light.neAO * 0.33f * strength;
+            float se = 1f - light.seAO * 0.33f * strength;
+            float sw = 1f - light.swAO * 0.33f * strength;
+            float nw = 1f - light.nwAO * 0.33f * strength;
 
-            SetColors(vertexData, sw, nw, ne, se, light.FaceRotationNecessary);
+            SetColors(data, sw, nw, ne, se, light.FaceRotationNecessary);
         }
-
-        private static void AdjustColorsAO(VertexData[] vertexData, BlockLightData light, float strength)
+        
+        private static void AdjustColorsAO(Color32[] data, BlockLightData light, float strength)
         {
             // 0.33f for there are 3 degrees of AO darkening (0.33f * 3 =~ 1f)
-            float ne = 1f-light.neAO * 0.33f * strength;
-            float se = 1f-light.seAO * 0.33f * strength;
-            float sw = 1f-light.swAO * 0.33f * strength;
-            float nw = 1f-light.nwAO * 0.33f * strength;
+            float ne = 1f - light.neAO * 0.33f * strength;
+            float se = 1f - light.seAO * 0.33f * strength;
+            float sw = 1f - light.swAO * 0.33f * strength;
+            float nw = 1f - light.nwAO * 0.33f * strength;
 
-            AdjustColors(vertexData, sw, nw, ne, se, light.FaceRotationNecessary);
+            AdjustColors(data, sw, nw, ne, se, light.FaceRotationNecessary);
         }
 
-        public static void SetColors(VertexData[] data, float sw, float nw, float ne, float se, bool rotated)
+        public static void SetColors(Color32[] data, float sw, float nw, float ne, float se, bool rotated)
         {
             float _sw = (sw*255.0f).Clamp(0f,255f);
             float _nw = (nw*255.0f).Clamp(0f,255f);
@@ -274,20 +273,20 @@ namespace Voxelmetric.Code.Configurable.Blocks.Utilities
 
             if (!rotated)
             {
-                data[0].Color = new Color32(sw_, sw_, sw_, 255);
-                data[1].Color = new Color32(nw_, nw_, nw_, 255);
-                data[2].Color = new Color32(ne_, ne_, ne_, 255);
-                data[3].Color = new Color32(se_, se_, se_, 255);
+                data[0] = new Color32(sw_, sw_, sw_, 255);
+                data[1] = new Color32(nw_, nw_, nw_, 255);
+                data[2] = new Color32(ne_, ne_, ne_, 255);
+                data[3] = new Color32(se_, se_, se_, 255);
             }
             else
             {
-                data[0].Color = new Color32(nw_, nw_, nw_, 255);
-                data[1].Color = new Color32(ne_, ne_, ne_, 255);
-                data[2].Color = new Color32(se_, se_, se_, 255);
-                data[3].Color = new Color32(sw_, sw_, sw_, 255);
+                data[0] = new Color32(nw_, nw_, nw_, 255);
+                data[1] = new Color32(ne_, ne_, ne_, 255);
+                data[2] = new Color32(se_, se_, se_, 255);
+                data[3] = new Color32(sw_, sw_, sw_, 255);
             }
         }
-
+        
         private static Color32 ToColor32(ref Color32 col, float coef)
         {
             return new Color32(
@@ -297,27 +296,27 @@ namespace Voxelmetric.Code.Configurable.Blocks.Utilities
                 col.a
                 );
         }
-
-        public static void AdjustColors(VertexData[] data, float sw, float nw, float ne, float se, bool rotated)
+        
+        public static void AdjustColors(Color32[] data, float sw, float nw, float ne, float se, bool rotated)
         {
-            sw = sw.Clamp(0f,1f);
-            nw = nw.Clamp(0f,1f);
-            ne = ne.Clamp(0f,1f);
-            se = se.Clamp(0f,1f);
+            sw = sw.Clamp(0f, 1f);
+            nw = nw.Clamp(0f, 1f);
+            ne = ne.Clamp(0f, 1f);
+            se = se.Clamp(0f, 1f);
 
             if (!rotated)
             {
-                data[0].Color = ToColor32(ref data[0].Color, sw);
-                data[1].Color = ToColor32(ref data[1].Color, nw);
-                data[2].Color = ToColor32(ref data[2].Color, ne);
-                data[3].Color = ToColor32(ref data[3].Color, se);
+                data[0] = ToColor32(ref data[0], sw);
+                data[1] = ToColor32(ref data[1], nw);
+                data[2] = ToColor32(ref data[2], ne);
+                data[3] = ToColor32(ref data[3], se);
             }
             else
             {
-                data[0].Color = ToColor32(ref data[0].Color, nw);
-                data[1].Color = ToColor32(ref data[1].Color, ne);
-                data[2].Color = ToColor32(ref data[2].Color, se);
-                data[3].Color = ToColor32(ref data[3].Color, sw);
+                data[0] = ToColor32(ref data[0], nw);
+                data[1] = ToColor32(ref data[1], ne);
+                data[2] = ToColor32(ref data[2], se);
+                data[3] = ToColor32(ref data[3], sw);
             }
         }
     }

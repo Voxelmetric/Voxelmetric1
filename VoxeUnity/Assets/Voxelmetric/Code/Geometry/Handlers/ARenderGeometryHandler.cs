@@ -1,9 +1,9 @@
 ﻿using UnityEngine;
-using Voxelmetric.Code.Geometry.GeometryBatcher;
+using Voxelmetric.Code.Geometry.Batchers;
 
 namespace Voxelmetric.Code.Geometry.GeometryHandler
 {
-    public abstract class ARenderGeometryHandler: IGeometryHandler
+    public abstract class ARenderGeometryHandler
     {
         public RenderGeometryBatcher Batcher { get; private set; }
 

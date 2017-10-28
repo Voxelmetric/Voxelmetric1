@@ -108,7 +108,7 @@ namespace Voxelmetric.Code.Builders
             ++z2;
             return true;
         }
-
+        
         public override void Build(Chunk chunk)
         {
             var blocks = chunk.blocks;
@@ -121,66 +121,74 @@ namespace Voxelmetric.Code.Builders
             bool[] mask = pools.BoolArrayPool.PopExact(sizeWithPaddingPow3);
             Array.Clear(mask, 0, mask.Length);
 
-            // This compression is essentialy RLE. However, instead of working on 1 axis
-            // it works in 3 dimensions.
-            int index = Env.ChunkPadding + (Env.ChunkPadding << m_pow) + (Env.ChunkPadding << (m_pow << 1));
-            int yOffset = sizeWithPaddingPow2 - m_sideSize*sizeWithPadding;
-            int zOffset = sizeWithPadding-m_sideSize;
-            for (int y = 0; y<m_sideSize; ++y, index+=yOffset)
+            /*if (Type!=0)
             {
-                for (int z = 0; z<m_sideSize; ++z, index+=zOffset)
+                TODO: Implement support for colored meshes
+            }
+            else*/
+            {
+                // This compression is essentialy RLE. However, instead of working on 1 axis
+                // it works in 3 dimensions.
+                int index = Env.ChunkPadding + (Env.ChunkPadding << m_pow) + (Env.ChunkPadding << (m_pow << 1));
+                int yOffset = sizeWithPaddingPow2 - m_sideSize * sizeWithPadding;
+                int zOffset = sizeWithPadding - m_sideSize;
+
+                for (int y = 0; y < m_sideSize; ++y, index += yOffset)
                 {
-                    for (int x = 0; x<m_sideSize; ++x, ++index)
+                    for (int z = 0; z < m_sideSize; ++z, index += zOffset)
                     {
-                        // Skip already checked blocks
-                        if (mask[index])
-                            continue;
-
-                        mask[index] = true;
-                        
-                        Block block = blocks.GetBlock(index);
-
-                        // Skip blocks we're not interested in right away
-                        if (!CanConsiderBlock(block))
-                            continue;
-
-                        int x1 = x, y1 = y, z1 = z, x2 = x+1, y2 = y+1, z2 = z+1;
-
-                        bool expandX = true;
-                        bool expandY = true;
-                        bool expandZ = true;
-                        bool expand;
-
-                        // Try to expand our box in all axes
-                        do
+                        for (int x = 0; x < m_sideSize; ++x, ++index)
                         {
-                            expand = false;
-                            
-                            if (expandY)
-                            {
-                                expandY = y2<m_sideSize &&
-                                          ExpandY(blocks, ref mask, block, x1, z1, x2, ref y2, z2);
-                                expand = expandY;
-                            }
-                            if (expandZ)
-                            {
-                                expandZ = z2<m_sideSize &&
-                                          ExpandZ(blocks, ref mask, block, x1, y1, x2, y2, ref z2);
-                                expand = expand|expandZ;
-                            }
-                            if (expandX)
-                            {
-                                expandX = x2<m_sideSize &&
-                                          ExpandX(blocks, ref mask, block, y1, z1, ref x2, y2, z2);
-                                expand = expand|expandX;
-                            }
-                        } while (expand);
+                            // Skip already checked blocks
+                            if (mask[index])
+                                continue;
 
-                        BuildBox(chunk, block, x1, y1, z1, x2, y2, z2);
+                            mask[index] = true;
+                            
+                            Block block = blocks.GetBlock(index);
+
+                            // Skip blocks we're not interested in right away
+                            if (!CanConsiderBlock(block))
+                                continue;
+
+                            int x1 = x, y1 = y, z1 = z, x2 = x + 1, y2 = y + 1, z2 = z + 1;
+
+                            bool expandX = true;
+                            bool expandY = true;
+                            bool expandZ = true;
+                            bool expand;
+
+                            // Try to expand our box in all axes
+                            do
+                            {
+                                expand = false;
+
+                                if (expandY)
+                                {
+                                    expandY = y2 < m_sideSize &&
+                                              ExpandY(blocks, ref mask, block, x1, z1, x2, ref y2, z2);
+                                    expand = expandY;
+                                }
+                                if (expandZ)
+                                {
+                                    expandZ = z2 < m_sideSize &&
+                                              ExpandZ(blocks, ref mask, block, x1, y1, x2, y2, ref z2);
+                                    expand = expand | expandZ;
+                                }
+                                if (expandX)
+                                {
+                                    expandX = x2 < m_sideSize &&
+                                              ExpandX(blocks, ref mask, block, y1, z1, ref x2, y2, z2);
+                                    expand = expand | expandX;
+                                }
+                            } while (expand);
+
+                            BuildBox(chunk, block, x1, y1, z1, x2, y2, z2);
+                        }
                     }
                 }
             }
-
+            
             pools.BoolArrayPool.Push(mask);
         }
 

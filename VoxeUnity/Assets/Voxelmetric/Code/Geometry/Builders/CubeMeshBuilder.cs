@@ -8,7 +8,7 @@ using Voxelmetric.Code.Data_types;
 using Voxelmetric.Code.Load_Resources.Blocks;
 using Vector3Int = Voxelmetric.Code.Data_types.Vector3Int;
 
-namespace Voxelmetric.Code.Builders.Geometry
+namespace Voxelmetric.Code.Builders
 {
     /// <summary>
     /// Generates a cubical mesh with merged faces
@@ -174,7 +174,7 @@ namespace Voxelmetric.Code.Builders.Geometry
                                       BlockUtils.PaddingOffsets[(int)Direction.up][0];
                         }
 
-                        block.BuildFace(chunk, face, ref mask[n], rotated);
+                        block.BuildFace(chunk, face, Palette, ref mask[n], rotated);
 
                         // Zero out the mask. We don't need to process the same fields again
                         for (l = 0; l<h; ++l)
@@ -298,7 +298,7 @@ namespace Voxelmetric.Code.Builders.Geometry
                                       BlockUtils.PaddingOffsets[(int)Direction.down][0];
                         }
 
-                        block.BuildFace(chunk, face, ref mask[n], rotated);
+                        block.BuildFace(chunk, face, Palette, ref mask[n], rotated);
 
                         // Zero out the mask. We don't need to process the same fields again
                         for (l = 0; l<h; ++l)
@@ -422,7 +422,7 @@ namespace Voxelmetric.Code.Builders.Geometry
                                       BlockUtils.PaddingOffsets[(int)Direction.east][0];
                         }
 
-                        block.BuildFace(chunk, face, ref mask[n], rotated);
+                        block.BuildFace(chunk, face, Palette, ref mask[n], rotated);
 
                         // Zero out the mask. We don't need to process the same fields again
                         for (l = 0; l<h; ++l)
@@ -546,7 +546,7 @@ namespace Voxelmetric.Code.Builders.Geometry
                                       BlockUtils.PaddingOffsets[(int)Direction.west][0];
                         }
 
-                        block.BuildFace(chunk, face, ref mask[n], rotated);
+                        block.BuildFace(chunk, face, Palette, ref mask[n], rotated);
 
                         // Zero out the mask. We don't need to process the same fields again
                         for (l = 0; l<h; ++l)
@@ -670,7 +670,7 @@ namespace Voxelmetric.Code.Builders.Geometry
                                       BlockUtils.PaddingOffsets[(int)Direction.north][0];
                         }
 
-                        block.BuildFace(chunk, face, ref mask[n], rotated);
+                        block.BuildFace(chunk, face, Palette, ref mask[n], rotated);
 
                         // Zero out the mask. We don't need to process the same fields again
                         for (l = 0; l<h; ++l)
@@ -794,7 +794,7 @@ namespace Voxelmetric.Code.Builders.Geometry
                                       BlockUtils.PaddingOffsets[(int)Direction.south][0];
                         }
 
-                        block.BuildFace(chunk, face, ref mask[n], rotated);
+                        block.BuildFace(chunk, face, Palette, ref mask[n], rotated);
 
                         // Zero out the mask. We don't need to process the same fields again
                         for (l = 0; l<h; ++l)

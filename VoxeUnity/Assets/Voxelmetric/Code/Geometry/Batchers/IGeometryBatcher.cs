@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace Voxelmetric.Code.Geometry.GeometryBatcher
+namespace Voxelmetric.Code.Geometry.Batchers
 {
     public interface IGeometryBatcher
     {

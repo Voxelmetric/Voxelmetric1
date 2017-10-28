@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
-using Voxelmetric.Code.Geometry.GeometryHandler;
+using Voxelmetric.Code.Core;
 
-namespace Voxelmetric.Code.Core.GeometryHandler
+namespace Voxelmetric.Code.Geometry.GeometryHandler
 {
     public class ChunkRenderGeometryHandler: ARenderGeometryHandler
     {
@@ -16,8 +16,7 @@ namespace Voxelmetric.Code.Core.GeometryHandler
         /// <summary> Updates the chunk based on its contents </summary>
         public override void Build()
         {
-            Globals.CubeMeshBuilder.SideMask = Features.DontRenderWorldEdgesMask;
-            Globals.CubeMeshBuilder.Build(chunk);
+            Globals.TerrainMeshBuilder.Build(chunk);
         }
 
         public override void Commit()

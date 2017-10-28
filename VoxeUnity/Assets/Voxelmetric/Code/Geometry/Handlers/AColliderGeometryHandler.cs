@@ -1,5 +1,5 @@
 ﻿using UnityEngine;
-using Voxelmetric.Code.Geometry.GeometryBatcher;
+using Voxelmetric.Code.Geometry.Batchers;
 
 namespace Voxelmetric.Code.Geometry.GeometryHandler
 {

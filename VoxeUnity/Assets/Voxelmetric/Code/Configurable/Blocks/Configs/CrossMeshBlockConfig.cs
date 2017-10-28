@@ -12,7 +12,6 @@ public class CrossMeshBlockConfig: BlockConfig
             return false;
 
         texture = world.textureProvider.GetTextureCollection(_GetPropertyFromConfig(config, "texture", ""));
-        solid = _GetPropertyFromConfig(config, "solid", false);
 
         return true;
     }

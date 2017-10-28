@@ -1,13 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using Voxelmetric.Code.Common;
 using Voxelmetric.Code.Core.Operations;
 using Voxelmetric.Code.Core.StateManager;
 using Voxelmetric.Code.Data_types;
 using Voxelmetric.Code.Load_Resources.Blocks;
 using Voxelmetric.Code.VM;
-using Assert = UnityEngine.Assertions.Assert;
 
 namespace Voxelmetric.Code.Core
 {
@@ -611,7 +609,15 @@ namespace Voxelmetric.Code.Core
         /// <returns>The block at the position</returns>
         public Block GetBlock(int index)
         {
-            return m_blockTypes[blocks[index].Type];
+            try
+            {
+                return m_blockTypes[blocks[index].Type];
+            }
+            catch (Exception ex)
+            {
+                UnityEngine.Debug.LogException(ex);
+                return new Block();
+            }
         }
 
         /// <summary>

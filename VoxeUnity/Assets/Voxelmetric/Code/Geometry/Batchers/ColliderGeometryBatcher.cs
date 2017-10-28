@@ -1,10 +1,10 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Assertions;
-using Voxelmetric.Code.Builders;
 using Voxelmetric.Code.Common.MemoryPooling;
+using Voxelmetric.Code.Geometry.Buffers;
 
-namespace Voxelmetric.Code.Geometry.GeometryBatcher
+namespace Voxelmetric.Code.Geometry.Batchers
 {
     public class ColliderGeometryBatcher: IGeometryBatcher
     {
@@ -76,7 +76,7 @@ namespace Voxelmetric.Code.Geometry.GeometryBatcher
                 var geometryBuffer = m_buffers[i];
                 for (int j = 0; j < geometryBuffer.Count; j++)
                 {
-                    if (geometryBuffer[j].WasUsed())
+                    if (geometryBuffer[j].WasUsed)
                         geometryBuffer[j] = new ColliderGeometryBuffer();
                 }
             }
@@ -145,7 +145,7 @@ namespace Voxelmetric.Code.Geometry.GeometryBatcher
                     ColliderGeometryBuffer buffer = holder[i];
 
                     // No data means there's no mesh to build
-                    if (buffer.IsEmpty())
+                    if (buffer.IsEmpty)
                         continue;
 
                     // Create a game object for collider. Unfortunatelly, we can't use object pooling
@@ -162,7 +162,7 @@ namespace Voxelmetric.Code.Geometry.GeometryBatcher
 
                         Mesh mesh = Globals.MemPools.MeshPool.Pop();
                         Assert.IsTrue(mesh.vertices.Length<=0);
-                        UnityMeshBuilder.BuildColliderMesh(mesh, buffer);
+                        buffer.SetupMesh(mesh);
 
                         MeshCollider collider = go.GetComponent<MeshCollider>();
                         collider.sharedMesh = null;

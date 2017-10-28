@@ -3,7 +3,7 @@
 namespace Voxelmetric.Code.Data_types
 {
     [Flags]
-    public enum Side
+    public enum Side: byte
     {
         up = 0x01, // front side
         down = 0x02, // back side

@@ -17,6 +17,8 @@ public class GrassColoredBlock: ColoredBlock
 
     public override void OnInit(BlockProvider blockProvider)
     {
+        base.OnInit(blockProvider);
+
         air = BlockProvider.AirBlock;
         Block blk = blockProvider.GetBlock("dirt");
         dirt = new BlockData(blk.Type, blk.Solid);

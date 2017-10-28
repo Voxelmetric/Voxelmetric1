@@ -1,11 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Threading;
 using Voxelmetric.Code.Common.Threading;
 using Voxelmetric.Code.Common.Threading.Managers;
 using Voxelmetric.Code.Core;
 using Voxelmetric.Code.Data_types;
-using ThreadPool = Voxelmetric.Code.Common.Threading.ThreadPool;
 
 namespace Voxelmetric.Code.Utilities
 {

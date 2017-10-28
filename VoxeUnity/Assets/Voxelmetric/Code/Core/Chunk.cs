@@ -1,9 +1,9 @@
 ﻿using UnityEngine.Profiling;
 using Voxelmetric.Code.Common;
 using Voxelmetric.Code.Common.MemoryPooling;
-using Voxelmetric.Code.Core.GeometryHandler;
 using Voxelmetric.Code.Core.StateManager;
 using Voxelmetric.Code.Data_types;
+using Voxelmetric.Code.Geometry.GeometryHandler;
 
 namespace Voxelmetric.Code.Core
 {

@@ -5,7 +5,7 @@ using Voxelmetric.Code.Configurable.Blocks.Utilities;
 using Voxelmetric.Code.Core;
 using Voxelmetric.Code.Data_types;
 
-namespace Voxelmetric.Code.Builders.Collider
+namespace Voxelmetric.Code.Builders
 {
     /// <summary>
     /// Generates a cubical collider mesh with merged faces

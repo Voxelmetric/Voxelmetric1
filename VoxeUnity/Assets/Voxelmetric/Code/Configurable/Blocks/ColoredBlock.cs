@@ -4,69 +4,64 @@ using Voxelmetric.Code.Configurable.Blocks;
 using Voxelmetric.Code.Configurable.Blocks.Utilities;
 using Voxelmetric.Code.Core;
 using Voxelmetric.Code.Data_types;
-using Voxelmetric.Code.Geometry;
-using Voxelmetric.Code.Geometry.GeometryBatcher;
+using Voxelmetric.Code.Geometry.Batchers;
+using Voxelmetric.Code.Load_Resources.Blocks;
 
 public class ColoredBlock : Block
 {
-    public Color32[] colors
+    public Color32[] colors { get; private set; }
+
+    public override void OnInit(BlockProvider blockProvider)
     {
-        get { return ((ColoredBlockConfig)Config).colors; }
+        base.OnInit(blockProvider);
+
+        colors = ((ColoredBlockConfig)Config).colors;
     }
 
-    public override void BuildFace(Chunk chunk, Vector3[] vertices, ref BlockFace face, bool rotated)
+    public override void BuildFace(Chunk chunk, Vector3[] vertices, Color32[] palette, ref BlockFace face, bool rotated)
     {
         bool backFace = DirectionUtils.IsBackface(face.side);
         int d = DirectionUtils.Get(face.side);
 
         LocalPools pools = chunk.pools;
-        VertexData[] vertexData = pools.VertexDataArrayPool.PopExact(4);
+        var verts = pools.Vector3ArrayPool.PopExact(4);
+        var cols = pools.Color32ArrayPool.PopExact(4);
+
         {
             if (vertices==null)
             {
                 Vector3 pos = face.pos;
 
-                vertexData[0].Vertex = pos+BlockUtils.PaddingOffsets[d][0];
-                vertexData[0].Color = colors[d];
-                vertexData[0].UV = Vector2.zero;
+                verts[0] = pos+BlockUtils.PaddingOffsets[d][0];
+                verts[1] = pos+BlockUtils.PaddingOffsets[d][1];
+                verts[2] = pos+BlockUtils.PaddingOffsets[d][2];
+                verts[3] = pos+BlockUtils.PaddingOffsets[d][3];
 
-                vertexData[1].Vertex = pos+BlockUtils.PaddingOffsets[d][1];
-                vertexData[1].Color = colors[d];
-                vertexData[1].UV = Vector2.zero;
-
-                vertexData[2].Vertex = pos+BlockUtils.PaddingOffsets[d][2];
-                vertexData[2].Color = colors[d];
-                vertexData[2].UV = Vector2.zero;
-
-                vertexData[3].Vertex = pos+BlockUtils.PaddingOffsets[d][3];
-                vertexData[3].Color = colors[d];
-                vertexData[3].UV = Vector2.zero;
+                cols[0] = colors[d];
+                cols[1] = colors[d];
+                cols[2] = colors[d];
+                cols[3] = colors[d];
             }
             else
             {
-                vertexData[0].Vertex = vertices[0];
-                vertexData[0].Color = colors[d];
-                vertexData[0].UV = Vector2.zero;
-
-                vertexData[1].Vertex = vertices[1];
-                vertexData[1].Color = colors[d];
-                vertexData[1].UV = Vector2.zero;
-
-                vertexData[2].Vertex = vertices[2];
-                vertexData[2].Color = colors[d];
-                vertexData[2].UV = Vector2.zero;
-
-                vertexData[3].Vertex = vertices[3];
-                vertexData[3].Color = colors[d];
-                vertexData[3].UV = Vector2.zero;
+                verts[0] = vertices[0];
+                verts[1] = vertices[1];
+                verts[2] = vertices[2];
+                verts[3] = vertices[3];
+                
+                cols[0] = colors[d];
+                cols[1] = colors[d];
+                cols[2] = colors[d];
+                cols[3] = colors[d];
             }
 
-            BlockUtils.AdjustColors(chunk, vertexData, face.light);
+            BlockUtils.AdjustColors(chunk, cols, face.light);
 
             RenderGeometryBatcher batcher = chunk.GeometryHandler.Batcher;
-            batcher.UseColors(face.materialID);
-            batcher.AddFace(vertexData, backFace, face.materialID);
+            batcher.AddFace(face.materialID, verts, cols, backFace);
         }
-        pools.VertexDataArrayPool.Push(vertexData);
+        
+        pools.Color32ArrayPool.Push(cols);
+        pools.Vector3ArrayPool.Push(verts);
     }
 }

@@ -5,7 +5,6 @@ using Voxelmetric.Code;
 using Voxelmetric.Code.Common;
 using Voxelmetric.Code.Common.Math;
 using Voxelmetric.Code.Core;
-using Voxelmetric.Code.Data_types;
 using Voxelmetric.Code.Load_Resources;
 using Vector3Int = Voxelmetric.Code.Data_types.Vector3Int;
 

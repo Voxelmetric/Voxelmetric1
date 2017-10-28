@@ -1,8 +1,8 @@
 ﻿using UnityEngine;
 using Voxelmetric.Code.Core;
 using Voxelmetric.Code.Data_types;
+using Voxelmetric.Code.Geometry.Batchers;
 using Voxelmetric.Code.Load_Resources.Blocks;
-using Voxelmetric.Code.Geometry.GeometryBatcher;
 using Vector3Int = Voxelmetric.Code.Data_types.Vector3Int;
 
 public class CustomMeshBlock : Block
@@ -11,6 +11,8 @@ public class CustomMeshBlock : Block
 
     public override void OnInit(BlockProvider blockProvider)
     {
+        base.OnInit(blockProvider);
+
         Custom = true;
     }
 
@@ -21,10 +23,6 @@ public class CustomMeshBlock : Block
                            : new Rect();
 
         RenderGeometryBatcher batcher = chunk.GeometryHandler.Batcher;
-        batcher.UseColors(materialID);
-        if (customMeshConfig.texture!=null)
-            batcher.UseTextures(materialID);
-            
-        batcher.AddMeshData(customMeshConfig.tris, customMeshConfig.verts, ref texture, localPos, materialID);
+        batcher.AddMeshData(materialID, customMeshConfig.tris, customMeshConfig.verts, customMeshConfig.colors, customMeshConfig.uvs, ref texture, localPos);
     }
 }

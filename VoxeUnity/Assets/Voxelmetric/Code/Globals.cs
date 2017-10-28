@@ -1,7 +1,5 @@
 ﻿using System.Diagnostics;
 using Voxelmetric.Code.Builders;
-using Voxelmetric.Code.Builders.Collider;
-using Voxelmetric.Code.Builders.Geometry;
 using Voxelmetric.Code.Common.MemoryPooling;
 using Voxelmetric.Code.Common.Threading;
 using Voxelmetric.Code.Utilities;
@@ -35,24 +33,13 @@ namespace Voxelmetric.Code
         }
 
         // Geometry mesh builder used for the terrain
-        private static readonly AMeshBuilder s_cubeMeshBuilder = new CubeMeshBuilder(Env.BlockSize, Env.ChunkSize);
-        public static AMeshBuilder CubeMeshBuilder
-        {
-            get
-            {
-                return s_cubeMeshBuilder;
-            }
-        }
+        public static AMeshBuilder ModelMeshBuilder { get; } = new CubeMeshBuilder(Env.BlockSize, Env.ChunkSize) { SideMask = 0 };
+
+        // Geometry mesh builder used for the terrain
+        public static AMeshBuilder TerrainMeshBuilder { get; } = new CubeMeshBuilder(Env.BlockSize, Env.ChunkSize) { SideMask = Features.DontRenderWorldEdgesMask };
 
         // Collider mesh builder used for the terrain
-        private static readonly AMeshBuilder s_cubeMeshColliderBuilder = new CubeMeshColliderBuilder(Env.BlockSize, Env.ChunkSize);
-        public static AMeshBuilder CubeMeshColliderBuilder
-        {
-            get
-            {
-                return s_cubeMeshColliderBuilder;
-            }
-        }
+        public static AMeshBuilder TerrainMeshColliderBuilder { get; } = new CubeMeshColliderBuilder(Env.BlockSize, Env.ChunkSize) { SideMask = Features.DontRenderWorldEdgesMask };
 
         // Global object pools
         public static GlobalPools MemPools { get; private set; }
@@ -75,29 +62,10 @@ namespace Voxelmetric.Code
         }
 
         // Global time budget handlers
-        private static readonly TimeBudgetHandler s_geometryBudget = new TimeBudgetHandler(4); // 4 ms a frame for geometry generation
-        public static TimeBudgetHandler GeometryBudget {
-            get
-            {
-                return s_geometryBudget;
-            }
-        }
+        public static TimeBudgetHandler GeometryBudget { get; } = new TimeBudgetHandler(4);
 
-        private static readonly TimeBudgetHandler s_edgeSyncBudget = new TimeBudgetHandler(4); // 4 ms a frame for edge synchronization
-        public static TimeBudgetHandler EdgeSyncBudget {
-            get
-            {
-                return s_edgeSyncBudget;
-            }
-        }
+        public static TimeBudgetHandler EdgeSyncBudget { get; } = new TimeBudgetHandler(4);
 
-        private static readonly TimeBudgetHandler s_setBlockBudget = new TimeBudgetHandler(4); // 4 ms a frame for edge synchronization
-        public static TimeBudgetHandler SetBlockBudget
-        {
-            get
-            {
-                return s_setBlockBudget;
-            }
-        }
+        public static TimeBudgetHandler SetBlockBudget { get; } = new TimeBudgetHandler(4);
     }
 }

@@ -4,50 +4,42 @@ using Voxelmetric.Code.Configurable.Blocks;
 using Voxelmetric.Code.Configurable.Blocks.Utilities;
 using Voxelmetric.Code.Core;
 using Voxelmetric.Code.Data_types;
-using Voxelmetric.Code.Geometry;
-using Voxelmetric.Code.Geometry.GeometryBatcher;
 using Vector3Int = Voxelmetric.Code.Data_types.Vector3Int;
 
 public class MagicaMeshBlock : Block
 {
     public MagicaMeshBlockConfig magicMeshConfig { get { return (MagicaMeshBlockConfig)Config; } }
     
-    public override void BuildFace(Chunk chunk, Vector3[] vertices, ref BlockFace face, bool rotated)
+    public override void BuildFace(Chunk chunk, Vector3[] vertices, Color32[] palette, ref BlockFace face, bool rotated)
     {
         bool backFace = DirectionUtils.IsBackface(face.side);
         
         LocalPools pools = chunk.pools;
-        VertexData[] vertexData = pools.VertexDataArrayPool.PopExact(4);
+        var verts = pools.Vector3ArrayPool.PopExact(4);
+        var cols = pools.Color32ArrayPool.PopExact(4);
+
         {
-            vertexData[0].Vertex = vertices[0];
-            vertexData[0].Color = Color.white;
-            vertexData[0].UV = Vector2.zero;
+            verts[0] = vertices[0];
+            verts[1] = vertices[1];
+            verts[2] = vertices[2];
+            verts[3] = vertices[3];
 
-            vertexData[1].Vertex = vertices[1];
-            vertexData[1].Color = Color.white;
-            vertexData[1].UV = Vector2.zero;
+            cols[0] = palette[face.block.Type];
+            cols[1] = palette[face.block.Type];
+            cols[2] = palette[face.block.Type];
+            cols[3] = palette[face.block.Type];
 
-            vertexData[2].Vertex = vertices[2];
-            vertexData[2].Color = Color.white;
-            vertexData[2].UV = Vector2.zero;
-
-            vertexData[3].Vertex = vertices[3];
-            vertexData[3].Color = Color.white;
-            vertexData[3].UV = Vector2.zero;
-
-            BlockUtils.AdjustColors(chunk, vertexData, face.light);
-            magicMeshConfig.AddFace(vertexData, backFace);
+            BlockUtils.AdjustColors(chunk, cols, face.light);
+            magicMeshConfig.AddFace(verts, cols, backFace);
         }
-        pools.VertexDataArrayPool.Push(vertexData);
+
+        pools.Color32ArrayPool.Push(cols);
+        pools.Vector3ArrayPool.Push(verts);
     }
 
     public override void BuildBlock(Chunk chunk, ref Vector3Int localPos, int materialID)
     {
-        Rect rect = new Rect();
-
-        RenderGeometryBatcher batcher = chunk.GeometryHandler.Batcher;
-        batcher.UseColors(materialID);
-
-        batcher.AddMeshData(magicMeshConfig.tris, magicMeshConfig.verts, ref rect, localPos, materialID);
+        var batcher = chunk.GeometryHandler.Batcher;
+        batcher.AddMeshData(materialID, magicMeshConfig.tris, magicMeshConfig.verts, magicMeshConfig.colors, localPos);
     }
 }

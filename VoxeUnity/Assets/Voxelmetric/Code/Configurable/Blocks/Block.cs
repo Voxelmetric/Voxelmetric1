@@ -1,7 +1,6 @@
 ﻿using UnityEngine;
 using Voxelmetric.Code.Configurable.Blocks;
 using Voxelmetric.Code.Core;
-using Voxelmetric.Code.Data_types;
 using Voxelmetric.Code.Load_Resources.Blocks;
 using Vector3Int = Voxelmetric.Code.Data_types.Vector3Int;
 
@@ -57,7 +56,7 @@ public class Block
         return adjacentBlock.Solid ? !Solid : (Solid || Type!=adjacentBlock.Type);
     }
 
-    public virtual void BuildFace(Chunk chunk, Vector3[] vertices, ref BlockFace face, bool rotated)
+    public virtual void BuildFace(Chunk chunk, Vector3[] vertices, Color32[] palette, ref BlockFace face, bool rotated)
     {
     }
 

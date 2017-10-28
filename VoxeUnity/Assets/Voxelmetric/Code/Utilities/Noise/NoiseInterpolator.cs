@@ -1,6 +1,4 @@
-﻿using System;
-using System.Diagnostics;
-using Voxelmetric.Code.Common;
+﻿using Voxelmetric.Code.Common;
 
 namespace Voxelmetric.Code.Utilities.Noise
 {

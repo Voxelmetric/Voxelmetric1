@@ -437,9 +437,6 @@ PlayerSettings:
   switchUdpSendBufferSize: 9
   switchUdpReceiveBufferSize: 42
   switchSocketBufferEfficiency: 4
-  switchSocketInitializeEnabled: 1
-  switchNetworkInterfaceManagerInitializeEnabled: 1
-  switchPlayerConnectionEnabled: 1
   ps4NPAgeRating: 12
   ps4NPTitleSecret: 
   ps4NPTrophyPackPath: 
@@ -589,7 +586,7 @@ PlayerSettings:
     iOS: 0
   incrementalIl2cppBuild: {}
   additionalIl2CppArgs: 
-  scriptingRuntimeVersion: 0
+  scriptingRuntimeVersion: 1
   apiCompatibilityLevelPerPlatform: {}
   m_RenderingPath: 1
   m_MobileRenderingPath: 1
@@ -681,7 +678,7 @@ PlayerSettings:
     UNet: 0
     Unity_Ads: 0
   facebookSdkVersion: 7.9.1
-  apiCompatibilityLevel: 2
+  apiCompatibilityLevel: 3
   cloudProjectId: 
   projectName: 
   organizationId: 

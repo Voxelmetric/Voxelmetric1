@@ -1,15 +1,16 @@
 ﻿using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using UnityEngine;
 using UnityEngine.Assertions;
 using Voxelmetric.Code;
-using Voxelmetric.Code.Builders.Geometry;
+using Voxelmetric.Code.Builders;
 using Voxelmetric.Code.Common;
 using Voxelmetric.Code.Core;
 using Voxelmetric.Code.Data_types;
-using Voxelmetric.Code.Geometry;
+using Voxelmetric.Code.Geometry.Buffers;
 using Voxelmetric.Code.Load_Resources.Blocks;
 using Voxelmetric.Code.Utilities.Import;
 using Vector3Int = Voxelmetric.Code.Data_types.Vector3Int;
@@ -21,26 +22,15 @@ public class MagicaMeshBlockConfig: BlockConfig
     private string m_path;
     private float m_scale;
 
-    private int[] m_triangles;
-    private VertexData[] m_vertices;
-
-    public int[] tris
-    {
-        get { return m_triangles; }
-    }
-
-    public VertexData[] verts
-    {
-        get { return m_vertices; }
-    }
+    public int[] tris { get; private set; }
+    public Vector3[] verts { get; private set; }
+    public Color32[] colors { get; private set; }
 
     public override bool OnSetUp(Hashtable config, World world)
     {
         if (!base.OnSetUp(config, world))
             return false;
-
-        solid = _GetPropertyFromConfig(config, "solid", false);
-
+        
         m_meshOffset = new Vector3(
             Env.BlockSizeHalf+float.Parse(_GetPropertyFromConfig(config, "meshXOffset", "0"), CultureInfo.InvariantCulture),
             Env.BlockSizeHalf+float.Parse(_GetPropertyFromConfig(config, "meshYOffset", "0"), CultureInfo.InvariantCulture),
@@ -58,14 +48,11 @@ public class MagicaMeshBlockConfig: BlockConfig
 
     public override bool OnPostSetUp(World world)
     {
-        return SetUpMesh(world, world.config.meshFolder+"/"+m_path, m_meshOffset, out m_triangles, out m_vertices);
+        return SetUpMesh(world, world.config.meshFolder+"/"+m_path, m_meshOffset);
     }
 
-    protected bool SetUpMesh(World world, string meshLocation, Vector3 positionOffset, out int[] trisOut, out VertexData[] vertsOut)
+    private bool SetUpMesh(World world, string meshLocation, Vector3 positionOffset)
     {
-        trisOut = null;
-        vertsOut = null;
-
         FileStream fs = null;
         try
         {
@@ -107,10 +94,12 @@ public class MagicaMeshBlockConfig: BlockConfig
                             int index = Helpers.GetChunkIndex1DFrom3D(x, y, z, pow);
                             int i = Helpers.GetIndex1DFrom3D(x, y, z, mvchunk.sizeX, mvchunk.sizeZ);
 
-                            if (data.chunk.data[i]==0)
-                                blocks.SetInner(index, BlockProvider.AirBlock);
-                            else
-                                blocks.SetInner(index, new BlockData(type));
+                            // TODO: Implement support for colors
+                            blocks.SetInner(
+                                index, data.chunk.data[i]==0
+                                           ? BlockProvider.AirBlock
+                                           : new BlockData(type, true)//new BlockData((ushort)i, true)
+                            );
                         }
                     }
                 }
@@ -118,17 +107,25 @@ public class MagicaMeshBlockConfig: BlockConfig
                 Block block = world.blockProvider.BlockTypes[type];
 
                 block.Custom = false;
-                m_geomBuffer = new RenderGeometryBuffer();
+                m_geomBuffer = new RenderGeometryBuffer()
+                {
+                    Colors = new List<Color32>()
+                };
+
                 {
                     // Build the mesh
-                    CubeMeshBuilder meshBuilder = new CubeMeshBuilder(m_scale, size);
-                    meshBuilder.SideMask = 0;
-                    //meshBuilder.Palette = data.palette;
+                    CubeMeshBuilder meshBuilder = new CubeMeshBuilder(m_scale, size)
+                    {
+                        SideMask = 0,
+                        Type = type,
+                        Palette = data.palette
+                    };
                     meshBuilder.Build(chunk);
 
                     // Convert lists to arrays
-                    vertsOut = m_geomBuffer.Vertices.ToArray();
-                    trisOut = m_geomBuffer.Triangles.ToArray();
+                    verts = m_geomBuffer.Vertices.ToArray();
+                    colors = m_geomBuffer.Colors.ToArray();
+                    tris = m_geomBuffer.Triangles.ToArray();
                 }
                 m_geomBuffer = null;
                 block.Custom = true;
@@ -155,12 +152,13 @@ public class MagicaMeshBlockConfig: BlockConfig
         get { return m_geomBuffer!=null; }
     }
 
-    public void AddFace(VertexData[] vertexData, bool backFace)
+    public void AddFace(Vector3[] verts, Color32[] cols, bool backFace)
     {
-        Assert.IsTrue(vertexData.Length==4);
+        Assert.IsTrue(verts.Length==4);
 
         // Add data to the render buffer
-        m_geomBuffer.AddVertices(vertexData);
+        m_geomBuffer.Vertices.AddRange(verts);
+        m_geomBuffer.Colors.AddRange(cols);
         m_geomBuffer.AddIndices(m_geomBuffer.Vertices.Count, backFace);
     }
 }

@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using UnityEngine;
 using Voxelmetric.Code.Core;
 
@@ -25,7 +26,7 @@ public class ColoredBlockConfig : BlockConfig
         }
         else if (config.ContainsKey("colors"))
         {
-            Newtonsoft.Json.Linq.JArray colorNames = (Newtonsoft.Json.Linq.JArray)JsonConvert.DeserializeObject(config["colors"].ToString());
+            JArray colorNames = (JArray)JsonConvert.DeserializeObject(config["colors"].ToString());
             if (colorNames.Count!=6)
                 return false; // Don't accept broken configs
 

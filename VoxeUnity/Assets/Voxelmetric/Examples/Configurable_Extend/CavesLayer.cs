@@ -1,7 +1,5 @@
 ﻿using Voxelmetric.Code.Core;
 using Voxelmetric.Code.Load_Resources;
-using Voxelmetric.Code.Load_Resources.Blocks;
-using Voxelmetric.Code.Utilities.Noise;
 
 
 public class CavesLayer: TerrainLayer
