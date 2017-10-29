@@ -609,15 +609,7 @@ namespace Voxelmetric.Code.Core
         /// <returns>The block at the position</returns>
         public Block GetBlock(int index)
         {
-            try
-            {
-                return m_blockTypes[blocks[index].Type];
-            }
-            catch (Exception ex)
-            {
-                UnityEngine.Debug.LogException(ex);
-                return new Block();
-            }
+            return m_blockTypes[blocks[index].Type];
         }
 
         /// <summary>
