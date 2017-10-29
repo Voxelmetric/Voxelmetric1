@@ -13,6 +13,6 @@ namespace Voxelmetric.Code.Builders
         //! Side mask
         public Side SideMask { get; set; }
 
-        public abstract void Build(Chunk chunk);
+        public abstract void Build(Chunk chunk, out int minBounds, out int maxBounds);
     }
 }

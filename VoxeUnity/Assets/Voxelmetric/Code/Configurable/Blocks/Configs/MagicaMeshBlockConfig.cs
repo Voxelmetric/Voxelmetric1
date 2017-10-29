@@ -120,7 +120,7 @@ public class MagicaMeshBlockConfig: BlockConfig
                         Type = type,
                         Palette = data.palette
                     };
-                    meshBuilder.Build(chunk);
+                    meshBuilder.Build(chunk, out chunk.minBounds, out chunk.maxBounds);
 
                     // Convert lists to arrays
                     verts = m_geomBuffer.Vertices.ToArray();

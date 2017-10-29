@@ -26,8 +26,13 @@ namespace Voxelmetric.Code.Core
         //! Chunk position in world coordinates
         public Vector3Int pos { get; private set; }
 
-        //! Bounding box in world coordinates
+        //! Bounding box in world coordinates. It always considers a full-size chunk
         public AABB WorldBounds { get; private set; }
+
+        //! Bounding coordinates in local space. Corresponds to real geometry
+        public int minBounds, maxBounds;
+        //! Bounding coordinates in local space. Corresponds to collision geometry
+        public int minBoundsC, maxBoundsC;
 
         //! ThreadID associated with this chunk. Used when working with object pools in MT environment. Resources
         //! need to be release where they were allocated. Thanks to this, associated containers could be made lock-free
@@ -116,6 +121,8 @@ namespace Voxelmetric.Code.Core
                 pos.x, pos.y, pos.z,
                 pos.x+ m_sideSize, pos.y+ m_sideSize, pos.z+ m_sideSize
                 );
+            minBounds = maxBounds = 0;
+            minBoundsC = maxBoundsC = 0;
 
             Reset();
 

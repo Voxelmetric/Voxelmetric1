@@ -99,11 +99,11 @@ namespace Voxelmetric.Code.Geometry.Buffers
             Vertices.Add(vertex);
         }
 
-        public void SetupMesh(Mesh mesh)
+        public void SetupMesh(Mesh mesh, bool calculateBounds)
         {
             // Prepare mesh
             mesh.SetVertices(Vertices);
-            mesh.SetTriangles(Triangles, 0);
+            mesh.SetTriangles(Triangles, 0, calculateBounds);
             mesh.uv = null;
             mesh.uv2 = null;
             mesh.uv3 = null;

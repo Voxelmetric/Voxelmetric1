@@ -126,7 +126,7 @@ namespace Voxelmetric.Code.Geometry.Batchers
         }
 
         /// <summary>
-        ///     Finalize the draw calls
+        ///     Creates a mesh and commits it to the engine. Bounding box is calculated from vertices
         /// </summary>
         public void Commit(Vector3 position, Quaternion rotation
 #if DEBUG
@@ -162,7 +162,7 @@ namespace Voxelmetric.Code.Geometry.Batchers
 
                         Mesh mesh = Globals.MemPools.MeshPool.Pop();
                         Assert.IsTrue(mesh.vertices.Length<=0);
-                        buffer.SetupMesh(mesh);
+                        buffer.SetupMesh(mesh, true);
 
                         MeshCollider collider = go.GetComponent<MeshCollider>();
                         collider.sharedMesh = null;
@@ -179,7 +179,63 @@ namespace Voxelmetric.Code.Geometry.Batchers
                 }
             }
         }
-        
+
+        /// <summary>
+        ///     Creates a mesh and commits it to the engine. Bounding box set according to value passed in bounds
+        /// </summary>
+        public void Commit(Vector3 position, Quaternion rotation, ref Bounds bounds
+#if DEBUG
+            , string debugName = null
+#endif
+        )
+        {
+            ReleaseOldData();
+
+            for (int j = 0; j<m_buffers.Length; j++)
+            {
+                var holder = m_buffers[j];
+
+                for (int i = 0; i<holder.Count; i++)
+                {
+                    ColliderGeometryBuffer buffer = holder[i];
+
+                    // No data means there's no mesh to build
+                    if (buffer.IsEmpty)
+                        continue;
+
+                    // Create a game object for collider. Unfortunatelly, we can't use object pooling
+                    // here for otherwise, unity would have to rebake because of change in object position
+                    // and that is very time consuming.
+                    GameObject prefab = GameObjectProvider.GetPool(m_prefabName).Prefab;
+                    GameObject go = Object.Instantiate(prefab);
+                    go.transform.parent = GameObjectProvider.Instance.ProviderGameObject.transform;
+
+                    {
+#if DEBUG
+                        go.name = string.Format(debugName, "_", i.ToString());
+#endif
+
+                        Mesh mesh = Globals.MemPools.MeshPool.Pop();
+                        Assert.IsTrue(mesh.vertices.Length<=0);
+                        buffer.SetupMesh(mesh, false);
+                        mesh.bounds = bounds;
+
+                        MeshCollider collider = go.GetComponent<MeshCollider>();
+                        collider.sharedMesh = null;
+                        collider.sharedMesh = mesh;
+                        collider.transform.position = position;
+                        collider.transform.rotation = rotation;
+                        collider.sharedMaterial = (m_materials==null || m_materials.Length<1) ? null : m_materials[j];
+
+                        m_objects.Add(go);
+                        m_colliders.Add(collider);
+                    }
+
+                    buffer.Clear();
+                }
+            }
+        }
+
         private void ReleaseOldData()
         {
             Assert.IsTrue(m_objects.Count==m_colliders.Count);

@@ -109,7 +109,7 @@ namespace Voxelmetric.Code.Builders
             return true;
         }
         
-        public override void Build(Chunk chunk)
+        public override void Build(Chunk chunk, out int minBounds, out int maxBounds)
         {
             var blocks = chunk.blocks;
             var pools = chunk.pools;
@@ -132,6 +132,13 @@ namespace Voxelmetric.Code.Builders
                 int index = Env.ChunkPadding + (Env.ChunkPadding << m_pow) + (Env.ChunkPadding << (m_pow << 1));
                 int yOffset = sizeWithPaddingPow2 - m_sideSize * sizeWithPadding;
                 int zOffset = sizeWithPadding - m_sideSize;
+
+                int minX = m_sideSize;
+                int minY = m_sideSize;
+                int minZ = m_sideSize;
+                int maxX = 0;
+                int maxY = 0;
+                int maxZ = 0;
 
                 for (int y = 0; y < m_sideSize; ++y, index += yOffset)
                 {
@@ -184,9 +191,21 @@ namespace Voxelmetric.Code.Builders
                             } while (expand);
 
                             BuildBox(chunk, block, x1, y1, z1, x2, y2, z2);
+
+                            // Calculate bounds
+                            if (x1 < minX) minX = x1;
+                            if (y1 < minY) minY = y1;
+                            if (z1 < minZ) minZ = z1;
+                            if (x2 > maxX) maxX = x2;
+                            if (y2 > maxY) maxY = y2;
+                            if (z2 > maxZ) maxZ = z2;
                         }
                     }
                 }
+
+                // Update chunk's geoemetry bounds
+                minBounds = minX|(minY<<8)|(minZ<<16);
+                maxBounds = maxX|(maxY<<8)|(maxZ<<16);
             }
             
             pools.BoolArrayPool.Push(mask);

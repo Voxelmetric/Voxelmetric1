@@ -453,25 +453,22 @@ namespace Voxelmetric.Code.Geometry.Batchers
             buffer.AddIndices(buffer.Vertices.Count, backFace);
         }
 
-        /// <summary>
-        ///     Finalize the draw calls
-        /// </summary>
         public void Commit(Vector3 position, Quaternion rotation
 #if DEBUG
             , string debugName = null
 #endif
-            )
+        )
         {
             ReleaseOldData();
-            
-            for (int j=0; j<m_buffers.Length; j++)
+
+            for (int j = 0; j<m_buffers.Length; j++)
             {
                 var holder = m_buffers[j];
 
                 for (int i = 0; i<holder.Count; i++)
                 {
                     var buffer = holder[i];
-                    
+
                     // No data means there's no mesh to build
                     if (buffer.IsEmpty)
                         continue;
@@ -483,10 +480,64 @@ namespace Voxelmetric.Code.Geometry.Batchers
 #if DEBUG
                         go.name = string.Format(debugName, "_", i.ToString());
 #endif
-                        
+
                         Mesh mesh = Globals.MemPools.MeshPool.Pop();
                         Assert.IsTrue(mesh.vertices.Length<=0);
-                        buffer.SetupMesh(mesh);
+                        buffer.SetupMesh(mesh, true);
+
+                        MeshFilter filter = go.GetComponent<MeshFilter>();
+                        filter.sharedMesh = null;
+                        filter.sharedMesh = mesh;
+                        filter.transform.position = position;
+                        filter.transform.rotation = rotation;
+
+                        Renderer renderer = go.GetComponent<Renderer>();
+                        renderer.sharedMaterial = (m_materials==null || m_materials.Length<1) ? null : m_materials[j];
+
+                        m_objects.Add(go);
+                        m_renderers.Add(renderer);
+                    }
+
+                    buffer.Clear();
+                }
+            }
+        }
+
+        /// <summary>
+        ///     Finalize the draw calls
+        /// </summary>
+        public void Commit(Vector3 position, Quaternion rotation, ref Bounds bounds
+#if DEBUG
+            , string debugName = null
+#endif
+        )
+        {
+            ReleaseOldData();
+
+            for (int j = 0; j<m_buffers.Length; j++)
+            {
+                var holder = m_buffers[j];
+
+                for (int i = 0; i<holder.Count; i++)
+                {
+                    var buffer = holder[i];
+
+                    // No data means there's no mesh to build
+                    if (buffer.IsEmpty)
+                        continue;
+
+                    var go = GameObjectProvider.PopObject(m_prefabName);
+                    Assert.IsTrue(go!=null);
+                    if (go!=null)
+                    {
+#if DEBUG
+                        go.name = string.Format(debugName, "_", i.ToString());
+#endif
+
+                        Mesh mesh = Globals.MemPools.MeshPool.Pop();
+                        Assert.IsTrue(mesh.vertices.Length<=0);
+                        buffer.SetupMesh(mesh, false);
+                        mesh.bounds = bounds;
 
                         MeshFilter filter = go.GetComponent<MeshFilter>();
                         filter.sharedMesh = null;
