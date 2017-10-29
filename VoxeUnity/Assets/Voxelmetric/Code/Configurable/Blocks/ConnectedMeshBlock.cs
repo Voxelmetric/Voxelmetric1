@@ -38,6 +38,7 @@ public class ConnectedMeshBlock: CustomMeshBlock
         var verts = d.verts;
         var uvs = d.uvs;
         var textures = d.textures;
+        var colors = d.colors;
 
         Rect rect;
         ChunkBlocks blocks = chunk.blocks;
@@ -48,7 +49,7 @@ public class ConnectedMeshBlock: CustomMeshBlock
         if (connectedMeshConfig.connectsToSolid && blocks.Get(ref sidePos).Solid)
         {
             rect = textures.GetTexture(chunk, ref face.pos, face.side);
-            batcher.AddMeshData(face.materialID, tris, verts, uvs, ref rect, face.pos);
+            batcher.AddMeshData(face.materialID, tris, verts, colors, uvs, ref rect, face.pos);
         }
         else if (connectedMeshConfig.connectsToTypes.Length!=0)
         {
@@ -58,7 +59,7 @@ public class ConnectedMeshBlock: CustomMeshBlock
                 if (neighborType==connectedMeshConfig.connectsToTypes[i])
                 {
                     rect = textures.GetTexture(chunk, ref face.pos, face.side);
-                    batcher.AddMeshData(face.materialID, tris, verts, uvs, ref rect, face.pos);
+                    batcher.AddMeshData(face.materialID, tris, verts, colors, uvs, ref rect, face.pos);
                     break;
                 }
             }
@@ -66,7 +67,7 @@ public class ConnectedMeshBlock: CustomMeshBlock
 
         var d2 = customMeshConfig.data;
         rect = d2.textures.GetTexture(chunk, ref face.pos, Direction.down);
-        batcher.AddMeshData(face.materialID, d2.tris, d2.verts, d2.uvs, ref rect, face.pos);
+        batcher.AddMeshData(face.materialID, d2.tris, d2.verts, d2.colors, d2.uvs, ref rect, face.pos);
     }
 
     public override void BuildBlock(Chunk chunk, ref Vector3Int localPos, int materialID)
@@ -91,6 +92,6 @@ public class ConnectedMeshBlock: CustomMeshBlock
 
         var d2 = customMeshConfig.data;
         Rect texture = d2.textures.GetTexture(chunk, ref localPos, Direction.down);
-        batcher.AddMeshData(materialID, d2.tris, d2.verts, d2.uvs, ref texture, localPos);
+        batcher.AddMeshData(materialID, d2.tris, d2.verts, d2.colors, d2.uvs, ref texture, localPos);
     }
 }

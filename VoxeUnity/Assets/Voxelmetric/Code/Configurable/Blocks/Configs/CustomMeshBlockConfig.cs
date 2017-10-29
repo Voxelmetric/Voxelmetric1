@@ -64,8 +64,8 @@ public class CustomMeshBlockConfig: BlockConfig
         int vertexCnt = 0;
         int triangleCnt = 0;
 
-        bool hasColors = false;
-        bool hasUVs = false;
+        //bool hasColors = false;
+        //bool hasUVs = false;
 
         for (int GOIndex = 0; GOIndex<meshGO.transform.childCount; GOIndex++)
         {
@@ -75,12 +75,12 @@ public class CustomMeshBlockConfig: BlockConfig
             triangleCnt += mesh.triangles.Length;
 
             // Check whether allocating space for UVs is necessary
-            if (!hasUVs && mesh.uv != null && mesh.uv.Length > 0)
-                hasUVs = true;
+            //if (!hasUVs && mesh.uv != null && mesh.uv.Length > 0)
+            //    hasUVs = true;
 
             // Check whether allocating space for colors is necessary
-            if (!hasColors && mesh.colors32 != null && mesh.colors32.Length > 0)
-                hasColors = true;
+            //if (!hasColors && mesh.colors32 != null && mesh.colors32.Length > 0)
+            //    hasColors = true;
         }
 
         // 6 indices & 4 vertices per quad
@@ -94,9 +94,9 @@ public class CustomMeshBlockConfig: BlockConfig
 
         trisOut = new int[triangleCnt];
         vertsOut = new Vector3[vertexCnt];
-        if (hasUVs)
+        //if (hasUVs)
             uvsOut = new Vector2[vertexCnt];
-        if (hasColors)
+        //if (hasColors)
             colorsOut = new Color32[vertexCnt];
 
         int ti=0, vi=0;
@@ -109,10 +109,10 @@ public class CustomMeshBlockConfig: BlockConfig
             {
                 vertsOut[vi] = mesh.vertices[i]+positionOffset;
 
-                if (hasUVs)
+                //if (hasUVs)
                     uvsOut[vi] = mesh.uv.Length!=0 ? mesh.uv[i] : new Vector2();
 
-                if (hasColors)
+                //if (hasColors)
                     colorsOut[vi] = mesh.colors32.Length!=0 ? mesh.colors32[i] : new Color32(255, 255, 255, 255);
             }
 
