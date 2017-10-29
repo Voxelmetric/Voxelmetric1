@@ -24,7 +24,8 @@ public class CustomMeshBlockConfig: BlockConfig
     {
         if (!base.OnSetUp(config, world))
             return false;
-        
+
+        solid = _GetPropertyFromConfig(config, "solid", false);
         m_data.textures = world.textureProvider.GetTextureCollection(_GetPropertyFromConfig(config, "texture", ""));
 
         Vector3 meshOffset;
