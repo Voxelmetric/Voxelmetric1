@@ -8,24 +8,24 @@ using Voxelmetric.Code.Load_Resources.Textures;
 
 public class CustomMeshBlockConfig: BlockConfig
 {
-    public int[] tris { get { return m_tris; } }
-    public Vector3[] verts{ get { return m_verts; } }
-    public Vector2[] uvs{ get { return m_uvs; } }
-    public Color32[] colors { get { return m_colors; } }
-    
-    private int[] m_tris;
-    private Vector3[] m_verts;
-    private Vector2[] m_uvs;
-    private Color32[] m_colors;
+    public class CustomMeshBlockData
+    {
+        public int[] tris;
+        public Vector3[] verts;
+        public Vector2[] uvs;
+        public Color32[] colors;
+        public TextureCollection textures;
+    }
 
-    public TextureCollection texture;
+    private readonly CustomMeshBlockData m_data = new CustomMeshBlockData();
+    public CustomMeshBlockData data { get { return m_data; }  }
 
     public override bool OnSetUp(Hashtable config, World world)
     {
         if (!base.OnSetUp(config, world))
             return false;
         
-        texture = world.textureProvider.GetTextureCollection(_GetPropertyFromConfig(config, "texture", ""));
+        m_data.textures = world.textureProvider.GetTextureCollection(_GetPropertyFromConfig(config, "texture", ""));
 
         Vector3 meshOffset;
         meshOffset.x = Env.BlockSizeHalf + float.Parse(_GetPropertyFromConfig(config, "meshXOffset", "0"), CultureInfo.InvariantCulture);
@@ -35,10 +35,10 @@ public class CustomMeshBlockConfig: BlockConfig
         SetUpMesh(
             world.config.meshFolder + "/" + _GetPropertyFromConfig(config, "meshFileLocation", ""),
             meshOffset,
-            out m_tris,
-            out m_verts,
-            out m_uvs,
-            out m_colors
+            out m_data.tris,
+            out m_data.verts,
+            out m_data.uvs,
+            out m_data.colors
             );
 
         return true;
