@@ -214,7 +214,7 @@ namespace Voxelmetric.Code.Geometry.Batchers
             var buffer = holder[holder.Count - 1];
 
             int startOffset = 0;
-            int leftToProcess = tris.Length;
+            int leftToProcess = verts.Length;
             while (leftToProcess>0)
             {
                 int left = Math.Min(leftToProcess, 65000);
@@ -242,8 +242,8 @@ namespace Voxelmetric.Code.Geometry.Batchers
 
                 // Add vertices
                 int initialVertexCount = buffer.Vertices.Count;
-                for (int i = startOffset; i < max; i++)
-                    buffer.Vertices.Add(verts[i] + offset);
+                for (int i = startOffset; i<max; i++)
+                    buffer.Vertices.Add(verts[i]+offset);
 
                 // Add UVs
                 PrepareUVs(ref buffer.UV1s, buffer.Vertices, initialVertexCount);
@@ -283,7 +283,7 @@ namespace Voxelmetric.Code.Geometry.Batchers
             var buffer = holder[holder.Count - 1];
 
             int startOffset = 0;
-            int leftToProcess = tris.Length;
+            int leftToProcess = verts.Length;
             while (leftToProcess > 0)
             {
                 int left = Math.Min(leftToProcess, 65000);
