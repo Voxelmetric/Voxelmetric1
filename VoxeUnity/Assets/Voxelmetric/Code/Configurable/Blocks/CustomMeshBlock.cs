@@ -23,6 +23,12 @@ public class CustomMeshBlock : Block
                            : new Rect();
 
         RenderGeometryBatcher batcher = chunk.GeometryHandler.Batcher;
-        batcher.AddMeshData(materialID, customMeshConfig.tris, customMeshConfig.verts, customMeshConfig.colors, customMeshConfig.uvs, ref texture, localPos);
+
+        if (customMeshConfig.uvs==null)
+            batcher.AddMeshData(materialID, customMeshConfig.tris, customMeshConfig.verts, customMeshConfig.colors, localPos);
+        else if (customMeshConfig.colors==null)
+            batcher.AddMeshData(materialID, customMeshConfig.tris, customMeshConfig.verts, customMeshConfig.uvs, ref texture, localPos);
+        else
+            batcher.AddMeshData(materialID, customMeshConfig.tris, customMeshConfig.verts, customMeshConfig.colors, customMeshConfig.uvs, ref texture, localPos);
     }
 }

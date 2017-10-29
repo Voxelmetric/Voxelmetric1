@@ -5,13 +5,12 @@ using Voxelmetric.Code.Core;
 using Voxelmetric.Code.Data_types;
 using Voxelmetric.Code.Load_Resources.Textures;
 
-public class ConnectedMeshBlockConfig : BlockConfig
+public class ConnectedMeshBlockConfig : CustomMeshBlockConfig
 {
-    public TextureCollection texture;
-
     public readonly int[][] directionalTris = new int[6][];
     public readonly Vector3[][] directionalVerts = new Vector3[6][];
     public readonly Vector2[][] directionalUVs = new Vector2[6][];
+    public readonly Color32[][] directionalColors = new Color32[6][];
     public readonly TextureCollection[] directionalTextures = new TextureCollection[6];
 
     public int[] connectsToTypes;
@@ -22,9 +21,7 @@ public class ConnectedMeshBlockConfig : BlockConfig
     {
         if (!base.OnSetUp(config, world))
             return false;
-
-        texture = world.textureProvider.GetTextureCollection(_GetPropertyFromConfig(config, "texture", ""));
-
+        
         connectsToNames = _GetPropertyFromConfig(config, "connectsToNames", "").Replace(" ", "").Split(',');
         connectsToSolid = _GetPropertyFromConfig(config, "connectsToSolid", true);
 
@@ -43,48 +40,14 @@ public class ConnectedMeshBlockConfig : BlockConfig
             
             SetUpMesh(
                 world.config.meshFolder + "/" + _GetPropertyFromConfig(config, direction + "FileLocation", ""),
-                meshOffset, dir
+                meshOffset,
+                out directionalTris[dir],
+                out directionalVerts[dir],
+                out directionalUVs[dir],
+                out directionalColors[dir]
                 );
         }
 
         return true;
-    }
-
-    private void SetUpMesh(string meshLocation, Vector3 positionOffset, int index)
-    {
-        GameObject meshGO = (GameObject)Resources.Load(meshLocation);
-
-        int vertexCnt = 0;
-        int triangleCnt = 0;
-
-        for (int GOIndex = 0; GOIndex < meshGO.transform.childCount; GOIndex++)
-        {
-            Mesh mesh = meshGO.transform.GetChild(GOIndex).GetComponent<MeshFilter>().sharedMesh;
-
-            vertexCnt += mesh.vertices.Length;
-            triangleCnt += mesh.triangles.Length;
-        }
-
-        var tris =  directionalTris[index] = new int[triangleCnt];
-        var verts = directionalVerts[index] = new Vector3[vertexCnt];
-        var uvs = directionalUVs[index] = new Vector2[vertexCnt];
-
-        int ti = 0, vi = 0;
-
-        for (int GOIndex = 0; GOIndex < meshGO.transform.childCount; GOIndex++)
-        {
-            Mesh mesh = meshGO.transform.GetChild(GOIndex).GetComponent<MeshFilter>().sharedMesh;
-
-            for (int i = 0; i < mesh.vertices.Length; i++, vi++)
-            {
-                verts[vi] = mesh.vertices[i] + positionOffset;
-                uvs[vi] = mesh.uv.Length != 0 ? mesh.uv[i] : new Vector2();
-                //Coloring of blocks is not yet implemented so just pass in full brightness
-                //colorsOut[vi] = new Color32(255, 255, 255, 255);
-            }
-
-            for (int i = 0; i < mesh.triangles.Length; i++, ti++)
-                tris[ti] = mesh.triangles[i];
-        }
     }
 }

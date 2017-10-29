@@ -8,10 +8,16 @@ using Voxelmetric.Code.Load_Resources.Textures;
 
 public class CustomMeshBlockConfig: BlockConfig
 {
-    public int[] tris { get; private set; }
-    public Vector3[] verts { get; private set; }
-    public Vector2[] uvs { get; private set; }
-    public Color32[] colors { get; private set; }
+    public int[] tris { get { return m_tris; } }
+    public Vector3[] verts{ get { return m_verts; } }
+    public Vector2[] uvs{ get { return m_uvs; } }
+    public Color32[] colors { get { return m_colors; } }
+    
+    private int[] m_tris;
+    private Vector3[] m_verts;
+    private Vector2[] m_uvs;
+    private Color32[] m_colors;
+
     public TextureCollection texture;
 
     public override bool OnSetUp(Hashtable config, World world)
@@ -28,19 +34,38 @@ public class CustomMeshBlockConfig: BlockConfig
 
         SetUpMesh(
             world.config.meshFolder + "/" + _GetPropertyFromConfig(config, "meshFileLocation", ""),
-            meshOffset
+            meshOffset,
+            out m_tris,
+            out m_verts,
+            out m_uvs,
+            out m_colors
             );
 
         return true;
     }
 
-    private void SetUpMesh(string meshLocation, Vector3 positionOffset)
+    protected static void SetUpMesh(
+        string meshLocation,
+        Vector3 positionOffset,
+        out int[] trisOut,
+        out Vector3[] vertsOut,
+        out Vector2[] uvsOut,
+        out Color32[] colorsOut
+        )
     {
         // TODO: Why not simply holding a mesh object instead of creating all these arrays?
         GameObject meshGO = (GameObject)Resources.Load(meshLocation);
 
+        trisOut = null;
+        vertsOut = null;
+        uvsOut = null;
+        colorsOut = null;
+
         int vertexCnt = 0;
         int triangleCnt = 0;
+
+        bool hasColors = false;
+        bool hasUVs = false;
 
         for (int GOIndex = 0; GOIndex<meshGO.transform.childCount; GOIndex++)
         {
@@ -48,21 +73,31 @@ public class CustomMeshBlockConfig: BlockConfig
 
             vertexCnt += mesh.vertices.Length;
             triangleCnt += mesh.triangles.Length;
+
+            // Check whether allocating space for UVs is necessary
+            if (!hasUVs && mesh.uv != null && mesh.uv.Length > 0)
+                hasUVs = true;
+
+            // Check whether allocating space for colors is necessary
+            if (!hasColors && mesh.colors32 != null && mesh.colors32.Length > 0)
+                hasColors = true;
         }
 
         // 6 indices & 4 vertices per quad
         Assert.IsTrue((vertexCnt * 3)>>1==triangleCnt);
         if ((vertexCnt * 3)>>1!=triangleCnt)
         {
-            Resources.UnloadAsset(meshGO);
+            // A bad resource
+            Debug.LogErrorFormat("Error loading mesh {0}. Number of triangles and vertices do not match!", meshLocation);
             return;
         }
 
-        tris = new int[triangleCnt];
-        verts = new Vector3[vertexCnt];
-        // TODO: Only allocate these if necessary
-        uvs = new Vector2[vertexCnt];
-        colors = new Color32[vertexCnt];
+        trisOut = new int[triangleCnt];
+        vertsOut = new Vector3[vertexCnt];
+        if (hasUVs)
+            uvsOut = new Vector2[vertexCnt];
+        if (hasColors)
+            colorsOut = new Color32[vertexCnt];
 
         int ti=0, vi=0;
 
@@ -72,15 +107,17 @@ public class CustomMeshBlockConfig: BlockConfig
 
             for (int i = 0; i < mesh.vertices.Length; i++, vi++)
             {
-                verts[vi] = mesh.vertices[i]+positionOffset;
-                uvs[vi] = mesh.uv.Length!=0 ? mesh.uv[i] : new Vector2();
-                colors[vi] = mesh.colors32.Length!=0 ? mesh.colors32[i] : new Color32(255, 255, 255, 255);
+                vertsOut[vi] = mesh.vertices[i]+positionOffset;
+
+                if (hasUVs)
+                    uvsOut[vi] = mesh.uv.Length!=0 ? mesh.uv[i] : new Vector2();
+
+                if (hasColors)
+                    colorsOut[vi] = mesh.colors32.Length!=0 ? mesh.colors32[i] : new Color32(255, 255, 255, 255);
             }
 
             for (int i = 0; i < mesh.triangles.Length; i++, ti++)
-                tris[ti] = mesh.triangles[i];
+                trisOut[ti] = mesh.triangles[i];
         }
-
-        //Resources.UnloadAsset(meshGO);
     }
 }

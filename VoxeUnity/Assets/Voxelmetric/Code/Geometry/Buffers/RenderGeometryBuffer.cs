@@ -139,6 +139,10 @@ namespace Voxelmetric.Code.Geometry.Buffers
                 }
                 mesh.SetColors(Colors);
             }
+            else
+            {
+                // TODO: Use white color if no color data is supplied?
+            }
 
             // Tangents
             mesh.tangents = null;
