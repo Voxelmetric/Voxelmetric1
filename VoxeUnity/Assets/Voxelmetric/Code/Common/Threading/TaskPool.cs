@@ -2,8 +2,8 @@
 using System.Collections.Generic;
 using System.Text;
 using System.Threading;
-using NUnit.Framework;
 using UnityEngine;
+using UnityEngine.Assertions;
 using Voxelmetric.Code.Common.Extensions;
 using Voxelmetric.Code.Common.MemoryPooling;
 
@@ -148,6 +148,8 @@ namespace Voxelmetric.Code.Common.Threading
             var actions = new List<ITaskPoolItem>();
             var actionsP = new List<ITaskPoolItem>();
 
+            ITaskPoolItem poolItem;
+
             while (!m_stop)
             {
                 // Swap action list pointers
@@ -177,7 +179,7 @@ namespace Voxelmetric.Code.Common.Threading
                 // Process priority tasks first
                 for (; m_currP< m_maxP; m_currP++)
                 {
-                    var poolItem = actionsP[m_currP];
+                    poolItem = actionsP[m_currP];
 
 #if DEBUG
                     try
@@ -190,13 +192,13 @@ namespace Voxelmetric.Code.Common.Threading
                     {
                         Debug.LogException(ex);
                     }
-                }
 #endif
-                
+                }
+
                 // Process ordinary tasks now
                 for (; m_curr < m_max; m_curr++)
                 {
-                    var poolItem = actions[m_curr];
+                    poolItem = actions[m_curr];
 
 #if DEBUG
                     try
@@ -224,7 +226,6 @@ namespace Voxelmetric.Code.Common.Threading
                             m_hasPriorityItems = false;
                             goto priorityLabel;
                         }
-                        
                     }
                 }
 
