@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Text;
 using UnityEngine;
-using UnityEngine.Assertions;
 using Voxelmetric.Code.Common.Extensions;
 using Voxelmetric.Code.Common.MemoryPooling;
 
@@ -63,49 +62,6 @@ namespace Voxelmetric.Code.Common.Threading
             {
                 m_pools[i] = new TaskPool();
                 m_pools[i].Start();
-            }
-        }
-
-        public void AddItem(ITaskPoolItem item)
-        {
-            int threadID = GenerateThreadID();
-            m_pools[threadID].AddItem(item);
-        }
-
-        public void AddItem<T>(Action<T> action) where T: class
-        {
-            int threadID = GenerateThreadID();
-            m_pools[threadID].AddItem(action);
-        }
-
-        public void AddItem<T>(int threadID, Action<T> action) where T : class
-        {
-            // Assume a proper index is passed as an arugment
-            Assert.IsTrue(threadID>=0 && threadID<m_pools.Length);
-            m_pools[threadID].AddItem(action);
-        }
-
-        public void AddItem<T>(Action<T> action, T arg)
-        {
-            int threadID = GenerateThreadID();
-            m_pools[threadID].AddItem(action, arg);
-        }
-
-        public void AddItem<T>(int threadID, Action<T> action, T arg)
-        {
-            // Assume a proper index is passed as an arugment
-            Assert.IsTrue(threadID>=0 && threadID<m_pools.Length);
-            m_pools[threadID].AddItem(action, arg);
-        }
-
-        public int PooledItemCnt
-        {
-            get
-            {
-                int items = 0;
-                for (int i = 0; i<m_pools.Length; i++)
-                    items += m_pools[i].Size;
-                return items;
             }
         }
 

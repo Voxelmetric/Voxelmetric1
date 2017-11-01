@@ -366,7 +366,7 @@ namespace Voxelmetric.Code.Core.StateManager
             task.Set(chunk.ThreadID, actionOnGenerateData, this);
 
             m_taskRunning = true;
-            WorkPoolManager.Add(task);
+            WorkPoolManager.Add(task, false);
 
             return true;
         }
@@ -721,7 +721,7 @@ namespace Voxelmetric.Code.Core.StateManager
                     );
 
                 m_taskRunning = true;
-                WorkPoolManager.Add(task);
+                WorkPoolManager.Add(task, false);
 
                 return true;
             }
@@ -776,11 +776,11 @@ namespace Voxelmetric.Code.Core.StateManager
                     chunk.ThreadID,
                     actionOnBuildVertices,
                     this,
-                    priority ? Globals.Watch.ElapsedTicks : long.MaxValue
+                    priority ? Globals.Watch.ElapsedTicks : long.MinValue
                     );
 
                 m_taskRunning = true;
-                WorkPoolManager.Add(task);
+                WorkPoolManager.Add(task, priority);
 
                 return true;
             }

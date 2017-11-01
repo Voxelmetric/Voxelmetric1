@@ -11,6 +11,7 @@
 using System;
 using System.Text;
 using System.Diagnostics;
+using System.Globalization;
 
 namespace Voxelmetric.Code.Common.Extensions
 {
@@ -158,25 +159,25 @@ namespace Voxelmetric.Code.Common.Extensions
 			{
 				case TypeCode.UInt32:
 					{
-						string_builder.Concat( arg.ToUInt32( System.Globalization.NumberFormatInfo.CurrentInfo ), padding, '0', base_value );
+						string_builder.Concat( arg.ToUInt32( NumberFormatInfo.CurrentInfo ), padding, '0', base_value );
 						break;
 					}
 
 				case TypeCode.Int32:
 					{
-						string_builder.Concat( arg.ToInt32( System.Globalization.NumberFormatInfo.CurrentInfo ), padding, '0', base_value );
+						string_builder.Concat( arg.ToInt32( NumberFormatInfo.CurrentInfo ), padding, '0', base_value );
 						break;
 					}
 
 				case TypeCode.Single:
 					{
-						string_builder.Concat( arg.ToSingle( System.Globalization.NumberFormatInfo.CurrentInfo ), decimal_places, padding, '0' );
+						string_builder.Concat( arg.ToSingle( NumberFormatInfo.CurrentInfo ), decimal_places, padding, '0' );
 						break;
 					}
 
 				case TypeCode.String:
 					{
-						string_builder.Append( Convert.ToString( arg ) );
+						string_builder.Append( Convert.ToString( arg, CultureInfo.InvariantCulture) );
 						break;
 					}
 

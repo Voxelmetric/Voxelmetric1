@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using System.Threading;
-using JetBrains.Annotations;
+using NUnit.Framework;
 using UnityEngine;
 using Voxelmetric.Code.Common.Extensions;
 using Voxelmetric.Code.Common.MemoryPooling;
@@ -12,30 +12,46 @@ namespace Voxelmetric.Code.Common.Threading
     public sealed class TaskPool: IDisposable
     {
         //! Each thread contains an object pool
-        public LocalPools Pools { get; private set; }
+        public LocalPools Pools { get; }
+
+        private readonly object m_lock = new object();
 
         private List<ITaskPoolItem> m_items; // list of tasks
-        private readonly object m_lock = new object();
+        private List<ITaskPoolItem> m_itemsP; // list of tasks
+
+        private readonly List<ITaskPoolItem> m_itemsTmp; // temporary list of tasks
+        private readonly List<ITaskPoolItem> m_itemsTmpP; // temporary list of tasks
 
         private readonly AutoResetEvent m_event; // event for notifing worker thread about work
         private readonly Thread m_thread; // worker thread
 
         private bool m_stop;
+        private bool m_hasPriorityItems;
 
         //! Diagnostics
-        private int m_curr, m_max;
+        private int m_curr, m_max, m_currP, m_maxP;
         private readonly StringBuilder m_sb = new StringBuilder(32);
 
         public TaskPool()
         {
             Pools = new LocalPools();
-
+            
             m_items = new List<ITaskPoolItem>();
+            m_itemsP = new List<ITaskPoolItem>();
+
+            m_itemsTmp = new List<ITaskPoolItem>();
+            m_itemsTmpP = new List<ITaskPoolItem>();
+
             m_event = new AutoResetEvent(false);
             m_thread = new Thread(ThreadFunc)
             {
                 IsBackground = true
             };
+            
+            m_stop = false;
+            m_hasPriorityItems = false;
+
+            m_curr = m_max = m_currP = m_maxP = 0;
         }
 
         ~TaskPool()
@@ -71,104 +87,97 @@ namespace Voxelmetric.Code.Common.Threading
             m_stop = true;
             m_event.Set();
         }
-
-        public int Size
-        {
-            get { return m_items.Count; }
-        }
-
+        
         public void AddItem(ITaskPoolItem item)
         {
-            // Do not add new action in we re stopped or action is invalid
-            if (item == null || m_stop)
+            Assert.IsNotNull(item);
+            m_itemsTmp.Add(item);
+        }
+
+        public void AddItem<T>(Action<T> action, long priority = long.MinValue) where T : class
+        {
+            Assert.IsNotNull(action);
+            m_itemsTmp.Add(new TaskPoolItem<T>(action, null, priority));
+        }
+
+        public void AddItem<T>(Action<T> action, T arg, long time = long.MinValue)
+        {
+            Assert.IsNotNull(action);
+            m_itemsTmp.Add(new TaskPoolItem<T>(action, arg, time));
+        }
+
+        public void AddPriorityItem(ITaskPoolItem item)
+        {
+            Assert.IsNotNull(item);
+            m_itemsTmpP.Add(item);
+        }
+
+        public void AddPriorityItem<T>(Action<T> action, long priority = long.MinValue) where T : class
+        {
+            Assert.IsNotNull(action);
+            m_itemsTmpP.Add(new TaskPoolItem<T>(action, null, priority));
+        }
+
+        public void AddPriorityItem<T>(Action<T> action, T arg, long priority = long.MinValue)
+        {
+            Assert.IsNotNull(action);
+            m_itemsTmpP.Add(new TaskPoolItem<T>(action, arg, priority));
+        }
+
+        public void Commit()
+        {
+            if (m_itemsTmp.Count<=0 && m_itemsTmpP.Count<=0)
                 return;
 
-            // Add task to task list and notify the worker thread
             lock (m_lock)
             {
-                m_items.Add(item);
+                m_items.AddRange(m_itemsTmp);
+                m_itemsP.AddRange(m_itemsTmpP);
+
+                m_hasPriorityItems = m_itemsP.Count > 0;
             }
-            m_event.Set();
-        }
 
-        public void AddItem<T>(Action<T> action) where T: class
-        {
-            // Do not add new action in we re stopped or action is invalid
-            if (action == null || m_stop)
-                return;
+            m_itemsTmp.Clear();
+            m_itemsTmpP.Clear();
 
-            // Add task to task list and notify the worker thread
-            lock (m_lock)
-            {
-                m_items.Add(new TaskPoolItem<T>(action, null));
-            }
-            m_event.Set();
-        }
-
-        public void AddItem<T>(Action<T> action, T arg)
-        {
-            // Do not add new action in we re stopped or action is invalid
-            if (action == null || m_stop)
-                return;
-
-            // Add task to task list and notify the worker thread
-            lock (m_lock)
-            {
-                m_items.Add(new TaskPoolItem<T>(action, arg));
-            }
-            m_event.Set();
-        }
-
-        public void AddItemUnsafe([NotNull] ITaskPoolItem item)
-        {
-            m_items.Add(item);
-        }
-
-        public void AddItemUnsafe<T>([NotNull] Action<T> action) where T : class
-        {
-            // Add task to task list
-            m_items.Add(new TaskPoolItem<T>(action, null));
-        }
-
-        public void AddItemUnsafe<T>([NotNull] Action<T> action, T arg)
-        {
-            // Add task to task list
-            m_items.Add(new TaskPoolItem<T>(action, arg));
-        }
-
-        public void Lock()
-        {
-            Monitor.Enter(m_lock);
-        }
-
-        public void Unlock()
-        {
-            Monitor.Exit(m_lock);
             m_event.Set();
         }
 
         private void ThreadFunc()
         {
             var actions = new List<ITaskPoolItem>();
+            var actionsP = new List<ITaskPoolItem>();
 
             while (!m_stop)
             {
                 // Swap action list pointers
                 lock (m_lock)
                 {
-                    var tmp = m_items;
-                    m_items = actions;
-                    actions = tmp;
+                    var tmp = actions;
+                    actions = m_items;
+                    m_items = tmp;
+
+                    tmp = actionsP;
+                    actionsP = m_itemsP;
+                    m_itemsP = tmp;
+
+                    m_hasPriorityItems = false;
                 }
 
+                // Sort tasks by priority
+                actions.Sort((x, y) => x.Priority.CompareTo(y.Priority));
                 m_max = actions.Count;
+                m_curr = 0;
 
-                // Execute all tasks in a row
-                for (m_curr = 0; m_curr < actions.Count; m_curr++)
+            priorityLabel:
+                actionsP.Sort((x, y) => x.Priority.CompareTo(y.Priority));
+                m_maxP = actionsP.Count;
+                m_currP = 0;
+
+                // Process priority tasks first
+                for (; m_currP< m_maxP; m_currP++)
                 {
-                    // Execute the action
-                    // Note, it's up to action to provide exception handling
-                    ITaskPoolItem poolItem = actions[m_curr];
+                    var poolItem = actionsP[m_currP];
 
 #if DEBUG
                     try
@@ -180,14 +189,51 @@ namespace Voxelmetric.Code.Common.Threading
                     catch (Exception ex)
                     {
                         Debug.LogException(ex);
-                        throw;
+                    }
+                }
+#endif
+                
+                // Process ordinary tasks now
+                for (; m_curr < m_max; m_curr++)
+                {
+                    var poolItem = actions[m_curr];
+
+#if DEBUG
+                    try
+                    {
+#endif
+                        poolItem.Run();
+#if DEBUG
+                    }
+                    catch (Exception ex)
+                    {
+                        Debug.LogException(ex);
                     }
 #endif
-                }
-                actions.Clear();
-                m_curr = m_max = 0;
 
-                // Wait for next tasks
+                    // Let's see if there wasn't a priority action queued in the meantime.
+                    // No need to lock these bool variables here. If they're not set yet,
+                    // we'll simply read their state in the next iteration
+                    if (!m_stop && m_hasPriorityItems)
+                    {
+                        lock (m_lock)
+                        {
+                            actionsP.AddRange(m_itemsP);
+                            m_itemsP.Clear();
+
+                            m_hasPriorityItems = false;
+                            goto priorityLabel;
+                        }
+                        
+                    }
+                }
+
+                // Everything processed
+                actions.Clear();
+                actionsP.Clear();
+                m_curr = m_max = m_currP = m_maxP = 0;
+
+                // Wait for new tasks
                 m_event.WaitOne();
             }
         }
@@ -195,7 +241,7 @@ namespace Voxelmetric.Code.Common.Threading
         public override string ToString()
         {
             m_sb.Length = 0;
-            return m_sb.ConcatFormat("{0}/{1}", m_curr, m_max).ToString();
+            return m_sb.ConcatFormat("{0}/{1}, prio:{2}/{3}", m_curr, m_max, m_currP, m_maxP).ToString();
         }
     }
 }

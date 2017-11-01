@@ -72,7 +72,8 @@ namespace Voxelmetric.Code.Utilities
                         arg.ComputePath();
                     },
                     this
-                ));
+                ),
+                false);
         }
 
         private void ComputePath()

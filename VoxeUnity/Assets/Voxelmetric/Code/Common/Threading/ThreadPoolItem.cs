@@ -5,57 +5,62 @@ namespace Voxelmetric.Code.Common.Threading
     public interface AThreadPoolItem: ITaskPoolItem
     {
         int ThreadID { get; }
-        long Time { get; }
     }
 
     public class ThreadPoolItem<T>: AThreadPoolItem
     {
-        private Action<T> Action;
-        private T Arg;
+        private Action<T> m_action;
+        private T m_arg;
+        private bool m_processed = false;
 
         public int ThreadID { get; private set; }
-
-        public long Time { get; private set; }
+        public long Priority { get; private set; }
 
         public ThreadPoolItem()
         {
         }
 
-        public ThreadPoolItem(ThreadPool pool, Action<T> action, T arg, long time = long.MaxValue)
+        public ThreadPoolItem(ThreadPool pool, Action<T> action, T arg, long priority = long.MinValue)
         {
-            Action = action;
-            Arg = arg;
+            m_action = action;
+            m_arg = arg;
             ThreadID = pool.GenerateThreadID();
-            Time = time;
+            Priority = priority;
         }
 
-        public ThreadPoolItem(int threadID, Action<T> action, T arg, long time = long.MaxValue)
+        public ThreadPoolItem(int threadID, Action<T> action, T arg, long time = long.MinValue)
         {
-            Action = action;
-            Arg = arg;
+            m_action = action;
+            m_arg = arg;
             ThreadID = threadID;
-            Time = time;
+            Priority = time;
         }
 
-        public void Set(ThreadPool pool, Action<T> action, T arg, long time = long.MaxValue)
+        public void Set(ThreadPool pool, Action<T> action, T arg, long time = long.MinValue)
         {
-            Action = action;
-            Arg = arg;
+            m_action = action;
+            m_arg = arg;
+            m_processed = false;
             ThreadID = pool.GenerateThreadID();
-            Time = time;
+            Priority = time;
         }
 
         public void Set(int threadID, Action<T> action, T arg, long time = long.MaxValue)
         {
-            Action = action;
-            Arg = arg;
+            m_action = action;
+            m_arg = arg;
+            m_processed = false;
             ThreadID = threadID;
-            Time = time;
+            Priority = time;
         }
 
         public void Run()
         {
-            Action(Arg);
+            if (!m_processed)
+            {
+                m_action(m_arg);
+                m_processed = true;
+            }
         }
     }
 }

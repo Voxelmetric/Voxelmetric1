@@ -30,6 +30,7 @@ namespace Voxelmetric.Code.Common.Threading.Managers
                 {
                     pool.AddItem(WorkItems[i]);
                 }
+                pool.Commit();
             }
             else
             {
