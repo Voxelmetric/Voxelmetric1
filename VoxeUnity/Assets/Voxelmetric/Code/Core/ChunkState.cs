@@ -13,8 +13,15 @@ namespace Voxelmetric.Code.Core
         PrepareSaveData = 0x08,
         SaveData = 0x10, //! Chunk stores its data
         BuildCollider = 0x20, //! Chunk generates its render geometry
-        BuildVertices = 0x40, //! Chunk generates its collision geometry
-        BuildVerticesNow = 0x80, //! Chunk generates its collision geometry with priority
-        Remove = 0x100, //! Chunk is waiting for removal
+        BuildColliderNow = 0x40, //! Chunk generates its render geometry
+        BuildVertices = 0x80, //! Chunk generates its collision geometry
+        BuildVerticesNow = 0x100, //! Chunk generates its collision geometry with priority
+        Remove = 0x200, //! Chunk is waiting for removal
+    }
+
+    public static class ChunkStates
+    {
+        public const ChunkState CurrStateBuildCollider = ChunkState.BuildCollider | ChunkState.BuildColliderNow;
+        public const ChunkState CurrStateBuildVertices = ChunkState.BuildVertices | ChunkState.BuildVerticesNow;
     }
 }

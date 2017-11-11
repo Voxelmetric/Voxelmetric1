@@ -186,7 +186,7 @@ namespace Voxelmetric.Code.Core
                 return false;
             
             // Build collider if necessary
-            if (stateManager.IsStateCompleted(ChunkState.BuildCollider))
+            if (stateManager.IsStateCompleted(ChunkStates.CurrStateBuildCollider))
             {
                 Profiler.BeginSample("UpdateCollisionGeometry");
                 Globals.GeometryBudget.StartMeasurement();
@@ -209,7 +209,7 @@ namespace Voxelmetric.Code.Core
                 return false;
             
             // Build chunk mesh if necessary
-            if (stateManager.IsStateCompleted(ChunkState.BuildVertices|ChunkState.BuildVerticesNow))
+            if (stateManager.IsStateCompleted(ChunkStates.CurrStateBuildVertices))
             {
                 Profiler.BeginSample("UpdateRenderGeometry");
                 Globals.GeometryBudget.StartMeasurement();
