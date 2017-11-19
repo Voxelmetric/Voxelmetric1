@@ -448,25 +448,37 @@ namespace Voxelmetric.Code.Core
             }
         }
 
-        public void ProcessSetBlock(BlockData block, int index, bool setBlockModified)
+        public void ProcessSetBlock(BlockData blockData, int index, bool setBlockModified)
         {
             int x, y, z;
             Helpers.GetChunkIndex3DFrom1D(index, out x, out y, out z, m_pow);
             Vector3Int pos = new Vector3Int(x, y, z);
             
+            // Nothing for us to do if there was no change
             BlockData oldBlockData = blocks[index];
+            if (oldBlockData.Type==blockData.Type)
+                return;
+            
+            // Handle block specific events
             Block oldBlock = m_blockTypes[oldBlockData.Type];
-            Block newBlock = m_blockTypes[block.Type];
-
+            Block newBlock = m_blockTypes[blockData.Type];
             oldBlock.OnDestroy(chunk, ref pos);
             newBlock.OnCreate(chunk, ref pos);
 
-            SetInner(index, block);
+            // Update chunk status
+            if (blockData.Type==BlockProvider.AirType)
+                --NonEmptyBlocks;
+            else if (oldBlockData.Type == BlockProvider.AirType)
+                ++NonEmptyBlocks;
 
+            // Update block info
+            blocks[index] = blockData;
+
+            // Notify about modification
             if (setBlockModified)
             {
                 Vector3Int globalPos = pos+chunk.pos;
-                BlockModified(new BlockPos(pos.x, pos.y, pos.z), ref globalPos, block);
+                BlockModified(new BlockPos(pos.x, pos.y, pos.z), ref globalPos, blockData);
             }
         }
 
