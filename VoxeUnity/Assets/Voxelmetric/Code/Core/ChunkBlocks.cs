@@ -450,14 +450,14 @@ namespace Voxelmetric.Code.Core
 
         public void ProcessSetBlock(BlockData blockData, int index, bool setBlockModified)
         {
-            int x, y, z;
-            Helpers.GetChunkIndex3DFrom1D(index, out x, out y, out z, m_pow);
-            Vector3Int pos = new Vector3Int(x, y, z);
-            
             // Nothing for us to do if there was no change
             BlockData oldBlockData = blocks[index];
             if (oldBlockData.Type==blockData.Type)
                 return;
+            
+            int x, y, z;
+            Helpers.GetChunkIndex3DFrom1D(index, out x, out y, out z, m_pow);
+            Vector3Int pos = new Vector3Int(x, y, z);
             
             // Handle block specific events
             Block oldBlock = m_blockTypes[oldBlockData.Type];
