@@ -1,12 +1,15 @@
 ﻿using System;
 using System.Globalization;
 using System.IO;
+using System.Runtime.InteropServices;
 using System.Text;
 using Voxelmetric.Code.Utilities;
 using UnityEngine;
+using UnityEngine.Assertions;
 using Voxelmetric.Code;
 using Voxelmetric.Code.Common;
 using Voxelmetric.Code.Common.IO;
+using Voxelmetric.Code.Common.Memory;
 using Voxelmetric.Code.Core;
 using Voxelmetric.Code.Data_types;
 using Voxelmetric.Code.Utilities.Noise;
@@ -29,6 +32,7 @@ namespace Voxelmetric.Examples
             Benchmark_Noise();
             Benchmark_Noise_Dowsampling();
             Benchmark_Compression();
+            Benchmark_MemCopy();
             Application.Quit();
         }
 
@@ -483,6 +487,145 @@ namespace Voxelmetric.Examples
                 Compression(writer, chunk, 4, 10);
                 Compression(writer, chunk, 8, 10);
                 Compression(writer, chunk, 12, 10);
+            }
+        }
+        
+        private class TestClass1
+        {
+            private readonly unsafe byte* m_blocks;
+            private readonly IntPtr rawptr;
+
+            public unsafe TestClass1()
+            {
+                // Force 16-bytes aligment
+                rawptr = Marshal.AllocHGlobal(Env.ChunkSizePow3 * StructSerialization.TSSize<BlockData>.ValueSize + 16);
+                var aligned = new IntPtr(16 * (((long)rawptr + 15) / 16));
+                m_blocks = (byte*)aligned.ToPointer();
+            }
+
+            ~TestClass1()
+            {
+                Marshal.FreeHGlobal(rawptr);
+            }
+            
+            public unsafe BlockData this[int i]
+            {
+                get
+                {
+                    return *((BlockData*)&m_blocks[i<<1]);
+                }
+                set
+                {
+                    *((BlockData*)&m_blocks[i<<1]) = value;
+                }
+            }
+            
+            public unsafe void Copy(byte[] src, int srcIndex, int dstIndex, int bytes)
+            {
+                fixed (byte *pSrc = &src[srcIndex])
+                {
+                    Utils.MemoryCopy(&m_blocks[dstIndex], pSrc, bytes);
+                }
+            }
+        }
+
+        private static BlockData[] bd2;
+        
+        private class TestClass2
+        {
+            private readonly BlockData[] m_blocks = Helpers.CreateArray1D<BlockData>(bd2.Length);
+            public BlockData this[int i]
+            {
+                get { return m_blocks[i]; }
+                set { m_blocks[i] = value; }
+            }
+            
+            public void Copy(BlockData[] src, int srcIndex, int dstIndex, int length)
+            {
+                Array.Copy(src, srcIndex, m_blocks, dstIndex, length);
+            }
+        }
+        
+        void Benchmark_MemCopy()
+        {
+            int[] memItems =
+            {
+                32,
+                64,
+                128,
+                256,
+                Env.ChunkSizeWithPaddingPow2,
+                Env.ChunkSizePow3
+            };
+
+            int[] iters =
+            {
+                1000000,
+                1000000,
+                50000,
+                50000,
+                10000,
+                5000
+            };
+            
+            Debug.Assert(memItems.Length==iters.Length);
+            int maxItems = memItems[memItems.Length-1];
+
+            byte[] bd1 = Helpers.CreateArray1D<byte>(maxItems * StructSerialization.TSSize<BlockData>.ValueSize);
+            for (int i = 0; i<bd1.Length; i++)
+                bd1[i] = 1;
+            bd2 = Helpers.CreateArray1D<BlockData>(maxItems);
+            for (int i = 0; i<bd2.Length; i++)
+                bd2[i] = new BlockData(0x101);
+            BlockData dummy = new BlockData(0x101);
+            
+            TestClass1 tc1 = new TestClass1();
+            TestClass2 tc2 = new TestClass2();
+            
+            Debug.Log("Bechmark - memory copy");
+            using (StreamWriter writer = File.CreateText("perf_memcpy.txt"))
+            {
+                for(int i=0; i<iters.Length; i++)
+                {
+                    int loops = iters[i];
+                    int items = memItems[i];
+                    int bytes = items * StructSerialization.TSSize<BlockData>.ValueSize;
+                    
+                    Debug.LogFormat("Bytes to copy: {0}", bytes);
+                    writer.WriteLine("Bytes to copy: {0}", bytes);
+                    
+                    {
+                        float[] number = {0};
+                        double t = Clock.BenchmarkTime(
+                            () =>
+                            {
+                                tc1.Copy(bd1, 0, 0, bytes);
+                            }, loops);
+                        
+                        Debug.LogFormat("MemoryCopy -> out:{0}, time:{1}", number[0],
+                                        t.ToString(CultureInfo.InvariantCulture));
+                        writer.WriteLine("MemoryCopy -> out:{0}, time:{1}", number[0],
+                                         t.ToString(CultureInfo.InvariantCulture));
+                    }
+                    for (int j = 0; j<items; j++)
+                        Assert.IsTrue(tc1[j]==dummy);
+
+                    {
+                        float[] number = {0};
+                        double t = Clock.BenchmarkTime(
+                            () =>
+                            {
+                                tc2.Copy(bd2, 0, 0, items);
+                            }, loops);
+                        
+                        Debug.LogFormat("ArrayCopy -> out:{0}, time:{1}", number[0],
+                                        t.ToString(CultureInfo.InvariantCulture));
+                        writer.WriteLine("ArrayCopy -> out:{0}, time:{1}", number[0],
+                                         t.ToString(CultureInfo.InvariantCulture));
+                    }
+                    for (int j = 0; j<items; j++)
+                        Assert.IsTrue(tc2[j]==dummy);
+                }
             }
         }
     }
