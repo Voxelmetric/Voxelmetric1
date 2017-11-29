@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using Voxelmetric.Code.Common;
 using Voxelmetric.Code.Common.IO;
@@ -97,9 +98,10 @@ namespace Voxelmetric.Code.Core
             m_blockTypes = chunk.world.blockProvider.BlockTypes;
         }
         
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public unsafe void Copy(ChunkBlocks src, int srcIndex, int dstIndex, int length)
         {
-            Utils.MemoryCopy(&m_blocks[dstIndex<<1], &src.m_blocks[srcIndex<<1], length<<1);
+            Utils.MemoryCopy(&m_blocks[dstIndex<<1], &src.m_blocks[srcIndex<<1], (uint)length<<1);
         }
         
         public unsafe void Reset()
@@ -614,6 +616,7 @@ namespace Voxelmetric.Code.Core
         /// </summary>
         /// <param name="pos">Position in local chunk coordinates</param>
         /// <returns>The block at the position</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public BlockData Get(ref Vector3Int pos)
         {
             int index = Helpers.GetChunkIndex1DFrom3D(pos.x, pos.y, pos.z, m_pow);
@@ -625,6 +628,7 @@ namespace Voxelmetric.Code.Core
         /// </summary>
         /// <param name="pos">Position in local chunk coordinates</param>
         /// <returns>The block at the position</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Block GetBlock(ref Vector3Int pos)
         {
             int index = Helpers.GetChunkIndex1DFrom3D(pos.x, pos.y, pos.z, m_pow);
@@ -636,6 +640,7 @@ namespace Voxelmetric.Code.Core
         /// </summary>
         /// <param name="index">Index in local chunk data</param>
         /// <returns>The block at the position</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public BlockData Get(int index)
         {
             return this[index];
@@ -646,6 +651,7 @@ namespace Voxelmetric.Code.Core
         /// </summary>
         /// <param name="index">Index in local chunk data</param>
         /// <returns>The block at the position</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Block GetBlock(int index)
         {
             return m_blockTypes[this[index].Type];
@@ -678,6 +684,7 @@ namespace Voxelmetric.Code.Core
         /// </summary>
         /// <param name="index">Index in local chunk data</param>
         /// <param name="blockData">A block to be placed on a given position</param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void SetRaw(int index, BlockData blockData)
         {
             this[index] = blockData;
@@ -742,6 +749,7 @@ namespace Voxelmetric.Code.Core
         /// Queues a modification of blocks in a given range
         /// </summary>
         /// <param name="op">Set operation to be performed</param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Modify(ModifyOp op)
         {
             m_setBlockQueue.Add(op);

@@ -520,7 +520,7 @@ namespace Voxelmetric.Examples
                 }
             }
             
-            public unsafe void Copy(byte[] src, int srcIndex, int dstIndex, int bytes)
+            public unsafe void Copy(byte[] src, uint srcIndex, uint dstIndex, uint bytes)
             {
                 fixed (byte *pSrc = &src[srcIndex])
                 {
@@ -589,7 +589,7 @@ namespace Voxelmetric.Examples
                 {
                     int loops = iters[i];
                     int items = memItems[i];
-                    int bytes = items * StructSerialization.TSSize<BlockData>.ValueSize;
+                    uint bytes = (uint)items * (uint)StructSerialization.TSSize<BlockData>.ValueSize;
                     
                     Debug.LogFormat("Bytes to copy: {0}", bytes);
                     writer.WriteLine("Bytes to copy: {0}", bytes);

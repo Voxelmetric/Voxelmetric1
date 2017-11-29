@@ -1,4 +1,5 @@
-﻿using System.Threading;
+﻿using System.Runtime.CompilerServices;
+using System.Threading;
 
 namespace Voxelmetric.Code.Common
 {
@@ -11,11 +12,13 @@ namespace Voxelmetric.Code.Common
 			get { return Thread.CurrentThread.ManagedThreadId==MainThreadID; }
 		}
 
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static int GetIndex1DFrom2D(int x, int z, int sizeX)
 		{
 			return x + z * sizeX;
 		}
 
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static int GetIndex1DFrom3D(int x, int y, int z, int sizeX, int sizeZ)
 		{
 			return x + sizeX * (z + y * sizeZ);
@@ -23,6 +26,7 @@ namespace Voxelmetric.Code.Common
 
 		public static readonly int ZeroChunkIndex = Env.ChunkPadding+(Env.ChunkPadding<<Env.ChunkPow)+(Env.ChunkPadding<<Env.ChunkPow2);
 
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static int GetChunkIndex1DFrom3D(int x, int y, int z)
 		{
 			int xx = x+Env.ChunkPadding;
@@ -31,6 +35,7 @@ namespace Voxelmetric.Code.Common
 			return xx+(zz<<Env.ChunkPow)+(yy<<Env.ChunkPow2);
 		}
 
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static int GetChunkIndex1DFrom3D(int x, int y, int z, int pow)
 		{
 			int xx = x+Env.ChunkPadding;
@@ -39,12 +44,14 @@ namespace Voxelmetric.Code.Common
 			return xx + (zz << pow) + (yy << (pow << 1));
 		}
 
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static void GetIndex2DFrom1D(int index, out int x, out int z, int sizeX)
 		{
 			x = index % sizeX;
 			z = index / sizeX;
 		}
 
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static void GetIndex3DFrom1D(int index, out int x, out int y, out int z, int sizeX, int sizeZ)
 		{
 			x = index % sizeX;
@@ -52,6 +59,7 @@ namespace Voxelmetric.Code.Common
 			z = (index / sizeX) % sizeZ;
 		}
 
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static void GetChunkIndex3DFrom1D(int index, out int x, out int y, out int z)
 		{
 			x = index & Env.ChunkMask;
@@ -63,6 +71,7 @@ namespace Voxelmetric.Code.Common
 			z -= Env.ChunkPadding;
 		}
 
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static void GetChunkIndex3DFrom1D(int index, out int x, out int y, out int z, int pow)
 		{
 			x = index & Env.ChunkMask;
@@ -75,11 +84,13 @@ namespace Voxelmetric.Code.Common
 		}
 
 		// Returns a coordinate at the beggining of the chunk
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static int MakeChunkCoordinate(int x)
 		{
 			return ((x>=0 ? x : x-Env.ChunkSize1)/Env.ChunkSize)*Env.ChunkSize;
 		}
 
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static int MakeChunkCoordinate(int x, int size)
 		{
 	        return ((x >= 0 ? x : x - (size-1)) / size) * size;
@@ -123,6 +134,7 @@ namespace Voxelmetric.Code.Common
 			return arr;
 		}
 
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static float Interpolate(float x0, float x1, float alpha)
 		{
 			return x0 + (x1 - x0) * alpha;
@@ -157,23 +169,27 @@ namespace Voxelmetric.Code.Common
 			}
 		}
 
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static int FastFloor(float val)
 		{
 			return (val > 0) ? (int)val : (int)val - 1;
 		}
 
 		// Custom modulo. Handles negative numbers.
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static int Mod(int value, int modulus)
 		{
 			int r = value % modulus;
 			return (r < 0) ? (r + modulus) : r;
 		}
 
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static float Mod(float value, int modulus)
 		{
 			return (value % modulus + modulus) % modulus;
 		}
 
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static uint Mod3(uint value)
 		{
 			value = (value >> 16) + (value & 0xFFFF); // sum base 2**16 digits value <= 0x1FFFE
@@ -187,6 +203,7 @@ namespace Voxelmetric.Code.Common
 			return value;
 		}
 
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static int Clamp(this int val, int min, int max)
 		{
 			if (val < min)
@@ -195,6 +212,7 @@ namespace Voxelmetric.Code.Common
 			return val > max ? max : val;
 		}
 
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static float Clamp(this float val, float min, float max)
 		{
 			if (val < min)
@@ -203,6 +221,7 @@ namespace Voxelmetric.Code.Common
 			return val > max ? max : val;
 		}
 
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static int Abs(int val)
 		{
 			return (val + (val >> 31)) ^ (val >> 31);
