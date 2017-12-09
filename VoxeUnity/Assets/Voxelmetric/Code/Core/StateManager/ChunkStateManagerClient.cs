@@ -817,6 +817,8 @@ namespace Voxelmetric.Code.Core.StateManager
         {
             Chunk chunk = stateManager.chunk;
             World world = chunk.world;
+            if (world==null)
+                return;
 
             // Calculate how many listeners a chunk can have
             int maxListeners = 0;
@@ -867,6 +869,8 @@ namespace Voxelmetric.Code.Core.StateManager
         private void SubscribeTwoNeighbors(Vector3Int neighborPos, bool subscribe)
         {
             World world = chunk.world;
+            if (world==null)
+                return;
 
             // No chunk lookup if the neighbor positions can't be contained in the world
             //if (!world.CheckInsideWorld(neighborPos))

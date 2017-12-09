@@ -31,7 +31,7 @@ namespace Voxelmetric.Examples
             Benchmark_1D_to_3D_Index();
             Benchmark_Noise();
             Benchmark_Noise_Dowsampling();
-            Benchmark_Compression();
+            //Benchmark_Compression();
             Benchmark_MemCopy();
             Application.Quit();
         }
@@ -307,6 +307,19 @@ namespace Voxelmetric.Examples
             }
         }
 
+        private NoiseItem PrepareLookupTable1D(FastNoise noise, NoiseItem ni)
+        {
+            // Generate a lookup table
+            int i = 0;
+            for (int z = 0; z < ni.noiseGen.Size; z++)
+            {
+                float zf = (z << ni.noiseGen.Step);
+                ni.lookupTable[i++] = noise.SingleSimplex(0, 0, zf);
+            }
+
+            return ni;
+        }
+
         private NoiseItem PrepareLookupTable2D(FastNoise noise, NoiseItem ni)
         {
             // Generate a lookup table
@@ -358,17 +371,36 @@ namespace Voxelmetric.Examples
                 {
                     NoiseItem ni = new NoiseItem {noiseGen = new NoiseInterpolator()};
                     ni.noiseGen.SetInterpBitStep(Env.ChunkSize, i);
-                    ni.lookupTable = Helpers.CreateArray1D<float>(ni.noiseGen.Size*ni.noiseGen.Size);
+                    ni.lookupTable = Helpers.CreateArray1D<float>(ni.noiseGen.Size+1);
+
+                    float[] number = {0};
+                    double t = Clock.BenchmarkTime(
+                        () =>
+                        {
+                            PrepareLookupTable1D(noise, ni);
+                            for (int x = 0; x<Env.ChunkSize; x++)
+                                number[0] += ni.noiseGen.Interpolate(x, ni.lookupTable);
+                        }, iters);
+                    Debug.LogFormat("noise.Generate 1D -> out:{0}, time:{1}, downsample factor {2}", number[0],
+                                    t.ToString(CultureInfo.InvariantCulture), i);
+                    writer.WriteLine("noise.Generate 1D -> out:{0}, time:{1}, downsample factor {2}", number[0],
+                                     t.ToString(CultureInfo.InvariantCulture), i);
+                }
+
+                for (int i = 1; i<=3; i++)
+                {
+                    NoiseItem ni = new NoiseItem {noiseGen = new NoiseInterpolator()};
+                    ni.noiseGen.SetInterpBitStep(Env.ChunkSize, i);
+                    ni.lookupTable = Helpers.CreateArray1D<float>((ni.noiseGen.Size+1)*(ni.noiseGen.Size+1));
 
                     float[] number = {0};
                     double t = Clock.BenchmarkTime(
                         () =>
                         {
                             PrepareLookupTable2D(noise, ni);
-                            for (int y = 0; y<Env.ChunkSize; y++)
-                                for (int z = 0; z<Env.ChunkSize; z++)
-                                    for (int x = 0; x<Env.ChunkSize; x++)
-                                        number[0] += ni.noiseGen.Interpolate(x, z, ni.lookupTable);
+                            for (int z = 0; z<Env.ChunkSize; z++)
+                                for (int x = 0; x<Env.ChunkSize; x++)
+                                    number[0] += ni.noiseGen.Interpolate(x, z, ni.lookupTable);
                         }, iters);
                     Debug.LogFormat("noise.Generate 2D -> out:{0}, time:{1}, downsample factor {2}", number[0],
                                     t.ToString(CultureInfo.InvariantCulture), i);
@@ -380,7 +412,7 @@ namespace Voxelmetric.Examples
                 {
                     NoiseItem ni = new NoiseItem {noiseGen = new NoiseInterpolator()};
                     ni.noiseGen.SetInterpBitStep(Env.ChunkSize, i);
-                    ni.lookupTable = Helpers.CreateArray1D<float>(ni.noiseGen.Size*ni.noiseGen.Size*ni.noiseGen.Size);
+                    ni.lookupTable = Helpers.CreateArray1D<float>((ni.noiseGen.Size+1)*(ni.noiseGen.Size+1)*(ni.noiseGen.Size+1));
 
                     float[] number = {0};
                     double t = Clock.BenchmarkTime(

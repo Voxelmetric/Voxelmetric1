@@ -110,12 +110,23 @@ namespace Voxelmetric.Code.Core
             this.pos = pos;
             
             stateManager = new ChunkStateManagerClient(this);
-            logic = world.config.randomUpdateFrequency>0.0f ? new ChunkLogic(this) : null;
 
-            if (GeometryHandler == null)
-                GeometryHandler = new ChunkRenderGeometryHandler(this, world.renderMaterials);
-            if (ChunkColliderGeometryHandler == null)
-                ChunkColliderGeometryHandler = new ChunkColliderGeometryHandler(this, world.physicsMaterials);
+            if (world!=null)
+            {
+                logic = world.config.randomUpdateFrequency>0.0f ? new ChunkLogic(this) : null;
+
+                if (GeometryHandler==null)
+                    GeometryHandler = new ChunkRenderGeometryHandler(this, world.renderMaterials);
+                if (ChunkColliderGeometryHandler==null)
+                    ChunkColliderGeometryHandler = new ChunkColliderGeometryHandler(this, world.physicsMaterials);
+            }
+            else
+            {
+                if (GeometryHandler == null)
+                    GeometryHandler = new ChunkRenderGeometryHandler(this, null);
+                if (ChunkColliderGeometryHandler == null)
+                    ChunkColliderGeometryHandler = new ChunkColliderGeometryHandler(this, null);
+            }
 
             WorldBounds = new AABB(
                 pos.x, pos.y, pos.z,

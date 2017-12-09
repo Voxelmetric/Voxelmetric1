@@ -34,7 +34,7 @@ public class AdditiveLayer: TerrainLayer
     {
         NoiseItem ni = chunk.pools.noiseItems[layerIndex];
         ni.noiseGen.SetInterpBitStep(Env.ChunkSizeWithPadding, 2);
-        ni.lookupTable = chunk.pools.FloatArrayPool.Pop(ni.noiseGen.Size * ni.noiseGen.Size);
+        ni.lookupTable = chunk.pools.FloatArrayPool.Pop((ni.noiseGen.Size+1)*(ni.noiseGen.Size+1));
 
 #if (UNITY_STANDALONE_WIN || UNITY_EDITOR_WIN) && ENABLE_FASTSIMD
         float[] noiseSet = chunk.pools.FloatArrayPool.Pop(ni.noiseGen.Size * ni.noiseGen.Size * ni.noiseGen.Size);

@@ -95,7 +95,7 @@ namespace Voxelmetric.Code.Core
 
         public void Init()
         {
-            m_blockTypes = chunk.world.blockProvider.BlockTypes;
+            m_blockTypes = chunk.world ? chunk.world.blockProvider.BlockTypes : null;
         }
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
