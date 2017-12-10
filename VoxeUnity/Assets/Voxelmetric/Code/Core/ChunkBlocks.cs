@@ -27,10 +27,12 @@ namespace Voxelmetric.Code.Core
         private readonly unsafe byte* m_blocks;
         private unsafe BlockData this[int i]
         {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get
             {
                 return *((BlockData*)&m_blocks[i<<1]);
             }
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             set
             {
                 *((BlockData*)&m_blocks[i<<1]) = value;
@@ -71,6 +73,16 @@ namespace Voxelmetric.Code.Core
             }
         }
 
+        public static int GetLength(int sideSize)
+        {
+            return sideSize * sideSize * sideSize;
+        }
+
+        public static int GetDataSize(int sideSize)
+        {
+            return GetLength(sideSize) * StructSerialization.TSSize<BlockData>.ValueSize;
+        }
+
         public unsafe ChunkBlocks(Chunk chunk, int sideSize)
         {
             this.chunk = chunk;
@@ -81,7 +93,7 @@ namespace Voxelmetric.Code.Core
             sideSize = m_sideSize + Env.ChunkPadding2;
             
             // Allocate the memory aligned to 16B boundaries
-            int arrLen = sideSize * sideSize * sideSize * StructSerialization.TSSize<BlockData>.ValueSize;
+            int arrLen = GetDataSize(sideSize);
             m_blocksRaw = Marshal.AllocHGlobal(arrLen + 8);
             var aligned = new IntPtr(16 * (((long)m_blocksRaw + 15) / 16));
             m_blocks = (byte*)aligned.ToPointer();
@@ -920,10 +932,10 @@ namespace Voxelmetric.Code.Core
         /// </summary>
         public void Compress()
         {
+            int sizePlusPadding = m_sideSize + Env.ChunkPadding;
             int sizeWithPadding = m_sideSize + Env.ChunkPadding2;
             int sizeWithPaddingPow2 = sizeWithPadding * sizeWithPadding;
             int sizeWithPaddingPow3 = sizeWithPaddingPow2 * sizeWithPadding;
-            int sizePlusPadding = m_sideSize + Env.ChunkPadding;
 
             var pools = chunk.pools;
             bool[] mask = pools.BoolArrayPool.PopExact(sizeWithPaddingPow3);
@@ -934,9 +946,9 @@ namespace Voxelmetric.Code.Core
             // This compression is essentialy RLE. However, instead of working on 1 axis
             // it works in 3 dimensions.
             int index = 0;
-            for (int y = -1; y<sizePlusPadding; ++y, index+=sizeWithPaddingPow2)
+            for (int y = -1; y<sizePlusPadding; ++y)
             {
-                for (int z = -1; z<sizePlusPadding; ++z, index+=sizeWithPadding)
+                for (int z = -1; z<sizePlusPadding; ++z)
                 {
                     for (int x = -1; x<sizePlusPadding; ++x, ++index)
                     {
