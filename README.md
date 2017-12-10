@@ -45,3 +45,15 @@ Define new blocks in the scene with your own textures and even your own 3d mesh 
 
 ## Development note
 Voxel(metric) is in development and still has a log way to go. This means things are liable to change fast without notice or be broken and documentation will struggle to keep up.
+
+## How to run the project
+There are several ways to open the project.
+
+##### Open project
+The easiest one is to select "Open" in Unity3D dashboard or "Open Project..." from the editor and selecting "VoxeUnity". This will work right of the box with no further steps required on your side.
+
+##### Import to an existing project
+If you already have an existing project running and want to import Voxe(lmetric) into it you can simply drag VoxeUnity folder and drop it to your project's folder. However, two more steps are necessary in this case. You need to select .NET 4.6 as your scripting runtime (Edit->Project Settings->Player) and you need to update the ResourcesFolder variable in Config.cs. By default it is set to "Assets/Voxelmetric/Resources" but depending on where you place you project you might need to change it to, e.g. "Assets/VoxeUnity/Assets/Voxelmetric/Resources". Without pointing Voxe(lmetric) into a proper folder it would not be able to find its resource files which would result in all kinds of errors on project's startup.
+
+##### Opening example scenes
+Once you imported your project successfuly there is nothing more holding you back from trying one of the example scenes bundled with the project. You can find them in VoxeUnity/Assest/Voxelmetric/Examples. You can use them as a template to build your own scenes.
