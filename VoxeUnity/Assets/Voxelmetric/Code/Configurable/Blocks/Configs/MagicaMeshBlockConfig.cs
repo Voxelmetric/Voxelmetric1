@@ -17,7 +17,6 @@ using Vector3Int = Voxelmetric.Code.Data_types.Vector3Int;
 
 public class MagicaMeshBlockConfig: BlockConfig
 {
-    private RenderGeometryBuffer m_geomBuffer = null;
     private Vector3 m_meshOffset;
     private string m_path;
     private float m_scale;
@@ -94,40 +93,52 @@ public class MagicaMeshBlockConfig: BlockConfig
                             int index = Helpers.GetChunkIndex1DFrom3D(x, y, z, pow);
                             int i = Helpers.GetIndex1DFrom3D(x, y, z, mvchunk.sizeX, mvchunk.sizeZ);
 
-                            // TODO: Implement support for colors
+                            ushort blockIndex = data.chunk.data[i];
+
+                            Block colorBlock = world.blockProvider.BlockTypes[blockIndex];
                             blocks.SetInner(
                                 index, data.chunk.data[i]==0
                                            ? BlockProvider.AirBlock
-                                           : new BlockData(type, true)//new BlockData((ushort)i, true)
+                                           : new BlockData(blockIndex, colorBlock.Solid)
                             );
                         }
                     }
                 }
 
                 Block block = world.blockProvider.BlockTypes[type];
-
                 block.Custom = false;
-                m_geomBuffer = new RenderGeometryBuffer()
-                {
-                    Colors = new List<Color32>()
-                };
-
                 {
                     // Build the mesh
                     CubeMeshBuilder meshBuilder = new CubeMeshBuilder(m_scale, size)
                     {
                         SideMask = 0,
-                        Type = type,
                         Palette = data.palette
                     };
                     meshBuilder.Build(chunk, out chunk.minBounds, out chunk.maxBounds);
 
-                    // Convert lists to arrays
-                    verts = m_geomBuffer.Vertices.ToArray();
-                    colors = m_geomBuffer.Colors.ToArray();
-                    tris = m_geomBuffer.Triangles.ToArray();
+                    var batcher = chunk.GeometryHandler.Batcher;
+                    if (batcher.Buffers!=null && batcher.Buffers.Length>0)
+                    {
+
+                        List<Vector3> tmpVertices = new List<Vector3>();
+                        List<Color32> tmpColors = new List<Color32>();
+                        List<int> tmpTriangles = new List<int>();
+
+                        // Only consider the default material for now
+                        var buff = batcher.Buffers[0];
+                        for (int i=0; i<buff.Count; i++)
+                        {
+                            tmpVertices.AddRange(buff[i].Vertices);
+                            tmpColors.AddRange(buff[i].Colors);
+                            tmpTriangles.AddRange(buff[i].Triangles);
+                        }
+
+                        // Convert lists to arrays
+                        verts = tmpVertices.ToArray();
+                        colors = tmpColors.ToArray();
+                        tris = tmpTriangles.ToArray();
+                    }
                 }
-                m_geomBuffer = null;
                 block.Custom = true;
 
                 fs = null;
@@ -145,20 +156,5 @@ public class MagicaMeshBlockConfig: BlockConfig
         }
 
         return true;
-    }
-
-    public bool IsInitPhase
-    {
-        get { return m_geomBuffer!=null; }
-    }
-
-    public void AddFace(Vector3[] verts, Color32[] cols, bool backFace)
-    {
-        Assert.IsTrue(verts.Length==4);
-
-        // Add data to the render buffer
-        m_geomBuffer.Vertices.AddRange(verts);
-        m_geomBuffer.Colors.AddRange(cols);
-        m_geomBuffer.AddIndices(m_geomBuffer.Vertices.Count, backFace);
     }
 }

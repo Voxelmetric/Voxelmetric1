@@ -59,6 +59,19 @@ public class BlockConfig
         };
     }
 
+    public static BlockConfig CreateColorBlockConfig(World world, ushort type)
+    {
+        return new BlockConfig
+        {
+            name = string.Format("simple_{0}", type),
+            typeInConfig = type,
+            className = "SimpleBlock",
+            solid = true,
+            transparent = false,
+            physicMaterialID = 0
+        };
+    }
+
     /// <summary>
     /// Assigns the variables in the config from a hashtable. When overriding this
     /// remember to call the base function first.
@@ -83,7 +96,7 @@ public class BlockConfig
                 Debug.LogError("Parameter 'type' missing from config");
                 return false;
             }
-            typeInConfig = (ushort)tmpTypeInConfig;
+            typeInConfig = (ushort)(tmpTypeInConfig + BlockProvider.LastReservedType);
         }
         
         // Optional parameters

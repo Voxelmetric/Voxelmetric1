@@ -5,7 +5,6 @@ using Newtonsoft.Json;
 using UnityEngine;
 using Voxelmetric.Code.Core;
 using Voxelmetric.Code.Data_types;
-// ReSharper disable All
 
 namespace Voxelmetric.Code.Load_Resources.Blocks
 {
@@ -14,6 +13,12 @@ namespace Voxelmetric.Code.Load_Resources.Blocks
         //! Air type block will always be present
         public static readonly ushort AirType = 0;
         public static readonly BlockData AirBlock = new BlockData(AirType, false);
+
+        //! Special reserved block types
+        public static readonly ushort FirstReservedSimpleType = 1;
+        public static readonly ushort LastReservedSimpleType = (ushort)(FirstReservedSimpleType+254);
+        public static readonly ushort LastReservedType = LastReservedSimpleType;
+        public static readonly ushort FirstCustomType = (ushort)(LastReservedType+1);
 
         //! An array of loaded block configs
         private BlockConfig[] m_configs;
@@ -73,9 +78,11 @@ namespace Voxelmetric.Code.Load_Resources.Blocks
             List<BlockConfig> configs = new List<BlockConfig>(configFiles.Length);
             Dictionary<ushort, ushort> types = new Dictionary<ushort, ushort>();
 
-            // Add the static air block type
+            // Add reserved block types
             AddBlockType(configs, types, BlockConfig.CreateAirBlockConfig(world));
-            
+            for(ushort i=1; i<=LastReservedSimpleType; i++)
+                AddBlockType(configs, types, BlockConfig.CreateColorBlockConfig(world, i));
+
             // Add block types from config
             foreach (var configFile in configFiles)
             {
@@ -100,8 +107,8 @@ namespace Voxelmetric.Code.Load_Resources.Blocks
 
             m_configs = configs.ToArray();
 
-            // Now iterate over conigs and find the one with the highest TypeInConfig
-            ushort maxTypeInConfig = AirType;
+            // Now iterate over configs and find the one with the highest TypeInConfig
+            ushort maxTypeInConfig = LastReservedType;
             for (int i = 0; i<m_configs.Length; i++)
             {
                 if (m_configs[i].typeInConfig>maxTypeInConfig)
@@ -109,7 +116,7 @@ namespace Voxelmetric.Code.Load_Resources.Blocks
             }
 
             // Allocate maxTypeInConfigs big array now and map config types to runtime types
-            m_types = new ushort[maxTypeInConfig+1];
+            m_types = new ushort[maxTypeInConfig+FirstCustomType];
             for (ushort i = 0; i < m_configs.Length; i++)
             {
                 m_types[m_configs[i].typeInConfig] = i;

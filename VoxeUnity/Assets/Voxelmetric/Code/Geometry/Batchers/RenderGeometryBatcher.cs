@@ -13,7 +13,7 @@ namespace Voxelmetric.Code.Geometry.Batchers
         //! Materials our meshes are to use
         private readonly Material[] m_materials;
         //! A list of buffers for each material
-        private readonly List<RenderGeometryBuffer> [] m_buffers;
+        public List<RenderGeometryBuffer>[] Buffers { get; }
         //! GameObjects used to hold our geometry
         private readonly List<GameObject> m_objects;
         //! A list of renderer used to render our geometry
@@ -36,16 +36,16 @@ namespace Voxelmetric.Code.Geometry.Batchers
                 return m_enabled;
             }
         }
-
+        
         public RenderGeometryBatcher(string prefabName, Material[] materials)
         {
             m_prefabName = prefabName;
             m_materials = materials;
 
             int buffersCount = materials == null || materials.Length < 1 ? 1 : materials.Length;
-            m_buffers = new List<RenderGeometryBuffer>[buffersCount];
+            Buffers = new List<RenderGeometryBuffer>[buffersCount];
 
-            for (int i = 0; i<m_buffers.Length; i++)
+            for (int i = 0; i<Buffers.Length; i++)
             {
                 /* TODO: Let's be optimistic and allocate enough room for just one buffer. It's going to suffice
                  * in >99% of cases. However, this prediction should maybe be based on chunk size rather then
@@ -53,7 +53,7 @@ namespace Voxelmetric.Code.Geometry.Batchers
                  * hold its geometry because of Unity's 65k-vertices limit per mesh. For chunks up to 32^3 big
                  * this should not be an issue, though.
                  */
-                m_buffers[i] = new List<RenderGeometryBuffer>(1)
+                Buffers[i] = new List<RenderGeometryBuffer>(1)
                 {
                     // Default render buffer
                     new RenderGeometryBuffer()
@@ -72,9 +72,9 @@ namespace Voxelmetric.Code.Geometry.Batchers
             // because internal arrays grow in capacity and we can't simply release their memory by calling Clear().
             // Objects and renderers are fine, because there's usually only 1 of them. In some extreme cases they
             // may grow more but only by 1 or 2 (and only if Env.ChunkPow>5).
-            for (int i = 0; i<m_buffers.Length; i++)
+            for (int i = 0; i<Buffers.Length; i++)
             {
-                var geometryBuffer = m_buffers[i];
+                var geometryBuffer = Buffers[i];
                 for (int j = 0; j < geometryBuffer.Count; j++)
                 {
                     if (geometryBuffer[j].WasUsed)
@@ -91,9 +91,9 @@ namespace Voxelmetric.Code.Geometry.Batchers
         /// </summary>
         public void Clear()
         {
-            for (int i = 0; i<m_buffers.Length; i++)
+            for (int i = 0; i<Buffers.Length; i++)
             {
-                var geometryBuffer = m_buffers[i];
+                var geometryBuffer = Buffers[i];
                 for (int j = 0; j < geometryBuffer.Count; j++)
                 {
                     geometryBuffer[j].Clear();
@@ -146,7 +146,7 @@ namespace Voxelmetric.Code.Geometry.Batchers
             Assert.IsTrue(((verts.Length * 3) >> 1) == tris.Length);
             Assert.IsTrue((verts.Length & 3) == 0);
 
-            var holder = m_buffers[materialID];
+            var holder = Buffers[materialID];
             var buffer = holder[holder.Count - 1];
 
             int startOffset = 0;
@@ -210,7 +210,7 @@ namespace Voxelmetric.Code.Geometry.Batchers
             Assert.IsTrue(((verts.Length * 3) >> 1) == tris.Length);
             Assert.IsTrue((verts.Length & 3) == 0);
 
-            var holder = m_buffers[materialID];
+            var holder = Buffers[materialID];
             var buffer = holder[holder.Count - 1];
 
             int startOffset = 0;
@@ -279,7 +279,7 @@ namespace Voxelmetric.Code.Geometry.Batchers
             Assert.IsTrue(((verts.Length * 3) >> 1) == tris.Length);
             Assert.IsTrue((verts.Length & 3) == 0);
 
-            var holder = m_buffers[materialID];
+            var holder = Buffers[materialID];
             var buffer = holder[holder.Count - 1];
 
             int startOffset = 0;
@@ -350,7 +350,7 @@ namespace Voxelmetric.Code.Geometry.Batchers
         {
             Assert.IsTrue(verts.Length == 4);
 
-            var holder = m_buffers[materialID];
+            var holder = Buffers[materialID];
             var buffer = holder[holder.Count - 1];
 
             // If there are too many vertices we need to create a new separate buffer for them
@@ -386,7 +386,7 @@ namespace Voxelmetric.Code.Geometry.Batchers
         {
             Assert.IsTrue(verts.Length == 4);
 
-            var holder = m_buffers[materialID];
+            var holder = Buffers[materialID];
             var buffer = holder[holder.Count - 1];
 
             // If there are too many vertices we need to create a new separate buffer for them
@@ -423,7 +423,7 @@ namespace Voxelmetric.Code.Geometry.Batchers
         {
             Assert.IsTrue(verts.Length == 4);
 
-            var holder = m_buffers[materialID];
+            var holder = Buffers[materialID];
             var buffer = holder[holder.Count - 1];
 
             // If there are too many vertices we need to create a new separate buffer for them
@@ -461,9 +461,9 @@ namespace Voxelmetric.Code.Geometry.Batchers
         {
             ReleaseOldData();
 
-            for (int j = 0; j<m_buffers.Length; j++)
+            for (int j = 0; j<Buffers.Length; j++)
             {
-                var holder = m_buffers[j];
+                var holder = Buffers[j];
 
                 for (int i = 0; i<holder.Count; i++)
                 {
@@ -514,9 +514,9 @@ namespace Voxelmetric.Code.Geometry.Batchers
         {
             ReleaseOldData();
 
-            for (int j = 0; j<m_buffers.Length; j++)
+            for (int j = 0; j<Buffers.Length; j++)
             {
-                var holder = m_buffers[j];
+                var holder = Buffers[j];
 
                 for (int i = 0; i<holder.Count; i++)
                 {

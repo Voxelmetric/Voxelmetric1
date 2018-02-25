@@ -73,7 +73,7 @@ namespace Voxelmetric.Code.Configurable.Blocks.Utilities
             }
         };
 
-        public static void PrepareColors(Chunk chunk, Color32[] data, ref BlockLightData light)
+        public static void PrepareColors(Chunk chunk, Color32[] data, BlockLightData light)
         {
             if (chunk.world.config.addAOToMesh)
                 SetColorsAO(data, light, chunk.world.config.ambientOcclusionStrength);

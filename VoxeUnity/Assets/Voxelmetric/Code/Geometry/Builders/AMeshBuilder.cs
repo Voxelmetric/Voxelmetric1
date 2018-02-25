@@ -8,8 +8,6 @@ namespace Voxelmetric.Code.Builders
     {
         //! Pallete used by this mesh builder
         public Color32[] Palette { get; set; }
-        //! Special block type used by this builder. Always comes in pair with Palette
-        public ushort Type { get; set; }
         //! Side mask
         public Side SideMask { get; set; }
 

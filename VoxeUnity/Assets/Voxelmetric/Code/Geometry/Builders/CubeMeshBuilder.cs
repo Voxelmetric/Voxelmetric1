@@ -62,6 +62,7 @@ namespace Voxelmetric.Code.Builders
 
                 return;
             }
+
             int n, w, h, l, k, maskIndex;
             Vector3Int texturePos = new Vector3Int(minX, minY, minZ);
 
