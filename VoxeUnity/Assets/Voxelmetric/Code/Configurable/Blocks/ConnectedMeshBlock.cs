@@ -8,7 +8,7 @@ using Vector3Int = Voxelmetric.Code.Data_types.Vector3Int;
 
 public class ConnectedMeshBlock: CustomMeshBlock
 {
-    public ConnectedMeshBlockConfig connectedMeshConfig
+    public ConnectedMeshBlockConfig meshConfig
     {
         get { return (ConnectedMeshBlockConfig)Config; }
     }
@@ -17,19 +17,19 @@ public class ConnectedMeshBlock: CustomMeshBlock
     {
         base.OnInit(blockProvider);
 
-        if (connectedMeshConfig.connectsToTypes==null)
+        if (meshConfig.connectsToTypes==null)
         {
-            connectedMeshConfig.connectsToTypes = new int[connectedMeshConfig.connectsToNames.Length];
-            for (int i = 0; i<connectedMeshConfig.connectsToNames.Length; i++)
+            meshConfig.connectsToTypes = new int[meshConfig.connectsToNames.Length];
+            for (int i = 0; i<meshConfig.connectsToNames.Length; i++)
             {
-                connectedMeshConfig.connectsToTypes[i] = blockProvider.GetType(connectedMeshConfig.connectsToNames[i]);
+                meshConfig.connectsToTypes[i] = blockProvider.GetType(meshConfig.connectsToNames[i]);
             }
         }
     }
 
     public override void BuildFace(Chunk chunk, Vector3[] vertices, Color32[] palette, ref BlockFace face, bool rotated)
     {
-        var d = connectedMeshConfig.dataDir[(int)face.side];
+        var d = meshConfig.dataDir[(int)face.side];
 
         var tris = d.tris;
         if (tris==null)
@@ -46,17 +46,17 @@ public class ConnectedMeshBlock: CustomMeshBlock
         RenderGeometryBatcher batcher = chunk.GeometryHandler.Batcher;
 
         Vector3Int sidePos = face.pos.Add(face.side);
-        if (connectedMeshConfig.connectsToSolid && blocks.Get(ref sidePos).Solid)
+        if (meshConfig.connectsToSolid && blocks.Get(ref sidePos).Solid)
         {
             rect = textures.GetTexture(chunk, ref face.pos, face.side);
             batcher.AddMeshData(face.materialID, tris, verts, colors, uvs, ref rect, face.pos);
         }
-        else if (connectedMeshConfig.connectsToTypes.Length!=0)
+        else if (meshConfig.connectsToTypes.Length!=0)
         {
             int neighborType = blocks.Get(ref sidePos).Type;
-            for (int i = 0; i<connectedMeshConfig.connectsToTypes.Length; i++)
+            for (int i = 0; i<meshConfig.connectsToTypes.Length; i++)
             {
-                if (neighborType==connectedMeshConfig.connectsToTypes[i])
+                if (neighborType==meshConfig.connectsToTypes[i])
                 {
                     rect = textures.GetTexture(chunk, ref face.pos, face.side);
                     batcher.AddMeshData(face.materialID, tris, verts, colors, uvs, ref rect, face.pos);
@@ -65,7 +65,7 @@ public class ConnectedMeshBlock: CustomMeshBlock
             }
         }
 
-        var d2 = customMeshConfig.data;
+        var d2 = meshConfig.data;
         rect = d2.textures.GetTexture(chunk, ref face.pos, Direction.down);
         batcher.AddMeshData(face.materialID, d2.tris, d2.verts, d2.colors, d2.uvs, ref rect, face.pos);
     }
@@ -90,7 +90,7 @@ public class ConnectedMeshBlock: CustomMeshBlock
 
         RenderGeometryBatcher batcher = chunk.GeometryHandler.Batcher;
 
-        var d2 = customMeshConfig.data;
+        var d2 = meshConfig.data;
         Rect texture = d2.textures.GetTexture(chunk, ref localPos, Direction.down);
         batcher.AddMeshData(materialID, d2.tris, d2.verts, d2.colors, d2.uvs, ref texture, localPos);
     }

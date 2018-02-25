@@ -22,10 +22,10 @@ public class SimpleBlock : Block
             verts[2] = vertices[2];
             verts[3] = vertices[3];
 
-            cols[0] = palette[face.block.Type & 255];
-            cols[1] = palette[face.block.Type & 255];
-            cols[2] = palette[face.block.Type & 255];
-            cols[3] = palette[face.block.Type & 255];
+            cols[0] = palette[face.block.Type];
+            cols[1] = palette[face.block.Type];
+            cols[2] = palette[face.block.Type];
+            cols[3] = palette[face.block.Type];
 
             BlockUtils.AdjustColors(chunk, cols, face.light);
 

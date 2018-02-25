@@ -5,9 +5,12 @@ using Voxelmetric.Code.Geometry.Batchers;
 using Voxelmetric.Code.Load_Resources.Blocks;
 using Vector3Int = Voxelmetric.Code.Data_types.Vector3Int;
 
-public class CustomMeshBlock : Block
+public class CustomMeshBlock: Block
 {
-    public CustomMeshBlockConfig customMeshConfig { get { return (CustomMeshBlockConfig)Config; } }
+    public CustomMeshBlockConfig meshConfig
+    {
+        get { return (CustomMeshBlockConfig)Config; }
+    }
 
     public override void OnInit(BlockProvider blockProvider)
     {
@@ -18,13 +21,13 @@ public class CustomMeshBlock : Block
 
     public override void BuildBlock(Chunk chunk, ref Vector3Int localPos, int materialID)
     {
-        var data = customMeshConfig.data;
+        var data = meshConfig.data;
         Rect texture = data.textures!=null
                            ? data.textures.GetTexture(chunk, ref localPos, Direction.down)
                            : new Rect();
 
         RenderGeometryBatcher batcher = chunk.GeometryHandler.Batcher;
-        
+
         if (data.uvs==null)
             batcher.AddMeshData(materialID, data.tris, data.verts, data.colors, localPos);
         else if (data.colors==null)
