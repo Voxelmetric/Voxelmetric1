@@ -1,5 +1,4 @@
-﻿using System;
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace Voxelmetric.Code.Load_Resources
 {
@@ -11,9 +10,6 @@ namespace Voxelmetric.Code.Load_Resources
         public string blockFolder;
         public string meshFolder;
 
-        public bool useCollisionMesh;
-        public bool renderBottomWorldFaces;
-
         public int minX;
         public int maxX;
         public int maxY;
@@ -22,18 +18,9 @@ namespace Voxelmetric.Code.Load_Resources
         public int maxZ;
 
         public float randomUpdateFrequency;
-
-        public string pathToBlockPrefab;
-        public string pathToChunkPrefab;
-
+        
         public bool addAOToMesh;
         public float ambientOcclusionStrength;
-
-        public Type worldBlocksManager;
-        public Type worldChunksHandler;
-        public Type chunkBlocksHandler;
-        public Type chunkRenerer;
-        public Type chunkLogic;
         
         // These variables relate to how the textures are loaded and how the atlas is created.
         // There is an issue in that texture indexes are created with these variables but if
@@ -43,8 +30,6 @@ namespace Voxelmetric.Code.Load_Resources
         public FilterMode textureAtlasFiltering;
         public TextureFormat textureFormat;
         public bool useMipMaps;
-        public bool useCustomTextureAtlas;
-        public string customTextureAtlasFile;
 
         public override string ToString()
         {

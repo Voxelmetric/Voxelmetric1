@@ -6,7 +6,6 @@
 
     "meshFolder": "Meshes",
     "prefabsFolder": "Prefabs",
-    "customTextureAtlasFile": "",
     "useCollisionMesh": true,
 
     "pathToBlockPrefab": "Prefabs/Block",
@@ -23,7 +22,5 @@
     "textureAtlasPadding": 32,
     "textureAtlasFiltering": "point",
     "textureFormat": "ARGB32",
-    "useMipMaps": true,
-    "useCustomTextureAtlas": false,
-    "customTextureAtlasFilePath": ""
+    "useMipMaps": true
 }

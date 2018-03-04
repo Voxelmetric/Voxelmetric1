@@ -26,21 +26,12 @@ namespace Voxelmetric.Code.Load_Resources.Textures
         public void Init(WorldConfig config)
         {
             this.config = config;
+            configs = LoadAllTextures();
             LoadTextureIndex();
         }
 
         private void LoadTextureIndex()
         {
-            // If you're using a pre defined texture atlas return now, don't try to generate a new one
-            if (config.useCustomTextureAtlas)
-            {
-                UseCustomTextureAtlas();
-                return;
-            }
-
-            if (configs == null)
-                configs = LoadAllTextures();
-
             List<Texture2D> individualTextures = new List<Texture2D>();
             for (int i = 0; i < configs.Length; i++)
             {
@@ -64,6 +55,7 @@ namespace Voxelmetric.Code.Load_Resources.Textures
             List<Rect> nonrepeatingTextures = new List<Rect>();
 
             int index = 0;
+            textures.Clear();
             for (int i = 0; i < configs.Length; i++)
             {
                 for (int j = 0; j < configs[i].textures.Length; j++)
@@ -97,44 +89,6 @@ namespace Voxelmetric.Code.Load_Resources.Textures
 
             uPaddingBleed.BleedEdges(atlas, config.textureAtlasPadding, repeatingTextures.ToArray(), true);
             uPaddingBleed.BleedEdges(atlas, config.textureAtlasPadding, nonrepeatingTextures.ToArray(), false);
-        }
-
-        //This function is used if you've made your own texture atlas and the configs just specify where the textures are
-        private void UseCustomTextureAtlas()
-        {
-            atlas = Resources.Load<Texture2D>(config.customTextureAtlasFile);
-
-            configs = new ConfigLoader<TextureConfig>(new[] { config.textureFolder }).AllConfigs();
-
-            for (int i = 0; i < configs.Length; i++)
-            {
-                var cfg = configs[i];
-
-                for (int j = 0; j < cfg.textures.Length; j++)
-                {
-                    var cfgTextures = cfg.textures[j];
-
-                    Rect texture = new Rect(
-                        cfgTextures.xPos / (float)atlas.width,
-                        cfgTextures.yPos / (float)atlas.height,
-                        cfgTextures.width / (float)atlas.width,
-                        cfgTextures.height / (float)atlas.height
-                    );
-
-                    TextureCollection collection;
-                    if (!textures.TryGetValue(cfg.name, out collection))
-                    {
-                        collection = new TextureCollection(cfg.name);
-                        textures.Add(cfg.name, collection);
-                    }
-
-                    int connectedTextureType = -1;
-                    if (cfg.connectedTextures)
-                        connectedTextureType = configs[i].textures[j].connectedType;
-
-                    collection.AddTexture(texture, connectedTextureType, configs[i].textures[j].weight);
-                }
-            }
         }
 
         private TextureConfig[] LoadAllTextures()
