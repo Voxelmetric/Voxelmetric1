@@ -6,7 +6,7 @@ namespace Voxelmetric.Code.Utilities.Import
 {
     public class MagicaVox
     {
-        // this is the default palette of voxel colors (the RGBA chunk is only included if the palette is differe)
+        // this is the default palette of voxel colors (ABGR)
         private static readonly uint[] DefaultPalette =
         {
             0x00000000, 0xffffffff, 0xffccffff, 0xff99ffff, 0xff66ffff, 0xff33ffff, 0xff00ffff, 0xffffccff, 0xffccccff, 0xff99ccff, 0xff66ccff, 0xff33ccff, 0xff00ccff, 0xffff99ff, 0xffcc99ff, 0xff9999ff,
@@ -129,15 +129,15 @@ namespace Voxelmetric.Code.Utilities.Import
             if (mainChunk.palette==null)
             {
                 mainChunk.palette = new Color32[256];
-                mainChunk.palette[0] = new Color32(0, 0, 0, 0);
-                for (int i = 1; i<256; i++)
+                for (int i = 0; i<256; i++)
                 {
-                    mainChunk.palette[i] = new Color32(
-                        (byte)((DefaultPalette[i]>>24)&0xFF),
-                        (byte)((DefaultPalette[i]>>16)&0xFF),
-                        (byte)((DefaultPalette[i]>>8)&0xFF),
-                        (byte)((DefaultPalette[i])&0xFF)
-                    );
+                    uint color = DefaultPalette[i];
+                    byte r = (byte)(color &0xFF);
+                    byte g = (byte)((color >> 8)&0xFF);
+                    byte b = (byte)((color >> 16)&0xFF);
+                    byte a = (byte)((color >> 24)&0xFF);
+
+                    mainChunk.palette[i] = new Color32(r, g, b, a);
                 }
             }
 

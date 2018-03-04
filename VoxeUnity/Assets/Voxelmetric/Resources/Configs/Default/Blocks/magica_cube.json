@@ -1,7 +1,7 @@
 {
     "name": "magicacube",
     "type": 12,
-    "blockClass": "MagicaMeshBlock",
+    "blockClass": "CustomMeshBlock",
     "configClass": "CustomMeshBlockConfig",
     "meshFileLocation": "test.vox",
     "raycastHitOnRemoval": true,
