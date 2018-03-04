@@ -2,12 +2,12 @@
 
 namespace Voxelmetric.Code.Configurable.Blocks
 {
-    public struct BlockFace
+    public struct BlockFace // 24B
     {
-        public Block block;
-        public Vector3Int pos;
-        public Direction side;
-        public BlockLightData light;
-        public int materialID;
+        public Vector3Int pos; // 12B
+        public int materialID; // 4B
+        public Block block; // 2B
+        public Direction side; // 1B
+        public BlockLightData light; //1B
     }
 }

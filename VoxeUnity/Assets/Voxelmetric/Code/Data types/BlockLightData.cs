@@ -7,20 +7,11 @@ namespace Voxelmetric.Code.Data_types
         /*
          * 0- 1: sw
          * 2- 3: nw
-         * 4- 5: nw
+         * 4- 5: ne
          * 6- 7: se
-         * 8: necessity of face rotation
-         * 9-15: reserved
          */
-        private readonly short mask;
-
-        public BlockLightData(
-            short lightMask
-            )
-        {
-            mask = lightMask;
-        }
-
+        private readonly byte mask;
+        
         public BlockLightData(
             bool nwSolid, bool nSolid, bool neSolid, bool eSolid,
             bool seSolid, bool sSolid, bool swSolid, bool wSolid
@@ -35,20 +26,16 @@ namespace Voxelmetric.Code.Data_types
             int _swSolid = swSolid ? 1 : 0;
             int _wSolid = wSolid ? 1 : 0;
 
-            // sw
-            int sw = GetVertexAO(_sSolid, _wSolid, _swSolid);
-            // nw
+            // nw (00)
             int nw = GetVertexAO(_nSolid, _wSolid, _nwSolid);
-            // ne
+            // ne (10)
             int ne = GetVertexAO(_nSolid, _eSolid, _neSolid);
-            // se
+            // sw (01)
+            int sw = GetVertexAO(_sSolid, _wSolid, _swSolid);
+            // se (11)
             int se = GetVertexAO(_sSolid, _eSolid, _seSolid);
 
-            mask = (short)(sw|(nw<<2)|(ne<<4)|(se<<6));
-
-            // Rotation flag
-            if (sw+ne>nw+se)
-                mask |= (1<<8);
+            mask = (byte)(sw|(nw<<2)|(ne<<4)|(se<<6));
         }
 
         private static int GetVertexAO(int side1, int side2, int corner)
@@ -58,27 +45,27 @@ namespace Voxelmetric.Code.Data_types
 
         public int swAO
         {
-            get { return (mask&0x03); }
+            get { return (mask&3); }
         }
 
         public int nwAO
         {
-            get { return (mask&0x0C)>>2; }
+            get { return (mask>>2)&3; }
         }
 
         public int neAO
         {
-            get { return (mask&0x30)>>4; }
+            get { return (mask>>4)&3; }
         }
 
         public int seAO
         {
-            get { return (mask&0xC0)>>6; }
+            get { return (mask>>6)&3; }
         }
 
         public bool FaceRotationNecessary
         {
-            get { return ((mask>>8)&1)!=0; }
+            get { return swAO+neAO>nwAO+seAO; }
         }
 
         public override bool Equals(object obj)

@@ -8,7 +8,7 @@ using Vector3Int = Voxelmetric.Code.Data_types.Vector3Int;
 
 public class ConnectedMeshBlock: CustomMeshBlock
 {
-    public ConnectedMeshBlockConfig meshConfig
+    public new ConnectedMeshBlockConfig meshConfig
     {
         get { return (ConnectedMeshBlockConfig)Config; }
     }
@@ -81,7 +81,7 @@ public class ConnectedMeshBlock: CustomMeshBlock
                 block = null,
                 pos = localPos,
                 side = dir,
-                light = new BlockLightData(0),
+                light = new BlockLightData(),
                 materialID = materialID
             };
 

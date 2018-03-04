@@ -3,7 +3,7 @@
     /// <summary>
     /// Enum helping us to determine a direction
     /// </summary>
-    public enum Direction
+    public enum Direction: byte
     {
         up = 0, // front face
         down = 1, // back face

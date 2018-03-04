@@ -85,15 +85,15 @@ namespace Voxelmetric.Code.Configurable.Blocks.Utilities
         {
             // With AO turned off, do not generate any fancy data
             if (!chunk.world.config.addAOToMesh)
-                return new BlockLightData(0);
+                return new BlockLightData();
 
             // Side blocks
-            bool nSolid, eSolid, sSolid, wSolid;
+            bool n_Solid, _eSolid, s_Solid, _wSolid;
             // Corner blocks
             bool nwSolid, neSolid, seSolid, swSolid;
 
             ChunkBlocks blocks = chunk.blocks;
-            int index, index2, index3;
+            int index1, index2, index3;
 
             int sizeWithPadding = chunk.SideSize + Env.ChunkPadding2;
             int sizeWithPaddingPow2 = sizeWithPadding * sizeWithPadding;
@@ -101,92 +101,92 @@ namespace Voxelmetric.Code.Configurable.Blocks.Utilities
             switch (direction)
             {
                 case Direction.up:
-                    index = localPosIndex + sizeWithPaddingPow2; // + (0,1,0)
-                    index2 = index - sizeWithPadding; // - (0,0,1)
-                    index3 = index + sizeWithPadding; // + (0,0,1)
+                    index1 = localPosIndex + sizeWithPaddingPow2; // + (0,1,0)
+                    index2 = index1 - sizeWithPadding; // - (0,0,1)
+                    index3 = index1 + sizeWithPadding; // + (0,0,1)
                     
                     swSolid = blocks.Get(index2 - 1).Solid; // -1,1,-1
-                    sSolid = blocks.Get(index2).Solid;      //  0,1,-1
+                    s_Solid = blocks.Get(index2).Solid;     //  0,1,-1
                     seSolid = blocks.Get(index2 + 1).Solid; //  1,1,-1
-                    wSolid = blocks.Get(index - 1).Solid;   // -1,1, 0
-                    eSolid = blocks.Get(index + 1).Solid;   //  1,1, 0
+                    _wSolid = blocks.Get(index1 - 1).Solid; // -1,1, 0
+                    _eSolid = blocks.Get(index1 + 1).Solid; //  1,1, 0
                     nwSolid = blocks.Get(index3 - 1).Solid; // -1,1, 1
-                    nSolid = blocks.Get(index3).Solid;      //  0,1, 1
+                    n_Solid = blocks.Get(index3).Solid;     //  0,1, 1
                     neSolid = blocks.Get(index3 + 1).Solid; //  1,1, 1
                     break;
                 case Direction.down:
-                    index = localPosIndex - sizeWithPaddingPow2; // - (0,1,0)
-                    index2 = index - sizeWithPadding; // - (0,0,1)
-                    index3 = index + sizeWithPadding; // + (0,0,1)
+                    index1 = localPosIndex - sizeWithPaddingPow2; // - (0,1,0)
+                    index2 = index1 - sizeWithPadding; // - (0,0,1)
+                    index3 = index1 + sizeWithPadding; // + (0,0,1)
 
                     swSolid = blocks.Get(index2 - 1).Solid; // -1,-1,-1
-                    sSolid = blocks.Get(index2).Solid;      //  0,-1,-1
+                    s_Solid = blocks.Get(index2).Solid;     //  0,-1,-1
                     seSolid = blocks.Get(index2 + 1).Solid; //  1,-1,-1
-                    wSolid = blocks.Get(index - 1).Solid;   // -1,-1, 0
-                    eSolid = blocks.Get(index + 1).Solid;   //  1,-1, 0
+                    _wSolid = blocks.Get(index1 - 1).Solid; // -1,-1, 0
+                    _eSolid = blocks.Get(index1 + 1).Solid; //  1,-1, 0
                     nwSolid = blocks.Get(index3 - 1).Solid; // -1,-1, 1
-                    nSolid = blocks.Get(index3).Solid;      //  0,-1, 1
+                    n_Solid = blocks.Get(index3).Solid;     //  0,-1, 1
                     neSolid = blocks.Get(index3 + 1).Solid; //  1,-1, 1
                     break;
                 case Direction.north:
-                    index = localPosIndex + sizeWithPadding; // + (0,0,1)
-                    index2 = index - sizeWithPaddingPow2;   // - (0,1,0)
-                    index3 = index + sizeWithPaddingPow2;   // + (0,1,0)
+                    index1 = localPosIndex + sizeWithPadding; // + (0,0,1)
+                    index2 = index1 - sizeWithPaddingPow2;   // - (0,1,0)
+                    index3 = index1 + sizeWithPaddingPow2;   // + (0,1,0)
 
                     swSolid = blocks.Get(index2 - 1).Solid; // -1,-1,1
                     seSolid = blocks.Get(index2 + 1).Solid; //  1,-1,1
-                    wSolid = blocks.Get(index - 1).Solid;   // -1, 0,1
-                    eSolid = blocks.Get(index + 1).Solid;   //  1, 0,1
+                    _wSolid = blocks.Get(index1 - 1).Solid; // -1, 0,1
+                    _eSolid = blocks.Get(index1 + 1).Solid; //  1, 0,1
                     nwSolid = blocks.Get(index3 - 1).Solid; // -1, 1,1
-                    sSolid = blocks.Get(index2).Solid;      //  0,-1,1
-                    nSolid = blocks.Get(index3).Solid;      //  0, 1,1
+                    s_Solid = blocks.Get(index2).Solid;     //  0,-1,1
+                    n_Solid = blocks.Get(index3).Solid;     //  0, 1,1
                     neSolid = blocks.Get(index3 + 1).Solid; //  1, 1,1
                     break;
                 case Direction.south:
-                    index = localPosIndex - sizeWithPadding; // - (0,0,1)
-                    index2 = index - sizeWithPaddingPow2;   // - (0,1,0)
-                    index3 = index + sizeWithPaddingPow2;   // + (0,1,0)
+                    index1 = localPosIndex - sizeWithPadding; // - (0,0,1)
+                    index2 = index1 - sizeWithPaddingPow2;   // - (0,1,0)
+                    index3 = index1 + sizeWithPaddingPow2;   // + (0,1,0)
                     
                     swSolid = blocks.Get(index2 - 1).Solid; // -1,-1,-1
                     seSolid = blocks.Get(index2 + 1).Solid; //  1,-1,-1
-                    wSolid = blocks.Get(index - 1).Solid;   // -1, 0,-1
-                    eSolid = blocks.Get(index + 1).Solid;   //  1, 0,-1
+                    _wSolid = blocks.Get(index1 - 1).Solid; // -1, 0,-1
+                    _eSolid = blocks.Get(index1 + 1).Solid; //  1, 0,-1
                     nwSolid = blocks.Get(index3 - 1).Solid; // -1, 1,-1
-                    sSolid = blocks.Get(index2).Solid;      //  0,-1,-1
-                    nSolid = blocks.Get(index3).Solid;      //  0, 1,-1
+                    s_Solid = blocks.Get(index2).Solid;     //  0,-1,-1
+                    n_Solid = blocks.Get(index3).Solid;     //  0, 1,-1
                     neSolid = blocks.Get(index3 + 1).Solid; //  1, 1,-1
                     break;
                 case Direction.east:
-                    index = localPosIndex+1; // + (1,0,0)
-                    index2 = index - sizeWithPaddingPow2; // - (0,1,0)
-                    index3 = index + sizeWithPaddingPow2; // + (0,1,0)
+                    index1 = localPosIndex+1; // + (1,0,0)
+                    index2 = index1 - sizeWithPaddingPow2; // - (0,1,0)
+                    index3 = index1 + sizeWithPaddingPow2; // + (0,1,0)
                     
-                    swSolid = blocks.Get(index2 - sizeWithPadding).Solid;   // 1,-1,-1
-                    sSolid = blocks.Get(index2).Solid;                      // 1,-1, 0
-                    seSolid = blocks.Get(index2 + sizeWithPadding).Solid;   // 1,-1, 1
-                    wSolid = blocks.Get(index - sizeWithPadding).Solid;     // 1, 0,-1
-                    eSolid = blocks.Get(index + sizeWithPadding).Solid;     // 1, 0, 1
-                    nwSolid = blocks.Get(index3 - sizeWithPadding).Solid;   // 1, 1,-1
-                    nSolid = blocks.Get(index3).Solid;                      // 1, 1, 0
-                    neSolid = blocks.Get(index3 + sizeWithPadding).Solid;   // 1, 1, 1
+                    swSolid = blocks.Get(index2 - sizeWithPadding).Solid; // 1,-1,-1
+                    s_Solid = blocks.Get(index2).Solid;                   // 1,-1, 0
+                    seSolid = blocks.Get(index2 + sizeWithPadding).Solid; // 1,-1, 1
+                    _wSolid = blocks.Get(index1 - sizeWithPadding).Solid; // 1, 0,-1
+                    _eSolid = blocks.Get(index1 + sizeWithPadding).Solid; // 1, 0, 1
+                    nwSolid = blocks.Get(index3 - sizeWithPadding).Solid; // 1, 1,-1
+                    n_Solid = blocks.Get(index3).Solid;                   // 1, 1, 0
+                    neSolid = blocks.Get(index3 + sizeWithPadding).Solid; // 1, 1, 1
                     break;
                 default://case Direction.west:
-                    index = localPosIndex-1; // - (1,0,0)
-                    index2 = index - sizeWithPaddingPow2; // - (0,1,0)
-                    index3 = index + sizeWithPaddingPow2; // + (0,1,0)
+                    index1 = localPosIndex-1; // - (1,0,0)
+                    index2 = index1 - sizeWithPaddingPow2; // - (0,1,0)
+                    index3 = index1 + sizeWithPaddingPow2; // + (0,1,0)
 
-                    swSolid = blocks.Get(index2 - sizeWithPadding).Solid;  // -1,-1,-1
-                    sSolid = blocks.Get(index2).Solid;                     // -1,-1, 0
-                    seSolid = blocks.Get(index2 + sizeWithPadding).Solid;  // -1,-1, 1
-                    wSolid = blocks.Get(index - sizeWithPadding).Solid;    // -1, 0,-1
-                    eSolid = blocks.Get(index + sizeWithPadding).Solid;    // -1, 0, 1
-                    nwSolid = blocks.Get(index3 - sizeWithPadding).Solid;  // -1, 1,-1
-                    nSolid = blocks.Get(index3).Solid;                     // -1, 1, 0
-                    neSolid = blocks.Get(index3 + sizeWithPadding).Solid;  // -1, 1, 1
+                    swSolid = blocks.Get(index2 - sizeWithPadding).Solid; // -1,-1,-1
+                    s_Solid = blocks.Get(index2).Solid;                   // -1,-1, 0
+                    seSolid = blocks.Get(index2 + sizeWithPadding).Solid; // -1,-1, 1
+                    _wSolid = blocks.Get(index1 - sizeWithPadding).Solid; // -1, 0,-1
+                    _eSolid = blocks.Get(index1 + sizeWithPadding).Solid; // -1, 0, 1
+                    nwSolid = blocks.Get(index3 - sizeWithPadding).Solid; // -1, 1,-1
+                    n_Solid = blocks.Get(index3).Solid;                   // -1, 1, 0
+                    neSolid = blocks.Get(index3 + sizeWithPadding).Solid; // -1, 1, 1
                     break;
             }
 
-            return new BlockLightData(nwSolid, nSolid, neSolid, eSolid, seSolid, sSolid, swSolid, wSolid);
+            return new BlockLightData(nwSolid, n_Solid, neSolid, _eSolid, seSolid, s_Solid, swSolid, _wSolid);
         }
         
         public static void AdjustColors(Chunk chunk, Color32[] data, BlockLightData light)
@@ -240,10 +240,11 @@ namespace Voxelmetric.Code.Configurable.Blocks.Utilities
         private static void SetColorsAO(Color32[] data, BlockLightData light, float strength)
         {
             // 0.33f for there are 3 degrees of AO darkening (0.33f * 3 =~ 1f)
-            float ne = 1f - light.neAO * 0.33f * strength;
-            float se = 1f - light.seAO * 0.33f * strength;
-            float sw = 1f - light.swAO * 0.33f * strength;
-            float nw = 1f - light.nwAO * 0.33f * strength;
+            float str = 0.33f * strength;
+            float ne = 1f - light.neAO * str;
+            float se = 1f - light.seAO * str;
+            float sw = 1f - light.swAO * str;
+            float nw = 1f - light.nwAO * str;
 
             SetColors(data, sw, nw, ne, se, light.FaceRotationNecessary);
         }
@@ -251,10 +252,11 @@ namespace Voxelmetric.Code.Configurable.Blocks.Utilities
         private static void AdjustColorsAO(Color32[] data, BlockLightData light, float strength)
         {
             // 0.33f for there are 3 degrees of AO darkening (0.33f * 3 =~ 1f)
-            float ne = 1f - light.neAO * 0.33f * strength;
-            float se = 1f - light.seAO * 0.33f * strength;
-            float sw = 1f - light.swAO * 0.33f * strength;
-            float nw = 1f - light.nwAO * 0.33f * strength;
+            float str = 0.33f * strength;
+            float ne = 1f - light.neAO * str;
+            float se = 1f - light.seAO * str;
+            float sw = 1f - light.swAO * str;
+            float nw = 1f - light.nwAO * str;
 
             AdjustColors(data, sw, nw, ne, se, light.FaceRotationNecessary);
         }
