@@ -46,7 +46,8 @@ namespace Voxelmetric.Examples
             if (objRenderer!=null && txt!=null)
             {
                 Planes.CalculateFrustumPlanes(cam, planes);
-                int intersection = Planes.TestPlanesAABB2(planes, objRenderer.bounds);
+                Bounds b = objRenderer.bounds;
+                int intersection = Planes.TestPlanesAABB2(planes, ref b);
                 switch (intersection)
                 {
                     case 0:

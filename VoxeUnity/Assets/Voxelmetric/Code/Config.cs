@@ -54,7 +54,7 @@ namespace Voxelmetric.Code
         public const bool UseThreadedIO = true;
 
         //! If true, chunk serialization is enabled
-        public const bool UseSerialization = true;
+        public const bool UseSerialization = false;
         //! If true, chunk will be serialized when it's unloaded
         public const bool SerializeChunkWhenUnloading = UseSerialization && true;
         //! If true, only difference form default-generated data will be stored

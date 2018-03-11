@@ -112,7 +112,7 @@ namespace Voxelmetric.Code.Common.Math
         ///     It is similiar to Unity3D's TestPlanesAABB, however, it accepts partial
         ///     intersections as well.
         /// </summary>
-        public static bool TestPlanesAABB(Plane[] planes, Bounds aabb)
+        public static bool TestPlanesAABB(Plane[] planes, ref Bounds aabb)
         {
             for (int i = 0; i<6; ++i)
             {
@@ -134,7 +134,7 @@ namespace Voxelmetric.Code.Common.Math
         ///     It is similiar to Unity3D's TestPlanesAABB, however, it accepts partial
         ///     intersections as well.
         /// </summary>
-        public static bool TestPlanesAABB(Plane[] planes, AABB aabb)
+        public static bool TestPlanesAABB(Plane[] planes, ref AABB aabb)
         {
             for (int i = 0; i<6; ++i)
             {
@@ -154,7 +154,7 @@ namespace Voxelmetric.Code.Common.Math
         /// <summary>
         ///     Does a check for intersection of a sphere with frustum planes.
         /// </summary>
-        public static int TestPlanesSphere(Plane[] planes, Vector3 center, float radius)
+        public static int TestPlanesSphere(Plane[] planes, ref Vector3 center, float radius)
         {
             for (int i = 0; i < 6; ++i)
             {
@@ -176,7 +176,7 @@ namespace Voxelmetric.Code.Common.Math
         ///     the number of intersecting planes. 0 means there is no intersection,
         ///     6 stands for aabb fully contained, anything else is a partial intersection
         /// </summary>
-        public static int TestPlanesAABB2(Plane[] planes, Bounds aabb)
+        public static int TestPlanesAABB2(Plane[] planes, ref Bounds aabb)
         {
             int inside = 6;
             for (int i = 0; i<6; ++i)
@@ -211,7 +211,7 @@ namespace Voxelmetric.Code.Common.Math
         ///     the number of intersecting planes. 0 means there is no intersection,
         ///     6 stands for aabb fully contained, anything else is a partial intersection
         /// </summary>
-        public static int TestPlanesAABB2(Plane[] planes, AABB aabb)
+        public static int TestPlanesAABB2(Plane[] planes, ref AABB aabb)
         {
             int inside = 6;
             for (int i = 0; i<6; ++i)

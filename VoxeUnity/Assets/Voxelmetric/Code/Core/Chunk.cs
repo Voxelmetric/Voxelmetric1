@@ -27,7 +27,7 @@ namespace Voxelmetric.Code.Core
         public Vector3Int pos { get; private set; }
 
         //! Bounding box in world coordinates. It always considers a full-size chunk
-        public AABB WorldBounds { get; private set; }
+        public AABB WorldBounds;
 
         //! Bounding coordinates in local space. Corresponds to real geometry
         public int minBounds, maxBounds;
