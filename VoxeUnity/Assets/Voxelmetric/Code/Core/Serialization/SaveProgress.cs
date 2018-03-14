@@ -31,7 +31,7 @@ namespace Voxelmetric.Code.Core.Serialization
             {
                 Chunk chunk = chunksToSave[i];
                 ChunkStateManagerClient stateManager = chunk.stateManager;
-                stateManager.Subscribe(this, ChunkStateExternal.Saved, true);
+                stateManager.Register(this);
             }
         }
 
@@ -50,7 +50,7 @@ namespace Voxelmetric.Code.Core.Serialization
         {
             // Unsubscribe from any further events
             ChunkStateManagerClient stateManager = (ChunkStateManagerClient)source;
-            stateManager.Subscribe(this, evt, false);
+            stateManager.Unregister(this);
 
             Assert.IsTrue(evt==ChunkStateExternal.Saved);
             if (evt==ChunkStateExternal.Saved)

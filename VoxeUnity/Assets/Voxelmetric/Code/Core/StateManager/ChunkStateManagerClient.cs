@@ -822,17 +822,18 @@ namespace Voxelmetric.Code.Core.StateManager
 
             // Calculate how many listeners a chunk can have
             int maxListeners = 0;
-            if (world.CheckInsideWorld(chunk.pos.Add(Env.ChunkSize, 0, 0)) && (chunk.pos.x!=world.Bounds.maxX))
+            Vector3Int pos = chunk.pos;            
+            if (world.CheckInsideWorld(pos.Add( Env.ChunkSize, 0, 0)) && (pos.x!=world.Bounds.maxX))
                 ++maxListeners;
-            if (world.CheckInsideWorld(chunk.pos.Add(-Env.ChunkSize, 0, 0)) && (chunk.pos.x!=world.Bounds.minX))
+            if (world.CheckInsideWorld(pos.Add(-Env.ChunkSize, 0, 0)) && (pos.x!=world.Bounds.minX))
                 ++maxListeners;
-            if (world.CheckInsideWorld(chunk.pos.Add(0, Env.ChunkSize, 0)) && (chunk.pos.y!=world.Bounds.maxY))
+            if (world.CheckInsideWorld(pos.Add(0,  Env.ChunkSize, 0)) && (pos.y!=world.Bounds.maxY))
                 ++maxListeners;
-            if (world.CheckInsideWorld(chunk.pos.Add(0, -Env.ChunkSize, 0)) && (chunk.pos.y!=world.Bounds.minY))
+            if (world.CheckInsideWorld(pos.Add(0, -Env.ChunkSize, 0)) && (pos.y!=world.Bounds.minY))
                 ++maxListeners;
-            if (world.CheckInsideWorld(chunk.pos.Add(0, 0, Env.ChunkSize)) && (chunk.pos.z!=world.Bounds.maxZ))
+            if (world.CheckInsideWorld(pos.Add(0, 0,  Env.ChunkSize)) && (pos.z!=world.Bounds.maxZ))
                 ++maxListeners;
-            if (world.CheckInsideWorld(chunk.pos.Add(0, 0, -Env.ChunkSize)) && (chunk.pos.z!=world.Bounds.minZ))
+            if (world.CheckInsideWorld(pos.Add(0, 0, -Env.ChunkSize)) && (pos.z!=world.Bounds.minZ))
                 ++maxListeners;
 
             //int prevListeners = stateManager.ListenerCountMax;
@@ -855,17 +856,17 @@ namespace Voxelmetric.Code.Core.StateManager
         private void SubscribeNeighbors(bool subscribe)
         {
             Vector3Int pos = chunk.pos;
-            SubscribeTwoNeighbors(new Vector3Int(pos.x + Env.ChunkSize, pos.y, pos.z), subscribe);
-            SubscribeTwoNeighbors(new Vector3Int(pos.x - Env.ChunkSize, pos.y, pos.z), subscribe);
-            SubscribeTwoNeighbors(new Vector3Int(pos.x, pos.y + Env.ChunkSize, pos.z), subscribe);
-            SubscribeTwoNeighbors(new Vector3Int(pos.x, pos.y - Env.ChunkSize, pos.z), subscribe);
-            SubscribeTwoNeighbors(new Vector3Int(pos.x, pos.y, pos.z + Env.ChunkSize), subscribe);
-            SubscribeTwoNeighbors(new Vector3Int(pos.x, pos.y, pos.z - Env.ChunkSize), subscribe);
+            SubscribeTwoNeighbors(pos.Add( Env.ChunkSize, 0, 0), subscribe);
+            SubscribeTwoNeighbors(pos.Add(-Env.ChunkSize, 0, 0), subscribe);
+            SubscribeTwoNeighbors(pos.Add(0,  Env.ChunkSize, 0), subscribe);
+            SubscribeTwoNeighbors(pos.Add(0, -Env.ChunkSize, 0), subscribe);
+            SubscribeTwoNeighbors(pos.Add(0, 0,  Env.ChunkSize), subscribe);
+            SubscribeTwoNeighbors(pos.Add(0, 0, -Env.ChunkSize), subscribe);
 
             // Update required listener count
             UpdateListenersCount(this);
         }
-
+        
         private void SubscribeTwoNeighbors(Vector3Int neighborPos, bool subscribe)
         {
             World world = chunk.world;
@@ -882,8 +883,16 @@ namespace Voxelmetric.Code.Core.StateManager
 
             ChunkStateManagerClient stateManager = neighbor.stateManager;
             // Subscribe with each other. Passing Idle as event - it is ignored in this case anyway
-            stateManager.Subscribe(this, ChunkState.Idle, subscribe);
-            Subscribe(stateManager, ChunkState.Idle, subscribe);
+            if (subscribe)
+            {
+                stateManager.Register(this);
+                Register(stateManager);
+            }
+            else
+            {
+                stateManager.Unregister(this);
+                Unregister(stateManager);
+            }
 
             // Update required listener count of the neighbor
             UpdateListenersCount(stateManager);

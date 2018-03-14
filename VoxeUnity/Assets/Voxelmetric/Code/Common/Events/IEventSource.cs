@@ -4,11 +4,11 @@
     {
         //! Unsubscribes all listeners
         void Clear();
-        //! Registers listener to receive a certain kind of notifications from source
-        bool Subscribe(IEventListener<TEvent> listener, TEvent evt, bool register);
+        //! Registers a listener to receive a certain kind of notifications from the source
+        bool Register(IEventListener<TEvent> listener);
+        //! Unregisters a listener from receiving a certain kind of notifications from the source
+        bool Unregister(IEventListener<TEvent> listener);
         //! Notifies subscribers about something (implementation specific)	
         void NotifyAll(TEvent evt);
-        //! Notifies one specific subscriber
-        void NotifyOne(IEventListener<TEvent> listener, TEvent evt);
     }
 }

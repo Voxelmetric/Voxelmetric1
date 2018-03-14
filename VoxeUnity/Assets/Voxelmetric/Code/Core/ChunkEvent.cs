@@ -9,15 +9,16 @@ using Voxelmetric.Code.Data_types;
 namespace Voxelmetric.Code.Core
 {
     public class ChunkEvent :
-        IEventSource<ChunkState>, IEventListener<ChunkState>,
-        IEventSource<ChunkStateExternal>
+        IEventSource<ChunkState>,
+        IEventSource<ChunkStateExternal>,
+        IEventListener<ChunkState>
     {
         //! Number of registered listeners
         protected int ListenerCount { get; private set; }
         protected int ListenerCountMax { get; set; }
 
         //! List of external listeners
-        private readonly Dictionary<ChunkStateExternal, List<IEventListener<ChunkStateExternal>>> m_listenersExternal;
+        private List<IEventListener<ChunkStateExternal>> m_listenersExternal;
         private readonly ChunkEvent[] m_listeners;
         //! List of chunk listeners
         public ChunkEvent[] Listeners
@@ -28,10 +29,7 @@ namespace Voxelmetric.Code.Core
         protected ChunkEvent()
         {
             m_listeners = Helpers.CreateArray1D<ChunkEvent>(6);
-            m_listenersExternal = new Dictionary<ChunkStateExternal, List<IEventListener<ChunkStateExternal>>>
-            {
-                {ChunkStateExternal.Saved, new List<IEventListener<ChunkStateExternal>>()}
-            };
+            m_listenersExternal = new List<IEventListener<ChunkStateExternal>>();
 
             Clear();
         }
@@ -43,12 +41,12 @@ namespace Voxelmetric.Code.Core
 
             for (int i = 0; i < Listeners.Length; i++)
                 Listeners[i] = null;
-
-            foreach (var pair in m_listenersExternal)
-                pair.Value.Clear();
+            m_listenersExternal = new List<IEventListener<ChunkStateExternal>>();
         }
 
-        public bool Subscribe(IEventListener<ChunkState> listener, ChunkState evt, bool registerListener)
+        #region IEventSource<ChunkState>
+
+        public bool Register(IEventListener<ChunkState> listener)
         {
             if (listener==null || listener==this)
                 return false;
@@ -70,53 +68,70 @@ namespace Voxelmetric.Code.Core
                 dir = Direction.down;
 
             ChunkEvent chunkListener = (ChunkEvent)listener;
+            ChunkEvent l = Listeners[(int)dir];
 
-            // Register
-            if (registerListener)
+            // Do not register if already registred
+            if (l==listener)
+                return false;
+
+            // Subscribe in the first free slot
+            if (l==null)
             {
-                ChunkEvent l = Listeners[(int)dir];
-
-                // Do not register if already registred
-                if (l==listener)
-                    return false;
-
-                // Subscribe in the first free slot
-                if (l==null)
-                {
-                    ++ListenerCount;
-                    Assert.IsTrue(ListenerCount<=6);
-                    Listeners[(int)dir] = chunkListener;
-                    return true;
-                }
-
-                // We want to register but there is no free space
-                Assert.IsTrue(false);
+                ++ListenerCount;
+                Assert.IsTrue(ListenerCount<=6);
+                Listeners[(int)dir] = chunkListener;
+                return true;
             }
-            // Unregister
-            else
-            {
-                ChunkEvent l = Listeners[(int)dir];
 
-                // Do not unregister if it's something else than we expected
-                if (l!=listener && l!=null)
-                {
-                    Assert.IsTrue(false);
-                    return false;
-                }
-
-                // Only unregister already registered sections
-                if (l==listener)
-                {
-                    --ListenerCount;
-                    Assert.IsTrue(ListenerCount>=0);
-                    Listeners[(int)dir] = null;
-                    return true;
-                }
-            }
+            // We want to register but there is no free space
+            Assert.IsTrue(false);
 
             return false;
         }
 
+        public bool Unregister(IEventListener<ChunkState> listener)
+        {
+            if (listener == null || listener == this)
+                return false;
+
+            // Determine neighbors's direction as compared to current chunk
+            Chunk chunk = ((ChunkStateManager)this).chunk;
+            Chunk chunkNeighbor = ((ChunkStateManager)listener).chunk;
+            Vector3Int p = chunk.pos - chunkNeighbor.pos;
+            Direction dir = Direction.up;
+            if (p.x < 0)
+                dir = Direction.east;
+            else if (p.x > 0)
+                dir = Direction.west;
+            else if (p.z < 0)
+                dir = Direction.north;
+            else if (p.z > 0)
+                dir = Direction.south;
+            else if (p.y > 0)
+                dir = Direction.down;
+
+            ChunkEvent chunkListener = (ChunkEvent)listener;
+            ChunkEvent l = Listeners[(int)dir];
+
+            // Do not unregister if it's something else than we expected
+            if (l != listener && l != null)
+            {
+                Assert.IsTrue(false);
+                return false;
+            }
+
+            // Only unregister already registered sections
+            if (l == listener)
+            {
+                --ListenerCount;
+                Assert.IsTrue(ListenerCount >= 0);
+                Listeners[(int)dir] = null;
+                return true;
+            }
+
+            return false;
+        }
+        
         public void NotifyAll(ChunkState state)
         {
             // Notify each registered listener
@@ -124,84 +139,50 @@ namespace Voxelmetric.Code.Core
             {
                 ChunkEvent l = Listeners[i];
                 if (l != null)
-                   l.OnNotified(this, state);
-            }
-        }
-
-        public void NotifyOne(IEventListener<ChunkState> listener, ChunkState state)
-        {
-            // Notify one of the listeners
-            for (int i = 0; i < Listeners.Length; i++)
-            {
-                ChunkEvent l = Listeners[i];
-                if (l==listener)
-                {
                     l.OnNotified(this, state);
-                    return;
-                }
             }
         }
-        
-        public virtual void OnNotified(IEventSource<ChunkState> source, ChunkState state)
-        {
-            throw new NotImplementedException();
-        }
 
-        public bool Subscribe(IEventListener<ChunkStateExternal> listener, ChunkStateExternal evt, bool register)
-        {
-            // Retrieve a list of listeners for a given event
-            List<IEventListener<ChunkStateExternal>> evtListeners;
-            m_listenersExternal.TryGetValue(evt, out evtListeners);
+        #endregion
 
-            // Add/remove listener if possible
-            Assert.IsTrue(evtListeners!=null);
-            bool listenerRegistered = evtListeners.Contains(listener);
-            if (register && !listenerRegistered)
+        #region IEventSource<ChunkStateExternal>
+
+        public bool Register(IEventListener<ChunkStateExternal> listener)
+        {
+            Assert.IsTrue(listener != null);
+            if (!m_listenersExternal.Contains(listener))
             {
-                evtListeners.Add(listener);
-                return true;
-            }
-            if (!register && listenerRegistered)
-            {
-                evtListeners.Remove(listener);
+                m_listenersExternal.Add(listener);
                 return true;
             }
 
             return false;
         }
 
+        public bool Unregister(IEventListener<ChunkStateExternal> listener)
+        {
+            Assert.IsTrue(listener != null);
+            return m_listenersExternal.Remove(listener);
+        }
+
         public void NotifyAll(ChunkStateExternal evt)
         {
-            // Retrieve a list of listeners for a given event
-            List<IEventListener<ChunkStateExternal>> evtListeners;
-            m_listenersExternal.TryGetValue(evt, out evtListeners);
-
-            // Nofity each listener
-            Assert.IsTrue(evtListeners!=null);
-            for (int i = 0; i < evtListeners.Count; i++)
+            for (int i = 0; i < m_listenersExternal.Count; i++)
             {
-                IEventListener<ChunkStateExternal> listener = evtListeners[i];
+                IEventListener<ChunkStateExternal> listener = m_listenersExternal[i];
                 listener.OnNotified(this, evt);
             }
         }
 
-        public void NotifyOne(IEventListener<ChunkStateExternal> listener, ChunkStateExternal evt)
-        {
-            // Retrieve a list of listeners for a given event
-            List<IEventListener<ChunkStateExternal>> evtListeners;
-            m_listenersExternal.TryGetValue(evt, out evtListeners);
+        #endregion
 
-            // Notify our listener
-            Assert.IsTrue(evtListeners!=null);
-            for (int i = 0; i < evtListeners.Count; i++)
-            {
-                IEventListener<ChunkStateExternal> l = evtListeners[i];
-                if (l == listener)
-                {
-                    listener.OnNotified(this, evt);
-                    return;
-                }
-            }
+        #region IEventListener<ChunkState>
+
+        public virtual void OnNotified(IEventSource<ChunkState> source, ChunkState state)
+        {
+            throw new NotImplementedException();
         }
+
+        #endregion
     }
 }
