@@ -66,6 +66,16 @@ namespace Voxelmetric.Code.Core
             Chunk chunk = Globals.MemPools.ChunkPool.Pop();
             chunk.Init(world, pos);
             return chunk;
+        }        
+
+        public static void RemoveChunk(Chunk chunk)
+        {
+            // Reset the chunk back to defaults
+            chunk.Reset();
+            chunk.world = null; // Can't do inside Reset!!
+
+            // Return the chunk pack to object pool
+            Globals.MemPools.ChunkPool.Push(chunk);
         }
 
         /// <summary>
@@ -79,16 +89,6 @@ namespace Voxelmetric.Code.Core
                 Helpers.MakeChunkCoordinate(pos.y),
                 Helpers.MakeChunkCoordinate(pos.z)
                 );
-        }
-
-        public static void RemoveChunk(Chunk chunk)
-        {
-            // Reset the chunk back to defaults
-            chunk.Reset();
-            chunk.world = null; // Can't do inside Reset!!
-
-            // Return the chunk pack to object pool
-            Globals.MemPools.ChunkPool.Push(chunk);
         }
 
         public Chunk(int sideSize = Env.ChunkSize)
@@ -156,7 +156,7 @@ namespace Voxelmetric.Code.Core
 
             m_needsCollider = false;
         }
-
+        
         public bool CanUpdate
         {
             get { return stateManager.CanUpdate(); }

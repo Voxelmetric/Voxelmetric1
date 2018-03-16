@@ -37,21 +37,7 @@ namespace Voxelmetric.Code.Core
         private readonly object pendingStructureMutex = new object();
         private readonly Dictionary<Vector3Int, List<StructureContext>> pendingStructures = new Dictionary<Vector3Int, List<StructureContext>>();
         private readonly List<StructureInfo> pendingStructureInfo = new List<StructureInfo>();
-
-        public bool CheckInsideWorld(Vector3Int pos)
-        {
-            int offsetX = (Bounds.maxX+Bounds.minX)>>1;
-            int offsetZ = (Bounds.maxZ+Bounds.minZ)>>1;
-
-            int xx = (pos.x-offsetX)/Env.ChunkSize;
-            int zz = (pos.z-offsetZ)/Env.ChunkSize;
-            int yy = pos.y/Env.ChunkSize;
-            int horizontalRadius = (Bounds.maxX-Bounds.minX)/(2*Env.ChunkSize);
-
-            return xx*xx+zz*zz<=horizontalRadius*horizontalRadius &&
-                   yy>=(Bounds.minY/Env.ChunkSize) && yy<=(Bounds.maxY/Env.ChunkSize);
-        }
-
+        
         void Awake()
         {
             chunks = new WorldChunks(this);
@@ -316,6 +302,20 @@ namespace Voxelmetric.Code.Core
             for (int i = chunk.MaxPendingStructureListIndex; i<cnt; i++)
                 list[i].Apply(chunk);
             chunk.MaxPendingStructureListIndex = cnt-1;
+        }
+
+        public bool CheckInsideWorld(Vector3Int pos)
+        {
+            int offsetX = (Bounds.maxX + Bounds.minX) >> 1;
+            int offsetZ = (Bounds.maxZ + Bounds.minZ) >> 1;
+
+            int xx = (pos.x - offsetX) / Env.ChunkSize;
+            int zz = (pos.z - offsetZ) / Env.ChunkSize;
+            int yy = pos.y / Env.ChunkSize;
+            int horizontalRadius = (Bounds.maxX - Bounds.minX) / (2 * Env.ChunkSize);
+
+            return xx * xx + zz * zz <= horizontalRadius * horizontalRadius &&
+                   yy >= (Bounds.minY / Env.ChunkSize) && yy <= (Bounds.maxY / Env.ChunkSize);
         }
     }
 }

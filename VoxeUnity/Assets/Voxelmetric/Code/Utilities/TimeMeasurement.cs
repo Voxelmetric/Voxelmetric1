@@ -1,33 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
 using System.Threading;
 
 namespace Voxelmetric.Code.Utilities
 {
     public static class Clock
     {
-        public static double NormalizedMean(this ICollection<double> values)
-        {
-            if (values.Count == 0)
-                return double.NaN;
-
-            var deviations = values.Deviations().ToArray();
-            var meanDeviation = deviations.Sum(t => Math.Abs(t.Item2)) / values.Count;
-            return deviations.Where(t => t.Item2 > 0 || Math.Abs(t.Item2) <= meanDeviation).Average(t => t.Item1);
-        }
-
-        public static IEnumerable<Common.Collections.Tuple<double, double>> Deviations(this ICollection<double> values)
-        {
-            if (values.Count == 0)
-                yield break;
-
-            var avg = values.Average();
-            foreach (var d in values)
-                yield return Common.Collections.Tuple.Create(d, avg - d);
-        }
-
         private interface IStopwatch
         {
             bool IsRunning { get; }
@@ -135,18 +113,12 @@ namespace Voxelmetric.Code.Utilities
             action();
 
             var stopwatch = new T();
-            var timings = new double[5];
-            for (int i = 0; i < timings.Length; i++)
-            {
-                stopwatch.Reset();
-                stopwatch.Start();
-                for (int j = 0; j < iterations; j++)
-                    action();
-                stopwatch.Stop();
-                timings[i] = stopwatch.Elapsed.TotalMilliseconds;
-            }
+            stopwatch.Start();
+            for (int j = 0; j < iterations; j++)
+                action();
+            stopwatch.Stop();
 
-            return timings.NormalizedMean();
+            return stopwatch.Elapsed.TotalMilliseconds;
         }
 
         public static double BenchmarkTime(Action action, int iterations = 10000)
