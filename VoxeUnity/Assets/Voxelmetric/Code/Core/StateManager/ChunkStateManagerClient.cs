@@ -356,7 +356,6 @@ namespace Voxelmetric.Code.Core.StateManager
 
                     // Consider SaveData completed as well
                     stateManager.SetStateCompleted(NextStatePrepareSaveData);
-                    stateManager.m_isSaveNeeded = false;
                 }
                 else
                     stateManager.SetStatePending(NextStatePrepareSaveData);
@@ -422,7 +421,6 @@ namespace Voxelmetric.Code.Core.StateManager
             }
             
             stateManager.SetStateCompleted(CurrStateSaveData);
-            stateManager.m_isSaveNeeded = false;
             stateManager.m_taskRunning = false;
         }
 
@@ -762,7 +760,7 @@ namespace Voxelmetric.Code.Core.StateManager
                     return false;
 
                 // Wait for save if it was requested
-                if (m_isSaveNeeded)
+                if (IsStatePending(ChunkState.PrepareSaveData) || IsStatePending(ChunkState.SaveData))
                     return false;
 
                 ResetStatePending(CurrStateRemoveChunk);
