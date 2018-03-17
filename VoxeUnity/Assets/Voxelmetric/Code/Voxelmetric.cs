@@ -39,7 +39,7 @@ namespace Voxelmetric.Code
 
             List<Chunk> chunksToSave = new List<Chunk> ();
 
-            foreach (Chunk chunk in world.chunks.chunkCollection)
+            foreach (Chunk chunk in world.chunks.Chunks)
             {
                 // Ignore chunks that can't be saved at the moment
                 ChunkStateManagerClient stateManager = chunk.stateManager;

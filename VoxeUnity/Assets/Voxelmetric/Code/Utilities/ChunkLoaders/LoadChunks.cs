@@ -352,7 +352,7 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
                         // Create a new chunk if possible
                         Vector3Int newChunkPos = new Vector3Int(cx, cy, cz);
                         Chunk chunk;
-                        if (!chunks.CreateOrGetChunk(ref newChunkPos, out chunk))
+                        if (!chunks.Create(ref newChunkPos, out chunk))
                             continue;
 
                         if (FullLoadOnStartUp)
@@ -404,7 +404,7 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
                 if (stateManager.IsStateCompleted(ChunkState.Remove))
                 {
                     // Remove the chunk from our provider and unregister it from chunk storage
-                    world.chunks.RemoveChunk(chunk);
+                    world.chunks.Remove(chunk);
 
                     // Unregister from updates
                     m_updateRequests.RemoveAt(i);
@@ -547,7 +547,7 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
 
             if (world!=null && world.chunks!=null && (Diag_DrawWorldBounds || Diag_DrawLoadRange))
             {
-                foreach (Chunk chunk in world.chunks.chunkCollection)
+                foreach (Chunk chunk in world.chunks.Chunks)
                 {
                     if (Diag_DrawWorldBounds)
                     {
