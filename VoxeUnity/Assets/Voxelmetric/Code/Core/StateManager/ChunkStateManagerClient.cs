@@ -743,9 +743,7 @@ namespace Voxelmetric.Code.Core.StateManager
         #endregion Generate vertices
 
         #region Remove chunk
-
-        private static readonly ChunkState CurrStateRemoveChunk = ChunkState.Remove;
-
+        
         private bool RemoveChunk()
         {
             // If chunk was loaded we need to wait for other states with higher priority to finish first
@@ -755,14 +753,14 @@ namespace Voxelmetric.Code.Core.StateManager
                 if (!IsStateCompleted(ChunkState.Generate))
                     return false;
 
-                // Wait for save if it was requested
+                // Wait for save to complete if it was requested
                 if (IsStatePending(ChunkState.PrepareSaveData) || IsStatePending(ChunkState.SaveData))
                     return false;
 
-                ResetStatePending(CurrStateRemoveChunk);
+                ResetStatePending(ChunkState.Remove);
             }
 
-            SetStateCompleted(CurrStateRemoveChunk);
+            SetStateCompleted(ChunkState.Remove);
             return true;
         }
 

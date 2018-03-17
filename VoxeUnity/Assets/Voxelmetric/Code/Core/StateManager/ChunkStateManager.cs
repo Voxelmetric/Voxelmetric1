@@ -17,7 +17,10 @@ namespace Voxelmetric.Code.Core.StateManager
         private ChunkState m_pendingStates;
         //! Tasks already executed
         private ChunkState m_completedStates;
-        
+
+        //! If true, removal of chunk has been requested and no further requests are going to be accepted
+        private bool m_removalRequested;
+
         protected ChunkStateManager(Chunk chunk)
         {
             this.chunk = chunk;
@@ -37,6 +40,7 @@ namespace Voxelmetric.Code.Core.StateManager
 
             m_pendingStates = m_pendingStates.Reset();
             m_completedStates = m_completedStates.Reset();
+            m_removalRequested = false;
 
             m_taskRunning = false;
 
@@ -63,8 +67,14 @@ namespace Voxelmetric.Code.Core.StateManager
 
         public void SetStatePending(ChunkState state)
         {
-            if (state==ChunkState.Remove && Features.SerializeChunkWhenUnloading)
-                m_pendingStates = m_pendingStates.Set(ChunkState.PrepareSaveData);
+            if (m_removalRequested && (state == ChunkState.PrepareSaveData || state == ChunkState.Remove))
+                return;
+            if (state == ChunkState.Remove)
+            {
+                m_removalRequested = true;
+                if (Features.SerializeChunkWhenUnloading)
+                    m_pendingStates = m_pendingStates.Set(ChunkState.PrepareSaveData);
+            }            
 
             m_pendingStates = m_pendingStates.Set(state);
         }
