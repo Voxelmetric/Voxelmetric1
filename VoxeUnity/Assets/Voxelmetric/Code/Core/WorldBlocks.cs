@@ -21,8 +21,11 @@ namespace Voxelmetric.Code.Core
         /// <param name="pos">Global position of the block data</param>
         public BlockData Get(ref Vector3Int pos)
         {
+            // Transform the position into chunk coordinates
+            Vector3Int chunkPos = Chunk.ContainingChunkPos(ref pos);
+
             // Return air for chunk that do not exist
-            Chunk chunk = world.chunks.Get(ref pos);
+            Chunk chunk = world.chunks.Get(ref chunkPos);
             if (chunk==null)
                 return BlockProvider.AirBlock;
 
@@ -35,9 +38,12 @@ namespace Voxelmetric.Code.Core
 
         public BlockData Get(Vector3Int pos)
         {
-            // Return air for chunk that do not exist
-            Chunk chunk = world.chunks.Get(ref pos);
+            // Transform the position into chunk coordinates
+            Vector3Int chunkPos = Chunk.ContainingChunkPos(ref pos);
+                        
+            Chunk chunk = world.chunks.Get(ref chunkPos);
             if (chunk==null)
+                // Return air if the chunk that do not exist
                 return BlockProvider.AirBlock;
 
             int xx = Helpers.Mod(pos.x, Env.ChunkSize);
@@ -53,9 +59,12 @@ namespace Voxelmetric.Code.Core
         /// <param name="pos">Global position of the block</param>
         public Block GetBlock(ref Vector3Int pos)
         {
-            // Return air for chunk that do not exist
-            Chunk chunk = world.chunks.Get(ref pos);
+            // Transform the position into chunk coordinates
+            Vector3Int chunkPos = Chunk.ContainingChunkPos(ref pos);
+                                
+            Chunk chunk = world.chunks.Get(ref chunkPos);
             if (chunk==null)
+                // Return air if the chunk that do not exist
                 return world.blockProvider.BlockTypes[BlockProvider.AirType];
 
             int xx = Helpers.Mod(pos.x, Env.ChunkSize);
@@ -73,7 +82,10 @@ namespace Voxelmetric.Code.Core
         /// <param name="blockData">A block to be placed on a given position</param>
         public void Set(ref Vector3Int pos, BlockData blockData)
         {
-            Chunk chunk = world.chunks.Get(ref pos);
+            // Transform the position into chunk coordinates
+            Vector3Int chunkPos = Chunk.ContainingChunkPos(ref pos);
+
+            Chunk chunk = world.chunks.Get(ref chunkPos);
             if (chunk==null)
                 return;
 
@@ -92,7 +104,10 @@ namespace Voxelmetric.Code.Core
         /// <param name="blockData">A block to be placed on a given position</param>
         public void SetRaw(ref Vector3Int pos, BlockData blockData)
         {
-            Chunk chunk = world.chunks.Get(ref pos);
+            // Transform the position into chunk coordinates
+            Vector3Int chunkPos = Chunk.ContainingChunkPos(ref pos);
+
+            Chunk chunk = world.chunks.Get(ref chunkPos);
             if (chunk==null)
                 return;
 
@@ -115,6 +130,7 @@ namespace Voxelmetric.Code.Core
             if (posFrom.x>posTo.x || posFrom.y>posTo.y || posFrom.z>posTo.z)
                 return;
 
+            // Transform positions into chunk coordinates
             Vector3Int chunkPosFrom = Chunk.ContainingChunkPos(ref posFrom);
             Vector3Int chunkPosTo = Chunk.ContainingChunkPos(ref posTo);
 
@@ -161,6 +177,7 @@ namespace Voxelmetric.Code.Core
             if (posFrom.x>posTo.x || posFrom.y>posTo.y || posFrom.z>posTo.z)
                 return;
 
+            // Transform positions into chunk coordinates
             Vector3Int chunkPosFrom = Chunk.ContainingChunkPos(ref posFrom);
             Vector3Int chunkPosTo = Chunk.ContainingChunkPos(ref posTo);
 
@@ -205,7 +222,9 @@ namespace Voxelmetric.Code.Core
         public void Modify(ref Vector3Int pos, BlockData blockData, bool setBlockModified,
             Action<ModifyBlockContext> onModified = null)
         {
+            // Transform the position into chunk coordinates
             Vector3Int chunkPos = Chunk.ContainingChunkPos(ref pos);
+
             Chunk chunk = world.chunks.Get(ref chunkPos);
             if (chunk==null)
                 return;

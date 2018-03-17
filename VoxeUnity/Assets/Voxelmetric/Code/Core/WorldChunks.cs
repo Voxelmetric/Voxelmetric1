@@ -40,20 +40,22 @@ namespace Voxelmetric.Code.Core
         public bool Create(ref Vector3Int pos, out Chunk chunk)
         {
             Assert.IsTrue(Helpers.IsMainThread);
-            Vector3Int p = Chunk.ContainingChunkPos(ref pos);
 
             chunk = null;
 
+            // Transform the position into chunk coordinates
+            Vector3Int chunkPos = Chunk.ContainingChunkPos(ref pos);
+
             // Let's keep it within allowed world bounds
-            if (!world.IsCoordInsideWorld(ref p))
+            if (!world.IsCoordInsideWorld(ref chunkPos))
                 return false;
             
-            chunk = Get(ref p);
+            chunk = Get(ref chunkPos);
             if (chunk == null)
             {
                 // Create a new chunk if it does not exist yet
-                chunk = Chunk.CreateChunk(world, p);
-                chunks.Add(p, chunk);
+                chunk = Chunk.CreateChunk(world, chunkPos);
+                chunks.Add(chunkPos, chunk);
                 return true;
             }
 
@@ -76,6 +78,8 @@ namespace Voxelmetric.Code.Core
         /// <returns>A chunk at a given position</returns>
         public Chunk Get(ref Vector3Int pos)
         {
+            Assert.IsTrue(Chunk.ContainingChunkPos(ref pos) == pos);
+
             Chunk containerChunk;
             chunks.TryGetValue(pos, out containerChunk);
             return containerChunk;
