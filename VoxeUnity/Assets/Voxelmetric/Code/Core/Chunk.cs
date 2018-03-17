@@ -1,4 +1,5 @@
-﻿using UnityEngine.Profiling;
+﻿using UnityEngine.Assertions;
+using UnityEngine.Profiling;
 using Voxelmetric.Code.Common;
 using Voxelmetric.Code.Common.MemoryPooling;
 using Voxelmetric.Code.Core.StateManager;
@@ -11,7 +12,7 @@ namespace Voxelmetric.Code.Core
     {
         //! ID used by memory pools to map the chunk to a given thread. Must be accessed from the main thread
         private static int s_id = 0;
-
+        
         public World world { get; private set; }
         public ChunkStateManagerClient stateManager { get; private set; }
         public ChunkBlocks blocks { get; private set; }
@@ -20,14 +21,20 @@ namespace Voxelmetric.Code.Core
         public ChunkColliderGeometryHandler ChunkColliderGeometryHandler { get; private set; }
         public LocalPools pools { get; private set; }
 
-        public bool NeedApplyStructure;
-        public int MaxPendingStructureListIndex;
-
         //! Chunk position in world coordinates
         public Vector3Int pos { get; private set; }
 
         //! Bounding box in world coordinates. It always considers a full-size chunk
         public AABB WorldBounds;
+
+        //! List of chunk listeners
+        public Chunk[] Neighbors { get; }
+        //! Number of registered listeners        
+        public int NeighborCount { get; private set; }
+        public int NeighborCountMax { get; set; }
+
+        //! Size of chunk's side
+        public int SideSize { get; } = 0;
 
         //! Bounding coordinates in local space. Corresponds to real geometry
         public int minBounds, maxBounds;
@@ -37,6 +44,9 @@ namespace Voxelmetric.Code.Core
         //! ThreadID associated with this chunk. Used when working with object pools in MT environment. Resources
         //! need to be release where they were allocated. Thanks to this, associated containers could be made lock-free
         public int ThreadID { get; private set; }
+
+        public int MaxPendingStructureListIndex;
+        public bool NeedApplyStructure;
 
         //! Says whether the chunk needs its collider rebuilt
         private bool m_needsCollider;
@@ -53,12 +63,6 @@ namespace Voxelmetric.Code.Core
                 if (m_needsCollider && !prevNeedCollider)
                     blocks.RequestCollider();
             }
-        }
-
-        private int m_sideSize = 0;
-        public int SideSize
-        {
-            get { return m_sideSize; }
         }
 
         public static Chunk CreateChunk(World world, Vector3Int pos)
@@ -93,7 +97,7 @@ namespace Voxelmetric.Code.Core
 
         public Chunk(int sideSize = Env.ChunkSize)
         {
-            m_sideSize = sideSize;
+            SideSize = sideSize;
 
             // Associate Chunk with a certain thread and make use of its memory pool
             // This is necessary in order to have lock-free caches
@@ -102,6 +106,8 @@ namespace Voxelmetric.Code.Core
             
             stateManager = new ChunkStateManagerClient(this);
             blocks = new ChunkBlocks(this, sideSize);
+
+            Neighbors = Helpers.CreateArray1D<Chunk>(6);
         }
 
         public void Init(World world, Vector3Int pos)
@@ -130,7 +136,7 @@ namespace Voxelmetric.Code.Core
 
             WorldBounds = new AABB(
                 pos.x, pos.y, pos.z,
-                pos.x+ m_sideSize, pos.y+ m_sideSize, pos.z+ m_sideSize
+                pos.x+ SideSize, pos.y+ SideSize, pos.z+ SideSize
                 );
             minBounds = maxBounds = 0;
             minBoundsC = maxBoundsC = 0;
@@ -139,12 +145,21 @@ namespace Voxelmetric.Code.Core
 
             blocks.Init();
             stateManager.Init();
+
+            // Subscribe neighbors
+            SubscribeNeighbors(true);
         }
 
         private void Reset()
         {
-            NeedApplyStructure = true;
-            MaxPendingStructureListIndex = 0;
+            // Unsubscribe neighbors
+            SubscribeNeighbors(false);
+
+            // Reset neighor data
+            NeighborCount = 0;
+            NeighborCountMax = 0;
+            for (int i = 0; i < Neighbors.Length; i++)
+                Neighbors[i] = null;
 
             stateManager.Reset();
             blocks.Reset();
@@ -155,8 +170,165 @@ namespace Voxelmetric.Code.Core
             ChunkColliderGeometryHandler.Reset();
 
             m_needsCollider = false;
+            NeedApplyStructure = true;
+            MaxPendingStructureListIndex = 0;
         }
-        
+
+        public bool RegisterNeighbor(Chunk neighbor)
+        {
+            if (neighbor == null || neighbor == this)
+                return false;
+
+            // Determine neighbors's direction as compared to current chunk
+            Vector3Int p = pos - neighbor.pos;
+            Direction dir = Direction.up;
+            if (p.x < 0)
+                dir = Direction.east;
+            else if (p.x > 0)
+                dir = Direction.west;
+            else if (p.z < 0)
+                dir = Direction.north;
+            else if (p.z > 0)
+                dir = Direction.south;
+            else if (p.y > 0)
+                dir = Direction.down;
+
+            Chunk l = Neighbors[(int)dir];
+
+            // Do not register if already registred
+            if (l == neighbor)
+                return false;
+
+            // Subscribe in the first free slot
+            if (l == null)
+            {
+                ++NeighborCount;
+                Assert.IsTrue(NeighborCount <= 6);
+                Neighbors[(int)dir] = neighbor;
+                return true;
+            }
+
+            // We want to register but there is no free space
+            Assert.IsTrue(false);
+
+            return false;
+        }
+
+        public bool UnregisterNeighbor(Chunk neighbor)
+        {
+            if (neighbor == null || neighbor == this)
+                return false;
+
+            // Determine neighbors's direction as compared to current chunk
+            Vector3Int p = pos - neighbor.pos;
+            Direction dir = Direction.up;
+            if (p.x < 0)
+                dir = Direction.east;
+            else if (p.x > 0)
+                dir = Direction.west;
+            else if (p.z < 0)
+                dir = Direction.north;
+            else if (p.z > 0)
+                dir = Direction.south;
+            else if (p.y > 0)
+                dir = Direction.down;
+
+            Chunk l = Neighbors[(int)dir];
+
+            // Do not unregister if it's something else than we expected
+            if (l != neighbor && l != null)
+            {
+                Assert.IsTrue(false);
+                return false;
+            }
+
+            // Only unregister already registered sections
+            if (l == neighbor)
+            {
+                --NeighborCount;
+                Assert.IsTrue(NeighborCount >= 0);
+                Neighbors[(int)dir] = null;
+                return true;
+            }
+
+            return false;
+        }
+
+        private static void UpdateNeighborCount(Chunk chunk)
+        {
+            ChunkStateManagerClient stateManager = chunk.stateManager;
+            World world = chunk.world;
+            if (world == null)
+                return;
+
+            // Calculate how many listeners a chunk can have
+            int maxListeners = 0;
+            Vector3Int pos = chunk.pos;
+            if (world.CheckInsideWorld(pos.Add(Env.ChunkSize, 0, 0)) && (pos.x != world.Bounds.maxX))
+                ++maxListeners;
+            if (world.CheckInsideWorld(pos.Add(-Env.ChunkSize, 0, 0)) && (pos.x != world.Bounds.minX))
+                ++maxListeners;
+            if (world.CheckInsideWorld(pos.Add(0, Env.ChunkSize, 0)) && (pos.y != world.Bounds.maxY))
+                ++maxListeners;
+            if (world.CheckInsideWorld(pos.Add(0, -Env.ChunkSize, 0)) && (pos.y != world.Bounds.minY))
+                ++maxListeners;
+            if (world.CheckInsideWorld(pos.Add(0, 0, Env.ChunkSize)) && (pos.z != world.Bounds.maxZ))
+                ++maxListeners;
+            if (world.CheckInsideWorld(pos.Add(0, 0, -Env.ChunkSize)) && (pos.z != world.Bounds.minZ))
+                ++maxListeners;
+
+            //int prevListeners = stateManager.ListenerCountMax;
+
+            // Update max listeners and request geometry update
+            chunk.NeighborCountMax = maxListeners;
+
+            // Request synchronization of edges and build geometry
+            //if(prevListeners<maxListeners)
+            stateManager.m_syncEdgeBlocks = true;
+
+            // Geometry needs to be rebuild
+            stateManager.SetStatePending(ChunkState.BuildVertices);
+
+            // Collider might beed to be rebuild
+            if (chunk.NeedsCollider)
+                chunk.blocks.RequestCollider();
+        }
+
+        private void SubscribeNeighbors(bool subscribe)
+        {
+            SubscribeTwoNeighbors(pos.Add(Env.ChunkSize, 0, 0), subscribe);
+            SubscribeTwoNeighbors(pos.Add(-Env.ChunkSize, 0, 0), subscribe);
+            SubscribeTwoNeighbors(pos.Add(0, Env.ChunkSize, 0), subscribe);
+            SubscribeTwoNeighbors(pos.Add(0, -Env.ChunkSize, 0), subscribe);
+            SubscribeTwoNeighbors(pos.Add(0, 0, Env.ChunkSize), subscribe);
+            SubscribeTwoNeighbors(pos.Add(0, 0, -Env.ChunkSize), subscribe);
+
+            // Update required listener count
+            UpdateNeighborCount(this);
+        }
+
+        private void SubscribeTwoNeighbors(Vector3Int neighborPos, bool subscribe)
+        {
+            Chunk neighbor = world.chunks.Get(ref neighborPos);
+            if (neighbor == null)
+                return;
+
+            // Subscribe with each other. Passing Idle as event - it is ignored in this case anyway
+            if (subscribe)
+            {
+                neighbor.RegisterNeighbor(this);
+                RegisterNeighbor(neighbor);
+            }
+            else
+            {
+                neighbor.UnregisterNeighbor(this);
+                UnregisterNeighbor(neighbor);
+            }
+
+            // Update required listener count of the neighbor
+            UpdateNeighborCount(neighbor);
+        }
+
         public bool CanUpdate
         {
             get { return stateManager.CanUpdate(); }

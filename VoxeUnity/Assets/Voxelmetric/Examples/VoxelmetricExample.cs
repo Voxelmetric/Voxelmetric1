@@ -44,6 +44,9 @@ namespace Voxelmetric.Examples
 
         void Update()
         {
+            if (saveProgress != null && saveProgress.GetProgress() >= 100)
+                saveProgress = null;
+
             // Roatation
             if (Input.GetMouseButton(1))
             {
@@ -153,8 +156,12 @@ namespace Voxelmetric.Examples
         
         public void SaveAll()
         {
-            var chunksToSave = Code.Voxelmetric.SaveAll(world);
-            saveProgress = new SaveProgress(chunksToSave);
+            if (saveProgress != null)
+                return;
+
+            saveProgress = new SaveProgress(
+                Code.Voxelmetric.SaveAll(world)
+                );
         }
 
         public string SaveStatus()

@@ -58,9 +58,12 @@ namespace Voxelmetric.Code.Core.Serialization
 
         public bool IsBinarizeNecessary()
         {
-            if (m_blocksModified==null &&
+            // When doing a pure differential serialization we need data
+            if (
+                Features.UseDifferentialSerialization &&
                 !Features.UseDifferentialSerialization_ForceSaveHeaders &&
-                !m_hadDifferentialChange)
+                (m_blocksModified == null || !m_hadDifferentialChange)
+                )
                 return false;
 
             return true;
@@ -68,16 +71,6 @@ namespace Voxelmetric.Code.Core.Serialization
 
         public bool Binarize(BinaryWriter bw)
         {
-            // Do not serialize if there's no chunk data and empty chunk serialization is turned off
-            if (m_blocksModified==null)
-            {
-                if (!Features.UseDifferentialSerialization_ForceSaveHeaders &&
-                    !m_hadDifferentialChange
-                    )
-                    return false;
-                m_hadDifferentialChange = false;
-            }
-
             bw.Write(SaveVersion);
             bw.Write((byte)(Features.UseDifferentialSerialization ? 1 : 0));
             bw.Write(Env.ChunkSizePow3);
@@ -426,14 +419,23 @@ namespace Voxelmetric.Code.Core.Serialization
             return true;
         }
 
-        public void ConsumeChanges()
+        public bool ConsumeChanges()
         {
-            if (!Features.UseDifferentialSerialization)
-                return;
-
             ChunkBlocks blocks = Chunk.blocks;
-            if (blocks.modifiedBlocks.Count<=0)
-                return;
+
+            if (!Features.UseDifferentialSerialization)
+                return true;
+
+            if (Features.UseDifferentialSerialization_ForceSaveHeaders)
+            {
+                if (blocks.modifiedBlocks.Count <= 0)
+                    return true;
+            }
+            else
+            {
+                if (blocks.modifiedBlocks.Count <= 0)
+                    return false;
+            }
 
             m_hadDifferentialChange = true;
 
@@ -450,16 +452,21 @@ namespace Voxelmetric.Code.Core.Serialization
             }
 
             int cnt = blocksDictionary.Keys.Count;
-            m_blocksModified = new BlockData[cnt];
-            m_positionsModified = new BlockPos[cnt];
-
-            int index = 0;
-            foreach (var pair in blocksDictionary)
+            if (cnt > 0)
             {
-                m_blocksModified[index] = pair.Value;
-                m_positionsModified[index] = pair.Key;
-                ++index;
+                m_blocksModified = new BlockData[cnt];
+                m_positionsModified = new BlockPos[cnt];
+
+                int index = 0;
+                foreach (var pair in blocksDictionary)
+                {
+                    m_blocksModified[index] = pair.Value;
+                    m_positionsModified[index] = pair.Key;
+                    ++index;
+                }
             }
+
+            return true;
         }
 
         public void CommitChanges()

@@ -3,7 +3,7 @@ using Voxelmetric.Code.Core.Serialization;
 
 namespace Voxelmetric.Code.Core.StateManager
 {
-    public abstract class ChunkStateManager: ChunkEvent
+    public abstract class ChunkStateManager: ChunkEventSource
     {
         public Chunk chunk { get; private set; }
         
@@ -105,7 +105,20 @@ namespace Voxelmetric.Code.Core.StateManager
 
         public bool IsSavePossible
         {
-            get { return m_save!=null && !m_pendingStates.Check(ChunkState.Remove) && m_completedStates.Check(ChunkState.Generate); }
+            get {
+                // Serialization must be enabled
+                if (!Features.UseSerialization || m_save == null)
+                    return false;
+                // Chunk has to be generated first before we can save it
+                if (!m_completedStates.Check(ChunkState.Generate))
+                    return false;
+
+                // When doing a pure differential serialization we need the chunk to be modified in order to save it
+                return
+                    !Features.UseDifferentialSerialization ||
+                    Features.UseDifferentialSerialization_ForceSaveHeaders ||
+                    chunk.blocks.modifiedBlocks.Count>0;
+            }
         }
 
         public bool IsUpdateBlocksPossible

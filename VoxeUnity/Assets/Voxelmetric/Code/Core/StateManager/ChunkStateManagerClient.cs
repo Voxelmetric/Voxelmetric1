@@ -1,6 +1,5 @@
 ﻿using System;
 using Voxelmetric.Code.Common;
-using Voxelmetric.Code.Common.Events;
 using Voxelmetric.Code.Common.Extensions;
 using Voxelmetric.Code.Common.Threading;
 using Voxelmetric.Code.Common.Threading.Managers;
@@ -44,7 +43,7 @@ namespace Voxelmetric.Code.Core.StateManager
         private ChunkStateExternal m_stateExternal;
         
         //! If true, edges are to be synchronized with neighbor chunks
-        private bool m_syncEdgeBlocks;
+        public bool m_syncEdgeBlocks;
 
         //! Static shared pointers to callbacks
         private static readonly Action<ChunkStateManagerClient> actionOnLoadData = OnLoadData;
@@ -66,16 +65,11 @@ namespace Voxelmetric.Code.Core.StateManager
         public override void Init()
         {
             base.Init();
-
-            // Subscribe neighbors
-            SubscribeNeighbors(true);
         }
 
         public override void Reset()
         {
             base.Reset();
-
-            SubscribeNeighbors(false);
 
             m_stateExternal = ChunkStateExternal.None;
 
@@ -136,8 +130,8 @@ namespace Voxelmetric.Code.Core.StateManager
                 return;
             }
 
-            // Go from the least important bit to most important one. If a given bit it set
-            // we execute the task tied with it
+            // Go from the least important bit to most important one. If a given bit is set
+            // we execute a task tied with it
             {
                 if (IsStatePending(ChunkState.LoadData) && LoadData())
                     return;
@@ -373,11 +367,9 @@ namespace Voxelmetric.Code.Core.StateManager
 
             ResetStatePending(CurrStatePrepareSaveData);
             ResetStateCompleted(CurrStatePrepareSaveData);
-
-            if (Features.UseSerialization)
+            
+            if (Features.UseSerialization && m_save.ConsumeChanges())
             {
-                m_save.ConsumeChanges();
-
                 var task = Globals.MemPools.SMThreadPI.Pop();
                 m_poolState = m_poolState.Set(ChunkPoolItemState.ThreadPI);
                 m_threadPoolItem = task;
@@ -451,18 +443,20 @@ namespace Voxelmetric.Code.Core.StateManager
         }
 
         #endregion Save chunk data
-        
+
+        #region Synchronize edges
+
         private bool SynchronizeNeighbors()
         {
             // 6 neighbors are necessary
-            if (ListenerCount!=ListenerCountMax)
+            if (chunk.NeighborCount!=chunk.NeighborCountMax)
                 return false;
 
             // All neighbors have to have their data generated
-            for (int i = 0; i<Listeners.Length; i++)
+            for (int i = 0; i<chunk.Neighbors.Length; i++)
             {
-                var stateManager = (ChunkStateManagerClient)Listeners[i];
-                if (stateManager!=null && !stateManager.IsStateCompleted(ChunkState.Generate))
+                var neighbor = chunk.Neighbors[i];
+                if (neighbor!=null && !neighbor.stateManager.IsStateCompleted(ChunkState.Generate))
                     return false;
             }
 
@@ -481,17 +475,17 @@ namespace Voxelmetric.Code.Core.StateManager
             int chunkIterXY = sizeWithPaddingPow2 - sizeWithPadding;
 
             // Search for neighbors we are vertically aligned with
-            for (int i = 0; i<Listeners.Length; i++)
+            for (int i = 0; i<chunk.Neighbors.Length; i++)
             {
                 Chunk neighborChunk = dummyChunk;
                 Vector3Int neighborPos;
 
-                var chunkEvent = Listeners[i];
-                if (chunkEvent!=null)
+                var neighbor = chunk.Neighbors[i];
+                if (neighbor!=null)
                 {
-                    var stateManager = (ChunkStateManagerClient)chunkEvent;
-                    neighborChunk = stateManager.chunk;
-                    neighborPos = neighborChunk.pos;
+                    var stateManager = neighbor.stateManager;
+                    neighborChunk = neighbor;
+                    neighborPos = neighbor.pos;
                 }
                 else
                 {
@@ -625,6 +619,8 @@ namespace Voxelmetric.Code.Core.StateManager
             // 6 neighbors are necessary to be loaded before synchronizing
             return SynchronizeNeighbors() && SynchronizeEdges();
         }
+
+        #endregion
 
         #region Build collider geometry
 
@@ -771,90 +767,6 @@ namespace Voxelmetric.Code.Core.StateManager
         }
 
         #endregion Remove chunk
-
-        private static void UpdateListenersCount(ChunkStateManagerClient stateManager)
-        {
-            Chunk chunk = stateManager.chunk;
-            World world = chunk.world;
-            if (world==null)
-                return;
-
-            // Calculate how many listeners a chunk can have
-            int maxListeners = 0;
-            Vector3Int pos = chunk.pos;            
-            if (world.CheckInsideWorld(pos.Add( Env.ChunkSize, 0, 0)) && (pos.x!=world.Bounds.maxX))
-                ++maxListeners;
-            if (world.CheckInsideWorld(pos.Add(-Env.ChunkSize, 0, 0)) && (pos.x!=world.Bounds.minX))
-                ++maxListeners;
-            if (world.CheckInsideWorld(pos.Add(0,  Env.ChunkSize, 0)) && (pos.y!=world.Bounds.maxY))
-                ++maxListeners;
-            if (world.CheckInsideWorld(pos.Add(0, -Env.ChunkSize, 0)) && (pos.y!=world.Bounds.minY))
-                ++maxListeners;
-            if (world.CheckInsideWorld(pos.Add(0, 0,  Env.ChunkSize)) && (pos.z!=world.Bounds.maxZ))
-                ++maxListeners;
-            if (world.CheckInsideWorld(pos.Add(0, 0, -Env.ChunkSize)) && (pos.z!=world.Bounds.minZ))
-                ++maxListeners;
-
-            //int prevListeners = stateManager.ListenerCountMax;
-
-            // Update max listeners and request geometry update
-            stateManager.ListenerCountMax = maxListeners;
-            
-            // Request synchronization of edges and build geometry
-            //if(prevListeners<maxListeners)
-                stateManager.m_syncEdgeBlocks = true;
-
-            // Geometry needs to be rebuild
-            stateManager.SetStatePending(ChunkState.BuildVertices);
-
-            // Collider might beed to be rebuild
-            if(chunk.NeedsCollider)
-                chunk.blocks.RequestCollider();
-        }
-
-        private void SubscribeNeighbors(bool subscribe)
-        {
-            Vector3Int pos = chunk.pos;
-            SubscribeTwoNeighbors(pos.Add( Env.ChunkSize, 0, 0), subscribe);
-            SubscribeTwoNeighbors(pos.Add(-Env.ChunkSize, 0, 0), subscribe);
-            SubscribeTwoNeighbors(pos.Add(0,  Env.ChunkSize, 0), subscribe);
-            SubscribeTwoNeighbors(pos.Add(0, -Env.ChunkSize, 0), subscribe);
-            SubscribeTwoNeighbors(pos.Add(0, 0,  Env.ChunkSize), subscribe);
-            SubscribeTwoNeighbors(pos.Add(0, 0, -Env.ChunkSize), subscribe);
-
-            // Update required listener count
-            UpdateListenersCount(this);
-        }
         
-        private void SubscribeTwoNeighbors(Vector3Int neighborPos, bool subscribe)
-        {
-            World world = chunk.world;
-            if (world==null)
-                return;
-
-            // No chunk lookup if the neighbor positions can't be contained in the world
-            //if (!world.CheckInsideWorld(neighborPos))
-              //return;
-
-            Chunk neighbor = world.chunks.Get(ref neighborPos);
-            if (neighbor==null)
-                return;
-
-            ChunkStateManagerClient stateManager = neighbor.stateManager;
-            // Subscribe with each other. Passing Idle as event - it is ignored in this case anyway
-            if (subscribe)
-            {
-                stateManager.Register(this);
-                Register(stateManager);
-            }
-            else
-            {
-                stateManager.Unregister(this);
-                Unregister(stateManager);
-            }
-
-            // Update required listener count of the neighbor
-            UpdateListenersCount(stateManager);
-        }
     }
 }

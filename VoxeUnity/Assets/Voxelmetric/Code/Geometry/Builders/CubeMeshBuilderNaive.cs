@@ -43,7 +43,7 @@ namespace Voxelmetric.Code.Builders
 
             var blocks = chunk.blocks;
             var pools = chunk.pools;
-            var listeners = chunk.stateManager.Listeners;
+            var listeners = chunk.Neighbors;
 
             // Custom blocks have their own rules
             if (block.Custom)
