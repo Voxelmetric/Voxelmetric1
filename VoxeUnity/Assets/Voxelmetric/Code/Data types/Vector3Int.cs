@@ -15,34 +15,14 @@ namespace Voxelmetric.Code.Data_types
         public static readonly Vector3Int east = new Vector3Int(1, 0, 0);
         public static readonly Vector3Int west = new Vector3Int(-1, 0, 0);
 
-        public readonly int x, y, z;
+        public int x, y, z;
 
         public Vector3Int(int x, int y, int z)
         {
             this.x = x;
             this.y = y;
             this.z = z;
-        }
-
-        public Vector3Int Add(int x, int y, int z)
-        {
-            return new Vector3Int(this.x + x, this.y + y, this.z + z);
-        }
-
-        public Vector3Int Add(Vector3Int pos)
-        {
-            return new Vector3Int(x + pos.x, y + pos.y, z + pos.z);
-        }
-
-        public Vector3Int Subtract(Vector3Int pos)
-        {
-            return new Vector3Int(x - pos.x, y - pos.y, z - pos.z);
-        }
-
-        public Vector3Int Negate()
-        {
-            return new Vector3Int(-x, -y, -z);
-        }
+        }        
 
         public byte[] ToBytes()
         {
@@ -99,7 +79,7 @@ namespace Voxelmetric.Code.Data_types
             }
         }
 
-        public float Distance2(ref Vector3Int pos)
+        public int Distance2(ref Vector3Int pos)
         {
             int xx = x - pos.x;
             int yy = y - pos.y;
@@ -107,7 +87,7 @@ namespace Voxelmetric.Code.Data_types
             return xx*xx + yy*yy + zz*zz;
         }
 
-        public static float Distance2(ref Vector3Int pos1, ref Vector3Int pos2)
+        public static int Distance2(ref Vector3Int pos1, ref Vector3Int pos2)
         {
             int xx = pos1.x - pos2.x;
             int yy = pos1.y - pos2.y;
@@ -115,15 +95,94 @@ namespace Voxelmetric.Code.Data_types
             return xx*xx + yy*yy + zz*zz;
         }
 
-        //These operators let you add and subtract BlockPos from each other
-        //or check equality with == and !=
-        public static Vector3Int operator -(Vector3Int pos1, Vector3Int pos2)
+        public static Vector3Int operator -(Vector3Int pos)
         {
-            return pos1.Subtract(pos2);
+            Vector3Int v;
+            v.x = -pos.x;
+            v.y = -pos.y;
+            v.z = -pos.z;
+            return v;
         }
 
-        public static Vector3Int operator -(Vector3Int pos) {
-            return pos.Negate();
+        public static Vector3Int operator -(Vector3Int pos, int i)
+        {
+            Vector3Int v;
+            v.x = pos.x - i;
+            v.y = pos.y - i;
+            v.z = pos.z - i;
+            return v;
+        }
+
+        public static Vector3Int operator -(Vector3Int pos1, Vector3Int pos2)
+        {
+            Vector3Int v;
+            v.x = pos1.x - pos2.x;
+            v.y = pos1.y - pos2.y;
+            v.z = pos1.z - pos2.z;
+            return v;
+        }
+
+        public Vector3Int Sub(int x, int y, int z)
+        {
+            Vector3Int v;
+            v.x = this.x - x;
+            v.y = this.y - y;
+            v.z = this.z - z;
+            return v;
+        }
+
+        public static Vector3Int operator +(Vector3Int pos, int i)
+        {
+            Vector3Int v;
+            v.x = pos.x + i;
+            v.y = pos.y + i;
+            v.z = pos.z + i;
+            return v;
+        }
+
+        public static Vector3Int operator +(Vector3Int pos1, Vector3Int pos2)
+        {
+            Vector3Int v;
+            v.x = pos1.x + pos2.x;
+            v.y = pos1.y + pos2.y;
+            v.z = pos1.z + pos2.z;
+            return v;
+        }
+
+        public Vector3Int Add(int x, int y, int z)
+        {
+            Vector3Int v;
+            v.x = this.x + x;
+            v.y = this.y + y;
+            v.z = this.z + z;
+            return v;
+        }
+
+        public static Vector3Int operator *(Vector3Int pos, int i)
+        {
+            Vector3Int v;
+            v.x = pos.x * i;
+            v.y = pos.y * i;
+            v.z = pos.z * i;
+            return v;
+        }
+
+        public static Vector3Int operator *(Vector3Int pos1, Vector3Int pos2)
+        {
+            Vector3Int v;
+            v.x = pos1.x * pos2.x;
+            v.y = pos1.y * pos2.y;
+            v.z = pos1.z * pos2.z;
+            return v;
+        }
+
+        public Vector3Int Mul(int x, int y, int z)
+        {
+            Vector3Int v;
+            v.x = this.x * x;
+            v.y = this.y * y;
+            v.z = this.z * z;
+            return v;
         }
 
         public static bool operator >(Vector3Int pos1, Vector3Int pos2)
@@ -144,21 +203,6 @@ namespace Voxelmetric.Code.Data_types
         public static bool operator <=(Vector3Int pos1, Vector3Int pos2)
         {
             return (pos1.x <= pos2.x || pos1.y <= pos2.y || pos1.z <= pos2.z);
-        }
-
-        public static Vector3Int operator +(Vector3Int pos1, Vector3Int pos2)
-        {
-            return pos1.Add(pos2);
-        }
-
-        public static Vector3Int operator *(Vector3Int pos, int i)
-        {
-            return new Vector3Int(pos.x * i, pos.y * i, pos.z * i);
-        }
-
-        public static Vector3Int operator *(Vector3Int pos1, Vector3Int pos2)
-        {
-            return new Vector3Int(pos1.x * pos2.x, pos1.y * pos2.y, pos1.z * pos2.z);
         }
 
         #region Struct comparison

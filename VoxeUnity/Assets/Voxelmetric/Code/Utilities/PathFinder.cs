@@ -89,13 +89,13 @@ namespace Voxelmetric.Code.Utilities
             Heuristics pos;
             closed.TryGetValue(lastTile, out pos);
             path.Clear();
-            path.Add(lastTile.Add(Direction.up));
+            path.Add(lastTile + Direction.up);
 
             open.TryGetValue(lastTile, out pos);
 
             while (pos.parent!=start)
             {
-                path.Insert(0, pos.parent.Add(Direction.up));
+                path.Insert(0, pos.parent + Direction.up);
                 if (!closed.TryGetValue(pos.parent, out pos))
                     break;
             }

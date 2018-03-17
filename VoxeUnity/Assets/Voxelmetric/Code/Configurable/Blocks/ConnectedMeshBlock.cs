@@ -45,7 +45,7 @@ public class ConnectedMeshBlock: CustomMeshBlock
 
         RenderGeometryBatcher batcher = chunk.GeometryHandler.Batcher;
 
-        Vector3Int sidePos = face.pos.Add(face.side);
+        Vector3Int sidePos = face.pos + face.side;
         if (meshConfig.connectsToSolid && blocks.Get(ref sidePos).Solid)
         {
             rect = textures.GetTexture(chunk, ref face.pos, face.side);

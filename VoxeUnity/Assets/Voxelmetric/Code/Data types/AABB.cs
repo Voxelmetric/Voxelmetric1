@@ -28,7 +28,7 @@ namespace Voxelmetric.Code.Data_types
                    z>minY && z<maxZ;
         }
 
-        public bool IsInside(Vector3 pos)
+        public bool IsInside(ref Vector3 pos)
         {
             return pos.x>minX && pos.x<maxX &&
                    pos.y>minY && pos.y<maxY &&
