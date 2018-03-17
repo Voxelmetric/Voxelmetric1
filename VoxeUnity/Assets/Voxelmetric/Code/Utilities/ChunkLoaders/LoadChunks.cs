@@ -434,7 +434,7 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
             // Chunk is too far away. Remove it
             if (!m_clipmap.IsInsideBounds_Transformed(tx, ty, tz))
             {
-                stateManager.RequestState(ChunkState.Remove);
+                stateManager.SetStatePending(ChunkState.Remove);
             }
             else
             {

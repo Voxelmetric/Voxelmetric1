@@ -447,7 +447,7 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
             // Remove the chunk if it is too far away
             if (xDist>hRadius*hRadius || yDist>vRadius*vRadius)
             {
-                stateManager.RequestState(ChunkState.Remove);
+                stateManager.SetStatePending(ChunkState.Remove);
             }
             else
             {

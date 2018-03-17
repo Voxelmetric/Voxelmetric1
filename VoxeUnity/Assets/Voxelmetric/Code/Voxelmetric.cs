@@ -47,7 +47,7 @@ namespace Voxelmetric.Code
                     continue;
 
                 chunksToSave.Add(chunk);
-                stateManager.RequestState(ChunkState.PrepareSaveData);
+                stateManager.SetStatePending(ChunkState.PrepareSaveData);
             }
 
             return chunksToSave;

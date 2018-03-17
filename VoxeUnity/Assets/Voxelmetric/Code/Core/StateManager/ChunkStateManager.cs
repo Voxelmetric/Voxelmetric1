@@ -12,17 +12,12 @@ namespace Voxelmetric.Code.Core.StateManager
 
         //! Specifies whether there's a task running on this Chunk
         protected volatile bool m_taskRunning;
-        //! Next state after currently finished state
-        protected ChunkState m_nextState;
         //! States waiting to be processed
-        protected ChunkState m_pendingStates;
+        private ChunkState m_pendingStates;
         //! Tasks already executed
-        protected ChunkState m_completedStates;
-        //! Just like m_completedStates, but it is synchronized on the main thread once a check for m_taskRunning is passed
-        protected ChunkState m_completedStatesSafe;
+        private ChunkState m_completedStates;
         
         //! If true, removal of chunk has been requested and no further requests are going to be accepted
-        protected bool m_removalRequested;
         protected bool m_isSaveNeeded;
 
         protected ChunkStateManager(Chunk chunk)
@@ -35,18 +30,15 @@ namespace Voxelmetric.Code.Core.StateManager
         public virtual void Init()
         {
             // Request this chunk to be generated
-            OnNotified(this, ChunkState.LoadData);
+            m_pendingStates = m_pendingStates.Set(ChunkState.LoadData);
         }
 
         public virtual void Reset()
         {
             Clear();
 
-            m_nextState = m_nextState.Reset();
             m_pendingStates = m_pendingStates.Reset();
             m_completedStates = m_completedStates.Reset();
-            m_completedStatesSafe = m_completedStates;
-            m_removalRequested = false;
             m_isSaveNeeded = false;
 
             m_taskRunning = false;
@@ -64,17 +56,15 @@ namespace Voxelmetric.Code.Core.StateManager
             if (m_taskRunning)
                 return false;
 
-            // Synchronize the value with what we have on a different thread. It would be no big deal not having this at
-            // all. However, it is technically more correct.
-            m_completedStatesSafe = m_completedStates;
-
             // Once this Chunk is marked as finished we ignore any further requests and won't perform any updates
-            return !m_completedStatesSafe.Check(ChunkState.Remove);
+            return !m_completedStates.Check(ChunkState.Remove);
         }
 
         public abstract void Update();
 
-        public void RequestState(ChunkState state)
+        #region Pending states
+
+        public void SetStatePending(ChunkState state)
         {
             switch (state)
             {
@@ -86,13 +76,9 @@ namespace Voxelmetric.Code.Core.StateManager
 
                 case ChunkState.Remove:
                 {
-                    if (m_removalRequested)
-                        return;
-                    m_removalRequested = true;
-
+                    m_pendingStates = m_pendingStates.Set(ChunkState.Remove);
                     if (Features.SerializeChunkWhenUnloading)
-                        OnNotified(this, ChunkState.PrepareSaveData);
-                    OnNotified(this, ChunkState.Remove);
+                        m_pendingStates = m_pendingStates.Set(ChunkState.PrepareSaveData);
                 }
                 break;
             }
@@ -100,20 +86,40 @@ namespace Voxelmetric.Code.Core.StateManager
             m_pendingStates = m_pendingStates.Set(state);
         }
 
-        public void ResetRequest(ChunkState state)
+        protected void ResetStatePending(ChunkState state)
         {
-            m_pendingStates = m_pendingStates.Reset(state);
+           m_pendingStates = m_pendingStates.Reset(state);
+        }
+
+        protected bool IsStatePending(ChunkState state)
+        {
+            return m_pendingStates.Check(state);
+        }
+
+        #endregion
+
+        #region Completed states
+
+        protected void SetStateCompleted(ChunkState state)
+        {
+            m_completedStates = m_completedStates.Set(state);
+        }
+
+        protected void ResetStateCompleted(ChunkState state)
+        {
+            m_completedStates = m_completedStates.Reset(state);
         }
 
         public bool IsStateCompleted(ChunkState state)
         {
-            return m_completedStatesSafe.Check(state);
+            return m_completedStates.Check(state);
         }
-        
+
+        #endregion
 
         public bool IsSavePossible
         {
-            get { return m_save!=null && !m_removalRequested && m_completedStatesSafe.Check(ChunkState.Generate); }
+            get { return m_save!=null && !m_pendingStates.Check(ChunkState.Remove) && m_completedStates.Check(ChunkState.Generate); }
         }
 
         public bool IsUpdateBlocksPossible

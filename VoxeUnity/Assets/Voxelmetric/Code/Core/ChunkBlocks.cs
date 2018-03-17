@@ -575,7 +575,7 @@ namespace Voxelmetric.Code.Core
                 lastUpdateTimeGeometry = now;
 
                 // Request rebuild on this chunk
-                stateManager.RequestState(ChunkState.BuildVerticesNow);
+                stateManager.SetStatePending(ChunkState.BuildVerticesNow);
 
                 // Notify neighbors that they need to rebuild their geometry
                 if (rebuildMaskGeometry>0)
@@ -587,7 +587,7 @@ namespace Voxelmetric.Code.Core
                         if (listener!=null && ((rebuildMaskGeometry>>j)&1)!=0)
                         {
                             // Request rebuild on neighbor chunks
-                            listener.RequestState(ChunkState.BuildVerticesNow);
+                            listener.SetStatePending(ChunkState.BuildVerticesNow);
                         }
                     }
                 }
@@ -601,7 +601,7 @@ namespace Voxelmetric.Code.Core
                 lastUpdateTimeCollider = now;
 
                 // Request rebuild on this chunk
-                stateManager.RequestState(ChunkState.BuildColliderNow);
+                stateManager.SetStatePending(ChunkState.BuildColliderNow);
 
                 // Notify neighbors that they need to rebuilt their geometry
                 if (rebuildMaskCollider > 0)
@@ -614,7 +614,7 @@ namespace Voxelmetric.Code.Core
                         {
                             // Request rebuild on neighbor chunks
                             if (listener.chunk.NeedsCollider)
-                                listener.RequestState(ChunkState.BuildColliderNow);
+                                listener.SetStatePending(ChunkState.BuildColliderNow);
                         }
                     }
                 }
