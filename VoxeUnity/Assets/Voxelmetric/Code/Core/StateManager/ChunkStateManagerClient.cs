@@ -189,7 +189,7 @@ namespace Voxelmetric.Code.Core.StateManager
         {
             // In order to save performance, we generate chunk data on-demand - when the chunk can be seen
             if (!PossiblyVisible)
-                return false;
+                return true;
 
             ResetStatePending(CurrStateLoadData);
             ResetStateCompleted(CurrStateLoadData);
@@ -648,7 +648,7 @@ namespace Voxelmetric.Code.Core.StateManager
         {
             // TODO: Having some sort of condition for colliders would be nice
             //if (!xyz)
-                //return fasle;
+                //return true;
 
             if (!IsStateCompleted(ChunkState.Generate))
                 return true;
@@ -708,7 +708,7 @@ namespace Voxelmetric.Code.Core.StateManager
         {
             // To save performance we generate geometry on-demand - when the chunk can be seen
             if (!Visible)
-                return false;
+                return true;
 
             if (!IsStateCompleted(ChunkState.Generate))
                 return true;
