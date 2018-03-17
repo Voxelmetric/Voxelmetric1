@@ -1,4 +1,5 @@
-﻿using Voxelmetric.Code.Common.Extensions;
+﻿using UnityEngine.Assertions;
+using Voxelmetric.Code.Common.Extensions;
 using Voxelmetric.Code.Core.Serialization;
 
 namespace Voxelmetric.Code.Core.StateManager
@@ -47,8 +48,8 @@ namespace Voxelmetric.Code.Core.StateManager
         {
             // Do not do any processing as long as there is any task still running
             // Note that this check is not thread-safe because this value can be changed from a different thread. However,
-            // we do not care. The worst thing that can happen is that we read a value which is one frame old. So be it.
-            // Thanks to being this relaxed approach we do not need any synchronization primitives at all.
+            // we do not care. The worst thing that can happen is that we read a value which is one frame old...
+            // Thanks to this relaxed approach we do not need any synchronization primitives anywhere.
             if (m_taskRunning)
                 return false;
 
@@ -62,12 +63,8 @@ namespace Voxelmetric.Code.Core.StateManager
 
         public void SetStatePending(ChunkState state)
         {
-            if (state==ChunkState.Remove)
-            {
-                m_pendingStates = m_pendingStates.Set(ChunkState.Remove);
-                if (Features.SerializeChunkWhenUnloading)
-                    m_pendingStates = m_pendingStates.Set(ChunkState.PrepareSaveData);
-            }
+            if (state==ChunkState.Remove && Features.SerializeChunkWhenUnloading)
+                m_pendingStates = m_pendingStates.Set(ChunkState.PrepareSaveData);
 
             m_pendingStates = m_pendingStates.Set(state);
         }
@@ -107,13 +104,14 @@ namespace Voxelmetric.Code.Core.StateManager
         {
             get {
                 // Serialization must be enabled
-                if (!Features.UseSerialization || m_save == null)
+                if (!Features.UseSerialization)
                     return false;
+
                 // Chunk has to be generated first before we can save it
                 if (!m_completedStates.Check(ChunkState.Generate))
                     return false;
 
-                // When doing a pure differential serialization we need the chunk to be modified in order to save it
+                // When doing a pure differential serialization chunk needs to be modified before we can save it
                 return
                     !Features.UseDifferentialSerialization ||
                     Features.UseDifferentialSerialization_ForceSaveHeaders ||
@@ -123,7 +121,14 @@ namespace Voxelmetric.Code.Core.StateManager
 
         public bool IsUpdateBlocksPossible
         {
-            get { return !m_pendingStates.Check(ChunkState.PrepareSaveData) && !m_pendingStates.Check(ChunkState.SaveData); }
+            get {
+                // Chunk has to be generated first before we can update its blocks
+                if (!m_completedStates.Check(ChunkState.Generate))
+                    return false;
+
+                // Never update during saving
+                return !m_pendingStates.Check(ChunkState.PrepareSaveData) && !m_pendingStates.Check(ChunkState.SaveData);
+            }
         }
 
         public abstract void SetMeshBuilt();

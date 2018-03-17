@@ -251,7 +251,7 @@ namespace Voxelmetric.Code.Core.StateManager
             ResetStatePending(CurrStatePrepareGenerate);
             ResetStateCompleted(CurrStatePrepareGenerate);
 
-            if (Features.UseSerialization)
+            if (Features.UseSerialization && m_save.CanDecompress())
             {
                 var task = Globals.MemPools.SMThreadPI.Pop();
                 m_poolState = m_poolState.Set(ChunkPoolItemState.ThreadPI);

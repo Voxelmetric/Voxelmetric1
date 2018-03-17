@@ -31,7 +31,7 @@ namespace Voxelmetric.Code.Core
         public Chunk[] Neighbors { get; }
         //! Number of registered listeners        
         public int NeighborCount { get; private set; }
-        public int NeighborCountMax { get; set; }
+        public int NeighborCountMax { get; private set; }
 
         //! Size of chunk's side
         public int SideSize { get; } = 0;
@@ -76,7 +76,7 @@ namespace Voxelmetric.Code.Core
         {
             // Reset the chunk back to defaults
             chunk.Reset();
-            chunk.world = null; // Can't do inside Reset!!
+            chunk.world = null;
 
             // Return the chunk pack to object pool
             Globals.MemPools.ChunkPool.Push(chunk);
@@ -172,7 +172,90 @@ namespace Voxelmetric.Code.Core
             m_needsCollider = false;
             NeedApplyStructure = true;
             MaxPendingStructureListIndex = 0;
+
+            //chunk.world = null; <-- must not be done inside here! Do it outside the method
         }
+        
+        public bool CanUpdate
+        {
+            get { return stateManager.CanUpdate(); }
+        }
+
+        public void UpdateState()
+        {
+            // Do not update our chunk until it has all its data prepared
+            if (stateManager.IsStateCompleted(ChunkState.Generate))
+            {
+                // Apply pending structures
+                world.ApplyPendingStructures(this);
+
+                // Update logic
+                if (logic!=null)
+                    logic.Update();
+
+                // Update blocks
+                blocks.Update();
+            }
+
+            // Process chunk tasks
+            stateManager.Update();
+        }
+
+        public bool UpdateCollisionGeometry()
+        {
+            // Release the collider when no longer needed
+            if (!NeedsCollider)
+            {
+                stateManager.SetColliderBuilt();
+                ChunkColliderGeometryHandler.Reset();
+                return false;
+            }
+
+            // Build collision geometry only if there is enough time
+            if (!Globals.GeometryBudget.HasTimeBudget)
+                return false;
+            
+            // Build collider if necessary
+            if (stateManager.IsStateCompleted(ChunkStates.CurrStateBuildCollider))
+            {
+                Profiler.BeginSample("UpdateCollisionGeometry");
+                Globals.GeometryBudget.StartMeasurement();
+
+                stateManager.SetColliderBuilt();
+                ChunkColliderGeometryHandler.Commit();
+
+                Globals.GeometryBudget.StopMeasurement();
+                Profiler.EndSample();
+                return true;
+            }
+            
+            return false;
+        }
+
+        public bool UpdateRenderGeometry()
+        {
+            // Build render geometry only if there is enough time
+            if (!Globals.GeometryBudget.HasTimeBudget)
+                return false;
+            
+            // Build chunk mesh if necessary
+            if (stateManager.IsStateCompleted(ChunkStates.CurrStateBuildVertices))
+            {
+                Profiler.BeginSample("UpdateRenderGeometry");
+                Globals.GeometryBudget.StartMeasurement();
+
+                stateManager.SetMeshBuilt();
+                GeometryHandler.Commit();
+
+                Globals.GeometryBudget.StopMeasurement();
+                Profiler.EndSample();
+                return true;
+            }
+            
+            return false;
+        }
+
+        #region Neighbors
 
         public bool RegisterNeighbor(Chunk neighbor)
         {
@@ -329,83 +412,6 @@ namespace Voxelmetric.Code.Core
             UpdateNeighborCount(neighbor);
         }
 
-        public bool CanUpdate
-        {
-            get { return stateManager.CanUpdate(); }
-        }
-
-        public void UpdateState()
-        {
-            // Do not update our chunk until it has all its data prepared
-            if (stateManager.IsStateCompleted(ChunkState.Generate))
-            {
-                // Apply pending structures
-                world.ApplyPendingStructures(this);
-
-                // Update logic
-                if (logic!=null)
-                    logic.Update();
-
-                // Update blocks
-                blocks.Update();
-            }
-
-            // Process chunk tasks
-            stateManager.Update();
-        }
-
-        public bool UpdateCollisionGeometry()
-        {
-            // Release the collider when no longer needed
-            if (!NeedsCollider)
-            {
-                stateManager.SetColliderBuilt();
-                ChunkColliderGeometryHandler.Reset();
-                return false;
-            }
-
-            // Build collision geometry only if there is enough time
-            if (!Globals.GeometryBudget.HasTimeBudget)
-                return false;
-            
-            // Build collider if necessary
-            if (stateManager.IsStateCompleted(ChunkStates.CurrStateBuildCollider))
-            {
-                Profiler.BeginSample("UpdateCollisionGeometry");
-                Globals.GeometryBudget.StartMeasurement();
-
-                stateManager.SetColliderBuilt();
-                ChunkColliderGeometryHandler.Commit();
-
-                Globals.GeometryBudget.StopMeasurement();
-                Profiler.EndSample();
-                return true;
-            }
-            
-            return false;
-        }
-
-        public bool UpdateRenderGeometry()
-        {
-            // Build render geometry only if there is enough time
-            if (!Globals.GeometryBudget.HasTimeBudget)
-                return false;
-            
-            // Build chunk mesh if necessary
-            if (stateManager.IsStateCompleted(ChunkStates.CurrStateBuildVertices))
-            {
-                Profiler.BeginSample("UpdateRenderGeometry");
-                Globals.GeometryBudget.StartMeasurement();
-
-                stateManager.SetMeshBuilt();
-                GeometryHandler.Commit();
-
-                Globals.GeometryBudget.StopMeasurement();
-                Profiler.EndSample();
-                return true;
-            }
-            
-            return false;
-        }
+        #endregion
     }
 }

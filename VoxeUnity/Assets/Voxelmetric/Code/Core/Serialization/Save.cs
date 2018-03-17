@@ -12,10 +12,6 @@ namespace Voxelmetric.Code.Core.Serialization
     {
         public static readonly short SaveVersion = 1;
 
-        //! If true and a differential serialization is enabled, it says that there was once a difference
-        //! Without this headers would not be serialized if a change was made on chunk that would return it to its default state
-        private bool m_hadDifferentialChange = false;
-        
         public Chunk Chunk { get; private set; }
         public bool IsDifferential { get; private set; }
 
@@ -27,7 +23,6 @@ namespace Voxelmetric.Code.Core.Serialization
         // Temporary structures
         private byte[] m_positionsBytes;
         private byte[] m_blocksBytes;
-        
 
         public Save(Chunk chunk)
         {
@@ -37,23 +32,22 @@ namespace Voxelmetric.Code.Core.Serialization
 
         public void Reset()
         {
-            m_hadDifferentialChange = false;
             MarkAsProcessed();
-            
-            // Reset temporary buffers
-            m_positionsBytes = null;
-            m_blocksBytes = null;
-
-            // Release the memory allocated by temporary buffers
-            m_positionsModified = null;
-            m_blocksModified = null;
+            ResetTemporary();            
         }
-
+        
         public void MarkAsProcessed()
         {
             // Release the memory allocated by temporary buffers
             m_positionsModified = null;
             m_blocksModified = null;
+        }
+
+        private void ResetTemporary()
+        {
+            // Reset temporary buffers
+            m_positionsBytes = null;
+            m_blocksBytes = null;
         }
 
         public bool IsBinarizeNecessary()
@@ -62,7 +56,7 @@ namespace Voxelmetric.Code.Core.Serialization
             if (
                 Features.UseDifferentialSerialization &&
                 !Features.UseDifferentialSerialization_ForceSaveHeaders &&
-                (m_blocksModified == null || !m_hadDifferentialChange)
+                m_blocksModified == null
                 )
                 return false;
 
@@ -96,17 +90,12 @@ namespace Voxelmetric.Code.Core.Serialization
             }
             else
             {
-                int blkLenBytes = m_blocksModified.Length * blockDataSize;
-
                 // Write compressed data to file
-                bw.Write(blkLenBytes);
-                bw.Write(m_blocksBytes, 0, blkLenBytes);
+                bw.Write(m_blocksBytes.Length);
+                bw.Write(m_blocksBytes, 0, m_blocksBytes.Length);
             }
 
-            // We no longer need the temporary buffers
-            m_positionsBytes = null;
-            m_blocksBytes = null;
-
+            ResetTemporary();
             return true;
         }
 
@@ -183,11 +172,7 @@ namespace Voxelmetric.Code.Core.Serialization
                     }
                 }
                 else
-                {
-                    // If somebody switched from full to differential serialization, make it so that the next time the chunk is serialized it's saved as diff
-                    if (Features.UseDifferentialSerialization)
-                        m_hadDifferentialChange = true;
-                    
+                {                    
                     int blkLenBytes = br.ReadInt32();
                     m_blocksBytes = new byte[blkLenBytes];
 
@@ -208,9 +193,7 @@ namespace Voxelmetric.Code.Core.Serialization
             {
                 // Revert any changes we performed on our chunk
                 Chunk.blocks.NonEmptyBlocks = -1;
-                
-                m_positionsBytes = null;
-                m_blocksBytes = null;
+                ResetTemporary();
             }
 
             return success;
@@ -220,46 +203,38 @@ namespace Voxelmetric.Code.Core.Serialization
         {
             if (Features.UseDifferentialSerialization)
             {
-                if (m_blocksModified != null)
+                var provider = Chunk.world.blockProvider;
+                int blockPosSize = StructSerialization.TSSize<BlockPos>.ValueSize;
+                int blockDataSize = StructSerialization.TSSize<BlockData>.ValueSize;
+
+                int posLenBytes = m_blocksModified.Length * blockPosSize;
+                int blkLenBytes = m_blocksModified.Length * blockDataSize;
+                m_positionsBytes = new byte[posLenBytes];
+                m_blocksBytes = new byte[blkLenBytes];
+
+                unsafe
                 {
-                    var provider = Chunk.world.blockProvider;
-                    int blockPosSize = StructSerialization.TSSize<BlockPos>.ValueSize;
-                    int blockDataSize = StructSerialization.TSSize<BlockData>.ValueSize;
-
-                    int posLenBytes = m_blocksModified.Length * blockPosSize;
-                    int blkLenBytes = m_blocksModified.Length * blockDataSize;
-                    m_positionsBytes = new byte[posLenBytes];
-                    m_blocksBytes = new byte[blkLenBytes];
-
-                    unsafe
+                    // Pack positions to a byte array
+                    fixed (byte* pDst = m_positionsBytes)
                     {
-                        // Pack positions to a byte array
-                        fixed (byte* pDst = m_positionsBytes)
+                        for (int i = 0, j = 0; i < m_blocksModified.Length; i++, j += blockPosSize)
                         {
-                            for (int i = 0, j = 0; i < m_blocksModified.Length; i++, j += blockPosSize)
-                            {
-                                *(BlockPos*)&pDst[j] = m_positionsModified[i];
-                            }
-                        }
-                        // Pack block data to a byte array
-                        fixed (BlockData* pBD = m_blocksModified)
-                        fixed (byte* pDst = m_blocksBytes)
-                        {
-                            for (int i = 0, j = 0; i < m_blocksModified.Length; i++, j += blockDataSize)
-                            {
-                                BlockData* bd = &pBD[i];
-                                // Convert block types from internal optimized version into global types
-                                ushort typeInConfig = provider.GetConfig(bd->Type).typeInConfig;
-
-                                *(BlockData*)&pDst[j] = new BlockData(typeInConfig, bd->Solid);
-                            }
+                            *(BlockPos*)&pDst[j] = m_positionsModified[i];
                         }
                     }
-                }
-                else
-                {
-                    m_positionsBytes = null;
-                    m_blocksBytes = null;
+                    // Pack block data to a byte array
+                    fixed (BlockData* pBD = m_blocksModified)
+                    fixed (byte* pDst = m_blocksBytes)
+                    {
+                        for (int i = 0, j = 0; i < m_blocksModified.Length; i++, j += blockDataSize)
+                        {
+                            BlockData* bd = &pBD[i];
+                            // Convert block types from internal optimized version into global types
+                            ushort typeInConfig = provider.GetConfig(bd->Type).typeInConfig;
+
+                            *(BlockData*)&pDst[j] = new BlockData(typeInConfig, bd->Solid);
+                        }
+                    }
                 }
             }
             else
@@ -287,8 +262,9 @@ namespace Voxelmetric.Code.Core.Serialization
                         {
                             for (int x = 0; x<Env.ChunkSize; ++x, i += blockDataSize, ++index)
                             {
+                                BlockData bd = blocks.Get(index);
+
                                 // Convert block types from internal optimized version into global types
-                                BlockData bd = blocks.Get(index+x);
                                 ushort typeInConfig = provider.GetConfig(bd.Type).typeInConfig;
 
                                 // Write updated block data to destination buffer
@@ -310,12 +286,21 @@ namespace Voxelmetric.Code.Core.Serialization
                     // Copy data from a temporary buffer to block buffer
                     Array.Copy(bytesCompressed, 0, m_blocksBytes, 0, blkLenBytes);
                 }
+
                 // Return our temporary buffer back to the pool
                 pools.ByteArrayPool.Push(bytesCompressed);
                 pools.ByteArrayPool.Push(tmp);
             }
 
             return true;
+        }
+
+        public bool CanDecompress()
+        {
+            if (IsDifferential)
+                return m_positionsBytes != null && m_blocksBytes != null;
+            else
+                return m_blocksBytes != null;
         }
 
         public bool DoDecompression()
@@ -325,97 +310,87 @@ namespace Voxelmetric.Code.Core.Serialization
 
             if (IsDifferential)
             {
-                if (m_positionsBytes!=null && m_blocksBytes!=null)
+                int blockPosSize = StructSerialization.TSSize<BlockPos>.ValueSize;
+                int blockDataSize = StructSerialization.TSSize<BlockData>.ValueSize;
+
+                m_positionsModified = new BlockPos[m_positionsBytes.Length / blockPosSize];
+                m_blocksModified = new BlockData[m_blocksBytes.Length / blockDataSize];
+
+                int i, j;
+                unsafe
                 {
-                    int blockPosSize = StructSerialization.TSSize<BlockPos>.ValueSize;
-                    int blockDataSize = StructSerialization.TSSize<BlockData>.ValueSize;
-
-                    m_positionsModified = new BlockPos[m_positionsBytes.Length / blockPosSize];
-                    m_blocksModified = new BlockData[m_blocksBytes.Length / blockDataSize];
-
-                    int i, j;
-                    unsafe
+                    // Extract positions
+                    fixed (byte* pSrc = m_positionsBytes)
                     {
-                        // Extract positions
-                        fixed (byte* pSrc = m_positionsBytes)
+                        for (i = 0, j = 0; j<m_positionsModified.Length; i += blockPosSize, j++)
                         {
-                            for (i = 0, j = 0; j<m_positionsModified.Length; i += blockPosSize, j++)
-                            {
-                                m_positionsModified[j] = *(BlockPos*)&pSrc[i];
-                            }
+                            m_positionsModified[j] = *(BlockPos*)&pSrc[i];
                         }
-                        // Extract block data
-                        fixed (byte* pSrc = m_blocksBytes)
+                    }
+                    // Extract block data
+                    fixed (byte* pSrc = m_blocksBytes)
+                    {
+                        for (i = 0, j = 0; j<m_blocksModified.Length; i += blockDataSize, j++)
                         {
-                            for (i = 0, j = 0; j<m_blocksModified.Length; i += blockDataSize, j++)
-                            {
-                                BlockData* bd = (BlockData*)&pSrc[i];
-                                // Convert global block types into internal optimized version
-                                ushort type = provider.GetTypeFromTypeInConfig(bd->Type);
+                            BlockData* bd = (BlockData*)&pSrc[i];
+                            // Convert global block types into internal optimized version
+                            ushort type = provider.GetTypeFromTypeInConfig(bd->Type);
 
-                                m_blocksModified[j] = new BlockData(type, bd->Solid);
-                            }
+                            m_blocksModified[j] = new BlockData(type, bd->Solid);
                         }
                     }
                 }
             }
             else
             {
-                m_positionsBytes = null;
-                if (m_blocksBytes!=null)
+                int blockDataSize = StructSerialization.TSSize<BlockData>.ValueSize;
+                int requestedByteSize = Env.ChunkSizePow3 * blockDataSize;
+
+                // Pop a large enough buffers from the pool
+                var bytes = pools.ByteArrayPool.Pop(requestedByteSize);
                 {
-                    int blockDataSize = StructSerialization.TSSize<BlockData>.ValueSize;
-                    int requestedByteSize = Env.ChunkSizePow3 * blockDataSize;
-
-                    // Pop a large enough buffers from the pool
-                    var bytes = pools.ByteArrayPool.Pop(requestedByteSize);
+                    // Decompress data
+                    int decompressedLength = CLZF2.lzf_decompress(m_blocksBytes, m_blocksBytes.Length, ref bytes);
+                    if (decompressedLength!=Env.ChunkSizePow3 * blockDataSize)
                     {
-                        // Decompress data
-                        int decompressedLength = CLZF2.lzf_decompress(m_blocksBytes, m_blocksBytes.Length, ref bytes);
-                        if (decompressedLength!=Env.ChunkSizePow3 * blockDataSize)
-                        {
-                            m_blocksBytes = null;
-                            return false;
-                        }
+                        m_blocksBytes = null;
+                        return false;
+                    }
 
-                        // Fill chunk with decompressed data
-                        ChunkBlocks blocks = Chunk.blocks;
-                        int i = 0;
-                        unsafe
+                    // Fill chunk with decompressed data
+                    ChunkBlocks blocks = Chunk.blocks;
+                    int i = 0;
+                    unsafe
+                    {
+                        fixed (byte* pSrc = bytes)
                         {
-                            fixed (byte* pSrc = bytes)
+                            int index = Helpers.ZeroChunkIndex;
+                            int yOffset = Env.ChunkSizeWithPaddingPow2- Env.ChunkSize*Env.ChunkSizeWithPadding;
+                            int zOffset = Env.ChunkSizeWithPadding-Env.ChunkSize;
+
+                            for (int y = 0; y<Env.ChunkSize; ++y, index+=yOffset)
                             {
-                                int index = Helpers.ZeroChunkIndex;
-                                int yOffset = Env.ChunkSizeWithPaddingPow2- Env.ChunkSize*Env.ChunkSizeWithPadding;
-                                int zOffset = Env.ChunkSizeWithPadding-Env.ChunkSize;
-
-                                for (int y = 0; y<Env.ChunkSize; ++y, index+=yOffset)
+                                for (int z = 0; z<Env.ChunkSize; ++z, index+=zOffset)
                                 {
-                                    for (int z = 0; z<Env.ChunkSize; ++z, index+=zOffset)
+                                    for (int x = 0; x<Env.ChunkSize; ++x, i += blockDataSize, ++index)
                                     {
-                                        for (int x = 0; x<Env.ChunkSize; ++x, i += blockDataSize, ++index)
-                                        {
-                                            BlockData* bd = (BlockData*)&pSrc[i];
+                                        BlockData* bd = (BlockData*)&pSrc[i];
 
-                                            // Convert global block type into internal optimized version
-                                            ushort type = provider.GetTypeFromTypeInConfig(bd->Type);
+                                        // Convert global block type into internal optimized version
+                                        ushort type = provider.GetTypeFromTypeInConfig(bd->Type);
 
-                                            blocks.SetRaw(index+x, new BlockData(type, bd->Solid));
-                                        }
+                                        blocks.SetRaw(index, new BlockData(type, bd->Solid));
                                     }
                                 }
                             }
                         }
                     }
-                    // Return our temporary buffer back to the pool
-                    pools.ByteArrayPool.Push(bytes);
                 }
+                // Return our temporary buffer back to the pool
+                pools.ByteArrayPool.Push(bytes);
             }
 
-            // We no longer need the temporary buffers
-            m_positionsBytes = null;
-            m_blocksBytes = null;
-
+            ResetTemporary();
             return true;
         }
 
@@ -436,9 +411,7 @@ namespace Voxelmetric.Code.Core.Serialization
                 if (blocks.modifiedBlocks.Count <= 0)
                     return false;
             }
-
-            m_hadDifferentialChange = true;
-
+            
             Dictionary<BlockPos, BlockData> blocksDictionary = new Dictionary<BlockPos, BlockData>();
             
             // Create a map of modified blocks and their positions
