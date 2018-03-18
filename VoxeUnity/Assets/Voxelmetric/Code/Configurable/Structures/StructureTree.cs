@@ -217,7 +217,7 @@ public class StructureTree: GeneratedStructure
         int yOff = chunk.Pos.y-y1-leavesRange1;
         int zOff = chunk.Pos.z-worldPos.z;
 
-        blocks.Modify(
+        blocks.chunk.Modify(
             new ModifyOpEllipsoid(leaves, min, max, new Vector3Int(xOff, yOff, zOff), a2inv, b2inv, false)
             );
     }
@@ -226,7 +226,7 @@ public class StructureTree: GeneratedStructure
     {
         ChunkBlocks blocks = chunk.Blocks;
 
-        blocks.Modify(
+        blocks.chunk.Modify(
             new ModifyOpCuboid(log, min, max, false)
             );
     }

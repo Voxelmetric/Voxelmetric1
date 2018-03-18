@@ -21,8 +21,9 @@ namespace Voxelmetric.Code.Core.Operations
                 parentContext.RegisterChildAction();
         }
 
-        public void Apply(ChunkBlocks blocks)
+        public void Apply(Chunk chunk)
         {
+            ChunkBlocks blocks = chunk.Blocks;
             OnSetBlocks(blocks);
             OnPostSetBlocks(blocks);
         }

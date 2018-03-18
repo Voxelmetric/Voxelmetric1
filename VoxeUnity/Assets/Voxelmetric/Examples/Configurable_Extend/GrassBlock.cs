@@ -53,7 +53,7 @@ public class GrassBlock: CubeBlock
                     // There has to be air above the dirt
                     int airIndex = grassIndex+Env.ChunkSizePow2;
                     if (blocks.Get(airIndex).Equals(air))
-                        blocks.Modify(new ModifyOpBlock(grass, grassIndex, true));
+                        blocks.chunk.Modify(new ModifyOpBlock(grass, grassIndex, true));
                 }
             }
         }

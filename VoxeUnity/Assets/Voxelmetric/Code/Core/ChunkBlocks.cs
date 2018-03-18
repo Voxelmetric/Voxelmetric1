@@ -5,7 +5,6 @@ using System.Runtime.InteropServices;
 using Voxelmetric.Code.Common;
 using Voxelmetric.Code.Common.IO;
 using Voxelmetric.Code.Common.Memory;
-using Voxelmetric.Code.Core.Operations;
 using Voxelmetric.Code.Data_types;
 using Voxelmetric.Code.Load_Resources.Blocks;
 using Voxelmetric.Code.VM;
@@ -24,7 +23,7 @@ namespace Voxelmetric.Code.Core
         //! Array of block data
         private readonly IntPtr m_blocksRaw;
         private readonly unsafe byte* m_blocks;
-        private unsafe BlockData this[int i]
+        public unsafe BlockData this[int i]
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get
@@ -48,17 +47,9 @@ namespace Voxelmetric.Code.Core
         //! Number of blocks which are not air (non-empty blocks)
         public int NonEmptyBlocks;
 
-        //! Queue of setBlock operations to execute
-        private readonly List<ModifyOp> m_setBlockQueue = new List<ModifyOp>();
-
         private byte[] receiveBuffer;
         private int receiveIndex;
-
-        private long lastUpdateTimeGeometry;
-        private long lastUpdateTimeCollider;
-        private int rebuildMaskGeometry;
-        private int rebuildMaskCollider;
-
+        
         public List<BlockPos> modifiedBlocks = new List<BlockPos>();
 
         private static byte[] emptyBytes;
@@ -122,25 +113,13 @@ namespace Voxelmetric.Code.Core
             // Reset internal parts of the chunk buffer
             int sideSize = m_sideSize + Env.ChunkPadding2;
             Utils.ZeroMemory(m_blocks, sideSize * sideSize * sideSize * StructSerialization.TSSize<BlockData>.ValueSize);
-
-            lastUpdateTimeGeometry = 0;
-            lastUpdateTimeCollider = 0;
-            rebuildMaskGeometry = -1;
-            rebuildMaskCollider = -1;
-
+            
             // We have to reallocate the list. Otherwise, the array could potentially grow
             // to Env.ChunkSizePow3 size.
             if (modifiedBlocks==null || modifiedBlocks.Count>m_sideSize*3) // Reallocation threshold
                 modifiedBlocks = new List<BlockPos>();
             else
                 modifiedBlocks.Clear();
-        }
-
-        public void RequestCollider()
-        {
-            // Request collider update if there is no request yet
-            if (rebuildMaskCollider<0)
-                rebuildMaskCollider = 0;
         }
 
         public void CalculateEmptyBlocks()
@@ -165,301 +144,6 @@ namespace Voxelmetric.Code.Core
                             ++NonEmptyBlocks;
                     }
                 }
-            }
-        }
-
-        public bool NeedToHandleNeighbors(ref Vector3Int pos)
-        {
-            return rebuildMaskGeometry!=0x3f &&
-                   // Only check neighbors when it is a change of a block on a chunk's edge
-                   (pos.x<=0 || pos.x>=(m_sideSize-1) ||
-                    pos.y<=0 || pos.y>=(m_sideSize-1) ||
-                    pos.z<=0 || pos.z>=(m_sideSize-1));
-        }
-
-        private ChunkBlocks HandleNeighborRight(ref Vector3Int pos)
-        {
-            int i = DirectionUtils.Get(Direction.east);
-
-            // If it is an edge position, notify neighbor as well
-            // Iterate over neighbors and decide which ones should be notified to rebuild
-            var listeners = chunk.Neighbors;
-            Chunk listener = listeners[i];
-            if (listener == null)
-                return null;
-            
-            int cx = chunk.Pos.x;
-            int cy = chunk.Pos.y;
-            int cz = chunk.Pos.z;
-            int lx = listener.Pos.x;
-            int ly = listener.Pos.y;
-            int lz = listener.Pos.z;
-
-            if (ly!=cy && lz!=cz)
-                return null;
-
-            if ((pos.x!=(m_sideSize-1)) || (lx-m_sideSize!=cx))
-                return null;
-
-            rebuildMaskGeometry = rebuildMaskGeometry | (1 << i);
-            return listener.Blocks;
-        }
-
-        private ChunkBlocks HandleNeighborLeft(ref Vector3Int pos)
-        {
-            int i = DirectionUtils.Get(Direction.west);
-
-            // If it is an edge position, notify neighbor as well
-            // Iterate over neighbors and decide which ones should be notified to rebuild
-            var listeners = chunk.Neighbors;
-            Chunk listener = listeners[i];
-            if (listener == null)
-                return null;
-
-            Chunk listenerChunk = chunk;
-
-            int cx = chunk.Pos.x;
-            int cy = chunk.Pos.y;
-            int cz = chunk.Pos.z;
-            int lx = listenerChunk.Pos.x;
-            int ly = listenerChunk.Pos.y;
-            int lz = listenerChunk.Pos.z;
-
-            if (ly != cy && lz != cz)
-                return null;
-
-            if ((pos.x!=0) || (lx+m_sideSize!=cx))
-                return null;
-
-            rebuildMaskGeometry = rebuildMaskGeometry | (1 << i);
-            return listenerChunk.Blocks;
-        }
-
-        private ChunkBlocks HandleNeighborUp(ref Vector3Int pos)
-        {
-            int i = DirectionUtils.Get(Direction.up);
-
-            // If it is an edge position, notify neighbor as well
-            // Iterate over neighbors and decide which ones should be notified to rebuild
-            var listeners = chunk.Neighbors;
-            Chunk listener = listeners[i];
-            if (listener == null)
-                return null;
-            
-            int cx = chunk.Pos.x;
-            int cy = chunk.Pos.y;
-            int cz = chunk.Pos.z;
-            int lx = listener.Pos.x;
-            int ly = listener.Pos.y;
-            int lz = listener.Pos.z;
-
-            if (lx!=cx && lz!=cz)
-                return null;
-
-            if ((pos.y!=(m_sideSize-1)) || (ly-m_sideSize!=cy))
-                return null;
-
-            rebuildMaskGeometry = rebuildMaskGeometry | (1 << i);
-            return listener.Blocks;
-        }
-
-        private ChunkBlocks HandleNeighborDown(ref Vector3Int pos)
-        {
-            int i = DirectionUtils.Get(Direction.down);
-
-            // If it is an edge position, notify neighbor as well
-            // Iterate over neighbors and decide which ones should be notified to rebuild
-            var listeners = chunk.Neighbors;
-            var listener = listeners[i];
-            if (listener == null)
-                return null;
-            
-            int cx = chunk.Pos.x;
-            int cy = chunk.Pos.y;
-            int cz = chunk.Pos.z;
-            int lx = listener.Pos.x;
-            int ly = listener.Pos.y;
-            int lz = listener.Pos.z;
-
-            if (lx != cx && lz != cz)
-                return null;
-
-            if ((pos.y!=0) || (ly+m_sideSize!=cy))
-                return null;
-
-            rebuildMaskGeometry = rebuildMaskGeometry | (1 << i);
-            return listener.Blocks;
-        }
-
-        private ChunkBlocks HandleNeighborFront(ref Vector3Int pos)
-        {
-            int i = DirectionUtils.Get(Direction.north);
-
-            // If it is an edge position, notify neighbor as well
-            // Iterate over neighbors and decide which ones should be notified to rebuild
-            var listeners = chunk.Neighbors;
-            var listener = listeners[i];
-            if (listener == null)
-                return null;
-            
-            int cx = chunk.Pos.x;
-            int cy = chunk.Pos.y;
-            int cz = chunk.Pos.z;
-            int lx = listener.Pos.x;
-            int ly = listener.Pos.y;
-            int lz = listener.Pos.z;
-
-            if (ly!=cy && lx!=cx)
-                return null;
-
-            if ((pos.z!=(m_sideSize-1)) || (lz-m_sideSize!=cz))
-                return null;
-
-            rebuildMaskGeometry = rebuildMaskGeometry | (1 << i);
-            return listener.Blocks;
-        }
-
-        private ChunkBlocks HandleNeighborBack(ref Vector3Int pos)
-        {
-            int i = DirectionUtils.Get(Direction.south);
-
-            // If it is an edge position, notify neighbor as well
-            // Iterate over neighbors and decide which ones should be notified to rebuild
-            var listeners = chunk.Neighbors;
-            var listener = listeners[i];
-            if (listener == null)
-                return null;
-
-            int cx = chunk.Pos.x;
-            int cy = chunk.Pos.y;
-            int cz = chunk.Pos.z;
-            int lx = listener.Pos.x;
-            int ly = listener.Pos.y;
-            int lz = listener.Pos.z;
-
-            if (ly != cy && lx != cx)
-                return null;
-
-            if (pos.z!=0 || (lz+m_sideSize!=cz))
-                return null;
-
-            rebuildMaskGeometry = rebuildMaskGeometry | (1 << i);
-            return listener.Blocks;
-        }
-
-        public ChunkBlocks HandleNeighbor(ref Vector3Int pos, Direction dir)
-        {
-            switch (dir)
-            {
-                case Direction.up:
-                    return HandleNeighborUp(ref pos);
-                case Direction.down:
-                    return HandleNeighborDown(ref pos);
-                case Direction.north:
-                    return HandleNeighborFront(ref pos);
-                case Direction.south:
-                    return HandleNeighborBack(ref pos);
-                case Direction.east:
-                    return HandleNeighborRight(ref pos);
-                default: //Direction.west
-                    return HandleNeighborLeft(ref pos);
-            }
-        }
-
-        public void HandleNeighbors(BlockData block, Vector3Int pos)
-        {
-            if (!NeedToHandleNeighbors(ref pos))
-                return;
-
-            int cx = chunk.Pos.x;
-            int cy = chunk.Pos.y;
-            int cz = chunk.Pos.z;
-            
-            // If it is an edge position, notify neighbor as well
-            // Iterate over neighbors and decide which ones should be notified to rebuild their geometry
-            var listeners = chunk.Neighbors;
-            for (int i = 0; i < listeners.Length; i++)
-            {
-                Chunk listener = listeners[i];
-                if (listener == null)
-                    continue;
-
-                Chunk listenerChunk = listener;
-                ChunkBlocks listenerChunkBlocks = listenerChunk.Blocks;
-
-                int lx = listenerChunk.Pos.x;
-                int ly = listenerChunk.Pos.y;
-                int lz = listenerChunk.Pos.z;
-
-                if (ly == cy || lz == cz)
-                {
-                    // Section to the left
-                    if ((pos.x == 0) && (lx + m_sideSize == cx))
-                    {
-                        rebuildMaskGeometry = rebuildMaskGeometry | (1 << i);
-
-                        // Mirror the block to the neighbor edge
-                        int neighborIndex = Helpers.GetChunkIndex1DFrom3D(m_sideSize, pos.y, pos.z, m_pow);
-                        listenerChunkBlocks[neighborIndex] = block;
-                    }
-                    // Section to the right
-                    else if ((pos.x == (m_sideSize-1)) && (lx - m_sideSize == cx))
-                    {
-                        rebuildMaskGeometry = rebuildMaskGeometry | (1 << i);
-
-                        // Mirror the block to the neighbor edge
-                        int neighborIndex = Helpers.GetChunkIndex1DFrom3D(-1, pos.y, pos.z, m_pow);
-                        listenerChunkBlocks[neighborIndex] = block;
-                    }
-                }
-
-                if (lx == cx || lz == cz)
-                {
-                    // Section to the bottom
-                    if ((pos.y == 0) && (ly + m_sideSize == cy))
-                    {
-                        rebuildMaskGeometry = rebuildMaskGeometry | (1 << i);
-
-                        // Mirror the block to the neighbor edge
-                        int neighborIndex = Helpers.GetChunkIndex1DFrom3D(pos.x, m_sideSize, pos.z, m_pow);
-                        listenerChunkBlocks[neighborIndex] = block;
-                    }
-                    // Section to the top
-                    else if ((pos.y == (m_sideSize-1)) && (ly - m_sideSize == cy))
-                    {
-                        rebuildMaskGeometry = rebuildMaskGeometry | (1 << i);
-
-                        // Mirror the block to the neighbor edge
-                        int neighborIndex = Helpers.GetChunkIndex1DFrom3D(pos.x, -1, pos.z, m_pow);
-                        listenerChunkBlocks[neighborIndex] = block;
-                    }
-                }
-
-                if (ly == cy || lx == cx)
-                {
-                    // Section to the back
-                    if ((pos.z == 0) && (lz + m_sideSize == cz))
-                    {
-                        rebuildMaskGeometry = rebuildMaskGeometry | (1 << i);
-
-                        // Mirror the block to the neighbor edge
-                        int neighborIndex = Helpers.GetChunkIndex1DFrom3D(pos.x, pos.y, m_sideSize, m_pow);
-                        listenerChunkBlocks[neighborIndex] = block;
-                    }
-                    // Section to the front
-                    else if ((pos.z == (m_sideSize-1)) && (lz - m_sideSize == cz))
-                    {
-                        rebuildMaskGeometry = rebuildMaskGeometry | (1 << i);
-
-                        // Mirror the block to the neighbor edge
-                        int neighborIndex = Helpers.GetChunkIndex1DFrom3D(pos.x, pos.y, -1, m_pow);
-                        listenerChunkBlocks[neighborIndex] = block;
-                    }
-                }
-
-                // No further checks needed once we know all neighbors need to be notified
-                if (rebuildMaskGeometry == 0x3f)
-                    break;
             }
         }
 
@@ -494,106 +178,6 @@ namespace Voxelmetric.Code.Core
             {
                 Vector3Int globalPos = pos+chunk.Pos;
                 BlockModified(new BlockPos(pos.x, pos.y, pos.z), ref globalPos, blockData);
-            }
-        }
-
-        public void Update()
-        {
-            if (!chunk.IsUpdateBlocksPossible)
-                return;
-
-            //UnityEngine.Debug.Log(m_setBlockQueue.Count);
-
-            if (m_setBlockQueue.Count>0)
-            {
-                if (rebuildMaskGeometry<0)
-                    rebuildMaskGeometry = 0;
-                if (chunk.NeedsCollider && rebuildMaskCollider < 0)
-                    rebuildMaskCollider = 0;
-
-                var timeBudget = Globals.SetBlockBudget;
-                
-                // Modify blocks
-                int j;
-                for (j = 0; j<m_setBlockQueue.Count; j++)
-                {
-                    timeBudget.StartMeasurement();
-                    m_setBlockQueue[j].Apply(this);
-                    timeBudget.StopMeasurement();
-
-                    // Sync edges if there's enough time
-                    /*if (!timeBudget.HasTimeBudget)
-                    {
-                        ++j;
-                        break;
-                    }*/
-                }
-
-                if (chunk.NeedsCollider)
-                    rebuildMaskCollider |= rebuildMaskGeometry;
-
-                if (j==m_setBlockQueue.Count)
-                    m_setBlockQueue.Clear();
-                else
-                {
-                    m_setBlockQueue.RemoveRange(0, j);
-                    return;
-                }
-            }
-
-            long now = Globals.Watch.ElapsedMilliseconds;
-
-            // Request a geometry update at most 10 times a second
-            if (rebuildMaskGeometry>=0 && now-lastUpdateTimeGeometry>=100)
-            {
-                lastUpdateTimeGeometry = now;
-
-                // Request rebuild on this chunk
-                chunk.SetStatePending(ChunkState.BuildVerticesNow);
-
-                // Notify neighbors that they need to rebuild their geometry
-                if (rebuildMaskGeometry>0)
-                {
-                    var listeners = chunk.Neighbors;
-                    for (int j = 0; j<listeners.Length; j++)
-                    {
-                        Chunk listener = listeners[j];
-                        if (listener!=null && ((rebuildMaskGeometry>>j)&1)!=0)
-                        {
-                            // Request rebuild on neighbor chunks
-                            listener.SetStatePending(ChunkState.BuildVerticesNow);
-                        }
-                    }
-                }
-
-                rebuildMaskGeometry = -1;
-            }
-
-            // Request a collider update at most 4 times a second
-            if (chunk.NeedsCollider && rebuildMaskCollider>=0 && now-lastUpdateTimeCollider>=250)
-            {
-                lastUpdateTimeCollider = now;
-
-                // Request rebuild on this chunk
-                chunk.SetStatePending(ChunkState.BuildColliderNow);
-
-                // Notify neighbors that they need to rebuilt their geometry
-                if (rebuildMaskCollider > 0)
-                {
-                    var listeners = chunk.Neighbors;
-                    for (int j = 0; j < listeners.Length; j++)
-                    {
-                        Chunk listener = listeners[j];
-                        if (listener != null && ((rebuildMaskCollider >> j) & 1) != 0)
-                        {
-                            // Request rebuild on neighbor chunks
-                            if (listener.NeedsCollider)
-                                listener.SetStatePending(ChunkState.BuildColliderNow);
-                        }
-                    }
-                }
-
-                rebuildMaskCollider = -1;
             }
         }
 
@@ -731,16 +315,6 @@ namespace Voxelmetric.Code.Core
             }
         }
         
-        /// <summary>
-        /// Queues a modification of blocks in a given range
-        /// </summary>
-        /// <param name="op">Set operation to be performed</param>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void Modify(ModifyOp op)
-        {
-            m_setBlockQueue.Add(op);
-        }
-
         public void BlockModified(BlockPos blockPos, ref Vector3Int globalPos, BlockData blockData)
         {
             VmNetworking ntw = chunk.world.networking;
