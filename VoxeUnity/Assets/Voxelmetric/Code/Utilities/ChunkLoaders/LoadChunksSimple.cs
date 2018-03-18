@@ -379,9 +379,8 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
                 ProcessChunk(chunk);
 
                 // Update the chunk if possible
-                if (chunk.CanUpdate)
+                if (chunk.Update())
                 {
-                    chunk.UpdateState();
                     chunk.UpdateRenderGeometry();
                     chunk.UpdateCollisionGeometry();
                 }

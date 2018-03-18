@@ -121,25 +121,10 @@ namespace Voxelmetric.Code.Core
                 batcher.Enabled = value;
             }
         }
+        
         //! Says whether or not building of geometry can be triggered
         public bool PossiblyVisible { get; set; }
-
-        public bool CanUpdate
-        {
-            get
-            {
-                // Do not do any processing as long as there is any task still running
-                // Note that this check is not thread-safe because this value can be changed from a different thread. However,
-                // we do not care. The worst thing that can happen is that we read a value which is one frame old...
-                // Thanks to this relaxed approach we do not need any synchronization primitives anywhere.
-                if (m_taskRunning)
-                    return false;
-
-                // Once this Chunk is marked as finished we ignore any further requests and won't perform any updates
-                return !m_completedStates.Check(ChunkState.Remove);
-            }
-        }
-
+        
         public bool IsSavePossible
         {
             get
@@ -560,9 +545,20 @@ namespace Voxelmetric.Code.Core
 
         #region State management
 
-        public void UpdateState()
+        public bool Update()
         {
-            // Do not update our chunk until it has all its data prepared
+            // Do not do any processing as long as there is any task still running
+            // Note that this check is not thread-safe because this value can be changed from a different thread. However,
+            // we do not care. The worst thing that can happen is that we read a value which is one frame old...
+            // Thanks to this relaxed approach we do not need any synchronization primitives anywhere.
+            if (m_taskRunning)
+                return false;
+
+            // Once this chunk is marked as removed we ignore any further requests and won't perform any updates
+            if (m_completedStates.Check(ChunkState.Remove))
+                return false;
+
+            // Some operations can only be performed on a generated chunk
             if (IsStateCompleted(ChunkState.Generate))
             {
                 // Apply pending structures
@@ -577,10 +573,12 @@ namespace Voxelmetric.Code.Core
             }
 
             // Process chunk tasks
-            UpdateState_Internal();
+            UpdateState();
+
+            return true;
         }
 
-        private void UpdateState_Internal()
+        private void UpdateState()
         {
             // Return processed work items back to the pool
             ReturnPoolItems();
@@ -603,24 +601,22 @@ namespace Voxelmetric.Code.Core
 
             // Go from the least important bit to most important one. If a given bit is set
             // we execute a task tied with it
-            {
-                if (IsStatePending(ChunkState.LoadData) && LoadData())
-                    return;
-                if (IsStatePending(ChunkState.PrepareGenerate) && PrepareGenerate())
-                    return;
-                if (IsStatePending(ChunkState.Generate) && GenerateData())
-                    return;
-                if (IsStatePending(ChunkState.PrepareSaveData) && PrepareSaveData())
-                    return;
-                if (IsStatePending(ChunkState.SaveData) && SaveData())
-                    return;
-                if (IsStatePending(ChunkState.Remove) && RemoveChunk())
-                    return;
-                if (IsStatePending(ChunkStates.CurrStateBuildCollider) && BuildCollider())
-                    return;
-                if (IsStatePending(ChunkStates.CurrStateBuildVertices) && BuildVertices())
-                    return;
-            }
+            if (IsStatePending(ChunkState.LoadData) && LoadData())
+                return;
+            if (IsStatePending(ChunkState.PrepareGenerate) && PrepareGenerate())
+                return;
+            if (IsStatePending(ChunkState.Generate) && GenerateData())
+                return;
+            if (IsStatePending(ChunkState.PrepareSaveData) && PrepareSaveData())
+                return;
+            if (IsStatePending(ChunkState.SaveData) && SaveData())
+                return;
+            if (IsStatePending(ChunkState.Remove) && RemoveChunk())
+                return;
+            if (IsStatePending(ChunkStates.CurrStateBuildCollider) && BuildCollider())
+                return;
+            if (IsStatePending(ChunkStates.CurrStateBuildVertices) && BuildVertices())
+                return;
         }
 
         private void ReturnPoolItems()
