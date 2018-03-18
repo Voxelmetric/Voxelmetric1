@@ -44,7 +44,7 @@ namespace Voxelmetric.Code.Core
             chunk = null;
 
             // Transform the position into chunk coordinates
-            Vector3Int chunkPos = Chunk.ContainingChunkPos(ref pos);
+            Vector3Int chunkPos = Helpers.ContainingChunkPos(ref pos);
 
             // Let's keep it within allowed world bounds
             if (!world.IsCoordInsideWorld(ref chunkPos))
@@ -78,7 +78,7 @@ namespace Voxelmetric.Code.Core
         /// <returns>A chunk at a given position</returns>
         public Chunk Get(ref Vector3Int pos)
         {
-            Assert.IsTrue(Chunk.ContainingChunkPos(ref pos) == pos);
+            Assert.IsTrue(Helpers.ContainingChunkPos(ref pos) == pos);
 
             Chunk containerChunk;
             chunks.TryGetValue(pos, out containerChunk);

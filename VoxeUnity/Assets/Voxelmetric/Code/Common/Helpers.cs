@@ -1,5 +1,6 @@
 ﻿using System.Runtime.CompilerServices;
 using System.Threading;
+using Voxelmetric.Code.Data_types;
 
 namespace Voxelmetric.Code.Common
 {
@@ -96,7 +97,20 @@ namespace Voxelmetric.Code.Common
 	        return ((x >= 0 ? x : x - (size-1)) / size) * size;
 		}
 
-		public static T[] CreateArray1D<T>(int size)
+	    /// <summary>
+	    /// Returns the position of the chunk containing this block
+	    /// </summary>
+	    /// <returns>The position of the chunk containing this block</returns>
+	    public static Vector3Int ContainingChunkPos(ref Vector3Int pos)
+	    {
+	        Vector3Int v;
+	        v.x = MakeChunkCoordinate(pos.x);
+	        v.y = MakeChunkCoordinate(pos.y);
+	        v.z = MakeChunkCoordinate(pos.z);
+	        return v;
+	    }
+
+        public static T[] CreateArray1D<T>(int size)
 		{
 			return new T[size];
 		}

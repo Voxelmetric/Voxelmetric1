@@ -1,24 +1,30 @@
 ﻿using NUnit.Framework;
 using UnityEngine;
 using Voxelmetric.Code;
-using Voxelmetric.Code.Core;
+using Voxelmetric.Code.Common;
 using Vector3Int = Voxelmetric.Code.Data_types.Vector3Int;
 
 public class BlockPosTest {
     [Test]
-    public void ContainingChunkCoordinatesTest() {
+    public void ContainingChunkCoordinatesTest()
+    {
         for(int x=-Env.ChunkSize; x<=2*Env.ChunkSize; x++)
             for (int y = -Env.ChunkSize; y <= 2 * Env.ChunkSize; y++)
                 for (int z = -Env.ChunkSize; z <= 2 * Env.ChunkSize; z++)
                     AssertContainingChunkCoordinates(new Vector3Int(x, y, z));
     }
 
-    private static void AssertContainingChunkCoordinates(Vector3Int pos) {
-        Assert.AreEqual(ExpContainingChunkCoordinates(pos), Chunk.ContainingChunkPos(ref pos), pos.ToString());
+    private static void AssertContainingChunkCoordinates(Vector3Int pos)
+    {
+        Assert.AreEqual(
+            ExpContainingChunkCoordinates(pos),
+            Helpers.ContainingChunkPos(ref pos), pos.ToString()
+            );
     }
 
     //returns the position of the chunk containing this block
-    private static Vector3Int ExpContainingChunkCoordinates(Vector3Int pos) {
+    private static Vector3Int ExpContainingChunkCoordinates(Vector3Int pos)
+    {
         int chunkSize = Env.ChunkSize;
 
         int cx = Mathf.FloorToInt(pos.x / (float)chunkSize) * chunkSize;

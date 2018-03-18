@@ -97,8 +97,8 @@ public class StructureTree: GeneratedStructure
         // Generate the crown
         Vector3Int posFrom = new Vector3Int(x1, y1, z1);
         Vector3Int posTo = new Vector3Int(x2, y2, z2);
-        Vector3Int chunkPosFrom = Chunk.ContainingChunkPos(ref posFrom);
-        Vector3Int chunkPosTo = Chunk.ContainingChunkPos(ref posTo);
+        Vector3Int chunkPosFrom = Helpers.ContainingChunkPos(ref posFrom);
+        Vector3Int chunkPosTo = Helpers.ContainingChunkPos(ref posTo);
         
         minY = Helpers.Mod(posFrom.y, Env.ChunkSize);
         for (cy = chunkPosFrom.y; cy<=chunkPosTo.y; cy += Env.ChunkSize, minY = 0)
@@ -162,8 +162,8 @@ public class StructureTree: GeneratedStructure
         // Generate the trunk
         posFrom = new Vector3Int(worldPos.x, worldPos.y, worldPos.z);
         posTo = new Vector3Int(worldPos.x, worldPos.y+trunkHeight, worldPos.z);
-        chunkPosFrom = Chunk.ContainingChunkPos(ref posFrom);
-        chunkPosTo = Chunk.ContainingChunkPos(ref posTo);
+        chunkPosFrom = Helpers.ContainingChunkPos(ref posFrom);
+        chunkPosTo = Helpers.ContainingChunkPos(ref posTo);
 
         cx = Helpers.MakeChunkCoordinate(worldPos.x);
         cz = Helpers.MakeChunkCoordinate(worldPos.z);

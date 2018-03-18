@@ -22,7 +22,7 @@ namespace Voxelmetric.Code.Core
         public BlockData Get(ref Vector3Int pos)
         {
             // Transform the position into chunk coordinates
-            Vector3Int chunkPos = Chunk.ContainingChunkPos(ref pos);
+            Vector3Int chunkPos = Helpers.ContainingChunkPos(ref pos);
 
             // Return air for chunk that do not exist
             Chunk chunk = world.chunks.Get(ref chunkPos);
@@ -39,7 +39,7 @@ namespace Voxelmetric.Code.Core
         public BlockData Get(Vector3Int pos)
         {
             // Transform the position into chunk coordinates
-            Vector3Int chunkPos = Chunk.ContainingChunkPos(ref pos);
+            Vector3Int chunkPos = Helpers.ContainingChunkPos(ref pos);
                         
             Chunk chunk = world.chunks.Get(ref chunkPos);
             if (chunk==null)
@@ -60,7 +60,7 @@ namespace Voxelmetric.Code.Core
         public Block GetBlock(ref Vector3Int pos)
         {
             // Transform the position into chunk coordinates
-            Vector3Int chunkPos = Chunk.ContainingChunkPos(ref pos);
+            Vector3Int chunkPos = Helpers.ContainingChunkPos(ref pos);
                                 
             Chunk chunk = world.chunks.Get(ref chunkPos);
             if (chunk==null)
@@ -83,7 +83,7 @@ namespace Voxelmetric.Code.Core
         public void Set(ref Vector3Int pos, BlockData blockData)
         {
             // Transform the position into chunk coordinates
-            Vector3Int chunkPos = Chunk.ContainingChunkPos(ref pos);
+            Vector3Int chunkPos = Helpers.ContainingChunkPos(ref pos);
 
             Chunk chunk = world.chunks.Get(ref chunkPos);
             if (chunk==null)
@@ -105,7 +105,7 @@ namespace Voxelmetric.Code.Core
         public void SetRaw(ref Vector3Int pos, BlockData blockData)
         {
             // Transform the position into chunk coordinates
-            Vector3Int chunkPos = Chunk.ContainingChunkPos(ref pos);
+            Vector3Int chunkPos = Helpers.ContainingChunkPos(ref pos);
 
             Chunk chunk = world.chunks.Get(ref chunkPos);
             if (chunk==null)
@@ -131,8 +131,8 @@ namespace Voxelmetric.Code.Core
                 return;
 
             // Transform positions into chunk coordinates
-            Vector3Int chunkPosFrom = Chunk.ContainingChunkPos(ref posFrom);
-            Vector3Int chunkPosTo = Chunk.ContainingChunkPos(ref posTo);
+            Vector3Int chunkPosFrom = Helpers.ContainingChunkPos(ref posFrom);
+            Vector3Int chunkPosTo = Helpers.ContainingChunkPos(ref posTo);
 
             // Update all chunks in range
             int minY = Helpers.Mod(posFrom.y, Env.ChunkSize);
@@ -178,8 +178,8 @@ namespace Voxelmetric.Code.Core
                 return;
 
             // Transform positions into chunk coordinates
-            Vector3Int chunkPosFrom = Chunk.ContainingChunkPos(ref posFrom);
-            Vector3Int chunkPosTo = Chunk.ContainingChunkPos(ref posTo);
+            Vector3Int chunkPosFrom = Helpers.ContainingChunkPos(ref posFrom);
+            Vector3Int chunkPosTo = Helpers.ContainingChunkPos(ref posTo);
 
             // Update all chunks in range
             int minY = Helpers.Mod(posFrom.y, Env.ChunkSize);
@@ -223,7 +223,7 @@ namespace Voxelmetric.Code.Core
             Action<ModifyBlockContext> onModified = null)
         {
             // Transform the position into chunk coordinates
-            Vector3Int chunkPos = Chunk.ContainingChunkPos(ref pos);
+            Vector3Int chunkPos = Helpers.ContainingChunkPos(ref pos);
 
             Chunk chunk = world.chunks.Get(ref chunkPos);
             if (chunk==null)
@@ -263,8 +263,8 @@ namespace Voxelmetric.Code.Core
             if (posFrom.x>posTo.x || posFrom.y>posTo.y || posFrom.z>posTo.z)
                 return;
 
-            Vector3Int chunkPosFrom = Chunk.ContainingChunkPos(ref posFrom);
-            Vector3Int chunkPosTo = Chunk.ContainingChunkPos(ref posTo);
+            Vector3Int chunkPosFrom = Helpers.ContainingChunkPos(ref posFrom);
+            Vector3Int chunkPosTo = Helpers.ContainingChunkPos(ref posTo);
 
             ModifyBlockContext context = null;
             if (onModified!=null)

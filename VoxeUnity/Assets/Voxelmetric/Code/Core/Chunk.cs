@@ -26,7 +26,7 @@ namespace Voxelmetric.Code.Core
         public AABB WorldBounds;
 
         //! List of neighbors
-        public Chunk[] Neighbors { get; }
+        public Chunk[] Neighbors { get; } = Helpers.CreateArray1D<Chunk>(6);
         //! Current number of neigbors        
         public int NeighborCount { get; private set; }
         //! Maximum possible number of neighbors given the circumstances
@@ -93,19 +93,6 @@ namespace Voxelmetric.Code.Core
             Globals.MemPools.ChunkPool.Push(chunk);
         }
 
-        /// <summary>
-        /// Returns the position of the chunk containing this block
-        /// </summary>
-        /// <returns>The position of the chunk containing this block</returns>
-        public static Vector3Int ContainingChunkPos(ref Vector3Int pos)
-        {
-            return new Vector3Int(
-                Helpers.MakeChunkCoordinate(pos.x),
-                Helpers.MakeChunkCoordinate(pos.y),
-                Helpers.MakeChunkCoordinate(pos.z)
-                );
-        }
-
         public Chunk(int sideSize = Env.ChunkSize)
         {
             SideSize = sideSize;
@@ -116,16 +103,12 @@ namespace Voxelmetric.Code.Core
             
             stateManager = new ChunkStateManagerClient(this);
             Blocks = new ChunkBlocks(this, sideSize);
-
-            Neighbors = Helpers.CreateArray1D<Chunk>(6);
         }
 
         public void Init(World world, Vector3Int pos)
         {
             this.world = world;
             this.Pos = pos;
-            
-            stateManager = new ChunkStateManagerClient(this);
 
             if (world!=null)
             {
@@ -148,9 +131,8 @@ namespace Voxelmetric.Code.Core
                 pos.x, pos.y, pos.z,
                 pos.x+ SideSize, pos.y+ SideSize, pos.z+ SideSize
                 );
-            MinBounds = NaxBounds = 0;
-            MinBoundsC = MaxBoundsC = 0;
 
+            stateManager = new ChunkStateManagerClient(this);
             Reset();
 
             Blocks.Init();
@@ -183,6 +165,9 @@ namespace Voxelmetric.Code.Core
             NeedApplyStructure = true;
             MaxPendingStructureListIndex = 0;
 
+            MinBounds = NaxBounds = 0;
+            MinBoundsC = MaxBoundsC = 0;
+
             //chunk.world = null; <-- must not be done inside here! Do it outside the method
         }
         
@@ -208,6 +193,7 @@ namespace Voxelmetric.Code.Core
 
         public bool UpdateCollisionGeometry()
         {
+            Profiler.BeginSample("UpdateCollisionGeometry");
             // Release the collider when no longer needed
             if (!NeedsCollider)
             {
@@ -221,43 +207,38 @@ namespace Voxelmetric.Code.Core
                 return false;
             
             // Build collider if necessary
-            if (stateManager.IsStateCompleted(ChunkStates.CurrStateBuildCollider))
-            {
-                Profiler.BeginSample("UpdateCollisionGeometry");
-                Globals.GeometryBudget.StartMeasurement();
-
-                stateManager.SetColliderBuilt();
-                ChunkColliderGeometryHandler.Commit();
-
-                Globals.GeometryBudget.StopMeasurement();
-                Profiler.EndSample();
-                return true;
-            }
+            if (!stateManager.IsStateCompleted(ChunkStates.CurrStateBuildCollider))
+                return false;
             
-            return false;
+            Globals.GeometryBudget.StartMeasurement();
+
+            stateManager.SetColliderBuilt();
+            ChunkColliderGeometryHandler.Commit();
+
+            Globals.GeometryBudget.StopMeasurement();
+            Profiler.EndSample();
+            return true;
         }
 
         public bool UpdateRenderGeometry()
         {
+            Profiler.BeginSample("UpdateRenderGeometry");
             // Build render geometry only if there is enough time
             if (!Globals.GeometryBudget.HasTimeBudget)
                 return false;
             
             // Build chunk mesh if necessary
-            if (stateManager.IsStateCompleted(ChunkStates.CurrStateBuildVertices))
-            {
-                Profiler.BeginSample("UpdateRenderGeometry");
-                Globals.GeometryBudget.StartMeasurement();
-
-                stateManager.SetMeshBuilt();
-                GeometryHandler.Commit();
-
-                Globals.GeometryBudget.StopMeasurement();
-                Profiler.EndSample();
-                return true;
-            }
+            if (!stateManager.IsStateCompleted(ChunkStates.CurrStateBuildVertices))
+                return false;
             
-            return false;
+            Globals.GeometryBudget.StartMeasurement();
+
+            stateManager.SetMeshBuilt();
+            GeometryHandler.Commit();
+
+            Globals.GeometryBudget.StopMeasurement();
+            Profiler.EndSample();
+            return true;
         }
 
         #region Neighbors
