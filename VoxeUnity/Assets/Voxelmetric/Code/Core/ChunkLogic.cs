@@ -36,7 +36,7 @@ namespace Voxelmetric.Code.Core
                     Voxelmetric.resources.random.Next(0, Env.ChunkSize)
                     );
 
-                chunk.blocks.GetBlock(ref randomVector3Int).RandomUpdate(chunk, ref randomVector3Int);
+                chunk.Blocks.GetBlock(ref randomVector3Int).RandomUpdate(chunk, ref randomVector3Int);
 
                 // Process Scheduled Updates
                 for (int i = 0; i<scheduledUpdates.Count; i++)
@@ -49,7 +49,7 @@ namespace Voxelmetric.Code.Core
                     if (scheduledUpdates[i].time<=0)
                     {
                         Vector3Int pos = scheduledUpdates[i].pos;
-                        Block block = chunk.blocks.GetBlock(ref pos);
+                        Block block = chunk.Blocks.GetBlock(ref pos);
                         block.ScheduledUpdate(chunk, ref pos);
                         scheduledUpdates.RemoveAt(i);
                         i--;

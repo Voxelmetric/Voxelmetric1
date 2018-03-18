@@ -45,7 +45,7 @@ namespace Voxelmetric.Code.Load_Resources.Textures
         {
             if (usesConnectedTextures)
             {
-                ChunkBlocks blocks = chunk.blocks;
+                ChunkBlocks blocks = chunk.Blocks;
                 int index = Helpers.GetChunkIndex1DFrom3D(localPos.x, localPos.y, localPos.z);
                 ushort blockType = blocks.Get(index).Type;
 

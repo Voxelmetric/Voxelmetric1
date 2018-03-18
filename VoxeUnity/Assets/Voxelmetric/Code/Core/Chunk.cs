@@ -1,7 +1,6 @@
 ﻿using UnityEngine.Assertions;
 using UnityEngine.Profiling;
 using Voxelmetric.Code.Common;
-using Voxelmetric.Code.Common.MemoryPooling;
 using Voxelmetric.Code.Core.StateManager;
 using Voxelmetric.Code.Data_types;
 using Voxelmetric.Code.Geometry.GeometryHandler;
@@ -15,31 +14,31 @@ namespace Voxelmetric.Code.Core
         
         public World world { get; private set; }
         public ChunkStateManagerClient stateManager { get; private set; }
-        public ChunkBlocks blocks { get; private set; }
-        public ChunkLogic logic { get; private set; }
+        public ChunkBlocks Blocks { get; private set; }
+        public ChunkLogic Logic { get; private set; }
         public ChunkRenderGeometryHandler GeometryHandler { get; private set; }
         public ChunkColliderGeometryHandler ChunkColliderGeometryHandler { get; private set; }
-        public LocalPools pools { get; private set; }
 
         //! Chunk position in world coordinates
-        public Vector3Int pos { get; private set; }
+        public Vector3Int Pos { get; private set; }
 
         //! Bounding box in world coordinates. It always considers a full-size chunk
         public AABB WorldBounds;
 
-        //! List of chunk listeners
+        //! List of neighbors
         public Chunk[] Neighbors { get; }
-        //! Number of registered listeners        
+        //! Current number of neigbors        
         public int NeighborCount { get; private set; }
+        //! Maximum possible number of neighbors given the circumstances
         public int NeighborCountMax { get; private set; }
 
         //! Size of chunk's side
         public int SideSize { get; } = 0;
 
         //! Bounding coordinates in local space. Corresponds to real geometry
-        public int minBounds, maxBounds;
+        public int MinBounds, NaxBounds;
         //! Bounding coordinates in local space. Corresponds to collision geometry
-        public int minBoundsC, maxBoundsC;
+        public int MinBoundsC, MaxBoundsC;
 
         //! ThreadID associated with this chunk. Used when working with object pools in MT environment. Resources
         //! need to be release where they were allocated. Thanks to this, associated containers could be made lock-free
@@ -61,19 +60,31 @@ namespace Voxelmetric.Code.Core
                 bool prevNeedCollider = m_needsCollider;
                 m_needsCollider = value;
                 if (m_needsCollider && !prevNeedCollider)
-                    blocks.RequestCollider();
+                    Blocks.RequestCollider();
             }
         }
 
-        public static Chunk CreateChunk(World world, Vector3Int pos)
+        /// <summary>
+        /// Takes a chunk from the memory pool and intiates it
+        /// </summary>
+        /// <param name="world">World to which this chunk belongs</param>
+        /// <param name="pos">Chunk position in world coordinates</param>
+        /// <returns>A new chunk</returns>
+        public static Chunk Create(World world, Vector3Int pos)
         {
             Chunk chunk = Globals.MemPools.ChunkPool.Pop();
             chunk.Init(world, pos);
             return chunk;
         }        
 
-        public static void RemoveChunk(Chunk chunk)
+        /// <summary>
+        /// Returns a chunk back to the memory pool
+        /// </summary>
+        /// <param name="chunk">Chunk to be returned back to the memory pool</param>
+        public static void Remove(Chunk chunk)
         {
+            Assert.IsTrue(chunk.stateManager.IsStateCompleted(ChunkState.Remove));
+
             // Reset the chunk back to defaults
             chunk.Reset();
             chunk.world = null;
@@ -102,10 +113,9 @@ namespace Voxelmetric.Code.Core
             // Associate Chunk with a certain thread and make use of its memory pool
             // This is necessary in order to have lock-free caches
             ThreadID = Globals.WorkPool.GetThreadIDFromIndex(s_id++);
-            pools = Globals.WorkPool.GetPool(ThreadID);
             
             stateManager = new ChunkStateManagerClient(this);
-            blocks = new ChunkBlocks(this, sideSize);
+            Blocks = new ChunkBlocks(this, sideSize);
 
             Neighbors = Helpers.CreateArray1D<Chunk>(6);
         }
@@ -113,13 +123,13 @@ namespace Voxelmetric.Code.Core
         public void Init(World world, Vector3Int pos)
         {
             this.world = world;
-            this.pos = pos;
+            this.Pos = pos;
             
             stateManager = new ChunkStateManagerClient(this);
 
             if (world!=null)
             {
-                logic = world.config.randomUpdateFrequency>0.0f ? new ChunkLogic(this) : null;
+                Logic = world.config.randomUpdateFrequency>0.0f ? new ChunkLogic(this) : null;
 
                 if (GeometryHandler==null)
                     GeometryHandler = new ChunkRenderGeometryHandler(this, world.renderMaterials);
@@ -138,12 +148,12 @@ namespace Voxelmetric.Code.Core
                 pos.x, pos.y, pos.z,
                 pos.x+ SideSize, pos.y+ SideSize, pos.z+ SideSize
                 );
-            minBounds = maxBounds = 0;
-            minBoundsC = maxBoundsC = 0;
+            MinBounds = NaxBounds = 0;
+            MinBoundsC = MaxBoundsC = 0;
 
             Reset();
 
-            blocks.Init();
+            Blocks.Init();
             stateManager.Init();
 
             // Subscribe neighbors
@@ -162,9 +172,9 @@ namespace Voxelmetric.Code.Core
                 Neighbors[i] = null;
 
             stateManager.Reset();
-            blocks.Reset();
-            if (logic!=null)
-                logic.Reset();
+            Blocks.Reset();
+            if (Logic!=null)
+                Logic.Reset();
 
             GeometryHandler.Reset();
             ChunkColliderGeometryHandler.Reset();
@@ -176,11 +186,6 @@ namespace Voxelmetric.Code.Core
             //chunk.world = null; <-- must not be done inside here! Do it outside the method
         }
         
-        public bool CanUpdate
-        {
-            get { return stateManager.CanUpdate(); }
-        }
-
         public void UpdateState()
         {
             // Do not update our chunk until it has all its data prepared
@@ -190,11 +195,11 @@ namespace Voxelmetric.Code.Core
                 world.ApplyPendingStructures(this);
 
                 // Update logic
-                if (logic!=null)
-                    logic.Update();
+                if (Logic!=null)
+                    Logic.Update();
 
                 // Update blocks
-                blocks.Update();
+                Blocks.Update();
             }
 
             // Process chunk tasks
@@ -263,7 +268,7 @@ namespace Voxelmetric.Code.Core
                 return false;
 
             // Determine neighbors's direction as compared to current chunk
-            Vector3Int p = pos - neighbor.pos;
+            Vector3Int p = Pos - neighbor.Pos;
             Direction dir = Direction.up;
             if (p.x < 0)
                 dir = Direction.east;
@@ -303,7 +308,7 @@ namespace Voxelmetric.Code.Core
                 return false;
 
             // Determine neighbors's direction as compared to current chunk
-            Vector3Int p = pos - neighbor.pos;
+            Vector3Int p = Pos - neighbor.Pos;
             Direction dir = Direction.up;
             if (p.x < 0)
                 dir = Direction.east;
@@ -346,7 +351,7 @@ namespace Voxelmetric.Code.Core
 
             // Calculate how many listeners a chunk can have
             int maxListeners = 0;
-            Vector3Int pos = chunk.pos;
+            Vector3Int pos = chunk.Pos;
             if (world.CheckInsideWorld(pos.Add(Env.ChunkSize, 0, 0)) && (pos.x != world.Bounds.maxX))
                 ++maxListeners;
             if (world.CheckInsideWorld(pos.Add(-Env.ChunkSize, 0, 0)) && (pos.x != world.Bounds.minX))
@@ -374,17 +379,17 @@ namespace Voxelmetric.Code.Core
 
             // Collider might beed to be rebuild
             if (chunk.NeedsCollider)
-                chunk.blocks.RequestCollider();
+                chunk.Blocks.RequestCollider();
         }
 
         private void SubscribeNeighbors(bool subscribe)
         {
-            SubscribeTwoNeighbors(pos.Add(Env.ChunkSize, 0, 0), subscribe);
-            SubscribeTwoNeighbors(pos.Add(-Env.ChunkSize, 0, 0), subscribe);
-            SubscribeTwoNeighbors(pos.Add(0, Env.ChunkSize, 0), subscribe);
-            SubscribeTwoNeighbors(pos.Add(0, -Env.ChunkSize, 0), subscribe);
-            SubscribeTwoNeighbors(pos.Add(0, 0, Env.ChunkSize), subscribe);
-            SubscribeTwoNeighbors(pos.Add(0, 0, -Env.ChunkSize), subscribe);
+            SubscribeTwoNeighbors(Pos.Add(Env.ChunkSize, 0, 0), subscribe);
+            SubscribeTwoNeighbors(Pos.Add(-Env.ChunkSize, 0, 0), subscribe);
+            SubscribeTwoNeighbors(Pos.Add(0, Env.ChunkSize, 0), subscribe);
+            SubscribeTwoNeighbors(Pos.Add(0, -Env.ChunkSize, 0), subscribe);
+            SubscribeTwoNeighbors(Pos.Add(0, 0, Env.ChunkSize), subscribe);
+            SubscribeTwoNeighbors(Pos.Add(0, 0, -Env.ChunkSize), subscribe);
 
             // Update required listener count
             UpdateNeighborCount(this);

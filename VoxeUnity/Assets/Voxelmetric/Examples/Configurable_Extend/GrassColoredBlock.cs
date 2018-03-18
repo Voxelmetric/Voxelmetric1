@@ -29,7 +29,7 @@ public class GrassColoredBlock: ColoredBlock
     // On random Update spread grass to any nearby dirt blocks on the surface
     public override void RandomUpdate(Chunk chunk, ref Vector3Int localPos)
     {
-        ChunkBlocks blocks = chunk.blocks;
+        ChunkBlocks blocks = chunk.Blocks;
 
         // Let's stay inside bounds
         int minX = localPos.x<=0 ? 0 : 1;

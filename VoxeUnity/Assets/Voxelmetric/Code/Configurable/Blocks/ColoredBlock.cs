@@ -1,5 +1,5 @@
 ﻿using UnityEngine;
-using Voxelmetric.Code.Common.MemoryPooling;
+using Voxelmetric.Code;
 using Voxelmetric.Code.Configurable.Blocks;
 using Voxelmetric.Code.Configurable.Blocks.Utilities;
 using Voxelmetric.Code.Core;
@@ -23,7 +23,7 @@ public class ColoredBlock : Block
         bool backFace = DirectionUtils.IsBackface(face.side);
         int d = DirectionUtils.Get(face.side);
 
-        LocalPools pools = chunk.pools;
+        var pools = Globals.WorkPool.GetPool(chunk.ThreadID);
         var verts = pools.Vector3ArrayPool.PopExact(4);
         var cols = pools.Color32ArrayPool.PopExact(4);
 

@@ -185,7 +185,7 @@ namespace Voxelmetric.Code.VM
                                + "Could not find chunk for " + pos);
             }
             else
-                chunk.blocks.ReceiveChunkData(data);
+                chunk.Blocks.ReceiveChunkData(data);
         }
 
         public void BroadcastChange(Vector3Int pos, BlockData blockData)

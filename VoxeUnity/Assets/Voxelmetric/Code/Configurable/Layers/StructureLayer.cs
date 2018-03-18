@@ -47,10 +47,10 @@ public class StructureLayer : TerrainLayer
     {
         //if (chunk.pos.x!=-30 || chunk.pos.y!=30 || chunk.pos.z!=0) return;
 
-        int minX = chunk.pos.x;
-        int maxX = chunk.pos.x + Env.ChunkSize1;
-        int minZ = chunk.pos.z;
-        int maxZ = chunk.pos.z + Env.ChunkSize1;
+        int minX = chunk.Pos.x;
+        int maxX = chunk.Pos.x + Env.ChunkSize1;
+        int minZ = chunk.Pos.z;
+        int maxZ = chunk.Pos.z + Env.ChunkSize1;
 
         int structureID = 0;
 

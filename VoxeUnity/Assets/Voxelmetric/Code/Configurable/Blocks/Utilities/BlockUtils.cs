@@ -92,7 +92,7 @@ namespace Voxelmetric.Code.Configurable.Blocks.Utilities
             // Corner blocks
             bool nwSolid, neSolid, seSolid, swSolid;
 
-            ChunkBlocks blocks = chunk.blocks;
+            ChunkBlocks blocks = chunk.Blocks;
             int index1, index2, index3;
 
             int sizeWithPadding = chunk.SideSize + Env.ChunkPadding2;

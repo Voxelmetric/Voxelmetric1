@@ -285,7 +285,7 @@ namespace Voxelmetric.Code.Core.StateManager
                 stateManager.m_save.CommitChanges();
 
             // Calculate the amount of non-empty blocks
-            chunk.blocks.CalculateEmptyBlocks();
+            chunk.Blocks.CalculateEmptyBlocks();
 
             //chunk.blocks.Compress();
             //chunk.blocks.Decompress();
@@ -485,45 +485,45 @@ namespace Voxelmetric.Code.Core.StateManager
                 {
                     var stateManager = neighbor.stateManager;
                     neighborChunk = neighbor;
-                    neighborPos = neighbor.pos;
+                    neighborPos = neighbor.Pos;
                 }
                 else
                 {
                     switch ((Direction)i)
                     {
-                        case Direction.up: neighborPos = chunk.pos.Add(0, Env.ChunkSize, 0); break;
-                        case Direction.down: neighborPos = chunk.pos.Add(0, -Env.ChunkSize, 0); break;
-                        case Direction.north: neighborPos = chunk.pos.Add(0, 0, Env.ChunkSize); break;
-                        case Direction.south: neighborPos = chunk.pos.Add(0, 0, -Env.ChunkSize); break;
-                        case Direction.east: neighborPos = chunk.pos.Add(Env.ChunkSize, 0, 0); break;
-                        default: neighborPos = chunk.pos.Add(-Env.ChunkSize, 0, 0); break;
+                        case Direction.up: neighborPos = chunk.Pos.Add(0, Env.ChunkSize, 0); break;
+                        case Direction.down: neighborPos = chunk.Pos.Add(0, -Env.ChunkSize, 0); break;
+                        case Direction.north: neighborPos = chunk.Pos.Add(0, 0, Env.ChunkSize); break;
+                        case Direction.south: neighborPos = chunk.Pos.Add(0, 0, -Env.ChunkSize); break;
+                        case Direction.east: neighborPos = chunk.Pos.Add(Env.ChunkSize, 0, 0); break;
+                        default: neighborPos = chunk.Pos.Add(-Env.ChunkSize, 0, 0); break;
                     }
                 }
 
                 // Sync vertical neighbors
-                if (neighborPos.x==chunk.pos.x && neighborPos.z==chunk.pos.z)
+                if (neighborPos.x==chunk.Pos.x && neighborPos.z==chunk.Pos.z)
                 {
                     // Copy the bottom layer of a neighbor chunk to the top layer of ours
-                    if (neighborPos.y>chunk.pos.y)
+                    if (neighborPos.y>chunk.Pos.y)
                     {
                         int srcIndex = Helpers.GetChunkIndex1DFrom3D(-1, 0, -1);
                         int dstIndex = Helpers.GetChunkIndex1DFrom3D(-1, Env.ChunkSize, -1);
-                        chunk.blocks.Copy(neighborChunk.blocks, srcIndex, dstIndex, sizeWithPaddingPow2);
+                        chunk.Blocks.Copy(neighborChunk.Blocks, srcIndex, dstIndex, sizeWithPaddingPow2);
                     }
                     // Copy the top layer of a neighbor chunk to the bottom layer of ours
                     else // if (neighborPos.y < chunk.pos.y)
                     {
                         int srcIndex = Helpers.GetChunkIndex1DFrom3D(-1, chunkSize1, -1);
                         int dstIndex = Helpers.GetChunkIndex1DFrom3D(-1, -1, -1);
-                        chunk.blocks.Copy(neighborChunk.blocks, srcIndex, dstIndex, sizeWithPaddingPow2);
+                        chunk.Blocks.Copy(neighborChunk.Blocks, srcIndex, dstIndex, sizeWithPaddingPow2);
                     }
                 }
 
                 // Sync front and back neighbors
-                if (neighborPos.x==chunk.pos.x && neighborPos.y==chunk.pos.y)
+                if (neighborPos.x==chunk.Pos.x && neighborPos.y==chunk.Pos.y)
                 {
                     // Copy the front layer of a neighbor chunk to the back layer of ours
-                    if (neighborPos.z>chunk.pos.z)
+                    if (neighborPos.z>chunk.Pos.z)
                     {
                         int srcIndex = Helpers.GetChunkIndex1DFrom3D(-1, -1, 0);
                         int dstIndex = Helpers.GetChunkIndex1DFrom3D(-1, -1, Env.ChunkSize);
@@ -533,8 +533,8 @@ namespace Voxelmetric.Code.Core.StateManager
                         {
                             for (int x = -1; x<sizePlusPadding; x++, srcIndex++, dstIndex++)
                             {
-                                BlockData data = neighborChunk.blocks.Get(srcIndex);
-                                chunk.blocks.SetRaw(dstIndex, data);
+                                BlockData data = neighborChunk.Blocks.Get(srcIndex);
+                                chunk.Blocks.SetRaw(dstIndex, data);
                             }
                         }
                     }
@@ -549,18 +549,18 @@ namespace Voxelmetric.Code.Core.StateManager
                         {
                             for (int x = -1; x<sizePlusPadding; x++, srcIndex++, dstIndex++)
                             {
-                                BlockData data = neighborChunk.blocks.Get(srcIndex);
-                                chunk.blocks.SetRaw(dstIndex, data);
+                                BlockData data = neighborChunk.Blocks.Get(srcIndex);
+                                chunk.Blocks.SetRaw(dstIndex, data);
                             }
                         }
                     }
                 }
 
                 // Sync right and left neighbors
-                if (neighborPos.y==chunk.pos.y && neighborPos.z==chunk.pos.z)
+                if (neighborPos.y==chunk.Pos.y && neighborPos.z==chunk.Pos.z)
                 {
                     // Copy the right layer of a neighbor chunk to the left layer of ours
-                    if (neighborPos.x>chunk.pos.x)
+                    if (neighborPos.x>chunk.Pos.x)
                     {
                         int srcIndex = Helpers.GetChunkIndex1DFrom3D(0, -1, -1);
                         int dstIndex = Helpers.GetChunkIndex1DFrom3D(Env.ChunkSize, -1, -1);
@@ -570,8 +570,8 @@ namespace Voxelmetric.Code.Core.StateManager
                                  z<sizePlusPadding;
                                  z++, srcIndex += sizeWithPadding, dstIndex += sizeWithPadding)
                             {
-                                BlockData data = neighborChunk.blocks.Get(srcIndex);
-                                chunk.blocks.SetRaw(dstIndex, data);
+                                BlockData data = neighborChunk.Blocks.Get(srcIndex);
+                                chunk.Blocks.SetRaw(dstIndex, data);
                             }
                         }
                     }
@@ -586,8 +586,8 @@ namespace Voxelmetric.Code.Core.StateManager
                                  z<sizePlusPadding;
                                  z++, srcIndex += sizeWithPadding, dstIndex += sizeWithPadding)
                             {
-                                BlockData data = neighborChunk.blocks.Get(srcIndex);
-                                chunk.blocks.SetRaw(dstIndex, data);
+                                BlockData data = neighborChunk.Blocks.Get(srcIndex);
+                                chunk.Blocks.SetRaw(dstIndex, data);
                             }
                         }
                     }
@@ -657,7 +657,7 @@ namespace Voxelmetric.Code.Core.StateManager
             ResetStatePending(ChunkStates.CurrStateBuildCollider);
             ResetStateCompleted(ChunkStates.CurrStateBuildCollider);
 
-            if (chunk.blocks.NonEmptyBlocks > 0)
+            if (chunk.Blocks.NonEmptyBlocks > 0)
             {
                 var task = Globals.MemPools.SMThreadPI.Pop();
                 m_poolState = m_poolState.Set(ChunkPoolItemState.ThreadPI);
@@ -717,7 +717,7 @@ namespace Voxelmetric.Code.Core.StateManager
             ResetStatePending(ChunkStates.CurrStateBuildVertices);
             ResetStateCompleted(ChunkStates.CurrStateBuildVertices);
 
-            if (chunk.blocks.NonEmptyBlocks > 0)
+            if (chunk.Blocks.NonEmptyBlocks > 0)
             {
                 var task = Globals.MemPools.SMThreadPI.Pop();
                 m_poolState = m_poolState.Set(ChunkPoolItemState.ThreadPI);

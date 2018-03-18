@@ -54,7 +54,7 @@ namespace Voxelmetric.Code.Core
             if (chunk == null)
             {
                 // Create a new chunk if it does not exist yet
-                chunk = Chunk.CreateChunk(world, chunkPos);
+                chunk = Chunk.Create(world, chunkPos);
                 chunks.Add(chunkPos, chunk);
                 return true;
             }
@@ -69,8 +69,8 @@ namespace Voxelmetric.Code.Core
             Assert.IsTrue(Helpers.IsMainThread);
             Assert.IsNotNull(chunk);
 
-            Chunk.RemoveChunk(chunk);
-            chunks.Remove(chunk.pos);
+            Chunk.Remove(chunk);
+            chunks.Remove(chunk.Pos);
         }
 
         /// <summary>Returns a chunk at a given position</summary>

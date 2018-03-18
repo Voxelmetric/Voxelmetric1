@@ -32,9 +32,10 @@ public class AdditiveLayer: TerrainLayer
 
     public override void PreProcess(Chunk chunk, int layerIndex)
     {
-        NoiseItem ni = chunk.pools.noiseItems[layerIndex];
+        var pools = Globals.WorkPool.GetPool(chunk.ThreadID);
+        var ni = pools.noiseItems[layerIndex];
         ni.noiseGen.SetInterpBitStep(Env.ChunkSizeWithPadding, 2);
-        ni.lookupTable = chunk.pools.FloatArrayPool.Pop((ni.noiseGen.Size+1)*(ni.noiseGen.Size+1));
+        ni.lookupTable = pools.FloatArrayPool.Pop((ni.noiseGen.Size+1)*(ni.noiseGen.Size+1));
 
 #if (UNITY_STANDALONE_WIN || UNITY_EDITOR_WIN) && ENABLE_FASTSIMD
         float[] noiseSet = chunk.pools.FloatArrayPool.Pop(ni.noiseGen.Size * ni.noiseGen.Size * ni.noiseGen.Size);
@@ -53,10 +54,10 @@ public class AdditiveLayer: TerrainLayer
             for (int x = 0; x < ni.noiseGen.Size; x++)
                 ni.lookupTable[i++] = NoiseUtilsSIMD.GetNoise(noiseSet, ni.noiseGen.Size, x, 0, z, amplitude, noise.Gain);
 
-        chunk.pools.FloatArrayPool.Push(noiseSet);
+        pools.FloatArrayPool.Push(noiseSet);
 #else
-        int xOffset = chunk.pos.x;
-        int zOffset = chunk.pos.z;
+        int xOffset = chunk.Pos.x;
+        int zOffset = chunk.Pos.z;
 
         // Generate a lookup table
         int i = 0;
@@ -75,13 +76,15 @@ public class AdditiveLayer: TerrainLayer
 
     public override void PostProcess(Chunk chunk, int layerIndex)
     {
-        NoiseItem ni = chunk.pools.noiseItems[layerIndex];
-        chunk.pools.FloatArrayPool.Push(ni.lookupTable);
+        var pools = Globals.WorkPool.GetPool(chunk.ThreadID);
+        var ni = pools.noiseItems[layerIndex];
+        pools.FloatArrayPool.Push(ni.lookupTable);
     }
 
     public override float GetHeight(Chunk chunk, int layerIndex, int x, int z, float heightSoFar, float strength)
     {
-        NoiseItem ni = chunk.pools.noiseItems[layerIndex];
+        var pools = Globals.WorkPool.GetPool(chunk.ThreadID);
+        var ni = pools.noiseItems[layerIndex];
 
         // Calculate height to add and sum it with the min height (because the height of this
         // layer should fluctuate between minHeight and minHeight+the max noise) and multiply
@@ -95,7 +98,8 @@ public class AdditiveLayer: TerrainLayer
 
     public override float GenerateLayer(Chunk chunk, int layerIndex, int x, int z, float heightSoFar, float strength)
     {
-        NoiseItem ni = chunk.pools.noiseItems[layerIndex];
+        var pools = Globals.WorkPool.GetPool(chunk.ThreadID);
+        NoiseItem ni = pools.noiseItems[layerIndex];
 
         // Calculate height to add and sum it with the min height (because the height of this
         // layer should fluctuate between minHeight and minHeight+the max noise) and multiply

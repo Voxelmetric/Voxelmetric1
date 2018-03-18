@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using Voxelmetric.Code.Common;
 using Voxelmetric.Code.Common.IO;
-using Voxelmetric.Code.Common.MemoryPooling;
 using Voxelmetric.Code.Data_types;
 
 namespace Voxelmetric.Code.Core.Serialization
@@ -68,7 +67,7 @@ namespace Voxelmetric.Code.Core.Serialization
             bw.Write(SaveVersion);
             bw.Write((byte)(Features.UseDifferentialSerialization ? 1 : 0));
             bw.Write(Env.ChunkSizePow3);
-            bw.Write(Chunk.blocks.NonEmptyBlocks);
+            bw.Write(Chunk.Blocks.NonEmptyBlocks);
 
             int blockPosSize = StructSerialization.TSSize<BlockPos>.ValueSize;
             int blockDataSize = StructSerialization.TSSize<BlockData>.ValueSize;
@@ -132,7 +131,7 @@ namespace Voxelmetric.Code.Core.Serialization
                 success = false;
                 goto deserializeFail;
             }
-            Chunk.blocks.NonEmptyBlocks = nonEmptyBlocks;
+            Chunk.Blocks.NonEmptyBlocks = nonEmptyBlocks;
             
             while (true)
             {
@@ -192,7 +191,7 @@ namespace Voxelmetric.Code.Core.Serialization
             if (!success)
             {
                 // Revert any changes we performed on our chunk
-                Chunk.blocks.NonEmptyBlocks = -1;
+                Chunk.Blocks.NonEmptyBlocks = -1;
                 ResetTemporary();
             }
 
@@ -239,7 +238,7 @@ namespace Voxelmetric.Code.Core.Serialization
             }
             else
             {
-                LocalPools pools = Chunk.pools;
+                var pools = Globals.WorkPool.GetPool(Chunk.ThreadID);
                 var provider = Chunk.world.blockProvider;
 
                 int blockDataSize = StructSerialization.TSSize<BlockData>.ValueSize;
@@ -249,7 +248,7 @@ namespace Voxelmetric.Code.Core.Serialization
                 byte[] tmp = pools.ByteArrayPool.Pop(requestedByteSize);
                 byte[] bytesCompressed = pools.ByteArrayPool.Pop(requestedByteSize);
                 {
-                    ChunkBlocks blocks = Chunk.blocks;
+                    ChunkBlocks blocks = Chunk.Blocks;
                     int i = 0;
 
                     int index = Helpers.ZeroChunkIndex;
@@ -305,7 +304,7 @@ namespace Voxelmetric.Code.Core.Serialization
 
         public bool DoDecompression()
         {
-            LocalPools pools = Chunk.pools;
+            var pools = Globals.WorkPool.GetPool(Chunk.ThreadID);
             var provider = Chunk.world.blockProvider;
 
             if (IsDifferential)
@@ -358,7 +357,7 @@ namespace Voxelmetric.Code.Core.Serialization
                     }
 
                     // Fill chunk with decompressed data
-                    ChunkBlocks blocks = Chunk.blocks;
+                    ChunkBlocks blocks = Chunk.Blocks;
                     int i = 0;
                     unsafe
                     {
@@ -396,7 +395,7 @@ namespace Voxelmetric.Code.Core.Serialization
 
         public bool ConsumeChanges()
         {
-            ChunkBlocks blocks = Chunk.blocks;
+            ChunkBlocks blocks = Chunk.Blocks;
 
             if (!Features.UseDifferentialSerialization)
                 return true;
@@ -453,7 +452,7 @@ namespace Voxelmetric.Code.Core.Serialization
                 for (int i = 0; i<m_blocksModified.Length; i++)
                 {
                     BlockPos pos = m_positionsModified[i];
-                    Chunk.blocks.SetRaw(Helpers.GetChunkIndex1DFrom3D(pos.x, pos.y, pos.z), m_blocksModified[i]);
+                    Chunk.Blocks.SetRaw(Helpers.GetChunkIndex1DFrom3D(pos.x, pos.y, pos.z), m_blocksModified[i]);
                 }
             }
 

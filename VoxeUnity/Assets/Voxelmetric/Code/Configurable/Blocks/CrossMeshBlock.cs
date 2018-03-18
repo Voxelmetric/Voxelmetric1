@@ -1,6 +1,5 @@
 ﻿using UnityEngine;
 using Voxelmetric.Code;
-using Voxelmetric.Code.Common.MemoryPooling;
 using Voxelmetric.Code.Configurable.Blocks.Utilities;
 using Voxelmetric.Code.Core;
 using Voxelmetric.Code.Data_types;
@@ -24,7 +23,7 @@ public class CrossMeshBlock : Block
 
     public override void BuildBlock(Chunk chunk, ref Vector3Int localPos, int materialID)
     {
-        LocalPools pools = chunk.pools;
+        var pools = Globals.WorkPool.GetPool(chunk.ThreadID);
         RenderGeometryBatcher batcher = chunk.GeometryHandler.Batcher;
 
         // Using the block positions hash is much better for random numbers than saving the offset and height in the block data

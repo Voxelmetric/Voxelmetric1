@@ -111,8 +111,8 @@ namespace Voxelmetric.Code.Builders
         
         public override void Build(Chunk chunk, out int minBounds, out int maxBounds)
         {
-            var blocks = chunk.blocks;
-            var pools = chunk.pools;
+            var blocks = chunk.Blocks;
+            var pools = Globals.WorkPool.GetPool(chunk.ThreadID);
 
             int sizeWithPadding = m_sideSize + Env.ChunkPadding2;
             int sizeWithPaddingPow2 = sizeWithPadding * sizeWithPadding;
@@ -121,92 +121,85 @@ namespace Voxelmetric.Code.Builders
             bool[] mask = pools.BoolArrayPool.PopExact(sizeWithPaddingPow3);
             Array.Clear(mask, 0, mask.Length);
 
-            /*if (Type!=0)
-            {
-                TODO: Implement support for colored meshes
-            }
-            else*/
-            {
-                // This compression is essentialy RLE. However, instead of working on 1 axis
-                // it works in 3 dimensions.
-                int index = Env.ChunkPadding + (Env.ChunkPadding << m_pow) + (Env.ChunkPadding << (m_pow << 1));
-                int yOffset = sizeWithPaddingPow2 - m_sideSize * sizeWithPadding;
-                int zOffset = sizeWithPadding - m_sideSize;
+            // This compression is essentialy RLE. However, instead of working on 1 axis
+            // it works in 3 dimensions.
+            int index = Env.ChunkPadding + (Env.ChunkPadding << m_pow) + (Env.ChunkPadding << (m_pow << 1));
+            int yOffset = sizeWithPaddingPow2 - m_sideSize * sizeWithPadding;
+            int zOffset = sizeWithPadding - m_sideSize;
 
-                int minX = m_sideSize;
-                int minY = m_sideSize;
-                int minZ = m_sideSize;
-                int maxX = 0;
-                int maxY = 0;
-                int maxZ = 0;
+            int minX = m_sideSize;
+            int minY = m_sideSize;
+            int minZ = m_sideSize;
+            int maxX = 0;
+            int maxY = 0;
+            int maxZ = 0;
 
-                for (int y = 0; y < m_sideSize; ++y, index += yOffset)
+            for (int y = 0; y < m_sideSize; ++y, index += yOffset)
+            {
+                for (int z = 0; z < m_sideSize; ++z, index += zOffset)
                 {
-                    for (int z = 0; z < m_sideSize; ++z, index += zOffset)
+                    for (int x = 0; x < m_sideSize; ++x, ++index)
                     {
-                        for (int x = 0; x < m_sideSize; ++x, ++index)
-                        {
-                            // Skip already checked blocks
-                            if (mask[index])
-                                continue;
+                        // Skip already checked blocks
+                        if (mask[index])
+                            continue;
 
-                            mask[index] = true;
+                        mask[index] = true;
                             
-                            Block block = blocks.GetBlock(index);
+                        Block block = blocks.GetBlock(index);
 
-                            // Skip blocks we're not interested in right away
-                            if (!CanConsiderBlock(block))
-                                continue;
+                        // Skip blocks we're not interested in right away
+                        if (!CanConsiderBlock(block))
+                            continue;
 
-                            int x1 = x, y1 = y, z1 = z, x2 = x + 1, y2 = y + 1, z2 = z + 1;
+                        int x1 = x, y1 = y, z1 = z, x2 = x + 1, y2 = y + 1, z2 = z + 1;
 
-                            bool expandX = true;
-                            bool expandY = true;
-                            bool expandZ = true;
-                            bool expand;
+                        bool expandX = true;
+                        bool expandY = true;
+                        bool expandZ = true;
+                        bool expand;
 
-                            // Try to expand our box in all axes
-                            do
+                        // Try to expand our box in all axes
+                        do
+                        {
+                            expand = false;
+
+                            if (expandY)
                             {
-                                expand = false;
+                                expandY = y2 < m_sideSize &&
+                                            ExpandY(blocks, ref mask, block, x1, z1, x2, ref y2, z2);
+                                expand = expandY;
+                            }
+                            if (expandZ)
+                            {
+                                expandZ = z2 < m_sideSize &&
+                                            ExpandZ(blocks, ref mask, block, x1, y1, x2, y2, ref z2);
+                                expand = expand | expandZ;
+                            }
+                            if (expandX)
+                            {
+                                expandX = x2 < m_sideSize &&
+                                            ExpandX(blocks, ref mask, block, y1, z1, ref x2, y2, z2);
+                                expand = expand | expandX;
+                            }
+                        } while (expand);
 
-                                if (expandY)
-                                {
-                                    expandY = y2 < m_sideSize &&
-                                              ExpandY(blocks, ref mask, block, x1, z1, x2, ref y2, z2);
-                                    expand = expandY;
-                                }
-                                if (expandZ)
-                                {
-                                    expandZ = z2 < m_sideSize &&
-                                              ExpandZ(blocks, ref mask, block, x1, y1, x2, y2, ref z2);
-                                    expand = expand | expandZ;
-                                }
-                                if (expandX)
-                                {
-                                    expandX = x2 < m_sideSize &&
-                                              ExpandX(blocks, ref mask, block, y1, z1, ref x2, y2, z2);
-                                    expand = expand | expandX;
-                                }
-                            } while (expand);
+                        BuildBox(chunk, block, x1, y1, z1, x2, y2, z2);
 
-                            BuildBox(chunk, block, x1, y1, z1, x2, y2, z2);
-
-                            // Calculate bounds
-                            if (x1 < minX) minX = x1;
-                            if (y1 < minY) minY = y1;
-                            if (z1 < minZ) minZ = z1;
-                            if (x2 > maxX) maxX = x2;
-                            if (y2 > maxY) maxY = y2;
-                            if (z2 > maxZ) maxZ = z2;
-                        }
+                        // Calculate bounds
+                        if (x1 < minX) minX = x1;
+                        if (y1 < minY) minY = y1;
+                        if (z1 < minZ) minZ = z1;
+                        if (x2 > maxX) maxX = x2;
+                        if (y2 > maxY) maxY = y2;
+                        if (z2 > maxZ) maxZ = z2;
                     }
                 }
-
-                // Update chunk's geoemetry bounds
-                minBounds = minX|(minY<<8)|(minZ<<16);
-                maxBounds = maxX|(maxY<<8)|(maxZ<<16);
             }
+
+            // Update chunk's geoemetry bounds
+            minBounds = minX|(minY<<8)|(minZ<<16);
+            maxBounds = maxX|(maxY<<8)|(maxZ<<16);
             
             pools.BoolArrayPool.Push(mask);
         }

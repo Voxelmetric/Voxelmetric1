@@ -190,12 +190,12 @@ namespace Voxelmetric.Code.Core
             if (listener == null)
                 return null;
             
-            int cx = chunk.pos.x;
-            int cy = chunk.pos.y;
-            int cz = chunk.pos.z;
-            int lx = listener.pos.x;
-            int ly = listener.pos.y;
-            int lz = listener.pos.z;
+            int cx = chunk.Pos.x;
+            int cy = chunk.Pos.y;
+            int cz = chunk.Pos.z;
+            int lx = listener.Pos.x;
+            int ly = listener.Pos.y;
+            int lz = listener.Pos.z;
 
             if (ly!=cy && lz!=cz)
                 return null;
@@ -204,7 +204,7 @@ namespace Voxelmetric.Code.Core
                 return null;
 
             rebuildMaskGeometry = rebuildMaskGeometry | (1 << i);
-            return listener.blocks;
+            return listener.Blocks;
         }
 
         private ChunkBlocks HandleNeighborLeft(ref Vector3Int pos)
@@ -221,12 +221,12 @@ namespace Voxelmetric.Code.Core
 
             Chunk listenerChunk = chunk;
 
-            int cx = chunk.pos.x;
-            int cy = chunk.pos.y;
-            int cz = chunk.pos.z;
-            int lx = listenerChunk.pos.x;
-            int ly = listenerChunk.pos.y;
-            int lz = listenerChunk.pos.z;
+            int cx = chunk.Pos.x;
+            int cy = chunk.Pos.y;
+            int cz = chunk.Pos.z;
+            int lx = listenerChunk.Pos.x;
+            int ly = listenerChunk.Pos.y;
+            int lz = listenerChunk.Pos.z;
 
             if (ly != cy && lz != cz)
                 return null;
@@ -235,7 +235,7 @@ namespace Voxelmetric.Code.Core
                 return null;
 
             rebuildMaskGeometry = rebuildMaskGeometry | (1 << i);
-            return listenerChunk.blocks;
+            return listenerChunk.Blocks;
         }
 
         private ChunkBlocks HandleNeighborUp(ref Vector3Int pos)
@@ -250,12 +250,12 @@ namespace Voxelmetric.Code.Core
             if (listener == null)
                 return null;
             
-            int cx = chunk.pos.x;
-            int cy = chunk.pos.y;
-            int cz = chunk.pos.z;
-            int lx = listener.pos.x;
-            int ly = listener.pos.y;
-            int lz = listener.pos.z;
+            int cx = chunk.Pos.x;
+            int cy = chunk.Pos.y;
+            int cz = chunk.Pos.z;
+            int lx = listener.Pos.x;
+            int ly = listener.Pos.y;
+            int lz = listener.Pos.z;
 
             if (lx!=cx && lz!=cz)
                 return null;
@@ -264,7 +264,7 @@ namespace Voxelmetric.Code.Core
                 return null;
 
             rebuildMaskGeometry = rebuildMaskGeometry | (1 << i);
-            return listener.blocks;
+            return listener.Blocks;
         }
 
         private ChunkBlocks HandleNeighborDown(ref Vector3Int pos)
@@ -279,12 +279,12 @@ namespace Voxelmetric.Code.Core
             if (listener == null)
                 return null;
             
-            int cx = chunk.pos.x;
-            int cy = chunk.pos.y;
-            int cz = chunk.pos.z;
-            int lx = listener.pos.x;
-            int ly = listener.pos.y;
-            int lz = listener.pos.z;
+            int cx = chunk.Pos.x;
+            int cy = chunk.Pos.y;
+            int cz = chunk.Pos.z;
+            int lx = listener.Pos.x;
+            int ly = listener.Pos.y;
+            int lz = listener.Pos.z;
 
             if (lx != cx && lz != cz)
                 return null;
@@ -293,7 +293,7 @@ namespace Voxelmetric.Code.Core
                 return null;
 
             rebuildMaskGeometry = rebuildMaskGeometry | (1 << i);
-            return listener.blocks;
+            return listener.Blocks;
         }
 
         private ChunkBlocks HandleNeighborFront(ref Vector3Int pos)
@@ -308,12 +308,12 @@ namespace Voxelmetric.Code.Core
             if (listener == null)
                 return null;
             
-            int cx = chunk.pos.x;
-            int cy = chunk.pos.y;
-            int cz = chunk.pos.z;
-            int lx = listener.pos.x;
-            int ly = listener.pos.y;
-            int lz = listener.pos.z;
+            int cx = chunk.Pos.x;
+            int cy = chunk.Pos.y;
+            int cz = chunk.Pos.z;
+            int lx = listener.Pos.x;
+            int ly = listener.Pos.y;
+            int lz = listener.Pos.z;
 
             if (ly!=cy && lx!=cx)
                 return null;
@@ -322,7 +322,7 @@ namespace Voxelmetric.Code.Core
                 return null;
 
             rebuildMaskGeometry = rebuildMaskGeometry | (1 << i);
-            return listener.blocks;
+            return listener.Blocks;
         }
 
         private ChunkBlocks HandleNeighborBack(ref Vector3Int pos)
@@ -337,12 +337,12 @@ namespace Voxelmetric.Code.Core
             if (listener == null)
                 return null;
 
-            int cx = chunk.pos.x;
-            int cy = chunk.pos.y;
-            int cz = chunk.pos.z;
-            int lx = listener.pos.x;
-            int ly = listener.pos.y;
-            int lz = listener.pos.z;
+            int cx = chunk.Pos.x;
+            int cy = chunk.Pos.y;
+            int cz = chunk.Pos.z;
+            int lx = listener.Pos.x;
+            int ly = listener.Pos.y;
+            int lz = listener.Pos.z;
 
             if (ly != cy && lx != cx)
                 return null;
@@ -351,7 +351,7 @@ namespace Voxelmetric.Code.Core
                 return null;
 
             rebuildMaskGeometry = rebuildMaskGeometry | (1 << i);
-            return listener.blocks;
+            return listener.Blocks;
         }
 
         public ChunkBlocks HandleNeighbor(ref Vector3Int pos, Direction dir)
@@ -378,9 +378,9 @@ namespace Voxelmetric.Code.Core
             if (!NeedToHandleNeighbors(ref pos))
                 return;
 
-            int cx = chunk.pos.x;
-            int cy = chunk.pos.y;
-            int cz = chunk.pos.z;
+            int cx = chunk.Pos.x;
+            int cy = chunk.Pos.y;
+            int cz = chunk.Pos.z;
 
             ChunkStateManagerClient stateManager = chunk.stateManager;
 
@@ -394,11 +394,11 @@ namespace Voxelmetric.Code.Core
                     continue;
 
                 Chunk listenerChunk = listener;
-                ChunkBlocks listenerChunkBlocks = listenerChunk.blocks;
+                ChunkBlocks listenerChunkBlocks = listenerChunk.Blocks;
 
-                int lx = listenerChunk.pos.x;
-                int ly = listenerChunk.pos.y;
-                int lz = listenerChunk.pos.z;
+                int lx = listenerChunk.Pos.x;
+                int ly = listenerChunk.Pos.y;
+                int lz = listenerChunk.Pos.z;
 
                 if (ly == cy || lz == cz)
                 {
@@ -501,7 +501,7 @@ namespace Voxelmetric.Code.Core
             // Notify about modification
             if (setBlockModified)
             {
-                Vector3Int globalPos = pos+chunk.pos;
+                Vector3Int globalPos = pos+chunk.Pos;
                 BlockModified(new BlockPos(pos.x, pos.y, pos.z), ref globalPos, blockData);
             }
         }
@@ -920,7 +920,7 @@ namespace Voxelmetric.Code.Core
             int sizeWithPaddingPow2 = sizeWithPadding * sizeWithPadding;
             int sizeWithPaddingPow3 = sizeWithPaddingPow2 * sizeWithPadding;
 
-            var pools = chunk.pools;
+            var pools = Globals.WorkPool.GetPool(chunk.ThreadID);
             bool[] mask = pools.BoolArrayPool.PopExact(sizeWithPaddingPow3);
 
             Array.Clear(mask, 0, mask.Length);

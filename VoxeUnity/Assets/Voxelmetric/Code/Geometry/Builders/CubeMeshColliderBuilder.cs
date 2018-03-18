@@ -38,8 +38,8 @@ namespace Voxelmetric.Code.Builders
             int sizeWithPadding = m_sideSize+Env.ChunkPadding2;
             int sizeWithPaddingPow2 = sizeWithPadding * sizeWithPadding;
 
-            var blocks = chunk.blocks;
-            var pools = chunk.pools;
+            var pools = Globals.WorkPool.GetPool(chunk.ThreadID);
+            var blocks = chunk.Blocks;
             var listeners = chunk.Neighbors;
 
             // Custom blocks have their own rules

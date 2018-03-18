@@ -2,7 +2,6 @@
 using System.Globalization;
 using System.IO;
 using System.Runtime.InteropServices;
-using System.Text;
 using Voxelmetric.Code.Utilities;
 using UnityEngine;
 using UnityEngine.Assertions;
@@ -15,7 +14,6 @@ using Voxelmetric.Code.Data_types;
 using Voxelmetric.Code.Utilities.Noise;
 using Random = System.Random;
 using Vector3Int = Voxelmetric.Code.Data_types.Vector3Int;
-using System.Collections.Generic;
 
 namespace Voxelmetric.Examples
 {
@@ -468,7 +466,7 @@ namespace Voxelmetric.Examples
         void Compression(StreamWriter writer, Chunk chunk, int blockTypes, int probabiltyOfChange)
         {
             const int iters = 100;
-            var blocks = chunk.blocks;
+            var blocks = chunk.Blocks;
 
             // Initialize the block array. Padded area contains zeros, the rest is random
             {
@@ -537,7 +535,7 @@ namespace Voxelmetric.Examples
 
                 // Verify that data has not changed
                 for (int i = 0; i < ChunkBlocks.GetLength(chunk.SideSize); i++)
-                    Assert.IsTrue(s_verifyBlocks.Get(i) == chunk.blocks.Get(i));
+                    Assert.IsTrue(s_verifyBlocks.Get(i) == chunk.Blocks.Get(i));
             }
         }
 

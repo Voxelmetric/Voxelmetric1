@@ -383,7 +383,7 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
                 ProcessChunk(chunk);
 
                 // Update the chunk if possible
-                if (chunk.CanUpdate)
+                if (chunk.stateManager.CanUpdate)
                 {
                     chunk.UpdateState();
 
@@ -427,9 +427,9 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
 
             ChunkStateManagerClient stateManager = chunk.stateManager;
 
-            int tx = m_clipmap.TransformX(chunk.pos.x / Env.ChunkSize);
-            int ty = m_clipmap.TransformY(chunk.pos.y / Env.ChunkSize);
-            int tz = m_clipmap.TransformZ(chunk.pos.z / Env.ChunkSize);
+            int tx = m_clipmap.TransformX(chunk.Pos.x / Env.ChunkSize);
+            int ty = m_clipmap.TransformY(chunk.Pos.y / Env.ChunkSize);
+            int tz = m_clipmap.TransformZ(chunk.Pos.z / Env.ChunkSize);
 
             // Chunk is too far away. Remove it
             if (!m_clipmap.IsInsideBounds_Transformed(tx, ty, tz))
@@ -439,9 +439,9 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
             else
             {
                 // Dummy collider example - create a collider for chunks directly surrounding the viewer
-                int xd = Helpers.Abs((m_viewerPos.x - chunk.pos.x) / Env.ChunkSize);
-                int yd = Helpers.Abs((m_viewerPos.y - chunk.pos.y) / Env.ChunkSize);
-                int zd = Helpers.Abs((m_viewerPos.z - chunk.pos.z) / Env.ChunkSize);
+                int xd = Helpers.Abs((m_viewerPos.x - chunk.Pos.x) / Env.ChunkSize);
+                int yd = Helpers.Abs((m_viewerPos.y - chunk.Pos.y) / Env.ChunkSize);
+                int zd = Helpers.Abs((m_viewerPos.z - chunk.Pos.z) / Env.ChunkSize);
                 chunk.NeedsCollider = xd <= 1 && yd <= 1 && zd <= 1;
 
                 if (!UseFrustumCulling)
@@ -552,12 +552,12 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
                     if (Diag_DrawWorldBounds)
                     {
                         // Make central chunks more apparent by using yellow color
-                        bool isCentral = chunk.pos.x==m_viewerPos.x || chunk.pos.y==m_viewerPos.y || chunk.pos.z==m_viewerPos.z;
+                        bool isCentral = chunk.Pos.x==m_viewerPos.x || chunk.Pos.y==m_viewerPos.y || chunk.Pos.z==m_viewerPos.z;
                         Gizmos.color = isCentral ? Color.yellow : Color.blue;
                         Vector3 chunkCenter = new Vector3(
-                            chunk.pos.x+(Env.ChunkSize>>1),
-                            chunk.pos.y+(Env.ChunkSize>>1),
-                            chunk.pos.z+(Env.ChunkSize>>1)
+                            chunk.Pos.x+(Env.ChunkSize>>1),
+                            chunk.Pos.y+(Env.ChunkSize>>1),
+                            chunk.Pos.z+(Env.ChunkSize>>1)
                             );
                         Vector3 chunkSize = new Vector3(Env.ChunkSize, Env.ChunkSize, Env.ChunkSize);
                         Gizmos.DrawWireCube(chunkCenter, chunkSize);
@@ -565,9 +565,9 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
 
                     if (Diag_DrawLoadRange)
                     {
-                        Vector3Int pos = chunk.pos;
+                        Vector3Int pos = chunk.Pos;
 
-                        if (chunk.pos.y==0)
+                        if (chunk.Pos.y==0)
                         {
                             int tx = m_clipmap.TransformX(pos.x / Env.ChunkSize);
                             int ty = m_clipmap.TransformY(pos.y / Env.ChunkSize);

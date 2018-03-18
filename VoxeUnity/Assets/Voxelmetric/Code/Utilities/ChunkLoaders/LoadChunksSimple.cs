@@ -128,9 +128,9 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
 
                 ChunkStateManagerClient stateManager = chunk.stateManager;
 
-                int xd = (m_viewerPos.x-chunk.pos.x)/Env.ChunkSize;
-                int yd = (m_viewerPos.y-chunk.pos.y)/Env.ChunkSize;
-                int zd = (m_viewerPos.z-chunk.pos.z)/Env.ChunkSize;
+                int xd = (m_viewerPos.x-chunk.Pos.x)/Env.ChunkSize;
+                int yd = (m_viewerPos.y-chunk.Pos.y)/Env.ChunkSize;
+                int zd = (m_viewerPos.z-chunk.Pos.z)/Env.ChunkSize;
                 
                 int xDist = xd*xd+zd*zd;
                 int yDist = yd*yd;
@@ -215,9 +215,9 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
 
                             ChunkStateManagerClient stateManager = chunk.stateManager;
 
-                            int xd = (m_viewerPos.x-chunk.pos.x)/Env.ChunkSize;
-                            int yd = (m_viewerPos.y-chunk.pos.y)/Env.ChunkSize;
-                            int zd = (m_viewerPos.z-chunk.pos.z)/Env.ChunkSize;
+                            int xd = (m_viewerPos.x-chunk.Pos.x)/Env.ChunkSize;
+                            int yd = (m_viewerPos.y-chunk.Pos.y)/Env.ChunkSize;
+                            int zd = (m_viewerPos.z-chunk.Pos.z)/Env.ChunkSize;
                             
                             int xDist = xd*xd+zd*zd;
                             int yDist = yd*yd;
@@ -385,7 +385,7 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
                 ProcessChunk(chunk);
 
                 // Update the chunk if possible
-                if (chunk.CanUpdate)
+                if (chunk.stateManager.CanUpdate)
                 {
                     chunk.UpdateState();
                     chunk.UpdateRenderGeometry();
@@ -435,9 +435,9 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
 
             ChunkStateManagerClient stateManager = chunk.stateManager;
 
-            int xd = (m_viewerPos.x-chunk.pos.x)/Env.ChunkSize;
-            int yd = (m_viewerPos.y-chunk.pos.y)/Env.ChunkSize;
-            int zd = (m_viewerPos.z-chunk.pos.z)/Env.ChunkSize;
+            int xd = (m_viewerPos.x-chunk.Pos.x)/Env.ChunkSize;
+            int yd = (m_viewerPos.y-chunk.Pos.y)/Env.ChunkSize;
+            int zd = (m_viewerPos.z-chunk.Pos.z)/Env.ChunkSize;
 
             int hRadius = HorizontalChunkLoadRadius;
             int vRadius = VerticalChunkLoadRadius;
@@ -542,12 +542,12 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
                     if (Diag_DrawWorldBounds)
                     {
                         // Make central chunks more apparent by using yellow color
-                        bool isCentral = chunk.pos.x==m_viewerPos.x || chunk.pos.y==m_viewerPos.y || chunk.pos.z==m_viewerPos.z;
+                        bool isCentral = chunk.Pos.x==m_viewerPos.x || chunk.Pos.y==m_viewerPos.y || chunk.Pos.z==m_viewerPos.z;
                         Gizmos.color = isCentral ? Color.yellow : Color.blue;
                         Vector3 chunkCenter = new Vector3(
-                            chunk.pos.x+(Env.ChunkSize>>1),
-                            chunk.pos.y+(Env.ChunkSize>>1),
-                            chunk.pos.z+(Env.ChunkSize>>1)
+                            chunk.Pos.x+(Env.ChunkSize>>1),
+                            chunk.Pos.y+(Env.ChunkSize>>1),
+                            chunk.Pos.z+(Env.ChunkSize>>1)
                             );
                         Vector3 chunkSize = new Vector3(Env.ChunkSize, Env.ChunkSize, Env.ChunkSize);
                         Gizmos.DrawWireCube(chunkCenter, chunkSize);
@@ -555,7 +555,7 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
 
                     if (Diag_DrawLoadRange)
                     {
-                        Vector3Int pos = chunk.pos;
+                        Vector3Int pos = chunk.Pos;
                         int xd = Helpers.Abs((m_viewerPos.x-pos.x)/Env.ChunkSize);
                         int zd = Helpers.Abs((m_viewerPos.z-pos.z)/Env.ChunkSize);
                         int dist = xd*xd+zd*zd;
@@ -563,7 +563,7 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
                         {
                             Gizmos.color = Color.green;
                             Gizmos.DrawWireCube(
-                                new Vector3(chunk.pos.x+halfSize, 0, chunk.pos.z+halfSize),
+                                new Vector3(chunk.Pos.x+halfSize, 0, chunk.Pos.z+halfSize),
                                 new Vector3(size-1f, 0, size-1f)
                                 );
                         }
@@ -571,7 +571,7 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
                         {
                             Gizmos.color = Color.red;
                             Gizmos.DrawWireCube(
-                                new Vector3(chunk.pos.x+halfSize, 0, chunk.pos.z+halfSize),
+                                new Vector3(chunk.Pos.x+halfSize, 0, chunk.Pos.z+halfSize),
                                 new Vector3(size-1f, 0, size-1f)
                                 );
                         }
@@ -582,7 +582,7 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
                         {
                             Gizmos.color = Color.magenta;
                             Gizmos.DrawWireCube(
-                                new Vector3(chunk.pos.x+halfSize, 0, chunk.pos.z+halfSize),
+                                new Vector3(chunk.Pos.x+halfSize, 0, chunk.Pos.z+halfSize),
                                 new Vector3(smallSize-0.05f, 0, smallSize-0.05f)
                                 );
                         }

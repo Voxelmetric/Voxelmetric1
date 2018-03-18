@@ -292,7 +292,7 @@ namespace Voxelmetric.Code.Core
                 // Consume the event
                 chunk.NeedApplyStructure = false;
 
-                if (!pendingStructures.TryGetValue(chunk.pos, out list))
+                if (!pendingStructures.TryGetValue(chunk.Pos, out list))
                     return;
                 
                 cnt = list.Count;

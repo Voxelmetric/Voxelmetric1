@@ -33,7 +33,7 @@ namespace Voxelmetric.Code.Core
             int yy = Helpers.Mod(pos.y, Env.ChunkSize);
             int zz = Helpers.Mod(pos.z, Env.ChunkSize);
 
-            return chunk.blocks.Get(Helpers.GetChunkIndex1DFrom3D(xx, yy, zz));
+            return chunk.Blocks.Get(Helpers.GetChunkIndex1DFrom3D(xx, yy, zz));
         }
 
         public BlockData Get(Vector3Int pos)
@@ -50,7 +50,7 @@ namespace Voxelmetric.Code.Core
             int yy = Helpers.Mod(pos.y, Env.ChunkSize);
             int zz = Helpers.Mod(pos.z, Env.ChunkSize);
 
-            return chunk.blocks.Get(Helpers.GetChunkIndex1DFrom3D(xx, yy, zz));
+            return chunk.Blocks.Get(Helpers.GetChunkIndex1DFrom3D(xx, yy, zz));
         }
 
         /// <summary>
@@ -71,7 +71,7 @@ namespace Voxelmetric.Code.Core
             int yy = Helpers.Mod(pos.y, Env.ChunkSize);
             int zz = Helpers.Mod(pos.z, Env.ChunkSize);
 
-            BlockData blockData = chunk.blocks.Get(Helpers.GetChunkIndex1DFrom3D(xx, yy, zz));
+            BlockData blockData = chunk.Blocks.Get(Helpers.GetChunkIndex1DFrom3D(xx, yy, zz));
             return world.blockProvider.BlockTypes[blockData.Type];
         }
 
@@ -93,7 +93,7 @@ namespace Voxelmetric.Code.Core
             int yy = Helpers.Mod(pos.y, Env.ChunkSize);
             int zz = Helpers.Mod(pos.z, Env.ChunkSize);
 
-            chunk.blocks.SetInner(Helpers.GetChunkIndex1DFrom3D(xx, yy, zz), blockData);
+            chunk.Blocks.SetInner(Helpers.GetChunkIndex1DFrom3D(xx, yy, zz), blockData);
         }
 
         /// <summary>
@@ -115,7 +115,7 @@ namespace Voxelmetric.Code.Core
             int yy = Helpers.Mod(pos.y, Env.ChunkSize);
             int zz = Helpers.Mod(pos.z, Env.ChunkSize);
 
-            chunk.blocks.SetRaw(Helpers.GetChunkIndex1DFrom3D(xx, yy, zz), blockData);
+            chunk.Blocks.SetRaw(Helpers.GetChunkIndex1DFrom3D(xx, yy, zz), blockData);
         }
 
         /// <summary>
@@ -158,7 +158,7 @@ namespace Voxelmetric.Code.Core
 
                         Vector3Int from = new Vector3Int(minX, minY, minZ);
                         Vector3Int to = new Vector3Int(maxX, maxY, maxZ);
-                        chunk.blocks.SetRange(ref from, ref to, blockData);
+                        chunk.Blocks.SetRange(ref from, ref to, blockData);
                     }
                 }
             }
@@ -205,7 +205,7 @@ namespace Voxelmetric.Code.Core
 
                         Vector3Int from = new Vector3Int(minX, minY, minZ);
                         Vector3Int to = new Vector3Int(maxX, maxY, maxZ);
-                        chunk.blocks.SetRangeRaw(ref from, ref to, blockData);
+                        chunk.Blocks.SetRangeRaw(ref from, ref to, blockData);
                     }
                 }
             }
@@ -237,7 +237,7 @@ namespace Voxelmetric.Code.Core
             int index = Helpers.GetChunkIndex1DFrom3D(blockPos.x, blockPos.y, blockPos.z);
 
             // Nothing for us to do if the block did not change
-            BlockData oldBlockData = chunk.blocks.Get(index);
+            BlockData oldBlockData = chunk.Blocks.Get(index);
             if (oldBlockData.Type==blockData.Type)
                 return;
 
@@ -245,7 +245,7 @@ namespace Voxelmetric.Code.Core
             if (onModified!=null)
                 context = new ModifyBlockContext(onModified, world, index, index, blockData, setBlockModified);
 
-            chunk.blocks.Modify(new ModifyOpBlock(blockData, index, setBlockModified, context));
+            chunk.Blocks.Modify(new ModifyOpBlock(blockData, index, setBlockModified, context));
         }
 
         /// <summary>
@@ -295,7 +295,7 @@ namespace Voxelmetric.Code.Core
 
                         int maxX = Math.Min(posTo.x-cx, Env.ChunkSize1);
                         
-                        chunk.blocks.Modify(
+                        chunk.Blocks.Modify(
                             new ModifyOpCuboid(
                                 blockData,
                                 new Vector3Int(minX, minY, minZ),

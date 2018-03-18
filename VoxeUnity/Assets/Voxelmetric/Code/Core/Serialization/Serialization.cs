@@ -25,7 +25,7 @@ namespace Voxelmetric.Code.Core.Serialization
         private static string SaveFileName(Chunk chunk)
         {
             string saveFile = SaveLocation(chunk.world.worldName);
-            saveFile += FileName(chunk.pos);
+            saveFile += FileName(chunk.Pos);
             return saveFile;
         }
 

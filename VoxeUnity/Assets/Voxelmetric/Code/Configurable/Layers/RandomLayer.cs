@@ -21,7 +21,7 @@ public class RandomLayer: TerrainLayer
     
     public override float GetHeight(Chunk chunk, int layerIndex, int x, int z, float heightSoFar, float strength)
     {
-        var lpos = new Vector3(chunk.pos.x + x, heightSoFar + 1f, chunk.pos.z);
+        var lpos = new Vector3(chunk.Pos.x + x, heightSoFar + 1f, chunk.Pos.z);
         float posChance = Randomization.Random(lpos.GetHashCode(), 200);
 
         if (chance > posChance)
@@ -34,7 +34,7 @@ public class RandomLayer: TerrainLayer
 
     public override float GenerateLayer(Chunk chunk, int layerIndex, int x, int z, float heightSoFar, float strength)
     {
-        var lpos = new Vector3(chunk.pos.x + x, heightSoFar + 1f, chunk.pos.z);
+        var lpos = new Vector3(chunk.Pos.x + x, heightSoFar + 1f, chunk.Pos.z);
         float posChance = Randomization.Random(lpos.GetHashCode(), 200);
 
         if (chance > posChance)

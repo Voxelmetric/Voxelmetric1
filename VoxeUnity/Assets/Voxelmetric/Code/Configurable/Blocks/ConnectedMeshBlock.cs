@@ -41,7 +41,7 @@ public class ConnectedMeshBlock: CustomMeshBlock
         var colors = d.colors;
 
         Rect rect;
-        ChunkBlocks blocks = chunk.blocks;
+        ChunkBlocks blocks = chunk.Blocks;
 
         RenderGeometryBatcher batcher = chunk.GeometryHandler.Batcher;
 

@@ -91,7 +91,7 @@ public class StructureTree: GeneratedStructure
         int maxX, maxY, maxZ;
         
         AABBInt bounds = new AABBInt(x1, worldPos.y, z1, x2, y2, z2);
-        Vector3Int chunkPos = chunk.pos;
+        Vector3Int chunkPos = chunk.Pos;
         StructureInfo info = null;
 
         // Generate the crown
@@ -117,7 +117,7 @@ public class StructureTree: GeneratedStructure
                     int yOff = cy-y1-leavesRange1;
                     int zOff = cz-worldPos.z;
 
-                    if (cx!=chunk.pos.x || cy!=chunk.pos.y || cz!=chunk.pos.z)
+                    if (cx!=chunk.Pos.x || cy!=chunk.Pos.y || cz!=chunk.Pos.z)
                     {
                         Vector3Int pos = new Vector3Int(cx, cy, cz);
                         Vector3Int min = new Vector3Int(minX, minY, minZ);
@@ -133,7 +133,7 @@ public class StructureTree: GeneratedStructure
                     }
 
                     // Actual crown construction
-                    ChunkBlocks blocks = chunk.blocks;
+                    ChunkBlocks blocks = chunk.Blocks;
                     int index = Helpers.GetChunkIndex1DFrom3D(minX, minY, minZ);
                     int yOffset = Env.ChunkSizeWithPaddingPow2-(maxZ-minZ+1)*Env.ChunkSizeWithPadding;
                     int zOffset = Env.ChunkSizeWithPadding-(maxX-minX+1);
@@ -176,7 +176,7 @@ public class StructureTree: GeneratedStructure
         {
             maxY = Math.Min(posTo.y-cy, Env.ChunkSize1);
 
-            if (cx!=chunk.pos.x || cy!=chunk.pos.y || cz!=chunk.pos.z)
+            if (cx!=chunk.Pos.x || cy!=chunk.Pos.y || cz!=chunk.Pos.z)
             {
                 Vector3Int pos = new Vector3Int(cx, cy, cz);
                 Vector3Int min = new Vector3Int(tx, minY, tz);
@@ -192,7 +192,7 @@ public class StructureTree: GeneratedStructure
             }
 
             // Actual trunk construction
-            ChunkBlocks blocks = chunk.blocks;
+            ChunkBlocks blocks = chunk.Blocks;
             int index = Helpers.GetChunkIndex1DFrom3D(tx, minY, tz);
             for (int y = minY; y<=maxY; ++y, index += Env.ChunkSizeWithPaddingPow2)
                 blocks.SetRaw(index, log);
@@ -202,7 +202,7 @@ public class StructureTree: GeneratedStructure
     public static void GenerateCrownPart(Chunk chunk, ref Vector3Int worldPos, ref Vector3Int min, ref Vector3Int max,
         int noise)
     {
-        ChunkBlocks blocks = chunk.blocks;
+        ChunkBlocks blocks = chunk.Blocks;
 
         int leavesRange = minCrownSize+noise;
         int leavesRange1 = leavesRange-1;
@@ -213,9 +213,9 @@ public class StructureTree: GeneratedStructure
         float b2inv = 1.0f/(leavesRange1*leavesRange1);
 
         int y1 = worldPos.y+1+trunkHeight;
-        int xOff = chunk.pos.x-worldPos.x;
-        int yOff = chunk.pos.y-y1-leavesRange1;
-        int zOff = chunk.pos.z-worldPos.z;
+        int xOff = chunk.Pos.x-worldPos.x;
+        int yOff = chunk.Pos.y-y1-leavesRange1;
+        int zOff = chunk.Pos.z-worldPos.z;
 
         blocks.Modify(
             new ModifyOpEllipsoid(leaves, min, max, new Vector3Int(xOff, yOff, zOff), a2inv, b2inv, false)
@@ -224,7 +224,7 @@ public class StructureTree: GeneratedStructure
 
     public static void GenerateTrunkPart(Chunk chunk, ref Vector3Int min, ref Vector3Int max)
     {
-        ChunkBlocks blocks = chunk.blocks;
+        ChunkBlocks blocks = chunk.Blocks;
 
         blocks.Modify(
             new ModifyOpCuboid(log, min, max, false)

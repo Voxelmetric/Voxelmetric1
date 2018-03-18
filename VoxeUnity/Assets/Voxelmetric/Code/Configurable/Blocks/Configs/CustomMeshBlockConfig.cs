@@ -196,7 +196,7 @@ public class CustomMeshBlockConfig: BlockConfig
                 // Create a temporary chunk object
                 Chunk chunk = new Chunk(size);
                 chunk.Init(world, Vector3Int.zero);
-                ChunkBlocks blocks = chunk.blocks;
+                ChunkBlocks blocks = chunk.Blocks;
 
                 // Convert the model's data to our internal system
                 for (int y = 0; y < mvchunk.sizeY; y++)
@@ -229,7 +229,7 @@ public class CustomMeshBlockConfig: BlockConfig
                         SideMask = 0,
                         Palette = data.palette
                     };
-                    meshBuilder.Build(chunk, out chunk.minBounds, out chunk.maxBounds);
+                    meshBuilder.Build(chunk, out chunk.MinBounds, out chunk.NaxBounds);
 
                     var batcher = chunk.GeometryHandler.Batcher;
                     if (batcher.Buffers != null && batcher.Buffers.Length > 0)

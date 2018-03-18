@@ -143,7 +143,7 @@ namespace Voxelmetric.Code.VM
                 data = ChunkBlocks.EmptyBytes;
             }
             else
-                data = chunk.blocks.ToBytes();
+                data = chunk.Blocks.ToBytes();
 
             if ( debugServer )
                 Debug.Log("VmServer.RequestChunk (" + Thread.CurrentThread.ManagedThreadId + "): " + id

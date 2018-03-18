@@ -1,4 +1,4 @@
-﻿using UnityEngine.Assertions;
+﻿using System.Runtime.CompilerServices;
 using Voxelmetric.Code.Common.Extensions;
 using Voxelmetric.Code.Core.Serialization;
 
@@ -48,19 +48,6 @@ namespace Voxelmetric.Code.Core.StateManager
                 m_save.Reset();
         }
 
-        public bool CanUpdate()
-        {
-            // Do not do any processing as long as there is any task still running
-            // Note that this check is not thread-safe because this value can be changed from a different thread. However,
-            // we do not care. The worst thing that can happen is that we read a value which is one frame old...
-            // Thanks to this relaxed approach we do not need any synchronization primitives anywhere.
-            if (m_taskRunning)
-                return false;
-
-            // Once this Chunk is marked as finished we ignore any further requests and won't perform any updates
-            return !m_completedStates.Check(ChunkState.Remove);
-        }
-
         public abstract void Update();
 
         #region Pending states
@@ -79,11 +66,13 @@ namespace Voxelmetric.Code.Core.StateManager
             m_pendingStates = m_pendingStates.Set(state);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         protected void ResetStatePending(ChunkState state)
         {
            m_pendingStates = m_pendingStates.Reset(state);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         protected bool IsStatePending(ChunkState state)
         {
             return m_pendingStates.Check(state);
@@ -93,22 +82,41 @@ namespace Voxelmetric.Code.Core.StateManager
 
         #region Completed states
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         protected void SetStateCompleted(ChunkState state)
         {
             m_completedStates = m_completedStates.Set(state);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         protected void ResetStateCompleted(ChunkState state)
         {
             m_completedStates = m_completedStates.Reset(state);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool IsStateCompleted(ChunkState state)
         {
             return m_completedStates.Check(state);
         }
 
         #endregion
+
+        public bool CanUpdate
+        {
+            get
+            {
+                // Do not do any processing as long as there is any task still running
+                // Note that this check is not thread-safe because this value can be changed from a different thread. However,
+                // we do not care. The worst thing that can happen is that we read a value which is one frame old...
+                // Thanks to this relaxed approach we do not need any synchronization primitives anywhere.
+                if (m_taskRunning)
+                    return false;
+
+                // Once this Chunk is marked as finished we ignore any further requests and won't perform any updates
+                return !m_completedStates.Check(ChunkState.Remove);
+            }
+        }
 
         public bool IsSavePossible
         {
@@ -125,7 +133,7 @@ namespace Voxelmetric.Code.Core.StateManager
                 return
                     !Features.UseDifferentialSerialization ||
                     Features.UseDifferentialSerialization_ForceSaveHeaders ||
-                    chunk.blocks.modifiedBlocks.Count>0;
+                    chunk.Blocks.modifiedBlocks.Count>0;
             }
         }
 
