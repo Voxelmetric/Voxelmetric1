@@ -1570,24 +1570,24 @@ namespace Voxelmetric.Code.Core
             if (!NeedsColliderGeometry)
                 return false; // Try the next step - build render geometry
 
-            // Block while we're waiting for data to be generated or during synchronization
-            if (!IsStateCompleted(ChunkState.Generate) || IsSyncingEdges)
-                return true;
-
-            // Enough neighbors are necessary for us to proceed
-            if (!CanSynchronizeNeighbors())
-                return true;
-
-            if (SynchronizeEdges())
-                return true;
-
-            bool priority = IsStatePending(ChunkState.BuildColliderNow);
-
-            ResetStatePending(ChunkStates.CurrStateBuildCollider);
-            ResetStateCompleted(ChunkStates.CurrStateBuildCollider);
-
             if (Blocks.NonEmptyBlocks > 0)
             {
+                // Block while we're waiting for data to be generated or during synchronization
+                if (!IsStateCompleted(ChunkState.Generate) || IsSyncingEdges)
+                    return true;
+
+                // Enough neighbors are necessary for us to proceed
+                if (!CanSynchronizeNeighbors())
+                    return true;
+
+                if (SynchronizeEdges())
+                    return true;
+
+                bool priority = IsStatePending(ChunkState.BuildColliderNow);
+
+                ResetStatePending(ChunkStates.CurrStateBuildCollider);
+                ResetStateCompleted(ChunkStates.CurrStateBuildCollider);
+            
                 var task = Globals.MemPools.SMThreadPI.Pop();
                 m_poolState = m_poolState.Set(ChunkPoolItemState.ThreadPI);
                 m_threadPoolItem = task;
@@ -1634,27 +1634,24 @@ namespace Voxelmetric.Code.Core
             if (!NeedsRenderGeometry)
                 return false; // Try the next step - there's no next step :)
 
-            if (!IsStateCompleted(ChunkState.Generate))
-                return true;
-
-            // Block while we're waiting for data to be generated or during synchronization
-            if (!IsStateCompleted(ChunkState.Generate) || IsSyncingEdges)
-                return true;
-
-            // Enough neighbors are necessary for us to proceed
-            if (!CanSynchronizeNeighbors())
-                return true;
-
-            if (SynchronizeEdges())
-                return true;
-
-            bool priority = IsStatePending(ChunkState.BuildVerticesNow);
-
-            ResetStatePending(ChunkStates.CurrStateBuildVertices);
-            ResetStateCompleted(ChunkStates.CurrStateBuildVertices);
-
             if (Blocks.NonEmptyBlocks > 0)
             {
+                // Block while we're waiting for data to be generated or during synchronization
+                if (!IsStateCompleted(ChunkState.Generate) || IsSyncingEdges)
+                return true;
+
+                // Enough neighbors are necessary for us to proceed
+                if (!CanSynchronizeNeighbors())
+                    return true;
+
+                if (SynchronizeEdges())
+                    return true;
+
+                bool priority = IsStatePending(ChunkState.BuildVerticesNow);
+
+                ResetStatePending(ChunkStates.CurrStateBuildVertices);
+                ResetStateCompleted(ChunkStates.CurrStateBuildVertices);
+            
                 var task = Globals.MemPools.SMThreadPI.Pop();
                 m_poolState = m_poolState.Set(ChunkPoolItemState.ThreadPI);
                 m_threadPoolItem = task;
