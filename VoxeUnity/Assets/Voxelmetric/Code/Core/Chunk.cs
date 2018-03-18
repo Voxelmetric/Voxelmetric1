@@ -281,6 +281,7 @@ namespace Voxelmetric.Code.Core
             PossiblyVisible = false;
             m_syncEdgeBlocks = true;
             m_removalRequested = false;
+            IsSyncingEdges = false;
 
             NeedApplyStructure = true;
             MaxPendingStructureListIndex = 0;
@@ -1358,7 +1359,7 @@ namespace Voxelmetric.Code.Core
             for (int i = 0; i < Neighbors.Length; i++)
             {
                 var neighbor = Neighbors[i];
-                if (neighbor != null && !neighbor.IsSyncingEdges)
+                if (neighbor != null && neighbor.IsSyncingEdges)
                     return true;
             }
 
