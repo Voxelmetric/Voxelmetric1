@@ -16,7 +16,7 @@ namespace Voxelmetric.Code.Geometry.Batchers
         public List<RenderGeometryBuffer>[] Buffers { get; }
         //! GameObjects used to hold our geometry
         private readonly List<GameObject> m_objects;
-        //! A list of renderer used to render our geometry
+        //! A list of renderers used for our geometry
         private readonly List<Renderer> m_renderers;
 
         private bool m_enabled;

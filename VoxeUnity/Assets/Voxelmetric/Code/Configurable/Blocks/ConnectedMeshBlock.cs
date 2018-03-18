@@ -43,7 +43,7 @@ public class ConnectedMeshBlock: CustomMeshBlock
         Rect rect;
         ChunkBlocks blocks = chunk.Blocks;
 
-        RenderGeometryBatcher batcher = chunk.GeometryHandler.Batcher;
+        RenderGeometryBatcher batcher = chunk.RenderGeometryHandler.Batcher;
 
         Vector3Int sidePos = face.pos + face.side;
         if (meshConfig.connectsToSolid && blocks.Get(ref sidePos).Solid)
@@ -88,7 +88,7 @@ public class ConnectedMeshBlock: CustomMeshBlock
             BuildFace(chunk, null, null, ref face, false);
         }
 
-        RenderGeometryBatcher batcher = chunk.GeometryHandler.Batcher;
+        RenderGeometryBatcher batcher = chunk.RenderGeometryHandler.Batcher;
 
         var d2 = meshConfig.data;
         Rect texture = d2.textures.GetTexture(chunk, ref localPos, Direction.down);

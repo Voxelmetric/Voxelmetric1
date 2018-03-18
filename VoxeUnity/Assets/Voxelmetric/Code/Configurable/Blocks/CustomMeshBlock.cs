@@ -26,7 +26,7 @@ public class CustomMeshBlock: Block
                            ? data.textures.GetTexture(chunk, ref localPos, Direction.down)
                            : new Rect();
 
-        RenderGeometryBatcher batcher = chunk.GeometryHandler.Batcher;
+        RenderGeometryBatcher batcher = chunk.RenderGeometryHandler.Batcher;
 
         if (data.uvs==null)
             batcher.AddMeshData(materialID, data.tris, data.verts, data.colors, localPos);

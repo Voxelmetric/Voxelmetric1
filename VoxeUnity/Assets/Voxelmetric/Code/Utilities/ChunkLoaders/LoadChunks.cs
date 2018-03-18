@@ -153,7 +153,7 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
                 ClipmapItem item = m_clipmap.Get_Transformed(tx, ty, tz);
                 bool isVisible = Planes.TestPlanesAABB(m_cameraPlanes, ref chunk.WorldBounds);
 
-                chunk.Visible = isVisible && item.IsInVisibleRange;
+                chunk.NeedsRenderGeometry = isVisible && item.IsInVisibleRange;
                 chunk.PossiblyVisible = isVisible || FullLoadOnStartUp;
 
                 return;
@@ -182,7 +182,7 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
                             
                             // Update visibility information
                             chunk.PossiblyVisible = FullLoadOnStartUp;
-                            chunk.Visible = false;
+                            chunk.NeedsRenderGeometry = false;
                         }
                     }
                 }
@@ -216,7 +216,7 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
                             // Update visibility information
                             ClipmapItem item = m_clipmap.Get_Transformed(tx, ty, tz);
 
-                            chunk.Visible = item.IsInVisibleRange;
+                            chunk.NeedsRenderGeometry = item.IsInVisibleRange;
                             chunk.PossiblyVisible = true;
                         }
                     }
@@ -352,7 +352,7 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
                         if (FullLoadOnStartUp)
                         {
                             chunk.PossiblyVisible = true;
-                            chunk.Visible = false;
+                            chunk.NeedsRenderGeometry = false;
                         }
 
                         m_updateRequests.Add(chunk);
@@ -430,7 +430,7 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
                 int xd = Helpers.Abs((m_viewerPos.x - chunk.Pos.x) / Env.ChunkSize);
                 int yd = Helpers.Abs((m_viewerPos.y - chunk.Pos.y) / Env.ChunkSize);
                 int zd = Helpers.Abs((m_viewerPos.z - chunk.Pos.z) / Env.ChunkSize);
-                chunk.NeedsCollider = xd <= 1 && yd <= 1 && zd <= 1;
+                chunk.NeedsColliderGeometry = xd <= 1 && yd <= 1 && zd <= 1;
 
                 if (!UseFrustumCulling)
                 {
@@ -441,14 +441,14 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
                     {
                         //chunk.LOD = item.LOD;
                         chunk.PossiblyVisible = true;
-                        chunk.Visible = true;
+                        chunk.NeedsRenderGeometry = true;
                     }
                     // Chunk is in cached range. Full update except for geometry generation
                     else
                     {
                         //chunk.LOD = item.LOD;
                         chunk.PossiblyVisible = true;
-                        chunk.Visible = false;
+                        chunk.NeedsRenderGeometry = false;
                     }
                 }
             }

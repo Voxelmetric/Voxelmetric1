@@ -134,8 +134,7 @@ namespace Voxelmetric.Code.Builders
                             vertexData[3] = new Vector3(xx+w, maxY, zz) * m_scale+
                                             BlockUtils.PaddingOffsets[(int)Direction.up][3];
 
-                            chunk.ChunkColliderGeometryHandler.Batcher.AddFace(
-                                vertexData, DirectionUtils.IsBackface(Direction.up), block.PhysicMaterialID);
+                            chunk.ColliderGeometryHandler.Batcher.AddFace(block.PhysicMaterialID, vertexData, DirectionUtils.IsBackface(Direction.up));
                         }
 
                         // Zero out the mask. We don't need to process the same fields again
@@ -223,8 +222,7 @@ namespace Voxelmetric.Code.Builders
                             vertexData[3] = new Vector3(xx+w, minY, zz) * m_scale+
                                             BlockUtils.PaddingOffsets[(int)Direction.down][3];
 
-                            chunk.ChunkColliderGeometryHandler.Batcher.AddFace(
-                                vertexData, DirectionUtils.IsBackface(Direction.down), block.PhysicMaterialID);
+                            chunk.ColliderGeometryHandler.Batcher.AddFace(block.PhysicMaterialID, vertexData, DirectionUtils.IsBackface(Direction.down));
                         }
 
                         // Zero out the mask. We don't need to process the same fields again
@@ -312,8 +310,7 @@ namespace Voxelmetric.Code.Builders
                             vertexData[3] = new Vector3(maxX, yy, zz+w) * m_scale+
                                             BlockUtils.PaddingOffsets[(int)Direction.east][3];
 
-                            chunk.ChunkColliderGeometryHandler.Batcher.AddFace(
-                                vertexData, DirectionUtils.IsBackface(Direction.east), block.PhysicMaterialID);
+                            chunk.ColliderGeometryHandler.Batcher.AddFace(block.PhysicMaterialID, vertexData, DirectionUtils.IsBackface(Direction.east));
                         }
 
                         // Zero out the mask. We don't need to process the same fields again
@@ -401,8 +398,7 @@ namespace Voxelmetric.Code.Builders
                             vertexData[3] = new Vector3(minX, yy, zz+w) * m_scale+
                                             BlockUtils.PaddingOffsets[(int)Direction.west][3];
 
-                            chunk.ChunkColliderGeometryHandler.Batcher.AddFace(
-                                vertexData, DirectionUtils.IsBackface(Direction.west), block.PhysicMaterialID);
+                            chunk.ColliderGeometryHandler.Batcher.AddFace(block.PhysicMaterialID, vertexData, DirectionUtils.IsBackface(Direction.west));
                         }
 
                         // Zero out the mask. We don't need to process the same fields again
@@ -490,8 +486,7 @@ namespace Voxelmetric.Code.Builders
                             vertexData[3] = new Vector3(xx+w, yy, maxZ) * m_scale+
                                             BlockUtils.PaddingOffsets[(int)Direction.north][3];
 
-                            chunk.ChunkColliderGeometryHandler.Batcher.AddFace(
-                                vertexData, DirectionUtils.IsBackface(Direction.north), block.PhysicMaterialID);
+                            chunk.ColliderGeometryHandler.Batcher.AddFace(block.PhysicMaterialID, vertexData, DirectionUtils.IsBackface(Direction.north));
                         }
 
                         // Zero out the mask. We don't need to process the same fields again
@@ -579,8 +574,7 @@ namespace Voxelmetric.Code.Builders
                             vertexData[3] = new Vector3(xx+w, yy, minZ) * m_scale+
                                             BlockUtils.PaddingOffsets[(int)Direction.south][3];
 
-                            chunk.ChunkColliderGeometryHandler.Batcher.AddFace(
-                                vertexData, DirectionUtils.IsBackface(Direction.south), block.PhysicMaterialID);
+                            chunk.ColliderGeometryHandler.Batcher.AddFace(block.PhysicMaterialID, vertexData, DirectionUtils.IsBackface(Direction.south));
                         }
 
                         // Zero out the mask. We don't need to process the same fields again

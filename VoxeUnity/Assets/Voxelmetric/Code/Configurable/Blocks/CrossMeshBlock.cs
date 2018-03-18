@@ -24,7 +24,7 @@ public class CrossMeshBlock : Block
     public override void BuildBlock(Chunk chunk, ref Vector3Int localPos, int materialID)
     {
         var pools = Globals.WorkPool.GetPool(chunk.ThreadID);
-        RenderGeometryBatcher batcher = chunk.GeometryHandler.Batcher;
+        RenderGeometryBatcher batcher = chunk.RenderGeometryHandler.Batcher;
 
         // Using the block positions hash is much better for random numbers than saving the offset and height in the block data
         int hash = localPos.GetHashCode();

@@ -29,7 +29,7 @@ public class SimpleBlock : Block
 
             BlockUtils.AdjustColors(chunk, cols, face.light);
 
-            RenderGeometryBatcher batcher = chunk.GeometryHandler.Batcher;
+            RenderGeometryBatcher batcher = chunk.RenderGeometryHandler.Batcher;
             batcher.AddFace(face.materialID, verts, cols, backFace);
         }
 

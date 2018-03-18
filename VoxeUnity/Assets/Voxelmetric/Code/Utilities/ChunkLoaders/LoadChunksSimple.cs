@@ -136,7 +136,7 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
                 // Update visibility information
                 bool isVisible = Planes.TestPlanesAABB(m_cameraPlanes, ref chunk.WorldBounds);
 
-                chunk.Visible = isVisible &&
+                chunk.NeedsRenderGeometry = isVisible &&
                     xDist<=HorizontalChunkLoadRadius*HorizontalChunkLoadRadius &&
                     yDist<=VerticalChunkLoadRadius*VerticalChunkLoadRadius;
                 chunk.PossiblyVisible = isVisible || FullLoadOnStartUp;
@@ -182,7 +182,7 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
 
                             // Update visibility information
                             chunk.PossiblyVisible = FullLoadOnStartUp;
-                            chunk.Visible = false;
+                            chunk.NeedsRenderGeometry = false;
                         }
                     }
                 }
@@ -217,7 +217,7 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
                             int yDist = yd*yd;
 
                             // Update visibility information
-                            chunk.Visible =
+                            chunk.NeedsRenderGeometry =
                                 xDist<=HorizontalChunkLoadRadius*HorizontalChunkLoadRadius &&
                                 yDist<=VerticalChunkLoadRadius*VerticalChunkLoadRadius;
                             chunk.PossiblyVisible = true;
@@ -355,7 +355,7 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
                         if (FullLoadOnStartUp)
                         {
                             chunk.PossiblyVisible = true;
-                            chunk.Visible = false;
+                            chunk.NeedsRenderGeometry = false;
                         }
 
                         m_updateRequests.Add(chunk);
@@ -442,12 +442,12 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
             else
             {
                 // Dummy collider example - create a collider for chunks directly surrounding the viewer
-                chunk.NeedsCollider = Helpers.Abs(xd)<=1 && Helpers.Abs(yd)<=1 && Helpers.Abs(zd)<=1;
+                chunk.NeedsColliderGeometry = Helpers.Abs(xd)<=1 && Helpers.Abs(yd)<=1 && Helpers.Abs(zd)<=1;
 
                 if (!UseFrustumCulling)
                 {
                     // Update visibility information
-                    chunk.Visible =
+                    chunk.NeedsRenderGeometry =
                         xDist<=HorizontalChunkLoadRadius*HorizontalChunkLoadRadius &&
                         yDist<=VerticalChunkLoadRadius*VerticalChunkLoadRadius;
                     chunk.PossiblyVisible = true;

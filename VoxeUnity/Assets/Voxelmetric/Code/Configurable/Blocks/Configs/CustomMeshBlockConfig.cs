@@ -231,7 +231,7 @@ public class CustomMeshBlockConfig: BlockConfig
                     };
                     meshBuilder.Build(chunk, out chunk.MinBounds, out chunk.NaxBounds);
 
-                    var batcher = chunk.GeometryHandler.Batcher;
+                    var batcher = chunk.RenderGeometryHandler.Batcher;
                     if (batcher.Buffers != null && batcher.Buffers.Length > 0)
                     {
 

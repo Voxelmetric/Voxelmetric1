@@ -15,11 +15,10 @@ namespace Voxelmetric.Code.Geometry.Batchers
         private readonly List<ColliderGeometryBuffer>[] m_buffers;
         //! GameObjects used to hold our geometry
         private readonly List<GameObject> m_objects;
-        //! A list of renderer used to render our geometry
+        //! A list of colliders used for our geometry
         private readonly List<Collider> m_colliders;
 
         private bool m_enabled;
-
         public bool Enabled
         {
             set
@@ -29,7 +28,7 @@ namespace Voxelmetric.Code.Geometry.Batchers
                     Collider collider = m_colliders[i];
                     collider.enabled = value;
                 }
-                m_enabled = value && m_colliders.Count > 0;
+                m_enabled = value;
             }
             get
             {
@@ -103,15 +102,15 @@ namespace Voxelmetric.Code.Geometry.Batchers
         /// <summary>
         ///     Addds one face to our render buffer
         /// </summary>
-        /// <param name="vertexData"> An array of 4 vertices forming the face</param>
-        /// <param name="backFace">If false, vertices are added clock-wise</param>
         /// <param name="materialID">ID of material to use when building the mesh</param>
-        public void AddFace(Vector3[] vertexData, bool backFace, int materialID)
+        /// <param name="verts"> An array of 4 vertices forming the face</param>
+        /// <param name="backFace">If false, vertices are added clock-wise</param>
+        public void AddFace(int materialID, Vector3[] verts, bool backFace)
         {
-            Assert.IsTrue(vertexData.Length == 4);
+            Assert.IsTrue(verts.Length == 4);
 
-            List<ColliderGeometryBuffer> holder = m_buffers[materialID];
-            ColliderGeometryBuffer buffer = holder[holder.Count - 1];
+            var holder = m_buffers[materialID];
+            var buffer = holder[holder.Count - 1];
 
             // If there are too many vertices we need to create a new separate buffer for them
             if (buffer.Vertices.Count + 4 > 65000)
@@ -120,8 +119,10 @@ namespace Voxelmetric.Code.Geometry.Batchers
                 holder.Add(buffer);
             }
 
-            // Add data to the render buffer
-            buffer.AddVertices(vertexData);
+            // Add vertices
+            buffer.AddVertices(verts);
+
+            // Add indices
             buffer.AddIndices(buffer.Vertices.Count, backFace);
         }
 
@@ -149,8 +150,8 @@ namespace Voxelmetric.Code.Geometry.Batchers
                         continue;
 
                     // Create a game object for collider. Unfortunatelly, we can't use object pooling
-                    // here for otherwise, unity would have to rebake because of change in object position
-                    // and that is very time consuming.
+                    // here. Unity3D would have to rebake the geometry of the old object because of a
+                    // change in its position and that is very time consuming.
                     GameObject prefab = GameObjectProvider.GetPool(m_prefabName).Prefab;
                     GameObject go = Object.Instantiate(prefab);
                     go.transform.parent = GameObjectProvider.Instance.ProviderGameObject.transform;
@@ -204,8 +205,8 @@ namespace Voxelmetric.Code.Geometry.Batchers
                         continue;
 
                     // Create a game object for collider. Unfortunatelly, we can't use object pooling
-                    // here for otherwise, unity would have to rebake because of change in object position
-                    // and that is very time consuming.
+                    // here. Unity3D would have to rebake the geometry of the old object because of a
+                    // change in its position and that is very time consuming.
                     GameObject prefab = GameObjectProvider.GetPool(m_prefabName).Prefab;
                     GameObject go = Object.Instantiate(prefab);
                     go.transform.parent = GameObjectProvider.Instance.ProviderGameObject.transform;

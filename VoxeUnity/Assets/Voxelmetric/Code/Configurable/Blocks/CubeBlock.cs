@@ -50,7 +50,7 @@ public class CubeBlock: Block
             BlockUtils.PrepareTexture(chunk, ref face.pos, uvs, face.side, textures, rotated);
             BlockUtils.PrepareColors(chunk, cols, face.light);
 
-            RenderGeometryBatcher batcher = chunk.GeometryHandler.Batcher;
+            RenderGeometryBatcher batcher = chunk.RenderGeometryHandler.Batcher;
             batcher.AddFace(face.materialID, verts, cols, uvs, backface);
         }
 

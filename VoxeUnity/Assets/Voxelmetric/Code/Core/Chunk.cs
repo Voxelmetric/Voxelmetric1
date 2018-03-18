@@ -31,8 +31,8 @@ namespace Voxelmetric.Code.Core
         public World world { get; private set; }
         public ChunkBlocks Blocks { get; }
         
-        public ChunkRenderGeometryHandler GeometryHandler { get; private set; }
-        public ChunkColliderGeometryHandler ChunkColliderGeometryHandler { get; private set; }
+        public ChunkRenderGeometryHandler RenderGeometryHandler { get; private set; }
+        public ChunkColliderGeometryHandler ColliderGeometryHandler { get; private set; }
 
         //! Queue of setBlock operations to execute
         private List<ModifyOp> m_setBlockQueue;
@@ -102,33 +102,39 @@ namespace Voxelmetric.Code.Core
         private ChunkPoolItemState m_poolState;
         private ITaskPoolItem m_threadPoolItem;
 
-        //! Says whether the chunk needs its collider rebuilt
-        private bool m_needsCollider;
-        public bool NeedsCollider
+        //! Says whether the chunk needs collision geometry
+        public bool NeedsColliderGeometry
         {
             get
             {
-                return m_needsCollider;
+                return ColliderGeometryHandler.Batcher.Enabled;
             }
             set
             {
-                bool prevNeedCollider = m_needsCollider;
-                m_needsCollider = value;
-                if (m_needsCollider && !prevNeedCollider)
-                    RequestCollider();
+                var batcher = ColliderGeometryHandler.Batcher;
+                bool prev = batcher.Enabled;
+
+                if (!value && prev)
+                    // Collider turned off
+                    ResetStatePending(ChunkStates.CurrStateBuildCollider);
+                else if (value && !prev)
+                    // Collider turned on
+                    SetStatePending(ChunkState.BuildCollider);
+
+                batcher.Enabled = value;
             }
         }
 
-        //! Says whether or not the chunk is visible
-        public bool Visible
+        //! Says whether the chunk needs render geometry
+        public bool NeedsRenderGeometry
         {
             get
             {
-                return GeometryHandler.Batcher.Enabled;
+                return RenderGeometryHandler.Batcher.Enabled;
             }
             set
             {
-                var batcher = GeometryHandler.Batcher;
+                var batcher = RenderGeometryHandler.Batcher;
                 bool prev = batcher.Enabled;
 
                 if (!value && prev)
@@ -216,17 +222,17 @@ namespace Voxelmetric.Code.Core
             {
                 m_logic = world.config.randomUpdateFrequency>0.0f ? new ChunkLogic(this) : null;
 
-                if (GeometryHandler==null)
-                    GeometryHandler = new ChunkRenderGeometryHandler(this, world.renderMaterials);
-                if (ChunkColliderGeometryHandler==null)
-                    ChunkColliderGeometryHandler = new ChunkColliderGeometryHandler(this, world.physicsMaterials);
+                if (RenderGeometryHandler==null)
+                    RenderGeometryHandler = new ChunkRenderGeometryHandler(this, world.renderMaterials);
+                if (ColliderGeometryHandler==null)
+                    ColliderGeometryHandler = new ChunkColliderGeometryHandler(this, world.physicsMaterials);
             }
             else
             {
-                if (GeometryHandler == null)
-                    GeometryHandler = new ChunkRenderGeometryHandler(this, null);
-                if (ChunkColliderGeometryHandler == null)
-                    ChunkColliderGeometryHandler = new ChunkColliderGeometryHandler(this, null);
+                if (RenderGeometryHandler == null)
+                    RenderGeometryHandler = new ChunkRenderGeometryHandler(this, null);
+                if (ColliderGeometryHandler == null)
+                    ColliderGeometryHandler = new ChunkColliderGeometryHandler(this, null);
             }
 
             WorldBounds = new AABB(
@@ -266,10 +272,10 @@ namespace Voxelmetric.Code.Core
             m_taskRunning = false;
             m_threadPoolItem = null;
 
-            Visible = false;
+            NeedsRenderGeometry = false;
+            NeedsColliderGeometry = false;
             PossiblyVisible = false;
             m_syncEdgeBlocks = true;
-            m_needsCollider = false;
             m_removalRequested = false;
 
             NeedApplyStructure = true;
@@ -291,19 +297,11 @@ namespace Voxelmetric.Code.Core
 
             Clear();
 
-            GeometryHandler.Reset();
-            ChunkColliderGeometryHandler.Reset();
+            RenderGeometryHandler.Reset();
+            ColliderGeometryHandler.Reset();
 
             //chunk.world = null; <-- must not be done inside here! Do it outside the method
         }
-
-        public void RequestCollider()
-        {
-            // Request collider update if there is no request yet
-            if (rebuildMaskCollider < 0)
-                rebuildMaskCollider = 0;
-        }
-
 
         public bool UpdateCollisionGeometry()
         {
@@ -313,21 +311,13 @@ namespace Voxelmetric.Code.Core
             if (!Globals.GeometryBudget.HasTimeBudget)
                 return false;
 
-            // Nothing to do if there's no collider yet
+            // Build collider only if necessary
             if (!IsStateCompleted(ChunkStates.CurrStateBuildCollider))
-            {
-                // Release the collider when no longer needed
-                if (!NeedsCollider)
-                {
-                    ResetStateCompleted(ChunkStates.CurrStateBuildCollider);
-                    ChunkColliderGeometryHandler.Reset();
-                }
                 return false;
-            }
             
             Globals.GeometryBudget.StartMeasurement();
             {
-                ChunkColliderGeometryHandler.Commit();
+                ColliderGeometryHandler.Commit();
                 ResetStateCompleted(ChunkStates.CurrStateBuildCollider);
             }
             Globals.GeometryBudget.StopMeasurement();
@@ -344,13 +334,13 @@ namespace Voxelmetric.Code.Core
             if (!Globals.GeometryBudget.HasTimeBudget)
                 return false;
             
-            // Build chunk mesh if necessary
+            // Build chunk mesh only if necessary
             if (!IsStateCompleted(ChunkStates.CurrStateBuildVertices))
                 return false;
             
             Globals.GeometryBudget.StartMeasurement();
             {
-                GeometryHandler.Commit();
+                RenderGeometryHandler.Commit();
                 ResetStateCompleted(ChunkStates.CurrStateBuildVertices);
             }
             Globals.GeometryBudget.StopMeasurement();
@@ -469,12 +459,11 @@ namespace Voxelmetric.Code.Core
             // Request synchronization of edges and build geometry
             chunk.m_syncEdgeBlocks = true;
 
-            // Geometry needs to be rebuild
+            // Geometry & collider needs to be rebuilt
+            // This does not mean they will be built because the chunk might not
+            // be visible or colliders might be turned off
             chunk.SetStatePending(ChunkState.BuildVertices);
-
-            // Collider might beed to be rebuild
-            if (chunk.NeedsCollider)
-                chunk.RequestCollider();
+            chunk.SetStatePending(ChunkState.BuildCollider);
         }
 
         private void SubscribeNeighbors(bool subscribe)
@@ -905,7 +894,7 @@ namespace Voxelmetric.Code.Core
             {
                 if (rebuildMaskGeometry < 0)
                     rebuildMaskGeometry = 0;
-                if (NeedsCollider && rebuildMaskCollider < 0)
+                if (rebuildMaskCollider < 0)
                     rebuildMaskCollider = 0;
 
                 var timeBudget = Globals.SetBlockBudget;
@@ -926,8 +915,7 @@ namespace Voxelmetric.Code.Core
                     }*/
                 }
 
-                if (NeedsCollider)
-                    rebuildMaskCollider |= rebuildMaskGeometry;
+                rebuildMaskCollider |= rebuildMaskGeometry;
 
                 if (j == m_setBlockQueue.Count)
                     m_setBlockQueue.Clear();
@@ -966,7 +954,7 @@ namespace Voxelmetric.Code.Core
             }
 
             // Request a collider update at most 4 times a second
-            if (NeedsCollider && rebuildMaskCollider >= 0 && now - lastUpdateTimeCollider >= 250)
+            if (NeedsColliderGeometry && rebuildMaskCollider >= 0 && now - lastUpdateTimeCollider >= 250)
             {
                 lastUpdateTimeCollider = now;
 
@@ -982,7 +970,7 @@ namespace Voxelmetric.Code.Core
                         if (neighbor != null && ((rebuildMaskCollider >> j) & 1) != 0)
                         {
                             // Request rebuild on neighbor chunks
-                            if (neighbor.NeedsCollider)
+                            if (neighbor.NeedsColliderGeometry)
                                 neighbor.SetStatePending(ChunkState.BuildColliderNow);
                         }
                     }
@@ -1528,7 +1516,7 @@ namespace Voxelmetric.Code.Core
 
         private static void OnBuildCollider(Chunk client)
         {
-            client.ChunkColliderGeometryHandler.Build();
+            client.ColliderGeometryHandler.Build();
             OnBuildColliderDone(client);
         }
 
@@ -1543,9 +1531,9 @@ namespace Voxelmetric.Code.Core
         /// </summary>
         private bool BuildCollider()
         {
-            // TODO: Having some sort of condition for colliders would be nice
-            //if (!xyz)
-            //return true;
+            // To save performance we generate collider on-demand
+            if (!NeedsColliderGeometry)
+                return false; // Try the next step - build render geometry
 
             if (!IsStateCompleted(ChunkState.Generate))
                 return true;
@@ -1587,7 +1575,7 @@ namespace Voxelmetric.Code.Core
 
         private static void OnBuildVertices(Chunk client)
         {
-            client.GeometryHandler.Build();
+            client.RenderGeometryHandler.Build();
             OnBuildVerticesDone(client);
         }
 
@@ -1603,8 +1591,8 @@ namespace Voxelmetric.Code.Core
         private bool BuildVertices()
         {
             // To save performance we generate geometry on-demand - when the chunk can be seen
-            if (!Visible)
-                return true;
+            if (!NeedsRenderGeometry)
+                return false; // Try the next step - there's no next step :)
 
             if (!IsStateCompleted(ChunkState.Generate))
                 return true;
