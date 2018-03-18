@@ -6,7 +6,6 @@ using Voxelmetric.Code.Common;
 using Voxelmetric.Code.Common.IO;
 using Voxelmetric.Code.Common.Memory;
 using Voxelmetric.Code.Core.Operations;
-using Voxelmetric.Code.Core.StateManager;
 using Voxelmetric.Code.Data_types;
 using Voxelmetric.Code.Load_Resources.Blocks;
 using Voxelmetric.Code.VM;
@@ -180,7 +179,6 @@ namespace Voxelmetric.Code.Core
 
         private ChunkBlocks HandleNeighborRight(ref Vector3Int pos)
         {
-            ChunkStateManagerClient stateManager = chunk.stateManager;
             int i = DirectionUtils.Get(Direction.east);
 
             // If it is an edge position, notify neighbor as well
@@ -209,7 +207,6 @@ namespace Voxelmetric.Code.Core
 
         private ChunkBlocks HandleNeighborLeft(ref Vector3Int pos)
         {
-            ChunkStateManagerClient stateManager = chunk.stateManager;
             int i = DirectionUtils.Get(Direction.west);
 
             // If it is an edge position, notify neighbor as well
@@ -240,7 +237,6 @@ namespace Voxelmetric.Code.Core
 
         private ChunkBlocks HandleNeighborUp(ref Vector3Int pos)
         {
-            ChunkStateManagerClient stateManager = chunk.stateManager;
             int i = DirectionUtils.Get(Direction.up);
 
             // If it is an edge position, notify neighbor as well
@@ -269,7 +265,6 @@ namespace Voxelmetric.Code.Core
 
         private ChunkBlocks HandleNeighborDown(ref Vector3Int pos)
         {
-            ChunkStateManagerClient stateManager = chunk.stateManager;
             int i = DirectionUtils.Get(Direction.down);
 
             // If it is an edge position, notify neighbor as well
@@ -298,7 +293,6 @@ namespace Voxelmetric.Code.Core
 
         private ChunkBlocks HandleNeighborFront(ref Vector3Int pos)
         {
-            ChunkStateManagerClient stateManager = chunk.stateManager;
             int i = DirectionUtils.Get(Direction.north);
 
             // If it is an edge position, notify neighbor as well
@@ -327,7 +321,6 @@ namespace Voxelmetric.Code.Core
 
         private ChunkBlocks HandleNeighborBack(ref Vector3Int pos)
         {
-            ChunkStateManagerClient stateManager = chunk.stateManager;
             int i = DirectionUtils.Get(Direction.south);
 
             // If it is an edge position, notify neighbor as well
@@ -381,9 +374,7 @@ namespace Voxelmetric.Code.Core
             int cx = chunk.Pos.x;
             int cy = chunk.Pos.y;
             int cz = chunk.Pos.z;
-
-            ChunkStateManagerClient stateManager = chunk.stateManager;
-
+            
             // If it is an edge position, notify neighbor as well
             // Iterate over neighbors and decide which ones should be notified to rebuild their geometry
             var listeners = chunk.Neighbors;
@@ -508,8 +499,7 @@ namespace Voxelmetric.Code.Core
 
         public void Update()
         {
-            ChunkStateManagerClient stateManager = chunk.stateManager;
-            if (!stateManager.IsUpdateBlocksPossible)
+            if (!chunk.IsUpdateBlocksPossible)
                 return;
 
             //UnityEngine.Debug.Log(m_setBlockQueue.Count);
@@ -558,7 +548,7 @@ namespace Voxelmetric.Code.Core
                 lastUpdateTimeGeometry = now;
 
                 // Request rebuild on this chunk
-                stateManager.SetStatePending(ChunkState.BuildVerticesNow);
+                chunk.SetStatePending(ChunkState.BuildVerticesNow);
 
                 // Notify neighbors that they need to rebuild their geometry
                 if (rebuildMaskGeometry>0)
@@ -570,7 +560,7 @@ namespace Voxelmetric.Code.Core
                         if (listener!=null && ((rebuildMaskGeometry>>j)&1)!=0)
                         {
                             // Request rebuild on neighbor chunks
-                            listener.stateManager.SetStatePending(ChunkState.BuildVerticesNow);
+                            listener.SetStatePending(ChunkState.BuildVerticesNow);
                         }
                     }
                 }
@@ -584,7 +574,7 @@ namespace Voxelmetric.Code.Core
                 lastUpdateTimeCollider = now;
 
                 // Request rebuild on this chunk
-                stateManager.SetStatePending(ChunkState.BuildColliderNow);
+                chunk.SetStatePending(ChunkState.BuildColliderNow);
 
                 // Notify neighbors that they need to rebuilt their geometry
                 if (rebuildMaskCollider > 0)
@@ -597,7 +587,7 @@ namespace Voxelmetric.Code.Core
                         {
                             // Request rebuild on neighbor chunks
                             if (listener.NeedsCollider)
-                                listener.stateManager.SetStatePending(ChunkState.BuildColliderNow);
+                                listener.SetStatePending(ChunkState.BuildColliderNow);
                         }
                     }
                 }
@@ -809,8 +799,7 @@ namespace Voxelmetric.Code.Core
             if(!InitFromBytes())
                 Reset();
 
-            ChunkStateManagerClient stateManager = chunk.stateManager;
-            ChunkStateManagerClient.OnGenerateDataOverNetworkDone(stateManager);
+            Chunk.OnGenerateDataOverNetworkDone(chunk);
 
             receiveBuffer = null;
             receiveIndex = 0;

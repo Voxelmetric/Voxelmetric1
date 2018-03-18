@@ -2,8 +2,8 @@
 using System.Collections.Generic;
 using Voxelmetric.Code.Core;
 using Voxelmetric.Code.Core.Operations;
-using Voxelmetric.Code.Core.StateManager;
 using Voxelmetric.Code.Data_types;
+using Chunk = Voxelmetric.Code.Core.Chunk;
 
 namespace Voxelmetric.Code
 {
@@ -42,12 +42,11 @@ namespace Voxelmetric.Code
             foreach (Chunk chunk in world.chunks.Chunks)
             {
                 // Ignore chunks that can't be saved at the moment
-                ChunkStateManagerClient stateManager = chunk.stateManager;
-                if (!stateManager.IsSavePossible)
+                if (!chunk.IsSavePossible)
                     continue;
 
                 chunksToSave.Add(chunk);
-                stateManager.SetStatePending(ChunkState.PrepareSaveData);
+                chunk.SetStatePending(ChunkState.PrepareSaveData);
             }
 
             return chunksToSave;

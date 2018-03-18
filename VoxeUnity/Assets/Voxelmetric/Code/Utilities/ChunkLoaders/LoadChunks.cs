@@ -6,8 +6,8 @@ using Voxelmetric.Code.Common;
 using Voxelmetric.Code.Common.Math;
 using Voxelmetric.Code.Core;
 using Voxelmetric.Code.Core.Clipmap;
-using Voxelmetric.Code.Core.StateManager;
 using Voxelmetric.Code.Data_types;
+using Chunk = Voxelmetric.Code.Core.Chunk;
 using Vector3Int = Voxelmetric.Code.Data_types.Vector3Int;
 
 namespace Voxelmetric.Code.Utilities.ChunkLoaders
@@ -140,9 +140,7 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
                 Chunk chunk = world.chunks.Get(ref chunkPos);
                 if (chunk==null)
                     return;
-
-                ChunkStateManagerClient stateManager = chunk.stateManager;
-
+                
                 int tx = m_clipmap.TransformX(x);
                 int ty = m_clipmap.TransformY(y);
                 int tz = m_clipmap.TransformZ(z);
@@ -155,8 +153,8 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
                 ClipmapItem item = m_clipmap.Get_Transformed(tx, ty, tz);
                 bool isVisible = Planes.TestPlanesAABB(m_cameraPlanes, ref chunk.WorldBounds);
 
-                stateManager.Visible = isVisible && item.IsInVisibleRange;
-                stateManager.PossiblyVisible = isVisible || FullLoadOnStartUp;
+                chunk.Visible = isVisible && item.IsInVisibleRange;
+                chunk.PossiblyVisible = isVisible || FullLoadOnStartUp;
 
                 return;
             }
@@ -181,12 +179,10 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
                             Chunk chunk = world.chunks.Get(ref chunkPos);
                             if (chunk==null)
                                 continue;
-
-                            ChunkStateManagerClient stateManager = chunk.stateManager;
                             
                             // Update visibility information
-                            stateManager.PossiblyVisible = FullLoadOnStartUp;
-                            stateManager.Visible = false;
+                            chunk.PossiblyVisible = FullLoadOnStartUp;
+                            chunk.Visible = false;
                         }
                     }
                 }
@@ -212,9 +208,7 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
                             Chunk chunk = world.chunks.Get(ref chunkPos);
                             if (chunk==null)
                                 continue;
-
-                            ChunkStateManagerClient stateManager = chunk.stateManager;
-
+                            
                             int tx = m_clipmap.TransformX(x);
                             int ty = m_clipmap.TransformY(y);
                             int tz = m_clipmap.TransformZ(z);
@@ -222,8 +216,8 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
                             // Update visibility information
                             ClipmapItem item = m_clipmap.Get_Transformed(tx, ty, tz);
 
-                            stateManager.Visible = item.IsInVisibleRange;
-                            stateManager.PossiblyVisible = true;
+                            chunk.Visible = item.IsInVisibleRange;
+                            chunk.PossiblyVisible = true;
                         }
                     }
                 }
@@ -357,9 +351,8 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
 
                         if (FullLoadOnStartUp)
                         {
-                            ChunkStateManagerClient stateManager = chunk.stateManager;
-                            stateManager.PossiblyVisible = true;
-                            stateManager.Visible = false;
+                            chunk.PossiblyVisible = true;
+                            chunk.Visible = false;
                         }
 
                         m_updateRequests.Add(chunk);
@@ -383,7 +376,7 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
                 ProcessChunk(chunk);
 
                 // Update the chunk if possible
-                if (chunk.stateManager.CanUpdate)
+                if (chunk.CanUpdate)
                 {
                     chunk.UpdateState();
 
@@ -400,8 +393,7 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
                 }
 
                 // Automatically collect chunks which are ready to be removed from the world
-                ChunkStateManagerClient stateManager = chunk.stateManager;
-                if (stateManager.IsStateCompleted(ChunkState.Remove))
+                if (chunk.IsStateCompleted(ChunkState.Remove))
                 {
                     // Remove the chunk from our provider and unregister it from chunk storage
                     world.chunks.Remove(chunk);
@@ -424,9 +416,7 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
         public void ProcessChunk(Chunk chunk)
         {
             Profiler.BeginSample("ProcessChunk");
-
-            ChunkStateManagerClient stateManager = chunk.stateManager;
-
+            
             int tx = m_clipmap.TransformX(chunk.Pos.x / Env.ChunkSize);
             int ty = m_clipmap.TransformY(chunk.Pos.y / Env.ChunkSize);
             int tz = m_clipmap.TransformZ(chunk.Pos.z / Env.ChunkSize);
@@ -434,7 +424,7 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
             // Chunk is too far away. Remove it
             if (!m_clipmap.IsInsideBounds_Transformed(tx, ty, tz))
             {
-                stateManager.SetStatePending(ChunkState.Remove);
+                chunk.SetStatePending(ChunkState.Remove);
             }
             else
             {
@@ -452,15 +442,15 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
                     if (item.IsInVisibleRange)
                     {
                         //chunk.LOD = item.LOD;
-                        stateManager.PossiblyVisible = true;
-                        stateManager.Visible = true;
+                        chunk.PossiblyVisible = true;
+                        chunk.Visible = true;
                     }
                     // Chunk is in cached range. Full update except for geometry generation
                     else
                     {
                         //chunk.LOD = item.LOD;
-                        stateManager.PossiblyVisible = true;
-                        stateManager.Visible = false;
+                        chunk.PossiblyVisible = true;
+                        chunk.Visible = false;
                     }
                 }
             }
@@ -596,8 +586,7 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
                         }
 
                         // Show generated chunks
-                        ChunkStateManagerClient stateManager = chunk.stateManager;
-                        if (stateManager.IsStateCompleted(ChunkState.Generate))
+                        if (chunk.IsStateCompleted(ChunkState.Generate))
                         {
                             Gizmos.color = Color.magenta;
                             Gizmos.DrawWireCube(

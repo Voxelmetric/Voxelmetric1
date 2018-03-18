@@ -3,8 +3,7 @@ using UnityEngine;
 using Voxelmetric.Code.Common.Extensions;
 using Voxelmetric.Code.Common.Memory;
 using Voxelmetric.Code.Common.Threading;
-using Voxelmetric.Code.Core;
-using Voxelmetric.Code.Core.StateManager;
+using Chunk = Voxelmetric.Code.Core.Chunk;
 
 namespace Voxelmetric.Code.Common.MemoryPooling
 {
@@ -24,11 +23,11 @@ namespace Voxelmetric.Code.Common.MemoryPooling
          * These need to be used with caution. Items are popped on the main thread and pushed back
          * on a separate thread.
          */
-        public readonly ObjectPool<TaskPoolItem<ChunkStateManagerClient>> SMTaskPI =
-            new ObjectPool<TaskPoolItem<ChunkStateManagerClient>>(m => new TaskPoolItem<ChunkStateManagerClient>(), 2048, false);
+        public readonly ObjectPool<TaskPoolItem<Chunk>> SMTaskPI =
+            new ObjectPool<TaskPoolItem<Chunk>>(m => new TaskPoolItem<Chunk>(), 2048, false);
         
-        public readonly ObjectPool<ThreadPoolItem<ChunkStateManagerClient>> SMThreadPI =
-            new ObjectPool<ThreadPoolItem<ChunkStateManagerClient>>(m => new ThreadPoolItem<ChunkStateManagerClient>(), 2048, false);
+        public readonly ObjectPool<ThreadPoolItem<Chunk>> SMThreadPI =
+            new ObjectPool<ThreadPoolItem<Chunk>>(m => new ThreadPoolItem<Chunk>(), 2048, false);
 
         #endregion
 

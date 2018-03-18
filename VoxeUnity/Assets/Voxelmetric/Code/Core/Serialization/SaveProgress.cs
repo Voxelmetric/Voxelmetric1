@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 using Voxelmetric.Code.Common.Events;
-using Voxelmetric.Code.Core.StateManager;
 
 namespace Voxelmetric.Code.Core.Serialization
 {
@@ -30,8 +29,7 @@ namespace Voxelmetric.Code.Core.Serialization
             for (int i = 0; i<chunksToSave.Count; i++)
             {
                 Chunk chunk = chunksToSave[i];
-                ChunkStateManagerClient stateManager = chunk.stateManager;
-                stateManager.Register(this);
+                chunk.Register(this);
             }
         }
 
@@ -45,12 +43,11 @@ namespace Voxelmetric.Code.Core.Serialization
         void IEventListener<ChunkStateExternal>.OnNotified(IEventSource<ChunkStateExternal> source, ChunkStateExternal evt)
         {
             if (evt==ChunkStateExternal.Saved)
-            {                
-                ChunkStateManagerClient stateManager = (ChunkStateManagerClient)source;                
-                chunksToSave.Remove(stateManager.chunk);
+            {
+                chunksToSave.Remove((Chunk)source);
 
                 // Unsubscribe from any further events
-                stateManager.Unregister(this);
+                source.Unregister(this);
 
                 progress = Mathf.FloorToInt((totalChunksToSave - chunksToSave.Count) / (float)totalChunksToSave * 100);
             }
