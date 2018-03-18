@@ -508,7 +508,7 @@ namespace Voxelmetric.Code.Core
             {
                 if (rebuildMaskGeometry<0)
                     rebuildMaskGeometry = 0;
-                if (rebuildMaskCollider<0)
+                if (chunk.NeedsCollider && rebuildMaskCollider < 0)
                     rebuildMaskCollider = 0;
 
                 var timeBudget = Globals.SetBlockBudget;
@@ -529,7 +529,8 @@ namespace Voxelmetric.Code.Core
                     }*/
                 }
 
-                rebuildMaskCollider |= rebuildMaskGeometry;
+                if (chunk.NeedsCollider)
+                    rebuildMaskCollider |= rebuildMaskGeometry;
 
                 if (j==m_setBlockQueue.Count)
                     m_setBlockQueue.Clear();

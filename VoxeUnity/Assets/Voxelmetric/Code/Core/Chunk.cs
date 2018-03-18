@@ -286,28 +286,30 @@ namespace Voxelmetric.Code.Core
         public bool UpdateCollisionGeometry()
         {
             Profiler.BeginSample("UpdateCollisionGeometry");
-            // Release the collider when no longer needed
-            if (!NeedsCollider)
-            {
-                ResetStateCompleted(ChunkStates.CurrStateBuildCollider);
-                ChunkColliderGeometryHandler.Reset();
-                return false;
-            }
 
             // Build collision geometry only if there is enough time
             if (!Globals.GeometryBudget.HasTimeBudget)
                 return false;
-            
-            // Build collider if necessary
+
+            // Nothing to do if there's no collider yet
             if (!IsStateCompleted(ChunkStates.CurrStateBuildCollider))
+            {
+                // Release the collider when no longer needed
+                if (!NeedsCollider)
+                {
+                    ResetStateCompleted(ChunkStates.CurrStateBuildCollider);
+                    ChunkColliderGeometryHandler.Reset();
+                }
                 return false;
+            }
             
             Globals.GeometryBudget.StartMeasurement();
-
-            ResetStateCompleted(ChunkStates.CurrStateBuildCollider);
-            ChunkColliderGeometryHandler.Commit();
-
+            {
+                ChunkColliderGeometryHandler.Commit();
+                ResetStateCompleted(ChunkStates.CurrStateBuildCollider);
+            }
             Globals.GeometryBudget.StopMeasurement();
+
             Profiler.EndSample();
             return true;
         }
@@ -315,6 +317,7 @@ namespace Voxelmetric.Code.Core
         public bool UpdateRenderGeometry()
         {
             Profiler.BeginSample("UpdateRenderGeometry");
+
             // Build render geometry only if there is enough time
             if (!Globals.GeometryBudget.HasTimeBudget)
                 return false;
@@ -324,11 +327,12 @@ namespace Voxelmetric.Code.Core
                 return false;
             
             Globals.GeometryBudget.StartMeasurement();
-
-            ResetStateCompleted(ChunkStates.CurrStateBuildVertices);
-            GeometryHandler.Commit();
-
+            {
+                GeometryHandler.Commit();
+                ResetStateCompleted(ChunkStates.CurrStateBuildVertices);
+            }
             Globals.GeometryBudget.StopMeasurement();
+
             Profiler.EndSample();
             return true;
         }
