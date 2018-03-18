@@ -867,11 +867,11 @@ namespace Voxelmetric.Code.Core
                 world.ApplyPendingStructures(this);
 
                 // Update logic
-                if (m_logic != null)
-                    m_logic.Update();
+                //if (m_logic != null)
+                    //m_logic.Update();
 
                 // Update blocks
-                UpdateBlocks();
+                //UpdateBlocks();
             }
 
             // Process chunk tasks
@@ -1570,14 +1570,14 @@ namespace Voxelmetric.Code.Core
             if (!NeedsColliderGeometry)
                 return false; // Try the next step - build render geometry
 
+            // Block while we're waiting for data to be generated or during synchronization
+            if (!IsStateCompleted(ChunkState.Generate))
+                return true;
+
             if (Blocks.NonEmptyBlocks > 0)
             {
-                // Block while we're waiting for data to be generated or during synchronization
-                if (!IsStateCompleted(ChunkState.Generate) || IsSyncingEdges)
-                    return true;
-
-                // Enough neighbors are necessary for us to proceed
-                if (!CanSynchronizeNeighbors())
+                // Enough neighbors are necessary for us to proceed. Watch out for synchronization
+                if (IsSyncingEdges || !CanSynchronizeNeighbors())
                     return true;
 
                 if (SynchronizeEdges())
@@ -1634,14 +1634,14 @@ namespace Voxelmetric.Code.Core
             if (!NeedsRenderGeometry)
                 return false; // Try the next step - there's no next step :)
 
-            if (Blocks.NonEmptyBlocks > 0)
-            {
-                // Block while we're waiting for data to be generated or during synchronization
-                if (!IsStateCompleted(ChunkState.Generate) || IsSyncingEdges)
+            // Block while we're waiting for data to be generated or during synchronization
+            if (!IsStateCompleted(ChunkState.Generate))
                 return true;
 
-                // Enough neighbors are necessary for us to proceed
-                if (!CanSynchronizeNeighbors())
+            if (Blocks.NonEmptyBlocks > 0)
+            {
+                // Enough neighbors are necessary for us to proceed. Watch out for synchronization
+                if (IsSyncingEdges || !CanSynchronizeNeighbors())
                     return true;
 
                 if (SynchronizeEdges())
