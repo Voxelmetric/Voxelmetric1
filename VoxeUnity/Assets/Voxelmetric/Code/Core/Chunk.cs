@@ -12,7 +12,7 @@ using Voxelmetric.Code.Geometry.GeometryHandler;
 
 namespace Voxelmetric.Code.Core
 {
-    public class Chunk : ChunkEventSource
+    public sealed class Chunk : ChunkEventSource
     {
         //! Static shared pointers to callbacks
         private static readonly Action<Chunk> actionOnLoadData = OnLoadData;
@@ -27,13 +27,15 @@ namespace Voxelmetric.Code.Core
         private static int s_id = 0;
         
         public World world { get; private set; }
-        public ChunkBlocks Blocks { get; private set; }
-        public ChunkLogic Logic { get; private set; }
+        public ChunkBlocks Blocks { get; }
+        
         public ChunkRenderGeometryHandler GeometryHandler { get; private set; }
         public ChunkColliderGeometryHandler ChunkColliderGeometryHandler { get; private set; }
         
         //! Save handler for chunk
-        protected readonly Save m_save;
+        private readonly Save m_save;
+        //! Custom update logic
+        private ChunkLogic m_logic;
 
         //! Chunk position in world coordinates
         public Vector3Int Pos { get; private set; }
@@ -70,11 +72,11 @@ namespace Voxelmetric.Code.Core
         //! Tasks already executed
         private ChunkState m_completedStates;
         //! Specifies whether there's a task running on this Chunk
-        protected volatile bool m_taskRunning;
+        private volatile bool m_taskRunning;
         //! If true, removal of chunk has been requested and no further requests are going to be accepted
         private bool m_removalRequested;
         //! If true, edges are to be synchronized with neighbor chunks
-        public bool m_syncEdgeBlocks;
+        private bool m_syncEdgeBlocks;
 
         //! Flags telling us whether pool items should be returned back to the pool
         private ChunkPoolItemState m_poolState;
@@ -220,7 +222,7 @@ namespace Voxelmetric.Code.Core
 
             if (world!=null)
             {
-                Logic = world.config.randomUpdateFrequency>0.0f ? new ChunkLogic(this) : null;
+                m_logic = world.config.randomUpdateFrequency>0.0f ? new ChunkLogic(this) : null;
 
                 if (GeometryHandler==null)
                     GeometryHandler = new ChunkRenderGeometryHandler(this, world.renderMaterials);
@@ -283,8 +285,8 @@ namespace Voxelmetric.Code.Core
             MinBoundsC = MaxBoundsC = 0;
 
             Blocks.Reset();
-            if (Logic!=null)
-                Logic.Reset();
+            if (m_logic!=null)
+                m_logic.Reset();
             if (m_save != null)
                 m_save.Reset();
 
@@ -521,13 +523,13 @@ namespace Voxelmetric.Code.Core
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        protected void ResetStatePending(ChunkState state)
+        private void ResetStatePending(ChunkState state)
         {
             m_pendingStates = m_pendingStates.Reset(state);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        protected bool IsStatePending(ChunkState state)
+        private bool IsStatePending(ChunkState state)
         {
             return m_pendingStates.Check(state);
         }
@@ -537,13 +539,13 @@ namespace Voxelmetric.Code.Core
         #region Completed states
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        protected void SetStateCompleted(ChunkState state)
+        private void SetStateCompleted(ChunkState state)
         {
             m_completedStates = m_completedStates.Set(state);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        protected void ResetStateCompleted(ChunkState state)
+        private void ResetStateCompleted(ChunkState state)
         {
             m_completedStates = m_completedStates.Reset(state);
         }
@@ -567,8 +569,8 @@ namespace Voxelmetric.Code.Core
                 world.ApplyPendingStructures(this);
 
                 // Update logic
-                if (Logic != null)
-                    Logic.Update();
+                if (m_logic != null)
+                    m_logic.Update();
 
                 // Update blocks
                 Blocks.Update();
