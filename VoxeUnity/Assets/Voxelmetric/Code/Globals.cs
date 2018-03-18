@@ -64,8 +64,6 @@ namespace Voxelmetric.Code
         // Global time budget handlers
         public static TimeBudgetHandler GeometryBudget { get; } = new TimeBudgetHandler(4);
 
-        public static TimeBudgetHandler EdgeSyncBudget { get; } = new TimeBudgetHandler(4);
-
         public static TimeBudgetHandler SetBlockBudget { get; } = new TimeBudgetHandler(4);
     }
 }

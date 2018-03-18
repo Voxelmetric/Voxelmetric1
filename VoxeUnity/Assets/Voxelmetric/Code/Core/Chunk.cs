@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices.WindowsRuntime;
 using UnityEngine.Assertions;
 using UnityEngine.Profiling;
 using Voxelmetric.Code.Common;
@@ -22,6 +23,7 @@ namespace Voxelmetric.Code.Core
         private static readonly Action<Chunk> actionOnGenerateData = OnGenerateData;
         private static readonly Action<Chunk> actionOnPrepareSaveData = OnPrepareSaveData;
         private static readonly Action<Chunk> actionOnSaveData = OnSaveData;
+        private static readonly Action<Chunk> actionOnSyncEdges = OnSynchronizeEdges;
         private static readonly Action<Chunk> actionOnBuildVertices = OnBuildVertices;
         private static readonly Action<Chunk> actionOnBuildCollider = OnBuildCollider;
 
@@ -97,6 +99,8 @@ namespace Voxelmetric.Code.Core
         private bool m_removalRequested;
         //! If true, edges are to be synchronized with neighbor chunks
         private bool m_syncEdgeBlocks;
+        //! If true, edge synchronization is in progress
+        public bool IsSyncingEdges { get; private set; }
 
         //! Flags telling us whether pool items should be returned back to the pool
         private ChunkPoolItemState m_poolState;
@@ -881,11 +885,16 @@ namespace Voxelmetric.Code.Core
             if (!m_completedStates.Check(ChunkState.Generate))
                 return;
 
-            // Never update during saving
+            // Don't update during saving
             if (
                 m_pendingStates.Check(ChunkState.PrepareSaveData) ||
                 m_pendingStates.Check(ChunkState.SaveData)
                 )
+                return;
+            
+            // Don't update when neighbors are syncing
+            // TODO: We should be interested only in edge-blocks in this case
+            if (AreNeighborsSynchronizing())
                 return;
 
             //UnityEngine.Debug.Log(m_setBlockQueue.Count);
@@ -1337,9 +1346,28 @@ namespace Voxelmetric.Code.Core
 
         #region Synchronize edges
 
-        private bool SynchronizeNeighbors()
+        private const ChunkState CurrStateSyncEdges = ChunkState.SyncEdges;
+
+        private bool AreNeighborsSynchronizing()
         {
-            // 6 neighbors are necessary
+            // There's has to be enough neighbors
+            if (NeighborCount != NeighborCountMax)
+                return false;
+
+            // All neighbors have to have their data generated
+            for (int i = 0; i < Neighbors.Length; i++)
+            {
+                var neighbor = Neighbors[i];
+                if (neighbor != null && !neighbor.IsSyncingEdges)
+                    return true;
+            }
+
+            return false;
+        }
+
+        private bool CanSynchronizeNeighbors()
+        {
+            // There's has to be enough neighbors
             if (NeighborCount != NeighborCountMax)
                 return false;
 
@@ -1357,21 +1385,20 @@ namespace Voxelmetric.Code.Core
         // A dummy chunk. Used e.g. for copying air block to padded area of chunks missing a neighbor
         private static readonly Chunk dummyChunk = new Chunk();
 
-        private void OnSynchronizeEdges()
+        private static void OnSynchronizeEdges(Chunk chunk)
         {
-            int chunkSize1 = SideSize - 1;
-            int sizePlusPadding = SideSize + Env.ChunkPadding;
-            int sizeWithPadding = SideSize + Env.ChunkPadding2;
+            int chunkSize1 = chunk.SideSize - 1;
+            int sizePlusPadding = chunk.SideSize + Env.ChunkPadding;
+            int sizeWithPadding = chunk.SideSize + Env.ChunkPadding2;
             int sizeWithPaddingPow2 = sizeWithPadding * sizeWithPadding;
             int chunkIterXY = sizeWithPaddingPow2 - sizeWithPadding;
 
-            // Search for neighbors we are vertically aligned with
-            for (int i = 0; i < Neighbors.Length; i++)
+            for (int i = 0; i < chunk.Neighbors.Length; i++)
             {
                 Chunk neighborChunk = dummyChunk;
                 Vector3Int neighborPos;
 
-                var neighbor = Neighbors[i];
+                var neighbor = chunk.Neighbors[i];
                 if (neighbor != null)
                 {
                     neighborChunk = neighbor;
@@ -1381,39 +1408,39 @@ namespace Voxelmetric.Code.Core
                 {
                     switch ((Direction)i)
                     {
-                        case Direction.up: neighborPos = Pos.Add(0, Env.ChunkSize, 0); break;
-                        case Direction.down: neighborPos = Pos.Add(0, -Env.ChunkSize, 0); break;
-                        case Direction.north: neighborPos = Pos.Add(0, 0, Env.ChunkSize); break;
-                        case Direction.south: neighborPos = Pos.Add(0, 0, -Env.ChunkSize); break;
-                        case Direction.east: neighborPos = Pos.Add(Env.ChunkSize, 0, 0); break;
-                        default: neighborPos = Pos.Add(-Env.ChunkSize, 0, 0); break;
+                        case Direction.up: neighborPos = chunk.Pos.Add(0, Env.ChunkSize, 0); break;
+                        case Direction.down: neighborPos = chunk.Pos.Add(0, -Env.ChunkSize, 0); break;
+                        case Direction.north: neighborPos = chunk.Pos.Add(0, 0, Env.ChunkSize); break;
+                        case Direction.south: neighborPos = chunk.Pos.Add(0, 0, -Env.ChunkSize); break;
+                        case Direction.east: neighborPos = chunk.Pos.Add(Env.ChunkSize, 0, 0); break;
+                        default: neighborPos = chunk.Pos.Add(-Env.ChunkSize, 0, 0); break;
                     }
                 }
 
                 // Sync vertical neighbors
-                if (neighborPos.x == Pos.x && neighborPos.z == Pos.z)
+                if (neighborPos.x == chunk.Pos.x && neighborPos.z == chunk.Pos.z)
                 {
                     // Copy the bottom layer of a neighbor chunk to the top layer of ours
-                    if (neighborPos.y > Pos.y)
+                    if (neighborPos.y > chunk.Pos.y)
                     {
                         int srcIndex = Helpers.GetChunkIndex1DFrom3D(-1, 0, -1);
                         int dstIndex = Helpers.GetChunkIndex1DFrom3D(-1, Env.ChunkSize, -1);
-                        Blocks.Copy(neighborChunk.Blocks, srcIndex, dstIndex, sizeWithPaddingPow2);
+                        chunk.Blocks.Copy(neighborChunk.Blocks, srcIndex, dstIndex, sizeWithPaddingPow2);
                     }
                     // Copy the top layer of a neighbor chunk to the bottom layer of ours
                     else // if (neighborPos.y < chunk.pos.y)
                     {
                         int srcIndex = Helpers.GetChunkIndex1DFrom3D(-1, chunkSize1, -1);
                         int dstIndex = Helpers.GetChunkIndex1DFrom3D(-1, -1, -1);
-                        Blocks.Copy(neighborChunk.Blocks, srcIndex, dstIndex, sizeWithPaddingPow2);
+                        chunk.Blocks.Copy(neighborChunk.Blocks, srcIndex, dstIndex, sizeWithPaddingPow2);
                     }
                 }
 
                 // Sync front and back neighbors
-                if (neighborPos.x == Pos.x && neighborPos.y == Pos.y)
+                if (neighborPos.x == chunk.Pos.x && neighborPos.y == chunk.Pos.y)
                 {
                     // Copy the front layer of a neighbor chunk to the back layer of ours
-                    if (neighborPos.z > Pos.z)
+                    if (neighborPos.z > chunk.Pos.z)
                     {
                         int srcIndex = Helpers.GetChunkIndex1DFrom3D(-1, -1, 0);
                         int dstIndex = Helpers.GetChunkIndex1DFrom3D(-1, -1, Env.ChunkSize);
@@ -1424,7 +1451,7 @@ namespace Voxelmetric.Code.Core
                             for (int x = -1; x < sizePlusPadding; x++, srcIndex++, dstIndex++)
                             {
                                 BlockData data = neighborChunk.Blocks.Get(srcIndex);
-                                Blocks.SetRaw(dstIndex, data);
+                                chunk.Blocks.SetRaw(dstIndex, data);
                             }
                         }
                     }
@@ -1440,17 +1467,17 @@ namespace Voxelmetric.Code.Core
                             for (int x = -1; x < sizePlusPadding; x++, srcIndex++, dstIndex++)
                             {
                                 BlockData data = neighborChunk.Blocks.Get(srcIndex);
-                                Blocks.SetRaw(dstIndex, data);
+                                chunk.Blocks.SetRaw(dstIndex, data);
                             }
                         }
                     }
                 }
 
                 // Sync right and left neighbors
-                if (neighborPos.y == Pos.y && neighborPos.z == Pos.z)
+                if (neighborPos.y == chunk.Pos.y && neighborPos.z == chunk.Pos.z)
                 {
                     // Copy the right layer of a neighbor chunk to the left layer of ours
-                    if (neighborPos.x > Pos.x)
+                    if (neighborPos.x > chunk.Pos.x)
                     {
                         int srcIndex = Helpers.GetChunkIndex1DFrom3D(0, -1, -1);
                         int dstIndex = Helpers.GetChunkIndex1DFrom3D(Env.ChunkSize, -1, -1);
@@ -1461,7 +1488,7 @@ namespace Voxelmetric.Code.Core
                                  z++, srcIndex += sizeWithPadding, dstIndex += sizeWithPadding)
                             {
                                 BlockData data = neighborChunk.Blocks.Get(srcIndex);
-                                Blocks.SetRaw(dstIndex, data);
+                                chunk.Blocks.SetRaw(dstIndex, data);
                             }
                         }
                     }
@@ -1477,12 +1504,21 @@ namespace Voxelmetric.Code.Core
                                  z++, srcIndex += sizeWithPadding, dstIndex += sizeWithPadding)
                             {
                                 BlockData data = neighborChunk.Blocks.Get(srcIndex);
-                                Blocks.SetRaw(dstIndex, data);
+                                chunk.Blocks.SetRaw(dstIndex, data);
                             }
                         }
                     }
                 }
             }
+
+            OnSynchronizeEdgesDone(chunk);
+        }
+
+        private static void OnSynchronizeEdgesDone(Chunk chunk)
+        {
+            chunk.SetStateCompleted(CurrStateSyncEdges);
+            chunk.m_taskRunning = false;
+            chunk.IsSyncingEdges = false;
         }
 
         private bool SynchronizeEdges()
@@ -1490,24 +1526,22 @@ namespace Voxelmetric.Code.Core
             // It is only necessary to perform the sychronization once when data is generated.
             // All subsequend changes of blocks are automatically synchronized inside ChunkBlocks
             if (!m_syncEdgeBlocks)
-                return true;
-
-            // Sync edges if there's enough time
-            if (!Globals.EdgeSyncBudget.HasTimeBudget)
                 return false;
-
             m_syncEdgeBlocks = false;
 
-            Globals.EdgeSyncBudget.StartMeasurement();
-            OnSynchronizeEdges();
-            Globals.EdgeSyncBudget.StopMeasurement();
-            return true;
-        }
+            ResetStatePending(CurrStateSyncEdges);
+            ResetStateCompleted(CurrStateSyncEdges);
 
-        private bool SynchronizeChunk()
-        {
-            // 6 neighbors are necessary to be loaded before synchronizing
-            return SynchronizeNeighbors() && SynchronizeEdges();
+            var task = Globals.MemPools.SMThreadPI.Pop();
+            m_poolState = m_poolState.Set(ChunkPoolItemState.ThreadPI);
+            m_threadPoolItem = task;
+
+            task.Set(ThreadID, actionOnSyncEdges, this);
+
+            m_taskRunning = true;
+            IsSyncingEdges = true;
+            WorkPoolManager.Add(task, false);
+            return true;
         }
 
         #endregion
@@ -1535,10 +1569,15 @@ namespace Voxelmetric.Code.Core
             if (!NeedsColliderGeometry)
                 return false; // Try the next step - build render geometry
 
-            if (!IsStateCompleted(ChunkState.Generate))
+            // Block while we're waiting for data to be generated or during synchronization
+            if (!IsStateCompleted(ChunkState.Generate) || IsSyncingEdges)
                 return true;
 
-            if (!SynchronizeChunk())
+            // Enough neighbors are necessary for us to proceed
+            if (!CanSynchronizeNeighbors())
+                return true;
+
+            if (SynchronizeEdges())
                 return true;
 
             bool priority = IsStatePending(ChunkState.BuildColliderNow);
@@ -1597,7 +1636,15 @@ namespace Voxelmetric.Code.Core
             if (!IsStateCompleted(ChunkState.Generate))
                 return true;
 
-            if (!SynchronizeChunk())
+            // Block while we're waiting for data to be generated or during synchronization
+            if (!IsStateCompleted(ChunkState.Generate) || IsSyncingEdges)
+                return true;
+
+            // Enough neighbors are necessary for us to proceed
+            if (!CanSynchronizeNeighbors())
+                return true;
+
+            if (SynchronizeEdges())
                 return true;
 
             bool priority = IsStatePending(ChunkState.BuildVerticesNow);

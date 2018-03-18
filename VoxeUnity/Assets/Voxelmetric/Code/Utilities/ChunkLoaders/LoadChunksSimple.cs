@@ -83,7 +83,7 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
         void Update()
         {
             Globals.GeometryBudget.Reset();
-            Globals.EdgeSyncBudget.Reset();
+            Globals.SetBlockBudget.Reset();
 
             PreProcessChunks();
             PostProcessChunks();
