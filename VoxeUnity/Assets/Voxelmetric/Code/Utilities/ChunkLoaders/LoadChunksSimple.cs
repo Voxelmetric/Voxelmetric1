@@ -381,8 +381,16 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
                 // Update the chunk if possible
                 if (chunk.Update())
                 {
-                    chunk.UpdateRenderGeometry();
-                    chunk.UpdateCollisionGeometry();
+                    // Build colliders if there is enough time
+                    if (Globals.GeometryBudget.HasTimeBudget)
+                    {
+                        Globals.GeometryBudget.StartMeasurement();
+
+                        bool wasBuilt = chunk.UpdateRenderGeometry();
+                        wasBuilt |= chunk.UpdateCollisionGeometry();
+                        if (wasBuilt)
+                            Globals.GeometryBudget.StopMeasurement();
+                    }
                 }
 
                 // Automatically collect chunks which are ready to be removed from the world
