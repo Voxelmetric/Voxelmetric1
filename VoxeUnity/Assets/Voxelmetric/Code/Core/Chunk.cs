@@ -115,7 +115,7 @@ namespace Voxelmetric.Code.Core
             set
             {
                 var batcher = ColliderGeometryHandler.Batcher;
-                /*bool prev = batcher.Enabled;
+                bool prev = batcher.Enabled;
 
                 if (!value && prev)
                     // Collider turned off
@@ -123,8 +123,8 @@ namespace Voxelmetric.Code.Core
                 else if (value && !prev)
                     // Collider turned on
                     SetStatePending(ChunkState.BuildCollider);
-                */
-                batcher.Enabled = false;//value;
+
+                batcher.Enabled = value;
             }
         }
 
@@ -866,11 +866,11 @@ namespace Voxelmetric.Code.Core
                 world.ApplyPendingStructures(this);
 
                 // Update logic
-                //if (m_logic != null)
-                    //m_logic.Update();
+                if (m_logic != null)
+                    m_logic.Update();
 
                 // Update blocks
-                //UpdateBlocks();
+                UpdateBlocks();
             }
 
             // Process chunk tasks
