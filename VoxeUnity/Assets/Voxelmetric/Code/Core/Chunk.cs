@@ -1342,9 +1342,7 @@ namespace Voxelmetric.Code.Core
         #endregion Save chunk data
 
         #region Synchronize edges
-
-        private const ChunkState CurrStateSyncEdges = ChunkState.SyncEdges;
-
+        
         private bool AreNeighborsSynchronizing()
         {
             // There's has to be enough neighbors
@@ -1355,10 +1353,7 @@ namespace Voxelmetric.Code.Core
             for (int i = 0; i < Neighbors.Length; i++)
             {
                 var neighbor = Neighbors[i];
-                if (neighbor == null)
-                    continue;
-
-                if (neighbor.m_isSyncingEdges)
+                if (neighbor!=null && neighbor.m_isSyncingEdges)
                     return true;
             }
 
@@ -1532,7 +1527,7 @@ namespace Voxelmetric.Code.Core
 
         private static void OnSynchronizeEdgesDone(Chunk chunk)
         {
-            chunk.SetStateCompleted(CurrStateSyncEdges);
+            chunk.SetStateCompleted(ChunkState.SyncEdges);
             chunk.m_isSyncingEdges = false;
             chunk.m_taskRunning = false;
         }
@@ -1547,28 +1542,19 @@ namespace Voxelmetric.Code.Core
             if (!AreNeighborsGenerated())
                 return true;
 
-            ResetStatePending(CurrStateSyncEdges);
-            ResetStateCompleted(CurrStateSyncEdges);
+            ResetStatePending(ChunkState.SyncEdges);
+            ResetStateCompleted(ChunkState.SyncEdges);
 
-            bool doMTSync = true;
-            if (doMTSync)
-            {
-                var task = Globals.MemPools.SMThreadPI.Pop();
-                m_poolState = m_poolState.Set(ChunkPoolItemState.ThreadPI);
-                m_threadPoolItem = task;
+            var task = Globals.MemPools.SMThreadPI.Pop();
+            m_poolState = m_poolState.Set(ChunkPoolItemState.ThreadPI);
+            m_threadPoolItem = task;
 
-                task.Set(ThreadID, actionOnSyncEdges, this);
+            task.Set(ThreadID, actionOnSyncEdges, this);
 
-                m_taskRunning = true;
-                m_isSyncingEdges = true;
-                WorkPoolManager.Add(task, false);
-                return true;
-            }
-            else
-            {
-                OnSynchronizeEdges(this);
-                return false;
-            }
+            m_taskRunning = true;
+            m_isSyncingEdges = true;
+            WorkPoolManager.Add(task, false);
+            return true;
         }
 
         #endregion
@@ -1597,7 +1583,7 @@ namespace Voxelmetric.Code.Core
                 return false; // Try the next step - build render geometry
 
             // Block while we're waiting for data to be synchronized
-            if (m_isSyncingEdges || !IsStateCompleted(ChunkState.SyncEdges))
+            if (!IsStateCompleted(ChunkState.SyncEdges))
                 return true;
 
             // Make sure all neighbors are synchronized
@@ -1658,7 +1644,7 @@ namespace Voxelmetric.Code.Core
                 return false; // Try the next step - there's no next step :)
 
             // Block while we're waiting for data to be synchronized
-            if (m_isSyncingEdges || !IsStateCompleted(ChunkState.SyncEdges))
+            if (!IsStateCompleted(ChunkState.SyncEdges))
                 return true;
 
             // Make sure all neighbors are synchronized
