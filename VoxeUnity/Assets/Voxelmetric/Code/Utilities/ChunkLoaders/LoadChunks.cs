@@ -85,7 +85,6 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
         void Update()
         {
             Globals.GeometryBudget.Reset();
-            Globals.EdgeSyncBudget.Reset();
             Globals.SetBlockBudget.Reset();
 
             PreProcessChunks();
@@ -378,13 +377,13 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
                 // Update the chunk if possible
                 if (chunk.Update())
                 {
-                    // Build colliders if there is enough time
+                    // Build geometry if there is enough time
                     if (Globals.GeometryBudget.HasTimeBudget)
                     {
                         Globals.GeometryBudget.StartMeasurement();
 
-                        bool wasBuilt = chunk.UpdateRenderGeometry();
-                        wasBuilt |= chunk.UpdateCollisionGeometry();
+                        bool wasBuilt = chunk.UpdateCollisionGeometry();
+                        wasBuilt |= chunk.UpdateRenderGeometry();
                         if (wasBuilt)
                             Globals.GeometryBudget.StopMeasurement();
                     }
