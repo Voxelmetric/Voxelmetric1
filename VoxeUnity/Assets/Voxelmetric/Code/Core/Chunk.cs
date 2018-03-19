@@ -96,8 +96,6 @@ namespace Voxelmetric.Code.Core
         private volatile bool m_taskRunning;
         //! If true, removal of chunk has been requested and no further requests are going to be accepted
         private bool m_removalRequested;
-        //! If true, edges are to be synchronized with neighbor chunks
-        private bool m_syncEdgeBlocks;
         //! If true, edge synchronization is in progress
         private bool m_isSyncingEdges;
 
@@ -278,7 +276,6 @@ namespace Voxelmetric.Code.Core
             NeedsRenderGeometry = false;
             NeedsColliderGeometry = false;
             PossiblyVisible = false;
-            m_syncEdgeBlocks = true;
             m_removalRequested = false;
             m_isSyncingEdges = false;
 
@@ -459,13 +456,11 @@ namespace Voxelmetric.Code.Core
             
             // Update max neighbor count and request geometry update
             chunk.NeighborCountMax = maxNeighbors;
-
-            // Request synchronization of edges and build geometry
-            chunk.m_syncEdgeBlocks = true;
-
+            
             // Geometry & collider needs to be rebuilt
             // This does not mean they will be built because the chunk might not
             // be visible or colliders might be turned off
+            chunk.SetStatePending(ChunkState.SyncEdges);
             chunk.SetStatePending(ChunkState.BuildVertices);
             chunk.SetStatePending(ChunkState.BuildCollider);
         }
@@ -1024,6 +1019,8 @@ namespace Voxelmetric.Code.Core
                 return;
             if (IsStatePending(ChunkState.Remove) && RemoveChunk())
                 return;
+            if (IsStatePending(ChunkState.SyncEdges) && SynchronizeEdges())
+                return;
             if (IsStatePending(ChunkStates.CurrStateBuildCollider) && BuildCollider())
                 return;
             if (IsStatePending(ChunkStates.CurrStateBuildVertices) && BuildVertices())
@@ -1384,7 +1381,7 @@ namespace Voxelmetric.Code.Core
             return true;
         }
 
-        private bool CanSynchronizeNeighbors()
+        private bool AreNeighborsGenerated()
         {
             // There's has to be enough neighbors
             if (NeighborCount != NeighborCountMax)
@@ -1542,30 +1539,36 @@ namespace Voxelmetric.Code.Core
 
         private bool SynchronizeEdges()
         {
-            // It is only necessary to perform the sychronization once when data is generated.
-            // All subsequend changes of blocks are automatically synchronized inside ChunkBlocks
-            if (!m_syncEdgeBlocks)
-                return false;
-
-            // Make sure all neighbors are generated
-            if (!CanSynchronizeNeighbors())
+            // Block while we're waiting for data to be generated
+            if (!IsStateCompleted(ChunkState.Generate))
                 return true;
 
-            m_syncEdgeBlocks = false;
+            // Make sure all neighbors are generated
+            if (!AreNeighborsGenerated())
+                return true;
 
+            ResetStatePending(CurrStateSyncEdges);
             ResetStateCompleted(CurrStateSyncEdges);
 
-            var task = Globals.MemPools.SMThreadPI.Pop();
-            m_poolState = m_poolState.Set(ChunkPoolItemState.ThreadPI);
-            m_threadPoolItem = task;
+            bool doMTSync = true;
+            if (doMTSync)
+            {
+                var task = Globals.MemPools.SMThreadPI.Pop();
+                m_poolState = m_poolState.Set(ChunkPoolItemState.ThreadPI);
+                m_threadPoolItem = task;
 
-            task.Set(ThreadID, actionOnSyncEdges, this);
-            
-            m_taskRunning = true;
-            m_isSyncingEdges = true;
-            WorkPoolManager.Add(task, false);
+                task.Set(ThreadID, actionOnSyncEdges, this);
 
-            return true;
+                m_taskRunning = true;
+                m_isSyncingEdges = true;
+                WorkPoolManager.Add(task, false);
+                return true;
+            }
+            else
+            {
+                OnSynchronizeEdges(this);
+                return false;
+            }
         }
 
         #endregion
@@ -1593,18 +1596,12 @@ namespace Voxelmetric.Code.Core
             if (!NeedsColliderGeometry)
                 return false; // Try the next step - build render geometry
 
-            // Block while we're waiting for data to be generated or during synchronization
-            if (!IsStateCompleted(ChunkState.Generate))
+            // Block while we're waiting for data to be synchronized
+            if (m_isSyncingEdges || !IsStateCompleted(ChunkState.SyncEdges))
                 return true;
 
-            // Watch out for synchronization
-            if (
-                // Sync in progress
-                m_isSyncingEdges ||
-                SynchronizeEdges() ||
-                // All neighbors have to be synchronized
-                !AreNeighborsSynchronized()
-            )
+            // Make sure all neighbors are synchronized
+            if (!AreNeighborsSynchronized())
                 return true;
 
             if (Blocks.NonEmptyBlocks > 0)
@@ -1660,18 +1657,12 @@ namespace Voxelmetric.Code.Core
             if (!NeedsRenderGeometry)
                 return false; // Try the next step - there's no next step :)
 
-            // Block while we're waiting for data to be generated or during synchronization
-            if (!IsStateCompleted(ChunkState.Generate))
+            // Block while we're waiting for data to be synchronized
+            if (m_isSyncingEdges || !IsStateCompleted(ChunkState.SyncEdges))
                 return true;
 
-            // Watch out for synchronization
-            if (
-                // Sync in progress
-                m_isSyncingEdges ||
-                SynchronizeEdges() ||
-                // All neighbors have to be synchronized
-                !AreNeighborsSynchronized()
-            )
+            // Make sure all neighbors are synchronized
+            if (!AreNeighborsSynchronized())
                 return true;
 
             if (Blocks.NonEmptyBlocks > 0)
