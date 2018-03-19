@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices.WindowsRuntime;
 using UnityEngine.Assertions;
 using UnityEngine.Profiling;
 using Voxelmetric.Code.Common;
@@ -100,7 +99,7 @@ namespace Voxelmetric.Code.Core
         //! If true, edges are to be synchronized with neighbor chunks
         private bool m_syncEdgeBlocks;
         //! If true, edge synchronization is in progress
-        public bool IsSyncingEdges { get; private set; }
+        private bool m_isSyncingEdges;
 
         //! Flags telling us whether pool items should be returned back to the pool
         private ChunkPoolItemState m_poolState;
@@ -116,7 +115,7 @@ namespace Voxelmetric.Code.Core
             set
             {
                 var batcher = ColliderGeometryHandler.Batcher;
-                bool prev = batcher.Enabled;
+                /*bool prev = batcher.Enabled;
 
                 if (!value && prev)
                     // Collider turned off
@@ -124,8 +123,8 @@ namespace Voxelmetric.Code.Core
                 else if (value && !prev)
                     // Collider turned on
                     SetStatePending(ChunkState.BuildCollider);
-
-                batcher.Enabled = value;
+                */
+                batcher.Enabled = false;//value;
             }
         }
 
@@ -281,7 +280,7 @@ namespace Voxelmetric.Code.Core
             PossiblyVisible = false;
             m_syncEdgeBlocks = true;
             m_removalRequested = false;
-            IsSyncingEdges = false;
+            m_isSyncingEdges = false;
 
             NeedApplyStructure = true;
             MaxPendingStructureListIndex = 0;
@@ -1359,11 +1358,30 @@ namespace Voxelmetric.Code.Core
             for (int i = 0; i < Neighbors.Length; i++)
             {
                 var neighbor = Neighbors[i];
-                if (neighbor != null && neighbor.IsSyncingEdges)
+                if (neighbor == null)
+                    continue;
+
+                if (neighbor.m_isSyncingEdges)
                     return true;
             }
 
             return false;
+        }
+
+        private bool AreNeighborsSynchronized()
+        {
+            // There's has to be enough neighbors
+            if (NeighborCount != NeighborCountMax)
+                return false;
+            
+            for (int i = 0; i < Neighbors.Length; i++)
+            {
+                var neighbor = Neighbors[i];
+                if (neighbor != null && !neighbor.IsStateCompleted(ChunkState.SyncEdges))
+                    return false;
+            }
+
+            return true;
         }
 
         private bool CanSynchronizeNeighbors()
@@ -1518,8 +1536,8 @@ namespace Voxelmetric.Code.Core
         private static void OnSynchronizeEdgesDone(Chunk chunk)
         {
             chunk.SetStateCompleted(CurrStateSyncEdges);
+            chunk.m_isSyncingEdges = false;
             chunk.m_taskRunning = false;
-            chunk.IsSyncingEdges = false;
         }
 
         private bool SynchronizeEdges()
@@ -1528,9 +1546,13 @@ namespace Voxelmetric.Code.Core
             // All subsequend changes of blocks are automatically synchronized inside ChunkBlocks
             if (!m_syncEdgeBlocks)
                 return false;
+
+            // Make sure all neighbors are generated
+            if (!CanSynchronizeNeighbors())
+                return true;
+
             m_syncEdgeBlocks = false;
 
-            ResetStatePending(CurrStateSyncEdges);
             ResetStateCompleted(CurrStateSyncEdges);
 
             var task = Globals.MemPools.SMThreadPI.Pop();
@@ -1538,10 +1560,11 @@ namespace Voxelmetric.Code.Core
             m_threadPoolItem = task;
 
             task.Set(ThreadID, actionOnSyncEdges, this);
-
+            
             m_taskRunning = true;
-            IsSyncingEdges = true;
+            m_isSyncingEdges = true;
             WorkPoolManager.Add(task, false);
+
             return true;
         }
 
@@ -1574,15 +1597,18 @@ namespace Voxelmetric.Code.Core
             if (!IsStateCompleted(ChunkState.Generate))
                 return true;
 
+            // Watch out for synchronization
+            if (
+                // Sync in progress
+                m_isSyncingEdges ||
+                SynchronizeEdges() ||
+                // All neighbors have to be synchronized
+                !AreNeighborsSynchronized()
+            )
+                return true;
+
             if (Blocks.NonEmptyBlocks > 0)
             {
-                // Enough neighbors are necessary for us to proceed. Watch out for synchronization
-                if (IsSyncingEdges || !CanSynchronizeNeighbors())
-                    return true;
-
-                if (SynchronizeEdges())
-                    return true;
-
                 bool priority = IsStatePending(ChunkState.BuildColliderNow);
 
                 ResetStatePending(ChunkStates.CurrStateBuildCollider);
@@ -1638,15 +1664,18 @@ namespace Voxelmetric.Code.Core
             if (!IsStateCompleted(ChunkState.Generate))
                 return true;
 
+            // Watch out for synchronization
+            if (
+                // Sync in progress
+                m_isSyncingEdges ||
+                SynchronizeEdges() ||
+                // All neighbors have to be synchronized
+                !AreNeighborsSynchronized()
+            )
+                return true;
+
             if (Blocks.NonEmptyBlocks > 0)
             {
-                // Enough neighbors are necessary for us to proceed. Watch out for synchronization
-                if (IsSyncingEdges || !CanSynchronizeNeighbors())
-                    return true;
-
-                if (SynchronizeEdges())
-                    return true;
-
                 bool priority = IsStatePending(ChunkState.BuildVerticesNow);
 
                 ResetStatePending(ChunkStates.CurrStateBuildVertices);
@@ -1668,7 +1697,7 @@ namespace Voxelmetric.Code.Core
 
                 return true;
             }
-
+            
             OnBuildVerticesDone(this);
             return false;
         }
