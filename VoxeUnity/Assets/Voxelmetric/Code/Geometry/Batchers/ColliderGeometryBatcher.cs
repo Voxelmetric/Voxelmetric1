@@ -18,15 +18,15 @@ namespace Voxelmetric.Code.Geometry.Batchers
         //! A list of colliders used for our geometry
         private readonly List<Collider> m_colliders;
 
-        private bool m_enabled;
+        private bool m_enabled = false;
         public bool Enabled
         {
             set
             {
-                for (int i = 0; i < m_colliders.Count; i++)
+                //if (m_enabled!=value)
                 {
-                    Collider collider = m_colliders[i];
-                    collider.enabled = value;
+                    for (int i = 0; i<m_colliders.Count; i++)
+                        m_colliders[i].enabled = value;
                 }
                 m_enabled = value;
             }
@@ -166,6 +166,7 @@ namespace Voxelmetric.Code.Geometry.Batchers
                         buffer.SetupMesh(mesh, true);
 
                         MeshCollider collider = go.GetComponent<MeshCollider>();
+                        collider.enabled = true;
                         collider.sharedMesh = null;
                         collider.sharedMesh = mesh;
                         collider.transform.position = position;
@@ -222,6 +223,7 @@ namespace Voxelmetric.Code.Geometry.Batchers
                         mesh.bounds = bounds;
 
                         MeshCollider collider = go.GetComponent<MeshCollider>();
+                        collider.enabled = true;
                         collider.sharedMesh = null;
                         collider.sharedMesh = mesh;
                         collider.transform.position = position;

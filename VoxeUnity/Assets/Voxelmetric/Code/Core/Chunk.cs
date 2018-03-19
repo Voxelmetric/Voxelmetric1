@@ -112,13 +112,12 @@ namespace Voxelmetric.Code.Core
             set
             {
                 var batcher = ColliderGeometryHandler.Batcher;
-                bool prev = batcher.Enabled;
+                if (batcher.Enabled==value)
+                    return;
 
-                if (!value && prev)
-                    // Collider turned off
+                if (!value)
                     ResetStatePending(ChunkStates.CurrStateBuildCollider);
-                else if (value && !prev)
-                    // Collider turned on
+                else
                     SetStatePending(ChunkState.BuildCollider);
 
                 batcher.Enabled = value;
@@ -135,13 +134,12 @@ namespace Voxelmetric.Code.Core
             set
             {
                 var batcher = RenderGeometryHandler.Batcher;
-                bool prev = batcher.Enabled;
+                if (batcher.Enabled==value)
+                    return;
 
-                if (!value && prev)
-                    // Chunk made invisible. We no longer need to build geometry for it
+                if (!value)
                     ResetStatePending(ChunkStates.CurrStateBuildVertices);
-                else if (value && !prev)
-                    // Chunk made visible. Make a request
+                else
                     SetStatePending(ChunkState.BuildVertices);
 
                 batcher.Enabled = value;

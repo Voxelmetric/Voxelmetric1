@@ -19,15 +19,15 @@ namespace Voxelmetric.Code.Geometry.Batchers
         //! A list of renderers used for our geometry
         private readonly List<Renderer> m_renderers;
 
-        private bool m_enabled;
+        private bool m_enabled = false;
         public bool Enabled
         {
             set
             {
-                for (int i = 0; i < m_renderers.Count; i++)
+                //if (m_enabled!=value)
                 {
-                    Renderer renderer = m_renderers[i];
-                    renderer.enabled = value;
+                    for (int i = 0; i<m_renderers.Count; i++)
+                        m_renderers[i].enabled = value;
                 }
                 m_enabled = value;
             }
@@ -492,8 +492,9 @@ namespace Voxelmetric.Code.Geometry.Batchers
                         filter.transform.rotation = rotation;
 
                         Renderer renderer = go.GetComponent<Renderer>();
+                        renderer.enabled = true;
                         renderer.sharedMaterial = (m_materials==null || m_materials.Length<1) ? null : m_materials[j];
-
+                        
                         m_objects.Add(go);
                         m_renderers.Add(renderer);
                     }
@@ -546,6 +547,7 @@ namespace Voxelmetric.Code.Geometry.Batchers
                         filter.transform.rotation = rotation;
 
                         Renderer renderer = go.GetComponent<Renderer>();
+                        renderer.enabled = true;
                         renderer.sharedMaterial = (m_materials==null || m_materials.Length<1) ? null : m_materials[j];
 
                         m_objects.Add(go);
