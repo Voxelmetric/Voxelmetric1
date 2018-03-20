@@ -5,7 +5,7 @@ namespace Voxelmetric.Code.Core
     [Flags]
     public enum ChunkState : ushort
     {
-        Idle = 0,
+        None = 0,
 
         LoadData = 0x01, //! Chunk loads its data
         PrepareGenerate = 0x02,

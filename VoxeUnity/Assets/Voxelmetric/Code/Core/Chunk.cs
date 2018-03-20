@@ -117,9 +117,9 @@ namespace Voxelmetric.Code.Core
                     return;
 
                 if (!value)
-                    ResetStatePending(ChunkStates.CurrStateBuildCollider);
+                    m_pendingStates &= ~ChunkStates.CurrStateBuildCollider;
                 else
-                    SetStatePending(ChunkState.BuildCollider);
+                    m_pendingStates |= ChunkState.BuildCollider;
 
                 batcher.Enabled = value;
             }
@@ -139,9 +139,9 @@ namespace Voxelmetric.Code.Core
                     return;
 
                 if (!value)
-                    ResetStatePending(ChunkStates.CurrStateBuildVertices);
+                    m_pendingStates &= ~ChunkStates.CurrStateBuildVertices;
                 else
-                    SetStatePending(ChunkState.BuildVertices);
+                    m_pendingStates|=ChunkState.BuildVertices;
 
                 batcher.Enabled = value;
             }
@@ -159,7 +159,7 @@ namespace Voxelmetric.Code.Core
                     return false;
 
                 // Chunk has to be generated first before we can save it
-                if (!m_completedStates.Check(ChunkState.Generate))
+                if ((m_completedStates&ChunkState.Generate)==0)
                     return false;
 
                 // When doing a pure differential serialization chunk needs to be modified before we can save it
@@ -189,7 +189,7 @@ namespace Voxelmetric.Code.Core
         /// <param name="chunk">Chunk to be returned back to the memory pool</param>
         public static void Remove(Chunk chunk)
         {
-            Assert.IsTrue(chunk.IsStateCompleted(ChunkState.Remove));
+            Assert.IsTrue((chunk.m_completedStates&ChunkState.Remove)!=0);
 
             // Reset the chunk back to defaults
             chunk.Reset();
@@ -246,7 +246,7 @@ namespace Voxelmetric.Code.Core
             Blocks.Init();
 
             // Request this chunk to be generated
-            m_pendingStates = m_pendingStates.Set(ChunkState.LoadData);
+            m_pendingStates |= ChunkState.LoadData;
 
             // Subscribe neighbors
             SubscribeNeighbors(true);
@@ -264,8 +264,8 @@ namespace Voxelmetric.Code.Core
                 Neighbors[i] = null;
 
             m_stateExternal = ChunkStateExternal.None;
-            m_pendingStates = m_pendingStates.Reset();
-            m_completedStates = m_completedStates.Reset();
+            m_pendingStates = ChunkState.None;
+            m_completedStates = ChunkState.None;
 
             m_poolState = m_poolState.Reset();
             m_taskRunning = false;
@@ -311,13 +311,13 @@ namespace Voxelmetric.Code.Core
                 return false;
 
             // Build collider only if necessary
-            if (!IsStateCompleted(ChunkStates.CurrStateBuildCollider))
+            if ((m_completedStates&ChunkStates.CurrStateBuildCollider)==0)
                 return false;
             
             Globals.GeometryBudget.StartMeasurement();
             {
                 ColliderGeometryHandler.Commit();
-                ResetStateCompleted(ChunkStates.CurrStateBuildCollider);
+                m_completedStates &= ~ChunkStates.CurrStateBuildCollider;
             }
             Globals.GeometryBudget.StopMeasurement();
 
@@ -334,13 +334,13 @@ namespace Voxelmetric.Code.Core
                 return false;
             
             // Build chunk mesh only if necessary
-            if (!IsStateCompleted(ChunkStates.CurrStateBuildVertices))
+            if ((m_completedStates&ChunkStates.CurrStateBuildVertices)==0)
                 return false;
             
             Globals.GeometryBudget.StartMeasurement();
             {
                 RenderGeometryHandler.Commit();
-                ResetStateCompleted(ChunkStates.CurrStateBuildVertices);
+                m_completedStates &= ~ChunkStates.CurrStateBuildVertices;
             }
             Globals.GeometryBudget.StopMeasurement();
 
@@ -439,17 +439,17 @@ namespace Voxelmetric.Code.Core
             // Calculate how many neighbors a chunk can have
             int maxNeighbors = 0;
             Vector3Int pos = chunk.Pos;
-            if (world.CheckInsideWorld(pos.Add(Env.ChunkSize, 0, 0)) && (pos.x != world.Bounds.maxX))
+            if (world.CheckInsideWorld(pos.Add(Env.ChunkSize, 0, 0)) && pos.x != world.Bounds.maxX)
                 ++maxNeighbors;
-            if (world.CheckInsideWorld(pos.Add(-Env.ChunkSize, 0, 0)) && (pos.x != world.Bounds.minX))
+            if (world.CheckInsideWorld(pos.Add(-Env.ChunkSize, 0, 0)) && pos.x != world.Bounds.minX)
                 ++maxNeighbors;
-            if (world.CheckInsideWorld(pos.Add(0, Env.ChunkSize, 0)) && (pos.y != world.Bounds.maxY))
+            if (world.CheckInsideWorld(pos.Add(0, Env.ChunkSize, 0)) && pos.y != world.Bounds.maxY)
                 ++maxNeighbors;
-            if (world.CheckInsideWorld(pos.Add(0, -Env.ChunkSize, 0)) && (pos.y != world.Bounds.minY))
+            if (world.CheckInsideWorld(pos.Add(0, -Env.ChunkSize, 0)) && pos.y != world.Bounds.minY)
                 ++maxNeighbors;
-            if (world.CheckInsideWorld(pos.Add(0, 0, Env.ChunkSize)) && (pos.z != world.Bounds.maxZ))
+            if (world.CheckInsideWorld(pos.Add(0, 0, Env.ChunkSize)) && pos.z != world.Bounds.maxZ)
                 ++maxNeighbors;
-            if (world.CheckInsideWorld(pos.Add(0, 0, -Env.ChunkSize)) && (pos.z != world.Bounds.minZ))
+            if (world.CheckInsideWorld(pos.Add(0, 0, -Env.ChunkSize)) && pos.z != world.Bounds.minZ)
                 ++maxNeighbors;
             
             // Update max neighbor count and request geometry update
@@ -458,9 +458,9 @@ namespace Voxelmetric.Code.Core
             // Geometry & collider needs to be rebuilt
             // This does not mean they will be built because the chunk might not
             // be visible or colliders might be turned off
-            chunk.SetStatePending(ChunkState.SyncEdges);
-            chunk.SetStatePending(ChunkState.BuildVertices);
-            chunk.SetStatePending(ChunkState.BuildCollider);
+            chunk.m_pendingStates|=ChunkState.SyncEdges;
+            chunk.m_pendingStates|=ChunkState.BuildVertices;
+            chunk.m_pendingStates|=ChunkState.BuildCollider;
         }
 
         private void SubscribeNeighbors(bool subscribe)
@@ -502,9 +502,9 @@ namespace Voxelmetric.Code.Core
         {
             return rebuildMaskGeometry != 0x3f &&
                    // Only check neighbors when it is a change of a block on a chunk's edge
-                   (pos.x <= 0 || pos.x >= (m_sideSize - 1) ||
-                    pos.y <= 0 || pos.y >= (m_sideSize - 1) ||
-                    pos.z <= 0 || pos.z >= (m_sideSize - 1));
+                   (pos.x <= 0 || pos.x >= m_sideSize - 1 ||
+                    pos.y <= 0 || pos.y >= m_sideSize - 1 ||
+                    pos.z <= 0 || pos.z >= m_sideSize - 1);
         }
 
         private ChunkBlocks HandleNeighborRight(ref Vector3Int pos)
@@ -527,7 +527,7 @@ namespace Voxelmetric.Code.Core
             if (ly != cy && lz != cz)
                 return null;
 
-            if ((pos.x != (m_sideSize - 1)) || (lx - m_sideSize != cx))
+            if (pos.x != m_sideSize - 1 || lx - m_sideSize != cx)
                 return null;
 
             rebuildMaskGeometry = rebuildMaskGeometry | (1 << i);
@@ -554,7 +554,7 @@ namespace Voxelmetric.Code.Core
             if (ly != cy && lz != cz)
                 return null;
 
-            if ((pos.x != 0) || (lx + m_sideSize != cx))
+            if (pos.x != 0 || lx + m_sideSize != cx)
                 return null;
 
             rebuildMaskGeometry = rebuildMaskGeometry | (1 << i);
@@ -581,7 +581,7 @@ namespace Voxelmetric.Code.Core
             if (lx != cx && lz != cz)
                 return null;
 
-            if ((pos.y != (m_sideSize - 1)) || (ly - m_sideSize != cy))
+            if (pos.y != m_sideSize - 1 || ly - m_sideSize != cy)
                 return null;
 
             rebuildMaskGeometry = rebuildMaskGeometry | (1 << i);
@@ -608,7 +608,7 @@ namespace Voxelmetric.Code.Core
             if (lx != cx && lz != cz)
                 return null;
 
-            if ((pos.y != 0) || (ly + m_sideSize != cy))
+            if (pos.y != 0 || ly + m_sideSize != cy)
                 return null;
 
             rebuildMaskGeometry = rebuildMaskGeometry | (1 << i);
@@ -635,7 +635,7 @@ namespace Voxelmetric.Code.Core
             if (ly != cy && lx != cx)
                 return null;
 
-            if ((pos.z != (m_sideSize - 1)) || (lz - m_sideSize != cz))
+            if (pos.z != m_sideSize - 1 || lz - m_sideSize != cz)
                 return null;
 
             rebuildMaskGeometry = rebuildMaskGeometry | (1 << i);
@@ -662,7 +662,7 @@ namespace Voxelmetric.Code.Core
             if (ly != cy && lx != cx)
                 return null;
 
-            if (pos.z != 0 || (lz + m_sideSize != cz))
+            if (pos.z != 0 || lz + m_sideSize != cz)
                 return null;
 
             rebuildMaskGeometry = rebuildMaskGeometry | (1 << i);
@@ -714,7 +714,7 @@ namespace Voxelmetric.Code.Core
                 if (ly == cy || lz == cz)
                 {
                     // Section to the left
-                    if ((pos.x == 0) && (lx + m_sideSize == cx))
+                    if (pos.x == 0 && lx + m_sideSize == cx)
                     {
                         rebuildMaskGeometry = rebuildMaskGeometry | (1 << i);
 
@@ -723,7 +723,7 @@ namespace Voxelmetric.Code.Core
                         neighborChunkBlocks[neighborIndex] = block;
                     }
                     // Section to the right
-                    else if ((pos.x == (m_sideSize - 1)) && (lx - m_sideSize == cx))
+                    else if (pos.x == m_sideSize - 1 && lx - m_sideSize == cx)
                     {
                         rebuildMaskGeometry = rebuildMaskGeometry | (1 << i);
 
@@ -736,7 +736,7 @@ namespace Voxelmetric.Code.Core
                 if (lx == cx || lz == cz)
                 {
                     // Section to the bottom
-                    if ((pos.y == 0) && (ly + m_sideSize == cy))
+                    if (pos.y == 0 && ly + m_sideSize == cy)
                     {
                         rebuildMaskGeometry = rebuildMaskGeometry | (1 << i);
 
@@ -745,7 +745,7 @@ namespace Voxelmetric.Code.Core
                         neighborChunkBlocks[neighborIndex] = block;
                     }
                     // Section to the top
-                    else if ((pos.y == (m_sideSize - 1)) && (ly - m_sideSize == cy))
+                    else if (pos.y == m_sideSize - 1 && ly - m_sideSize == cy)
                     {
                         rebuildMaskGeometry = rebuildMaskGeometry | (1 << i);
 
@@ -758,7 +758,7 @@ namespace Voxelmetric.Code.Core
                 if (ly == cy || lx == cx)
                 {
                     // Section to the back
-                    if ((pos.z == 0) && (lz + m_sideSize == cz))
+                    if (pos.z == 0 && lz + m_sideSize == cz)
                     {
                         rebuildMaskGeometry = rebuildMaskGeometry | (1 << i);
 
@@ -767,7 +767,7 @@ namespace Voxelmetric.Code.Core
                         neighborChunkBlocks[neighborIndex] = block;
                     }
                     // Section to the front
-                    else if ((pos.z == (m_sideSize - 1)) && (lz - m_sideSize == cz))
+                    else if (pos.z == m_sideSize - 1 && lz - m_sideSize == cz)
                     {
                         rebuildMaskGeometry = rebuildMaskGeometry | (1 << i);
 
@@ -785,54 +785,29 @@ namespace Voxelmetric.Code.Core
 
         #endregion
 
-        #region Pending states
+        #region States management
 
-        public void SetStatePending(ChunkState state)
+        public void RequestRemoval()
         {
-            if (m_removalRequested && (state == ChunkState.PrepareSaveData || state == ChunkState.Remove))
+            if (m_removalRequested)
                 return;
-            if (state == ChunkState.Remove)
-            {
-                m_removalRequested = true;
-                if (Features.SerializeChunkWhenUnloading)
-                    m_pendingStates = m_pendingStates.Set(ChunkState.PrepareSaveData);
-            }
-
-            m_pendingStates = m_pendingStates.Set(state);
+            m_removalRequested = true;
+            m_pendingStates |= ChunkState.Remove;
+            if (Features.SerializeChunkWhenUnloading)
+                m_pendingStates |= ChunkState.PrepareSaveData;
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private void ResetStatePending(ChunkState state)
+        public void RequestSave()
         {
-            m_pendingStates = m_pendingStates.Reset(state);
+            if (m_removalRequested)
+                return;
+            m_pendingStates |= ChunkState.PrepareSaveData;
         }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private bool IsStatePending(ChunkState state)
-        {
-            return m_pendingStates.Check(state);
-        }
-
-        #endregion
-
-        #region Completed states
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private void SetStateCompleted(ChunkState state)
-        {
-            m_completedStates = m_completedStates.Set(state);
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private void ResetStateCompleted(ChunkState state)
-        {
-            m_completedStates = m_completedStates.Reset(state);
-        }
-
+        
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool IsStateCompleted(ChunkState state)
         {
-            return m_completedStates.Check(state);
+            return (m_completedStates&state)!=0;
         }
 
         #endregion
@@ -849,11 +824,11 @@ namespace Voxelmetric.Code.Core
                 return false;
 
             // Once this chunk is marked as removed we ignore any further requests and won't perform any updates
-            if (m_completedStates.Check(ChunkState.Remove))
+            if ((m_completedStates&ChunkState.Remove)!=0)
                 return false;
 
             // Some operations can only be performed on a generated chunk
-            if (IsStateCompleted(ChunkState.Generate))
+            if ((m_completedStates&ChunkState.Generate)!=0)
             {
                 // Apply pending structures
                 world.ApplyPendingStructures(this);
@@ -875,13 +850,13 @@ namespace Voxelmetric.Code.Core
         public void UpdateBlocks()
         {
             // Chunk has to be generated first before we can update its blocks
-            if (!m_completedStates.Check(ChunkState.Generate))
+            if ((m_completedStates&ChunkState.Generate)==0)
                 return;
 
             // Don't update during saving
             if (
-                m_pendingStates.Check(ChunkState.PrepareSaveData) ||
-                m_pendingStates.Check(ChunkState.SaveData)
+                (m_pendingStates&ChunkState.PrepareSaveData)!=0 ||
+                (m_pendingStates&ChunkState.SaveData)!=0
                 )
                 return;
             
@@ -936,7 +911,7 @@ namespace Voxelmetric.Code.Core
                 lastUpdateTimeGeometry = now;
 
                 // Request rebuild on this chunk
-                SetStatePending(ChunkState.BuildVerticesNow);
+                m_pendingStates|=ChunkState.BuildVerticesNow;
 
                 // Notify neighbors that they need to rebuild their geometry
                 if (rebuildMaskGeometry > 0)
@@ -947,7 +922,7 @@ namespace Voxelmetric.Code.Core
                         if (neighbor != null && ((rebuildMaskGeometry >> j) & 1) != 0)
                         {
                             // Request rebuild on neighbor chunks
-                            neighbor.SetStatePending(ChunkState.BuildVerticesNow);
+                            neighbor.m_pendingStates|=ChunkState.BuildVerticesNow;
                         }
                     }
                 }
@@ -961,7 +936,7 @@ namespace Voxelmetric.Code.Core
                 lastUpdateTimeCollider = now;
 
                 // Request rebuild on this chunk
-                SetStatePending(ChunkState.BuildColliderNow);
+                m_pendingStates|=ChunkState.BuildColliderNow;
 
                 // Notify neighbors that they need to rebuilt their geometry
                 if (rebuildMaskCollider > 0)
@@ -973,7 +948,7 @@ namespace Voxelmetric.Code.Core
                         {
                             // Request rebuild on neighbor chunks
                             if (neighbor.NeedsColliderGeometry)
-                                neighbor.SetStatePending(ChunkState.BuildColliderNow);
+                                neighbor.m_pendingStates|=ChunkState.BuildColliderNow;
                         }
                     }
                 }
@@ -987,7 +962,7 @@ namespace Voxelmetric.Code.Core
             // Return processed work items back to the pool
             ReturnPoolItems();
 
-            if (m_stateExternal != ChunkStateExternal.None)
+            if (m_stateExternal!=ChunkStateExternal.None)
             {
                 // Notify everyone listening
                 NotifyAll(m_stateExternal);
@@ -997,34 +972,34 @@ namespace Voxelmetric.Code.Core
 
             // If removal was requested before we got to loading the chunk we can safely mark
             // it as removed right away
-            if (IsStatePending(ChunkState.Remove) && !IsStateCompleted(ChunkState.LoadData))
+            if ((m_pendingStates&ChunkState.Remove)!=0 && (m_completedStates&ChunkState.LoadData)==0)
             {
-                SetStateCompleted(ChunkState.Remove);
+                m_completedStates |= ChunkState.Remove;
                 return;
             }
 
             // Go from the least important bit to most important one. If a given bit is set
             // we execute a task tied with it
-            if (IsStatePending(ChunkState.LoadData) && LoadData())
+            if ((m_pendingStates&ChunkState.LoadData)!=0 && LoadData())
                 return;
-            if (IsStatePending(ChunkState.PrepareGenerate) && PrepareGenerate())
+            if ((m_pendingStates&ChunkState.PrepareGenerate)!=0 && PrepareGenerate())
                 return;
-            if (IsStatePending(ChunkState.Generate) && GenerateData())
+            if ((m_pendingStates&ChunkState.Generate)!=0 && GenerateData())
                 return;
-            if (IsStatePending(ChunkState.PrepareSaveData) && PrepareSaveData())
+            if ((m_pendingStates&ChunkState.PrepareSaveData)!=0 && PrepareSaveData())
                 return;
-            if (IsStatePending(ChunkState.SaveData) && SaveData())
+            if ((m_pendingStates&ChunkState.SaveData)!=0 && SaveData())
                 return;
-            if (IsStatePending(ChunkState.Remove) && RemoveChunk())
+            if ((m_pendingStates&ChunkState.Remove)!=0 && RemoveChunk())
                 return;
-            if (IsStatePending(ChunkState.SyncEdges) && SynchronizeEdges())
+            if ((m_pendingStates&ChunkState.SyncEdges)!=0 && SynchronizeEdges())
                 return;
-            if (IsStatePending(ChunkStates.CurrStateBuildCollider) && BuildCollider())
+            if ((m_pendingStates&ChunkStates.CurrStateBuildCollider)!=0 && BuildCollider())
                 return;
-            if (IsStatePending(ChunkStates.CurrStateBuildVertices) && BuildVertices())
+            if ((m_pendingStates&ChunkStates.CurrStateBuildVertices)!=0 && BuildVertices())
                 return;
         }
-        
+
         private void ReturnPoolItems()
         {
             var pools = Globals.MemPools;
@@ -1067,13 +1042,13 @@ namespace Voxelmetric.Code.Core
         {
             if (success)
             {
-                chunk.SetStateCompleted(CurrStateLoadData);
-                chunk.SetStatePending(NextStateLoadData);
+                chunk.m_completedStates |= CurrStateLoadData;
+                chunk.m_pendingStates|=NextStateLoadData;
             }
             else
             {
-                chunk.SetStateCompleted(CurrStateLoadData | ChunkState.PrepareGenerate);
-                chunk.SetStatePending(ChunkState.Generate);
+                chunk.m_completedStates |= CurrStateLoadData | ChunkState.PrepareGenerate;
+                chunk.m_pendingStates|=ChunkState.Generate;
             }
 
             chunk.m_taskRunning = false;
@@ -1085,8 +1060,8 @@ namespace Voxelmetric.Code.Core
             if (!PossiblyVisible)
                 return true;
 
-            ResetStatePending(CurrStateLoadData);
-            ResetStateCompleted(CurrStateLoadData);
+            m_pendingStates &= ~CurrStateLoadData;
+            m_completedStates &= ~CurrStateLoadData;
 
             if (Features.UseSerialization)
             {
@@ -1121,23 +1096,23 @@ namespace Voxelmetric.Code.Core
         private static void OnPrepareGenerateDone(Chunk chunk, bool success)
         {
             // Consume info about invalidated chunk
-            chunk.SetStateCompleted(CurrStatePrepareGenerate);
+            chunk.m_completedStates |= CurrStatePrepareGenerate;
 
             if (success)
             {
                 if (chunk.m_save.IsDifferential)
                 {
-                    chunk.SetStatePending(NextStatePrepareGenerate);
+                    chunk.m_pendingStates|=NextStatePrepareGenerate;
                 }
                 else
                 {
-                    chunk.SetStateCompleted(ChunkState.Generate);
-                    chunk.SetStatePending(ChunkState.BuildVertices);
+                    chunk.m_completedStates |= ChunkState.Generate;
+                    chunk.m_pendingStates|=ChunkState.BuildVertices;
                 }
             }
             else
             {
-                chunk.SetStatePending(NextStatePrepareGenerate);
+                chunk.m_pendingStates|=NextStatePrepareGenerate;
             }
 
             chunk.m_taskRunning = false;
@@ -1145,11 +1120,11 @@ namespace Voxelmetric.Code.Core
 
         private bool PrepareGenerate()
         {
-            if (!IsStateCompleted(ChunkState.LoadData))
+            if ((m_completedStates&ChunkState.LoadData)==0)
                 return true;
 
-            ResetStatePending(CurrStatePrepareGenerate);
-            ResetStateCompleted(CurrStatePrepareGenerate);
+            m_pendingStates &= ~CurrStatePrepareGenerate;
+            m_completedStates &= ~CurrStatePrepareGenerate;
 
             if (Features.UseSerialization && m_save.CanDecompress())
             {
@@ -1194,8 +1169,8 @@ namespace Voxelmetric.Code.Core
 
         private static void OnGenerateDataDone(Chunk chunk)
         {
-            chunk.SetStateCompleted(CurrStateGenerateData);
-            chunk.SetStatePending(NextStateGenerateData);
+            chunk.m_completedStates |= CurrStateGenerateData;
+            chunk.m_pendingStates|=NextStateGenerateData;
             chunk.m_taskRunning = false;
         }
 
@@ -1207,11 +1182,11 @@ namespace Voxelmetric.Code.Core
 
         private bool GenerateData()
         {
-            if (!IsStateCompleted(ChunkState.LoadData))
+            if ((m_completedStates&ChunkState.LoadData)==0)
                 return true;
 
-            ResetStatePending(CurrStateGenerateData);
-            ResetStateCompleted(CurrStateGenerateData);
+            m_pendingStates &= ~CurrStateGenerateData;
+            m_completedStates &= ~CurrStateGenerateData;
 
             var task = Globals.MemPools.SMThreadPI.Pop();
             m_poolState = m_poolState.Set(ChunkPoolItemState.ThreadPI);
@@ -1248,23 +1223,23 @@ namespace Voxelmetric.Code.Core
                     chunk.m_save.MarkAsProcessed();
 
                     // Consider SaveData completed as well
-                    chunk.SetStateCompleted(NextStatePrepareSaveData);
+                    chunk.m_completedStates |= NextStatePrepareSaveData;
                 }
-                chunk.SetStatePending(NextStatePrepareSaveData);
+                chunk.m_pendingStates|=NextStatePrepareSaveData;
             }
 
-            chunk.SetStateCompleted(CurrStatePrepareSaveData);
+            chunk.m_completedStates |= CurrStatePrepareSaveData;
             chunk.m_taskRunning = false;
         }
 
         private bool PrepareSaveData()
         {
             // We need to wait until chunk is generated
-            if (!IsStateCompleted(ChunkState.Generate))
+            if ((m_completedStates&ChunkState.Generate)==0)
                 return true;
 
-            ResetStatePending(CurrStatePrepareSaveData);
-            ResetStateCompleted(CurrStatePrepareSaveData);
+            m_pendingStates &= ~CurrStatePrepareSaveData;
+            m_completedStates &= ~CurrStatePrepareSaveData;
 
             if (Features.UseSerialization && m_save.ConsumeChanges())
             {
@@ -1304,21 +1279,21 @@ namespace Voxelmetric.Code.Core
                     chunk.m_stateExternal = ChunkStateExternal.Saved;
                 // Free temporary memory in case of failure
                 chunk.m_save.MarkAsProcessed();
-                chunk.SetStateCompleted(ChunkState.SaveData);
+                chunk.m_completedStates |= ChunkState.SaveData;
             }
 
-            chunk.SetStateCompleted(CurrStateSaveData);
+            chunk.m_completedStates |= CurrStateSaveData;
             chunk.m_taskRunning = false;
         }
 
         private bool SaveData()
         {
             // We need to wait until chunk is generated
-            if (!IsStateCompleted(ChunkState.PrepareSaveData))
+            if ((m_completedStates&ChunkState.PrepareSaveData)==0)
                 return true;
 
-            ResetStatePending(CurrStateSaveData);
-            ResetStateCompleted(CurrStateSaveData);
+            m_pendingStates &= ~CurrStateSaveData;
+            m_completedStates &= ~CurrStateSaveData;
 
             if (Features.UseSerialization)
             {
@@ -1367,7 +1342,7 @@ namespace Voxelmetric.Code.Core
             for (int i = 0; i < Neighbors.Length; i++)
             {
                 var neighbor = Neighbors[i];
-                if (neighbor != null && !neighbor.IsStateCompleted(ChunkState.SyncEdges))
+                if (neighbor != null && (neighbor.m_completedStates&ChunkState.SyncEdges)==0)
                     return false;
             }
 
@@ -1384,7 +1359,7 @@ namespace Voxelmetric.Code.Core
             for (int i = 0; i < Neighbors.Length; i++)
             {
                 var neighbor = Neighbors[i];
-                if (neighbor != null && !neighbor.IsStateCompleted(ChunkState.Generate))
+                if (neighbor != null && (neighbor.m_completedStates&ChunkState.Generate)==0)
                     return false;
             }
 
@@ -1525,7 +1500,7 @@ namespace Voxelmetric.Code.Core
 
         private static void OnSynchronizeEdgesDone(Chunk chunk)
         {
-            chunk.SetStateCompleted(ChunkState.SyncEdges);
+            chunk.m_completedStates |= ChunkState.SyncEdges;
             chunk.m_isSyncingEdges = false;
             chunk.m_taskRunning = false;
         }
@@ -1533,15 +1508,15 @@ namespace Voxelmetric.Code.Core
         private bool SynchronizeEdges()
         {
             // Block while we're waiting for data to be generated
-            if (!IsStateCompleted(ChunkState.Generate))
+            if ((m_completedStates&ChunkState.Generate)==0)
                 return true;
 
             // Make sure all neighbors are generated
             if (!AreNeighborsGenerated())
                 return true;
 
-            ResetStatePending(ChunkState.SyncEdges);
-            ResetStateCompleted(ChunkState.SyncEdges);
+            m_pendingStates &= ~ChunkState.SyncEdges;
+            m_completedStates &= ~ChunkState.SyncEdges;
 
             var task = Globals.MemPools.SMThreadPI.Pop();
             m_poolState = m_poolState.Set(ChunkPoolItemState.ThreadPI);
@@ -1567,7 +1542,7 @@ namespace Voxelmetric.Code.Core
 
         private static void OnBuildColliderDone(Chunk chunk)
         {
-            chunk.SetStateCompleted(ChunkStates.CurrStateBuildCollider);
+            chunk.m_completedStates |= ChunkStates.CurrStateBuildCollider;
             chunk.m_taskRunning = false;
         }
 
@@ -1581,7 +1556,7 @@ namespace Voxelmetric.Code.Core
                 return false; // Try the next step - build render geometry
 
             // Block while we're waiting for data to be synchronized
-            if (!IsStateCompleted(ChunkState.SyncEdges))
+            if ((m_completedStates&ChunkState.SyncEdges)==0)
                 return true;
 
             // Make sure all neighbors are synchronized
@@ -1590,10 +1565,10 @@ namespace Voxelmetric.Code.Core
 
             if (Blocks.NonEmptyBlocks > 0)
             {
-                bool priority = IsStatePending(ChunkState.BuildColliderNow);
+                bool priority = (m_pendingStates&ChunkState.BuildColliderNow)!=0;
 
-                ResetStatePending(ChunkStates.CurrStateBuildCollider);
-                ResetStateCompleted(ChunkStates.CurrStateBuildCollider);
+                m_pendingStates &= ~ChunkStates.CurrStateBuildCollider;
+                m_completedStates &= ~ChunkStates.CurrStateBuildCollider;
             
                 var task = Globals.MemPools.SMThreadPI.Pop();
                 m_poolState = m_poolState.Set(ChunkPoolItemState.ThreadPI);
@@ -1628,7 +1603,7 @@ namespace Voxelmetric.Code.Core
 
         private static void OnBuildVerticesDone(Chunk chunk)
         {
-            chunk.SetStateCompleted(ChunkStates.CurrStateBuildVertices);
+            chunk.m_completedStates |= ChunkStates.CurrStateBuildVertices;
             chunk.m_taskRunning = false;
         }
 
@@ -1642,7 +1617,7 @@ namespace Voxelmetric.Code.Core
                 return false; // Try the next step - there's no next step :)
 
             // Block while we're waiting for data to be synchronized
-            if (!IsStateCompleted(ChunkState.SyncEdges))
+            if ((m_completedStates&ChunkState.SyncEdges)==0)
                 return true;
 
             // Make sure all neighbors are synchronized
@@ -1651,10 +1626,10 @@ namespace Voxelmetric.Code.Core
 
             if (Blocks.NonEmptyBlocks > 0)
             {
-                bool priority = IsStatePending(ChunkState.BuildVerticesNow);
+                bool priority = (m_pendingStates&ChunkState.BuildVerticesNow)!=0;
 
-                ResetStatePending(ChunkStates.CurrStateBuildVertices);
-                ResetStateCompleted(ChunkStates.CurrStateBuildVertices);
+                m_pendingStates &= ~ChunkStates.CurrStateBuildVertices;
+                m_completedStates &= ~ChunkStates.CurrStateBuildVertices;
             
                 var task = Globals.MemPools.SMThreadPI.Pop();
                 m_poolState = m_poolState.Set(ChunkPoolItemState.ThreadPI);
@@ -1684,20 +1659,23 @@ namespace Voxelmetric.Code.Core
         private bool RemoveChunk()
         {
             // If chunk was loaded we need to wait for other states with higher priority to finish first
-            if (IsStateCompleted(ChunkState.LoadData))
+            if ((m_completedStates&ChunkState.LoadData)!=0)
             {
                 // Wait until chunk is generated
-                if (!IsStateCompleted(ChunkState.Generate))
+                if ((m_completedStates&ChunkState.Generate)==0)
                     return false;
 
                 // Wait for save to complete if it was requested
-                if (IsStatePending(ChunkState.PrepareSaveData) || IsStatePending(ChunkState.SaveData))
+                if (
+                    (m_pendingStates&ChunkState.PrepareSaveData)!=0 ||
+                    (m_pendingStates&ChunkState.SaveData)!=0
+                    )
                     return false;
 
-                ResetStatePending(ChunkState.Remove);
+                m_pendingStates &= ~ChunkState.Remove;
             }
 
-            SetStateCompleted(ChunkState.Remove);
+            m_completedStates |= ChunkState.Remove;
             return true;
         }
 
