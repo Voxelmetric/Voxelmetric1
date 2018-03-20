@@ -23,7 +23,7 @@ namespace Voxelmetric.Code.Core
         //! Array of block data
         private readonly IntPtr m_blocksRaw;
         private readonly unsafe byte* m_blocks;
-        public unsafe BlockData this[int i]
+        private unsafe BlockData this[int i]
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get

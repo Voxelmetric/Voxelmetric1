@@ -720,7 +720,7 @@ namespace Voxelmetric.Code.Core
 
                         // Mirror the block to the neighbor edge
                         int neighborIndex = Helpers.GetChunkIndex1DFrom3D(m_sideSize, pos.y, pos.z, m_pow);
-                        neighborChunkBlocks[neighborIndex] = block;
+                        neighborChunkBlocks.SetRaw(neighborIndex, block);
                     }
                     // Section to the right
                     else if (pos.x == m_sideSize - 1 && lx - m_sideSize == cx)
@@ -729,7 +729,7 @@ namespace Voxelmetric.Code.Core
 
                         // Mirror the block to the neighbor edge
                         int neighborIndex = Helpers.GetChunkIndex1DFrom3D(-1, pos.y, pos.z, m_pow);
-                        neighborChunkBlocks[neighborIndex] = block;
+                        neighborChunkBlocks.SetRaw(neighborIndex, block);
                     }
                 }
 
@@ -742,7 +742,7 @@ namespace Voxelmetric.Code.Core
 
                         // Mirror the block to the neighbor edge
                         int neighborIndex = Helpers.GetChunkIndex1DFrom3D(pos.x, m_sideSize, pos.z, m_pow);
-                        neighborChunkBlocks[neighborIndex] = block;
+                        neighborChunkBlocks.SetRaw(neighborIndex, block);
                     }
                     // Section to the top
                     else if (pos.y == m_sideSize - 1 && ly - m_sideSize == cy)
@@ -751,7 +751,7 @@ namespace Voxelmetric.Code.Core
 
                         // Mirror the block to the neighbor edge
                         int neighborIndex = Helpers.GetChunkIndex1DFrom3D(pos.x, -1, pos.z, m_pow);
-                        neighborChunkBlocks[neighborIndex] = block;
+                        neighborChunkBlocks.SetRaw(neighborIndex, block);
                     }
                 }
 
@@ -764,7 +764,7 @@ namespace Voxelmetric.Code.Core
 
                         // Mirror the block to the neighbor edge
                         int neighborIndex = Helpers.GetChunkIndex1DFrom3D(pos.x, pos.y, m_sideSize, m_pow);
-                        neighborChunkBlocks[neighborIndex] = block;
+                        neighborChunkBlocks.SetRaw(neighborIndex, block);
                     }
                     // Section to the front
                     else if (pos.z == m_sideSize - 1 && lz - m_sideSize == cz)
@@ -773,7 +773,7 @@ namespace Voxelmetric.Code.Core
 
                         // Mirror the block to the neighbor edge
                         int neighborIndex = Helpers.GetChunkIndex1DFrom3D(pos.x, pos.y, -1, m_pow);
-                        neighborChunkBlocks[neighborIndex] = block;
+                        neighborChunkBlocks.SetRaw(neighborIndex, block);
                     }
                 }
 
