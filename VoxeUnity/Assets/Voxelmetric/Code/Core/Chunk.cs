@@ -334,12 +334,16 @@ namespace Voxelmetric.Code.Core
             Profiler.BeginSample("UpdateRenderGeometry");
 
             // Build render geometry only if there is enough time
-            if (!Globals.GeometryBudget.HasTimeBudget)
+            if (!Globals.GeometryBudget.HasTimeBudget) {
+                Profiler.EndSample();
                 return false;
+            }
             
             // Build chunk mesh only if necessary
-            if ((m_completedStates&ChunkStates.CurrStateBuildVertices)==0)
+            if ((m_completedStates&ChunkStates.CurrStateBuildVertices)==0) {
+                Profiler.EndSample();
                 return false;
+            }
             
             Globals.GeometryBudget.StartMeasurement();
             {
