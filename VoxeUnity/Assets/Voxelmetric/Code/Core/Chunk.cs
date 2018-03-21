@@ -307,12 +307,16 @@ namespace Voxelmetric.Code.Core
             Profiler.BeginSample("UpdateCollisionGeometry");
 
             // Build collision geometry only if there is enough time
-            if (!Globals.GeometryBudget.HasTimeBudget)
+            if (!Globals.GeometryBudget.HasTimeBudget) {
+                Profiler.EndSample();
                 return false;
+            }
 
             // Build collider only if necessary
-            if ((m_completedStates&ChunkStates.CurrStateBuildCollider)==0)
+            if ((m_completedStates & ChunkStates.CurrStateBuildCollider) == 0) {
+                Profiler.EndSample();
                 return false;
+            }
             
             Globals.GeometryBudget.StartMeasurement();
             {
