@@ -228,13 +228,12 @@ namespace Voxelmetric.Code.Core
             Chunk chunk = world.chunks.Get(ref chunkPos);
             if (chunk==null)
                 return;
-
-            Vector3Int blockPos = new Vector3Int(
+            
+            int index = Helpers.GetChunkIndex1DFrom3D(
                 Helpers.Mod(pos.x, Env.ChunkSize),
                 Helpers.Mod(pos.y, Env.ChunkSize),
                 Helpers.Mod(pos.z, Env.ChunkSize)
                 );
-            int index = Helpers.GetChunkIndex1DFrom3D(blockPos.x, blockPos.y, blockPos.z);
 
             // Nothing for us to do if the block did not change
             BlockData oldBlockData = chunk.Blocks.Get(index);
