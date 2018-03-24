@@ -171,13 +171,20 @@ public class TerrainGen
     /// <param name="chunk">Chunk for which terrain is generated</param>
     public void GenerateTerrainForChunk(Chunk chunk)
     {
+        int maxY = chunk.Pos.y + Env.ChunkSize;
         for (int z = 0; z<Env.ChunkSize; z++)
         {
             for (int x = 0; x<Env.ChunkSize; x++)
             {
                 float height = 0f;
                 for (int i = 0; i<TerrainLayers.Length; i++)
+                {
                     height = TerrainLayers[i].GenerateLayer(chunk, i, x, z, height, 1f);
+
+                    // Note: We can do this if there are any substraction layers
+                    if (height > maxY)
+                        break;
+                }
             }
         }
     }
