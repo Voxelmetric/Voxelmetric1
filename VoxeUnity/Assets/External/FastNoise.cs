@@ -44,7 +44,9 @@ using FN_DECIMAL = System.Single;
 #endif
 
 using System;
+#if! FN_DISABLE_AGGRESSIVE_INLINING
 using System.Runtime.CompilerServices;
+#endif
 
 public class FastNoise
 {
