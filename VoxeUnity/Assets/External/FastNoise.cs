@@ -37,10 +37,6 @@
 
 // ----------------
 
-#if UNITY_3 || UNITY_4 || UNITY_5 || UNITY_2017
-#define FN_DISABLE_AGGRESSIVE_INLINING
-#endif
-
 #if FN_USE_DOUBLES
 using FN_DECIMAL = System.Double;
 #else
@@ -48,6 +44,7 @@ using FN_DECIMAL = System.Single;
 #endif
 
 using System;
+using System.Runtime.CompilerServices;
 
 public class FastNoise
 {
