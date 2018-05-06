@@ -94,10 +94,10 @@ namespace Client.Scripts.Misc
             m_text.ConcatFormat("Collection freq: {0:0.00}s\n", m_delta);
             m_text.ConcatFormat("Last collect delta: {0:0.000}s ({1:0.0} FPS)\n", m_lastDeltaTime, 1f / m_lastDeltaTime);
 
-            if (World!=null && World.chunks!=null)
+            if (World!=null)
             {
                 ++m_lines;
-                m_text.ConcatFormat("Chunks: {0}\n", World.chunks.Count);
+                m_text.ConcatFormat("Chunks: {0}\n", World.Count);
             }
 
             // Tasks

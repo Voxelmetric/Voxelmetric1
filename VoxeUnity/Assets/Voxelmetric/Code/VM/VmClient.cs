@@ -177,7 +177,7 @@ namespace Voxelmetric.Code.VM
         private void ReceiveChunk(byte[] data)
         {
             Vector3Int pos = Vector3Int.FromBytes(data, 1);
-            Chunk chunk = world.chunks.Get(ref pos);
+            Chunk chunk = world.GetChunk(ref pos);
             // for now just issue an error if it isn't yet loaded
             if (chunk == null)
             {
@@ -201,7 +201,7 @@ namespace Voxelmetric.Code.VM
 
         private void ReceiveChange(ref Vector3Int pos, BlockData block)
         {
-            world.blocks.Modify(ref pos, block, false);
+            world.ModifyBlockData(ref pos, block, false);
         }
 
         public void Disconnect()

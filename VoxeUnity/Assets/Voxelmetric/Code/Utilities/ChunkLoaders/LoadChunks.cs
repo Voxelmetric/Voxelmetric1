@@ -136,7 +136,7 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
             {
                 // Update chunk's visibility information
                 Vector3Int chunkPos = new Vector3Int(wx, wy, wz);
-                Chunk chunk = world.chunks.Get(ref chunkPos);
+                Chunk chunk = world.GetChunk(ref chunkPos);
                 if (chunk==null)
                     return;
                 
@@ -175,7 +175,7 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
                         {
                             // Update chunk's visibility information
                             Vector3Int chunkPos = new Vector3Int(cx, cy, cz);
-                            Chunk chunk = world.chunks.Get(ref chunkPos);
+                            Chunk chunk = world.GetChunk(ref chunkPos);
                             if (chunk==null)
                                 continue;
                             
@@ -204,7 +204,7 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
                         {
                             // Update chunk's visibility information
                             Vector3Int chunkPos = new Vector3Int(cx, cy, cz);
-                            Chunk chunk = world.chunks.Get(ref chunkPos);
+                            Chunk chunk = world.GetChunk(ref chunkPos);
                             if (chunk==null)
                                 continue;
                             
@@ -311,7 +311,7 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
             if (// No update necessary if there was no movement
                 m_viewerPos ==m_viewerPosPrev &&
                 // However, we need to make sure that we have enough chunks loaded
-                world.chunks.Count>=expectedChunks)
+                world.Count>=expectedChunks)
                 return;
 
             // Unregister any non-necessary pending structures
@@ -324,8 +324,6 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
             // Cycle through the array of positions
             Profiler.BeginSample("PostProcessChunks");
             {
-                WorldChunks chunks = world.chunks;
-
                 // Cycle through the array of positions
                 for (int y = maxY; y>=minY; y -= Env.ChunkSize)
                 {
@@ -345,7 +343,7 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
                         // Create a new chunk if possible
                         Vector3Int newChunkPos = new Vector3Int(cx, cy, cz);
                         Chunk chunk;
-                        if (!chunks.Create(ref newChunkPos, out chunk))
+                        if (!world.CreateChunk(ref newChunkPos, out chunk))
                             continue;
 
                         if (FullLoadOnStartUp)
@@ -393,7 +391,7 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
                 if (chunk.IsStateCompleted(ChunkState.Remove))
                 {
                     // Remove the chunk from our provider and unregister it from chunk storage
-                    world.chunks.Remove(chunk);
+                    world.RemoveChunk(chunk);
 
                     // Unregister from updates
                     m_updateRequests.RemoveAt(i);
@@ -532,9 +530,9 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
             float halfSize = size*0.5f;
             float smallSize = size*0.25f;
 
-            if (world!=null && world.chunks!=null && (Diag_DrawWorldBounds || Diag_DrawLoadRange))
+            if (world!=null && (Diag_DrawWorldBounds || Diag_DrawLoadRange))
             {
-                foreach (Chunk chunk in world.chunks.Chunks)
+                foreach (Chunk chunk in world.Chunks)
                 {
                     if (Diag_DrawWorldBounds)
                     {

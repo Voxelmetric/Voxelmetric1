@@ -11,7 +11,7 @@ using Vector3Int = Voxelmetric.Code.Data_types.Vector3Int;
 
 namespace Voxelmetric.Code.Core
 {
-    public class World : MonoBehaviour
+    public partial class World : MonoBehaviour
     {
         public string worldConfig = "default";
         public WorldConfig config;
@@ -19,8 +19,6 @@ namespace Voxelmetric.Code.Core
         //This world name is used for the save file name and as a seed for random noise
         public string worldName = "world";
 
-        public WorldChunks chunks;
-        public WorldBlocks blocks;
         public VmNetworking networking = new VmNetworking();
 
         public BlockProvider blockProvider;
@@ -38,12 +36,6 @@ namespace Voxelmetric.Code.Core
         private readonly Dictionary<Vector3Int, List<StructureContext>> pendingStructures = new Dictionary<Vector3Int, List<StructureContext>>();
         private readonly List<StructureInfo> pendingStructureInfo = new List<StructureInfo>();
         
-        void Awake()
-        {
-            chunks = new WorldChunks(this);
-            blocks = new WorldBlocks(this);
-        }
-
         void Start()
         {
             StartWorld();
@@ -220,7 +212,7 @@ namespace Voxelmetric.Code.Core
                 lock (chunks)
                 {
                     // Let the chunk know it needs an update if it exists
-                    chunk = chunks.Get(ref context.chunkPos);
+                    chunk = GetChunk(ref context.chunkPos);
                 }
                 if (chunk != null)
                     chunk.NeedApplyStructure = true;

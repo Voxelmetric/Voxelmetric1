@@ -6,26 +6,19 @@ using Voxelmetric.Code.Load_Resources.Blocks;
 
 namespace Voxelmetric.Code.Core
 {
-    public class WorldBlocks
+    public partial class World
     {
-        World world;
-
-        public WorldBlocks(World world)
-        {
-            this.world = world;
-        }
-
         /// <summary>
         /// Gets the chunk and retrives the block data at the given coordinates
         /// </summary>
         /// <param name="pos">Global position of the block data</param>
-        public BlockData Get(ref Vector3Int pos)
+        public BlockData GetBlockData(ref Vector3Int pos)
         {
             // Transform the position into chunk coordinates
             Vector3Int chunkPos = Helpers.ContainingChunkPos(ref pos);
 
             // Return air for chunk that do not exist
-            Chunk chunk = world.chunks.Get(ref chunkPos);
+            Chunk chunk = GetChunk(ref chunkPos);
             if (chunk==null)
                 return BlockProvider.AirBlock;
 
@@ -36,12 +29,12 @@ namespace Voxelmetric.Code.Core
             return chunk.Blocks.Get(Helpers.GetChunkIndex1DFrom3D(xx, yy, zz));
         }
 
-        public BlockData Get(Vector3Int pos)
+        public BlockData GetBlockData(Vector3Int pos)
         {
             // Transform the position into chunk coordinates
             Vector3Int chunkPos = Helpers.ContainingChunkPos(ref pos);
                         
-            Chunk chunk = world.chunks.Get(ref chunkPos);
+            Chunk chunk = GetChunk(ref chunkPos);
             if (chunk==null)
                 // Return air if the chunk that do not exist
                 return BlockProvider.AirBlock;
@@ -62,17 +55,17 @@ namespace Voxelmetric.Code.Core
             // Transform the position into chunk coordinates
             Vector3Int chunkPos = Helpers.ContainingChunkPos(ref pos);
                                 
-            Chunk chunk = world.chunks.Get(ref chunkPos);
+            Chunk chunk = GetChunk(ref chunkPos);
             if (chunk==null)
                 // Return air if the chunk that do not exist
-                return world.blockProvider.BlockTypes[BlockProvider.AirType];
+                return blockProvider.BlockTypes[BlockProvider.AirType];
 
             int xx = Helpers.Mod(pos.x, Env.ChunkSize);
             int yy = Helpers.Mod(pos.y, Env.ChunkSize);
             int zz = Helpers.Mod(pos.z, Env.ChunkSize);
 
             BlockData blockData = chunk.Blocks.Get(Helpers.GetChunkIndex1DFrom3D(xx, yy, zz));
-            return world.blockProvider.BlockTypes[blockData.Type];
+            return blockProvider.BlockTypes[blockData.Type];
         }
 
         /// <summary>
@@ -80,12 +73,12 @@ namespace Voxelmetric.Code.Core
         /// </summary>
         /// <param name="pos">Global position of the block</param>
         /// <param name="blockData">A block to be placed on a given position</param>
-        public void Set(ref Vector3Int pos, BlockData blockData)
+        public void SetBlockData(ref Vector3Int pos, BlockData blockData)
         {
             // Transform the position into chunk coordinates
             Vector3Int chunkPos = Helpers.ContainingChunkPos(ref pos);
 
-            Chunk chunk = world.chunks.Get(ref chunkPos);
+            Chunk chunk = GetChunk(ref chunkPos);
             if (chunk==null)
                 return;
 
@@ -102,12 +95,12 @@ namespace Voxelmetric.Code.Core
         /// </summary>
         /// <param name="pos">Global position of the block</param>
         /// <param name="blockData">A block to be placed on a given position</param>
-        public void SetRaw(ref Vector3Int pos, BlockData blockData)
+        public void SetBlockDataRaw(ref Vector3Int pos, BlockData blockData)
         {
             // Transform the position into chunk coordinates
             Vector3Int chunkPos = Helpers.ContainingChunkPos(ref pos);
 
-            Chunk chunk = world.chunks.Get(ref chunkPos);
+            Chunk chunk = GetChunk(ref chunkPos);
             if (chunk==null)
                 return;
 
@@ -124,7 +117,7 @@ namespace Voxelmetric.Code.Core
         /// <param name="posFrom">Starting position in local chunk coordinates</param>
         /// <param name="posTo">Ending position in local chunk coordinates</param>
         /// <param name="blockData">A block to be placed on a given position</param>
-        public void SetRange(ref Vector3Int posFrom, ref Vector3Int posTo, BlockData blockData)
+        public void SetBlockDataRanged(ref Vector3Int posFrom, ref Vector3Int posTo, BlockData blockData)
         {
             // Let's make sure that ranges are okay
             if (posFrom.x>posTo.x || posFrom.y>posTo.y || posFrom.z>posTo.z)
@@ -150,7 +143,7 @@ namespace Voxelmetric.Code.Core
                     for (int cx = chunkPosFrom.x; cx<=chunkPosTo.x; cx += Env.ChunkSize, minX = 0)
                     {
                         Vector3Int chunkPos = new Vector3Int(cx, cy, cz);
-                        Chunk chunk = world.chunks.Get(ref chunkPos);
+                        Chunk chunk = GetChunk(ref chunkPos);
                         if (chunk==null)
                             continue;
 
@@ -171,7 +164,7 @@ namespace Voxelmetric.Code.Core
         /// <param name="posFrom">Starting position in local chunk coordinates</param>
         /// <param name="posTo">Ending position in local chunk coordinates</param>
         /// <param name="blockData">A block to be placed on a given position</param>
-        public void SetRangeRaw(ref Vector3Int posFrom, ref Vector3Int posTo, BlockData blockData)
+        public void SetBlockDataRangedRaw(ref Vector3Int posFrom, ref Vector3Int posTo, BlockData blockData)
         {
             // Let's make sure that ranges are okay
             if (posFrom.x>posTo.x || posFrom.y>posTo.y || posFrom.z>posTo.z)
@@ -197,7 +190,7 @@ namespace Voxelmetric.Code.Core
                     for (int cx = chunkPosFrom.x; cx<=chunkPosTo.x; cx += Env.ChunkSize, minX = 0)
                     {
                         Vector3Int chunkPos = new Vector3Int(cx, cy, cz);
-                        Chunk chunk = world.chunks.Get(ref chunkPos);
+                        Chunk chunk = GetChunk(ref chunkPos);
                         if (chunk==null)
                             continue;
 
@@ -219,13 +212,13 @@ namespace Voxelmetric.Code.Core
         /// <param name="blockData">The block be placed</param>
         /// <param name="setBlockModified">Set to true to mark chunk data as modified</param>
         /// <param name="onModified">Action to perform once the operation finished</param>
-        public void Modify(ref Vector3Int pos, BlockData blockData, bool setBlockModified,
+        public void ModifyBlockData(ref Vector3Int pos, BlockData blockData, bool setBlockModified,
             Action<ModifyBlockContext> onModified = null)
         {
             // Transform the position into chunk coordinates
             Vector3Int chunkPos = Helpers.ContainingChunkPos(ref pos);
 
-            Chunk chunk = world.chunks.Get(ref chunkPos);
+            Chunk chunk = GetChunk(ref chunkPos);
             if (chunk==null)
                 return;
             
@@ -242,7 +235,7 @@ namespace Voxelmetric.Code.Core
 
             ModifyBlockContext context = null;
             if (onModified!=null)
-                context = new ModifyBlockContext(onModified, world, index, index, blockData, setBlockModified);
+                context = new ModifyBlockContext(onModified, this, index, index, blockData, setBlockModified);
 
             chunk.Modify(new ModifyOpBlock(blockData, index, setBlockModified, context));
         }
@@ -255,7 +248,7 @@ namespace Voxelmetric.Code.Core
         /// <param name="blockData">BlockData to place at the given location</param>
         /// <param name="setBlockModified">Set to true to mark chunk data as modified</param>
         /// <param name="onModified">Action to perform once the operation finished</param>
-        public void ModifyRange(ref Vector3Int posFrom, ref Vector3Int posTo, BlockData blockData, bool setBlockModified,
+        public void ModifyBlockDataRanged(ref Vector3Int posFrom, ref Vector3Int posTo, BlockData blockData, bool setBlockModified,
             Action<ModifyBlockContext> onModified = null)
         {
             // Let's make sure that ranges are okay
@@ -267,7 +260,7 @@ namespace Voxelmetric.Code.Core
 
             ModifyBlockContext context = null;
             if (onModified!=null)
-                context = new ModifyBlockContext(onModified, world,
+                context = new ModifyBlockContext(onModified, this,
                                                  Helpers.GetChunkIndex1DFrom3D(posFrom.x, posFrom.y, posFrom.z),
                                                  Helpers.GetChunkIndex1DFrom3D(posTo.x, posTo.y, posTo.z),
                                                  blockData, setBlockModified);
@@ -288,7 +281,7 @@ namespace Voxelmetric.Code.Core
                     for (int cx = chunkPosFrom.x; cx<=chunkPosTo.x; cx += Env.ChunkSize, minX = 0)
                     {
                         Vector3Int chunkPos = new Vector3Int(cx, cy, cz);
-                        Chunk chunk = world.chunks.Get(ref chunkPos);
+                        Chunk chunk = GetChunk(ref chunkPos);
                         if (chunk==null)
                             continue;
 

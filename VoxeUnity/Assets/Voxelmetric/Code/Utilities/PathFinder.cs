@@ -240,7 +240,7 @@ namespace Voxelmetric.Code.Utilities
 
         public bool IsWalkable(World world, ref Vector3Int pos)
         {
-            Block block = world.blocks.GetBlock(ref pos);
+            Block block = world.GetBlock(ref pos);
             if (!block.CanCollide)
                 return false;
 
@@ -248,7 +248,7 @@ namespace Voxelmetric.Code.Utilities
             for (int y = 1; y<=entityHeight; y++)
             {
                 Vector3Int blockPos = pos.Add(0, y, 0);
-                block = world.blocks.GetBlock(ref blockPos);
+                block = world.GetBlock(ref blockPos);
                 if (block.CanCollide)
                     return false;
             }

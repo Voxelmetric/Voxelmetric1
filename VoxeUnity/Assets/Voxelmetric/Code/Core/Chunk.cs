@@ -14,7 +14,7 @@ using Voxelmetric.Code.Geometry.GeometryHandler;
 
 namespace Voxelmetric.Code.Core
 {
-    public sealed class Chunk : ChunkEventSource
+    public partial class Chunk : ChunkEventSource
     {
         //! Static shared pointers to callbacks
         private static readonly Action<Chunk> actionOnLoadData = OnLoadData;
@@ -486,7 +486,7 @@ namespace Voxelmetric.Code.Core
 
         private void SubscribeTwoNeighbors(Vector3Int neighborPos, bool subscribe)
         {
-            Chunk neighbor = world.chunks.Get(ref neighborPos);
+            Chunk neighbor = world.GetChunk(ref neighborPos);
             if (neighbor == null)
                 return;
 

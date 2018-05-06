@@ -103,7 +103,7 @@ namespace Voxelmetric.Examples
                         {
                             bool adjacent = block.Type!=BlockProvider.AirType;
                             Vector3Int blockPos = adjacent ? hit.adjacentPos : hit.vector3Int;
-                            Code.Voxelmetric.SetBlock(world, ref blockPos, new BlockData(block.Type, block.Solid));
+                            Code.Voxelmetric.SetBlockData(world, ref blockPos, new BlockData(block.Type, block.Solid));
                         }
                     }
 
@@ -149,7 +149,7 @@ namespace Voxelmetric.Examples
 
                     Vector3Int fromPos = new Vector3Int(-44,-44,-44);
                     Vector3Int toPos = new Vector3Int(44, 44, 44);
-                    Code.Voxelmetric.SetBlockRange(world, ref fromPos, ref toPos, BlockProvider.AirBlock, action);
+                    Code.Voxelmetric.SetBlockData(world, ref fromPos, ref toPos, BlockProvider.AirBlock, action);
                 }
             }
         }

@@ -12,19 +12,19 @@ namespace Voxelmetric.Code
         //Used as a manager class with references to classes treated like singletons
         public static readonly VoxelmetricResources resources = new VoxelmetricResources ();
 
-        public static void SetBlock(World world, ref Vector3Int pos, BlockData blockData, Action<ModifyBlockContext> onAction = null)
+        public static void SetBlockData(World world, ref Vector3Int pos, BlockData blockData, Action<ModifyBlockContext> onAction = null)
         {
-            world.blocks.Modify(ref pos, blockData, true, onAction);
+            world.ModifyBlockData(ref pos, blockData, true, onAction);
         }
 
-        public static void SetBlockRange(World world, ref Vector3Int posFrom, ref Vector3Int posTo, BlockData blockData, Action<ModifyBlockContext> onAction=null)
+        public static void SetBlockData(World world, ref Vector3Int posFrom, ref Vector3Int posTo, BlockData blockData, Action<ModifyBlockContext> onAction=null)
         {
-            world.blocks.ModifyRange(ref posFrom, ref posTo, blockData, true, onAction);
+            world.ModifyBlockDataRanged(ref posFrom, ref posTo, blockData, true, onAction);
         }
 
         public static Block GetBlock(World world, ref Vector3Int pos)
         {
-            return world.blocks.GetBlock(ref pos);
+            return world.GetBlock(ref pos);
         }
 
         /// <summary>
@@ -39,7 +39,7 @@ namespace Voxelmetric.Code
 
             List<Chunk> chunksToSave = new List<Chunk> ();
 
-            foreach (Chunk chunk in world.chunks.Chunks)
+            foreach (Chunk chunk in world.Chunks)
             {
                 // Ignore chunks that can't be saved at the moment
                 if (!chunk.IsSavePossible)

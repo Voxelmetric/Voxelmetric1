@@ -130,7 +130,7 @@ namespace Voxelmetric.Code.VM
                                + " world not set (" + pos + ", " + id + ")");
             }
             else
-                chunk = world.chunks.Get(ref pos);
+                chunk = world.GetChunk(ref pos);
 
             byte[] data;
 
@@ -208,7 +208,7 @@ namespace Voxelmetric.Code.VM
         public void ReceiveChange(ref Vector3Int pos, ushort data, int id)
         {
             BlockData blockData = new BlockData(data);
-            world.blocks.Modify(ref pos, blockData, true);
+            world.ModifyBlockData(ref pos, blockData, true);
             BroadcastChange(pos, blockData, id);
         }
     }
