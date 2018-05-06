@@ -13,7 +13,7 @@ OcclusionCullingSettings:
 --- !u!104 &2
 RenderSettings:
   m_ObjectHideFlags: 0
-  serializedVersion: 8
+  serializedVersion: 9
   m_Fog: 0
   m_FogColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
   m_FogMode: 3
@@ -39,6 +39,7 @@ RenderSettings:
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
   m_IndirectSpecularColor: {r: 0, g: 0, b: 0, a: 1}
+  m_UseRadianceAmbientProbe: 0
 --- !u!157 &4
 LightmapSettings:
   m_ObjectHideFlags: 0
@@ -54,11 +55,10 @@ LightmapSettings:
     m_EnableBakedLightmaps: 1
     m_EnableRealtimeLightmaps: 0
   m_LightmapEditorSettings:
-    serializedVersion: 9
+    serializedVersion: 10
     m_Resolution: 1
     m_BakeResolution: 50
-    m_TextureWidth: 1024
-    m_TextureHeight: 1024
+    m_AtlasSize: 1024
     m_AO: 0
     m_AOMaxDistance: 1
     m_CompAOExponent: 0
@@ -90,7 +90,7 @@ LightmapSettings:
     m_PVRFilteringAtrousPositionSigmaAO: 1
     m_ShowResolutionOverlay: 1
   m_LightingDataAsset: {fileID: 0}
-  m_UseShadowmask: 1
+  m_UseShadowmask: 0
 --- !u!196 &5
 NavMeshSettings:
   serializedVersion: 2
@@ -2203,31 +2203,31 @@ Prefab:
     m_Modifications:
     - target: {fileID: 422196, guid: 5fb0c4eef722bd7449de294d0744b781, type: 2}
       propertyPath: m_LocalPosition.x
-      value: 8
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 422196, guid: 5fb0c4eef722bd7449de294d0744b781, type: 2}
       propertyPath: m_LocalPosition.y
-      value: 290
+      value: 450
       objectReference: {fileID: 0}
     - target: {fileID: 422196, guid: 5fb0c4eef722bd7449de294d0744b781, type: 2}
       propertyPath: m_LocalPosition.z
-      value: 8
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 422196, guid: 5fb0c4eef722bd7449de294d0744b781, type: 2}
       propertyPath: m_LocalRotation.x
-      value: -0.4218772
+      value: 0.5
       objectReference: {fileID: 0}
     - target: {fileID: 422196, guid: 5fb0c4eef722bd7449de294d0744b781, type: 2}
       propertyPath: m_LocalRotation.y
-      value: -0.56277865
+      value: 0.5
       objectReference: {fileID: 0}
     - target: {fileID: 422196, guid: 5fb0c4eef722bd7449de294d0744b781, type: 2}
       propertyPath: m_LocalRotation.z
-      value: 0.40775803
+      value: -0.5
       objectReference: {fileID: 0}
     - target: {fileID: 422196, guid: 5fb0c4eef722bd7449de294d0744b781, type: 2}
       propertyPath: m_LocalRotation.w
-      value: -0.5822657
+      value: 0.5
       objectReference: {fileID: 0}
     - target: {fileID: 422196, guid: 5fb0c4eef722bd7449de294d0744b781, type: 2}
       propertyPath: m_RootOrder
@@ -2271,7 +2271,7 @@ Prefab:
       objectReference: {fileID: 0}
     - target: {fileID: 11422472, guid: 5fb0c4eef722bd7449de294d0744b781, type: 2}
       propertyPath: HorizontalChunkLoadRadius
-      value: 6
+      value: 8
       objectReference: {fileID: 0}
     - target: {fileID: 11422472, guid: 5fb0c4eef722bd7449de294d0744b781, type: 2}
       propertyPath: HorizontalChunkDeleteRadius
@@ -2311,7 +2311,7 @@ Prefab:
       objectReference: {fileID: 0}
     - target: {fileID: 11497504, guid: 5fb0c4eef722bd7449de294d0744b781, type: 2}
       propertyPath: HorizontalChunkLoadRadius
-      value: 6
+      value: 8
       objectReference: {fileID: 0}
     - target: {fileID: 11497504, guid: 5fb0c4eef722bd7449de294d0744b781, type: 2}
       propertyPath: HorizontalChunkDeleteRadius
@@ -2344,6 +2344,14 @@ Prefab:
     - target: {fileID: 9258768, guid: 5fb0c4eef722bd7449de294d0744b781, type: 2}
       propertyPath: m_Enabled
       value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 422196, guid: 5fb0c4eef722bd7449de294d0744b781, type: 2}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 90
+      objectReference: {fileID: 0}
+    - target: {fileID: 422196, guid: 5fb0c4eef722bd7449de294d0744b781, type: 2}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 90
       objectReference: {fileID: 0}
     m_RemovedComponents:
     - {fileID: 11465880, guid: 5fb0c4eef722bd7449de294d0744b781, type: 2}

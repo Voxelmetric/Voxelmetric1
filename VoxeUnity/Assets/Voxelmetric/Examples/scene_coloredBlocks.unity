@@ -593,13 +593,13 @@ Transform:
   m_PrefabParentObject: {fileID: 422196, guid: 5fb0c4eef722bd7449de294d0744b781, type: 2}
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 13}
-  m_LocalRotation: {x: -0.4218772, y: -0.5627786, z: 0.40775803, w: -0.5822656}
-  m_LocalPosition: {x: 8, y: 290, z: 8}
+  m_LocalRotation: {x: 0.5, y: 0.5, z: -0.5, w: 0.5}
+  m_LocalPosition: {x: 0, y: 450, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 33}
   m_RootOrder: 0
-  m_LocalEulerAnglesHint: {x: 71.85, y: 88.049995, z: 0}
+  m_LocalEulerAnglesHint: {x: 90, y: 90, z: 0}
 --- !u!4 &37
 Transform:
   m_ObjectHideFlags: 0
@@ -674,7 +674,7 @@ AudioListener:
 --- !u!104 &42
 RenderSettings:
   m_ObjectHideFlags: 0
-  serializedVersion: 8
+  serializedVersion: 9
   m_Fog: 0
   m_FogColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
   m_FogMode: 3
@@ -700,6 +700,7 @@ RenderSettings:
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
   m_IndirectSpecularColor: {r: 0, g: 0, b: 0, a: 1}
+  m_UseRadianceAmbientProbe: 0
 --- !u!108 &43
 Light:
   m_ObjectHideFlags: 0
@@ -795,11 +796,10 @@ LightmapSettings:
     m_EnableBakedLightmaps: 1
     m_EnableRealtimeLightmaps: 0
   m_LightmapEditorSettings:
-    serializedVersion: 9
+    serializedVersion: 10
     m_Resolution: 1
     m_BakeResolution: 50
-    m_TextureWidth: 1024
-    m_TextureHeight: 1024
+    m_AtlasSize: 1024
     m_AO: 0
     m_AOMaxDistance: 1
     m_CompAOExponent: 0
@@ -831,7 +831,7 @@ LightmapSettings:
     m_PVRFilteringAtrousPositionSigmaAO: 1
     m_ShowResolutionOverlay: 1
   m_LightingDataAsset: {fileID: 0}
-  m_UseShadowmask: 1
+  m_UseShadowmask: 0
 --- !u!222 &47
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -1888,7 +1888,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   world: {fileID: 127}
-  HorizontalChunkLoadRadius: 6
+  HorizontalChunkLoadRadius: 8
   VerticalChunkLoadRadius: 3
   FollowCameraX: 1
   FollowCameraY: 0
@@ -1910,7 +1910,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   world: {fileID: 127}
-  HorizontalChunkLoadRadius: 6
+  HorizontalChunkLoadRadius: 8
   VerticalChunkLoadRadius: 3
   FollowCameraX: 1
   FollowCameraY: 0
