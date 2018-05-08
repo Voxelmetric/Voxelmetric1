@@ -32,7 +32,7 @@ namespace Voxelmetric.Code.Data_types
         {
             return pos.x>minX && pos.x<maxX &&
                    pos.y>minY && pos.y<maxY &&
-                   pos.z>minY && pos.z<maxZ;
+                   pos.z>minZ && pos.z<maxZ;
         }
     }
 }
