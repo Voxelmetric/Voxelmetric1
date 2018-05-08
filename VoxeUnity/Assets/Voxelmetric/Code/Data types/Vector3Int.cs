@@ -38,27 +38,30 @@ namespace Voxelmetric.Code.Data_types
 
         public static Vector3Int FromBytes(byte[] bytes, int offset)
         {
-            return new Vector3Int(
-                BitConverter.ToInt32(bytes, offset),
-                BitConverter.ToInt32(bytes, offset + 4),
-                BitConverter.ToInt32(bytes, offset + 8));
+            Vector3Int v;
+            v.x = BitConverter.ToInt32(bytes, offset);
+            v.y = BitConverter.ToInt32(bytes, offset + 4);
+            v.z = BitConverter.ToInt32(bytes, offset + 8);
+            return v;
         }
 
         //BlockPos and Vector3 can be substituted for one another
-        public static implicit operator Vector3Int(Vector3 v)
+        public static implicit operator Vector3Int(Vector3 pos)
         {
-            Vector3Int vector3Int = new Vector3Int(
-                Mathf.RoundToInt(v.x),
-                Mathf.RoundToInt(v.y),
-                Mathf.RoundToInt(v.z)
-                );
-
-            return vector3Int;
+            Vector3Int v;
+            v.x = Mathf.RoundToInt(pos.x);
+            v.y = Mathf.RoundToInt(pos.y);
+            v.z = Mathf.RoundToInt(pos.z);
+            return v;
         }
 
         public static implicit operator Vector3(Vector3Int pos)
         {
-            return new Vector3(pos.x, pos.y, pos.z);
+            Vector3 v;
+            v.x = pos.x;
+            v.y = pos.y;
+            v.z = pos.z;
+            return v;
         }
 
         public static implicit operator Vector3Int(Direction d)
@@ -183,26 +186,6 @@ namespace Voxelmetric.Code.Data_types
             v.y = this.y * y;
             v.z = this.z * z;
             return v;
-        }
-
-        public static bool operator >(Vector3Int pos1, Vector3Int pos2)
-        {
-            return (pos1.x > pos2.x || pos1.y > pos2.y || pos1.z > pos2.z);
-        }
-
-        public static bool operator <(Vector3Int pos1, Vector3Int pos2)
-        {
-            return (pos1.x < pos2.x || pos1.y < pos2.y || pos1.z < pos2.z);
-        }
-
-        public static bool operator >=(Vector3Int pos1, Vector3Int pos2)
-        {
-            return (pos1.x >= pos2.x || pos1.y >= pos2.y || pos1.z >= pos2.z);
-        }
-
-        public static bool operator <=(Vector3Int pos1, Vector3Int pos2)
-        {
-            return (pos1.x <= pos2.x || pos1.y <= pos2.y || pos1.z <= pos2.z);
         }
 
         #region Struct comparison
