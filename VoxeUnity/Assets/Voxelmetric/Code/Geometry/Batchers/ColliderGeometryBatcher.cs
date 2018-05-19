@@ -169,8 +169,9 @@ namespace Voxelmetric.Code.Geometry.Batchers
                         collider.enabled = true;
                         collider.sharedMesh = null;
                         collider.sharedMesh = mesh;
-                        collider.transform.position = position;
-                        collider.transform.rotation = rotation;
+                        var t = collider.transform;
+                        t.position = position;
+                        t.rotation = rotation;
                         collider.sharedMaterial = (m_materials==null || m_materials.Length<1) ? null : m_materials[j];
 
                         m_objects.Add(go);

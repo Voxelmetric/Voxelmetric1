@@ -29,7 +29,7 @@ namespace Voxelmetric.Code.Builders
         protected override void BuildBox(Chunk chunk, Block block, int minX, int minY, int minZ, int maxX, int maxY,
             int maxZ)
         {
-            // All faces in the are build in the following order:
+            // Order of vertices when building faces:
             //     1--2
             //     |  |
             //     |  |

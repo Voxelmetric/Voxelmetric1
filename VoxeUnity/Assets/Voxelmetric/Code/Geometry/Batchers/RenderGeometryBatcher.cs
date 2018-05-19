@@ -488,8 +488,9 @@ namespace Voxelmetric.Code.Geometry.Batchers
                         MeshFilter filter = go.GetComponent<MeshFilter>();
                         filter.sharedMesh = null;
                         filter.sharedMesh = mesh;
-                        filter.transform.position = position;
-                        filter.transform.rotation = rotation;
+                        var t = filter.transform;
+                        t.position = position;
+                        t.rotation = rotation;
 
                         Renderer renderer = go.GetComponent<Renderer>();
                         renderer.enabled = true;
