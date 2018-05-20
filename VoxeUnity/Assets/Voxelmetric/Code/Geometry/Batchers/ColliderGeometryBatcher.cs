@@ -15,18 +15,16 @@ namespace Voxelmetric.Code.Geometry.Batchers
         private readonly List<ColliderGeometryBuffer>[] m_buffers;
         //! GameObjects used to hold our geometry
         private readonly List<GameObject> m_objects;
-        //! A list of colliders used for our geometry
-        private readonly List<Collider> m_colliders;
 
         private bool m_enabled = false;
         public bool Enabled
         {
             set
             {
-                //if (m_enabled!=value)
+                if (value != m_enabled)
                 {
-                    for (int i = 0; i<m_colliders.Count; i++)
-                        m_colliders[i].enabled = value;
+                    for (int i = 0; i < m_objects.Count; i++)
+                        m_objects[i].SetActive(value);
                 }
                 m_enabled = value;
             }
@@ -59,7 +57,6 @@ namespace Voxelmetric.Code.Geometry.Batchers
             }
 
             m_objects = new List<GameObject>();
-            m_colliders = new List<Collider>();
 
             Clear();
         }
@@ -140,6 +137,7 @@ namespace Voxelmetric.Code.Geometry.Batchers
             for (int j = 0; j<m_buffers.Length; j++)
             {
                 var holder = m_buffers[j];
+                var material = (m_materials == null || m_materials.Length < 1) ? null : m_materials[j];
 
                 for (int i = 0; i< holder.Count; i++)
                 {
@@ -172,10 +170,9 @@ namespace Voxelmetric.Code.Geometry.Batchers
                         var t = collider.transform;
                         t.position = position;
                         t.rotation = rotation;
-                        collider.sharedMaterial = (m_materials==null || m_materials.Length<1) ? null : m_materials[j];
+                        collider.sharedMaterial = material;
 
                         m_objects.Add(go);
-                        m_colliders.Add(collider);
                     }
 
                     buffer.Clear();
@@ -197,6 +194,7 @@ namespace Voxelmetric.Code.Geometry.Batchers
             for (int j = 0; j<m_buffers.Length; j++)
             {
                 var holder = m_buffers[j];
+                var material = (m_materials == null || m_materials.Length < 1) ? null : m_materials[j];
 
                 for (int i = 0; i<holder.Count; i++)
                 {
@@ -227,12 +225,12 @@ namespace Voxelmetric.Code.Geometry.Batchers
                         collider.enabled = true;
                         collider.sharedMesh = null;
                         collider.sharedMesh = mesh;
-                        collider.transform.position = position;
-                        collider.transform.rotation = rotation;
-                        collider.sharedMaterial = (m_materials==null || m_materials.Length<1) ? null : m_materials[j];
+                        var t = collider.transform;
+                        t.position = position;
+                        t.rotation = rotation;
+                        collider.sharedMaterial = material;
 
                         m_objects.Add(go);
-                        m_colliders.Add(collider);
                     }
 
                     buffer.Clear();
@@ -242,7 +240,6 @@ namespace Voxelmetric.Code.Geometry.Batchers
 
         private void ReleaseOldData()
         {
-            Assert.IsTrue(m_objects.Count==m_colliders.Count);
             for (int i = 0; i<m_objects.Count; i++)
             {
                 var go = m_objects[i];
@@ -263,10 +260,7 @@ namespace Voxelmetric.Code.Geometry.Batchers
                 Object.DestroyImmediate(go);
             }
 
-            if(m_objects.Count>0)
-                m_objects.Clear();
-            if(m_colliders.Count>0)
-                m_colliders.Clear();
+            m_objects.Clear();
         }
     }
 }

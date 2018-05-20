@@ -16,18 +16,16 @@ namespace Voxelmetric.Code.Geometry.Batchers
         public List<RenderGeometryBuffer>[] Buffers { get; }
         //! GameObjects used to hold our geometry
         private readonly List<GameObject> m_objects;
-        //! A list of renderers used for our geometry
-        private readonly List<Renderer> m_renderers;
 
         private bool m_enabled = false;
         public bool Enabled
         {
             set
             {
-                //if (m_enabled!=value)
+                if (value != m_enabled)
                 {
-                    for (int i = 0; i<m_renderers.Count; i++)
-                        m_renderers[i].enabled = value;
+                    for (int i = 0; i < m_objects.Count; i++)
+                        m_objects[i].SetActive(value);
                 }
                 m_enabled = value;
             }
@@ -61,7 +59,6 @@ namespace Voxelmetric.Code.Geometry.Batchers
             }
 
             m_objects = new List<GameObject>(1);
-            m_renderers = new List<Renderer>(1);
 
             Clear();
         }
@@ -464,6 +461,7 @@ namespace Voxelmetric.Code.Geometry.Batchers
             for (int j = 0; j<Buffers.Length; j++)
             {
                 var holder = Buffers[j];
+                var material = (m_materials == null || m_materials.Length < 1) ? null : m_materials[j];
 
                 for (int i = 0; i<holder.Count; i++)
                 {
@@ -494,10 +492,9 @@ namespace Voxelmetric.Code.Geometry.Batchers
 
                         Renderer renderer = go.GetComponent<Renderer>();
                         renderer.enabled = true;
-                        renderer.sharedMaterial = (m_materials==null || m_materials.Length<1) ? null : m_materials[j];
-                        
+                        renderer.sharedMaterial = material;
+
                         m_objects.Add(go);
-                        m_renderers.Add(renderer);
                     }
 
                     buffer.Clear();
@@ -519,6 +516,7 @@ namespace Voxelmetric.Code.Geometry.Batchers
             for (int j = 0; j<Buffers.Length; j++)
             {
                 var holder = Buffers[j];
+                var material = (m_materials == null || m_materials.Length < 1) ? null : m_materials[j];
 
                 for (int i = 0; i<holder.Count; i++)
                 {
@@ -544,15 +542,15 @@ namespace Voxelmetric.Code.Geometry.Batchers
                         MeshFilter filter = go.GetComponent<MeshFilter>();
                         filter.sharedMesh = null;
                         filter.sharedMesh = mesh;
-                        filter.transform.position = position;
-                        filter.transform.rotation = rotation;
+                        var t = filter.transform;
+                        t.position = position;
+                        t.rotation = rotation;
 
                         Renderer renderer = go.GetComponent<Renderer>();
                         renderer.enabled = true;
-                        renderer.sharedMaterial = (m_materials==null || m_materials.Length<1) ? null : m_materials[j];
+                        renderer.sharedMaterial = material;
 
                         m_objects.Add(go);
-                        m_renderers.Add(renderer);
                     }
 
                     buffer.Clear();
@@ -562,7 +560,6 @@ namespace Voxelmetric.Code.Geometry.Batchers
 
         private void ReleaseOldData()
         {
-            Assert.IsTrue(m_objects.Count==m_renderers.Count);
             for (int i = 0; i<m_objects.Count; i++)
             {
                 var go = m_objects[i];
@@ -586,7 +583,6 @@ namespace Voxelmetric.Code.Geometry.Batchers
             }
 
             m_objects.Clear();
-            m_renderers.Clear();
         }
     }
 }
