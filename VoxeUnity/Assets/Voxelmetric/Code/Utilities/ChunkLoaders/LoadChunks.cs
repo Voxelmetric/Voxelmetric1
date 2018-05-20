@@ -123,9 +123,9 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
 
             bool isLast = rangeX==1 && rangeY==1 && rangeZ==1;
 
-            int wx = m_viewerPos.x+(x*Env.ChunkSize);
-            int wy = m_viewerPos.y+(y*Env.ChunkSize);
-            int wz = m_viewerPos.z+(z*Env.ChunkSize);
+            int wx = x*Env.ChunkSize;
+            int wy = y*Env.ChunkSize;
+            int wz = z*Env.ChunkSize;
 
             int rx = rangeX*Env.ChunkSize;
             int ry = rangeY*Env.ChunkSize;
