@@ -93,7 +93,7 @@ namespace Voxelmetric.Code.Core
         //! Tasks already executed
         private ChunkState m_completedStates;
         //! Specifies whether there's a task running on this Chunk
-        private volatile bool m_taskRunning;
+        private bool m_taskRunning;
         //! If true, removal of chunk has been requested and no further requests are going to be accepted
         private bool m_removalRequested;
         //! If true, edge synchronization is in progress
@@ -112,16 +112,7 @@ namespace Voxelmetric.Code.Core
             }
             set
             {
-                var batcher = ColliderGeometryHandler.Batcher;
-                if (batcher.Enabled==value)
-                    return;
-
-                if (!value)
-                    m_pendingStates &= ~ChunkStates.CurrStateBuildCollider;
-                else
-                    m_pendingStates |= ChunkState.BuildCollider;
-
-                batcher.Enabled = value;
+                ColliderGeometryHandler.Batcher.Enabled = value;
             }
         }
 
@@ -134,16 +125,7 @@ namespace Voxelmetric.Code.Core
             }
             set
             {
-                var batcher = RenderGeometryHandler.Batcher;
-                if (batcher.Enabled==value)
-                    return;
-
-                if (!value)
-                    m_pendingStates &= ~ChunkStates.CurrStateBuildVertices;
-                else
-                    m_pendingStates|=ChunkState.BuildVertices;
-
-                batcher.Enabled = value;
+                RenderGeometryHandler.Batcher.Enabled = value;
             }
         }
         
