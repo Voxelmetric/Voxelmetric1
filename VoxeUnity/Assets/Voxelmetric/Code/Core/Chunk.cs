@@ -75,7 +75,7 @@ namespace Voxelmetric.Code.Core
         private int rebuildMaskCollider;
 
         //! Bounding coordinates in local space. Corresponds to real geometry
-        public int MinBounds, NaxBounds;
+        public int MinBounds, MaxBounds;
         //! Bounding coordinates in local space. Corresponds to collision geometry
         public int MinBoundsC, MaxBoundsC;
 
@@ -262,7 +262,7 @@ namespace Voxelmetric.Code.Core
             NeedApplyStructure = true;
             MaxPendingStructureListIndex = 0;
 
-            MinBounds = NaxBounds = 0;
+            MinBounds = MaxBounds = 0;
             MinBoundsC = MaxBoundsC = 0;
 
             lastUpdateTimeGeometry = 0;

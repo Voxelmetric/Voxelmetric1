@@ -229,7 +229,7 @@ public class CustomMeshBlockConfig: BlockConfig
                         SideMask = 0,
                         Palette = data.palette
                     };
-                    meshBuilder.Build(chunk, out chunk.MinBounds, out chunk.NaxBounds);
+                    meshBuilder.Build(chunk, out chunk.MinBounds, out chunk.MaxBounds);
 
                     var batcher = chunk.RenderGeometryHandler.Batcher;
                     if (batcher.Buffers != null && batcher.Buffers.Length > 0)

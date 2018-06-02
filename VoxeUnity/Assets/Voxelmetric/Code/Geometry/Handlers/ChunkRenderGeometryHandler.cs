@@ -16,7 +16,7 @@ namespace Voxelmetric.Code.Geometry.GeometryHandler
         /// <summary> Updates the chunk based on its contents </summary>
         public override void Build()
         {
-            Globals.TerrainMeshBuilder.Build(chunk, out chunk.MinBounds, out chunk.NaxBounds);
+            Globals.TerrainMeshBuilder.Build(chunk, out chunk.MinBounds, out chunk.MaxBounds);
         }
 
         public override void Commit()
@@ -28,9 +28,9 @@ namespace Voxelmetric.Code.Geometry.GeometryHandler
             int minX = chunk.MinBounds&0xFF;
             int minY = (chunk.MinBounds>>8)&0xFF;
             int minZ = (chunk.MinBounds>>16)&0xFF;
-            int maxX = chunk.NaxBounds&0xFF;
-            int maxY = (chunk.NaxBounds>>8)&0xFF;
-            int maxZ = (chunk.NaxBounds>>16)&0xFF;
+            int maxX = chunk.MaxBounds&0xFF;
+            int maxY = (chunk.MaxBounds>>8)&0xFF;
+            int maxZ = (chunk.MaxBounds>>16)&0xFF;
             Bounds bounds = new Bounds(
                 new Vector3((minX+maxX)>>1, (minY+maxY)>>1, (minZ+maxZ)>>1),
                 new Vector3(maxX-minX, maxY-minY, maxZ-minZ)
