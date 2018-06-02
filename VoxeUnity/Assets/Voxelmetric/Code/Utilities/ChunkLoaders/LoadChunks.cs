@@ -482,7 +482,7 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
                     );
                 m_clipmap.Init(0, 0);
 
-                m_viewerPos = m_viewerPos + Vector3Int.one; // Invalidate prev pos so that updated ranges can take effect right away
+                m_viewerPosPrev = m_viewerPos + Vector3Int.one; // Invalidate prev pos so that updated ranges can take effect right away
             }
         }
 
