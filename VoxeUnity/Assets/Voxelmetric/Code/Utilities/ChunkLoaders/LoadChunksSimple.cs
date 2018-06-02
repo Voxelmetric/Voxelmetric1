@@ -129,17 +129,22 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
                 int xd = (m_viewerPos.x-chunk.Pos.x)/Env.ChunkSize;
                 int yd = (m_viewerPos.y-chunk.Pos.y)/Env.ChunkSize;
                 int zd = (m_viewerPos.z-chunk.Pos.z)/Env.ChunkSize;
-                
-                int xDist = xd*xd+zd*zd;
-                int yDist = yd*yd;
-                
-                // Update visibility information
-                bool isVisible = Planes.TestPlanesAABB(m_cameraPlanes, ref chunk.WorldBounds);
 
-                chunk.NeedsRenderGeometry = isVisible &&
-                    xDist<=HorizontalChunkLoadRadius*HorizontalChunkLoadRadius &&
-                    yDist<=VerticalChunkLoadRadius*VerticalChunkLoadRadius;
-                chunk.PossiblyVisible = isVisible || FullLoadOnStartUp;
+                // Update visibility information
+                if (
+                    ChunkLoadOrder.CheckXZ(xd, zd, HorizontalChunkLoadRadius) &&
+                    ChunkLoadOrder.CheckY(yd, VerticalChunkLoadRadius)
+                    )
+                {
+                    bool isVisible = Planes.TestPlanesAABB(m_cameraPlanes, ref chunk.WorldBounds);
+                    chunk.NeedsRenderGeometry = isVisible;
+                    chunk.PossiblyVisible = isVisible || FullLoadOnStartUp;
+                }
+                else
+                {
+                    chunk.NeedsRenderGeometry = false;
+                    chunk.PossiblyVisible = FullLoadOnStartUp;
+                }
 
                 return;
             }
@@ -148,17 +153,6 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
             int ry = rangeY*Env.ChunkSize;
             int rz = rangeZ*Env.ChunkSize;
 
-            /*AABB bounds2 = new AABB(wx, wy, wz, wx+rx, wy+ry, wz+rz);
-            int inside = 0;
-
-            // if the camera position lies inside the bounding box we'll assume partial visibility automatically
-            if (bounds2.IsInside(m_camera.transform.position))
-                inside = 3;
-            else
-            {
-                // Check whether the bouding box lies inside the camera's frustum
-                inside = Geometry.TestPlanesAABB2(m_cameraPlanes, bounds2);
-            }*/
             // Check whether the bouding box lies inside the camera's frustum
             AABB bounds2 = new AABB(wx, wy, wz, wx+rx, wy+ry, wz+rz);
             int inside = Planes.TestPlanesAABB2(m_cameraPlanes, ref bounds2);
@@ -212,15 +206,12 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
                             int xd = (m_viewerPos.x-chunk.Pos.x)/Env.ChunkSize;
                             int yd = (m_viewerPos.y-chunk.Pos.y)/Env.ChunkSize;
                             int zd = (m_viewerPos.z-chunk.Pos.z)/Env.ChunkSize;
-                            
-                            int xDist = xd*xd+zd*zd;
-                            int yDist = yd*yd;
 
                             // Update visibility information
-                            chunk.NeedsRenderGeometry =
-                                xDist<=HorizontalChunkLoadRadius*HorizontalChunkLoadRadius &&
-                                yDist<=VerticalChunkLoadRadius*VerticalChunkLoadRadius;
                             chunk.PossiblyVisible = true;
+                            chunk.NeedsRenderGeometry =
+                                ChunkLoadOrder.CheckXZ(xd, zd, HorizontalChunkLoadRadius) &&
+                                ChunkLoadOrder.CheckY(yd, VerticalChunkLoadRadius);
                         }
                     }
                 }
@@ -236,19 +227,19 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
             if (rangeX>1)
             {
                 offX = rangeX>>1;
-                rangeX = (rangeX+1)>>1; // ceil the number
+                rangeX = rangeX - offX;
             }
             int offY = rangeY;
             if (rangeY>1)
             {
                 offY = rangeY>>1;
-                rangeY = (rangeY+1)>>1; // ceil the number
+                rangeY = rangeY - offY;
             }
             int offZ = rangeZ;
             if (rangeZ>1)
             {
                 offZ = rangeZ>>1;
-                rangeZ = (rangeZ+1)>>1; // ceil the number
+                rangeZ = rangeZ - offZ;
             }
 
             // Subdivide if possible
@@ -435,13 +426,11 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
             int yd = (m_viewerPos.y-chunk.Pos.y)/Env.ChunkSize;
             int zd = (m_viewerPos.z-chunk.Pos.z)/Env.ChunkSize;
 
-            int hRadius = HorizontalChunkLoadRadius;
-            int vRadius = VerticalChunkLoadRadius;
-            int xDist = xd*xd+zd*zd;
-            int yDist = yd*yd;
-
             // Remove the chunk if it is too far away
-            if (xDist>hRadius*hRadius || yDist>vRadius*vRadius)
+            if (
+                !ChunkLoadOrder.CheckXZ(xd, zd, HorizontalChunkLoadRadius) ||
+                !ChunkLoadOrder.CheckY(yd, VerticalChunkLoadRadius)
+                )
             {
                 chunk.RequestRemoval();
             }
@@ -453,9 +442,7 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
                 if (!UseFrustumCulling)
                 {
                     // Update visibility information
-                    chunk.NeedsRenderGeometry =
-                        xDist<=HorizontalChunkLoadRadius*HorizontalChunkLoadRadius &&
-                        yDist<=VerticalChunkLoadRadius*VerticalChunkLoadRadius;
+                    chunk.NeedsRenderGeometry = true;
                     chunk.PossiblyVisible = true;
                 }
             }
@@ -482,10 +469,8 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
             if (isDifferenceXZ)
                 m_chunkPositions = ChunkLoadOrder.ChunkPositions(HorizontalChunkLoadRadius);
             // Invalidate prev pos so that updated ranges can take effect right away
-            if (isDifferenceXZ || isDifferenceY ||
-                HorizontalChunkLoadRadius != m_chunkHorizontalLoadRadiusPrev ||
-                VerticalChunkLoadRadius != m_chunkVerticalLoadRadiusPrev)
-                m_viewerPos = m_viewerPos+Vector3Int.one;
+            if (isDifferenceXZ || isDifferenceY)
+                m_viewerPosPrev = m_viewerPos+Vector3Int.one;
         }
 
         private void UpdateViewerPosition()
@@ -553,10 +538,10 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
                     if (Diag_DrawLoadRange)
                     {
                         Vector3Int pos = chunk.Pos;
-                        int xd = Helpers.Abs((m_viewerPos.x-pos.x)/Env.ChunkSize);
-                        int zd = Helpers.Abs((m_viewerPos.z-pos.z)/Env.ChunkSize);
-                        int dist = xd*xd+zd*zd;
-                        if (dist<=HorizontalChunkLoadRadius*HorizontalChunkLoadRadius)
+                        int xd = (m_viewerPos.x - chunk.Pos.x) / Env.ChunkSize;
+                        int zd = (m_viewerPos.z - chunk.Pos.z) / Env.ChunkSize;
+
+                        if (ChunkLoadOrder.CheckXZ(xd, zd, HorizontalChunkLoadRadius))
                         {
                             Gizmos.color = Color.green;
                             Gizmos.DrawWireCube(
