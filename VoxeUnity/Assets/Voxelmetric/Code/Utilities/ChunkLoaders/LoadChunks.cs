@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-using UnityEngine;
-using UnityEngine.Assertions;
+﻿using UnityEngine;
 using UnityEngine.Profiling;
 using Voxelmetric.Code.Common;
 using Voxelmetric.Code.Common.Math;
@@ -16,178 +14,77 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
     /// Running constantly, LoadChunks generates the world as we move.
     /// This script can be attached to any component. The world will be loaded based on its position
     /// </summary>
-    [RequireComponent(typeof (Camera))]
-    public class LoadChunks: MonoBehaviour, IChunkLoader
+    public class LoadChunks: LoadChunksBase
     {
-        private const int HorizontalMinRange = 0;
-        private const int HorizontalMaxRange = 32;
-        private const int HorizontalDefRange = 6;
-        private const int VerticalMinRange = 0;
-        private const int VerticalMaxRange = 32;
-        private const int VerticalDefRange = 3;
-
-        //! The world we are attached to
-        public World world;
-        //! The camera against which we perform frustrum checks
-        private Camera m_camera;
-        //! Position of the camera when the game started
-        private Vector3 m_cameraStartPos;
-
-        //! Distance in chunks for loading chunks
-        [Range(HorizontalMinRange, HorizontalMaxRange)] public int HorizontalChunkLoadRadius = HorizontalDefRange;
-        //! Distance in chunks for loading chunks
-        [Range(VerticalMinRange, VerticalMaxRange)] public int VerticalChunkLoadRadius = VerticalDefRange;
-        //! Makes the world regenerate around the attached camera. If false, X sticks at 0.
-        public bool FollowCameraX = true;
-        //! Makes the world regenerate around the attached camera. If false, Y sticks at 0.
-        public bool FollowCameraY = false;
-        //! Makes the world regenerate around the attached camera. If false, Z sticks at 0.
-        public bool FollowCameraZ = true;
-        //! Toogles frustum culling
-        public bool UseFrustumCulling = true;
-        //! If false, only visible part of map is loaded on startup
-        public bool FullLoadOnStartUp = true;
-
-        public bool Diag_DrawWorldBounds = false;
-        public bool Diag_DrawLoadRange = false;
-
-        private int m_chunkHorizontalLoadRadiusPrev;
-        private int m_chunkVerticalLoadRadiusPrev;
-
-        private Vector3Int[] m_chunkPositions;
-        private readonly Plane[] m_cameraPlanes = new Plane[6];
         private Clipmap m_clipmap;
-        private Vector3Int m_viewerPos;
-        private Vector3Int m_viewerPosPrev;
-        
-        //! A list of chunks to update
-        private readonly List<Chunk> m_updateRequests = new List<Chunk>();
 
-        void Awake()
+        protected override void OnPreProcessChunks()
         {
-            Assert.IsNotNull(world);
-            m_camera = GetComponent<Camera>();
-        }
-
-        void Start()
-        {
-            m_chunkHorizontalLoadRadiusPrev = HorizontalChunkLoadRadius;
-            m_chunkVerticalLoadRadiusPrev = VerticalChunkLoadRadius;
-
-            m_cameraStartPos = m_camera.transform.position;
-
-            UpdateViewerPosition();
-
-            // Add some arbirtary value so that m_viewerPosPrev is different from m_viewerPos
-            m_viewerPosPrev += Vector3Int.one;
-        }
-
-        void Update()
-        {
-            Globals.GeometryBudget.Reset();
-            Globals.SetBlockBudget.Reset();
-
-            PreProcessChunks();
-            PostProcessChunks();
-            ProcessChunks();
-        }
-
-        public void PreProcessChunks()
-        {
-            Profiler.BeginSample("PreProcessChunks");
-
-            // Recalculate camera frustum planes
-            Planes.CalculateFrustumPlanes(m_camera, m_cameraPlanes);
-
-            // Update clipmap based on range values
-            UpdateRanges();
-
-            // Update viewer position
-            UpdateViewerPosition();
-
             // Update clipmap offsets based on the viewer position
             m_clipmap.SetOffset(
                 m_viewerPos.x / Env.ChunkSize,
                 m_viewerPos.y / Env.ChunkSize,
                 m_viewerPos.z / Env.ChunkSize
                 );
-
-
-            Profiler.EndSample();
         }
-        
-        private void UpdateVisibility(int x, int y, int z, int rangeX, int rangeY, int rangeZ)
+
+
+        protected override void UpdateVisibility(int x, int y, int z, int rangeX, int rangeY, int rangeZ)
         {
             if (rangeX == 0 || rangeY == 0 || rangeZ == 0)
                 return;
+
+            Profiler.BeginSample("Cull");
 
             bool isLast = rangeX==1 && rangeY==1 && rangeZ==1;
 
             int wx = x*Env.ChunkSize;
             int wy = y*Env.ChunkSize;
             int wz = z*Env.ChunkSize;
-
-            int rx = rangeX*Env.ChunkSize;
-            int ry = rangeY*Env.ChunkSize;
-            int rz = rangeZ*Env.ChunkSize;
-
+            
             // Stop if there is no further subdivision possible
             if (isLast)
             {
+                Profiler.BeginSample("CullLast");
+
                 // Update chunk's visibility information
                 Vector3Int chunkPos = new Vector3Int(wx, wy, wz);
                 Chunk chunk = world.GetChunk(ref chunkPos);
-                if (chunk==null)
-                    return;
-                
-                int tx = m_clipmap.TransformX(x);
-                int ty = m_clipmap.TransformY(y);
-                int tz = m_clipmap.TransformZ(z);
+                if (chunk != null)
+                {
 
-                // Skip chunks which are too far away
-                if (!m_clipmap.IsInsideBounds_Transformed(tx, ty, tz))
-                    return;
+                    int tx = m_clipmap.TransformX(x);
+                    int ty = m_clipmap.TransformY(y);
+                    int tz = m_clipmap.TransformZ(z);
 
-                // Update visibility information
-                ClipmapItem item = m_clipmap.Get_Transformed(tx, ty, tz);
-                bool isVisible = Planes.TestPlanesAABB(m_cameraPlanes, ref chunk.WorldBounds);
+                    // Skip chunks which are too far away
+                    if (m_clipmap.IsInsideBounds_Transformed(tx, ty, tz))
+                    {
+                        // Update visibility information
+                        ClipmapItem item = m_clipmap.Get_Transformed(tx, ty, tz);
+                        bool isVisible = Planes.TestPlanesAABB(m_cameraPlanes, ref chunk.WorldBounds);
 
-                chunk.NeedsRenderGeometry = isVisible && item.IsInVisibleRange;
-                chunk.PossiblyVisible = isVisible || FullLoadOnStartUp;
+                        chunk.NeedsRenderGeometry = isVisible && item.IsInVisibleRange;
+                        chunk.PossiblyVisible = isVisible;
+                    }
+                }
 
+                Profiler.EndSample(); // CullLast
+                Profiler.EndSample(); // Cull
                 return;
             }
-            
+
+            int rx = rangeX * Env.ChunkSize;
+            int ry = rangeY * Env.ChunkSize;
+            int rz = rangeZ * Env.ChunkSize;
+
             // Check whether the bouding box lies inside the camera's frustum
             AABB bounds2 = new AABB(wx, wy, wz, wx+rx, wy+ry, wz+rz);
             int inside = Planes.TestPlanesAABB2(m_cameraPlanes, ref bounds2);
 
             #region Full invisibility            
 
-            if (inside==0)
-            {
-                // Full invisibility. All chunks in this area need to be made invisible
-                for (int cy = wy; cy<wy+ry; cy += Env.ChunkSize)
-                {
-                    for (int cz = wz; cz<wz+rz; cz += Env.ChunkSize)
-                    {
-                        for (int cx = wx; cx<wx+rx; cx += Env.ChunkSize)
-                        {
-                            // Update chunk's visibility information
-                            Vector3Int chunkPos = new Vector3Int(cx, cy, cz);
-                            Chunk chunk = world.GetChunk(ref chunkPos);
-                            if (chunk==null)
-                                continue;
-                            
-                            // Update visibility information
-                            chunk.PossiblyVisible = FullLoadOnStartUp;
-                            chunk.NeedsRenderGeometry = false;
-                        }
-                    }
-                }
-
-                return;
-            }
+            // Everything is invisible by default
 
             #endregion
 
@@ -195,6 +92,8 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
 
             if (inside==6)
             {
+                Profiler.BeginSample("CullFullInside");
+
                 // Full visibility. All chunks in this area need to be made visible
                 for (int cy = wy; cy<wy+ry; cy += Env.ChunkSize)
                 {
@@ -221,6 +120,8 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
                     }
                 }
 
+                Profiler.EndSample(); // CullLast
+                Profiler.EndSample(); // Cull
                 return;
             }
 
@@ -229,23 +130,25 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
             #region Partial visibility
 
             int offX = rangeX;
-            if (rangeX>1)
+            if (rangeX > 1)
             {
-                offX = rangeX>>1;
-                rangeX = (rangeX+1)>>1; // ceil the number
+                offX = rangeX >> 1;
+                rangeX = rangeX - offX;
             }
             int offY = rangeY;
-            if (rangeY>1)
+            if (rangeY > 1)
             {
-                offY = rangeY>>1;
-                rangeY = (rangeY+1)>>1; // ceil the number
+                offY = rangeY >> 1;
+                rangeY = rangeY - offY;
             }
             int offZ = rangeZ;
-            if (rangeZ>1)
+            if (rangeZ > 1)
             {
-                offZ = rangeZ>>1;
-                rangeZ = (rangeZ+1)>>1; // ceil the number
+                offZ = rangeZ >> 1;
+                rangeZ = rangeZ - offZ;
             }
+
+            Profiler.EndSample();
 
             // Subdivide if possible
             // TODO: Avoid the recursion
@@ -260,155 +163,8 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
 
             #endregion
         }
-
-        private void HandleVisibility()
-        {
-            if (!UseFrustumCulling)
-                return;
-
-            Profiler.BeginSample("HandleVisibility");
-
-            int minX = m_viewerPos.x-(HorizontalChunkLoadRadius*Env.ChunkSize);
-            int maxX = m_viewerPos.x+(HorizontalChunkLoadRadius*Env.ChunkSize);
-            int minY = m_viewerPos.y-(VerticalChunkLoadRadius*Env.ChunkSize);
-            int maxY = m_viewerPos.y+(VerticalChunkLoadRadius*Env.ChunkSize);
-            int minZ = m_viewerPos.z-(HorizontalChunkLoadRadius*Env.ChunkSize);
-            int maxZ = m_viewerPos.z+(HorizontalChunkLoadRadius*Env.ChunkSize);
-            world.CapCoordXInsideWorld(ref minX, ref maxX);
-            world.CapCoordYInsideWorld(ref minY, ref maxY);
-            world.CapCoordZInsideWorld(ref minZ, ref maxZ);
-
-            minX /= Env.ChunkSize;
-            maxX /= Env.ChunkSize;
-            minY /= Env.ChunkSize;
-            maxY /= Env.ChunkSize;
-            minZ /= Env.ChunkSize;
-            maxZ /= Env.ChunkSize;
-
-            // TODO: Merge this with clipmap
-            // Let's update chunk visibility info. Operate in chunk load radius so we know we're never outside cached range
-            UpdateVisibility(minX, minY, minZ, maxX-minX+1, maxY-minY+1, maxZ-minZ+1);
-
-            Profiler.EndSample();
-        }
-
-        public void PostProcessChunks()
-        {
-            int minX = m_viewerPos.x-(HorizontalChunkLoadRadius*Env.ChunkSize);
-            int maxX = m_viewerPos.x+(HorizontalChunkLoadRadius*Env.ChunkSize);
-            int minY = m_viewerPos.y-(VerticalChunkLoadRadius*Env.ChunkSize);
-            int maxY = m_viewerPos.y+(VerticalChunkLoadRadius*Env.ChunkSize);
-            int minZ = m_viewerPos.z-(HorizontalChunkLoadRadius*Env.ChunkSize);
-            int maxZ = m_viewerPos.z+(HorizontalChunkLoadRadius*Env.ChunkSize);
-            world.CapCoordXInsideWorld(ref minX, ref maxX);
-            world.CapCoordYInsideWorld(ref minY, ref maxY);
-            world.CapCoordZInsideWorld(ref minZ, ref maxZ);
-
-            world.Bounds = new AABBInt(minX, minY, minZ, maxX, maxY, maxZ);
-
-            int expectedChunks = m_chunkPositions.Length*((maxY-minY+Env.ChunkSize) /Env.ChunkSize);
-            
-            if (// No update necessary if there was no movement
-                m_viewerPos ==m_viewerPosPrev &&
-                // However, we need to make sure that we have enough chunks loaded
-                world.Count>=expectedChunks)
-                return;
-
-            // Unregister any non-necessary pending structures
-            Profiler.BeginSample("UnregisterStructures");
-            {
-                world.UnregisterPendingStructures();
-            }
-            Profiler.EndSample();
-
-            // Cycle through the array of positions
-            Profiler.BeginSample("PostProcessChunks");
-            {
-                // Cycle through the array of positions
-                for (int y = maxY; y>=minY; y -= Env.ChunkSize)
-                {
-                    for (int i = 0; i<m_chunkPositions.Length; i++)
-                    {
-                        // Skip loading chunks which are off limits
-                        int cx = (m_chunkPositions[i].x*Env.ChunkSize)+m_viewerPos.x;
-                        if (cx>maxX || cx<minX)
-                            continue;
-                        int cy = (m_chunkPositions[i].y*Env.ChunkSize)+y;
-                        if (cy>maxY || cy<minY)
-                            continue;
-                        int cz = (m_chunkPositions[i].z*Env.ChunkSize)+m_viewerPos.z;
-                        if (cz>maxZ || cz<minZ)
-                            continue;
-
-                        // Create a new chunk if possible
-                        Vector3Int newChunkPos = new Vector3Int(cx, cy, cz);
-                        Chunk chunk;
-                        if (!world.CreateChunk(ref newChunkPos, out chunk))
-                            continue;
-
-                        if (FullLoadOnStartUp)
-                        {
-                            chunk.PossiblyVisible = true;
-                            chunk.NeedsRenderGeometry = false;
-                        }
-
-                        m_updateRequests.Add(chunk);
-                    }
-                }
-            }
-            Profiler.EndSample();
-        }
-
-        public void ProcessChunks()
-        {
-            Profiler.BeginSample("ProcessChunks");
-
-            HandleVisibility();
-
-            // Process removal requests
-            for (int i = 0; i<m_updateRequests.Count;)
-            {
-                Chunk chunk = m_updateRequests[i];
-
-                ProcessChunk(chunk);
-
-                // Update the chunk if possible
-                if (chunk.Update())
-                {
-                    // Build geometry if there is enough time
-                    if (Globals.GeometryBudget.HasTimeBudget)
-                    {
-                        Globals.GeometryBudget.StartMeasurement();
-
-                        bool wasBuilt = chunk.UpdateCollisionGeometry();
-                        wasBuilt |= chunk.UpdateRenderGeometry();
-                        if (wasBuilt)
-                            Globals.GeometryBudget.StopMeasurement();
-                    }
-                }
-
-                // Automatically collect chunks which are ready to be removed from the world
-                if (chunk.IsStateCompleted(ChunkState.Remove))
-                {
-                    // Remove the chunk from our provider and unregister it from chunk storage
-                    world.RemoveChunk(chunk);
-
-                    // Unregister from updates
-                    m_updateRequests.RemoveAt(i);
-                    continue;
-                }
-
-                ++i;
-            }
-
-            world.PerformBlockActions();
-
-            FullLoadOnStartUp = false;
-
-            Profiler.EndSample();
-        }
-
-        public void ProcessChunk(Chunk chunk)
+    
+        protected override void OnProcessChunk(Chunk chunk)
         {
             Profiler.BeginSample("ProcessChunk");
             
@@ -451,76 +207,16 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
             }
         }
 
-        // Updates our clipmap region. Has to be set from the outside!
-        private void UpdateRanges()
+        protected override void OnUpdateRanges()
         {
-            // Make sure horizontal ranges are always correct
-            HorizontalChunkLoadRadius = Mathf.Max(HorizontalMinRange, HorizontalChunkLoadRadius);
-            HorizontalChunkLoadRadius = Mathf.Min(HorizontalMaxRange, HorizontalChunkLoadRadius);
-
-            // Make sure vertical ranges are always correct
-            VerticalChunkLoadRadius = Mathf.Max(VerticalMinRange, VerticalChunkLoadRadius);
-            VerticalChunkLoadRadius = Mathf.Min(VerticalMaxRange, VerticalChunkLoadRadius);
-
-            bool isDifferenceXZ = HorizontalChunkLoadRadius != m_chunkHorizontalLoadRadiusPrev || m_chunkPositions == null;
-            bool isDifferenceY = VerticalChunkLoadRadius != m_chunkVerticalLoadRadiusPrev;
-            m_chunkHorizontalLoadRadiusPrev = HorizontalChunkLoadRadius;
-            m_chunkVerticalLoadRadiusPrev = VerticalChunkLoadRadius;
-
-            // Rebuild precomputed chunk positions
-            if (isDifferenceXZ)
-                m_chunkPositions = ChunkLoadOrder.ChunkPositions(HorizontalChunkLoadRadius);
-            // Invalidate prev pos so that updated ranges can take effect right away
-            if (isDifferenceXZ || isDifferenceY ||
-                HorizontalChunkLoadRadius != m_chunkHorizontalLoadRadiusPrev ||
-                VerticalChunkLoadRadius != m_chunkVerticalLoadRadiusPrev)
-            {
-                m_clipmap = new Clipmap(
-                    HorizontalChunkLoadRadius,
-                    VerticalChunkLoadRadius,
-                    VerticalChunkLoadRadius+1
-                    );
-                m_clipmap.Init(0, 0);
-
-                m_viewerPosPrev = m_viewerPos + Vector3Int.one; // Invalidate prev pos so that updated ranges can take effect right away
-            }
+            m_clipmap = new Clipmap(
+                            HorizontalChunkLoadRadius,
+                            VerticalChunkLoadRadius,
+                            VerticalChunkLoadRadius+1
+                            );
+            m_clipmap.Init(0, 0);
         }
-
-        private void UpdateViewerPosition()
-        {
-            Vector3Int chunkPos = transform.position;
-            Vector3Int pos = Helpers.ContainingChunkPos(ref chunkPos);
-
-            // Update the viewer position
-            m_viewerPosPrev = m_viewerPos;
-
-            // Do not let y overflow
-            int x = m_viewerPos.x;
-            if (FollowCameraX)
-            {
-                x = pos.x;
-                world.CapCoordXInsideWorld(ref x, ref x);
-            }
-
-            // Do not let y overflow
-            int y = m_viewerPos.y;
-            if (FollowCameraY)
-            {
-                y = pos.y;
-                world.CapCoordYInsideWorld(ref y, ref y);
-            }
-
-            // Do not let y overflow
-            int z = m_viewerPos.z;
-            if (FollowCameraZ)
-            {
-                z = pos.z;
-                world.CapCoordZInsideWorld(ref z, ref z);
-            }
-
-            m_viewerPos = new Vector3Int(x, y, z);
-        }
-        
+            
         private void OnDrawGizmosSelected()
         {
             if (!enabled)
