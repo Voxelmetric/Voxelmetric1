@@ -5,7 +5,6 @@ using UnityEngine.Profiling;
 using Voxelmetric.Code.Common;
 using Voxelmetric.Code.Common.Math;
 using Voxelmetric.Code.Core;
-using Voxelmetric.Code.Core.Clipmap;
 using Voxelmetric.Code.Data_types;
 using Chunk = Voxelmetric.Code.Core.Chunk;
 using Vector3Int = Voxelmetric.Code.Data_types.Vector3Int;
@@ -45,8 +44,6 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
         public bool FollowCameraZ = true;
         //! Toogles frustum culling
         public bool UseFrustumCulling = true;
-        //! If false, only visible part of map is loaded on startup
-        public bool FullLoadOnStartUp = true;
 
         public bool Diag_DrawWorldBounds = false;
         public bool Diag_DrawLoadRange = false;
@@ -166,13 +163,7 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
                         Chunk chunk;
                         if (!world.CreateChunk(ref newChunkPos, out chunk))
                             continue;
-
-                        if (FullLoadOnStartUp)
-                        {
-                            chunk.PossiblyVisible = true;
-                            chunk.NeedsRenderGeometry = false;
-                        }
-
+                        
                         m_updateRequests.Add(chunk);
                     }
                 }
@@ -261,8 +252,6 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
             }
 
             world.PerformBlockActions();
-
-            FullLoadOnStartUp = false;
 
             Profiler.EndSample();
         }
