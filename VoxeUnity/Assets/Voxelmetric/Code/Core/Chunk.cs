@@ -429,17 +429,17 @@ namespace Voxelmetric.Code.Core
             // Calculate how many neighbors a chunk can have
             int maxNeighbors = 0;
             Vector3Int pos = chunk.Pos;
-            if (world.CheckInsideWorld(pos.Add(Env.ChunkSize, 0, 0)))
+            if (world.CheckInsideWorld(pos.Add(Env.ChunkSize, 0, 0)) && pos.x <= world.Bounds.maxX)
                 ++maxNeighbors;
-            if (world.CheckInsideWorld(pos.Add(-Env.ChunkSize, 0, 0)))
+            if (world.CheckInsideWorld(pos.Add(-Env.ChunkSize, 0, 0)) && pos.x >= world.Bounds.minX)
                 ++maxNeighbors;
-            if (world.CheckInsideWorld(pos.Add(0, Env.ChunkSize, 0)))
+            if (world.CheckInsideWorld(pos.Add(0, Env.ChunkSize, 0)) && pos.y <= world.Bounds.maxY)
                 ++maxNeighbors;
-            if (world.CheckInsideWorld(pos.Add(0, -Env.ChunkSize, 0)))
+            if (world.CheckInsideWorld(pos.Add(0, -Env.ChunkSize, 0)) && pos.y >= world.Bounds.minY)
                 ++maxNeighbors;
-            if (world.CheckInsideWorld(pos.Add(0, 0, Env.ChunkSize)))
+            if (world.CheckInsideWorld(pos.Add(0, 0, Env.ChunkSize)) && pos.z <= world.Bounds.maxZ)
                 ++maxNeighbors;
-            if (world.CheckInsideWorld(pos.Add(0, 0, -Env.ChunkSize)))
+            if (world.CheckInsideWorld(pos.Add(0, 0, -Env.ChunkSize)) && pos.z >= world.Bounds.minZ)
                 ++maxNeighbors;
             
             // Update max neighbor count and request geometry update
