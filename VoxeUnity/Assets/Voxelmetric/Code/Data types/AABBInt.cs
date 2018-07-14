@@ -23,13 +23,13 @@ namespace Voxelmetric.Code.Data_types
 
         public bool IsInside(ref Vector3Int pos)
         {
-            return pos.x<maxX && pos.y<maxY && pos.z<maxZ &&
+            return pos.x<=maxX && pos.y<=maxY && pos.z<=maxZ &&
                    pos.x>=minX && pos.y>=minY && pos.z>=minZ;
         }
 
         public bool IsInside(ref AABBInt aab2)
         {
-            return aab2.maxX<maxX && aab2.maxY<maxY && aab2.maxZ<maxZ &&
+            return aab2.maxX<=maxX && aab2.maxY<=maxY && aab2.maxZ<=maxZ &&
                    aab2.minX>=minX && aab2.minY>=minY && aab2.minZ>=minZ;
         }
 

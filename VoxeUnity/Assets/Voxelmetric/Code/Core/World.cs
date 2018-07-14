@@ -6,6 +6,7 @@ using Voxelmetric.Code.Data_types;
 using Voxelmetric.Code.Load_Resources;
 using Voxelmetric.Code.Load_Resources.Blocks;
 using Voxelmetric.Code.Load_Resources.Textures;
+using Voxelmetric.Code.Utilities;
 using Voxelmetric.Code.VM;
 using Vector3Int = Voxelmetric.Code.Data_types.Vector3Int;
 
@@ -298,16 +299,7 @@ namespace Voxelmetric.Code.Core
 
         public bool CheckInsideWorld(Vector3Int pos)
         {
-            int offsetX = (Bounds.maxX + Bounds.minX) >> 1;
-            int offsetZ = (Bounds.maxZ + Bounds.minZ) >> 1;
-
-            int xx = (pos.x - offsetX) / Env.ChunkSize;
-            int zz = (pos.z - offsetZ) / Env.ChunkSize;
-            int yy = pos.y / Env.ChunkSize;
-            int horizontalRadius = (Bounds.maxX - Bounds.minX) / (2 * Env.ChunkSize);
-
-            return xx * xx + zz * zz <= horizontalRadius * horizontalRadius &&
-                   yy >= (Bounds.minY / Env.ChunkSize) && yy <= (Bounds.maxY / Env.ChunkSize);
+            return Bounds.IsInside(ref pos);
         }
     }
 }
