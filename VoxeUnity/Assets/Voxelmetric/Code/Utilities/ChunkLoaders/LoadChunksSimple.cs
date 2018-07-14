@@ -182,7 +182,7 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
 
             if (world!=null && (Diag_DrawWorldBounds || Diag_DrawLoadRange))
             {
-                foreach (Chunk chunk in world.Chunks)
+                foreach (Chunk chunk in m_updateRequests)
                 {
                     if (Diag_DrawWorldBounds)
                     {

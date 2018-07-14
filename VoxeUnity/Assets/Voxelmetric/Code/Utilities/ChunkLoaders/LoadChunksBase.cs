@@ -179,7 +179,7 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
             Profiler.BeginSample("CullPrepare1");
 
             // Make everything invisible by default
-            foreach (var ch in world.Chunks)
+            foreach (var ch in m_updateRequests)
             {
                 ch.PossiblyVisible = false;
                 ch.NeedsRenderGeometry = false;
