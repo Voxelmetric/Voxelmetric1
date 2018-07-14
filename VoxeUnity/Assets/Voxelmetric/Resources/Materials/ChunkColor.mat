@@ -4,7 +4,7 @@
 Material:
   serializedVersion: 6
   m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
+  m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
   m_Name: ChunkColor
   m_Shader: {fileID: 4800000, guid: 1ac4d3d118f9e2843b1cf9420cd37055, type: 3}
