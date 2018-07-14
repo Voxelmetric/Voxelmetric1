@@ -55,19 +55,25 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
 
             // Check whether the bouding box lies inside the camera's frustum
             AABB bounds2 = new AABB(wx, wy, wz, wx+rx, wy+ry, wz+rz);
-            int inside = Planes.TestPlanesAABB2(m_cameraPlanes, ref bounds2);
+            Planes.TestPlanesResult res = Planes.TestPlanesAABB2(m_cameraPlanes, ref bounds2);
 
             #region Full invisibility            
 
             // Everything is invisible by default
 
+            if (res == Planes.TestPlanesResult.Outside)
+            {
+                Profiler.EndSample();
+                return;
+            }
+
             #endregion
 
             #region Full visibility            
-            
-            if (inside==6)
+
+            if (res == Planes.TestPlanesResult.Inside)
             {
-                Profiler.BeginSample("CullFullInside");
+                Profiler.BeginSample("CullFullVisible");
 
                 // Full visibility. All chunks in this area need to be made visible
                 for (int cy = wy; cy<wy+ry; cy += Env.ChunkSize)
@@ -121,12 +127,12 @@ namespace Voxelmetric.Code.Utilities.ChunkLoaders
 
             // Subdivide if possible
             // TODO: Avoid the recursion
-            UpdateVisibility(x     , y     , z     , offX  , offY  , offZ);
-            UpdateVisibility(x+offX, y     , z     , rangeX, offY  , offZ);
+            UpdateVisibility(x     , y     , z     , offX  , offY  , offZ  );
+            UpdateVisibility(x+offX, y     , z     , rangeX, offY  , offZ  );
             UpdateVisibility(x     , y     , z+offZ, offX  , offY  , rangeZ);
             UpdateVisibility(x+offX, y     , z+offZ, rangeX, offY  , rangeZ);
-            UpdateVisibility(x     , y+offY, z     , offX  , rangeY, offZ);
-            UpdateVisibility(x+offX, y+offY, z     , rangeX, rangeY, offZ);
+            UpdateVisibility(x     , y+offY, z     , offX  , rangeY, offZ  );
+            UpdateVisibility(x+offX, y+offY, z     , rangeX, rangeY, offZ  );
             UpdateVisibility(x     , y+offY, z+offZ, offX  , rangeY, rangeZ);
             UpdateVisibility(x+offX, y+offY, z+offZ, rangeX, rangeY, rangeZ);
 

@@ -15,6 +15,13 @@ namespace Voxelmetric.Code.Common.Math
             Far
         }
 
+        public enum TestPlanesResult
+        {
+            Outside = 0,
+            Intersect,
+            Inside
+        }
+
         private static readonly float[] RootVector = new float[4];
         private static readonly float[] ComVector = new float[4];
 
@@ -154,21 +161,21 @@ namespace Voxelmetric.Code.Common.Math
         /// <summary>
         ///     Does a check for intersection of a sphere with frustum planes.
         /// </summary>
-        public static int TestPlanesSphere(Plane[] planes, ref Vector3 center, float radius)
+        public static TestPlanesResult TestPlanesSphere(Plane[] planes, ref Vector3 center, float radius)
         {
-            for (int i = 0; i < 6; ++i)
+            for (int i = 0; i < planes.Length; ++i)
             {
                 Plane p = planes[i];
 
                 float dist = Vector3.Dot(p.normal, center)+p.distance;
                 if (dist < -radius)
-                    return 0; // Outside the bounds
+                    return TestPlanesResult.Outside; // Outside the bounds
 
                 if (Mathf.Abs(dist)<radius)
-                    return 3; // Partialy inside
+                    return TestPlanesResult.Intersect; // Partial intersection
             }
 
-            return 6; // Sphere fully contained
+            return TestPlanesResult.Inside; // Fully inside
         }
 
         /// <summary>
@@ -176,10 +183,11 @@ namespace Voxelmetric.Code.Common.Math
         ///     the number of intersecting planes. 0 means there is no intersection,
         ///     6 stands for aabb fully contained, anything else is a partial intersection
         /// </summary>
-        public static int TestPlanesAABB2(Plane[] planes, ref Bounds aabb)
+        public static TestPlanesResult TestPlanesAABB2(Plane[] planes, ref Bounds aabb)
         {
-            int inside = 6;
-            for (int i = 0; i<6; ++i)
+            TestPlanesResult res = TestPlanesResult.Inside;
+
+            for (int i = 0; i<planes.Length; ++i)
             {
                 Plane p = planes[i];
                 bool condX = p.normal.x > 0;
@@ -192,7 +200,7 @@ namespace Voxelmetric.Code.Common.Math
                     condZ ? aabb.max.z : aabb.min.z
                     );
                 if (Vector3.Dot(vPositive, p.normal)+p.distance<0)
-                    return 0; // Outside the bounds
+                    return TestPlanesResult.Outside; // Outside the bounds
 
                 Vector3 vNegative = new Vector3(
                     condX ? aabb.min.x : aabb.max.x,
@@ -200,10 +208,10 @@ namespace Voxelmetric.Code.Common.Math
                     condZ ? aabb.min.z : aabb.max.z
                     );
                 if (Vector3.Dot(vNegative, p.normal)+p.distance<0)
-                    inside = 3; // Partial intersection
+                    res = TestPlanesResult.Intersect; // Partial intersection
             }
 
-            return inside; // AABB fully contained
+            return res; // Fully inside
         }
 
         /// <summary>
@@ -211,10 +219,11 @@ namespace Voxelmetric.Code.Common.Math
         ///     the number of intersecting planes. 0 means there is no intersection,
         ///     6 stands for aabb fully contained, anything else is a partial intersection
         /// </summary>
-        public static int TestPlanesAABB2(Plane[] planes, ref AABB aabb)
+        public static TestPlanesResult TestPlanesAABB2(Plane[] planes, ref AABB aabb)
         {
-            int inside = 6;
-            for (int i = 0; i<6; ++i)
+            TestPlanesResult res = TestPlanesResult.Inside;
+
+            for (int i = 0; i<planes.Length; ++i)
             {
                 Plane p = planes[i];
                 bool condX = p.normal.x>0;
@@ -227,7 +236,7 @@ namespace Voxelmetric.Code.Common.Math
                     condZ ? aabb.maxZ : aabb.minZ
                     );
                 if (Vector3.Dot(vPositive, p.normal)+p.distance<0)
-                    return 0; // Outside the bounds
+                    return TestPlanesResult.Outside; // Outside the bounds
 
                 Vector3 vNegative = new Vector3(
                     condX ? aabb.minX : aabb.maxX,
@@ -235,10 +244,10 @@ namespace Voxelmetric.Code.Common.Math
                     condZ ? aabb.minZ : aabb.maxZ
                     );
                 if (Vector3.Dot(vNegative, p.normal)+p.distance<0)
-                    inside = 3; // Partial intersection
+                    res = TestPlanesResult.Intersect; // Partial intersection
             }
 
-            return inside; // AABB fully contained
+            return res; // Fully inside
         }
     }
 }

@@ -47,13 +47,13 @@ namespace Voxelmetric.Examples
             {
                 Planes.CalculateFrustumPlanes(cam, planes);
                 Bounds b = objRenderer.bounds;
-                int intersection = Planes.TestPlanesAABB2(planes, ref b);
-                switch (intersection)
+                Planes.TestPlanesResult res = Planes.TestPlanesAABB2(planes, ref b);
+                switch (res)
                 {
-                    case 0:
+                    case Planes.TestPlanesResult.Outside:
                         txt.text = "Outside";
                         break;
-                    case 6:
+                    case Planes.TestPlanesResult.Inside:
                         txt.text = "Inside";
                         break;
                     default:
