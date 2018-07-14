@@ -121,7 +121,7 @@ namespace Voxelmetric.Code.Common.Math
         /// </summary>
         public static bool TestPlanesAABB(Plane[] planes, ref Bounds aabb)
         {
-            for (int i = 0; i<6; ++i)
+            for (int i = 0; i<planes.Length; ++i)
             {
                 Plane p = planes[i];
                 Vector3 vPositive = new Vector3(
@@ -143,7 +143,7 @@ namespace Voxelmetric.Code.Common.Math
         /// </summary>
         public static bool TestPlanesAABB(Plane[] planes, ref AABB aabb)
         {
-            for (int i = 0; i<6; ++i)
+            for (int i = 0; i<planes.Length; ++i)
             {
                 Plane p = planes[i];
                 Vector3 vPositive = new Vector3(
