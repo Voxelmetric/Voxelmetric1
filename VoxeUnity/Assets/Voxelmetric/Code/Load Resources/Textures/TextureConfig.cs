@@ -2,12 +2,16 @@
 
 namespace Voxelmetric.Code.Load_Resources.Textures
 {
+    public enum TextureConfigType
+    {
+        Simple = 0,
+        Connected
+    }
+
     public struct TextureConfig {
 
         public string name;
-
-        public bool connectedTextures;
-        public bool randomTextures;
+        public TextureConfigType type;
 
         public Texture[] textures;
 
@@ -15,15 +19,15 @@ namespace Voxelmetric.Code.Load_Resources.Textures
         {
             public string file;
             public Texture2D texture2d;
-            public int connectedType;
-            public int weight;
 
-            public int xPos;
-            public int yPos;
+            public int weight;
+            public int index;
+
+            public int x;
+            public int y;
             public int width;
             public int height;
-
-            public bool repeatingTexture;
+            public bool repeating;
         }
 
         public override string ToString()

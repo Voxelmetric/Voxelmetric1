@@ -9,79 +9,168 @@ namespace Voxelmetric.Code.Load_Resources.Textures
 {
     public class TextureCollection
     {
-        public readonly string textureName;
+        public readonly string m_textureName;
+        private readonly TextureConfigType m_textureType;
+        private readonly List<Rect> m_uvs;
 
-        private bool usesConnectedTextures = false;
-        private readonly Rect[] connectedTextures = new Rect[48];
-        private readonly List<Rect> textures = new List<Rect>();
-
-        public TextureCollection(string name)
+        public TextureCollection(string name, TextureConfigType type)
         {
-            textureName = name;
-        }
+            m_textureName = name;
+            m_textureType = type;
 
-        public void AddTexture(Rect texture, int connectedTextureType, int randomChance)
-        {
-            if (connectedTextureType != -1)
+            if (m_textureType == TextureConfigType.Connected)
             {
-                usesConnectedTextures = true;
-                connectedTextures[connectedTextureType] = texture;
-            }
-            else if (randomChance > 1)
-            {
-                // Add the texture multiple times to raise the chance it's selected randomly
-                for (int i = 0; i < randomChance; i++)
-                {
-                    textures.Add(texture);
-                }
+                m_uvs = new List<Rect>(48);
+                for (int i=0; i<48; i++)
+                    m_uvs.Add(new Rect());
             }
             else
+                m_uvs = new List<Rect>();
+        }
+
+        public void AddTexture(Rect uvs, TextureConfig.Texture texture)
+        {
+            switch (m_textureType)
             {
-                textures.Add(texture);
+                case TextureConfigType.Connected:
+                    m_uvs[texture.index] = uvs;
+                    break;
+                default:
+                    if (texture.weight <= 0)
+                        texture.weight = 1;
+                    // Add the texture multiple times to raise the chance it's selected randomly
+                    for (int i = 0; i < texture.weight; i++)
+                        m_uvs.Add(uvs);
+                    break;
             }
         }
 
         public Rect GetTexture(Chunk chunk, ref Vector3Int localPos, Direction direction)
         {
-            if (usesConnectedTextures)
+            if (m_uvs.Count == 1)
+                return m_uvs[0];
+
+            if (m_textureType==TextureConfigType.Connected)
             {
                 ChunkBlocks blocks = chunk.Blocks;
-                int index = Helpers.GetChunkIndex1DFrom3D(localPos.x, localPos.y, localPos.z);
-                ushort blockType = blocks.Get(index).Type;
+                int localPosIndex = Helpers.GetChunkIndex1DFrom3D(localPos.x, localPos.y, localPos.z);
+                ushort blockType = blocks.Get(localPosIndex).Type;
 
-                bool nw = ConnectedTextures.IsSame(blocks, index, -1, 1, direction, blockType);
-                bool n = ConnectedTextures.IsSame(blocks, index, 0, 1, direction, blockType);
-                bool ne = ConnectedTextures.IsSame(blocks, index, 1, 1, direction, blockType);
-                bool w = ConnectedTextures.IsSame(blocks, index, -1, 0, direction, blockType);
-                bool e = ConnectedTextures.IsSame(blocks, index, 1, 0, direction, blockType);
-                bool se = ConnectedTextures.IsSame(blocks, index, 1, -1, direction, blockType);
-                bool s = ConnectedTextures.IsSame(blocks, index, 0, -1, direction, blockType);
-                bool sw = ConnectedTextures.IsSame(blocks, index, -1, -1, direction, blockType);
+                // Side blocks
+                bool n_, _e, s_, _w;
+                // Corner blocks
+                bool nw, ne, se, sw;
 
-                return connectedTextures[ConnectedTextures.GetTexture(n, e, s, w, nw, ne, se, sw)];
+                int index1, index2, index3;
+                int sizeWithPadding = chunk.SideSize + Env.ChunkPadding2;
+                int sizeWithPaddingPow2 = sizeWithPadding * sizeWithPadding;
+
+                switch (direction)
+                {
+                    case Direction.up:
+                        index1 = localPosIndex + sizeWithPaddingPow2;   // + (0,1,0)
+                        index2 = index1 - sizeWithPadding;              // - (0,0,1)
+                        index3 = index1 + sizeWithPadding;              // + (0,0,1)
+
+                        sw = blocks.Get(index2 - 1).Type==blockType;    // -1,1,-1
+                        s_ = blocks.Get(index2).Type == blockType;      //  0,1,-1
+                        se = blocks.Get(index2 + 1).Type == blockType;  //  1,1,-1
+                        _w = blocks.Get(index1 - 1).Type == blockType;  // -1,1, 0
+                        _e = blocks.Get(index1 + 1).Type == blockType;  //  1,1, 0
+                        nw = blocks.Get(index3 - 1).Type == blockType;  // -1,1, 1
+                        n_ = blocks.Get(index3).Type == blockType;      //  0,1, 1
+                        ne = blocks.Get(index3 + 1).Type == blockType;  //  1,1, 1
+                        break;
+                    case Direction.down:
+                        index1 = localPosIndex - sizeWithPaddingPow2;   // - (0,1,0)
+                        index2 = index1 - sizeWithPadding;              // - (0,0,1)
+                        index3 = index1 + sizeWithPadding;              // + (0,0,1)
+
+                        sw = blocks.Get(index2 - 1).Type == blockType; // -1,-1,-1
+                        s_ = blocks.Get(index2).Type == blockType;     //  0,-1,-1
+                        se = blocks.Get(index2 + 1).Type == blockType; //  1,-1,-1
+                        _w = blocks.Get(index1 - 1).Type == blockType; // -1,-1, 0
+                        _e = blocks.Get(index1 + 1).Type == blockType; //  1,-1, 0
+                        nw = blocks.Get(index3 - 1).Type == blockType; // -1,-1, 1
+                        n_ = blocks.Get(index3).Type == blockType;     //  0,-1, 1
+                        ne = blocks.Get(index3 + 1).Type == blockType; //  1,-1, 1
+                        break;
+                    case Direction.north:
+                        index1 = localPosIndex + sizeWithPadding;   // + (0,0,1)
+                        index2 = index1 - sizeWithPaddingPow2;      // - (0,1,0)
+                        index3 = index1 + sizeWithPaddingPow2;      // + (0,1,0)
+
+                        sw = blocks.Get(index2 - 1).Type == blockType; // -1,-1,1
+                        se = blocks.Get(index2 + 1).Type == blockType; //  1,-1,1
+                        _w = blocks.Get(index1 - 1).Type == blockType; // -1, 0,1
+                        _e = blocks.Get(index1 + 1).Type == blockType; //  1, 0,1
+                        nw = blocks.Get(index3 - 1).Type == blockType; // -1, 1,1
+                        s_ = blocks.Get(index2).Type == blockType;     //  0,-1,1
+                        n_ = blocks.Get(index3).Type == blockType;     //  0, 1,1
+                        ne = blocks.Get(index3 + 1).Type == blockType; //  1, 1,1
+                        break;
+                    case Direction.south:
+                        index1 = localPosIndex - sizeWithPadding;   // - (0,0,1)
+                        index2 = index1 - sizeWithPaddingPow2;      // - (0,1,0)
+                        index3 = index1 + sizeWithPaddingPow2;      // + (0,1,0)
+
+                        sw = blocks.Get(index2 - 1).Type == blockType; // -1,-1,-1
+                        se = blocks.Get(index2 + 1).Type == blockType; //  1,-1,-1
+                        _w = blocks.Get(index1 - 1).Type == blockType; // -1, 0,-1
+                        _e = blocks.Get(index1 + 1).Type == blockType; //  1, 0,-1
+                        nw = blocks.Get(index3 - 1).Type == blockType; // -1, 1,-1
+                        s_ = blocks.Get(index2).Type == blockType;     //  0,-1,-1
+                        n_ = blocks.Get(index3).Type == blockType;     //  0, 1,-1
+                        ne = blocks.Get(index3 + 1).Type == blockType; //  1, 1,-1
+                        break;
+                    case Direction.east:
+                        index1 = localPosIndex + 1;             // + (1,0,0)
+                        index2 = index1 - sizeWithPaddingPow2;  // - (0,1,0)
+                        index3 = index1 + sizeWithPaddingPow2;  // + (0,1,0)
+
+                        sw = blocks.Get(index2 - sizeWithPadding).Type == blockType; // 1,-1,-1
+                        s_ = blocks.Get(index2).Type == blockType;                   // 1,-1, 0
+                        se = blocks.Get(index2 + sizeWithPadding).Type == blockType; // 1,-1, 1
+                        _w = blocks.Get(index1 - sizeWithPadding).Type == blockType; // 1, 0,-1
+                        _e = blocks.Get(index1 + sizeWithPadding).Type == blockType; // 1, 0, 1
+                        nw = blocks.Get(index3 - sizeWithPadding).Type == blockType; // 1, 1,-1
+                        n_ = blocks.Get(index3).Type == blockType;                   // 1, 1, 0
+                        ne = blocks.Get(index3 + sizeWithPadding).Type == blockType; // 1, 1, 1
+                        break;
+                    default://case Direction.west:
+                        index1 = localPosIndex - 1;             // - (1,0,0)
+                        index2 = index1 - sizeWithPaddingPow2;  // - (0,1,0)
+                        index3 = index1 + sizeWithPaddingPow2;  // + (0,1,0)
+
+                        sw = blocks.Get(index2 - sizeWithPadding).Type == blockType; // -1,-1,-1
+                        s_ = blocks.Get(index2).Type == blockType;                   // -1,-1, 0
+                        se = blocks.Get(index2 + sizeWithPadding).Type == blockType; // -1,-1, 1
+                        _w = blocks.Get(index1 - sizeWithPadding).Type == blockType; // -1, 0,-1
+                        _e = blocks.Get(index1 + sizeWithPadding).Type == blockType; // -1, 0, 1
+                        nw = blocks.Get(index3 - sizeWithPadding).Type == blockType; // -1, 1,-1
+                        n_ = blocks.Get(index3).Type == blockType;                   // -1, 1, 0
+                        ne = blocks.Get(index3 + sizeWithPadding).Type == blockType; // -1, 1, 1
+                        break;
+                }
+
+                int uvIndex = ConnectedTextures.GetTexture(n_, _e, s_, _w, nw, ne, se, sw);
+                return m_uvs[uvIndex];
             }
 
-            if (textures.Count == 1)
-                return textures[0];
-
-            if (textures.Count > 1)
+            if (m_uvs.Count > 1)
             {
                 int hash = localPos.GetHashCode();
                 if (hash < 0)
                     hash *= -1;
 
                 float randomNumber = (hash % 100) /100f;
-                randomNumber *= textures.Count;
+                randomNumber *= m_uvs.Count;
 
-                return textures[(int)randomNumber];
+                return m_uvs[(int)randomNumber];
             }
 
-
-            Debug.LogError("There were no textures for " + textureName);
+            Debug.LogError("There were no textures for " + m_textureName);
             return new Rect();
         }
-
-
-
     }
 }

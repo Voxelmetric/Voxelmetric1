@@ -1,6 +1,5 @@
 {
       "name": "pyramid",
-      "randomTextures": true,
       "textures": [
         {
           "file": "pyramid-1",

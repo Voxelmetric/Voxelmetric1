@@ -60,25 +60,19 @@ namespace Voxelmetric.Code.Load_Resources.Textures
             {
                 for (int j = 0; j < configs[i].textures.Length; j++)
                 {
-                    Rect texture = rects[index];
+                    var t = configs[i].textures[j];
+                    Rect uvs = rects[index];
 
                     TextureCollection collection;
                     if (!textures.TryGetValue(configs[i].name, out collection))
                     {
-                        collection = new TextureCollection(configs[i].name);
+                        collection = new TextureCollection(configs[i].name, configs[i].type);
                         textures.Add(configs[i].name, collection);
                     }
 
-                    int connectedTextureType = -1;
-                    if (configs[i].connectedTextures)
-                    {
-                        connectedTextureType = configs[i].textures[j].connectedType;
-                    }
+                    collection.AddTexture(uvs, t);
 
-
-                    collection.AddTexture(texture, connectedTextureType, configs[i].textures[j].weight);
-
-                    if (configs[i].textures[j].repeatingTexture)
+                    if (configs[i].textures[j].repeating)
                         repeatingTextures.Add(rects[index]);
                     else
                         nonrepeatingTextures.Add(rects[index]);
@@ -109,7 +103,7 @@ namespace Voxelmetric.Code.Load_Resources.Textures
                 for (int n = 0; n < cfg.textures.Length; n++)
                     cfg.textures[n].texture2d = Texture2DFromConfig(cfg.textures[n], sourceTexturesLookup);
 
-                if (cfg.connectedTextures)
+                if (cfg.type==TextureConfigType.Connected)
                 {
                     // Create all 48 possibilities from the 5 supplied textures
                     Texture2D[] newTextures = ConnectedTextures.ConnectedTexturesFromBaseTextures(cfg.textures);
@@ -117,7 +111,7 @@ namespace Voxelmetric.Code.Load_Resources.Textures
 
                     for (int x = 0; x < newTextures.Length; x++)
                     {
-                        connectedTextures[x].connectedType = x;
+                        connectedTextures[x].index = x;
                         connectedTextures[x].texture2d = newTextures[x];
                     }
 
@@ -143,7 +137,7 @@ namespace Voxelmetric.Code.Load_Resources.Textures
             
             //If theres a width and a height fetch the pixels specified by the rect as a texture
             Texture2D newTexture = new Texture2D(texture.width, texture.height, config.textureFormat, file.mipmapCount < 1);
-            newTexture.SetPixels(0, 0, texture.width, texture.height, file.GetPixels(texture.xPos, texture.yPos, texture.width, texture.height));
+            newTexture.SetPixels(0, 0, texture.width, texture.height, file.GetPixels(texture.x, texture.y, texture.width, texture.height));
             return newTexture;
         }
 

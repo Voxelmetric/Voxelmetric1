@@ -1,6 +1,5 @@
 {
       "name": "wild_grass",
-      "randomTextures": true,
       "textures": [
         {
           "file": "wild_grass-1",

@@ -1,44 +1,44 @@
 {
     "name": "connected",
-    "connectedTextures": true,
+    "type": "connected",
     "textures": [
         {
             "file": "connected",
-            "connectedType": 0,
-            "xPos": 0,
-            "yPos": 0,
+			"index": 0,
+            "x": 0,
+            "y": 0,
             "width": 32,
             "height": 32
         },
         {
             "file": "connected",
-            "connectedType": 1,
-            "xPos": 32,
-            "yPos": 0,
+			"index": 1,
+            "x": 32,
+            "y": 0,
             "width": 32,
             "height": 32
         },
         {
             "file": "connected",
-            "connectedType": 2,
-            "xPos": 0,
-            "yPos": 32,
+			"index": 2,
+            "x": 0,
+            "y": 32,
             "width": 32,
             "height": 32
         },
         {
             "file": "connected",
-            "connectedType": 3,
-            "xPos": 32,
-            "yPos": 32,
+			"index": 3,
+            "x": 32,
+            "y": 32,
             "width": 32,
             "height": 32
         },
         {
             "file": "connected",
-            "connectedType": 4,
-            "xPos": 0,
-            "yPos": 64,
+			"index": 4,
+            "x": 0,
+            "y": 64,
             "width": 32,
             "height": 32
         }
