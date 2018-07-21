@@ -197,44 +197,56 @@ namespace Voxelmetric.Code.Configurable.Blocks.Utilities
             AdjustColorsAO(data, light, chunk.world.config.ambientOcclusionStrength);
         }
 
-        public static void PrepareTexture(Chunk chunk, ref Vector3Int localPos, Vector2[] data, Direction direction, TextureCollection textureCollection, bool rotated)
+        private static void PrepareTexture(Vector2[] data, ref Rect texture, bool rotated, bool backface)
         {
-            Rect texture = textureCollection.GetTexture(chunk, ref localPos, direction);
-
             if (!rotated)
             {
-                data[0] = new Vector2(texture.x, texture.y);
-                data[1] = new Vector2(texture.x, texture.y+texture.height);
-                data[2] = new Vector2(texture.x+texture.width, texture.y+texture.height);
-                data[3] = new Vector2(texture.x+texture.width, texture.y);
+                if (backface)
+                {
+                    data[0] = new Vector2(texture.x + texture.width, texture.y);
+                    data[1] = new Vector2(texture.x + texture.width, texture.y + texture.height);
+                    data[2] = new Vector2(texture.x, texture.y + texture.height);
+                    data[3] = new Vector2(texture.x, texture.y);
+                }
+                else
+                {
+                    data[0] = new Vector2(texture.x, texture.y);
+                    data[1] = new Vector2(texture.x, texture.y + texture.height);
+                    data[2] = new Vector2(texture.x + texture.width, texture.y + texture.height);
+                    data[3] = new Vector2(texture.x + texture.width, texture.y);
+                }
             }
             else
             {
-                data[0] = new Vector2(texture.x, texture.y+texture.height);
-                data[1] = new Vector2(texture.x+texture.width, texture.y+texture.height);
-                data[2] = new Vector2(texture.x+texture.width, texture.y);
-                data[3] = new Vector2(texture.x, texture.y);
+                if (backface)
+                {
+                    data[0] = new Vector2(texture.x + texture.width, texture.y + texture.height);
+                    data[1] = new Vector2(texture.x, texture.y + texture.height);
+                    data[2] = new Vector2(texture.x, texture.y);
+                    data[3] = new Vector2(texture.x + texture.width, texture.y);
+                }
+                else
+                {
+                    data[0] = new Vector2(texture.x, texture.y + texture.height);
+                    data[1] = new Vector2(texture.x + texture.width, texture.y + texture.height);
+                    data[2] = new Vector2(texture.x + texture.width, texture.y);
+                    data[3] = new Vector2(texture.x, texture.y);
+                }
             }
         }
+
+        public static void PrepareTexture(Chunk chunk, ref Vector3Int localPos, Vector2[] data, Direction direction, TextureCollection textureCollection, bool rotated)
+        {
+            Rect texture = textureCollection.GetTexture(chunk, ref localPos, direction);
+            bool backface = DirectionUtils.IsBackface(direction);
+            PrepareTexture(data, ref texture, rotated, backface);
+        }        
 
         public static void PrepareTexture(Chunk chunk, ref Vector3Int localPos, Vector2[] data, Direction direction, TextureCollection[] textureCollections, bool rotated)
         {
             Rect texture = textureCollections[(int)direction].GetTexture(chunk, ref localPos, direction);
-
-            if (!rotated)
-            {
-                data[0] = new Vector2(texture.x, texture.y);
-                data[1] = new Vector2(texture.x, texture.y+texture.height);
-                data[2] = new Vector2(texture.x+texture.width, texture.y+texture.height);
-                data[3] = new Vector2(texture.x+texture.width, texture.y);
-            }
-            else
-            {
-                data[0] = new Vector2(texture.x, texture.y+texture.height);
-                data[1] = new Vector2(texture.x+texture.width, texture.y+texture.height);
-                data[2] = new Vector2(texture.x+texture.width, texture.y);
-                data[3] = new Vector2(texture.x, texture.y);
-            }
+            bool backface = DirectionUtils.IsBackface(direction);
+            PrepareTexture(data, ref texture, rotated, backface);
         }
 
         private static void SetColorsAO(Color32[] data, BlockLightData light, float strength)
