@@ -52,9 +52,9 @@ namespace Voxelmetric.Code.Core
         //! List of neighbors
         public Chunk[] Neighbors { get; } = Helpers.CreateArray1D<Chunk>(6);
         //! Current number of neigbors        
-        public int NeighborCount { get; private set; }
+        public byte NeighborCount { get; private set; }
         //! Maximum possible number of neighbors given the circumstances
-        public int NeighborCountMax { get; private set; }
+        public byte NeighborCountMax { get; private set; }
 
         private int m_pow = 0;
         //! Size of chunk's side
@@ -236,12 +236,16 @@ namespace Voxelmetric.Code.Core
 
         private void Reset()
         {
-            // Unsubscribe neighbors
-            SubscribeNeighbors(false);
+            if (NeighborCountMax != 0)
+            {
+                // Unsubscribe neighbors
+                SubscribeNeighbors(false);
 
-            // Reset neighor data
-            NeighborCount = 0;
-            NeighborCountMax = 0;
+                // Reset neighbor data
+                NeighborCount = 0;
+                NeighborCountMax = 0;
+            }
+
             for (int i = 0; i < Neighbors.Length; i++)
                 Neighbors[i] = null;
 
@@ -427,21 +431,21 @@ namespace Voxelmetric.Code.Core
                 return;
 
             // Calculate how many neighbors a chunk can have
-            int maxNeighbors = 0;
+            byte maxNeighbors = 0;
             Vector3Int pos = chunk.Pos;
-            if (world.CheckInsideWorld(pos.Add(Env.ChunkSize, 0, 0)) && pos.x <= world.Bounds.maxX)
+            if (world.CheckInsideWorld(pos.Add(Env.ChunkSize, 0, 0)))
                 ++maxNeighbors;
-            if (world.CheckInsideWorld(pos.Add(-Env.ChunkSize, 0, 0)) && pos.x >= world.Bounds.minX)
+            if (world.CheckInsideWorld(pos.Add(-Env.ChunkSize, 0, 0)))
                 ++maxNeighbors;
-            if (world.CheckInsideWorld(pos.Add(0, Env.ChunkSize, 0)) && pos.y <= world.Bounds.maxY)
+            if (world.CheckInsideWorld(pos.Add(0, Env.ChunkSize, 0)))
                 ++maxNeighbors;
-            if (world.CheckInsideWorld(pos.Add(0, -Env.ChunkSize, 0)) && pos.y >= world.Bounds.minY)
+            if (world.CheckInsideWorld(pos.Add(0, -Env.ChunkSize, 0)))
                 ++maxNeighbors;
-            if (world.CheckInsideWorld(pos.Add(0, 0, Env.ChunkSize)) && pos.z <= world.Bounds.maxZ)
+            if (world.CheckInsideWorld(pos.Add(0, 0, Env.ChunkSize)))
                 ++maxNeighbors;
-            if (world.CheckInsideWorld(pos.Add(0, 0, -Env.ChunkSize)) && pos.z >= world.Bounds.minZ)
+            if (world.CheckInsideWorld(pos.Add(0, 0, -Env.ChunkSize)))
                 ++maxNeighbors;
-            
+
             // Update max neighbor count and request geometry update
             chunk.NeighborCountMax = maxNeighbors;
             
