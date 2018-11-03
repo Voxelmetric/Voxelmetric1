@@ -1,0 +1,12 @@
+{
+  "name": "dirt noise layer",
+  "index": 400,
+  "layerType": "AdditiveLayer",
+  "properties": {
+    "blockName": "dirt",
+    "frequency": "20",
+    "exponent": "1",
+    "minHeight": "2",
+    "maxHeight": "5"
+  }
+}
