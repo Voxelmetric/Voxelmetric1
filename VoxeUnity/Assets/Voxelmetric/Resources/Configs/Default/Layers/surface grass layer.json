@@ -1,8 +1,0 @@
-{
-  "name": "Surface grass layer",
-  "index": 1000,
-  "layerType": "SurfaceLayer",
-  "properties": {
-    "blockName": "grass"
-  }
-}

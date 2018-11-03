@@ -81,7 +81,17 @@ public class AdditiveLayer: TerrainLayer
         pools.FloatArrayPool.Push(ni.lookupTable);
     }
 
-    public override float GetHeight(Chunk chunk, int layerIndex, int x, int z, float heightSoFar, float strength)
+    public override float GetTemperature(Chunk chunk, int layerIndex, int x, int z, float tempSoFar)
+    {
+        return tempSoFar;
+    }
+
+    public override float GetHumidity(Chunk chunk, int layerIndex, int x, int z, float humSoFar)
+    {
+        return humSoFar;
+    }
+
+    public override float GetHeight(Chunk chunk, int layerIndex, int x, int z, float heightSoFar, float tempSoFar, float humSoFar, float strength)
     {
         var pools = Globals.WorkPool.GetPool(chunk.ThreadID);
         var ni = pools.noiseItems[layerIndex];
@@ -96,7 +106,7 @@ public class AdditiveLayer: TerrainLayer
         return heightSoFar + heightToAdd;
     }
 
-    public override float GenerateLayer(Chunk chunk, int layerIndex, int x, int z, float heightSoFar, float strength)
+    public override float GenerateLayer(Chunk chunk, int layerIndex, int x, int z, float heightSoFar, float tempSoFar, float humSoFar, float strength)
     {
         var pools = Globals.WorkPool.GetPool(chunk.ThreadID);
         NoiseItem ni = pools.noiseItems[layerIndex];
