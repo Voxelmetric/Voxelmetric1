@@ -165,6 +165,24 @@ public class TerrainGen
         return height;
     }
 
+    public float GetTerrainTemperatureForChunk(Chunk chunk, int x, int z)
+    {
+        float temp = 0f;
+        for (int i = 0; i < TerrainLayers.Length; i++)
+            temp = TerrainLayers[i].GetTemperature(chunk, i, x, z, temp);
+
+        return temp;
+    }
+
+    public float GetTerrainHumidityForChunk(Chunk chunk, int x, int z)
+    {
+        float hum = 0f;
+        for (int i = 0; i < TerrainLayers.Length; i++)
+            hum = TerrainLayers[i].GetHumidity(chunk, i, x, z, hum);
+
+        return hum;
+    }
+
     /// <summary>
     /// Generates terrain for a given chunk
     /// </summary>
@@ -177,9 +195,13 @@ public class TerrainGen
             for (int x = 0; x<Env.ChunkSize; x++)
             {
                 float height = 0f;
+                float temp = 0f;
+                float hum = 0f;
                 for (int i = 0; i<TerrainLayers.Length; i++)
                 {
-                    height = TerrainLayers[i].GenerateLayer(chunk, i, x, z, height, 1f);
+                    temp = TerrainLayers[i].GetTemperature(chunk, i, x, z, temp);
+                    hum = TerrainLayers[i].GetHumidity(chunk, i, x, z, hum);
+                    height = TerrainLayers[i].GenerateLayer(chunk, i, x, z, height, temp, hum);
 
                     // Note: We can do this if there are any substraction layers
                     if (height > maxY)

@@ -33,12 +33,22 @@ public class StructureLayer : TerrainLayer
         structure.Init(world);
     }
 
-    public override float GetHeight(Chunk chunk, int layerIndex, int x, int z, float heightSoFar, float strength)
+    public override float GetTemperature(Chunk chunk, int layerIndex, int x, int z, float tempSoFar)
+    {
+        return tempSoFar;
+    }
+
+    public override float GetHumidity(Chunk chunk, int layerIndex, int x, int z, float humSoFar)
+    {
+        return humSoFar;
+    }
+
+    public override float GetHeight(Chunk chunk, int layerIndex, int x, int z, float heightSoFar, float tempSoFar, float humSoFar, float strength)
     {
         return heightSoFar;
     }
 
-    public override float GenerateLayer(Chunk chunk, int layerIndex, int x, int z, float heightSoFar, float strength)
+    public override float GenerateLayer(Chunk chunk, int layerIndex, int x, int z, float heightSoFar, float tempSoFar, float humSoFar, float strength)
     {
         return heightSoFar;
     }

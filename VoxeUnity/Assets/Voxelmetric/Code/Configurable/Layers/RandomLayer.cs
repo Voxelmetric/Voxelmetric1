@@ -18,8 +18,18 @@ public class RandomLayer: TerrainLayer
         
         chance = float.Parse(properties["chance"], CultureInfo.InvariantCulture);
     }
-    
-    public override float GetHeight(Chunk chunk, int layerIndex, int x, int z, float heightSoFar, float strength)
+
+    public override float GetTemperature(Chunk chunk, int layerIndex, int x, int z, float tempSoFar)
+    {
+        return tempSoFar;
+    }
+
+    public override float GetHumidity(Chunk chunk, int layerIndex, int x, int z, float humSoFar)
+    {
+        return humSoFar;
+    }
+
+    public override float GetHeight(Chunk chunk, int layerIndex, int x, int z, float heightSoFar, float tempSoFar, float humSoFar, float strength)
     {
         var lpos = new Vector3(chunk.Pos.x + x, heightSoFar + 1f, chunk.Pos.z);
         float posChance = Randomization.Random(lpos.GetHashCode(), 200);
@@ -32,7 +42,7 @@ public class RandomLayer: TerrainLayer
         return heightSoFar;
     }
 
-    public override float GenerateLayer(Chunk chunk, int layerIndex, int x, int z, float heightSoFar, float strength)
+    public override float GenerateLayer(Chunk chunk, int layerIndex, int x, int z, float heightSoFar, float tempSoFar, float humSoFar, float strength)
     {
         var lpos = new Vector3(chunk.Pos.x + x, heightSoFar + 1f, chunk.Pos.z);
         float posChance = Randomization.Random(lpos.GetHashCode(), 200);

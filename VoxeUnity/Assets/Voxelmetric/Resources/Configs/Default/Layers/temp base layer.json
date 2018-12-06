@@ -1,0 +1,8 @@
+{
+  "name": "temperature base layer",
+  "index": 50,
+  "layerType": "TemperatureLayer",
+  "properties": {
+    "minTemp": -2
+  }
+}

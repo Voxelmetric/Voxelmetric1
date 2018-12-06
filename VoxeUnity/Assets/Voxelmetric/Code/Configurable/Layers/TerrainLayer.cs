@@ -66,6 +66,10 @@ public abstract class TerrainLayer : IComparable, IEquatable<TerrainLayer>
     /// <returns>List of chunks waiting to be saved.</returns>
     public abstract float GetHeight(Chunk chunk, int layerIndex, int x, int z, float heightSoFar, float strength);
 
+    public abstract float GetTemperature(Chunk chunk, int layerIndex, int x, int z, float tempSoFar);
+
+    public abstract float GetHumidity(Chunk chunk, int layerIndex, int x, int z, float humSoFar);
+
     /// <summary>
     /// Retrieves the height on given coordinates and if possible, updates the block within chunk based on the layer's configuration
     /// </summary>
@@ -76,7 +80,7 @@ public abstract class TerrainLayer : IComparable, IEquatable<TerrainLayer>
     /// <param name="heightSoFar">Position on the y-axis in world coordinates</param>
     /// <param name="strength">How much features are pronounced</param>
     /// <returns>List of chunks waiting to be saved.</returns>
-    public abstract float GenerateLayer(Chunk chunk, int layerIndex, int x, int z, float heightSoFar, float strength);
+    public abstract float GenerateLayer(Chunk chunk, int layerIndex, int x, int z, float heightSoFar, float tempSoFar, float humSoFar, float strength);
 
     /// <summary>
     /// Called once for each chunk. Should generate any
