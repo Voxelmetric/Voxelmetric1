@@ -74,11 +74,6 @@ public class HumidityLayer : TerrainLayer
 		return tempSoFar;
 	}
 
-	public override float GetClump(Chunk chunk, int layerIndex, int x, int z, float clumpSoFar)
-	{
-		return clumpSoFar;
-	}
-
 	public override float GetHumidity(Chunk chunk, int layerIndex, int x, int z, float humSoFar)
 	{
 		var pools = Globals.WorkPool.GetPool(chunk.ThreadID);
@@ -93,7 +88,7 @@ public class HumidityLayer : TerrainLayer
 		return humSoFar;
 	}
 
-	public override float GenerateLayer(Chunk chunk, int layerIndex, int x, int z, float heightSoFar, float tempSoFar, float humSoFar, float clumpSoFar)
+	public override float GenerateLayer(Chunk chunk, int layerIndex, int x, int z, float heightSoFar, float tempSoFar, float humSoFar)
 	{
 		var pools = Globals.WorkPool.GetPool(chunk.ThreadID);
 		var ni = pools.noiseItems[layerIndex];

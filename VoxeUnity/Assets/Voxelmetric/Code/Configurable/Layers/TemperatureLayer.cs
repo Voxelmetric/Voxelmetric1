@@ -87,13 +87,8 @@ public class TemperatureLayer : TerrainLayer
 	{
 		return humSoFar;
 	}
-
-	public override float GetClump(Chunk chunk, int layerIndex, int x, int z, float clumpSoFar)
-	{
-		return clumpSoFar;
-	}
 		
-	public override float GenerateLayer(Chunk chunk, int layerIndex, int x, int z, float heightSoFar, float tempSoFar, float humSoFar, float clumpSoFar)
+	public override float GenerateLayer(Chunk chunk, int layerIndex, int x, int z, float heightSoFar, float tempSoFar, float humSoFar)
 	{
 		var pools = Globals.WorkPool.GetPool(chunk.ThreadID);
 		var ni = pools.noiseItems[layerIndex];

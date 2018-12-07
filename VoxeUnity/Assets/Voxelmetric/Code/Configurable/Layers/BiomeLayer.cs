@@ -62,17 +62,12 @@ public class BiomeLayer : TerrainLayer
         return humSoFar;
     }
 
-    public override float GetClump(Chunk chunk, int layerIndex, int x, int z, float clumpSoFar)
-    {
-        return clumpSoFar;
-    }
-
     public override float GetHeight(Chunk chunk, int layerIndex, int x, int z, float heightSoFar)
     {
         return heightSoFar + 1;
     }
 
-    public override float GenerateLayer(Chunk chunk, int layerIndex, int x, int z, float heightSoFar, float tempSoFar, float humSoFar, float clumpSoFar)
+    public override float GenerateLayer(Chunk chunk, int layerIndex, int x, int z, float heightSoFar, float tempSoFar, float humSoFar)
     {
         if (tempSoFar > minTemp && tempSoFar < maxTemp && humSoFar > minHum && humSoFar < maxHum) // Can we generate the biome here?
         {
