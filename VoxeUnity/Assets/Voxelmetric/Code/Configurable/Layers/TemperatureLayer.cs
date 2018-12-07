@@ -90,15 +90,6 @@ public class TemperatureLayer : TerrainLayer
 		
 	public override float GenerateLayer(Chunk chunk, int layerIndex, int x, int z, float heightSoFar, float tempSoFar, float humSoFar)
 	{
-		var pools = Globals.WorkPool.GetPool(chunk.ThreadID);
-		var ni = pools.noiseItems[layerIndex];
-
-		float tempToAdd = ni.noiseGen.Interpolate(x, z, ni.lookupTable);
-		tempToAdd += minTemp;
-
-		if (tempToAdd > tempSoFar)
-			return tempToAdd;
-
-		return tempSoFar;
+		return heightSoFar;
 	}
 }

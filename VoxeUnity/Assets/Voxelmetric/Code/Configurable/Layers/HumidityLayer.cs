@@ -90,15 +90,6 @@ public class HumidityLayer : TerrainLayer
 
 	public override float GenerateLayer(Chunk chunk, int layerIndex, int x, int z, float heightSoFar, float tempSoFar, float humSoFar)
 	{
-		var pools = Globals.WorkPool.GetPool(chunk.ThreadID);
-		var ni = pools.noiseItems[layerIndex];
-
-		float humToAdd = ni.noiseGen.Interpolate(x, z, ni.lookupTable);
-		humToAdd += minHum;
-
-		if (humToAdd > humSoFar)
-			return humToAdd;
-
-		return humSoFar;
-	}
+        return heightSoFar;
+    }
 } 
