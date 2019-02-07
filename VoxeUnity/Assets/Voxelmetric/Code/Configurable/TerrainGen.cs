@@ -180,10 +180,6 @@ public class TerrainGen
                 for (int i = 0; i<TerrainLayers.Length; i++)
                 {
                     height = TerrainLayers[i].GenerateLayer(chunk, i, x, z, height, 1f);
-
-                    // Note: We can do this if there are any substraction layers
-                    if (height > maxY)
-                        break;
                 }
             }
         }
