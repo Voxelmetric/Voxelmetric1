@@ -1,8 +1,0 @@
-{
-  "name": "custommesh",
-  "blockClass": "CustomMeshBlock",
-  "configClass": "CustomMeshBlockConfig",
-  "meshFileLocation": "CustomMesh",
-  "texture": "pyramid",
-  "solid": false
-}

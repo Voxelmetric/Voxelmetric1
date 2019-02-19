@@ -1,0 +1,15 @@
+{
+    "name": "connected",
+    "type": 9,
+    "blockClass": "CubeBlock",
+    "configClass": "CubeBlockConfig",
+    "textures": [
+        "connected",
+        "connected",
+        "connected",
+        "connected",
+        "connected",
+        "connected"
+    ],
+    "material": "ChunkColorUV"
+}

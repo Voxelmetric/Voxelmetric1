@@ -1,0 +1,8 @@
+{
+    "name": "dirt",
+    "type": 6,
+    "blockClass": "ColoredBlock",
+    "configClass": "ColoredBlockConfig",
+    "color": "118,73,50",
+    "material": "ChunkColor"
+}

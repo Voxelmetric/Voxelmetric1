@@ -1,0 +1,11 @@
+{
+    "name": "magicamesh",
+    "type": 10,
+    "blockClass": "CustomMeshBlock",
+    "configClass": "CustomMeshBlockConfig",
+    "meshFileLocation": "chr_knight.vox",
+    "raycastHitOnRemoval": true,
+    "raycastHit": true,
+    "material": "ChunkColor",
+    "scaleInv": 8
+}

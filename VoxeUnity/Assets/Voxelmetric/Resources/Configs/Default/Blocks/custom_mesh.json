@@ -1,0 +1,11 @@
+{
+    "name": "custommesh",
+    "type": 7,
+    "blockClass": "CustomMeshBlock",
+    "configClass": "CustomMeshBlockConfig",
+    "meshFileLocation": "CustomMesh",
+    "texture": "pyramid",
+    "raycastHitOnRemoval": true,
+    "raycastHit": true,
+    "material": "pyramidMat"
+}

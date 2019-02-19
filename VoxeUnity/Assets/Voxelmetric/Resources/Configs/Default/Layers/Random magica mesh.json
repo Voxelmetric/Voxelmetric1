@@ -1,0 +1,9 @@
+{
+  "name": "Random magica mesh",
+  "index": 1700,
+  "layerType": "RandomLayer",
+  "properties": {
+    "blockName": "magicamesh",
+    "chance": "0.04"
+  }
+}

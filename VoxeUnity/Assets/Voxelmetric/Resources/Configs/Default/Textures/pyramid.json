@@ -1,0 +1,13 @@
+{
+      "name": "pyramid",
+      "textures": [
+        {
+          "file": "pyramid-1",
+          "weight": 4
+          },
+          {
+            "file": "pyramid-2",
+            "weight": 1
+          }
+      ]
+}

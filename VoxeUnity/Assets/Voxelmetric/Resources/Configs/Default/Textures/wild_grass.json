@@ -1,0 +1,17 @@
+{
+      "name": "wild_grass",
+      "textures": [
+        {
+          "file": "wild_grass-1",
+          "weight": 10
+        },
+        {
+          "file": "wild_grass-2",
+          "weight": 6
+        },
+        {
+          "file": "wild_grass-3",
+          "weight": 1
+        }
+      ]
+}

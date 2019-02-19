@@ -1,0 +1,10 @@
+{
+    "name": "leaves",
+    "type": 4,
+    "blockClass": "ColoredBlock",
+    "configClass": "ColoredBlockConfig",
+    "color": "48,128,48",
+    "raycastHitOnRemoval": true,
+    "raycastHit": true,
+    "material": "ChunkColor"
+}

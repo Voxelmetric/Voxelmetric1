@@ -1,0 +1,22 @@
+{
+    "name": "colored",
+    "textureFolder": "Configs/Default/Textures",
+    "layerFolder": "Configs/Default/Layers",
+    "blockFolder": "Configs/Colored/Blocks",
+
+    "meshFolder": "Meshes",
+    "prefabsFolder": "Prefabs",
+
+    "maxY": 640,
+    "minY": 0,
+
+    "randomUpdateFrequency": 1,
+
+    "addAOToMesh": true,
+    "ambientOcclusionStrength": 1,
+
+    "textureAtlasPadding": 32,
+    "textureAtlasFiltering": "point",
+    "textureFormat": "ARGB32",
+    "useMipMaps": true
+}

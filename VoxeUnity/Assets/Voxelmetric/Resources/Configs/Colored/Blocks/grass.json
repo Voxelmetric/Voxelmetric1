@@ -1,0 +1,16 @@
+{
+    "name": "grass",
+    "type": 5,
+    "blockClass": "GrassColoredBlock",
+    "configClass": "ColoredBlockConfig",
+    "color": "63,195,63",/*
+    "colors": [
+        "63,195,63",
+        "118,73,50",
+        "63,195,63",
+        "63,195,63",
+        "63,195,63",
+        "63,195,63"
+    ],*/
+    "material": "ChunkColor"
+}

@@ -1,9 +1,0 @@
-{
-  "name": "Structure tree layer",
-  "index": 1500,
-  "layerType": "StructureLayer",
-  "structure": "StructureTree",
-  "properties": {
-    "chance": "0.003"
-  }
-}

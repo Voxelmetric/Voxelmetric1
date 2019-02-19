@@ -1,0 +1,11 @@
+{
+    "name": "magicacube",
+    "type": 12,
+    "blockClass": "CustomMeshBlock",
+    "configClass": "CustomMeshBlockConfig",
+    "meshFileLocation": "test.vox",
+    "raycastHitOnRemoval": true,
+    "raycastHit": true,
+    "material": "ChunkColor",
+    "scaleInv": 32
+}

@@ -1,0 +1,12 @@
+{
+  "name": "Stone base layer",
+  "index": 100,
+  "layerType": "AbsoluteLayer",
+  "properties": {
+    "blockName": "stone",
+    "frequency": "32",
+    "exponent": "1",
+    "minHeight": "40",
+    "maxHeight": "56"
+  }
+}

@@ -1,0 +1,15 @@
+{
+    "name": "log",
+    "type": 3,
+    "blockClass": "CubeBlock",
+    "configClass": "CubeBlockConfig",
+    "textures": [
+        "log_top",
+        "log_top",
+        "log_side",
+        "log_side",
+        "log_side",
+        "log_side"
+    ],
+    "material": "ChunkColorUV"
+}

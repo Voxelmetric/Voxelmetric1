@@ -1,0 +1,15 @@
+{
+    "name": "dirt",
+    "type": 6,
+    "blockClass": "CubeBlock",
+    "configClass": "CubeBlockConfig",
+    "textures": [
+        "dirt",
+        "dirt",
+        "dirt",
+        "dirt",
+        "dirt",
+        "dirt"
+    ],
+    "material": "ChunkColorUV"
+}

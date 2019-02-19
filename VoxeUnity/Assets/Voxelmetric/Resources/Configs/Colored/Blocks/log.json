@@ -1,0 +1,8 @@
+{
+    "name": "log",
+    "type": 3,
+    "blockClass": "ColoredBlock",
+    "configClass": "ColoredBlockConfig",
+    "color": "102,51,0",
+    "material": "ChunkColor"
+}
